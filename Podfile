@@ -7,7 +7,6 @@ workspace 'Wallet'
 
 project 'Wallet/Wallet'
 project 'WalletKit/WalletKit'
-project 'SectionsTableViewKit/SectionsTableViewKit'
 
 def kit_pods
   pod 'Alamofire'
