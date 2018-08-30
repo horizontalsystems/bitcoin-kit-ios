@@ -12,6 +12,7 @@ class AddressConverter {
         switch type {
             case .p2pkh, .p2pk: version = network.pubKeyHash
             case .p2sh: version = network.scriptHash
+            case .p2wsh: version = network.scriptHash
             default: throw ConversionError.unknownAddressType
         }
         var withVersion = (Data([version])) + keyHash

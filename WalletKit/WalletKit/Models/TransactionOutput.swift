@@ -2,13 +2,15 @@ import Foundation
 import RealmSwift
 
 @objc enum ScriptType: Int {
-    case unknown, p2pkh, p2pk, p2sh
+    case unknown, p2pkh, p2pk, p2sh, p2wsh, p2wkh
 
     var size: Int {
         switch self {
             case .p2pk: return 35
             case .p2pkh: return 25
             case .p2sh: return 23
+            case .p2wsh: return 23
+            case .p2wkh: return 35
             default: return 0
         }
     }
@@ -18,6 +20,8 @@ import RealmSwift
             case .p2pk: return 0x21
             case .p2pkh: return 0x14
             case .p2sh: return 0x14
+            case .p2wsh: return 0x14
+            case .p2wkh: return 0x20
             default: return 0
         }
     }
