@@ -21,9 +21,9 @@ Pod::Spec.new do |spec|
 
   spec.pod_target_xcconfig = { 'SWIFT_WHOLE_MODULE_OPTIMIZATION' => 'YES',
                                'APPLICATION_EXTENSION_API_ONLY' => 'YES',
-                               'SWIFT_INCLUDE_PATHS' => '${PODS_ROOT}/WalletKit/Libraries',
-                               'HEADER_SEARCH_PATHS' => '"${PODS_ROOT}/WalletKit/Libraries/openssl/include" "${PODS_ROOT}/WalletKit/Libraries/secp256k1/include"',
-                               'LIBRARY_SEARCH_PATHS' => '"${PODS_ROOT}/WalletKit/Libraries/openssl/lib" "${PODS_ROOT}/WalletKit/Libraries/secp256k1/lib"' }
+                               'SWIFT_INCLUDE_PATHS' => '${PODS_ROOT}/WalletKit/WalletKit/Libraries',
+                               'HEADER_SEARCH_PATHS' => '"${PODS_ROOT}/WalletKit/WalletKit/Libraries/openssl/include" "${PODS_ROOT}/WalletKit/WalletKit/Libraries/secp256k1/include"',
+                               'LIBRARY_SEARCH_PATHS' => '"${PODS_ROOT}/WalletKit/WalletKit/Libraries/openssl/lib" "${PODS_ROOT}/WalletKit/WalletKit/Libraries/secp256k1/lib"' }
   spec.preserve_paths = ['WalletKit/setup', 'WalletKit/Libraries']
   spec.prepare_command = 'sh WalletKit/setup/build_libraries.sh'
 
