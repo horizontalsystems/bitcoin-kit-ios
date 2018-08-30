@@ -3,9 +3,9 @@ use_frameworks!
 
 inhibit_all_warnings!
 
-workspace 'Wallet'
+workspace 'Example'
 
-project 'Wallet/Wallet'
+project 'Example/Example'
 project 'WalletKit/WalletKit'
 
 def kit_pods
@@ -19,18 +19,9 @@ def kit_pods
   pod "RxRealm"
 end
 
-target :Bank do
-  project 'Wallet/Wallet'
-
+target :Example do
+  project 'Example/Example'
   kit_pods
-
-  pod 'GrouviExtensions'
-  pod 'GrouviActionSheet'
-  pod 'GrouviHUD'#, :path => '../GrouviHUD'
-  pod 'SectionsTableViewKit'#, :path => '../SectionsTableViewKit'
-
-  pod 'RxCocoa'
-  pod "SnapKit"
 end
 
 target :WalletKit do
@@ -40,12 +31,6 @@ end
 
 target :WalletKitTests do
   project 'WalletKit/WalletKit'
-
-  pod "Cuckoo"
-end
-
-target :WalletTests do
-  project 'Wallet/Wallet'
 
   pod "Cuckoo"
 end

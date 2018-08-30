@@ -3,83 +3,50 @@ PODS:
   - BigInt (3.1.0):
     - SipHash (~> 1.2)
   - Cuckoo (0.11.3)
-  - GrouviActionSheet (1.1.5):
-    - GrouviExtensions
-    - SnapKit (~> 4.0.0)
-  - GrouviExtensions (1.1.1):
-    - RxSwift (~> 4.2.0)
-    - SnapKit (~> 4.0.0)
-  - GrouviHUD (1.0.2):
-    - RxSwift
-    - SnapKit (~> 4.0.0)
   - ObjectMapper (3.3.0)
   - Realm (3.7.6):
     - Realm/Headers (= 3.7.6)
   - Realm/Headers (3.7.6)
   - RealmSwift (3.7.6):
     - Realm (= 3.7.6)
-  - RxCocoa (4.2.0):
-    - RxSwift (~> 4.0)
   - RxRealm (0.7.5):
     - RealmSwift (~> 3.0)
     - RxSwift (~> 4.0)
   - RxSwift (4.2.0)
-  - SectionsTableViewKit (1.0.0):
-    - GrouviExtensions
-    - SnapKit (~> 4.0.0)
   - SipHash (1.2.2)
-  - SnapKit (4.0.0)
 
 DEPENDENCIES:
   - Alamofire
   - BigInt
   - Cuckoo
-  - GrouviActionSheet
-  - GrouviExtensions
-  - GrouviHUD
   - ObjectMapper
   - RealmSwift
-  - RxCocoa
   - RxRealm
   - RxSwift
-  - SectionsTableViewKit
-  - SnapKit
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
     - Alamofire
     - BigInt
     - Cuckoo
-    - GrouviActionSheet
-    - GrouviExtensions
-    - GrouviHUD
     - ObjectMapper
     - Realm
     - RealmSwift
-    - RxCocoa
     - RxRealm
     - RxSwift
-    - SectionsTableViewKit
     - SipHash
-    - SnapKit
 
 SPEC CHECKSUMS:
   Alamofire: c7287b6e5d7da964a70935e5db17046b7fde6568
   BigInt: 76b5dfdfa3e2e478d4ffdf161aeede5502e2742f
   Cuckoo: 97522dd7ac6f18adba6022bdc74aa69e82ca691a
-  GrouviActionSheet: b34f3f29231a48d360005a9946da7c660b54bfec
-  GrouviExtensions: e5a582e62cb8de559250630778b2d79b0b9ec5ea
-  GrouviHUD: 230e32e2f5b20c58bb9c15e126aaf9403c11f170
   ObjectMapper: b612bf8c8e99c4dc0bb6013a51f7c27966ed5da9
   Realm: 9eaecad54712d6246d08ba34c10f354e4715d7d3
   RealmSwift: 1fe08b4ebaeeaacf17f9ba0343f7b25c9fc31fa6
-  RxCocoa: 0b54909c902e1e581212a03e690bbd94032d8baa
   RxRealm: a6c6c0a07cb61f34209969ca6657734edfdfff30
   RxSwift: 99e10317ddfcc7fbe01356aafd118fde4a0be104
-  SectionsTableViewKit: 0aaeae49acb88b9cff005d0e2dc1ba488039590d
   SipHash: fad90a4683e420c52ef28063063dbbce248ea6d4
-  SnapKit: a42d492c16e80209130a3379f73596c3454b7694
 
-PODFILE CHECKSUM: 0c9722a442d231246ee164d6e3d57a7100e248ca
+PODFILE CHECKSUM: 81d5f322010c923196814d4a27d3988fe90ef093
 
 COCOAPODS: 1.5.3
