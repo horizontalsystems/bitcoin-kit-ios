@@ -23,15 +23,15 @@ class Peer : NSObject, StreamDelegate {
     private var sentVersion: Bool = false
     private var sentVerack: Bool = false
 
-    convenience init(network: NetworkProtocol = TestNet()) {
+    convenience init(network: NetworkProtocol = BitcoinTestNet()) {
         self.init(host: network.dnsSeeds[0], port: Int(network.port), network: network)
     }
 
-    convenience init(host: String, network: NetworkProtocol = TestNet()) {
+    convenience init(host: String, network: NetworkProtocol = BitcoinTestNet()) {
         self.init(host: host, port: Int(network.port), network: network)
     }
 
-    init(host: String, port: Int, network: NetworkProtocol = TestNet()) {
+    init(host: String, port: Int, network: NetworkProtocol = BitcoinTestNet()) {
         self.host = host
         self.port = UInt32(port)
         self.network = network

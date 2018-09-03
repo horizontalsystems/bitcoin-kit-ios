@@ -5,14 +5,21 @@ import RxSwift
 public class WalletKit {
 
     public enum NetworkType {
-        case mainNet
-        case testNet
-        case regTest
+        case bitcoinMainNet
+        case bitcoinTestNet
+        case bitcoinRegTest
+        case bitcoinCashMainNet
+        case bitcoinCashTestNet
     }
 
     let disposeBag = DisposeBag()
 
+    let difficultyEncoder: DifficultyEncoder
+    let difficultyCalculator: DifficultyCalculator
+
     let network: NetworkProtocol
+    let blockValidator: BlockValidator
+
     let realmFactory: RealmFactory
     let logger: Logger
 
@@ -28,11 +35,6 @@ public class WalletKit {
 
     let initialSyncer: InitialSyncer
     let progressSyncer: ProgressSyncer
-
-    let difficultyEncoder: DifficultyEncoder
-    let difficultyCalculator: DifficultyCalculator
-
-    let blockValidator: BlockValidator
 
     let blockSyncer: BlockSyncer
     let merkleBlockValidator: MerkleBlockValidator
@@ -56,12 +58,26 @@ public class WalletKit {
     let unspentOutputSelector: UnspentOutputSelector
     let unspentOutputProvider: UnspentOutputProvider
 
-    public init(withWords words: [String], realmConfiguration: Realm.Configuration, networkType: NetworkType = .mainNet) {
+    public init(withWords words: [String], realmConfiguration: Realm.Configuration, networkType: NetworkType) {
+        difficultyEncoder = DifficultyEncoder()
+        difficultyCalculator = DifficultyCalculator(difficultyEncoder: difficultyEncoder)
+
         switch networkType {
-        case .mainNet: self.network = MainNet()
-//        case .testNet: self.network = TestNet()
-        case .testNet: self.network = RegTest()
-        case .regTest: self.network = RegTest()
+        case .bitcoinMainNet:
+            network = BitcoinMainNet()
+            blockValidator = BlockValidator(calculator: difficultyCalculator)
+        case .bitcoinTestNet:
+            network = BitcoinTestNet()
+            blockValidator = TestNetBlockValidator(calculator: difficultyCalculator)
+        case .bitcoinRegTest:
+            network = BitcoinRegTest()
+            blockValidator = TestNetBlockValidator(calculator: difficultyCalculator)
+        case .bitcoinCashMainNet:
+            network = BitcoinCashMainNet()
+            blockValidator = BlockValidator(calculator: difficultyCalculator)
+        case .bitcoinCashTestNet:
+            network = BitcoinCashTestNet()
+            blockValidator = TestNetBlockValidator(calculator: difficultyCalculator)
         }
 
         realmFactory = RealmFactory(configuration: realmConfiguration)
@@ -79,11 +95,6 @@ public class WalletKit {
         initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, apiManager: apiManager, peerGroup: peerGroup)
         addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, peerGroup: peerGroup)
         progressSyncer = ProgressSyncer(realmFactory: realmFactory)
-
-        difficultyEncoder = DifficultyEncoder()
-        difficultyCalculator = DifficultyCalculator(difficultyEncoder: difficultyEncoder)
-
-        blockValidator = networkType == .mainNet ? BlockValidator(calculator: difficultyCalculator) : TestNetBlockValidator(calculator: difficultyCalculator)
 
         blockSyncer = BlockSyncer(realmFactory: realmFactory, peerGroup: peerGroup)
         merkleBlockValidator = MerkleBlockValidator()

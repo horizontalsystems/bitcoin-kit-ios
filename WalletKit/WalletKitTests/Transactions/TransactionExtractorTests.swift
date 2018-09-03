@@ -26,7 +26,7 @@ class TransactionExtractorTests: XCTestCase {
         p2pkh = MockP2PKHExtractor()
         p2pk = MockP2PKExtractor()
         p2sh = MockP2SHExtractor()
-        addressConverter = MockAddressConverter(network: TestNet())
+        addressConverter = MockAddressConverter(network: BitcoinTestNet())
         scriptConverter = MockScriptConverter()
 
         inputExtractors = [pfromsh]

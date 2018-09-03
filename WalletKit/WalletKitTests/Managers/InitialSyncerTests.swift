@@ -18,10 +18,10 @@ class InitialSyncerTests: XCTestCase {
         super.setUp()
 
         mockRealmFactory = MockRealmFactory(configuration: Realm.Configuration())
-        mockHDWallet = MockHDWallet(seed: Data(), network: TestNet(), gapLimit: 2)
+        mockHDWallet = MockHDWallet(seed: Data(), network: BitcoinTestNet(), gapLimit: 2)
         mockStateManager = MockStateManager(realmFactory: mockRealmFactory)
         mockApiManager = MockApiManager(apiUrl: "")
-        mockPeerGroup = MockPeerGroup(realmFactory: mockRealmFactory, network: TestNet())
+        mockPeerGroup = MockPeerGroup(realmFactory: mockRealmFactory, network: BitcoinTestNet())
 
         realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
         try! realm.write { realm.deleteAll() }

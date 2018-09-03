@@ -22,8 +22,6 @@ class SyncerTests: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        DefaultValueRegistry.register(value: TestNet(), forType: NetworkProtocol.self)
-
         let mockWalletKit = MockWalletKit()
 
         mockLogger = mockWalletKit.mockLogger

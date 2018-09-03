@@ -1,22 +1,18 @@
 import Foundation
 
-class TestNet: NetworkProtocol {
-    let name = "testnet"
+class BitcoinCashTestNet: NetworkProtocol {
+    let name = "bitcoin-cash-test-net"
     let pubKeyHash: UInt8 = 0x6f
     let privateKey: UInt8 = 0xef
     let scriptHash: UInt8 = 0xc4
     let xPubKey: UInt32 = 0x043587cf
     let xPrivKey: UInt32 = 0x04358394
-    let magic: UInt32 = 0x0b110907
+    let magic: UInt32 = 0xf4e5f3f4
     let port: UInt32 = 18333
     let coinType: UInt32 = 1
 
     let dnsSeeds = [
-        "testnet-seed.bitcoin.petertodd.org",    // Peter Todd
-        "testnet-seed.bitcoin.jonasschnelli.ch", // Jonas Schnelli
-        "testnet-seed.bluematt.me",              // Matt Corallo
-        "testnet-seed.bitcoin.schildbach.de",    // Andreas Schildbach
-        "bitcoin-testnet.bloqseeds.net",         // Bloq
+        "testnet-seed.bitcoinabc.org",
     ]
 
     let genesisBlock = Block(
@@ -33,12 +29,12 @@ class TestNet: NetworkProtocol {
     let checkpointBlock = Block(
             withHeader: BlockHeader(
                     version: 536870912,
-                    previousBlockHeaderReversedHex: "000000000000032d74ad8eb0a0be6b39b8e095bd9ca8537da93aae15087aafaf",
-                    merkleRootReversedHex: "dec6a6b395b29be37f4b074ed443c3625fac3ae835b1f1080155f01843a64268",
-                    timestamp: 1533498326,
-                    bits: 436270990,
-                    nonce: 205753354
+                    previousBlockHeaderReversedHex: "00000000000000e07429b8be0c135297a165c7637ef3941ab3d761a754b61392",
+                    merkleRootReversedHex: "5ab6666b8a31e476e02e46fbe9b3cbae625ebd6514dedc78500340a478a026f0",
+                    timestamp: 1535342611,
+                    bits: 436465949,
+                    nonce: 1510232395
             ),
-            height: 1380960)
+            height: 1253952)
 
 }

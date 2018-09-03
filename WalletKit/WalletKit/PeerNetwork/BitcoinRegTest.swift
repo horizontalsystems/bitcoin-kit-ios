@@ -1,7 +1,7 @@
 import Foundation
 
-class RegTest: NetworkProtocol {
-    let name = "regtest"
+class BitcoinRegTest: NetworkProtocol {
+    let name = "bitcoin-reg-test"
     let pubKeyHash: UInt8 = 0x6f
     let privateKey: UInt8 = 0xef
     let scriptHash: UInt8 = 0xc4
