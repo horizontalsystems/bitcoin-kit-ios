@@ -5,7 +5,12 @@ import RealmSwift
 
 class MockWalletKit {
 
+    let mockDifficultyEncoder: MockDifficultyEncoder
+    let mockDifficultyCalculator: MockDifficultyCalculator
+
     let mockNetwork: MockNetworkProtocol
+    let mockBlockValidator: MockBlockValidator
+
     let mockRealmFactory: MockRealmFactory
     let mockLogger: MockLogger
 
@@ -21,11 +26,6 @@ class MockWalletKit {
 
     let mockInitialSyncer: MockInitialSyncer
     let mockProgressSyncer: MockProgressSyncer
-
-    let mockDifficultyEncoder: MockDifficultyEncoder
-    let mockDifficultyCalculator: MockDifficultyCalculator
-
-    let mockBlockValidator: MockBlockValidator
 
     let mockBlockSyncer: MockBlockSyncer
     let mockMerkleBlockValidator: MockMerkleBlockValidator
@@ -52,7 +52,11 @@ class MockWalletKit {
     let realm: Realm
 
     public init() {
+        mockDifficultyEncoder = MockDifficultyEncoder()
+        mockDifficultyCalculator = MockDifficultyCalculator(difficultyEncoder: mockDifficultyEncoder)
+
         mockNetwork = MockNetworkProtocol()
+        mockBlockValidator = MockBlockValidator(calculator: mockDifficultyCalculator)
 
         stub(mockNetwork) { mock in
             when(mock.coinType.get).thenReturn(1)
@@ -75,11 +79,6 @@ class MockWalletKit {
         mockInitialSyncer = MockInitialSyncer(realmFactory: mockRealmFactory, hdWallet: mockHdWallet, stateManager: mockStateManager, apiManager: mockApiManager, peerGroup: mockPeerGroup)
         mockProgressSyncer = MockProgressSyncer(realmFactory: mockRealmFactory)
         mockAddressManager = MockAddressManager(realmFactory: mockRealmFactory, hdWallet: mockHdWallet, peerGroup: mockPeerGroup)
-
-        mockDifficultyEncoder = MockDifficultyEncoder()
-        mockDifficultyCalculator = MockDifficultyCalculator(difficultyEncoder: mockDifficultyEncoder)
-
-        mockBlockValidator = MockBlockValidator(calculator: mockDifficultyCalculator)
 
         mockBlockSyncer = MockBlockSyncer(realmFactory: mockRealmFactory, peerGroup: mockPeerGroup)
         mockMerkleBlockValidator = MockMerkleBlockValidator()
