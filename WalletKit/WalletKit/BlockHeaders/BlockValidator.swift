@@ -1,5 +1,4 @@
 import Foundation
-import BigInt
 
 class BlockValidator {
 
