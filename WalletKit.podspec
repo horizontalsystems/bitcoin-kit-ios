@@ -24,7 +24,7 @@ Pod::Spec.new do |spec|
                                'SWIFT_INCLUDE_PATHS' => '${PODS_ROOT}/WalletKit/WalletKit/Libraries',
                                'HEADER_SEARCH_PATHS' => '"${PODS_ROOT}/WalletKit/WalletKit/Libraries/openssl/include" "${PODS_ROOT}/WalletKit/WalletKit/Libraries/secp256k1/include"',
                                'LIBRARY_SEARCH_PATHS' => '"${PODS_ROOT}/WalletKit/WalletKit/Libraries/openssl/lib" "${PODS_ROOT}/WalletKit/WalletKit/Libraries/secp256k1/lib"' }
-  spec.preserve_paths = ['WalletKit/WalletKit/setup', 'WalletKit/WalletKit/Libraries']
+  spec.preserve_paths = ['WalletKit/setup', 'WalletKit/Libraries']
   # spec.prepare_command = 'sh WalletKit/setup/build_libraries.sh'
 
   spec.dependency 'Alamofire'
