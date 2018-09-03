@@ -79,5 +79,4 @@ public class TransactionOutput: Object {
         return transactionOutput
     }
 
-
 }
