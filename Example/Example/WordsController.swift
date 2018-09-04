@@ -11,6 +11,12 @@ class WordsController: UIViewController {
         title = "WalletKit Demo"
     }
 
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
+
+        view.endEditing(true)
+    }
+
     @IBAction func generateNewWords() {
         if let generatedWords = try? Mnemonic.generate() {
             textView?.text = generatedWords.joined(separator: " ")
