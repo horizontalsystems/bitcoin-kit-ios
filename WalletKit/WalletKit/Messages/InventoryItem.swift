@@ -14,17 +14,21 @@ struct InventoryItem {
     /// Hash of the object
     let hash: Data
 
+    init(type: Int32, hash: Data) {
+        self.type = type
+        self.hash = hash
+    }
+
+    init(_ byteStream: ByteStream) {
+        type = byteStream.read(Int32.self)
+        hash = byteStream.read(Data.self, count: 32)
+    }
+
     func serialized() -> Data {
         var data = Data()
         data += type
         data += hash
         return data
-    }
-
-    static func deserialize(_ byteStream: ByteStream) -> InventoryItem {
-        let type = byteStream.read(Int32.self)
-        let hash = byteStream.read(Data.self, count: 32)
-        return InventoryItem(type: type, hash: hash)
     }
 
     var objectType: ObjectType {

@@ -1,6 +1,6 @@
 import Foundation
 
-struct GetHeadersMessage {
+struct GetHeadersMessage: IMessage{
     /// the protocol version
     let version: UInt32
     /// number of block locator hash entries
@@ -10,6 +10,13 @@ struct GetHeadersMessage {
     /// hash of the last desired header; set to zero to get as many headers as possible (2000)
     let hashStop: Data
 
+    init(_ data: Data) {
+        version = 0
+        hashCount = 0
+        blockLocatorHashes = Data()
+        hashStop = Data()
+    }
+
     func serialized() -> Data {
         var data = Data()
         data += version
@@ -18,4 +25,5 @@ struct GetHeadersMessage {
         data += hashStop
         return data
     }
+
 }

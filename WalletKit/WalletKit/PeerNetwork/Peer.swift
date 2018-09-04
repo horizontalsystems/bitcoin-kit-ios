@@ -154,41 +154,14 @@ class Peer : NSObject, StreamDelegate {
             }
         }
 
-        while packets.count >= Message.minimumLength {
-            guard let message = Message.deserialize(packets) else {
+        while packets.count >= NetworkMessage.minimumLength {
+            guard let networkMessage = NetworkMessage.deserialize(packets) else {
                 return
             }
 
             autoreleasepool {
-                packets = Data(packets.dropFirst(Message.minimumLength + Int(message.length)))
-                switch message.command {
-                case "version":
-                    handle(versionMessage: VersionMessage.deserialize(message.payload))
-                case "verack":
-                    handleVerackMessage()
-                case "addr":
-                    handle(addressMessage: AddressMessage.deserialize(message.payload))
-                case "inv":
-                    handle(inventoryMessage: InventoryMessage.deserialize(message.payload))
-                case "headers":
-                    handle(headersMessage: HeadersMessage.deserialize(message.payload))
-                case "getdata":
-                    handle(getDataMessage: GetDataMessage.deserialize(message.payload))
-                case "notfound":
-                    break
-                case "block":
-                    handle(blockMessage: BlockMessage.deserialize(message.payload))
-                case "merkleblock":
-                    handle(merkleBlockMessage: MerkleBlockMessage.deserialize(message.payload))
-                case "tx":
-                    handle(transactionMessage: TransactionMessage.deserialize(message.payload))
-                case "ping":
-                    handle(pingMessage: PingMessage.deserialize(message.payload))
-                case "reject":
-                    handle(rejectMessage: RejectMessage.deserialize(message.payload))
-                default:
-                    break
-                }
+                packets = Data(packets.dropFirst(NetworkMessage.minimumLength + Int(networkMessage.length)))
+                handle(message: networkMessage.message)
             }
         }
     }
@@ -201,9 +174,8 @@ class Peer : NSObject, StreamDelegate {
         sendFilterAddMessage(filter: filter)
     }
 
-    private func send(messageWithCommand command: String, payload: Data) {
-        let checksum = Data(Crypto.sha256sha256(payload).prefix(4))
-        let message = Message(magic: network.magic, command: command, length: UInt32(payload.count), checksum: checksum, payload: payload)
+    private func send(message: IMessage) {
+        let message = NetworkMessage(magic: network.magic, message: message)
 
         let data = message.serialized()
         _ = data.withUnsafeBytes {
@@ -225,12 +197,12 @@ class Peer : NSObject, StreamDelegate {
         )
 
         log("<-- VERSION: \(versionMessage.version) --- \(versionMessage.userAgent?.value ?? "") --- \(ServiceFlags(rawValue: versionMessage.services))")
-        send(messageWithCommand: "version", payload: versionMessage.serialized())
+        send(message: versionMessage)
     }
 
     private func sendVerackMessage() {
         log("<-- VERACK")
-        send(messageWithCommand: "verack", payload: Data())
+        send(message: VerackMessage())
     }
 
     private func sendFilterLoadMessage(filters: [Data]) {
@@ -249,45 +221,66 @@ class Peer : NSObject, StreamDelegate {
         let filterLoadMessage = FilterLoadMessage(filter: filterData, nHashFuncs: filter.nHashFuncs, nTweak: nTweak, nFlags: 0)
 
         log("<-- FILTERLOAD: \(filters.count) item(s)")
-        send(messageWithCommand: "filterload", payload: filterLoadMessage.serialized())
+        send(message: filterLoadMessage)
     }
 
     private func sendFilterAddMessage(filter: Data) {
         let filterAddMessage = FilterAddMessage(elementBytes: VarInt(filter.count), element: filter)
 
         log("<-- FILTERADD: \(filter.hex)")
-        send(messageWithCommand: "filteradd", payload: filterAddMessage.serialized())
+        send(message: filterAddMessage)
     }
 
     func sendMemoryPoolMessage() {
         log("<-- MEMPOOL")
-        send(messageWithCommand: "mempool", payload: Data())
+        send(message: MempoolMessage())
     }
 
     func sendGetHeadersMessage(headerHashes: [Data]) {
         let getHeadersMessage = GetBlocksMessage(version: UInt32(protocolVersion), hashCount: VarInt(headerHashes.count), blockLocatorHashes: headerHashes, hashStop: Data(count: 32))
 
         log("<-- GETHEADERS: \(headerHashes.map { $0.reversedHex })")
-        send(messageWithCommand: "getheaders", payload: getHeadersMessage.serialized())
+        send(message: getHeadersMessage)
     }
 
     func sendGetDataMessage(message: InventoryMessage) {
         log("<-- GETDATA: \(message.inventoryItems.count) item(s)")
-        send(messageWithCommand: "getdata", payload: message.serialized())
+        send(message: message)
     }
 
     func send(inventoryMessage: InventoryMessage) {
         log("<-- INV: \(inventoryMessage.inventoryItems.first?.hash.reversedHex ?? "UNKNOWN")")
-        send(messageWithCommand: "inv", payload: inventoryMessage.serialized())
+        send(message: inventoryMessage)
     }
 
     func sendTransaction(transaction: Transaction) {
         log("<-- TX: \(transaction.reversedHashHex)")
-        send(messageWithCommand: "tx", payload: TransactionSerializer.serialize(transaction: transaction))
+        send(message: TransactionMessage(transaction: transaction))
     }
 
-    private func handle(versionMessage: VersionMessage) {
-        log("--> VERSION: \(versionMessage.version) --- \(versionMessage.userAgent?.value ?? "") --- \(ServiceFlags(rawValue: versionMessage.services))")
+
+    private func handle(message: IMessage) {
+        switch message {
+            case let versionMessage as VersionMessage: handle(message: versionMessage)
+            case _ as VerackMessage: handleVerackMessage()
+            case let addressMessage as AddressMessage: handle(message: addressMessage)
+            case let inventoryMessage as InventoryMessage: handle(message: inventoryMessage)
+            case let headersMessage as HeadersMessage: handle(message: headersMessage)
+            case let getDataMessage as GetDataMessage: handle(message: getDataMessage)
+            case let blockMessage as BlockMessage: handle(message: blockMessage)
+            case let merkleBlockMessage as MerkleBlockMessage: handle(message: merkleBlockMessage)
+            case let transactionMessage as TransactionMessage: handle(message: transactionMessage)
+            case let pingMessage as PingMessage: handle(message: pingMessage)
+            case let rejectMessage as RejectMessage: handle(message: rejectMessage)
+            default: break
+        }
+    }
+
+
+
+
+    private func handle(message: VersionMessage) {
+        log("--> VERSION: \(message.version) --- \(message.userAgent?.value ?? "") --- \(ServiceFlags(rawValue: message.services))")
 
         if !sentVerack {
             sendVerackMessage()
@@ -300,52 +293,52 @@ class Peer : NSObject, StreamDelegate {
         delegate?.peerDidConnect(self)
     }
 
-    private func handle(addressMessage: AddressMessage) {
-        log("--> ADDR: \(addressMessage.count) address(es)")
-        delegate?.peer(self, didReceiveAddressMessage: addressMessage)
+    private func handle(message: AddressMessage) {
+        log("--> ADDR: \(message.count) address(es)")
+        delegate?.peer(self, didReceiveAddressMessage: message)
     }
 
-    private func handle(inventoryMessage: InventoryMessage) {
-        log("--> INV: \(inventoryMessage.count) item(s)")
-        delegate?.peer(self, didReceiveInventoryMessage: inventoryMessage)
+    private func handle(message: InventoryMessage) {
+        log("--> INV: \(message.count) item(s)")
+        delegate?.peer(self, didReceiveInventoryMessage: message)
     }
 
-    private func handle(headersMessage: HeadersMessage) {
-        log("--> HEADERS: \(headersMessage.count) item(s)")
-        delegate?.peer(self, didReceiveHeadersMessage: headersMessage)
+    private func handle(message: HeadersMessage) {
+        log("--> HEADERS: \(message.count) item(s)")
+        delegate?.peer(self, didReceiveHeadersMessage: message)
     }
 
-    private func handle(getDataMessage: GetDataMessage) {
-        log("--> GETDATA: \(getDataMessage.count) item(s)")
-        delegate?.peer(self, didReceiveGetDataMessage: getDataMessage)
+    private func handle(message: GetDataMessage) {
+        log("--> GETDATA: \(message.count) item(s)")
+        delegate?.peer(self, didReceiveGetDataMessage: message)
     }
 
-    private func handle(blockMessage: BlockMessage) {
-        log("--> BLOCK: \(Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: blockMessage.blockHeaderItem)).reversedHex)")
+    private func handle(message: BlockMessage) {
+        log("--> BLOCK: \(Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: message.blockHeaderItem)).reversedHex)")
     }
 
-    private func handle(merkleBlockMessage: MerkleBlockMessage) {
-        log("--> MERKLEBLOCK: \(Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: merkleBlockMessage.blockHeader)).reversedHex)")
-        delegate?.peer(self, didReceiveMerkleBlockMessage: merkleBlockMessage)
+    private func handle(message: MerkleBlockMessage) {
+        log("--> MERKLEBLOCK: \(Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: message.blockHeader)).reversedHex)")
+        delegate?.peer(self, didReceiveMerkleBlockMessage: message)
     }
 
-    private func handle(transactionMessage: TransactionMessage) {
-        log("--> TX: \(Crypto.sha256sha256(TransactionSerializer.serialize(transaction: transactionMessage.transaction)).reversedHex)")
-        delegate?.peer(self, didReceiveTransaction: transactionMessage.transaction)
+    private func handle(message: TransactionMessage) {
+        log("--> TX: \(Crypto.sha256sha256(TransactionSerializer.serialize(transaction: message.transaction)).reversedHex)")
+        delegate?.peer(self, didReceiveTransactionMessage: message)
     }
 
-    private func handle(pingMessage: PingMessage) {
+    private func handle(message: PingMessage) {
         log("--> PING")
 
-        let pongMessage = PongMessage(nonce: pingMessage.nonce)
+        let pongMessage = PongMessage(nonce: message.nonce)
 
         log("<-- PONG")
-        send(messageWithCommand: "pong", payload: pongMessage.serialized())
+        send(message: pongMessage)
     }
 
-    private func handle(rejectMessage: RejectMessage) {
-        log("--> REJECT: \(rejectMessage.message) code: 0x\(String(rejectMessage.ccode, radix: 16)) reason: \(rejectMessage.reason)")
-        delegate?.peer(self, didReceiveRejectMessage: rejectMessage)
+    private func handle(message: RejectMessage) {
+        log("--> REJECT: \(message.message) code: 0x\(String(message.ccode, radix: 16)) reason: \(message.reason)")
+        delegate?.peer(self, didReceiveRejectMessage: message)
     }
 
     private func log(_ message: String) {
@@ -359,7 +352,7 @@ protocol PeerDelegate : class {
     func peer(_ peer: Peer, didReceiveAddressMessage message: AddressMessage)
     func peer(_ peer: Peer, didReceiveHeadersMessage message: HeadersMessage)
     func peer(_ peer: Peer, didReceiveMerkleBlockMessage message: MerkleBlockMessage)
-    func peer(_ peer: Peer, didReceiveTransaction transaction: Transaction)
+    func peer(_ peer: Peer, didReceiveTransactionMessage message: TransactionMessage)
     func peer(_ peer: Peer, didReceiveInventoryMessage message: InventoryMessage)
     func peer(_ peer: Peer, didReceiveGetDataMessage message: GetDataMessage)
     func peer(_ peer: Peer, didReceiveRejectMessage message: RejectMessage)

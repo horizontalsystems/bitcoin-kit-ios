@@ -15,6 +15,27 @@ struct NetworkAddress {
     let address: String
     let port: UInt16
 
+    init(services: UInt64, address: String, port: UInt16) {
+        self.services = services
+        self.address = address
+        self.port = port
+    }
+
+    init(_ byteStream: ByteStream) {
+        services = byteStream.read(UInt64.self)
+
+        let addrData = byteStream.read(Data.self, count: 16)
+        let addr = ipv6(from: addrData)
+        if addr.hasPrefix("0000:0000:0000:0000:0000:ffff") {
+            address = "0000:0000:0000:0000:0000:ffff:" + ipv4(from: addrData)
+        } else {
+            address = addr
+        }
+
+
+        port = byteStream.read(UInt16.self)
+    }
+
     func serialized() -> Data {
         var data = Data()
         data += services.littleEndian
@@ -23,21 +44,6 @@ struct NetworkAddress {
         return data
     }
 
-    static func deserialize(_ byteStream: ByteStream) -> NetworkAddress {
-        let services = byteStream.read(UInt64.self)
-        let address = parseIP(data: byteStream.read(Data.self, count: 16))
-        let port = byteStream.read(UInt16.self)
-        return NetworkAddress(services: services, address: address, port: port)
-    }
-
-    static private func parseIP(data: Data) -> String {
-        let address = ipv6(from: data)
-        if address.hasPrefix("0000:0000:0000:0000:0000:ffff") {
-            return "0000:0000:0000:0000:0000:ffff:" + ipv4(from: data)
-        } else {
-            return address
-        }
-    }
 }
 
 extension NetworkAddress : CustomStringConvertible {

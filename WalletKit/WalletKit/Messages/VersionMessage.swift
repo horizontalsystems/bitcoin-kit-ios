@@ -10,7 +10,7 @@ import Foundation
 
 /// When a node creates an outgoing connection, it will immediately advertise its version.
 /// The remote node will respond with its version. No further communication is possible until both peers have exchanged their version.
-struct VersionMessage {
+struct VersionMessage: IMessage{
     /// Identifies protocol version being used by the node
     let version: Int32
     /// bitfield of features to be enabled for this connection
@@ -32,6 +32,44 @@ struct VersionMessage {
     /// Whether the remote peer should announce relayed transactions or not, see BIP 0037
     let relay: Bool?
 
+    init(version: Int32, services: UInt64, timestamp: Int64, yourAddress: NetworkAddress, myAddress: NetworkAddress?, nonce: UInt64?, userAgent: VarString?, startHeight: Int32?, relay: Bool?) {
+        self.version = version
+        self.services = services
+        self.timestamp = timestamp
+        self.yourAddress = yourAddress
+        self.myAddress = myAddress
+        self.nonce = nonce
+        self.userAgent = userAgent
+        self.startHeight = startHeight
+        self.relay = relay
+    }
+
+    init(_ data: Data) {
+        let byteStream = ByteStream(data)
+
+        version = byteStream.read(Int32.self)
+        services = byteStream.read(UInt64.self)
+        timestamp = byteStream.read(Int64.self)
+        yourAddress = NetworkAddress(byteStream)
+        if byteStream.availableBytes == 0 {
+            myAddress = nil
+            nonce = nil
+            userAgent = nil
+            startHeight = nil
+            relay = nil
+            return
+        }
+        myAddress = NetworkAddress(byteStream)
+        nonce = byteStream.read(UInt64.self)
+        userAgent = byteStream.read(VarString.self)
+        startHeight = byteStream.read(Int32.self)
+        if byteStream.availableBytes == 0 {
+            relay = nil
+            return
+        }
+        relay = byteStream.read(Bool.self)
+    }
+
     func serialized() -> Data {
         var data = Data()
         data += version.littleEndian
@@ -46,25 +84,4 @@ struct VersionMessage {
         return data
     }
 
-    static func deserialize(_ data: Data) -> VersionMessage {
-        let byteStream = ByteStream(data)
-
-        let version = byteStream.read(Int32.self)
-        let services = byteStream.read(UInt64.self)
-        let timestamp = byteStream.read(Int64.self)
-        let yourAddress = NetworkAddress.deserialize(byteStream)
-        guard byteStream.availableBytes > 0 else {
-            return VersionMessage(version: version, services: services, timestamp: timestamp, yourAddress: yourAddress, myAddress: nil, nonce: nil, userAgent: nil, startHeight: nil, relay: nil)
-        }
-        let myAddress = NetworkAddress.deserialize(byteStream)
-        let nonce = byteStream.read(UInt64.self)
-        let userAgent = byteStream.read(VarString.self)
-        let startHeight = byteStream.read(Int32.self)
-        guard byteStream.availableBytes > 0 else {
-            return VersionMessage(version: version, services: services, timestamp: timestamp, yourAddress: yourAddress, myAddress: myAddress, nonce: nonce, userAgent: userAgent, startHeight: startHeight, relay: nil)
-        }
-        let relay = byteStream.read(Bool.self)
-
-        return VersionMessage(version: version, services: services, timestamp: timestamp, yourAddress: yourAddress, myAddress: myAddress, nonce: nonce, userAgent: userAgent, startHeight: startHeight, relay: relay)
-    }
 }

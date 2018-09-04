@@ -9,11 +9,29 @@
 import Foundation
 
 /// Allows a node to advertise its knowledge of one or more objects. It can be received unsolicited, or in reply to getblocks.
-struct InventoryMessage {
+struct InventoryMessage: IMessage{
     /// Number of inventory entries
     let count: VarInt
     /// Inventory vectors
     let inventoryItems: [InventoryItem]
+
+    init(count: VarInt, inventoryItems: [InventoryItem]) {
+        self.count = count
+        self.inventoryItems = inventoryItems
+    }
+
+    init(_ data: Data) {
+        let byteStream = ByteStream(data)
+
+        count = byteStream.read(VarInt.self)
+
+        var items = [InventoryItem]()
+        for _ in 0..<Int(count.underlyingValue) {
+            items.append(InventoryItem(byteStream))
+        }
+
+        inventoryItems = items
+    }
 
     func serialized() -> Data {
         var data = Data()
@@ -22,13 +40,4 @@ struct InventoryMessage {
         return data
     }
 
-    static func deserialize(_ data: Data) -> InventoryMessage {
-        let byteStream = ByteStream(data)
-        let count = byteStream.read(VarInt.self)
-        var items = [InventoryItem]()
-        for _ in 0..<Int(count.underlyingValue) {
-            items.append(InventoryItem.deserialize(byteStream))
-        }
-        return InventoryMessage(count: count, inventoryItems: items)
-    }
 }

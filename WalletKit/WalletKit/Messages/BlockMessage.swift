@@ -8,13 +8,27 @@
 
 import Foundation
 
-struct BlockMessage {
+struct BlockMessage: IMessage{
     let blockHeaderItem: BlockHeader
 
     /// Number of transaction entries
     let transactionCount: VarInt
     /// Block transactions, in format of "tx" command
     let transactions: [Transaction]
+
+    init(_ data: Data) {
+        let byteStream = ByteStream(data)
+
+        blockHeaderItem = BlockHeaderSerializer.deserialize(fromByteStream: byteStream)
+        transactionCount = byteStream.read(VarInt.self)
+
+        var txs = [Transaction]()
+        for _ in 0..<transactionCount.underlyingValue {
+            txs.append(TransactionSerializer.deserialize(byteStream))
+        }
+
+        transactions = txs
+    }
 
     func serialized() -> Data {
         var data = Data()
@@ -24,17 +38,6 @@ struct BlockMessage {
             data += TransactionSerializer.serialize(transaction: transaction)
         }
         return data
-    }
-
-    static func deserialize(_ data: Data) -> BlockMessage {
-        let byteStream = ByteStream(data)
-        let blockHeaderItem = BlockHeaderSerializer.deserialize(fromByteStream: byteStream)
-        let transactionCount = byteStream.read(VarInt.self)
-        var transactions = [Transaction]()
-        for _ in 0..<transactionCount.underlyingValue {
-            transactions.append(TransactionSerializer.deserialize(byteStream))
-        }
-        return BlockMessage(blockHeaderItem: blockHeaderItem, transactionCount: transactionCount, transactions: transactions)
     }
 
 }

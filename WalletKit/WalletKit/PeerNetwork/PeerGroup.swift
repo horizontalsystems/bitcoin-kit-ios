@@ -103,11 +103,11 @@ extension PeerGroup: PeerDelegate {
 //        delegate?.peerGroupDidReceive(merkleBlock: message)
     }
 
-    func peer(_ peer: Peer, didReceiveTransaction transaction: Transaction) {
-        let txHash = Crypto.sha256sha256(TransactionSerializer.serialize(transaction: transaction))
+    func peer(_ peer: Peer, didReceiveTransactionMessage message: TransactionMessage) {
+        let txHash = Crypto.sha256sha256(TransactionSerializer.serialize(transaction: message.transaction))
 
         if let index = pendingBlocks.index(where: { $0.pendingTransactionHashes.contains(txHash) }) {
-            pendingBlocks[index].transactions.append(transaction)
+            pendingBlocks[index].transactions.append(message.transaction)
 
             if pendingBlocks[index].transactions.count == pendingBlocks[index].pendingTransactionHashes.count {
                 let block = pendingBlocks.remove(at: index)
@@ -115,7 +115,7 @@ extension PeerGroup: PeerDelegate {
             }
 
         } else {
-            delegate?.peerGroupDidReceive(transaction: transaction)
+            delegate?.peerGroupDidReceive(transaction: message.transaction)
         }
     }
 
