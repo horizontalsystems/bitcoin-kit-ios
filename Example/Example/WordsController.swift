@@ -9,8 +9,6 @@ class WordsController: UIViewController {
         super.viewDidLoad()
 
         title = "WalletKit Demo"
-
-        textView?.text = "output onion luxury staff switch present goose million laptop lesson deal dust"
     }
 
     @IBAction func generateNewWords() {
