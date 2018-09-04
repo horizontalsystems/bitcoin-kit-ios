@@ -41,7 +41,7 @@ public class Block: Object {
         self.init()
 
         self.header = header
-        headerHash = Crypto.sha256sha256(header.serialized())
+        headerHash = Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: header))
         reversedHeaderHashHex = headerHash.reversedHex
     }
 

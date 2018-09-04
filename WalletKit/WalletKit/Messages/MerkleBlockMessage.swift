@@ -14,7 +14,7 @@ struct MerkleBlockMessage {
 
     func serialized() -> Data {
         var data = Data()
-        data += blockHeader.serialized()
+        data += BlockHeaderSerializer.serialize(header: blockHeader)
         data += totalTransactions
         data += numberOfHashes.serialized()
         data += hashes.flatMap { $0 }
@@ -25,7 +25,7 @@ struct MerkleBlockMessage {
 
     static func deserialize(_ data: Data) -> MerkleBlockMessage {
         let byteStream = ByteStream(data)
-        let blockHeaderItem = BlockHeader.deserialize(fromByteStream: byteStream)
+        let blockHeaderItem = BlockHeaderSerializer.deserialize(fromByteStream: byteStream)
         let totalTransactions = byteStream.read(UInt32.self)
         let numberOfHashes = byteStream.read(VarInt.self)
         var hashes = [Data]()

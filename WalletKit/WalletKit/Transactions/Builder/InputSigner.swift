@@ -33,7 +33,7 @@ class InputSigner {
             throw SignError.noPrivateKey
         }
 
-        let serializedTransaction = try transaction.serializedForSignature(inputIndex: index) + UInt32(1)
+        let serializedTransaction = try TransactionSerializer.serializedForSignature(transaction: transaction, inputIndex: index) + UInt32(1)
         let signatureHash = Crypto.sha256sha256(serializedTransaction)
         let signature = try Crypto.sign(data: signatureHash, privateKey: privateKey.raw) + Data(bytes: [0x01])
 

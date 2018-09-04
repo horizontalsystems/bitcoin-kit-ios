@@ -18,21 +18,21 @@ struct BlockMessage {
 
     func serialized() -> Data {
         var data = Data()
-        data += blockHeaderItem.serialized()
+        data += BlockHeaderSerializer.serialize(header: blockHeaderItem)
         data += transactionCount.serialized()
         for transaction in transactions {
-            data += transaction.serialized()
+            data += TransactionSerializer.serialize(transaction: transaction)
         }
         return data
     }
 
     static func deserialize(_ data: Data) -> BlockMessage {
         let byteStream = ByteStream(data)
-        let blockHeaderItem = BlockHeader.deserialize(fromByteStream: byteStream)
+        let blockHeaderItem = BlockHeaderSerializer.deserialize(fromByteStream: byteStream)
         let transactionCount = byteStream.read(VarInt.self)
         var transactions = [Transaction]()
         for _ in 0..<transactionCount.underlyingValue {
-            transactions.append(Transaction.deserialize(byteStream))
+            transactions.append(TransactionSerializer.deserialize(byteStream))
         }
         return BlockMessage(blockHeaderItem: blockHeaderItem, transactionCount: transactionCount, transactions: transactions)
     }

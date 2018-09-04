@@ -58,25 +58,4 @@ public class TransactionOutput: Object {
         self.publicKey = publicKey
     }
 
-    func serialized() -> Data {
-        var data = Data()
-
-        data += value
-        let scriptLength = VarInt(lockingScript.count)
-        data += scriptLength.serialized()
-        data += lockingScript
-
-        return data
-    }
-
-    static func deserialize(_ byteStream: ByteStream) -> TransactionOutput {
-        let transactionOutput = TransactionOutput()
-
-        transactionOutput.value = Int(byteStream.read(Int64.self))
-        let scriptLength: VarInt = byteStream.read(VarInt.self)
-        transactionOutput.lockingScript = byteStream.read(Data.self, count: Int(scriptLength.underlyingValue))
-
-        return transactionOutput
-    }
-
 }

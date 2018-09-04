@@ -17,7 +17,7 @@ struct HeadersMessage {
 
         var headers = [BlockHeader]()
         for _ in 0..<Int(count.underlyingValue) {
-            headers.append(BlockHeader.deserialize(fromByteStream: byteStream))
+            headers.append(BlockHeaderSerializer.deserialize(fromByteStream: byteStream))
             _ = byteStream.read(Data.self, count: 1)
         }
 

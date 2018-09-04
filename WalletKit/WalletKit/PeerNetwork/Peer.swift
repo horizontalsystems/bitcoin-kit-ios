@@ -181,7 +181,7 @@ class Peer : NSObject, StreamDelegate {
                 case "merkleblock":
                     handle(merkleBlockMessage: MerkleBlockMessage.deserialize(message.payload))
                 case "tx":
-                    handle(transaction: Transaction.deserialize(message.payload))
+                    handle(transactionMessage: TransactionMessage.deserialize(message.payload))
                 case "ping":
                     handle(pingMessage: PingMessage.deserialize(message.payload))
                 case "reject":
@@ -283,7 +283,7 @@ class Peer : NSObject, StreamDelegate {
 
     func sendTransaction(transaction: Transaction) {
         log("<-- TX: \(transaction.reversedHashHex)")
-        send(messageWithCommand: "tx", payload: transaction.serialized())
+        send(messageWithCommand: "tx", payload: TransactionSerializer.serialize(transaction: transaction))
     }
 
     private func handle(versionMessage: VersionMessage) {
@@ -321,17 +321,17 @@ class Peer : NSObject, StreamDelegate {
     }
 
     private func handle(blockMessage: BlockMessage) {
-        log("--> BLOCK: \(Crypto.sha256sha256(blockMessage.blockHeaderItem.serialized()).reversedHex)")
+        log("--> BLOCK: \(Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: blockMessage.blockHeaderItem)).reversedHex)")
     }
 
     private func handle(merkleBlockMessage: MerkleBlockMessage) {
-        log("--> MERKLEBLOCK: \(Crypto.sha256sha256(merkleBlockMessage.blockHeader.serialized()).reversedHex)")
+        log("--> MERKLEBLOCK: \(Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: merkleBlockMessage.blockHeader)).reversedHex)")
         delegate?.peer(self, didReceiveMerkleBlockMessage: merkleBlockMessage)
     }
 
-    private func handle(transaction: Transaction) {
-        log("--> TX: \(Crypto.sha256sha256(transaction.serialized()).reversedHex)")
-        delegate?.peer(self, didReceiveTransaction: transaction)
+    private func handle(transactionMessage: TransactionMessage) {
+        log("--> TX: \(Crypto.sha256sha256(TransactionSerializer.serialize(transaction: transactionMessage.transaction)).reversedHex)")
+        delegate?.peer(self, didReceiveTransaction: transactionMessage.transaction)
     }
 
     private func handle(pingMessage: PingMessage) {

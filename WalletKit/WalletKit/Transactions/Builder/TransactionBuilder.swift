@@ -73,7 +73,7 @@ class TransactionBuilder {
 
         transaction.status = .new
         transaction.isMine = true
-        transaction.reversedHashHex = Crypto.sha256sha256(transaction.serialized()).reversedHex
+        transaction.reversedHashHex = Crypto.sha256sha256(TransactionSerializer.serialize(transaction: transaction)).reversedHex
         return transaction
     }
 

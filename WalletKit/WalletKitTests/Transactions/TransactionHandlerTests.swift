@@ -172,7 +172,7 @@ class TransactionHandlerTests: XCTestCase {
 
         assertTransactionEqual(tx1: transaction, tx2: realmTransaction)
         XCTAssertEqual(realmBlock.headerHash, block.headerHash)
-        XCTAssertEqual(Crypto.sha256sha256(realmBlock.header.serialized()), Crypto.sha256sha256(block.header.serialized()))
+        XCTAssertEqual(Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: realmBlock.header)), Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: block.header)))
         XCTAssertEqual(realmBlock.synced, true)
         XCTAssertEqual(realmTransaction.block, realmBlock)
 

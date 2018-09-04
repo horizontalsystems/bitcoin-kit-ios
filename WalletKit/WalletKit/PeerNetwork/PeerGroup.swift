@@ -49,7 +49,7 @@ class PeerGroup {
 
     func relay(transaction: Transaction) {
         let inventoryMessage = InventoryMessage(count: VarInt(1), inventoryItems: [
-            InventoryItem(type: InventoryItem.ObjectType.transaction.rawValue, hash: Crypto.sha256sha256(transaction.serialized()))
+            InventoryItem(type: InventoryItem.ObjectType.transaction.rawValue, hash: Crypto.sha256sha256(TransactionSerializer.serialize(transaction: transaction)))
         ])
 
         peer.send(inventoryMessage: inventoryMessage)
@@ -104,7 +104,7 @@ extension PeerGroup: PeerDelegate {
     }
 
     func peer(_ peer: Peer, didReceiveTransaction transaction: Transaction) {
-        let txHash = Crypto.sha256sha256(transaction.serialized())
+        let txHash = Crypto.sha256sha256(TransactionSerializer.serialize(transaction: transaction))
 
         if let index = pendingBlocks.index(where: { $0.pendingTransactionHashes.contains(txHash) }) {
             pendingBlocks[index].transactions.append(transaction)
