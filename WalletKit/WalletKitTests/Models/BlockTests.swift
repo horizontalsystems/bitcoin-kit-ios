@@ -8,7 +8,7 @@ class BlockTests: XCTestCase {
         let previousBlock = Block()
         previousBlock.height = 1
 
-        let header: BlockHeader = TestData.checkpointBlock.header
+        let header: BlockHeader = TestData.checkpointBlock.header!
         let headerHash = Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: header))
 
         let block = Block(withHeader: header, previousBlock: previousBlock)
@@ -23,7 +23,7 @@ class BlockTests: XCTestCase {
     func testCreateWithHeight() {
         let height = 1
 
-        let header: BlockHeader = TestData.checkpointBlock.header
+        let header: BlockHeader = TestData.checkpointBlock.header!
         let headerHash = Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: header))
 
         let block = Block(withHeader: header, height: height)

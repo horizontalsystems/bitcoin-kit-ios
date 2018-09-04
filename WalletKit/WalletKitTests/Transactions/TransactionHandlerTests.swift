@@ -58,7 +58,7 @@ class TransactionHandlerTests: XCTestCase {
             realm.add(block, update: true)
         }
 
-        try! transactionHandler.handle(blockTransactions: [transaction], blockHeader: block.header)
+        try! transactionHandler.handle(blockTransactions: [transaction], blockHeader: block.header!)
 
         let realmBlock = realm.objects(Block.self).filter("reversedHeaderHashHex = %@", block.reversedHeaderHashHex).last!
         let realmTransaction = realm.objects(Transaction.self).last!
@@ -79,7 +79,7 @@ class TransactionHandlerTests: XCTestCase {
             realm.add(block, update: true)
         }
 
-        try! transactionHandler.handle(blockTransactions: [], blockHeader: block.header)
+        try! transactionHandler.handle(blockTransactions: [], blockHeader: block.header!)
 
         verify(mockProcessor, never()).enqueueRun()
         verify(mockProgressSyncer).enqueueRun()
@@ -97,7 +97,7 @@ class TransactionHandlerTests: XCTestCase {
             when(mock.getValidBlocks(headers: any(), realm: any())).thenReturn((blocks: [block], error: nil))
         }
 
-        try! transactionHandler.handle(blockTransactions: [transaction], blockHeader: block.header)
+        try! transactionHandler.handle(blockTransactions: [transaction], blockHeader: block.header!)
 
         let realmBlock = realm.objects(Block.self).filter("reversedHeaderHashHex = %@", block.reversedHeaderHashHex).last!
         let realmTransaction = realm.objects(Transaction.self).last!
@@ -120,7 +120,7 @@ class TransactionHandlerTests: XCTestCase {
             realm.add(transaction, update: true)
         }
 
-        try! transactionHandler.handle(blockTransactions: [transaction], blockHeader: block.header)
+        try! transactionHandler.handle(blockTransactions: [transaction], blockHeader: block.header!)
 
         let realmTransaction = realm.objects(Transaction.self).last!
 
@@ -139,7 +139,7 @@ class TransactionHandlerTests: XCTestCase {
             when(mock.getValidBlocks(headers: any(), realm: any())).thenReturn((blocks: [block], error: nil))
         }
 
-        try! transactionHandler.handle(blockTransactions: [transaction], blockHeader: block.header)
+        try! transactionHandler.handle(blockTransactions: [transaction], blockHeader: block.header!)
 
         let realmBlock = realm.objects(Block.self).filter("reversedHeaderHashHex = %@", block.headerHash.reversedHex).last!
         let realmTransaction = realm.objects(Transaction.self).last!
@@ -165,14 +165,14 @@ class TransactionHandlerTests: XCTestCase {
             when(mock.block(withHeader: any(), height: any())).thenReturn(block)
         }
 
-        try! transactionHandler.handle(blockTransactions: [transaction], blockHeader: block.header)
+        try! transactionHandler.handle(blockTransactions: [transaction], blockHeader: block.header!)
 
         let realmBlock = realm.objects(Block.self).last!
         let realmTransaction = realm.objects(Transaction.self).last!
 
         assertTransactionEqual(tx1: transaction, tx2: realmTransaction)
         XCTAssertEqual(realmBlock.headerHash, block.headerHash)
-        XCTAssertEqual(Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: realmBlock.header)), Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: block.header)))
+        XCTAssertEqual(Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: realmBlock.header!)), Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: block.header!)))
         XCTAssertEqual(realmBlock.synced, true)
         XCTAssertEqual(realmTransaction.block, realmBlock)
 
@@ -189,7 +189,7 @@ class TransactionHandlerTests: XCTestCase {
         }
 
         do {
-            try transactionHandler.handle(blockTransactions: [transaction], blockHeader: block.header)
+            try transactionHandler.handle(blockTransactions: [transaction], blockHeader: block.header!)
             XCTFail("Expected exception not thrown!")
         } catch let error as BlockValidator.ValidatorError {
             XCTAssertEqual(error, BlockValidator.ValidatorError.noCheckpointBlock)
@@ -210,7 +210,7 @@ class TransactionHandlerTests: XCTestCase {
         }
 
         do {
-            try transactionHandler.handle(blockTransactions: [transaction], blockHeader: block.header)
+            try transactionHandler.handle(blockTransactions: [transaction], blockHeader: block.header!)
             XCTFail("Expected exception not thrown!")
         } catch let error as TransactionHandler.HandleError {
             XCTAssertEqual(error, TransactionHandler.HandleError.invalidBlockHeader)
