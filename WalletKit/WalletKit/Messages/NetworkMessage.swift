@@ -22,7 +22,7 @@ struct NetworkMessage{
         self.message = message
     }
 
-    init(magic: UInt32, message: IMessage) {
+    init(network: NetworkProtocol, message: IMessage) {
         let serializedMessage = message.serialized()
         let checksum = Data(Crypto.sha256sha256(serializedMessage).prefix(4))
         let length = UInt32(serializedMessage.count)
@@ -35,7 +35,7 @@ struct NetworkMessage{
             }
         }
 
-        self.init(magic: magic, command: command, length: length, checksum: checksum, message: message)
+        self.init(magic: network.magic, command: command, length: length, checksum: checksum, message: message)
     }
 
     func serialized() -> Data {
