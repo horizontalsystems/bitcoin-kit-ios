@@ -9,11 +9,7 @@ class Manager {
 
     let networkType: WalletKit.NetworkType = .bitcoinRegTest
 
-    var _walletKit: WalletKit?
-
-    var walletKit: WalletKit {
-        return _walletKit!
-    }
+    var walletKit: WalletKit!
 
     init() {
         if let words = savedWords {
@@ -34,7 +30,7 @@ class Manager {
         }
 
         clearWords()
-        _walletKit = nil
+        walletKit = nil
     }
 
     private func initWalletKit(words: [String]) {
@@ -44,7 +40,7 @@ class Manager {
         let documentsUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
         let realmConfiguration = Realm.Configuration(fileURL: documentsUrl?.appendingPathComponent(realmFileName))
 
-        _walletKit = WalletKit(withWords: words, realmConfiguration: realmConfiguration, networkType: networkType)
+        walletKit = WalletKit(withWords: words, realmConfiguration: realmConfiguration, networkType: networkType)
     }
 
     private var savedWords: [String]? {

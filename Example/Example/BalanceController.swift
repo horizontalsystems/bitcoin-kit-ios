@@ -32,7 +32,6 @@ class BalanceController: UIViewController {
     }
 
     @objc func logout() {
-        unspentOutputsNotificationToken?.invalidate()
         Manager.shared.logout()
 
         if let window = UIApplication.shared.keyWindow {
@@ -51,6 +50,10 @@ class BalanceController: UIViewController {
     }
 
     private func updateBalance() {
+        guard Manager.shared.walletKit != nil else {
+            return
+        }
+
         var satoshiBalance = 0
 
         for output in Manager.shared.walletKit.unspentOutputsRealmResults {
