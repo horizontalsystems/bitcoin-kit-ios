@@ -81,7 +81,7 @@ class SyncerTests: XCTestCase {
     }
 
     func testRunHeaderHandler() {
-        let headers: [BlockHeader] = [TestData.firstBlock.header, TestData.secondBlock.header]
+        let headers: [BlockHeader] = [TestData.firstBlock.header!, TestData.secondBlock.header!]
 
         syncer.peerGroupDidReceive(headers: headers)
 
@@ -95,7 +95,7 @@ class SyncerTests: XCTestCase {
             when(mock.handle(headers: any())).thenThrow(error)
         }
 
-        let headers: [BlockHeader] = [TestData.firstBlock.header, TestData.secondBlock.header]
+        let headers: [BlockHeader] = [TestData.firstBlock.header!, TestData.secondBlock.header!]
 
         syncer.peerGroupDidReceive(headers: headers)
 
