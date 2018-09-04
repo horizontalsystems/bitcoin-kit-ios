@@ -1330,7 +1330,7 @@
 					"$(PROJECT_DIR)/Libraries/openssl/lib",
 				);
 				MODULEMAP_FILE = "$(SRCROOT)/WalletKit/WalletKit.modulemap";
-				PRODUCT_BUNDLE_IDENTIFIER = im.grouvi.WalletKit;
+				PRODUCT_BUNDLE_IDENTIFIER = io.horizontalsystems.walletkit;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/Libraries";
@@ -1372,7 +1372,7 @@
 					"$(PROJECT_DIR)/Libraries/openssl/lib",
 				);
 				MODULEMAP_FILE = "$(SRCROOT)/WalletKit/WalletKit.modulemap";
-				PRODUCT_BUNDLE_IDENTIFIER = im.grouvi.WalletKit;
+				PRODUCT_BUNDLE_IDENTIFIER = io.horizontalsystems.walletkit;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/Libraries";
