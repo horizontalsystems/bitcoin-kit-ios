@@ -21,7 +21,7 @@ class BlockValidator {
 
         if isDifficultyTransitionPoint(height: block.height) {
             try validateDifficultyTransition(block: block)
-        } else if block.header.bits != block.previousBlock?.header.bits {
+        } else if block.header?.bits != block.previousBlock?.header?.bits {
             throw ValidatorError.notEqualBits
         }
     }
@@ -31,7 +31,7 @@ class BlockValidator {
             throw ValidatorError.noPreviousBlock
         }
 
-        guard block.header.previousBlockHeaderHash == previousBlock.headerHash else {
+        guard block.header?.previousBlockHeaderHash == previousBlock.headerHash else {
             throw ValidatorError.wrongPreviousHeaderHash
         }
     }
@@ -50,7 +50,7 @@ class BlockValidator {
         guard let previousBlock = block.previousBlock else {
             throw ValidatorError.noPreviousBlock
         }
-        if try calculator.difficultyAfter(block: previousBlock, lastCheckPointBlock: lastCheckPointBlock) != block.header.bits {
+        if try calculator.difficultyAfter(block: previousBlock, lastCheckPointBlock: lastCheckPointBlock) != block.header?.bits {
             throw ValidatorError.notDifficultyTransitionEqualBits
         }
     }

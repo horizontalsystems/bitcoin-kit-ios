@@ -2,12 +2,14 @@ import Foundation
 import RealmSwift
 
 public class Block: Object {
+    enum BlockError: Error { case noHeader }
+
     @objc public dynamic var reversedHeaderHashHex = ""
     @objc public dynamic var headerHash = Data()
     @objc public dynamic var height: Int = 0
     @objc dynamic var synced = false
 
-    @objc public dynamic var header: BlockHeader!
+    @objc public dynamic var header: BlockHeader?
     @objc dynamic var previousBlock: Block?
 
     let transactions = LinkingObjects(fromType: Transaction.self, property: "block")
@@ -16,7 +18,7 @@ public class Block: Object {
         return "reversedHeaderHashHex"
     }
 
-    convenience init(withHeader header: BlockHeader, previousBlock: Block) {
+    convenience init(withHeader header: BlockHeader?, previousBlock: Block) {
         self.init(withHeader: header)
 
         height = previousBlock.height + 1
@@ -37,12 +39,14 @@ public class Block: Object {
         self.height = height
     }
 
-    private convenience init(withHeader header: BlockHeader) {
+    private convenience init(withHeader header: BlockHeader?) {
         self.init()
 
-        self.header = header
-        headerHash = Crypto.sha256sha256(header.serialized())
-        reversedHeaderHashHex = headerHash.reversedHex
+        if let header = header {
+            self.header = header
+            headerHash = Crypto.sha256sha256(header.serialized())
+            reversedHeaderHashHex = headerHash.reversedHex
+        }
     }
 
 }

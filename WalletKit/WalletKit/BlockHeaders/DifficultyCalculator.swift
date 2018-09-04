@@ -2,6 +2,7 @@ import Foundation
 import BigInt
 
 class DifficultyCalculator {
+
     private let maxTargetBits: Int = 0x1d00ffff                   // Maximum difficulty.
     var maxTargetDifficulty: BigInt { return difficultyEncoder.decodeCompact(bits: maxTargetBits) }
 
@@ -21,9 +22,12 @@ class DifficultyCalculator {
     }
 
     func difficultyAfter(block: Block, lastCheckPointBlock: Block) throws -> Int {
-        let timeSpan = limit(timeSpan: block.header.timestamp - lastCheckPointBlock.header.timestamp)
+        guard let blockHeader = block.header, let lastCheckPointBlockHeader = lastCheckPointBlock.header else {
+            throw Block.BlockError.noHeader
+        }
+        let timeSpan = limit(timeSpan: blockHeader.timestamp - lastCheckPointBlockHeader.timestamp)
 
-        var bigIntDifficulty = difficultyEncoder.decodeCompact(bits: block.header.bits)
+        var bigIntDifficulty = difficultyEncoder.decodeCompact(bits: blockHeader.bits)
         bigIntDifficulty *= BigInt(timeSpan)
         bigIntDifficulty /= BigInt(targetTimeSpan)
         let newDifficulty = min(difficultyEncoder.encodeCompact(from: bigIntDifficulty), maxTargetBits)

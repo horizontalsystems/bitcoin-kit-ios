@@ -70,13 +70,13 @@ class HeaderHandlerTests: XCTestCase {
         let firstBlock = TestData.firstBlock
 
         stub(mockFactory) { mock in
-            when(mock.block(withHeader: equal(to: firstBlock.header), previousBlock: equal(to: checkpointBlock))).thenReturn(firstBlock)
+            when(mock.block(withHeader: equal(to: firstBlock.header!), previousBlock: equal(to: checkpointBlock))).thenReturn(firstBlock)
         }
         stub(mockValidator) { mock in
             when(mock.validate(block: equal(to: firstBlock))).thenDoNothing()
         }
 
-        try! headerHandler.handle(headers: [firstBlock.header])
+        try! headerHandler.handle(headers: [firstBlock.header!])
 
         XCTAssertEqual(realm.objects(Block.self).count, 2)
         verify(mockBlockSyncer).enqueueRun()
@@ -92,15 +92,15 @@ class HeaderHandlerTests: XCTestCase {
         }
 
         stub(mockFactory) { mock in
-            when(mock.block(withHeader: equal(to: secondBlock.header), previousBlock: equal(to: firstBlock))).thenReturn(secondBlock)
-            when(mock.block(withHeader: equal(to: thirdBlock.header), previousBlock: equal(to: secondBlock))).thenReturn(thirdBlock)
+            when(mock.block(withHeader: equal(to: secondBlock.header!), previousBlock: equal(to: firstBlock))).thenReturn(secondBlock)
+            when(mock.block(withHeader: equal(to: thirdBlock.header!), previousBlock: equal(to: secondBlock))).thenReturn(thirdBlock)
         }
         stub(mockValidator) { mock in
             when(mock.validate(block: equal(to: secondBlock))).thenDoNothing()
             when(mock.validate(block: equal(to: thirdBlock))).thenDoNothing()
         }
 
-        try! headerHandler.handle(headers: [secondBlock.header, thirdBlock.header])
+        try! headerHandler.handle(headers: [secondBlock.header!, thirdBlock.header!])
 
         XCTAssertNotEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", secondBlock.reversedHeaderHashHex).first, nil)
         XCTAssertNotEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", thirdBlock.reversedHeaderHashHex).first, nil)
@@ -118,8 +118,8 @@ class HeaderHandlerTests: XCTestCase {
         }
 
         stub(mockFactory) { mock in
-            when(mock.block(withHeader: equal(to: secondBlock.header), previousBlock: equal(to: firstBlock))).thenReturn(secondBlock)
-            when(mock.block(withHeader: equal(to: thirdBlock.header), previousBlock: equal(to: secondBlock))).thenReturn(thirdBlock)
+            when(mock.block(withHeader: equal(to: secondBlock.header!), previousBlock: equal(to: firstBlock))).thenReturn(secondBlock)
+            when(mock.block(withHeader: equal(to: thirdBlock.header!), previousBlock: equal(to: secondBlock))).thenReturn(thirdBlock)
         }
         stub(mockValidator) { mock in
             when(mock.validate(block: equal(to: secondBlock))).thenThrow(BlockValidator.ValidatorError.notEqualBits)
@@ -129,7 +129,7 @@ class HeaderHandlerTests: XCTestCase {
         var caught = false
 
         do {
-            try headerHandler.handle(headers: [secondBlock.header, thirdBlock.header])
+            try headerHandler.handle(headers: [secondBlock.header!, thirdBlock.header!])
         } catch let error as BlockValidator.ValidatorError {
             caught = true
             XCTAssertEqual(error, BlockValidator.ValidatorError.notEqualBits)
@@ -151,8 +151,8 @@ class HeaderHandlerTests: XCTestCase {
         }
 
         stub(mockFactory) { mock in
-            when(mock.block(withHeader: equal(to: secondBlock.header), previousBlock: equal(to: firstBlock))).thenReturn(secondBlock)
-            when(mock.block(withHeader: equal(to: thirdBlock.header), previousBlock: equal(to: secondBlock))).thenReturn(thirdBlock)
+            when(mock.block(withHeader: equal(to: secondBlock.header!), previousBlock: equal(to: firstBlock))).thenReturn(secondBlock)
+            when(mock.block(withHeader: equal(to: thirdBlock.header!), previousBlock: equal(to: secondBlock))).thenReturn(thirdBlock)
         }
         stub(mockValidator) { mock in
             when(mock.validate(block: equal(to: secondBlock))).thenDoNothing()
@@ -162,7 +162,7 @@ class HeaderHandlerTests: XCTestCase {
         var caught = false
 
         do {
-            try headerHandler.handle(headers: [secondBlock.header, thirdBlock.header])
+            try headerHandler.handle(headers: [secondBlock.header!, thirdBlock.header!])
         } catch let error as BlockValidator.ValidatorError {
             caught = true
             XCTAssertEqual(error, BlockValidator.ValidatorError.notEqualBits)
@@ -184,15 +184,15 @@ class HeaderHandlerTests: XCTestCase {
         }
 
         stub(mockFactory) { mock in
-            when(mock.block(withHeader: equal(to: secondBlock.header), previousBlock: equal(to: firstBlock))).thenReturn(secondBlock)
-            when(mock.block(withHeader: equal(to: thirdBlock.header), previousBlock: equal(to: secondBlock))).thenReturn(thirdBlock)
+            when(mock.block(withHeader: equal(to: secondBlock.header!), previousBlock: equal(to: firstBlock))).thenReturn(secondBlock)
+            when(mock.block(withHeader: equal(to: thirdBlock.header!), previousBlock: equal(to: secondBlock))).thenReturn(thirdBlock)
         }
         stub(mockValidator) { mock in
             when(mock.validate(block: equal(to: secondBlock))).thenDoNothing()
             when(mock.validate(block: equal(to: thirdBlock))).thenDoNothing()
         }
 
-        let validBlocks = headerHandler.getValidBlocks(headers: [secondBlock.header, thirdBlock.header], realm: realm)
+        let validBlocks = headerHandler.getValidBlocks(headers: [secondBlock.header!, thirdBlock.header!], realm: realm)
 
         XCTAssertEqual(validBlocks.blocks[0].headerHash, secondBlock.headerHash)
         XCTAssertEqual(validBlocks.blocks[1].headerHash, thirdBlock.headerHash)
