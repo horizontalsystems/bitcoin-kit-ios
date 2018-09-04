@@ -1,6 +1,13 @@
 import Foundation
 
 class AddressConverter {
+    enum ConversionError: Error {
+        case invalidChecksum
+        case invalidAddressLength
+        case unknownAddressType
+        case wrongAddressPrefix
+    }
+
     let network: NetworkProtocol
 
     init(network: NetworkProtocol) {
@@ -26,6 +33,16 @@ class AddressConverter {
         guard address.count >= 34 && address.count <= 55 else {
             throw ConversionError.invalidAddressLength
         }
+        let pattern = ["^\(network.scriptPrefixPattern)", "^\(network.pubKeyPrefixPattern)"]
+        var unknownPrefix = true
+        pattern.forEach { pattern in
+            if let regex = try? NSRegularExpression(pattern: pattern), !regex.matches(in: address, range: NSRange(location: 0, length: address.count)).isEmpty {
+                unknownPrefix = false
+            }
+        }
+        if unknownPrefix {
+            throw ConversionError.wrongAddressPrefix
+        }
         let hex = Base58.decode(address)
         let givenChecksum = hex.suffix(4)
         let doubleSHA256 = Crypto.sha256sha256(hex.prefix(hex.count - 4))
@@ -35,10 +52,5 @@ class AddressConverter {
         }
         return hex[1..<hex.count - 4]
     }
-}
 
-enum ConversionError: Error {
-    case invalidChecksum
-    case invalidAddressLength
-    case unknownAddressType
 }

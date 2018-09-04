@@ -182,6 +182,10 @@ public class WalletKit {
         try transactionCreator.create(to: address, value: value)
     }
 
+    public func validate(address: String) throws {
+       _ = try addressConverter.convert(address: address)
+    }
+
     public func fee(for value: Int, senderPay: Bool) throws -> Int {
         return try transactionBuilder.fee(for: value, feeRate: transactionCreator.feeRate, senderPay: true, type: .p2pkh)
     }

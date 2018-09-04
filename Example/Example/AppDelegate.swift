@@ -6,11 +6,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        
+
+        let controller = Manager.shared.walletKit == nil ? UINavigationController(rootViewController: WordsController()) : MainController()
+
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.makeKeyAndVisible()
         window?.backgroundColor = .white
-        window?.rootViewController = ViewController()
+        window?.rootViewController = controller
 
         return true
     }
