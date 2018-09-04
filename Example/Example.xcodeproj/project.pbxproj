@@ -25,6 +25,7 @@
 		D34BDCB4213E4C62009D0AAC /* ReceiveController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D34BDCB2213E4C62009D0AAC /* ReceiveController.xib */; };
 		D34BDCB7213E74B8009D0AAC /* TransactionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D34BDCB5213E74B8009D0AAC /* TransactionCell.swift */; };
 		D34BDCB8213E74B8009D0AAC /* TransactionCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = D34BDCB6213E74B8009D0AAC /* TransactionCell.xib */; };
+		D34BDCBA213E8CD5009D0AAC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D34BDCB9213E8CD5009D0AAC /* Assets.xcassets */; };
 		D3FD451A20F375B300F472B9 /* WalletKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3FD451220F35A1900F472B9 /* WalletKit.framework */; };
 		D3FD451E20F375E200F472B9 /* WalletKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D3FD451220F35A1900F472B9 /* WalletKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
@@ -73,6 +74,7 @@
 		D34BDCB2213E4C62009D0AAC /* ReceiveController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ReceiveController.xib; sourceTree = "<group>"; };
 		D34BDCB5213E74B8009D0AAC /* TransactionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCell.swift; sourceTree = "<group>"; };
 		D34BDCB6213E74B8009D0AAC /* TransactionCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TransactionCell.xib; sourceTree = "<group>"; };
+		D34BDCB9213E8CD5009D0AAC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D3FD451220F35A1900F472B9 /* WalletKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = WalletKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -137,6 +139,7 @@
 		D3285F4420BD158E00644076 /* Example */ = {
 			isa = PBXGroup;
 			children = (
+				D34BDCB9213E8CD5009D0AAC /* Assets.xcassets */,
 				D3285F4520BD158E00644076 /* AppDelegate.swift */,
 				D3373DB120C52F640082BC4A /* LaunchScreen.xib */,
 				D3285F5120BD158F00644076 /* Info.plist */,
@@ -224,6 +227,7 @@
 				D34BDCA22137F7A7009D0AAC /* WordsController.xib in Resources */,
 				D34BDCB8213E74B8009D0AAC /* TransactionCell.xib in Resources */,
 				D3373DB220C52F640082BC4A /* LaunchScreen.xib in Resources */,
+				D34BDCBA213E8CD5009D0AAC /* Assets.xcassets in Resources */,
 				D34BDCB0213E4C37009D0AAC /* SendController.xib in Resources */,
 				D34BDCB4213E4C62009D0AAC /* ReceiveController.xib in Resources */,
 			);
