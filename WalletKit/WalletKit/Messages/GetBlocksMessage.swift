@@ -1,11 +1,3 @@
-//
-//  GetBlocksMessage.swift
-//  BitcoinKit
-//
-//  Created by Kishikawa Katsumi on 2018/02/11.
-//  Copyright © 2018 Kishikawa Katsumi. All rights reserved.
-//
-
 import Foundation
 
 struct GetBlocksMessage: IMessage{
@@ -17,13 +9,6 @@ struct GetBlocksMessage: IMessage{
     let blockLocatorHashes: [Data]
     /// hash of the last desired block; set to zero to get as many blocks as possible (500)
     let hashStop: Data
-
-    init(version: UInt32, hashCount: VarInt, blockLocatorHashes: [Data], hashStop: Data) {
-        self.version = version
-        self.hashCount = hashCount
-        self.blockLocatorHashes = blockLocatorHashes
-        self.hashStop = hashStop
-    }
 
     init(_ data: Data) {
         version = 0

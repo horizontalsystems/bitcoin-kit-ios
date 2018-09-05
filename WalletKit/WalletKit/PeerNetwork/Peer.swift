@@ -80,13 +80,13 @@ class Peer {
     }
 
     func sendGetHeadersMessage(headerHashes: [Data]) {
-        let getHeadersMessage = GetBlocksMessage(version: UInt32(protocolVersion), hashCount: VarInt(headerHashes.count), blockLocatorHashes: headerHashes, hashStop: Data(count: 32))
+        let getHeadersMessage = GetHeadersMessage(version: UInt32(protocolVersion), hashCount: VarInt(headerHashes.count), blockLocatorHashes: headerHashes, hashStop: Data(count: 32))
 
         log("<-- GETHEADERS: \(headerHashes.map { $0.reversedHex })")
         connection.send(message: getHeadersMessage)
     }
 
-    func sendGetDataMessage(message: InventoryMessage) {
+    func sendGetDataMessage(message: GetDataMessage) {
         log("<-- GETDATA: \(message.inventoryItems.count) item(s)")
         connection.send(message: message)
     }
@@ -96,9 +96,9 @@ class Peer {
         connection.send(message: inventoryMessage)
     }
 
-    func sendTransaction(transaction: Transaction) {
-        log("<-- TX: \(transaction.reversedHashHex)")
-        connection.send(message: TransactionMessage(transaction: transaction))
+    func sendTransaction(transactionMessage: TransactionMessage) {
+        log("<-- TX: \(transactionMessage.transaction.reversedHashHex)")
+        connection.send(message: transactionMessage)
     }
 
     private func log(_ message: String) {

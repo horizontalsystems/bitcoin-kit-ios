@@ -74,6 +74,8 @@ class PeerConnection: NSObject, StreamDelegate {
         writeStream = nil
         runLoop = nil
 
+        delegate?.connectionDidDisconnect(self)
+
         log("DISCONNECTED")
     }
 

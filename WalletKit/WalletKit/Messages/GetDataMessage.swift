@@ -19,6 +19,11 @@ struct GetDataMessage: IMessage{
     /// Inventory vectors
     let inventoryItems: [InventoryItem]
 
+    init(count: VarInt, inventoryItems: [InventoryItem]) {
+        self.count = count
+        self.inventoryItems = inventoryItems
+    }
+
     init(_ data: Data) {
         let byteStream = ByteStream(data)
 

@@ -40,7 +40,7 @@ class PeerGroup {
     }
 
     func requestBlocks(headerHashes: [Data]) {
-        let inventoryMessage = InventoryMessage(count: VarInt(headerHashes.count), inventoryItems: headerHashes.map { hash in
+        let inventoryMessage = GetDataMessage(count: VarInt(headerHashes.count), inventoryItems: headerHashes.map { hash in
             InventoryItem(type: InventoryItem.ObjectType.filteredBlockMessage.rawValue, hash: hash)
         })
 
@@ -129,7 +129,7 @@ extension PeerGroup: PeerDelegate {
         }
 
         if !items.isEmpty {
-            let getDataMessage = InventoryMessage(count: VarInt(items.count), inventoryItems: items)
+            let getDataMessage = GetDataMessage(count: VarInt(items.count), inventoryItems: items)
             peer.sendGetDataMessage(message: getDataMessage)
         }
     }
@@ -137,7 +137,8 @@ extension PeerGroup: PeerDelegate {
     func peer(_ peer: Peer, didReceiveGetDataMessage message: GetDataMessage) {
         for item in message.inventoryItems {
             if item.objectType == .transaction, let transaction = delegate?.transaction(forHash: item.hash) {
-                peer.sendTransaction(transaction: transaction)
+                let transactionMessage = TransactionMessage(transaction: transaction)
+                peer.sendTransaction(transactionMessage: transactionMessage)
             }
         }
     }

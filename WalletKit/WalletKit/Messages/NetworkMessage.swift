@@ -86,9 +86,8 @@ struct NetworkMessage{
             return nil
         }
 
-        guard let message = messagesMap[command]?.init(payload) else {
-            return nil
-        }
+        let messageClass = messagesMap[command] ?? UnknownMessage.self
+        let message = messageClass.init(payload)
 
         return NetworkMessage(magic: magic, command: command, length: length, checksum: checksum, message: message)
     }
