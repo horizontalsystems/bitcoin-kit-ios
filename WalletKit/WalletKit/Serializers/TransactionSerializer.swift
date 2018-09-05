@@ -30,12 +30,11 @@ class TransactionSerializer {
         return data
     }
 
-    static func deserialize(_ data: Data) -> Transaction {
-        let byteStream = ByteStream(data)
-        return deserialize(byteStream)
+    static func deserialize(data: Data) -> Transaction {
+        return deserialize(byteStream: ByteStream(data))
     }
 
-    static func deserialize(_ byteStream: ByteStream) -> Transaction {
+    static func deserialize(byteStream: ByteStream) -> Transaction {
         let transaction = Transaction()
 
         transaction.version = Int(byteStream.read(Int32.self))

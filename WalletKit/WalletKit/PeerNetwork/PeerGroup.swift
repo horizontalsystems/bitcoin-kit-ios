@@ -39,20 +39,12 @@ class PeerGroup {
         peer.sendGetHeadersMessage(headerHashes: headerHashes)
     }
 
-    func requestBlocks(headerHashes: [Data]) {
-        let inventoryMessage = GetDataMessage(count: VarInt(headerHashes.count), inventoryItems: headerHashes.map { hash in
-            InventoryItem(type: InventoryItem.ObjectType.filteredBlockMessage.rawValue, hash: hash)
-        })
-
-        peer.sendGetDataMessage(message: inventoryMessage)
+    func requestMerkleBlocks(headerHashes: [Data]) {
+        peer.requestMerkleBlocks(headerHashes: headerHashes)
     }
 
     func relay(transaction: Transaction) {
-        let inventoryMessage = InventoryMessage(count: VarInt(1), inventoryItems: [
-            InventoryItem(type: InventoryItem.ObjectType.transaction.rawValue, hash: Crypto.sha256sha256(TransactionSerializer.serialize(transaction: transaction)))
-        ])
-
-        peer.send(inventoryMessage: inventoryMessage)
+        peer.relay(transaction: transaction)
     }
 
     func addPublicKeyFilter(pubKey: PublicKey) {
@@ -100,7 +92,6 @@ extension PeerGroup: PeerDelegate {
         } catch {
             print("MERKLE BLOCK MESSAGE ERROR: \(error)")
         }
-//        delegate?.peerGroupDidReceive(merkleBlock: message)
     }
 
     func peer(_ peer: Peer, didReceiveTransactionMessage message: TransactionMessage) {
@@ -119,39 +110,8 @@ extension PeerGroup: PeerDelegate {
         }
     }
 
-    func peer(_ peer: Peer, didReceiveInventoryMessage message: InventoryMessage) {
-        var items = [InventoryItem]()
-
-        for item in message.inventoryItems {
-            if let delegate = delegate, delegate.shouldRequest(inventoryItem: item) {
-                var inventoryItem: InventoryItem
-                switch item.objectType {
-                    case .blockMessage:
-                        inventoryItem = InventoryItem(type: InventoryItem.ObjectType.filteredBlockMessage.rawValue, hash: item.hash)
-                    default:
-                        inventoryItem = item
-                }
-
-                items.append(inventoryItem)
-            }
-        }
-
-        if !items.isEmpty {
-            let getDataMessage = GetDataMessage(count: VarInt(items.count), inventoryItems: items)
-            peer.sendGetDataMessage(message: getDataMessage)
-        }
-    }
-
-    func peer(_ peer: Peer, didReceiveGetDataMessage message: GetDataMessage) {
-        for item in message.inventoryItems {
-            if item.objectType == .transaction, let transaction = delegate?.transaction(forHash: item.hash) {
-                let transactionMessage = TransactionMessage(transaction: transaction)
-                peer.sendTransaction(transactionMessage: transactionMessage)
-            }
-        }
-    }
-
-    func peer(_ peer: Peer, didReceiveRejectMessage message: RejectMessage) {
+    func shouldRequest(inventoryItem: InventoryItem) -> Bool {
+        return delegate?.shouldRequest(inventoryItem: inventoryItem) ?? false
     }
 
 }

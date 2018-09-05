@@ -138,7 +138,7 @@ class PeerConnection: NSObject, StreamDelegate {
         }
 
         while packets.count >= NetworkMessage.minimumLength {
-            guard let networkMessage = NetworkMessage.deserialize(packets) else {
+            guard let networkMessage = NetworkMessage.deserialize(data: packets) else {
                 return
             }
 

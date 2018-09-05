@@ -1,19 +1,22 @@
 import Foundation
 
-struct TransactionMessage: IMessage{
+struct TransactionMessage: IMessage {
     let transaction: Transaction
 
     init(transaction: Transaction) {
         self.transaction = transaction
     }
 
-    init(_ data: Data) {
-        let byteStream = ByteStream(data)
-        transaction = TransactionSerializer.deserialize(byteStream)
+    init(data: Data) {
+        transaction = TransactionSerializer.deserialize(data: data)
+    }
+
+    init(transactionData: Data) {
+        transaction = TransactionSerializer.deserialize(data: transactionData)
     }
 
     func serialized() -> Data {
-        return TransactionSerializer.serialize(transaction: self.transaction)
+        return TransactionSerializer.serialize(transaction: transaction)
     }
 
 }

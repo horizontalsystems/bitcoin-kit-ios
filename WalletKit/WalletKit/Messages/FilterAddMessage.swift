@@ -1,15 +1,15 @@
 import Foundation
 
-struct FilterAddMessage: IMessage{
+struct FilterAddMessage: IMessage {
     let elementBytes: VarInt
     let element: Data
 
-    init(elementBytes: VarInt, element: Data) {
-        self.elementBytes = elementBytes
-        self.element = element
+    init(filter: Data) {
+        self.elementBytes = VarInt(filter.count)
+        self.element = filter
     }
 
-    init(_ data: Data) {
+    init(data: Data) {
         elementBytes = 0
         element = Data()
     }
@@ -20,4 +20,5 @@ struct FilterAddMessage: IMessage{
         data += element
         return data
     }
+
 }

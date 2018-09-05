@@ -93,8 +93,4 @@ extension Syncer: PeerGroupDelegate {
         }
     }
 
-    func transaction(forHash hash: Data) -> Transaction? {
-        return realmFactory.realm.objects(Transaction.self).filter("reversedHashHex = %@", hash.reversedHex).first
-    }
-
 }

@@ -1,6 +1,6 @@
 import Foundation
 
-struct MerkleBlockMessage: IMessage{
+struct MerkleBlockMessage: IMessage {
     let blockHeader: BlockHeader
 
     /// Number of transactions in the block (including unmatched ones)
@@ -12,7 +12,7 @@ struct MerkleBlockMessage: IMessage{
     let numberOfFlags: VarInt
     let flags: [UInt8]
 
-    public init(blockHeader: BlockHeader, totalTransactions: UInt32, numberOfHashes: VarInt, hashes: [Data], numberOfFlags: VarInt, flags: [UInt8]) {
+    init(blockHeader: BlockHeader, totalTransactions: UInt32, numberOfHashes: VarInt, hashes: [Data], numberOfFlags: VarInt, flags: [UInt8]) {
         self.blockHeader = blockHeader
         self.totalTransactions = totalTransactions
         self.numberOfHashes = numberOfHashes
@@ -21,27 +21,27 @@ struct MerkleBlockMessage: IMessage{
         self.flags = flags
     }
 
-    init(_ data: Data) {
+    init(data: Data) {
         let byteStream = ByteStream(data)
 
-        blockHeader = BlockHeaderSerializer.deserialize(fromByteStream: byteStream)
+        blockHeader = BlockHeaderSerializer.deserialize(byteStream: byteStream)
         totalTransactions = byteStream.read(UInt32.self)
         numberOfHashes = byteStream.read(VarInt.self)
 
-        var _hashes = [Data]()
+        var hashes = [Data]()
         for _ in 0..<numberOfHashes.underlyingValue {
-            _hashes.append(byteStream.read(Data.self, count: 32))
+            hashes.append(byteStream.read(Data.self, count: 32))
         }
 
-        hashes = _hashes
+        self.hashes = hashes
         numberOfFlags = byteStream.read(VarInt.self)
 
-        var _flags = [UInt8]()
+        var flags = [UInt8]()
         for _ in 0..<numberOfFlags.underlyingValue {
-            _flags.append(byteStream.read(UInt8.self))
+            flags.append(byteStream.read(UInt8.self))
         }
 
-        flags = _flags
+        self.flags = flags
     }
 
     func serialized() -> Data {

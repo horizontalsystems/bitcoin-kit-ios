@@ -1,6 +1,7 @@
 import Foundation
 
 class BlockHeaderSerializer {
+
     static func serialize(header: BlockHeader) -> Data {
         var data = Data()
         data += Int32(header.version)
@@ -12,11 +13,7 @@ class BlockHeaderSerializer {
         return data
     }
 
-    static func deserialize(fromData data: Data) -> BlockHeader {
-        return deserialize(fromByteStream: ByteStream(data))
-    }
-
-    static func deserialize(fromByteStream byteStream: ByteStream) -> BlockHeader {
+    static func deserialize(byteStream: ByteStream) -> BlockHeader {
         let blockHeader = BlockHeader()
 
         blockHeader.version = Int(byteStream.read(Int32.self))

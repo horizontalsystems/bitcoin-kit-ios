@@ -1,11 +1,3 @@
-//
-//  NetworkAddress.swift
-//  BitcoinKit
-//
-//  Created by Kishikawa Katsumi on 2018/02/11.
-//  Copyright © 2018 Kishikawa Katsumi. All rights reserved.
-//
-
 import Foundation
 
 /// When a network address is needed somewhere,
@@ -21,7 +13,7 @@ struct NetworkAddress {
         self.port = port
     }
 
-    init(_ byteStream: ByteStream) {
+    init(byteStream: ByteStream) {
         services = byteStream.read(UInt64.self)
 
         let addrData = byteStream.read(Data.self, count: 16)
@@ -46,7 +38,7 @@ struct NetworkAddress {
 
 }
 
-extension NetworkAddress : CustomStringConvertible {
+extension NetworkAddress: CustomStringConvertible {
     var description: String {
         return "[\(address)]:\(port.bigEndian) \(ServiceFlags(rawValue: services))"
     }

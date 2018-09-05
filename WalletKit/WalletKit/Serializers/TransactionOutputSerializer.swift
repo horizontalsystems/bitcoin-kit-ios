@@ -1,6 +1,7 @@
 import Foundation
 
 class TransactionOutputSerializer {
+
      static func serialize(output: TransactionOutput) -> Data {
         var data = Data()
 

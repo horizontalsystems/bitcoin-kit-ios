@@ -1,15 +1,7 @@
-//
-//  RejectMessage.swift
-//  BitcoinKit
-//
-//  Created by Kishikawa Katsumi on 2018/02/11.
-//  Copyright © 2018 Kishikawa Katsumi. All rights reserved.
-//
-
 import Foundation
 
 /// The reject message is sent when messages are rejected.
-struct RejectMessage: IMessage{
+struct RejectMessage: IMessage {
     /// type of message rejected
     let message: VarString
     /// code relating to rejected message
@@ -29,7 +21,7 @@ struct RejectMessage: IMessage{
     /// block header hash of the object being rejected, so the field is 32 bytes.
     let data: Data
 
-    init(_ data: Data) {
+    init(data: Data) {
         let byteStream = ByteStream(data)
 
         message = byteStream.read(VarString.self)

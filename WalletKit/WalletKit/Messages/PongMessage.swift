@@ -1,16 +1,8 @@
-//
-//  PongMessage.swift
-//  BitcoinKit
-//
-//  Created by Kishikawa Katsumi on 2018/02/11.
-//  Copyright © 2018 Kishikawa Katsumi. All rights reserved.
-//
-
 import Foundation
 
 /// The pong message is sent in response to a ping message.
 /// In modern protocol versions, a pong response is generated using a nonce included in the ping.
-struct PongMessage: IMessage{
+struct PongMessage: IMessage {
     /// nonce from ping
     let nonce: UInt64
 
@@ -18,7 +10,7 @@ struct PongMessage: IMessage{
         self.nonce = nonce
     }
 
-    init(_ data: Data) {
+    init(data: Data) {
         let byteStream = ByteStream(data)
         nonce = byteStream.read(UInt64.self)
     }

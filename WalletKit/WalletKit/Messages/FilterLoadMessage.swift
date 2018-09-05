@@ -1,14 +1,6 @@
-//
-//  FilterLoadMessage.swift
-//  BitcoinKit
-//
-//  Created by Kishikawa Katsumi on 2018/02/11.
-//  Copyright © 2018 Kishikawa Katsumi. All rights reserved.
-//
-
 import Foundation
 
-struct FilterLoadMessage: IMessage{
+struct FilterLoadMessage: IMessage {
     /// The filter itself is simply a bit field of arbitrary byte-aligned size. The maximum size is 36,000 bytes.
     let filter: Data
     /// The number of hash functions to use in this filter. The maximum value allowed in this field is 50.
@@ -25,7 +17,7 @@ struct FilterLoadMessage: IMessage{
         self.nFlags = nFlags
     }
 
-    init(_ data: Data) {
+    init(data: Data) {
         filter = Data()
         nHashFuncs = 0
         nTweak = 0

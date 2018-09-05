@@ -8,5 +8,4 @@ protocol PeerGroupDelegate : class {
     func peerGroupDidReceive(transaction: Transaction)
 
     func shouldRequest(inventoryItem: InventoryItem) -> Bool
-    func transaction(forHash hash: Data) -> Transaction?
 }

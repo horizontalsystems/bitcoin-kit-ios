@@ -1,6 +1,6 @@
 import Foundation
 
-struct GetBlocksMessage: IMessage{
+struct GetBlocksMessage: IMessage {
     /// the protocol version
     let version: UInt32
     /// number of block locator hash entries
@@ -10,7 +10,7 @@ struct GetBlocksMessage: IMessage{
     /// hash of the last desired block; set to zero to get as many blocks as possible (500)
     let hashStop: Data
 
-    init(_ data: Data) {
+    init(data: Data) {
         version = 0
         hashCount = 0
         blockLocatorHashes = [Data]()

@@ -1,16 +1,8 @@
-//
-//  VersionMessage.swift
-//  BitcoinKit
-//
-//  Created by Kishikawa Katsumi on 2018/02/11.
-//  Copyright © 2018 Kishikawa Katsumi. All rights reserved.
-//
-
 import Foundation
 
 /// When a node creates an outgoing connection, it will immediately advertise its version.
 /// The remote node will respond with its version. No further communication is possible until both peers have exchanged their version.
-struct VersionMessage: IMessage{
+struct VersionMessage: IMessage {
     /// Identifies protocol version being used by the node
     let version: Int32
     /// bitfield of features to be enabled for this connection
@@ -44,13 +36,13 @@ struct VersionMessage: IMessage{
         self.relay = relay
     }
 
-    init(_ data: Data) {
+    init(data: Data) {
         let byteStream = ByteStream(data)
 
         version = byteStream.read(Int32.self)
         services = byteStream.read(UInt64.self)
         timestamp = byteStream.read(Int64.self)
-        yourAddress = NetworkAddress(byteStream)
+        yourAddress = NetworkAddress(byteStream: byteStream)
         if byteStream.availableBytes == 0 {
             myAddress = nil
             nonce = nil
@@ -59,7 +51,7 @@ struct VersionMessage: IMessage{
             relay = nil
             return
         }
-        myAddress = NetworkAddress(byteStream)
+        myAddress = NetworkAddress(byteStream: byteStream)
         nonce = byteStream.read(UInt64.self)
         userAgent = byteStream.read(VarString.self)
         startHeight = byteStream.read(Int32.self)

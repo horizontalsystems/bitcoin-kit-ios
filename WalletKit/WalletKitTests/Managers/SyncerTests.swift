@@ -192,21 +192,4 @@ class SyncerTests: XCTestCase {
         }
     }
 
-    func testTransaction() {
-        let transaction = TestData.p2pkhTransaction
-
-        try! realm.write {
-            realm.add(transaction)
-        }
-
-        let tx = syncer.transaction(forHash: transaction.reversedHashHex.reversedData!)
-        XCTAssertEqual(tx?.reversedHashHex, transaction.reversedHashHex)
-    }
-
-    func testTransaction_NoTransaction() {
-        let transaction = TestData.p2pkhTransaction
-        let tx = syncer.transaction(forHash: transaction.reversedHashHex.reversedData!)
-        XCTAssertEqual(tx, nil)
-    }
-
 }

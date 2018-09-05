@@ -1,6 +1,6 @@
 import Foundation
 
-protocol IMessage{
-    init(_ data: Data)
+protocol IMessage {
+    init(data: Data)
     func serialized() -> Data
 }

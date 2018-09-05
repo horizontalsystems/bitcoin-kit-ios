@@ -1,6 +1,6 @@
 import Foundation
 
-struct NetworkMessage{
+struct NetworkMessage {
     /// Magic value indicating message origin network, and used to seek to next message when stream state is unknown
     let magic: UInt32
     /// ASCII string identifying the packet content, NULL padded (non-NULL padding results in packet rejected)
@@ -27,15 +27,15 @@ struct NetworkMessage{
         let checksum = Data(Crypto.sha256sha256(serializedMessage).prefix(4))
         let length = UInt32(serializedMessage.count)
 
-        var command: String = ""
-        for (c, msgClass) in NetworkMessage.messagesMap {
-            if (msgClass == type(of: message)) {
-                command = c
+        var resolvedCommand: String = ""
+        for (command, messageClass) in NetworkMessage.messagesMap {
+            if (messageClass == type(of: message)) {
+                resolvedCommand = command
                 break
             }
         }
 
-        self.init(magic: network.magic, command: command, length: length, checksum: checksum, message: message)
+        self.init(magic: network.magic, command: resolvedCommand, length: length, checksum: checksum, message: message)
     }
 
     func serialized() -> Data {
@@ -62,13 +62,13 @@ struct NetworkMessage{
         "verack": VerackMessage.self,
         "version": VersionMessage.self,
         "headers": HeadersMessage.self,
-        "mempool": MempoolMessage.self,
+        "mempool": MemPoolMessage.self,
         "merkleblock": MerkleBlockMessage.self,
         "tx": TransactionMessage.self,
         "filterload": FilterLoadMessage.self
     ]
 
-    static func deserialize(_ data: Data) -> NetworkMessage? {
+    static func deserialize(data: Data) -> NetworkMessage? {
         let byteStream = ByteStream(data)
 
         let magic = byteStream.read(UInt32.self)
@@ -87,7 +87,7 @@ struct NetworkMessage{
         }
 
         let messageClass = messagesMap[command] ?? UnknownMessage.self
-        let message = messageClass.init(payload)
+        let message = messageClass.init(data: payload)
 
         return NetworkMessage(magic: magic, command: command, length: length, checksum: checksum, message: message)
     }

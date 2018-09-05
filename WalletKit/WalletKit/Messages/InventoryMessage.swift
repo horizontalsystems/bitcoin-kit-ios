@@ -1,42 +1,36 @@
-//
-//  InventoryMessage.swift
-//  BitcoinKit
-//
-//  Created by Kishikawa Katsumi on 2018/02/11.
-//  Copyright © 2018 Kishikawa Katsumi. All rights reserved.
-//
-
 import Foundation
 
 /// Allows a node to advertise its knowledge of one or more objects. It can be received unsolicited, or in reply to getblocks.
-struct InventoryMessage: IMessage{
+struct InventoryMessage: IMessage {
     /// Number of inventory entries
     let count: VarInt
     /// Inventory vectors
     let inventoryItems: [InventoryItem]
 
-    init(count: VarInt, inventoryItems: [InventoryItem]) {
-        self.count = count
+    init(inventoryItems: [InventoryItem]) {
+        self.count = VarInt(inventoryItems.count)
         self.inventoryItems = inventoryItems
     }
 
-    init(_ data: Data) {
+    init(data: Data) {
         let byteStream = ByteStream(data)
 
         count = byteStream.read(VarInt.self)
 
-        var items = [InventoryItem]()
+        var inventoryItems = [InventoryItem]()
         for _ in 0..<Int(count.underlyingValue) {
-            items.append(InventoryItem(byteStream))
+            inventoryItems.append(InventoryItem(byteStream: byteStream))
         }
 
-        inventoryItems = items
+        self.inventoryItems = inventoryItems
     }
 
     func serialized() -> Data {
         var data = Data()
         data += count.serialized()
-        data += inventoryItems.flatMap { $0.serialized() }
+        data += inventoryItems.flatMap {
+            $0.serialized()
+        }
         return data
     }
 

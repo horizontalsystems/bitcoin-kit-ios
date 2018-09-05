@@ -1,11 +1,3 @@
-//
-//  InventoryItem.swift
-//  BitcoinKit
-//
-//  Created by Kishikawa Katsumi on 2018/02/11.
-//  Copyright © 2018 Kishikawa Katsumi. All rights reserved.
-//
-
 import Foundation
 
 struct InventoryItem {
@@ -19,7 +11,7 @@ struct InventoryItem {
         self.hash = hash
     }
 
-    init(_ byteStream: ByteStream) {
+    init(byteStream: ByteStream) {
         type = byteStream.read(Int32.self)
         hash = byteStream.read(Data.self, count: 32)
     }
@@ -48,7 +40,7 @@ struct InventoryItem {
         }
     }
 
-    enum ObjectType : Int32 {
+    enum ObjectType: Int32 {
         /// Any data of with this number may be ignored
         case error = 0
         /// Hash is related to a transaction
@@ -64,4 +56,5 @@ struct InventoryItem {
         case compactBlockMessage = 4
         case unknown
     }
+
 }

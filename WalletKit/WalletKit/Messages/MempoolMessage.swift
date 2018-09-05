@@ -1,11 +1,15 @@
 import Foundation
 
-struct MempoolMessage: IMessage{
+struct MemPoolMessage: IMessage {
 
-    init() {}
-    init(_ data: Data) {}
+    init() {
+    }
+
+    init(data: Data) {
+    }
 
     func serialized() -> Data {
         return Data()
     }
+
 }

@@ -1,6 +1,6 @@
 import Foundation
 
-struct GetHeadersMessage: IMessage{
+struct GetHeadersMessage: IMessage {
     /// the protocol version
     let version: UInt32
     /// number of block locator hash entries
@@ -10,14 +10,14 @@ struct GetHeadersMessage: IMessage{
     /// hash of the last desired header; set to zero to get as many headers as possible (2000)
     let hashStop: Data
 
-    init(version: UInt32, hashCount: VarInt, blockLocatorHashes: [Data], hashStop: Data) {
-        self.version = version
-        self.hashCount = hashCount
-        self.blockLocatorHashes = blockLocatorHashes
-        self.hashStop = hashStop
+    init(protocolVersion: Int32, headerHashes: [Data]) {
+        version = UInt32(protocolVersion)
+        hashCount = VarInt(headerHashes.count)
+        blockLocatorHashes = headerHashes
+        hashStop = Data(count: 32)
     }
 
-    init(_ data: Data) {
+    init(data: Data) {
         version = 0
         hashCount = 0
         blockLocatorHashes = [Data]()

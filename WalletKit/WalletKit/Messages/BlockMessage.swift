@@ -1,14 +1,6 @@
-//
-//  BlockMessage.swift
-//  BitcoinKit
-//
-//  Created by Kishikawa Katsumi on 2018/02/11.
-//  Copyright © 2018 Kishikawa Katsumi. All rights reserved.
-//
-
 import Foundation
 
-struct BlockMessage: IMessage{
+struct BlockMessage: IMessage {
     let blockHeaderItem: BlockHeader
 
     /// Number of transaction entries
@@ -16,18 +8,18 @@ struct BlockMessage: IMessage{
     /// Block transactions, in format of "tx" command
     let transactions: [Transaction]
 
-    init(_ data: Data) {
+    init(data: Data) {
         let byteStream = ByteStream(data)
 
-        blockHeaderItem = BlockHeaderSerializer.deserialize(fromByteStream: byteStream)
+        blockHeaderItem = BlockHeaderSerializer.deserialize(byteStream: byteStream)
         transactionCount = byteStream.read(VarInt.self)
 
-        var txs = [Transaction]()
+        var transactions = [Transaction]()
         for _ in 0..<transactionCount.underlyingValue {
-            txs.append(TransactionSerializer.deserialize(byteStream))
+            transactions.append(TransactionSerializer.deserialize(byteStream: byteStream))
         }
 
-        transactions = txs
+        self.transactions = transactions
     }
 
     func serialized() -> Data {

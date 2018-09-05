@@ -1,6 +1,7 @@
 import Foundation
 
 class TransactionInputSerializer {
+
     static func serialize(input: TransactionInput) -> Data {
         var data = Data()
         data += input.previousOutputTxReversedHex.reversedData ?? Data()
