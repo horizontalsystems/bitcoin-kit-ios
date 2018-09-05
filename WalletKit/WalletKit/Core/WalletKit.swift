@@ -39,6 +39,8 @@ public class WalletKit {
     let blockSyncer: BlockSyncer
     let merkleBlockValidator: MerkleBlockValidator
 
+    let validatedBlockFactory: ValidatedBlockFactory
+
     let headerSyncer: HeaderSyncer
     let headerHandler: HeaderHandler
 
@@ -99,8 +101,10 @@ public class WalletKit {
         blockSyncer = BlockSyncer(realmFactory: realmFactory, peerGroup: peerGroup)
         merkleBlockValidator = MerkleBlockValidator()
 
+        validatedBlockFactory = ValidatedBlockFactory(realmFactory: realmFactory, factory: factory, validator: blockValidator, network: network)
+
         headerSyncer = HeaderSyncer(realmFactory: realmFactory, peerGroup: peerGroup, network: network)
-        headerHandler = HeaderHandler(realmFactory: realmFactory, factory: factory, validator: blockValidator, blockSyncer: blockSyncer, network: network)
+        headerHandler = HeaderHandler(realmFactory: realmFactory, validateBlockFactory: validatedBlockFactory, blockSyncer: blockSyncer)
 
         inputSigner = InputSigner(hdWallet: hdWallet)
         scriptBuilder = ScriptBuilder()
@@ -114,7 +118,7 @@ public class WalletKit {
         transactionExtractor = TransactionExtractor(scriptConverter: scriptConverter, addressConverter: addressConverter)
         transactionLinker = TransactionLinker()
         transactionProcessor = TransactionProcessor(realmFactory: realmFactory, extractor: transactionExtractor, linker: transactionLinker, addressManager: addressManager, logger: logger)
-        transactionHandler = TransactionHandler(realmFactory: realmFactory, processor: transactionProcessor, progressSyncer: progressSyncer, headerHandler: headerHandler, factory: factory)
+        transactionHandler = TransactionHandler(realmFactory: realmFactory, processor: transactionProcessor, progressSyncer: progressSyncer, validateBlockFactory: validatedBlockFactory)
         transactionSender = TransactionSender(realmFactory: realmFactory, peerGroup: peerGroup)
         transactionBuilder = TransactionBuilder(unspentOutputSelector: unspentOutputSelector, unspentOutputProvider: unspentOutputProvider, transactionSizeCalculator: transactionSizeCalculator, addressConverter: addressConverter, inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory)
         transactionCreator = TransactionCreator(realmFactory: realmFactory, transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, transactionSender: transactionSender, addressManager: addressManager)

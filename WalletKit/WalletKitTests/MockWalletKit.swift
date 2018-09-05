@@ -30,6 +30,8 @@ class MockWalletKit {
     let mockBlockSyncer: MockBlockSyncer
     let mockMerkleBlockValidator: MockMerkleBlockValidator
 
+    let mockValidatedBlockFactory: MockValidatedBlockFactory
+
     let mockHeaderSyncer: MockHeaderSyncer
     let mockHeaderHandler: MockHeaderHandler
 
@@ -83,8 +85,10 @@ class MockWalletKit {
         mockBlockSyncer = MockBlockSyncer(realmFactory: mockRealmFactory, peerGroup: mockPeerGroup)
         mockMerkleBlockValidator = MockMerkleBlockValidator()
 
+        mockValidatedBlockFactory = MockValidatedBlockFactory(realmFactory: mockRealmFactory, factory: mockFactory, validator: mockBlockValidator, network: mockNetwork)
+
         mockHeaderSyncer = MockHeaderSyncer(realmFactory: mockRealmFactory, peerGroup: mockPeerGroup, network: mockNetwork)
-        mockHeaderHandler = MockHeaderHandler(realmFactory: mockRealmFactory, factory: mockFactory, validator: mockBlockValidator, blockSyncer: mockBlockSyncer, network: mockNetwork)
+        mockHeaderHandler = MockHeaderHandler(realmFactory: mockRealmFactory, validateBlockFactory: mockValidatedBlockFactory, blockSyncer: mockBlockSyncer)
 
         mockInputSigner = MockInputSigner(hdWallet: mockHdWallet)
         mockScriptBuilder = MockScriptBuilder()
@@ -98,7 +102,7 @@ class MockWalletKit {
         mockTransactionExtractor = MockTransactionExtractor(scriptConverter: mockScriptConverter, addressConverter: mockAddressConverter)
         mockTransactionLinker = MockTransactionLinker()
         mockTransactionProcessor = MockTransactionProcessor(realmFactory: mockRealmFactory, extractor: mockTransactionExtractor, linker: mockTransactionLinker, addressManager: mockAddressManager, logger: mockLogger)
-        mockTransactionHandler = MockTransactionHandler(realmFactory: mockRealmFactory, processor: mockTransactionProcessor, progressSyncer: mockProgressSyncer, headerHandler: mockHeaderHandler, factory: mockFactory)
+        mockTransactionHandler = MockTransactionHandler(realmFactory: mockRealmFactory, processor: mockTransactionProcessor, progressSyncer: mockProgressSyncer, validateBlockFactory: mockValidatedBlockFactory)
         mockTransactionSender = MockTransactionSender(realmFactory: mockRealmFactory, peerGroup: mockPeerGroup)
         mockTransactionBuilder = MockTransactionBuilder(unspentOutputSelector: mockUnspentOutputSelector, unspentOutputProvider: mockUnspentOutputProvider, transactionSizeCalculator: mockTransactionSizeCalculator, addressConverter: mockAddressConverter, inputSigner: mockInputSigner, scriptBuilder: mockScriptBuilder, factory: mockFactory)
         mockTransactionCreator = MockTransactionCreator(realmFactory: mockRealmFactory, transactionBuilder: mockTransactionBuilder, transactionProcessor: mockTransactionProcessor, transactionSender: mockTransactionSender, addressManager: mockAddressManager)

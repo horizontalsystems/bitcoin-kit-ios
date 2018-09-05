@@ -6,9 +6,8 @@ import RealmSwift
 class TransactionHandlerTests: XCTestCase {
 
     private var mockProcessor: MockTransactionProcessor!
-    private var mockHeaderHandler: MockHeaderHandler!
+    private var mockValidatedBlockFactory: MockValidatedBlockFactory!
     private var mockProgressSyncer: MockProgressSyncer!
-    private var mockFactory: MockFactory!
     private var transactionHandler: TransactionHandler!
 
     private var realm: Realm!
@@ -19,29 +18,24 @@ class TransactionHandlerTests: XCTestCase {
         let mockWalletKit = MockWalletKit()
 
         mockProcessor = mockWalletKit.mockTransactionProcessor
-        mockFactory = mockWalletKit.mockFactory
-        mockHeaderHandler = mockWalletKit.mockHeaderHandler
+        mockValidatedBlockFactory = mockWalletKit.mockValidatedBlockFactory
         mockProgressSyncer = mockWalletKit.mockProgressSyncer
         realm = mockWalletKit.realm
 
         stub(mockProcessor) { mock in
             when(mock.enqueueRun()).thenDoNothing()
         }
-        stub(mockFactory) { mock in
-            when(mock.block(withHeader: any(), height: any())).thenReturn(Block())
-        }
         stub(mockProgressSyncer) { mock in
             when(mock.enqueueRun()).thenDoNothing()
         }
 
-        transactionHandler = TransactionHandler(realmFactory: mockWalletKit.mockRealmFactory, processor: mockProcessor, progressSyncer: mockProgressSyncer, headerHandler: mockHeaderHandler, factory: mockFactory)
+        transactionHandler = TransactionHandler(realmFactory: mockWalletKit.mockRealmFactory, processor: mockProcessor, progressSyncer: mockProgressSyncer, validateBlockFactory: mockValidatedBlockFactory)
     }
 
     override func tearDown() {
         mockProcessor = nil
-        mockHeaderHandler = nil
+        mockValidatedBlockFactory = nil
         mockProgressSyncer = nil
-        mockFactory = nil
         transactionHandler = nil
         realm = nil
 
@@ -93,8 +87,8 @@ class TransactionHandlerTests: XCTestCase {
         try! realm.write {
             realm.add(transaction, update: true)
         }
-        stub(mockHeaderHandler) { mock in
-            when(mock.getValidBlocks(headers: any(), realm: any())).thenReturn((blocks: [block], error: nil))
+        stub(mockValidatedBlockFactory) { mock in
+            when(mock.block(fromHeader: any(), previousBlock: any())).thenReturn(block)
         }
 
         try! transactionHandler.handle(blockTransactions: [transaction], blockHeader: block.header!)
@@ -135,8 +129,8 @@ class TransactionHandlerTests: XCTestCase {
         let transaction = TestData.p2pkhTransaction
         let block = TestData.firstBlock
 
-        stub(mockHeaderHandler) { mock in
-            when(mock.getValidBlocks(headers: any(), realm: any())).thenReturn((blocks: [block], error: nil))
+        stub(mockValidatedBlockFactory) { mock in
+            when(mock.block(fromHeader: any(), previousBlock: any())).thenReturn(block)
         }
 
         try! transactionHandler.handle(blockTransactions: [transaction], blockHeader: block.header!)
@@ -161,9 +155,6 @@ class TransactionHandlerTests: XCTestCase {
         try! realm.write {
             realm.add(savedBlock, update: true)
         }
-        stub(mockFactory) { mock in
-            when(mock.block(withHeader: any(), height: any())).thenReturn(block)
-        }
 
         try! transactionHandler.handle(blockTransactions: [transaction], blockHeader: block.header!)
 
@@ -184,8 +175,8 @@ class TransactionHandlerTests: XCTestCase {
         let transaction = TestData.p2pkhTransaction
         let block = TestData.firstBlock
 
-        stub(mockHeaderHandler) { mock in
-            when(mock.getValidBlocks(headers: any(), realm: any())).thenReturn((blocks: [block], error: BlockValidator.ValidatorError.noCheckpointBlock))
+        stub(mockValidatedBlockFactory) { mock in
+            when(mock.block(fromHeader: any(), previousBlock: any())).thenThrow(BlockValidator.ValidatorError.noCheckpointBlock)
         }
 
         do {
@@ -193,27 +184,6 @@ class TransactionHandlerTests: XCTestCase {
             XCTFail("Expected exception not thrown!")
         } catch let error as BlockValidator.ValidatorError {
             XCTAssertEqual(error, BlockValidator.ValidatorError.noCheckpointBlock)
-        } catch {
-            XCTFail("Unexpected exception!")
-        }
-
-        verify(mockProcessor, never()).enqueueRun()
-        verify(mockProgressSyncer, never()).enqueueRun()
-    }
-
-    func testHandleBlockTransactions_EmptyBlocks() {
-        let transaction = TestData.p2pkhTransaction
-        let block = TestData.firstBlock
-
-        stub(mockHeaderHandler) { mock in
-            when(mock.getValidBlocks(headers: any(), realm: any())).thenReturn((blocks: [], error: nil))
-        }
-
-        do {
-            try transactionHandler.handle(blockTransactions: [transaction], blockHeader: block.header!)
-            XCTFail("Expected exception not thrown!")
-        } catch let error as TransactionHandler.HandleError {
-            XCTAssertEqual(error, TransactionHandler.HandleError.invalidBlockHeader)
         } catch {
             XCTFail("Unexpected exception!")
         }
