@@ -19,6 +19,7 @@
 		11B351B9459725FD481444A5 /* TestNetBlockValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35677D69EC754EC7C82DF /* TestNetBlockValidator.swift */; };
 		11B3524F96AE7EE9AB1B9819 /* KitState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B358A39F9684FE50F36467 /* KitState.swift */; };
 		11B35260C9636ACB9D507179 /* ProgressSyncerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35466922671F6E3523611 /* ProgressSyncerTests.swift */; };
+		11B3527FFC38E51D2CA2D333 /* ValidatedBlockFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35031DF14FCC6D0BC8A2F /* ValidatedBlockFactory.swift */; };
 		11B352951D5B8B5EF40C31BD /* P2PKExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35102A1246D20E8354340 /* P2PKExtractor.swift */; };
 		11B352D3CFB8A10D6640E93D /* BlockValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B359EA1AA39E70C270812B /* BlockValidator.swift */; };
 		11B352D61054A1CD7AD03A43 /* P2SHExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B3569A9FFF012BEE407446 /* P2SHExtractorTests.swift */; };
@@ -62,6 +63,7 @@
 		11B35B0318E92B0DCF798431 /* P2SHExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B359294D97AEDB1835AB4C /* P2SHExtractor.swift */; };
 		11B35BB1C166ED5CECF292C5 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B3590614D2772B1436542A /* Extensions.swift */; };
 		11B35BEAB8E94403F66BEF75 /* WalletKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35CDB306DF2676A56216B /* WalletKit.swift */; };
+		11B35BF7FB1E62417FFF5CD1 /* ValidatedBlockFactoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B352D2B22AD843B83D889A /* ValidatedBlockFactoryTests.swift */; };
 		11B35C8F2A29CA171165BF7A /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35F3FD9CCB938B62D07EA /* Observable.swift */; };
 		11B35CDFF90E2447AB536BDB /* MerkleBlockValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B3549DFD32AC3E74C3AE66 /* MerkleBlockValidatorTests.swift */; };
 		11B35CEAD9ADE1922CD7912A /* TransactionLinkerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35DB7140D86176157F8CA /* TransactionLinkerTests.swift */; };
@@ -160,6 +162,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		11B35031DF14FCC6D0BC8A2F /* ValidatedBlockFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ValidatedBlockFactory.swift; sourceTree = "<group>"; };
 		11B350357DF0C843FDC0C2DE /* Block.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Block.swift; sourceTree = "<group>"; };
 		11B35053479E4B3B3C2B2031 /* DifficultyCalculatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DifficultyCalculatorTests.swift; sourceTree = "<group>"; };
 		11B350E70F0721BE279DC91A /* P2PKHExtractor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = P2PKHExtractor.swift; sourceTree = "<group>"; };
@@ -172,6 +175,7 @@
 		11B352782DC699D1FAAD6168 /* BlockSyncerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockSyncerTests.swift; sourceTree = "<group>"; };
 		11B3527FFC458AEFC035AC35 /* BlockTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockTests.swift; sourceTree = "<group>"; };
 		11B3529A1731702724B0342D /* Factory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Factory.swift; sourceTree = "<group>"; };
+		11B352D2B22AD843B83D889A /* ValidatedBlockFactoryTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ValidatedBlockFactoryTests.swift; sourceTree = "<group>"; };
 		11B35352F3DA4C26A552C62B /* TransactionInput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionInput.swift; sourceTree = "<group>"; };
 		11B3538AE4523B395063F66D /* BitcoinCashMainNet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinCashMainNet.swift; sourceTree = "<group>"; };
 		11B353B145524AAE2A1B76A6 /* HeadersMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeadersMessage.swift; sourceTree = "<group>"; };
@@ -401,6 +405,7 @@
 			children = (
 				11B35C42651693CE86B75FE2 /* BlockSyncer.swift */,
 				11B358CC64C9E70F44570325 /* MerkleBlockValidator.swift */,
+				11B35031DF14FCC6D0BC8A2F /* ValidatedBlockFactory.swift */,
 			);
 			path = Blocks;
 			sourceTree = "<group>";
@@ -568,6 +573,7 @@
 			children = (
 				11B352782DC699D1FAAD6168 /* BlockSyncerTests.swift */,
 				11B3549DFD32AC3E74C3AE66 /* MerkleBlockValidatorTests.swift */,
+				11B352D2B22AD843B83D889A /* ValidatedBlockFactoryTests.swift */,
 			);
 			path = Blocks;
 			sourceTree = "<group>";
@@ -950,6 +956,7 @@
 				"$(SRCROOT)/WalletKit/Transactions/TransactionSizeCalculator.swift",
 				"$(SRCROOT)/WalletKit/Managers/AddressManager.swift",
 				"$(SRCROOT)/WalletKit/Managers/ProgressSyncer.swift",
+				"$(SRCROOT)/WalletKit/Blocks/ValidatedBlockFactory.swift",
 			);
 			name = Cuckoo;
 			outputPaths = (
@@ -1023,6 +1030,7 @@
 				2FA5D1F7E6DABFC12A0AD064 /* HDPrivateKeyTests.swift in Sources */,
 				11B35260C9636ACB9D507179 /* ProgressSyncerTests.swift in Sources */,
 				58AAAE66D8FED9069148C2E4 /* P2WitnessExtractorTests.swift in Sources */,
+				11B35BF7FB1E62417FFF5CD1 /* ValidatedBlockFactoryTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1124,6 +1132,7 @@
 				2FA5D5F6FEC0ABE2B43081A6 /* FilterAddMessage.swift in Sources */,
 				11B351810EDEC4CA2EE5444B /* BitcoinCashTestNet.swift in Sources */,
 				11B350895B60D5941F788B85 /* BitcoinCashMainNet.swift in Sources */,
+				11B3527FFC38E51D2CA2D333 /* ValidatedBlockFactory.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
