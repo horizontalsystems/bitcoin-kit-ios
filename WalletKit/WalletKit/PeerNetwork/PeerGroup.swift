@@ -74,7 +74,7 @@ extension PeerGroup: PeerDelegate {
 
         statusSubject.onNext(.connected)
 
-        delegate?.peerGroupDidConnect()
+        delegate?.peerGroupReady()
     }
 
     func peerDidDisconnect(_ peer: Peer) {
@@ -124,7 +124,15 @@ extension PeerGroup: PeerDelegate {
 
         for item in message.inventoryItems {
             if let delegate = delegate, delegate.shouldRequest(inventoryItem: item) {
-                items.append(delegate.inventoryItem(inventoryItem: item))
+                var inventoryItem: InventoryItem
+                switch item.objectType {
+                    case .blockMessage:
+                        inventoryItem = InventoryItem(type: InventoryItem.ObjectType.filteredBlockMessage.rawValue, hash: item.hash)
+                    default:
+                        inventoryItem = item
+                }
+
+                items.append(inventoryItem)
             }
         }
 

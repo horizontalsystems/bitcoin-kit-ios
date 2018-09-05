@@ -65,7 +65,7 @@ class SyncerTests: XCTestCase {
     }
 
     func testRunHeaderSyncerOnConnect() {
-        syncer.peerGroupDidConnect()
+        syncer.peerGroupReady()
         verify(mockHeaderSyncer).sync()
     }
 
@@ -76,7 +76,7 @@ class SyncerTests: XCTestCase {
             when(mock.sync()).thenThrow(error)
         }
 
-        syncer.peerGroupDidConnect()
+        syncer.peerGroupReady()
         verify(mockLogger).log(tag: "Header Syncer Error", message: "\(error)")
     }
 

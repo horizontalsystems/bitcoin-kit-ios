@@ -40,7 +40,7 @@ class Syncer {
 
 extension Syncer: PeerGroupDelegate {
 
-    func peerGroupDidConnect() {
+    func peerGroupReady() {
         do {
             try headerSyncer?.sync()
         } catch {
@@ -50,9 +50,6 @@ extension Syncer: PeerGroupDelegate {
         // TODO: following callbacks need to be covered with tests
         blockSyncer?.enqueueRun()
         transactionSender?.enqueueRun()
-    }
-
-    func peerGroupDidDisconnect() {
     }
 
     func peerGroupDidReceive(headers: [BlockHeader]) {
@@ -93,15 +90,6 @@ extension Syncer: PeerGroupDelegate {
                 return realm.objects(Block.self).filter("reversedHeaderHashHex = %@", inventoryItem.hash.reversedHex).isEmpty
             case .filteredBlockMessage, .compactBlockMessage, .unknown, .error:
                 return false
-        }
-    }
-
-    func inventoryItem(inventoryItem: InventoryItem) -> InventoryItem {
-        switch inventoryItem.objectType {
-            case .blockMessage:
-                return InventoryItem(type: InventoryItem.ObjectType.filteredBlockMessage.rawValue, hash: inventoryItem.hash)
-            default:
-                return inventoryItem
         }
     }
 
