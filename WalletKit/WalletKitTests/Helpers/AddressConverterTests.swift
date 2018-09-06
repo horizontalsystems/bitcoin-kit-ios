@@ -31,7 +31,7 @@ class AddressConverterTests: XCTestCase {
         let keyHash = "80d733d7a4c02aba01da9370afc954c73a32dba5"
         do {
             let convertedData = try addressConverter.convert(address: address)
-            XCTAssertEqual(convertedData, Data(hex: keyHash))
+            XCTAssertEqual(convertedData.keyHash, Data(hex: keyHash))
         } catch {
             XCTFail("Error Handled!")
         }
@@ -42,7 +42,8 @@ class AddressConverterTests: XCTestCase {
         let keyHash = "80d733d7a4c02aba01da9370afc954c73a32dba5"
         do {
             let convertedAddress = try addressConverter.convert(keyHash: Data(hex: keyHash)!, type: .p2pkh)
-            XCTAssertEqual(convertedAddress, address)
+            XCTAssertEqual(convertedAddress.string, address)
+            XCTAssertEqual(convertedAddress.type, .pubKeyHash)
         } catch {
             XCTFail("Error Handled!")
         }
@@ -53,7 +54,8 @@ class AddressConverterTests: XCTestCase {
         let keyHash = "D259F4688599C8422F477166A0C89344AD9EE72F"
         do {
             let convertedData = try addressConverter.convert(address: address)
-            XCTAssertEqual(convertedData, Data(hex: keyHash))
+            XCTAssertEqual(convertedData.keyHash, Data(hex: keyHash))
+            XCTAssertEqual(convertedData.type, .scriptHash)
         } catch {
             XCTFail("Error Handled!")
         }
@@ -64,7 +66,7 @@ class AddressConverterTests: XCTestCase {
         let keyHash = "D259F4688599C8422F477166A0C89344AD9EE72F"
         do {
             let convertedAddress = try addressConverter.convert(keyHash: Data(hex: keyHash)!, type: .p2sh)
-            XCTAssertEqual(convertedAddress, address)
+            XCTAssertEqual(convertedAddress.string, address)
         } catch {
             XCTFail("Error Handled!")
         }

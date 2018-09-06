@@ -14,22 +14,27 @@ class AddressConverter {
         self.network = network
     }
 
-    func convert(keyHash: Data, type: ScriptType) throws -> String {
+    func convert(keyHash: Data, type: ScriptType) throws -> Address {
         let version: UInt8
+        let addressType: AddressType
         switch type {
-            case .p2pkh, .p2pk: version = network.pubKeyHash
-            case .p2sh: version = network.scriptHash
-            case .p2wsh: version = network.scriptHash
+            case .p2pkh, .p2pk, .p2wkh:
+                version = network.pubKeyHash
+                addressType = .pubKeyHash
+            case .p2sh, .p2wsh:
+                version = network.scriptHash
+                addressType = .scriptHash
             default: throw ConversionError.unknownAddressType
         }
         var withVersion = (Data([version])) + keyHash
         let doubleSHA256 = Crypto.sha256sha256(withVersion)
         let checksum = doubleSHA256.prefix(4)
         withVersion += checksum
-        return Base58.encode(withVersion)
+        let base58 = Base58.encode(withVersion)
+        return Address(type: addressType, keyHash: keyHash, base58: base58)
     }
 
-    func convert(address: String) throws -> Data {
+   func convert(address: String) throws -> Address {
         guard address.count >= 34 && address.count <= 55 else {
             throw ConversionError.invalidAddressLength
         }
@@ -50,7 +55,14 @@ class AddressConverter {
         guard givenChecksum == actualChecksum else {
             throw ConversionError.invalidChecksum
         }
-        return hex[1..<hex.count - 4]
+
+        let type: AddressType
+        switch hex[0] {
+            case network.scriptHash: type = .scriptHash
+            default: type = .pubKeyHash
+        }
+        let keyHash = hex.dropFirst().dropLast(4)
+        return Address(type: type, keyHash: keyHash, base58: address)
     }
 
 }
