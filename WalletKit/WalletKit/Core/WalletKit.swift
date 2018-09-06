@@ -37,7 +37,6 @@ public class WalletKit {
     let progressSyncer: ProgressSyncer
 
     let blockSyncer: BlockSyncer
-    let merkleBlockValidator: MerkleBlockValidator
 
     let validatedBlockFactory: ValidatedBlockFactory
 
@@ -97,9 +96,7 @@ public class WalletKit {
         initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, apiManager: apiManager, peerGroup: peerGroup)
         addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, peerGroup: peerGroup)
         progressSyncer = ProgressSyncer(realmFactory: realmFactory)
-
         blockSyncer = BlockSyncer(realmFactory: realmFactory, peerGroup: peerGroup)
-        merkleBlockValidator = MerkleBlockValidator()
 
         validatedBlockFactory = ValidatedBlockFactory(realmFactory: realmFactory, factory: factory, validator: blockValidator, network: network)
 

@@ -26,9 +26,7 @@ class MockWalletKit {
 
     let mockInitialSyncer: MockInitialSyncer
     let mockProgressSyncer: MockProgressSyncer
-
     let mockBlockSyncer: MockBlockSyncer
-    let mockMerkleBlockValidator: MockMerkleBlockValidator
 
     let mockValidatedBlockFactory: MockValidatedBlockFactory
 
@@ -81,9 +79,7 @@ class MockWalletKit {
         mockInitialSyncer = MockInitialSyncer(realmFactory: mockRealmFactory, hdWallet: mockHdWallet, stateManager: mockStateManager, apiManager: mockApiManager, peerGroup: mockPeerGroup)
         mockProgressSyncer = MockProgressSyncer(realmFactory: mockRealmFactory)
         mockAddressManager = MockAddressManager(realmFactory: mockRealmFactory, hdWallet: mockHdWallet, peerGroup: mockPeerGroup)
-
         mockBlockSyncer = MockBlockSyncer(realmFactory: mockRealmFactory, peerGroup: mockPeerGroup)
-        mockMerkleBlockValidator = MockMerkleBlockValidator()
 
         mockValidatedBlockFactory = MockValidatedBlockFactory(realmFactory: mockRealmFactory, factory: mockFactory, validator: mockBlockValidator, network: mockNetwork)
 
