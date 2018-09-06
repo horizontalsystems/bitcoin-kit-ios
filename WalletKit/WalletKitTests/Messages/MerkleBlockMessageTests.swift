@@ -3,8 +3,8 @@ import Cuckoo
 import RealmSwift
 @testable import WalletKit
 
-class MerkleBlockValidatorTests: XCTestCase {
-    private var validator: MerkleBlockValidator!
+class MerkleBlockMessageTests: XCTestCase {
+    private var message: MerkleBlockMessage!
     private var blockHeader: BlockHeader!
     private var totalTransactions: UInt32!
     private var numberOfHashes: VarInt!
@@ -37,39 +37,24 @@ class MerkleBlockValidatorTests: XCTestCase {
         numberOfFlags = 3
         flags = [223, 22, 0]
 
-        validator = MerkleBlockValidator()
+        message = getMessage()
     }
 
     override func tearDown() {
         super.tearDown()
     }
 
-    private func getSampleMessage() -> MerkleBlockMessage {
+    func getMessage() -> MerkleBlockMessage{
         return MerkleBlockMessage(
                 blockHeader: blockHeader, totalTransactions: totalTransactions,
                 numberOfHashes: numberOfHashes, hashes: hashes, numberOfFlags: numberOfFlags, flags: flags
         )
     }
 
-
     func testValidMerkleBlock() {
         var txIds = [Data]()
         do {
-            txIds = try validator.validateAndGetTxHashes(message: getSampleMessage())
-        } catch {
-            print(error)
-            XCTFail("Should be valid")
-        }
-
-        XCTAssertEqual(txIds.count, 1)
-        XCTAssertEqual(txIds[0], hashes[3])
-    }
-
-    func testTxIdsClearedFirst() {
-        var txIds = [Data]()
-        do {
-            txIds = try validator.validateAndGetTxHashes(message: getSampleMessage())
-            txIds = try validator.validateAndGetTxHashes(message: getSampleMessage())
+            txIds = try message.getMerkleBlock().transactionHashes
         } catch {
             print(error)
             XCTFail("Should be valid")
@@ -82,13 +67,14 @@ class MerkleBlockValidatorTests: XCTestCase {
     func testWrongMerkleRoot() {
         blockHeader = BlockHeader()
         blockHeader.merkleRoot = Data(hex: "0000000000000000000000000000000000000000000000000000000000000001")!
+        message = getMessage()
 
         var caught = false
         do {
-            _ = try validator.validateAndGetTxHashes(message: getSampleMessage())
-        } catch let error as MerkleBlockValidator.ValidationError {
+            _ = try message.getMerkleBlock()
+        } catch let error as MerkleBlockMessage.ValidationError {
             caught = true
-            XCTAssertEqual(error, MerkleBlockValidator.ValidationError.wrongMerkleRoot)
+            XCTAssertEqual(error, MerkleBlockMessage.ValidationError.wrongMerkleRoot)
         } catch {
             XCTFail("Unknown Exception")
         }
@@ -100,13 +86,14 @@ class MerkleBlockValidatorTests: XCTestCase {
 
     func testNoTransactions() {
         totalTransactions = 0
+        message = getMessage()
 
         var caught = false
         do {
-            _ = try validator.validateAndGetTxHashes(message: getSampleMessage())
-        } catch let error as MerkleBlockValidator.ValidationError {
+            _ = try message.getMerkleBlock()
+        } catch let error as MerkleBlockMessage.ValidationError {
             caught = true
-            XCTAssertEqual(error, MerkleBlockValidator.ValidationError.noTransactions)
+            XCTAssertEqual(error, MerkleBlockMessage.ValidationError.noTransactions)
         } catch {
             XCTFail("Unknown Exception")
         }
@@ -117,14 +104,15 @@ class MerkleBlockValidatorTests: XCTestCase {
     }
 
     func testTooManyTransactions() {
-        totalTransactions = MerkleBlockValidator.MAX_BLOCK_SIZE / 60 + 1
+        totalTransactions = MerkleBlockMessage.MAX_BLOCK_SIZE / 60 + 1
+        message = getMessage()
 
         var caught = false
         do {
-            _ = try validator.validateAndGetTxHashes(message: getSampleMessage())
-        } catch let error as MerkleBlockValidator.ValidationError {
+            _ = try message.getMerkleBlock()
+        } catch let error as MerkleBlockMessage.ValidationError {
             caught = true
-            XCTAssertEqual(error, MerkleBlockValidator.ValidationError.tooManyTransactions)
+            XCTAssertEqual(error, MerkleBlockMessage.ValidationError.tooManyTransactions)
         } catch {
             XCTFail("Unknown Exception")
         }
@@ -136,13 +124,14 @@ class MerkleBlockValidatorTests: XCTestCase {
 
     func testMoreHashesThanTransactions() {
         totalTransactions = 8
+        message = getMessage()
 
         var caught = false
         do {
-            _ = try validator.validateAndGetTxHashes(message: getSampleMessage())
-        } catch let error as MerkleBlockValidator.ValidationError {
+            _ = try message.getMerkleBlock()
+        } catch let error as MerkleBlockMessage.ValidationError {
             caught = true
-            XCTAssertEqual(error, MerkleBlockValidator.ValidationError.moreHashesThanTransactions)
+            XCTAssertEqual(error, MerkleBlockMessage.ValidationError.moreHashesThanTransactions)
         } catch {
             XCTFail("Unknown Exception")
         }
@@ -154,13 +143,14 @@ class MerkleBlockValidatorTests: XCTestCase {
 
     func testMatchedBitsFewerThanHashes() {
         flags = [200]
+        message = getMessage()
 
         var caught = false
         do {
-            _ = try validator.validateAndGetTxHashes(message: getSampleMessage())
-        } catch let error as MerkleBlockValidator.ValidationError {
+            _ = try message.getMerkleBlock()
+        } catch let error as MerkleBlockMessage.ValidationError {
             caught = true
-            XCTAssertEqual(error, MerkleBlockValidator.ValidationError.matchedBitsFewerThanHashes)
+            XCTAssertEqual(error, MerkleBlockMessage.ValidationError.matchedBitsFewerThanHashes)
         } catch {
             XCTFail("Unknown Exception")
         }
@@ -172,13 +162,14 @@ class MerkleBlockValidatorTests: XCTestCase {
 
     func testUnnecessaryBits() {
         flags = [223, 22, 0, 1]
+        message = getMessage()
 
         var caught = false
         do {
-            _ = try validator.validateAndGetTxHashes(message: getSampleMessage())
-        } catch let error as MerkleBlockValidator.ValidationError {
+            _ = try message.getMerkleBlock()
+        } catch let error as MerkleBlockMessage.ValidationError {
             caught = true
-            XCTAssertEqual(error, MerkleBlockValidator.ValidationError.unnecessaryBits)
+            XCTAssertEqual(error, MerkleBlockMessage.ValidationError.unnecessaryBits)
         } catch {
             XCTFail("Unknown Exception")
         }
@@ -190,13 +181,14 @@ class MerkleBlockValidatorTests: XCTestCase {
 
     func testNotEnoughBits() {
         flags = [223, 22]
+        message = getMessage()
 
         var caught = false
         do {
-            _ = try validator.validateAndGetTxHashes(message: getSampleMessage())
-        } catch let error as MerkleBlockValidator.ValidationError {
+            _ = try message.getMerkleBlock()
+        } catch let error as MerkleBlockMessage.ValidationError {
             caught = true
-            XCTAssertEqual(error, MerkleBlockValidator.ValidationError.notEnoughBits)
+            XCTAssertEqual(error, MerkleBlockMessage.ValidationError.notEnoughBits)
         } catch {
             XCTFail("Unknown Exception")
         }
@@ -208,13 +200,14 @@ class MerkleBlockValidatorTests: XCTestCase {
 
     func testNotEnoughHashes() {
         flags = [223, 22, 5]
+        message = getMessage()
 
         var caught = false
         do {
-            _ = try validator.validateAndGetTxHashes(message: getSampleMessage())
-        } catch let error as MerkleBlockValidator.ValidationError {
+            _ = try message.getMerkleBlock()
+        } catch let error as MerkleBlockMessage.ValidationError {
             caught = true
-            XCTAssertEqual(error, MerkleBlockValidator.ValidationError.notEnoughHashes)
+            XCTAssertEqual(error, MerkleBlockMessage.ValidationError.notEnoughHashes)
         } catch {
             XCTFail("Unknown Exception")
         }
@@ -226,13 +219,14 @@ class MerkleBlockValidatorTests: XCTestCase {
 
     func testDuplicatedLeftOrRightBranches() {
         hashes[3] = Data(hex: "16b57ae681df96435c030f799317eab55deaf4258d4de629f18dbeb8534a6fa5")!
+        message = getMessage()
 
         var caught = false
         do {
-            _ = try validator.validateAndGetTxHashes(message: getSampleMessage())
-        } catch let error as MerkleBlockValidator.ValidationError {
+            _ = try message.getMerkleBlock()
+        } catch let error as MerkleBlockMessage.ValidationError {
             caught = true
-            XCTAssertEqual(error, MerkleBlockValidator.ValidationError.duplicatedLeftOrRightBranches)
+            XCTAssertEqual(error, MerkleBlockMessage.ValidationError.duplicatedLeftOrRightBranches)
         } catch {
             XCTFail("Unknown Exception")
         }

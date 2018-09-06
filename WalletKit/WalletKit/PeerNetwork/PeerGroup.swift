@@ -4,12 +4,6 @@ import RxSwift
 
 class PeerGroup {
 
-    struct PendingBlock {
-        let header: BlockHeader
-        var pendingTransactionHashes: [Data]
-        var transactions: [Transaction]
-    }
-
     enum Status {
         case connected, disconnected
     }
@@ -20,9 +14,6 @@ class PeerGroup {
     private let realmFactory: RealmFactory
 
     private let peer: Peer
-
-    private let validator = MerkleBlockValidator()
-    private var pendingBlocks: [PendingBlock] = []
 
     init(realmFactory: RealmFactory, network: NetworkProtocol) {
         self.realmFactory = realmFactory
@@ -72,42 +63,16 @@ extension PeerGroup: PeerDelegate {
     func peerDidDisconnect(_ peer: Peer) {
     }
 
-    func peer(_ peer: Peer, didReceiveAddressMessage message: AddressMessage) {
+    func peer(_ peer: Peer, didReceiveHeaders headers: [BlockHeader]) {
+        delegate?.peerGroupDidReceive(headers: headers)
     }
 
-    func peer(_ peer: Peer, didReceiveHeadersMessage message: HeadersMessage) {
-        delegate?.peerGroupDidReceive(headers: message.blockHeaders)
+    func peer(_ peer: Peer, didReceiveMerkleBlock merkleBlock: MerkleBlock) {
+        delegate?.peerGroupDidReceive(blockHeader: merkleBlock.header, withTransactions: merkleBlock.transactions)
     }
 
-    func peer(_ peer: Peer, didReceiveMerkleBlockMessage message: MerkleBlockMessage) {
-        do {
-            let hashes = try validator.validateAndGetTxHashes(message: message)
-
-            if hashes.isEmpty {
-                delegate?.peerGroupDidReceive(blockHeader: message.blockHeader, withTransactions: [])
-            } else {
-                pendingBlocks.append(PendingBlock(header: message.blockHeader, pendingTransactionHashes: hashes, transactions: []))
-                print("TX COUNT: \(hashes.count)")
-            }
-        } catch {
-            print("MERKLE BLOCK MESSAGE ERROR: \(error)")
-        }
-    }
-
-    func peer(_ peer: Peer, didReceiveTransactionMessage message: TransactionMessage) {
-        let txHash = Crypto.sha256sha256(TransactionSerializer.serialize(transaction: message.transaction))
-
-        if let index = pendingBlocks.index(where: { $0.pendingTransactionHashes.contains(txHash) }) {
-            pendingBlocks[index].transactions.append(message.transaction)
-
-            if pendingBlocks[index].transactions.count == pendingBlocks[index].pendingTransactionHashes.count {
-                let block = pendingBlocks.remove(at: index)
-                delegate?.peerGroupDidReceive(blockHeader: block.header, withTransactions: block.transactions)
-            }
-
-        } else {
-            delegate?.peerGroupDidReceive(transaction: message.transaction)
-        }
+    func peer(_ peer: Peer, didReceiveTransaction transaction: Transaction) {
+        delegate?.peerGroupDidReceive(transaction: transaction)
     }
 
     func shouldRequest(inventoryItem: InventoryItem) -> Bool {

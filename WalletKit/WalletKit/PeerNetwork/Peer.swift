@@ -1,12 +1,13 @@
 import Foundation
 
 class Peer {
-    private let connection: PeerConnection
     private let protocolVersion: Int32 = 70015
 
     private var sentVersion: Bool = false
     private var sentVerack: Bool = false
 
+    private let connection: PeerConnection
+    private var requestedMerkleBlocks: [Data: MerkleBlock?] = [Data: MerkleBlock?]()
     private var relayedTransactions: [Data: Data] = [Data: Data]()
 
     weak var delegate: PeerDelegate?
@@ -59,25 +60,28 @@ class Peer {
     }
 
     func requestMerkleBlocks(headerHashes: [Data]) {
-        let inventoryMessage = GetDataMessage(inventoryItems: headerHashes.map { hash in
+        for hash in headerHashes {
+            requestedMerkleBlocks[hash] = nil
+        }
+
+        let getDataMessage = GetDataMessage(inventoryItems: headerHashes.map { hash in
             InventoryItem(type: InventoryItem.ObjectType.filteredBlockMessage.rawValue, hash: hash)
         })
 
-        connection.send(message: inventoryMessage)
+        log("<-- GETDATA: \(getDataMessage.inventoryItems.count) items")
+        connection.send(message: getDataMessage)
     }
 
     func relay(transaction: Transaction) {
-        log("<-- TX: \(transaction.reversedHashHex)")
-
         let transactionData = TransactionSerializer.serialize(transaction: transaction)
         let transactionHash = Crypto.sha256sha256(transactionData)
         relayedTransactions[transactionHash] = transactionData
-        print("saving: \(transactionHash.hex); count: \(relayedTransactions.count)")
 
         let inventoryMessage = InventoryMessage(inventoryItems: [
             InventoryItem(type: InventoryItem.ObjectType.transaction.rawValue, hash: transactionHash)
         ])
 
+        log("<-- INV: \(inventoryMessage.inventoryItems) items")
         connection.send(message: inventoryMessage)
     }
 
@@ -122,18 +126,18 @@ extension Peer: PeerConnectionDelegate {
 
     func connection(_ connection: PeerConnection, didReceiveMessage message: IMessage) {
         switch message {
-            case let versionMessage as VersionMessage: handle(message: versionMessage)
-            case _ as VerackMessage: handleVerackMessage()
-            case let addressMessage as AddressMessage: handle(message: addressMessage)
-            case let inventoryMessage as InventoryMessage: handle(message: inventoryMessage)
-            case let headersMessage as HeadersMessage: handle(message: headersMessage)
-            case let getDataMessage as GetDataMessage: handle(message: getDataMessage)
-            case let blockMessage as BlockMessage: handle(message: blockMessage)
-            case let merkleBlockMessage as MerkleBlockMessage: handle(message: merkleBlockMessage)
-            case let transactionMessage as TransactionMessage: handle(message: transactionMessage)
-            case let pingMessage as PingMessage: handle(message: pingMessage)
-            case let rejectMessage as RejectMessage: handle(message: rejectMessage)
-            default: break
+        case let versionMessage as VersionMessage: handle(message: versionMessage)
+        case _ as VerackMessage: handleVerackMessage()
+        case let addressMessage as AddressMessage: handle(message: addressMessage)
+        case let inventoryMessage as InventoryMessage: handle(message: inventoryMessage)
+        case let headersMessage as HeadersMessage: handle(message: headersMessage)
+        case let getDataMessage as GetDataMessage: handle(message: getDataMessage)
+        case let blockMessage as BlockMessage: handle(message: blockMessage)
+        case let merkleBlockMessage as MerkleBlockMessage: handle(message: merkleBlockMessage)
+        case let transactionMessage as TransactionMessage: handle(message: transactionMessage)
+        case let pingMessage as PingMessage: handle(message: pingMessage)
+        case let rejectMessage as RejectMessage: handle(message: rejectMessage)
+        default: break
         }
     }
 
@@ -153,7 +157,6 @@ extension Peer: PeerConnectionDelegate {
 
     private func handle(message: AddressMessage) {
         log("--> ADDR: \(message.count) address(es)")
-        delegate?.peer(self, didReceiveAddressMessage: message)
     }
 
     private func handle(message: InventoryMessage) {
@@ -177,23 +180,23 @@ extension Peer: PeerConnectionDelegate {
 
         if !items.isEmpty {
             let getDataMessage = GetDataMessage(inventoryItems: items)
+            log("<-- GETDATA: \(getDataMessage.inventoryItems.count) items")
             connection.send(message: getDataMessage)
         }
-
     }
 
     private func handle(message: HeadersMessage) {
         log("--> HEADERS: \(message.count) item(s)")
-        delegate?.peer(self, didReceiveHeadersMessage: message)
+        delegate?.peer(self, didReceiveHeaders: message.blockHeaders)
     }
 
     private func handle(message: GetDataMessage) {
         log("--> GETDATA: \(message.count) item(s)")
 
         for item in message.inventoryItems {
-            print("searching: \(item.hash.hex); count: \(relayedTransactions.count)")
             if item.objectType == .transaction, let transactionData = relayedTransactions.removeValue(forKey: item.hash) {
                 let transactionMessage = TransactionMessage(transactionData: transactionData)
+                log("<-- TX: \(transactionMessage.transaction.reversedHashHex)")
                 connection.send(message: transactionMessage)
             }
         }
@@ -205,12 +208,34 @@ extension Peer: PeerConnectionDelegate {
 
     private func handle(message: MerkleBlockMessage) {
         log("--> MERKLEBLOCK: \(Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: message.blockHeader)).reversedHex)")
-        delegate?.peer(self, didReceiveMerkleBlockMessage: message)
+        do {
+            let merkleBlock = try message.getMerkleBlock()
+
+            if merkleBlock.transactionHashes.isEmpty {
+                merkleBlockCompleted(merkleBlock: merkleBlock)
+            } else {
+                requestedMerkleBlocks[merkleBlock.headerHash] = merkleBlock
+                print("TX COUNT: \(merkleBlock.transactionHashes.count)")
+            }
+        } catch {
+            print("MERKLE BLOCK MESSAGE ERROR: \(error)")
+        }
     }
 
     private func handle(message: TransactionMessage) {
-        log("--> TX: \(Crypto.sha256sha256(TransactionSerializer.serialize(transaction: message.transaction)).reversedHex)")
-        delegate?.peer(self, didReceiveTransactionMessage: message)
+        let transaction = message.transaction
+        let txHash = Crypto.sha256sha256(TransactionSerializer.serialize(transaction: transaction))
+        log("--> TX: \(txHash.reversedHex)")
+        
+        guard var merkleBlock = requestedMerkleBlocks.filter({ _, merkleBlock in merkleBlock?.transactionHashes.contains(txHash) ?? false }).first?.value else {
+            delegate?.peer(self, didReceiveTransaction: transaction)
+            return
+        }
+
+        merkleBlock.transactions.append(transaction)
+        if merkleBlock.transactions.count == merkleBlock.transactionHashes.count {
+            merkleBlockCompleted(merkleBlock: merkleBlock)
+        }
     }
 
     private func handle(message: PingMessage) {
@@ -223,19 +248,25 @@ extension Peer: PeerConnectionDelegate {
     }
 
     private func handle(message: RejectMessage) {
-//        log("--> REJECT: \(message.message) code: 0x\(String(message.ccode, radix: 16)) reason: \(message.reason)")
-//        delegate?.peer(self, didReceiveRejectMessage: message)
+        log("--> REJECT: \(message.message) code: 0x\(String(message.ccode, radix: 16)) reason: \(message.reason)")
+    }
+
+
+    private func merkleBlockCompleted(merkleBlock: MerkleBlock) {
+        delegate?.peer(self, didReceiveMerkleBlock: merkleBlock)
+        requestedMerkleBlocks.removeValue(forKey: merkleBlock.headerHash)
+//        if requestedMerkleBlocks.isEmpty() {
+//            isFree = true
+//        }
     }
 
 }
 
-protocol PeerDelegate : class {
+protocol PeerDelegate: class {
     func peerDidConnect(_ peer: Peer)
     func peerDidDisconnect(_ peer: Peer)
-    func peer(_ peer: Peer, didReceiveAddressMessage message: AddressMessage)
-    func peer(_ peer: Peer, didReceiveHeadersMessage message: HeadersMessage)
-    func peer(_ peer: Peer, didReceiveMerkleBlockMessage message: MerkleBlockMessage)
-    func peer(_ peer: Peer, didReceiveTransactionMessage message: TransactionMessage)
-//    func peer(_ peer: Peer, didReceiveRejectMessage message: RejectMessage)
+    func peer(_ peer: Peer, didReceiveHeaders headers: [BlockHeader])
+    func peer(_ peer: Peer, didReceiveMerkleBlock merkleBlock: MerkleBlock)
+    func peer(_ peer: Peer, didReceiveTransaction transaction: Transaction)
     func shouldRequest(inventoryItem: InventoryItem) -> Bool
 }
