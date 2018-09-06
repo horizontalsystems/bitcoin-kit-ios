@@ -24,21 +24,23 @@ class HeaderHandler {
             throw HandleError.emptyHeaders
         }
 
-        var previousBlock: Block?
+        var blocks = [Block]()
 
         defer {
-            if previousBlock != nil {
+            try? realm.write {
+                realm.add(blocks)
+            }
+
+            if !blocks.isEmpty {
                 blockSyncer.enqueueRun()
             }
         }
 
+        var previousBlock: Block?
+
         for header in headers {
             let block = try validateBlockFactory.block(fromHeader: header, previousBlock: previousBlock)
-
-            try realm.write {
-                realm.add(block)
-            }
-
+            blocks.append(block)
             previousBlock = block
         }
     }
