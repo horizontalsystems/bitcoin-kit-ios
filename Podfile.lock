@@ -4,11 +4,11 @@ PODS:
     - SipHash (~> 1.2)
   - Cuckoo (0.11.3)
   - ObjectMapper (3.3.0)
-  - Realm (3.7.6):
-    - Realm/Headers (= 3.7.6)
-  - Realm/Headers (3.7.6)
-  - RealmSwift (3.7.6):
-    - Realm (= 3.7.6)
+  - Realm (3.8.0):
+    - Realm/Headers (= 3.8.0)
+  - Realm/Headers (3.8.0)
+  - RealmSwift (3.8.0):
+    - Realm (= 3.8.0)
   - RxRealm (0.7.5):
     - RealmSwift (~> 3.0)
     - RxSwift (~> 4.0)
@@ -41,8 +41,8 @@ SPEC CHECKSUMS:
   BigInt: 76b5dfdfa3e2e478d4ffdf161aeede5502e2742f
   Cuckoo: 97522dd7ac6f18adba6022bdc74aa69e82ca691a
   ObjectMapper: b612bf8c8e99c4dc0bb6013a51f7c27966ed5da9
-  Realm: 9eaecad54712d6246d08ba34c10f354e4715d7d3
-  RealmSwift: 1fe08b4ebaeeaacf17f9ba0343f7b25c9fc31fa6
+  Realm: 3fdae59de78838064e9f77638d7cdb7b8cff9dc8
+  RealmSwift: c990518b800e106d1f77099d3a4648c3b100337d
   RxRealm: a6c6c0a07cb61f34209969ca6657734edfdfff30
   RxSwift: 99e10317ddfcc7fbe01356aafd118fde4a0be104
   SipHash: fad90a4683e420c52ef28063063dbbce248ea6d4
