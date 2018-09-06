@@ -53,10 +53,6 @@ class Peer {
     }
 
     func sendGetHeadersMessage(headerHashes: [Data]) {
-        for hash in headerHashes {
-            requestedMerkleBlocks[hash] = nil
-        }
-
         let getHeadersMessage = GetHeadersMessage(protocolVersion: protocolVersion, headerHashes: headerHashes)
 
         log("<-- GETHEADERS: \(headerHashes.map { $0.reversedHex })")
@@ -64,16 +60,19 @@ class Peer {
     }
 
     func requestMerkleBlocks(headerHashes: [Data]) {
-        let inventoryMessage = GetDataMessage(inventoryItems: headerHashes.map { hash in
+        for hash in headerHashes {
+            requestedMerkleBlocks[hash] = nil
+        }
+
+        let getDataMessage = GetDataMessage(inventoryItems: headerHashes.map { hash in
             InventoryItem(type: InventoryItem.ObjectType.filteredBlockMessage.rawValue, hash: hash)
         })
 
-        connection.send(message: inventoryMessage)
+        log("<-- GETDATA: \(getDataMessage.inventoryItems.count) items")
+        connection.send(message: getDataMessage)
     }
 
     func relay(transaction: Transaction) {
-        log("<-- TX: \(transaction.reversedHashHex)")
-
         let transactionData = TransactionSerializer.serialize(transaction: transaction)
         let transactionHash = Crypto.sha256sha256(transactionData)
         relayedTransactions[transactionHash] = transactionData
@@ -82,6 +81,7 @@ class Peer {
             InventoryItem(type: InventoryItem.ObjectType.transaction.rawValue, hash: transactionHash)
         ])
 
+        log("<-- INV: \(inventoryMessage.inventoryItems) items")
         connection.send(message: inventoryMessage)
     }
 
@@ -180,6 +180,7 @@ extension Peer: PeerConnectionDelegate {
 
         if !items.isEmpty {
             let getDataMessage = GetDataMessage(inventoryItems: items)
+            log("<-- GETDATA: \(getDataMessage.inventoryItems.count) items")
             connection.send(message: getDataMessage)
         }
     }
@@ -193,9 +194,9 @@ extension Peer: PeerConnectionDelegate {
         log("--> GETDATA: \(message.count) item(s)")
 
         for item in message.inventoryItems {
-            print("searching: \(item.hash.hex); count: \(relayedTransactions.count)")
             if item.objectType == .transaction, let transactionData = relayedTransactions.removeValue(forKey: item.hash) {
                 let transactionMessage = TransactionMessage(transactionData: transactionData)
+                log("<-- TX: \(transactionMessage.transaction.reversedHashHex)")
                 connection.send(message: transactionMessage)
             }
         }
@@ -225,15 +226,15 @@ extension Peer: PeerConnectionDelegate {
         let transaction = message.transaction
         let txHash = Crypto.sha256sha256(TransactionSerializer.serialize(transaction: transaction))
         log("--> TX: \(txHash.reversedHex)")
-
-        if var merkleBlock = requestedMerkleBlocks.values.filter({ merkleBlock in merkleBlock?.transactionHashes.contains(txHash) ?? false }).first.flatMap({ $0 }) {
-            merkleBlock.transactions.append(transaction)
-
-            if merkleBlock.transactions.count == merkleBlock.transactionHashes.count {
-                merkleBlockCompleted(merkleBlock: merkleBlock)
-            }
-        } else {
+        
+        guard var merkleBlock = requestedMerkleBlocks.filter({ _, merkleBlock in merkleBlock?.transactionHashes.contains(txHash) ?? false }).first?.value else {
             delegate?.peer(self, didReceiveTransaction: transaction)
+            return
+        }
+
+        merkleBlock.transactions.append(transaction)
+        if merkleBlock.transactions.count == merkleBlock.transactionHashes.count {
+            merkleBlockCompleted(merkleBlock: merkleBlock)
         }
     }
 
