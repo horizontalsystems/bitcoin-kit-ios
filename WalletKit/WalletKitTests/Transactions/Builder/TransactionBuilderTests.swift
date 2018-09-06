@@ -81,7 +81,7 @@ class TransactionBuilderTests: XCTestCase {
         }
 
         stub(mockAddressConverter) { mock in
-            when(mock.convert(address: any())).thenReturn(Data())
+            when(mock.convert(address: any())).thenReturn(Address(type: .pubKeyHash, keyHash: Data(), base58: ""))
         }
 
         stub(mockScriptBuilder) { mock in

@@ -38,7 +38,7 @@ class TransactionBuilder {
     func buildTransaction(value: Int, feeRate: Int, senderPay: Bool, type: ScriptType = .p2pkh, changePubKey: PublicKey, toAddress: String) throws -> Transaction {
         let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, senderPay: senderPay, outputs: unspentOutputProvider.allUnspentOutputs())
 
-        let toKeyHash = try addressConverter.convert(address: toAddress)
+        let address = try addressConverter.convert(address: toAddress)
         // Build transaction
         let transaction = factory.transaction(version: 1, inputs: [], outputs: [], lockTime: 0)
 
@@ -48,7 +48,7 @@ class TransactionBuilder {
         }
 
         // Add :to output
-        try addOutputToTransaction(transaction: transaction, address: toAddress, keyHash: toKeyHash, value: 0, scriptType: type)
+        try addOutputToTransaction(transaction: transaction, address: toAddress, keyHash: address.keyHash, value: 0, scriptType: type)
 
         // Calculate fee and add :change output if needed
         if !senderPay {
