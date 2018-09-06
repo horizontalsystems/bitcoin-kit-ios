@@ -39,20 +39,12 @@ class PeerGroup {
         peer.sendGetHeadersMessage(headerHashes: headerHashes)
     }
 
-    func requestBlocks(headerHashes: [Data]) {
-        let inventoryMessage = InventoryMessage(count: VarInt(headerHashes.count), inventoryItems: headerHashes.map { hash in
-            InventoryItem(type: InventoryItem.ObjectType.filteredBlockMessage.rawValue, hash: hash)
-        })
-
-        peer.sendGetDataMessage(message: inventoryMessage)
+    func requestMerkleBlocks(headerHashes: [Data]) {
+        peer.requestMerkleBlocks(headerHashes: headerHashes)
     }
 
     func relay(transaction: Transaction) {
-        let inventoryMessage = InventoryMessage(count: VarInt(1), inventoryItems: [
-            InventoryItem(type: InventoryItem.ObjectType.transaction.rawValue, hash: Crypto.sha256sha256(transaction.serialized()))
-        ])
-
-        peer.send(inventoryMessage: inventoryMessage)
+        peer.relay(transaction: transaction)
     }
 
     func addPublicKeyFilter(pubKey: PublicKey) {
@@ -74,7 +66,7 @@ extension PeerGroup: PeerDelegate {
 
         statusSubject.onNext(.connected)
 
-        delegate?.peerGroupDidConnect()
+        delegate?.peerGroupReady()
     }
 
     func peerDidDisconnect(_ peer: Peer) {
@@ -100,14 +92,13 @@ extension PeerGroup: PeerDelegate {
         } catch {
             print("MERKLE BLOCK MESSAGE ERROR: \(error)")
         }
-//        delegate?.peerGroupDidReceive(merkleBlock: message)
     }
 
-    func peer(_ peer: Peer, didReceiveTransaction transaction: Transaction) {
-        let txHash = Crypto.sha256sha256(transaction.serialized())
+    func peer(_ peer: Peer, didReceiveTransactionMessage message: TransactionMessage) {
+        let txHash = Crypto.sha256sha256(TransactionSerializer.serialize(transaction: message.transaction))
 
         if let index = pendingBlocks.index(where: { $0.pendingTransactionHashes.contains(txHash) }) {
-            pendingBlocks[index].transactions.append(transaction)
+            pendingBlocks[index].transactions.append(message.transaction)
 
             if pendingBlocks[index].transactions.count == pendingBlocks[index].pendingTransactionHashes.count {
                 let block = pendingBlocks.remove(at: index)
@@ -115,34 +106,12 @@ extension PeerGroup: PeerDelegate {
             }
 
         } else {
-            delegate?.peerGroupDidReceive(transaction: transaction)
+            delegate?.peerGroupDidReceive(transaction: message.transaction)
         }
     }
 
-    func peer(_ peer: Peer, didReceiveInventoryMessage message: InventoryMessage) {
-        var items = [InventoryItem]()
-
-        for item in message.inventoryItems {
-            if let delegate = delegate, delegate.shouldRequest(inventoryItem: item) {
-                items.append(delegate.inventoryItem(inventoryItem: item))
-            }
-        }
-
-        if !items.isEmpty {
-            let getDataMessage = InventoryMessage(count: VarInt(items.count), inventoryItems: items)
-            peer.sendGetDataMessage(message: getDataMessage)
-        }
-    }
-
-    func peer(_ peer: Peer, didReceiveGetDataMessage message: GetDataMessage) {
-        for item in message.inventoryItems {
-            if item.objectType == .transaction, let transaction = delegate?.transaction(forHash: item.hash) {
-                peer.sendTransaction(transaction: transaction)
-            }
-        }
-    }
-
-    func peer(_ peer: Peer, didReceiveRejectMessage message: RejectMessage) {
+    func shouldRequest(inventoryItem: InventoryItem) -> Bool {
+        return delegate?.shouldRequest(inventoryItem: inventoryItem) ?? false
     }
 
 }

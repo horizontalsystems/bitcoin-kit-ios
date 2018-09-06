@@ -20,7 +20,7 @@ class BlockSyncerTests: XCTestCase {
         realm = mockWalletKit.realm
 
         stub(mockPeerGroup) { mock in
-            when(mock.requestBlocks(headerHashes: any())).thenDoNothing()
+            when(mock.requestMerkleBlocks(headerHashes: any())).thenDoNothing()
         }
 
         blockSyncer = BlockSyncer(realmFactory: mockWalletKit.mockRealmFactory, peerGroup: mockPeerGroup, queue: DispatchQueue.main)
@@ -39,7 +39,7 @@ class BlockSyncerTests: XCTestCase {
         blockSyncer.enqueueRun()
         waitForMainQueue()
 
-        verify(mockPeerGroup, never()).requestBlocks(headerHashes: any())
+        verify(mockPeerGroup, never()).requestMerkleBlocks(headerHashes: any())
     }
 
     func testSync_NonSyncedBlocks() {
@@ -52,7 +52,7 @@ class BlockSyncerTests: XCTestCase {
         blockSyncer.enqueueRun()
         waitForMainQueue()
 
-        verify(mockPeerGroup).requestBlocks(headerHashes: equal(to: [hash]))
+        verify(mockPeerGroup).requestMerkleBlocks(headerHashes: equal(to: [hash]))
     }
 
     func testSync_SyncedBlocks() {
@@ -67,7 +67,7 @@ class BlockSyncerTests: XCTestCase {
         blockSyncer.enqueueRun()
         waitForMainQueue()
 
-        verify(mockPeerGroup).requestBlocks(headerHashes: equal(to: [hash]))
+        verify(mockPeerGroup).requestMerkleBlocks(headerHashes: equal(to: [hash]))
     }
 
 }

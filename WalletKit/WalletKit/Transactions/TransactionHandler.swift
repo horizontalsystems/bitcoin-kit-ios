@@ -21,7 +21,7 @@ class TransactionHandler {
     func handle(blockTransactions transactions: [Transaction], blockHeader: BlockHeader) throws {
         let realm = realmFactory.realm
 
-        let reversedHashHex = Crypto.sha256sha256(blockHeader.serialized()).reversedHex
+        let reversedHashHex = Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: blockHeader)).reversedHex
 
         var hasNewTransactions = false
         var hasNewSyncedBlocks = false

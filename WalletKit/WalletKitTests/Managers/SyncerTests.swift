@@ -65,7 +65,7 @@ class SyncerTests: XCTestCase {
     }
 
     func testRunHeaderSyncerOnConnect() {
-        syncer.peerGroupDidConnect()
+        syncer.peerGroupReady()
         verify(mockHeaderSyncer).sync()
     }
 
@@ -76,7 +76,7 @@ class SyncerTests: XCTestCase {
             when(mock.sync()).thenThrow(error)
         }
 
-        syncer.peerGroupDidConnect()
+        syncer.peerGroupReady()
         verify(mockLogger).log(tag: "Header Syncer Error", message: "\(error)")
     }
 
@@ -190,23 +190,6 @@ class SyncerTests: XCTestCase {
         for item in items {
             XCTAssertEqual(syncer.shouldRequest(inventoryItem: item), false)
         }
-    }
-
-    func testTransaction() {
-        let transaction = TestData.p2pkhTransaction
-
-        try! realm.write {
-            realm.add(transaction)
-        }
-
-        let tx = syncer.transaction(forHash: transaction.reversedHashHex.reversedData!)
-        XCTAssertEqual(tx?.reversedHashHex, transaction.reversedHashHex)
-    }
-
-    func testTransaction_NoTransaction() {
-        let transaction = TestData.p2pkhTransaction
-        let tx = syncer.transaction(forHash: transaction.reversedHashHex.reversedData!)
-        XCTAssertEqual(tx, nil)
     }
 
 }

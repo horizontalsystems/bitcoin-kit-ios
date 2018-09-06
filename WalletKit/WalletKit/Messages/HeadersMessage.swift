@@ -1,26 +1,30 @@
 import Foundation
 
-struct HeadersMessage {
+struct HeadersMessage: IMessage {
     let count: VarInt
     let blockHeaders: [BlockHeader]
 
-//    public func serialized() -> Data {
-//        var data = Data()
-//        data += count.serialized()
-//        data += blockHeaders.flatMap { $0.serialized() }
-//        return data
-//    }
-
-    static func deserialize(_ data: Data) -> HeadersMessage {
+    init(data: Data) {
         let byteStream = ByteStream(data)
-        let count = byteStream.read(VarInt.self)
 
-        var headers = [BlockHeader]()
+        count = byteStream.read(VarInt.self)
+
+        var blockHeaders = [BlockHeader]()
         for _ in 0..<Int(count.underlyingValue) {
-            headers.append(BlockHeader.deserialize(fromByteStream: byteStream))
+            blockHeaders.append(BlockHeaderSerializer.deserialize(byteStream: byteStream))
             _ = byteStream.read(Data.self, count: 1)
         }
 
-        return HeadersMessage(count: count, blockHeaders: headers)
+        self.blockHeaders = blockHeaders
     }
+
+    public func serialized() -> Data {
+        var data = Data()
+        data += count.serialized()
+        data += blockHeaders.flatMap {
+            BlockHeaderSerializer.serialize(header: $0)
+        }
+        return data
+    }
+
 }

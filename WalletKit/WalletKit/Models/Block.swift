@@ -44,7 +44,7 @@ public class Block: Object {
 
         if let header = header {
             self.header = header
-            headerHash = Crypto.sha256sha256(header.serialized())
+            headerHash = Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: header))
             reversedHeaderHashHex = headerHash.reversedHex
         }
     }
