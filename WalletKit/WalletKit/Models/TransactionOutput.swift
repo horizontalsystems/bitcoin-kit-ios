@@ -26,6 +26,13 @@ import RealmSwift
         }
     }
 
+    var addressType: AddressType {
+        switch self {
+        case .p2sh, .p2wsh: return .scriptHash
+        default: return .pubKeyHash
+        }
+    }
+
 }
 
 public class TransactionOutput: Object {

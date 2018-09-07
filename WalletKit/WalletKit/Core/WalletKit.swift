@@ -187,8 +187,8 @@ public class WalletKit {
        _ = try addressConverter.convert(address: address)
     }
 
-    public func fee(for value: Int, senderPay: Bool) throws -> Int {
-        return try transactionBuilder.fee(for: value, feeRate: transactionCreator.feeRate, senderPay: true, type: .p2pkh)
+    public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool) throws -> Int {
+        return try transactionBuilder.fee(for: value, feeRate: transactionCreator.feeRate, senderPay: true, address: toAddress)
     }
 
     public var receiveAddress: String {

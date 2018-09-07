@@ -24,10 +24,14 @@ class TransactionBuilder {
         self.factory = factory
     }
 
-    func fee(for value: Int, feeRate: Int, senderPay: Bool, type: ScriptType = .p2pkh) throws -> Int {
-        let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, senderPay: senderPay, outputs: unspentOutputProvider.allUnspentOutputs())
+    func fee(for value: Int, feeRate: Int, senderPay: Bool, address: String? = nil) throws -> Int {
+        var outputType: ScriptType = .p2pkh
+        if let string = address, let address = try? addressConverter.convert(address: string) {
+            outputType = address.scriptType
+        }
+        let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputType: outputType, senderPay: senderPay, outputs: unspentOutputProvider.allUnspentOutputs())
 
-        let feeWithChangeOutput = selectedOutputsInfo.fee + transactionSizeCalculator.outputSize(type: type) * feeRate
+        let feeWithChangeOutput = selectedOutputsInfo.fee + transactionSizeCalculator.outputSize(type: .p2pkh) * feeRate
         if selectedOutputsInfo.totalValue > value + (senderPay ? feeWithChangeOutput : 0) {
             return feeWithChangeOutput
         } else {
@@ -35,10 +39,11 @@ class TransactionBuilder {
         }
     }
 
-    func buildTransaction(value: Int, feeRate: Int, senderPay: Bool, type: ScriptType = .p2pkh, changePubKey: PublicKey, toAddress: String) throws -> Transaction {
-        let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, senderPay: senderPay, outputs: unspentOutputProvider.allUnspentOutputs())
-
+    func buildTransaction(value: Int, feeRate: Int, senderPay: Bool, changeScriptType: ScriptType = .p2pkh, changePubKey: PublicKey, toAddress: String) throws -> Transaction {
         let address = try addressConverter.convert(address: toAddress)
+
+        let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputType: address.scriptType, senderPay: senderPay, outputs: unspentOutputProvider.allUnspentOutputs())
+
         // Build transaction
         let transaction = factory.transaction(version: 1, inputs: [], outputs: [], lockTime: 0)
 
@@ -48,7 +53,7 @@ class TransactionBuilder {
         }
 
         // Add :to output
-        try addOutputToTransaction(transaction: transaction, address: toAddress, keyHash: address.keyHash, value: 0, scriptType: type)
+        try addOutputToTransaction(transaction: transaction, address: address, value: 0)
 
         // Calculate fee and add :change output if needed
         if !senderPay {
@@ -61,8 +66,9 @@ class TransactionBuilder {
         let sentValue = senderPay ? value + selectedOutputsInfo.fee : value
 
         transaction.outputs[0].value = receivedValue
-        if selectedOutputsInfo.totalValue > sentValue + transactionSizeCalculator.outputSize(type: type) * feeRate {
-            try addOutputToTransaction(transaction: transaction, address: changePubKey.address, pubKey: changePubKey, keyHash: changePubKey.keyHash, value: selectedOutputsInfo.totalValue - sentValue, scriptType: type)
+        if selectedOutputsInfo.totalValue > sentValue + transactionSizeCalculator.outputSize(type: changeScriptType) * feeRate {
+            let changeAddress = Address(type: changeScriptType.addressType, keyHash: changePubKey.keyHash, base58: changePubKey.address)
+            try addOutputToTransaction(transaction: transaction, address: changeAddress, value: selectedOutputsInfo.totalValue - sentValue)
         }
 
         // Sign inputs
@@ -87,9 +93,9 @@ class TransactionBuilder {
         transaction.inputs.append(input)
     }
 
-    private func addOutputToTransaction(transaction: Transaction, address: String, pubKey: PublicKey? = nil, keyHash: Data, value: Int, scriptType: ScriptType) throws {
-        let script = try scriptBuilder.lockingScript(type: scriptType, params: [keyHash])
-        let output = try factory.transactionOutput(withValue: value, index: transaction.outputs.count, lockingScript: script, type: scriptType, address: address, keyHash: keyHash, publicKey: pubKey)
+    private func addOutputToTransaction(transaction: Transaction, address: Address, pubKey: PublicKey? = nil, value: Int) throws {
+        let script = try scriptBuilder.lockingScript(type: address.scriptType, params: [address.keyHash])
+        let output = try factory.transactionOutput(withValue: value, index: transaction.outputs.count, lockingScript: script, type: address.scriptType, address: address.string, keyHash: address.keyHash, publicKey: pubKey)
         transaction.outputs.append(output)
     }
 
