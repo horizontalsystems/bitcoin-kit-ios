@@ -43,8 +43,8 @@ class TransactionsController: UITableViewController {
         var totalOutput: Int = 0
         var totalMineInput: Int = 0
         var totalMineOutput: Int = 0
-        var fromAddresses = [String]()
-        var toAddresses = [String]()
+        var fromAddresses = [TransactionAddress]()
+        var toAddresses = [TransactionAddress]()
 
         for input in transaction.inputs {
             if let address = input.address {
@@ -58,23 +58,25 @@ class TransactionsController: UITableViewController {
                     totalMineInput += previousOutput.value
                 }
             }
-
+            var mine = true
             if input.previousOutput?.publicKey == nil {
-                if let address = input.address {
-                    fromAddresses.append(address)
-                } else {
-                    fromAddresses.append("stub from address")
-                }
+                mine = false
+            }
+            if let address = input.address {
+                fromAddresses.append(TransactionAddress(address: address, mine: mine))
             }
         }
 
         for output in transaction.outputs {
             totalOutput += output.value
 
+            var mine = false
             if output.publicKey != nil {
                 totalMineOutput += output.value
-            } else if let address = output.address {
-                toAddresses.append(address)
+                mine = true
+            }
+            if let address = output.address {
+                toAddresses.append(TransactionAddress(address: address, mine: mine))
             }
         }
 
