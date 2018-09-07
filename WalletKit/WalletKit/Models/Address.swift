@@ -9,7 +9,15 @@ struct Address: Equatable {
 
     var string: String { return base58 }
 
+    var scriptType: ScriptType {
+        switch type {
+            case .pubKeyHash: return .p2pkh
+            case .scriptHash: return .p2sh
+        }
+    }
+
     static func ==(lhs: Address, rhs: Address) -> Bool {
         return lhs.type == rhs.type && lhs.keyHash == rhs.keyHash
     }
+
 }

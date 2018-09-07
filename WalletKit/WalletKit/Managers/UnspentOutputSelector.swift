@@ -18,13 +18,13 @@ class UnspentOutputSelector {
         self.calculator = calculator
     }
 
-    func select(value: Int, feeRate: Int, senderPay: Bool, outputs: [TransactionOutput]) throws -> SelectedUnspentOutputInfo {
+    func select(value: Int, feeRate: Int, outputType: ScriptType = .p2pkh, senderPay: Bool, outputs: [TransactionOutput]) throws -> SelectedUnspentOutputInfo {
         guard !outputs.isEmpty else {
             throw SelectorError.emptyOutputs
         }
 
         var selected = [TransactionOutput]()
-        var calculatedFee = (calculator.transactionSize() + calculator.outputSize(type: .p2pkh)) * feeRate // fee
+        var calculatedFee = (calculator.transactionSize() + calculator.outputSize(type: outputType)) * feeRate // fee
 
         let dust = calculator.inputSize(type: .p2pkh) * feeRate // fee needed for make changeOutput
 

@@ -26,7 +26,7 @@ class TransactionCreatorTests: XCTestCase {
         mockAddressManager = mockWalletKit.mockAddressManager
 
         stub(mockTransactionBuilder) { mock in
-            when(mock.buildTransaction(value: any(), feeRate: any(), senderPay: any(), type: any(), changePubKey: any(), toAddress: any())).thenReturn(TestData.p2pkhTransaction)
+            when(mock.buildTransaction(value: any(), feeRate: any(), senderPay: any(), changeScriptType: any(), changePubKey: any(), toAddress: any())).thenReturn(TestData.p2pkhTransaction)
         }
         stub(mockTransactionProcessor) { mock in
             when(mock.enqueueRun()).thenDoNothing()

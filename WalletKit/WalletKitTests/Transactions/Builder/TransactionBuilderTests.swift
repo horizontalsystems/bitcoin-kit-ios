@@ -19,6 +19,7 @@ class TransactionBuilderTests: XCTestCase {
     private var unspentOutputs: SelectedUnspentOutputInfo!
     private var transaction: Transaction!
     private var toOutput: TransactionOutput!
+    private var toOutputSH: TransactionOutput!
     private var changeOutput: TransactionOutput!
     private var input: TransactionInput!
     private var totalInputValue: Int!
@@ -27,6 +28,7 @@ class TransactionBuilderTests: XCTestCase {
     private var fee: Int!
     private var changePubKey: PublicKey!
     private var toAddress: String!
+    private var toAddressSH: String!
 
     override func setUp() {
         super.setUp()
@@ -46,7 +48,8 @@ class TransactionBuilderTests: XCTestCase {
         transactionBuilder = TransactionBuilder(unspentOutputSelector: mockUnspentOutputSelector, unspentOutputProvider: mockUnspentOutputProvider, transactionSizeCalculator: mockTransactionSizeCalculator, addressConverter: mockAddressConverter, inputSigner: mockInputSigner, scriptBuilder: mockScriptBuilder, factory: mockFactory)
 
         changePubKey = TestData.pubKey()
-        toAddress = "2QVLmkcuXLpmuRz9C8BiccAMujm4"
+        toAddress = "mzwSXvtPs7MFbW2ysNA4Gw3P2KjrcEWaE5"
+        toAddressSH = "2MyQWMrsLsqAMSUeusduAzN6pWuH2V27ykE"
 
         let previousTransaction = TestData.p2pkhTransaction
         try! realm.write {
@@ -62,10 +65,11 @@ class TransactionBuilderTests: XCTestCase {
         transaction = Transaction(version: 1, inputs: [], outputs: [])
         input = TransactionInput(withPreviousOutputTxReversedHex: previousTransaction.reversedHashHex, previousOutputIndex: unspentOutputs.outputs[0].index, script: Data(), sequence: 0)
         toOutput = TransactionOutput(withValue: value - fee, index: 0, lockingScript: Data(), type: .p2pkh, address: toAddress, keyHash: nil)
+        toOutputSH = TransactionOutput(withValue: value - fee, index: 0, lockingScript: Data(), type: .p2sh, address: toAddressSH, keyHash: nil)
         changeOutput = TransactionOutput(withValue: totalInputValue - value, index: 1, lockingScript: Data(), type: .p2pkh, keyHash: changePubKey.keyHash)
 
         stub(mockUnspentOutputSelector) { mock in
-            when(mock.select(value: any(), feeRate: any(), senderPay: any(), outputs: any())).thenReturn(unspentOutputs)
+            when(mock.select(value: any(), feeRate: any(), outputType: any(), senderPay: any(), outputs: any())).thenReturn(unspentOutputs)
         }
 
         stub(mockUnspentOutputProvider) { mock in
@@ -81,7 +85,10 @@ class TransactionBuilderTests: XCTestCase {
         }
 
         stub(mockAddressConverter) { mock in
-            when(mock.convert(address: any())).thenReturn(Address(type: .pubKeyHash, keyHash: Data(), base58: ""))
+            when(mock.convert(address: toAddress)).thenReturn(Address(type: .pubKeyHash, keyHash: Data(hex: "d50bf226c9ff3bcf06f13d8ca129f24bedeef594")!, base58: "mzwSXvtPs7MFbW2ysNA4Gw3P2KjrcEWaE5"))
+            when(mock.convert(address: toAddressSH)).thenReturn(Address(type: .scriptHash, keyHash: Data(hex: "43922a3f1dc4569f9eccce9a71549d5acabbc0ca")!, base58: toAddressSH))
+            when(mock.convert(address: changePubKey.address)).thenReturn(Address(type: .pubKeyHash, keyHash: changePubKey.keyHash, base58: changePubKey.address))
+//            when(mock.convert(address: any())).thenReturn(Address(type: .pubKeyHash, keyHash: Data(), base58: ""))
         }
 
         stub(mockScriptBuilder) { mock in
@@ -99,6 +106,7 @@ class TransactionBuilderTests: XCTestCase {
 
         stub(mockFactory) { mock in
             when(mock.transactionOutput(withValue: any(), index: any(), lockingScript: any(), type: equal(to: ScriptType.p2pkh), address: equal(to: toAddress), keyHash: any(), publicKey: any())).thenReturn(toOutput)
+            when(mock.transactionOutput(withValue: any(), index: any(), lockingScript: any(), type: equal(to: ScriptType.p2sh), address: equal(to: toAddressSH), keyHash: any(), publicKey: any())).thenReturn(toOutputSH)
             when(mock.transactionOutput(withValue: any(), index: any(), lockingScript: any(), type: equal(to: ScriptType.p2pkh), address: equal(to: changePubKey.address), keyHash: any(), publicKey: any())).thenReturn(changeOutput)
         }
     }
@@ -114,6 +122,7 @@ class TransactionBuilderTests: XCTestCase {
         transactionBuilder = nil
         changePubKey = nil
         toAddress = nil
+        toAddressSH = nil
         value = nil
         feeRate = nil
         fee = nil
@@ -136,6 +145,26 @@ class TransactionBuilderTests: XCTestCase {
         XCTAssertEqual(resultTx.inputs[0].previousOutput!, unspentOutputs.outputs[0])
         XCTAssertEqual(resultTx.outputs.count, 2)
         XCTAssertEqual(resultTx.outputs[0].address, toAddress)
+        XCTAssertEqual(resultTx.outputs[0].value, value - fee)  // value - fee
+        XCTAssertEqual(resultTx.outputs[1].keyHash, changePubKey.keyHash)
+        XCTAssertEqual(resultTx.outputs[1].value, unspentOutputs.outputs[0].value - value)
+    }
+
+    func testBuildSHTransaction() {
+        var resultTx = Transaction()
+        do {
+            resultTx = try transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, changePubKey: changePubKey, toAddress: toAddressSH)
+        } catch let error {
+            XCTFail(error.localizedDescription)
+        }
+
+        XCTAssertNotEqual(resultTx.reversedHashHex, "")
+        XCTAssertEqual(resultTx.status, .new)
+        XCTAssertEqual(resultTx.isMine, true)
+        XCTAssertEqual(resultTx.inputs.count, 1)
+        XCTAssertEqual(resultTx.inputs[0].previousOutput!, unspentOutputs.outputs[0])
+        XCTAssertEqual(resultTx.outputs.count, 2)
+        XCTAssertEqual(resultTx.outputs[0].address, toAddressSH)
         XCTAssertEqual(resultTx.outputs[0].value, value - fee)  // value - fee
         XCTAssertEqual(resultTx.outputs[1].keyHash, changePubKey.keyHash)
         XCTAssertEqual(resultTx.outputs[1].value, unspentOutputs.outputs[0].value - value)
@@ -215,11 +244,11 @@ class TransactionBuilderTests: XCTestCase {
         outputTx.outputs[0].scriptType = .p2pkh
 
         stub(mockUnspentOutputSelector) { mock in
-            when(mock.select(value: any(), feeRate: any(), senderPay: any(), outputs: any())).thenReturn(SelectedUnspentOutputInfo(outputs: [outputTx.outputs[0]], totalValue: 11805400, fee: 112800))
+            when(mock.select(value: any(), feeRate: any(), outputType: any(), senderPay: any(), outputs: any())).thenReturn(SelectedUnspentOutputInfo(outputs: [outputTx.outputs[0]], totalValue: 11805400, fee: 112800))
         }
 
         do {
-            let result = try transactionBuilder.fee(for: value, feeRate: 600, senderPay: true, type: .p2pkh)
+            let result = try transactionBuilder.fee(for: value, feeRate: 600, senderPay: true, address: toAddress)
             XCTAssertEqual(result, 133200)
         } catch let error {
             XCTFail(error.localizedDescription)

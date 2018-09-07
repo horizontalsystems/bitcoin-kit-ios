@@ -47,6 +47,10 @@ class TransactionsController: UITableViewController {
         var toAddresses = [String]()
 
         for input in transaction.inputs {
+            if let address = input.address {
+                totalInput += 1
+                fromAddresses.append(address)
+            }
             if let previousOutput = input.previousOutput {
                 totalInput += previousOutput.value
 
