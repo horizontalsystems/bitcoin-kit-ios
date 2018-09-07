@@ -49,6 +49,10 @@ class BalanceController: UIViewController {
         }
     }
 
+    @IBAction func showRealmInfo() {
+        Manager.shared.walletKit.showRealmInfo()
+    }
+
     private func updateBalance() {
         guard Manager.shared.walletKit != nil else {
             return

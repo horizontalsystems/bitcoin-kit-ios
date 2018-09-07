@@ -33,9 +33,18 @@
                     <nil key="textColor"/>
                     <nil key="highlightedColor"/>
                 </label>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="oEu-Qf-bsR">
+                    <rect key="frame" x="130.5" y="587" width="114" height="30"/>
+                    <state key="normal" title="Show Realm Info"/>
+                    <connections>
+                        <action selector="showRealmInfo" destination="-1" eventType="touchUpInside" id="pRN-NE-AP9"/>
+                    </connections>
+                </button>
             </subviews>
             <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <constraints>
+                <constraint firstItem="oEu-Qf-bsR" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="23R-yJ-Nda"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="bottom" secondItem="oEu-Qf-bsR" secondAttribute="bottom" constant="50" id="BYn-Fw-3hH"/>
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="gaY-fU-Lj3" secondAttribute="trailing" constant="20" id="CCT-UW-a4d"/>
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="lGE-w6-tlj" secondAttribute="trailing" constant="20" id="EVU-Gq-EMP"/>
                 <constraint firstItem="lGE-w6-tlj" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="20" id="PcQ-mW-IK0"/>
