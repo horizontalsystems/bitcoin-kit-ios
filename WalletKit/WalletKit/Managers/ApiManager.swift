@@ -43,7 +43,7 @@ class ApiManager {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
 //        print("API OUT: \(method.rawValue) \(apiUrl)\(path) \(parameters.map { String(describing: $0) } ?? "")")
-        print("API OUT: \(method.rawValue) \(apiUrl)\(path)")
+        print("API OUT: \(method.rawValue) \(path)")
 
         return RequestRouter(request: request, encoding: method == .get ? URLEncoding.default : JSONEncoding.default, parameters: parameters)
     }
@@ -119,43 +119,45 @@ class ApiManager {
         })
     }
 
-}
+    func getBlockHashes(address: String) -> Observable<[BlockResponse]> {
+        let addressPath = [
+            String(address.prefix(3)),
+            String(address[address.index(address.startIndex, offsetBy: 3)..<address.index(address.startIndex, offsetBy: 6)]),
+            String(address[address.index(address.startIndex, offsetBy: 6)...])
+        ].joined(separator: "/")
 
-extension ApiManager {
+        let result: Observable<AddressResponse> = observable(forRequest: request(withMethod: .get, path: "/btc-regtest/address/\(addressPath)/index.json"))
 
-    func getBlockHashes(addresses: [String]) -> Observable<[BlockResponse]> {
-        let result: Observable<[AddressResponse]> = observable(forRequest: request(withMethod: .get, path: "/address", parameters: ["ads": addresses]))
-        return result.map { addresses in
-            var result = [BlockResponse]()
+        return result
+                .map { address in
+                    var result = [BlockResponse]()
 
-            for address in addresses {
-                result.append(contentsOf: address.blocks)
-            }
+                    for hash in address.blockHashes {
+                        result.append(BlockResponse(hash: hash, height: 0))
+                    }
 
-            return result
-        }
+                    return result
+                }
+                .catchError { error -> Observable<[BlockResponse]> in
+                    if let error = error as? ApiError, case let .serverError(status, _) = error, status == 404 {
+                        return Observable.just([])
+                    }
+                    return Observable.error(error)
+                }
     }
 
 }
 
 struct AddressResponse: ImmutableMappable {
-    let value: String
-    let blocks: [BlockResponse]
+    let blockHashes: [String]
 
     init(map: Map) throws {
-        value = try map.value("value")
-        blocks = try map.value("blocks")
+        blockHashes = try map.value("blocks")
     }
 
 }
 
-struct BlockResponse: ImmutableMappable {
+struct BlockResponse {
     let hash: String
     let height: Int
-
-    init(map: Map) throws {
-        hash = try map.value("hash")
-        height = try map.value("height")
-    }
-
 }

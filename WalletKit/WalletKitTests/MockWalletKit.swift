@@ -76,7 +76,7 @@ class MockWalletKit {
         mockSyncer = MockSyncer(logger: mockLogger, realmFactory: mockRealmFactory)
         mockFactory = MockFactory()
 
-        mockInitialSyncer = MockInitialSyncer(realmFactory: mockRealmFactory, hdWallet: mockHdWallet, stateManager: mockStateManager, apiManager: mockApiManager, peerGroup: mockPeerGroup)
+        mockInitialSyncer = MockInitialSyncer(realmFactory: mockRealmFactory, hdWallet: mockHdWallet, stateManager: mockStateManager, apiManager: mockApiManager, factory: mockFactory, peerGroup: mockPeerGroup, network: mockNetwork)
         mockProgressSyncer = MockProgressSyncer(realmFactory: mockRealmFactory)
         mockAddressManager = MockAddressManager(realmFactory: mockRealmFactory, hdWallet: mockHdWallet, peerGroup: mockPeerGroup)
         mockBlockSyncer = MockBlockSyncer(realmFactory: mockRealmFactory, peerGroup: mockPeerGroup)
