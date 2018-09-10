@@ -54,7 +54,7 @@ class TransactionsController: UITableViewController {
                     totalMineInput += previousOutput.value
                 }
             }
-            let mine = input.previousOutput?.publicKey == nil
+            let mine = input.previousOutput?.publicKey != nil
             if let address = input.address {
                 fromAddresses.append(TransactionAddress(address: address, mine: mine))
             }
