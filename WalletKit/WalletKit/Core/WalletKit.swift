@@ -72,7 +72,7 @@ public class WalletKit {
             blockValidator = TestNetBlockValidator(calculator: difficultyCalculator)
         case .bitcoinRegTest:
             network = BitcoinRegTest()
-            blockValidator = TestNetBlockValidator(calculator: difficultyCalculator)
+            blockValidator = RegTestBlockValidator(calculator: difficultyCalculator)
         case .bitcoinCashMainNet:
             network = BitcoinCashMainNet()
             blockValidator = BlockValidator(calculator: difficultyCalculator)

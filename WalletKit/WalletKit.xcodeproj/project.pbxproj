@@ -110,6 +110,7 @@
 		58AAA1702C9422A8EBA464D7 /* UnspentOutputSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA983B426801C46003567 /* UnspentOutputSelector.swift */; };
 		58AAA19EA96193409D8AA8EC /* ScriptConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAC8BAD29CC18864884DB /* ScriptConverter.swift */; };
 		58AAA1E87B62806CD5891D43 /* Chunk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA3BE8FA350BD415CD5B3 /* Chunk.swift */; };
+		58AAA27A403387E4AAA297AA /* RegTestBlockValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA8A4CC0DEA8504F05D34 /* RegTestBlockValidator.swift */; };
 		58AAA3492A592C937473454F /* ScriptBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAF2482982ED7215EEBF9 /* ScriptBuilder.swift */; };
 		58AAA36E48DB45B72112973B /* TransactionCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAC66042A881E2F74AFD6 /* TransactionCreator.swift */; };
 		58AAA398676B02669E4E5E3F /* TransactionSenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAE590E2089C768A7A870 /* TransactionSenderTests.swift */; };
@@ -279,6 +280,7 @@
 		58AAA481A82D05C914AB0CCA /* UnspentOutputProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnspentOutputProvider.swift; sourceTree = "<group>"; };
 		58AAA6BB66ECE0543BE377E3 /* ScriptTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScriptTests.swift; sourceTree = "<group>"; };
 		58AAA74DF0D1F82EF49824E3 /* PFromPKHExtractorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PFromPKHExtractorTests.swift; sourceTree = "<group>"; };
+		58AAA8A4CC0DEA8504F05D34 /* RegTestBlockValidator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegTestBlockValidator.swift; sourceTree = "<group>"; };
 		58AAA983B426801C46003567 /* UnspentOutputSelector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnspentOutputSelector.swift; sourceTree = "<group>"; };
 		58AAAA7C33E2529A70D0E529 /* TransactionSizeCalculator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionSizeCalculator.swift; sourceTree = "<group>"; };
 		58AAAB4FF63F2AA59C24E9C0 /* Address.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Address.swift; sourceTree = "<group>"; };
@@ -578,6 +580,7 @@
 				11B350F2CF9C3EBC2F72CAEF /* HeaderHandler.swift */,
 				11B35CBB5B17DD80FD6A0661 /* HeaderSyncer.swift */,
 				11B35677D69EC754EC7C82DF /* TestNetBlockValidator.swift */,
+				58AAA8A4CC0DEA8504F05D34 /* RegTestBlockValidator.swift */,
 			);
 			path = BlockHeaders;
 			sourceTree = "<group>";
@@ -1189,6 +1192,7 @@
 				11B3527FFC38E51D2CA2D333 /* ValidatedBlockFactory.swift in Sources */,
 				58AAAD1C062938F07E90EA9D /* Address.swift in Sources */,
 				2FA5D9ED521660FA5EEF360E /* MerkleBlock.swift in Sources */,
+				58AAA27A403387E4AAA297AA /* RegTestBlockValidator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
