@@ -24,6 +24,15 @@ class OpCode {
     static let checkMultiSigVerify: UInt8 = 0xAF
     static let endIf: UInt8 = 0x68
 
+    static func push(_ value: Int) -> Data {
+        guard value != 0 else {
+            return Data([0])
+        }
+        guard value <= 16 else {
+            return Data()
+        }
+        return Data([UInt8(value + 0x50)])
+    }
 
     static func push(_ data: Data) -> Data {
         let length = data.count

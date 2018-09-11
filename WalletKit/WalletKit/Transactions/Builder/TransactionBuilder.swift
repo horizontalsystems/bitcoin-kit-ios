@@ -67,7 +67,7 @@ class TransactionBuilder {
 
         transaction.outputs[0].value = receivedValue
         if selectedOutputsInfo.totalValue > sentValue + transactionSizeCalculator.outputSize(type: changeScriptType) * feeRate {
-            let changeAddress = Address(type: changeScriptType.addressType, keyHash: changePubKey.keyHash, base58: changePubKey.address)
+            let changeAddress = LegacyAddress(type: changeScriptType.addressType, keyHash: changePubKey.keyHash, base58: changePubKey.address)
             try addOutputToTransaction(transaction: transaction, address: changeAddress, value: selectedOutputsInfo.totalValue - sentValue)
         }
 
@@ -95,7 +95,7 @@ class TransactionBuilder {
 
     private func addOutputToTransaction(transaction: Transaction, address: Address, pubKey: PublicKey? = nil, value: Int) throws {
         let script = try scriptBuilder.lockingScript(type: address.scriptType, params: [address.keyHash])
-        let output = try factory.transactionOutput(withValue: value, index: transaction.outputs.count, lockingScript: script, type: address.scriptType, address: address.string, keyHash: address.keyHash, publicKey: pubKey)
+        let output = try factory.transactionOutput(withValue: value, index: transaction.outputs.count, lockingScript: script, type: address.scriptType, address: address.stringValue, keyHash: address.keyHash, publicKey: pubKey)
         transaction.outputs.append(output)
     }
 

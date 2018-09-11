@@ -11,7 +11,19 @@ class PFromWitnessExtractor: ScriptExtractor {
             throw ScriptError.wrongSequence
         }
         let witnessScript = try converter.decode(data: scriptData)
-        try witnessScript.validate(opCodes: Data(bytes: [0x00, 0x14]))
+        guard witnessScript.chunks.count == 2 else {
+            throw ScriptError.wrongSequence
+        }
+        var allowedPushCode = false
+        for i in 0..<16 {
+            if witnessScript.chunks.first?.opCode == OpCode.push(i).first {
+                allowedPushCode = true
+                break
+            }
+        }
+        guard allowedPushCode, witnessScript.chunks[1].opCode == 0x14 else {
+            throw ScriptError.wrongSequence
+        }
 
         return scriptData
     }

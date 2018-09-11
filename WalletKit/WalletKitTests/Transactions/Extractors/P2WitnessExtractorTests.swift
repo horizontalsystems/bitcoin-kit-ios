@@ -56,6 +56,7 @@ class P2WitnessExtractorTests: XCTestCase {
         }
         stub(mockRedeemScript) { mock in
             when(mock.validate(opCodes: any())).thenDoNothing()
+            when(mock.chunks.get).thenReturn([Chunk(scriptData: Data([0x00]), index: 0), Chunk(scriptData: Data([0x14]), index: 0)])
         }
 
         do {

@@ -16,6 +16,7 @@ class AddressConverterTests: XCTestCase {
             when(mock.scriptHash.get).thenReturn(0xc4)
             when(mock.pubKeyPrefixPattern.get).thenReturn("m|n")
             when(mock.scriptPrefixPattern.get).thenReturn("2")
+            when(mock.bech32PrefixPattern.get).thenReturn("bc")
         }
         addressConverter = AddressConverter(network: mockWalletKit.mockNetwork)
     }
@@ -37,12 +38,23 @@ class AddressConverterTests: XCTestCase {
         }
     }
 
+    func testSegWitValidAddressConvert() {
+        let address = "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4"
+        let keyHash = "751e76e8199196d454941c45d1b3a323f1433bd6"
+        do {
+            let convertedData = try addressConverter.convert(address: address)
+            XCTAssertEqual(convertedData.keyHash, Data(hex: keyHash))
+        } catch {
+            XCTFail("Error Handled!")
+        }
+    }
+
     func testValidPubKeyConvert() {
         let address = "msGCb97sW9s9Mt7gN5m7TGmwLqhqGaFqYz"
         let keyHash = "80d733d7a4c02aba01da9370afc954c73a32dba5"
         do {
             let convertedAddress = try addressConverter.convert(keyHash: Data(hex: keyHash)!, type: .p2pkh)
-            XCTAssertEqual(convertedAddress.string, address)
+            XCTAssertEqual(convertedAddress.stringValue, address)
             XCTAssertEqual(convertedAddress.type, .pubKeyHash)
         } catch {
             XCTFail("Error Handled!")
@@ -66,7 +78,7 @@ class AddressConverterTests: XCTestCase {
         let keyHash = "D259F4688599C8422F477166A0C89344AD9EE72F"
         do {
             let convertedAddress = try addressConverter.convert(keyHash: Data(hex: keyHash)!, type: .p2sh)
-            XCTAssertEqual(convertedAddress.string, address)
+            XCTAssertEqual(convertedAddress.stringValue, address)
         } catch {
             XCTFail("Error Handled!")
         }
