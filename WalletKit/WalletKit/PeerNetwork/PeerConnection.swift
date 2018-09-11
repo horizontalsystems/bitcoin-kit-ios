@@ -19,8 +19,8 @@ class PeerConnection: NSObject, StreamDelegate {
 
     private var packets: Data = Data()
 
-    init(network: NetworkProtocol = BitcoinTestNet()) {
-        self.host = network.dnsSeeds[0]
+    init(host: String, network: NetworkProtocol = BitcoinTestNet()) {
+        self.host = host
         self.port = UInt32(network.port)
         self.network = network
 
