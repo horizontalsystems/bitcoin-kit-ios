@@ -1,12 +1,13 @@
 import UIKit
 import WalletKit
 import RealmSwift
+import RxSwift
 
 class TransactionsController: UITableViewController {
+    let disposeBag = DisposeBag()
 
-    private var transactionsNotificationToken: NotificationToken?
-
-    var records = [TransactionRecord]()
+    var transactions = [TransactionInfo]()
+    var lastBlockHeight = 0
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -15,80 +16,26 @@ class TransactionsController: UITableViewController {
 
         tableView.register(UINib(nibName: String(describing: TransactionCell.self), bundle: Bundle(for: TransactionCell.self)), forCellReuseIdentifier: String(describing: TransactionCell.self))
 
-        transactionsNotificationToken = Manager.shared.walletKit.transactionsRealmResults.observe { [weak self] _ in
-            self?.update()
-        }
-    }
+        update()
+        lastBlockHeight = Manager.shared.walletKit.lastBlockHeight
 
-    deinit {
-        transactionsNotificationToken?.invalidate()
+        Manager.shared.transactionsSubject.observeOn(MainScheduler.instance).subscribe(onNext: { [weak self] in
+            self?.update()
+        }).disposed(by: disposeBag)
+
+        Manager.shared.lastBlockHeightSubject.observeOn(MainScheduler.instance).subscribe(onNext: { [weak self] height in
+            self?.lastBlockHeight = height
+            self?.update()
+        }).disposed(by: disposeBag)
     }
 
     private func update() {
-        guard Manager.shared.walletKit != nil else {
-            return
-        }
-
-        records = []
-
-        for transaction in Manager.shared.walletKit.transactionsRealmResults {
-            records.append(transactionRecord(fromTransaction: transaction))
-        }
-
+        transactions = Manager.shared.walletKit.transactions
         tableView.reloadData()
     }
 
-    private func transactionRecord(fromTransaction transaction: Transaction) -> TransactionRecord {
-        var totalInput: Int = 0
-        var totalOutput: Int = 0
-        var totalMineInput: Int = 0
-        var totalMineOutput: Int = 0
-        var fromAddresses = [TransactionAddress]()
-        var toAddresses = [TransactionAddress]()
-
-        for input in transaction.inputs {
-            if let previousOutput = input.previousOutput {
-                totalInput += previousOutput.value
-
-                if previousOutput.publicKey != nil {
-                    totalMineInput += previousOutput.value
-                }
-            }
-            let mine = input.previousOutput?.publicKey != nil
-            if let address = input.address {
-                fromAddresses.append(TransactionAddress(address: address, mine: mine))
-            }
-        }
-
-        for output in transaction.outputs {
-            totalOutput += output.value
-
-            var mine = false
-            if output.publicKey != nil {
-                totalMineOutput += output.value
-                mine = true
-            }
-            if let address = output.address {
-                toAddresses.append(TransactionAddress(address: address, mine: mine))
-            }
-        }
-
-        let amount = totalMineOutput - totalMineInput
-        let fee = totalInput - totalOutput
-
-        return TransactionRecord(
-                transactionHash: transaction.reversedHashHex,
-                from: fromAddresses,
-                to: toAddresses,
-                amount: Double(amount) / 100000000,
-                fee: Double(fee) / 100000000,
-                blockHeight: transaction.block?.height,
-                timestamp: transaction.block?.header?.timestamp
-        )
-    }
-
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return records.count
+        return transactions.count
     }
 
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -101,7 +48,7 @@ class TransactionsController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if let cell = cell as? TransactionCell {
-            cell.bind(record: records[indexPath.row])
+            cell.bind(transaction: transactions[indexPath.row], lastBlockHeight: lastBlockHeight)
         }
     }
 

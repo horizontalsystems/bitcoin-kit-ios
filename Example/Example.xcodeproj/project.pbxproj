@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		11B353C90D2B3CC4AFFC86CB /* TransactionRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B355C7B3571EF797B4C673 /* TransactionRecord.swift */; };
 		11B356ED28D5D63CBEEA1553 /* Manager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B358E4D5FBAB8DAC6ECA15 /* Manager.swift */; };
 		9BC62502C0E5BAB5EBB94220 /* Pods_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 371E90EA78E17131648DF088 /* Pods_Example.framework */; };
 		D3285F4620BD158E00644076 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3285F4520BD158E00644076 /* AppDelegate.swift */; };
@@ -46,7 +45,6 @@
 
 /* Begin PBXFileReference section */
 		0D8A12931D87BE8EE9BE445A /* Pods-WalletTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WalletTests.release.xcconfig"; path = "../Pods/Target Support Files/Pods-WalletTests/Pods-WalletTests.release.xcconfig"; sourceTree = "<group>"; };
-		11B355C7B3571EF797B4C673 /* TransactionRecord.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionRecord.swift; sourceTree = "<group>"; };
 		11B358E4D5FBAB8DAC6ECA15 /* Manager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Manager.swift; sourceTree = "<group>"; };
 		1DCA47EF6BE4C3209C3E2900 /* Pods-WalletTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WalletTests.debug.xcconfig"; path = "../Pods/Target Support Files/Pods-WalletTests/Pods-WalletTests.debug.xcconfig"; sourceTree = "<group>"; };
 		2C164F48A0BFFCB59C780A50 /* Pods-Bank.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Bank.release.xcconfig"; path = "../Pods/Target Support Files/Pods-Bank/Pods-Bank.release.xcconfig"; sourceTree = "<group>"; };
@@ -156,7 +154,6 @@
 				11B358E4D5FBAB8DAC6ECA15 /* Manager.swift */,
 				D34BDCB5213E74B8009D0AAC /* TransactionCell.swift */,
 				D34BDCB6213E74B8009D0AAC /* TransactionCell.xib */,
-				11B355C7B3571EF797B4C673 /* TransactionRecord.swift */,
 			);
 			path = Example;
 			sourceTree = "<group>";
@@ -302,7 +299,6 @@
 				D34BDCA4213E4B2C009D0AAC /* MainController.swift in Sources */,
 				D3285F4620BD158E00644076 /* AppDelegate.swift in Sources */,
 				11B356ED28D5D63CBEEA1553 /* Manager.swift in Sources */,
-				11B353C90D2B3CC4AFFC86CB /* TransactionRecord.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

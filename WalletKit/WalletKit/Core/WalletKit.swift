@@ -14,6 +14,12 @@ public class WalletKit {
 
     let disposeBag = DisposeBag()
 
+    public weak var delegate: BitcoinKitDelegate?
+
+    private var unspentOutputsNotificationToken: NotificationToken?
+    private var transactionsNotificationToken: NotificationToken?
+    private var blocksNotificationToken: NotificationToken?
+
     let difficultyEncoder: DifficultyEncoder
     let difficultyCalculator: DifficultyCalculator
 
@@ -59,7 +65,13 @@ public class WalletKit {
     let unspentOutputSelector: UnspentOutputSelector
     let unspentOutputProvider: UnspentOutputProvider
 
-    public init(withWords words: [String], realmConfiguration: Realm.Configuration, networkType: NetworkType) {
+    public init(withWords words: [String], networkType: NetworkType) {
+        let wordsHash = words.joined()
+        let realmFileName = "\(wordsHash)-\(networkType).realm"
+
+        let documentsUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+        let realmConfiguration = Realm.Configuration(fileURL: documentsUrl?.appendingPathComponent(realmFileName))
+
         difficultyEncoder = DifficultyEncoder()
         difficultyCalculator = DifficultyCalculator(difficultyEncoder: difficultyEncoder)
 
@@ -128,7 +140,29 @@ public class WalletKit {
         syncer.transactionSender = transactionSender
         syncer.blockSyncer = blockSyncer
 
+        unspentOutputsNotificationToken = unspentOutputRealmResults.observe { [weak self] changeset in
+            self?.handleUnspentOutputs(changeset: changeset)
+        }
+
+        transactionsNotificationToken = transactionRealmResults.observe { [weak self] changeset in
+            self?.handleTransactions(changeset: changeset)
+        }
+
+        blocksNotificationToken = blockRealmResults.observe { [weak self] changeset in
+            self?.handleBlocks(changeset: changeset)
+        }
+
+        progressSyncer.subject.subscribeInBackground(disposeBag: disposeBag, onNext: { [weak self] progress in
+            self?.handleProgressUpdate(progress: progress)
+        })
+
         progressSyncer.enqueueRun()
+    }
+
+    deinit {
+        unspentOutputsNotificationToken?.invalidate()
+        transactionsNotificationToken?.invalidate()
+        blocksNotificationToken?.invalidate()
     }
 
     public func showRealmInfo() {
@@ -164,19 +198,22 @@ public class WalletKit {
         }
     }
 
-    public var transactionsRealmResults: Results<Transaction> {
-        return realmFactory.realm.objects(Transaction.self).filter("isMine = %@", true).sorted(byKeyPath: "block.height", ascending: false)
+    public var transactions: [TransactionInfo] {
+        return transactionRealmResults.map { transactionInfo(fromTransaction: $0) }
     }
 
-    public var latestBlockHeight: Int {
-        return realmFactory.realm.objects(Block.self).sorted(byKeyPath: "height").last?.height ?? 0
+    public var lastBlockHeight: Int {
+        return blockRealmResults.last?.height ?? 0
     }
 
-    public var unspentOutputsRealmResults: Results<TransactionOutput> {
-        return realmFactory.realm.objects(TransactionOutput.self)
-                .filter("publicKey != nil")
-                .filter("scriptType = %@ OR scriptType = %@", ScriptType.p2pkh.rawValue, ScriptType.p2pk.rawValue)
-                .filter("inputs.@count = %@", 0)
+    public var balance: Int {
+        var balance = 0
+
+        for output in unspentOutputRealmResults {
+            balance += output.value
+        }
+
+        return balance
     }
 
     public func send(to address: String, value: Int) throws {
@@ -195,8 +232,102 @@ public class WalletKit {
         return (try? addressManager.receiveAddress()) ?? ""
     }
 
-    public var progressSubject: BehaviorSubject<Double> {
-        return progressSyncer.subject
+    public var progress: Double {
+        return progressSyncer.progress
     }
 
+    private func handleTransactions(changeset: RealmCollectionChange<Results<Transaction>>) {
+        if case let .update(collection, deletions, insertions, modifications) = changeset {
+            delegate?.transactionsUpdated(
+                    walletKit: self,
+                    inserted: insertions.map { collection[$0] }.map { transactionInfo(fromTransaction: $0) },
+                    updated: modifications.map { collection[$0] }.map { transactionInfo(fromTransaction: $0) },
+                    deleted: deletions.map { collection[$0] }.map { transactionInfo(fromTransaction: $0) }
+            )
+        }
+    }
+
+    private func handleBlocks(changeset: RealmCollectionChange<Results<Block>>) {
+        if case let .update(collection, deletions, insertions, _) = changeset, let height = collection.last?.height, (!deletions.isEmpty || !insertions.isEmpty) {
+            delegate?.lastBlockHeightUpdated(walletKit: self, lastBlockHeight: height)
+        }
+    }
+
+    private func handleUnspentOutputs(changeset: RealmCollectionChange<Results<TransactionOutput>>) {
+        if case .update = changeset {
+            delegate?.balanceUpdated(walletKit: self, balance: balance)
+        }
+    }
+
+    private func handleProgressUpdate(progress: Double) {
+        delegate?.progressUpdated(walletKit: self, progress: progress)
+    }
+
+    private var unspentOutputRealmResults: Results<TransactionOutput> {
+        return realmFactory.realm.objects(TransactionOutput.self)
+                .filter("publicKey != nil")
+                .filter("scriptType = %@ OR scriptType = %@", ScriptType.p2pkh.rawValue, ScriptType.p2pk.rawValue)
+                .filter("inputs.@count = %@", 0)
+    }
+
+    private var transactionRealmResults: Results<Transaction> {
+        return realmFactory.realm.objects(Transaction.self).filter("isMine = %@", true).sorted(byKeyPath: "block.height", ascending: false)
+    }
+
+    private var blockRealmResults: Results<Block> {
+        return realmFactory.realm.objects(Block.self).sorted(byKeyPath: "height")
+    }
+
+    private func transactionInfo(fromTransaction transaction: Transaction) -> TransactionInfo {
+        var totalMineInput: Int = 0
+        var totalMineOutput: Int = 0
+        var fromAddresses = [TransactionAddress]()
+        var toAddresses = [TransactionAddress]()
+
+        for input in transaction.inputs {
+            if let previousOutput = input.previousOutput {
+                if previousOutput.publicKey != nil {
+                    totalMineInput += previousOutput.value
+                }
+            }
+
+            let mine = input.previousOutput?.publicKey != nil
+
+            if let address = input.address {
+                fromAddresses.append(TransactionAddress(address: address, mine: mine))
+            }
+        }
+
+        for output in transaction.outputs {
+            var mine = false
+
+            if output.publicKey != nil {
+                totalMineOutput += output.value
+                mine = true
+            }
+
+            if let address = output.address {
+                toAddresses.append(TransactionAddress(address: address, mine: mine))
+            }
+        }
+
+        let amount = totalMineOutput - totalMineInput
+
+        return TransactionInfo(
+                transactionHash: transaction.reversedHashHex,
+                from: fromAddresses,
+                to: toAddresses,
+                amount: amount,
+                blockHeight: transaction.block?.height,
+                timestamp: transaction.block?.header?.timestamp
+        )
+    }
+
+}
+
+public protocol BitcoinKitDelegate: class {
+    func transactionsUpdated(walletKit: WalletKit, inserted: [TransactionInfo], updated: [TransactionInfo], deleted: [TransactionInfo])
+    func balanceUpdated(walletKit: WalletKit, balance: Int)
+    func lastBlockHeightUpdated(walletKit: WalletKit, lastBlockHeight: Int)
+    func progressUpdated(walletKit: WalletKit, progress: Double)
 }
