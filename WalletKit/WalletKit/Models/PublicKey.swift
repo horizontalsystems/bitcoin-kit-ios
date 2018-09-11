@@ -1,7 +1,7 @@
 import Foundation
 import RealmSwift
 
-public class PublicKey: Object {
+class PublicKey: Object {
 
     enum InitError: Error {
         case invalid
@@ -14,7 +14,7 @@ public class PublicKey: Object {
     @objc dynamic var external = true
     @objc dynamic var raw: Data?
     @objc dynamic var keyHash = Data()
-    @objc public dynamic var address = ""
+    @objc dynamic var address = ""
 
     convenience init(withIndex index: Int, external: Bool, hdPublicKey key: HDPublicKey) {
         self.init()
@@ -25,7 +25,7 @@ public class PublicKey: Object {
         self.address = key.toAddress()
     }
 
-    override public class func primaryKey() -> String? {
+    override class func primaryKey() -> String? {
         return "address"
     }
 

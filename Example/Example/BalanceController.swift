@@ -7,8 +7,7 @@ class BalanceController: UIViewController {
 
     @IBOutlet weak var balanceLabel: UILabel?
     @IBOutlet weak var progressLabel: UILabel?
-
-    private var unspentOutputsNotificationToken: NotificationToken?
+    @IBOutlet weak var lastBlockLabel: UILabel?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -18,17 +17,23 @@ class BalanceController: UIViewController {
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(logout))
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Start", style: .plain, target: self, action: #selector(start))
 
-        unspentOutputsNotificationToken = Manager.shared.walletKit.unspentOutputsRealmResults.observe { [weak self] _ in
-            self?.updateBalance()
-        }
+        let walletKit = Manager.shared.walletKit!
 
-        Manager.shared.walletKit.progressSubject.observeOn(MainScheduler.instance).subscribe(onNext: { [weak self] progress in
-            self?.progressLabel?.text = "Sync Progress: \(Int(progress * 100))%"
+        update(balance: walletKit.balance)
+        update(progress: walletKit.progress)
+        update(lastBlockHeight: walletKit.lastBlockHeight)
+
+        Manager.shared.balanceSubject.observeOn(MainScheduler.instance).subscribe(onNext: { [weak self] balance in
+            self?.update(balance: balance)
         }).disposed(by: disposeBag)
-    }
 
-    deinit {
-        unspentOutputsNotificationToken?.invalidate()
+        Manager.shared.progressSubject.observeOn(MainScheduler.instance).subscribe(onNext: { [weak self] progress in
+            self?.update(progress: progress)
+        }).disposed(by: disposeBag)
+
+        Manager.shared.lastBlockHeightSubject.observeOn(MainScheduler.instance).subscribe(onNext: { [weak self] height in
+            self?.update(lastBlockHeight: height)
+        }).disposed(by: disposeBag)
     }
 
     @objc func logout() {
@@ -53,20 +58,16 @@ class BalanceController: UIViewController {
         Manager.shared.walletKit.showRealmInfo()
     }
 
-    private func updateBalance() {
-        guard Manager.shared.walletKit != nil else {
-            return
-        }
+    private func update(balance: Int) {
+        balanceLabel?.text = "Balance: \(Double(balance) / 100_000_000)"
+    }
 
-        var satoshiBalance = 0
+    private func update(progress: Double) {
+        progressLabel?.text = "Sync Progress: \(Int(progress * 100))%"
+    }
 
-        for output in Manager.shared.walletKit.unspentOutputsRealmResults {
-            satoshiBalance += output.value
-        }
-
-        let balance = Double(satoshiBalance) / 100000000
-
-        balanceLabel?.text = "Balance: \(balance)"
+    private func update(lastBlockHeight: Int) {
+        lastBlockLabel?.text = "Last Block: \(lastBlockHeight)"
     }
 
 }

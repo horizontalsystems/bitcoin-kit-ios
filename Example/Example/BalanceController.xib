@@ -12,6 +12,7 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="BalanceController" customModule="Example" customModuleProvider="target">
             <connections>
                 <outlet property="balanceLabel" destination="lGE-w6-tlj" id="bQu-Wh-hoe"/>
+                <outlet property="lastBlockLabel" destination="OO3-Pv-oyv" id="1kW-Bw-heh"/>
                 <outlet property="progressLabel" destination="gaY-fU-Lj3" id="ayH-Ak-djH"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
             </connections>
@@ -40,14 +41,23 @@
                         <action selector="showRealmInfo" destination="-1" eventType="touchUpInside" id="pRN-NE-AP9"/>
                     </connections>
                 </button>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Last Block: n/a" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OO3-Pv-oyv">
+                    <rect key="frame" x="20" y="122" width="335" height="21"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                    <nil key="textColor"/>
+                    <nil key="highlightedColor"/>
+                </label>
             </subviews>
             <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <constraints>
                 <constraint firstItem="oEu-Qf-bsR" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="23R-yJ-Nda"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="OO3-Pv-oyv" secondAttribute="trailing" constant="20" id="7OS-bT-DYR"/>
+                <constraint firstItem="OO3-Pv-oyv" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="20" id="95u-3L-BgN"/>
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="bottom" secondItem="oEu-Qf-bsR" secondAttribute="bottom" constant="50" id="BYn-Fw-3hH"/>
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="gaY-fU-Lj3" secondAttribute="trailing" constant="20" id="CCT-UW-a4d"/>
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="lGE-w6-tlj" secondAttribute="trailing" constant="20" id="EVU-Gq-EMP"/>
                 <constraint firstItem="lGE-w6-tlj" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="20" id="PcQ-mW-IK0"/>
+                <constraint firstItem="OO3-Pv-oyv" firstAttribute="top" secondItem="gaY-fU-Lj3" secondAttribute="bottom" constant="20" id="RLe-xO-UBJ"/>
                 <constraint firstItem="lGE-w6-tlj" firstAttribute="top" secondItem="fnl-2z-Ty3" secondAttribute="top" constant="20" id="TyD-CB-sWZ"/>
                 <constraint firstItem="gaY-fU-Lj3" firstAttribute="top" secondItem="lGE-w6-tlj" secondAttribute="bottom" constant="20" id="uJl-lF-fNi"/>
                 <constraint firstItem="gaY-fU-Lj3" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="20" id="wwD-hF-BEv"/>

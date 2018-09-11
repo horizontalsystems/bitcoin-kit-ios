@@ -18,7 +18,7 @@ struct HeadersMessage: IMessage {
         self.blockHeaders = blockHeaders
     }
 
-    public func serialized() -> Data {
+    func serialized() -> Data {
         var data = Data()
         data += count.serialized()
         data += blockHeaders.flatMap {

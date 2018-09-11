@@ -6,7 +6,13 @@ class ProgressSyncer {
     private let realmFactory: RealmFactory
     private let queue: DispatchQueue
 
-    let subject = BehaviorSubject<Double>(value: 0)
+    let subject = PublishSubject<Double>()
+
+    var progress: Double = 0 {
+        didSet {
+            subject.onNext(progress)
+        }
+    }
 
     init(realmFactory: RealmFactory, queue: DispatchQueue = DispatchQueue(label: "ProgressManager", qos: .background)) {
         self.realmFactory = realmFactory
@@ -29,9 +35,7 @@ class ProgressSyncer {
         let allBlocksCount = realm.objects(Block.self).count
         let syncedBlocksCount = realm.objects(Block.self).filter("synced = %@", true).count
 
-        let progress = allBlocksCount == 0 ? 0 : Double(syncedBlocksCount) / Double(allBlocksCount)
-
-        subject.onNext(progress)
+        progress = allBlocksCount == 0 ? 0 : Double(syncedBlocksCount) / Double(allBlocksCount)
     }
 
 }

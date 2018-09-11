@@ -1,20 +1,20 @@
 import Foundation
 import RealmSwift
 
-public class Block: Object {
+class Block: Object {
     enum BlockError: Error { case noHeader }
 
-    @objc public dynamic var reversedHeaderHashHex = ""
-    @objc public dynamic var headerHash = Data()
-    @objc public dynamic var height: Int = 0
+    @objc dynamic var reversedHeaderHashHex = ""
+    @objc dynamic var headerHash = Data()
+    @objc dynamic var height: Int = 0
     @objc dynamic var synced = false
 
-    @objc public dynamic var header: BlockHeader?
+    @objc dynamic var header: BlockHeader?
     @objc dynamic var previousBlock: Block?
 
     let transactions = LinkingObjects(fromType: Transaction.self, property: "block")
 
-    override public class func primaryKey() -> String? {
+    override class func primaryKey() -> String? {
         return "reversedHeaderHashHex"
     }
 

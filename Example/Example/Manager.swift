@@ -1,6 +1,7 @@
 import Foundation
 import WalletKit
 import RealmSwift
+import RxSwift
 
 class Manager {
     static let shared = Manager()
@@ -10,6 +11,11 @@ class Manager {
     let networkType: WalletKit.NetworkType = .bitcoinRegTest
 
     var walletKit: WalletKit!
+
+    let balanceSubject = PublishSubject<Int>()
+    let lastBlockHeightSubject = PublishSubject<Int>()
+    let progressSubject = PublishSubject<Double>()
+    let transactionsSubject = PublishSubject<Void>()
 
     init() {
         if let words = savedWords {
@@ -34,13 +40,8 @@ class Manager {
     }
 
     private func initWalletKit(words: [String]) {
-        let wordsHash = words.joined()
-        let realmFileName = "\(wordsHash)-\(networkType).realm"
-
-        let documentsUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
-        let realmConfiguration = Realm.Configuration(fileURL: documentsUrl?.appendingPathComponent(realmFileName))
-
-        walletKit = WalletKit(withWords: words, realmConfiguration: realmConfiguration, networkType: networkType)
+        walletKit = WalletKit(withWords: words, networkType: networkType)
+        walletKit.delegate = self
     }
 
     private var savedWords: [String]? {
@@ -58,6 +59,26 @@ class Manager {
     private func clearWords() {
         UserDefaults.standard.removeObject(forKey: keyWords)
         UserDefaults.standard.synchronize()
+    }
+
+}
+
+extension Manager: BitcoinKitDelegate {
+
+    public func transactionsUpdated(walletKit: WalletKit, inserted: [TransactionInfo], updated: [TransactionInfo], deleted: [TransactionInfo]) {
+        transactionsSubject.onNext(())
+    }
+
+    public func balanceUpdated(walletKit: WalletKit, balance: Int) {
+        balanceSubject.onNext(balance)
+    }
+
+    public func lastBlockHeightUpdated(walletKit: WalletKit, lastBlockHeight: Int) {
+        lastBlockHeightSubject.onNext(lastBlockHeight)
+    }
+
+    public func progressUpdated(walletKit: WalletKit, progress: Double) {
+        progressSubject.onNext(progress)
     }
 
 }

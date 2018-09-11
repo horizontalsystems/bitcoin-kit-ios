@@ -35,16 +35,16 @@ import RealmSwift
 
 }
 
-public class TransactionOutput: Object {
+class TransactionOutput: Object {
 
-    @objc public dynamic var value: Int = 0
+    @objc dynamic var value: Int = 0
     @objc dynamic var lockingScript = Data()
     @objc dynamic var index: Int = 0
 
-    @objc public dynamic var publicKey: PublicKey?
+    @objc dynamic var publicKey: PublicKey?
     @objc dynamic var scriptType: ScriptType = .unknown
     @objc dynamic var keyHash: Data?
-    @objc public dynamic var address: String?
+    @objc dynamic var address: String?
 
     let transactions = LinkingObjects(fromType: Transaction.self, property: "outputs")
     var transaction: Transaction? {
