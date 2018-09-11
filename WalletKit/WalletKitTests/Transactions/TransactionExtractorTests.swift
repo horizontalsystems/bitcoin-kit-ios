@@ -54,7 +54,7 @@ class TransactionExtractorTests: XCTestCase {
             when(mock.decode(data: any())).thenReturn(Script(with: Data(), chunks: []))
         }
         stub(addressConverter) { mock in
-            when(mock.convert(keyHash: any(), type: any())).thenReturn(Address(type: .pubKeyHash, keyHash: Data(), base58: ""))
+            when(mock.convert(keyHash: any(), type: any())).thenReturn(LegacyAddress(type: .pubKeyHash, keyHash: Data(), base58: ""))
         }
 
         p2pkhTransaction = TestData.p2pkhTransaction
@@ -151,7 +151,7 @@ class TransactionExtractorTests: XCTestCase {
             when(mock.extract(from: any(), converter: any())).thenReturn(keyHash)
         }
         stub(addressConverter) { mock in
-            when(mock.convert(keyHash: any(), type: any())).thenReturn(Address(type: .pubKeyHash, keyHash: Data(), base58: address))
+            when(mock.convert(keyHash: any(), type: any())).thenReturn(LegacyAddress(type: .pubKeyHash, keyHash: Data(), base58: address))
         }
 
         do {

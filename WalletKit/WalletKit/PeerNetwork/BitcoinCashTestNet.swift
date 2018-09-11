@@ -7,6 +7,7 @@ class BitcoinCashTestNet: NetworkProtocol {
     let scriptHash: UInt8 = 0xc4
     let pubKeyPrefixPattern: String = "q"
     let scriptPrefixPattern: String = "p"
+    let bech32PrefixPattern: String = "bitcoincash"
     let xPubKey: UInt32 = 0x043587cf
     let xPrivKey: UInt32 = 0x04358394
     let magic: UInt32 = 0xf4e5f3f4

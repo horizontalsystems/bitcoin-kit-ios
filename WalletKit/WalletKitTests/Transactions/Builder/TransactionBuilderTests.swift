@@ -85,9 +85,9 @@ class TransactionBuilderTests: XCTestCase {
         }
 
         stub(mockAddressConverter) { mock in
-            when(mock.convert(address: toAddress)).thenReturn(Address(type: .pubKeyHash, keyHash: Data(hex: "d50bf226c9ff3bcf06f13d8ca129f24bedeef594")!, base58: "mzwSXvtPs7MFbW2ysNA4Gw3P2KjrcEWaE5"))
-            when(mock.convert(address: toAddressSH)).thenReturn(Address(type: .scriptHash, keyHash: Data(hex: "43922a3f1dc4569f9eccce9a71549d5acabbc0ca")!, base58: toAddressSH))
-            when(mock.convert(address: changePubKey.address)).thenReturn(Address(type: .pubKeyHash, keyHash: changePubKey.keyHash, base58: changePubKey.address))
+            when(mock.convert(address: toAddress)).thenReturn(LegacyAddress(type: .pubKeyHash, keyHash: Data(hex: "d50bf226c9ff3bcf06f13d8ca129f24bedeef594")!, base58: "mzwSXvtPs7MFbW2ysNA4Gw3P2KjrcEWaE5"))
+            when(mock.convert(address: toAddressSH)).thenReturn(LegacyAddress(type: .scriptHash, keyHash: Data(hex: "43922a3f1dc4569f9eccce9a71549d5acabbc0ca")!, base58: toAddressSH))
+            when(mock.convert(address: changePubKey.address)).thenReturn(LegacyAddress(type: .pubKeyHash, keyHash: changePubKey.keyHash, base58: changePubKey.address))
 //            when(mock.convert(address: any())).thenReturn(Address(type: .pubKeyHash, keyHash: Data(), base58: ""))
         }
 

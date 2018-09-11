@@ -7,6 +7,7 @@ class BitcoinTestNet: NetworkProtocol {
     let scriptHash: UInt8 = 0xc4
     let pubKeyPrefixPattern: String = "m|n"
     let scriptPrefixPattern: String = "2"
+    let bech32PrefixPattern: String = "tb"
     let xPubKey: UInt32 = 0x043587cf
     let xPrivKey: UInt32 = 0x04358394
     let magic: UInt32 = 0x0b110907

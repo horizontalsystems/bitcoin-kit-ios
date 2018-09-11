@@ -53,7 +53,7 @@ class TransactionExtractor {
             }
 
             if let keyHash = output.keyHash, let address = try? addressConverter.convert(keyHash: keyHash, type: output.scriptType) {
-                output.address = address.string
+                output.address = address.stringValue
             }
         }
 
@@ -72,7 +72,7 @@ class TransactionExtractor {
                         case .p2sh, .p2pkh, .p2wsh:
                             let ripemd160 = Crypto.sha256ripemd160(payload)
                             input.keyHash = ripemd160
-                            input.address = try? addressConverter.convert(keyHash: ripemd160, type: extractor.type).string
+                            input.address = (try? addressConverter.convert(keyHash: ripemd160, type: extractor.type))?.stringValue
                         default: break
                     }
                     break

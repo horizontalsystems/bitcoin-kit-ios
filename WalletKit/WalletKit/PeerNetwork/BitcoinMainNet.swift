@@ -7,6 +7,7 @@ class BitcoinMainNet: NetworkProtocol {
     let scriptHash: UInt8 = 0x05
     let pubKeyPrefixPattern: String = "1"
     let scriptPrefixPattern: String = "3"
+    let bech32PrefixPattern: String = "bc"
     let xPubKey: UInt32 = 0x0488b21e
     let xPrivKey: UInt32 = 0x0488ade4
     let magic: UInt32 = 0xf9beb4d9
