@@ -52,7 +52,8 @@ class TransactionSerializer {
         }
 
         transaction.lockTime = Int(byteStream.read(UInt32.self))
-        transaction.reversedHashHex = Crypto.sha256sha256(serialize(transaction: transaction)).reversedHex
+        transaction.dataHash = Crypto.sha256sha256(serialize(transaction: transaction))
+        transaction.reversedHashHex = transaction.dataHash.reversedHex
 
         return transaction
     }

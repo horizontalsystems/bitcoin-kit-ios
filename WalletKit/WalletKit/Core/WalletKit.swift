@@ -31,6 +31,7 @@ public class WalletKit {
 
     let hdWallet: HDWallet
 
+    let peerIpManager: PeerIpManager
     let stateManager: StateManager
     let apiManager: ApiManager
     let addressManager: AddressManager
@@ -100,8 +101,14 @@ public class WalletKit {
 
         stateManager = StateManager(realmFactory: realmFactory)
         apiManager = ApiManager(apiUrl: "http://ipfs.grouvi.org/ipns/QmVefrf2xrWzGzPpERF6fRHeUTh9uVSyfHHh4cWgUBnXpq/io-hs/data/blockstore")
+        peerIpManager = PeerIpManager(network: network)
 
-        peerGroup = PeerGroup(realmFactory: realmFactory, network: network)
+        let realm = realmFactory.realm
+        let pubKeys = realm.objects(PublicKey.self)
+        let filters = Array(pubKeys.map { $0.keyHash }) + Array(pubKeys.map { $0.raw! })
+
+
+        peerGroup = PeerGroup(network: network, bloomFilters: filters, peerIpManager: peerIpManager)
         syncer = Syncer(logger: logger, realmFactory: realmFactory)
         factory = Factory()
 

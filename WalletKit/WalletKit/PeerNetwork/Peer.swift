@@ -1,24 +1,51 @@
 import Foundation
 
 class Peer {
-    private let protocolVersion: Int32 = 70015
+    enum Status {
+        case connecting, disconnected, ready, busy
+        var connected: Bool {
+            return self == .ready || self == .busy
+        }
+    }
 
+    var status: Status = .disconnected
+
+    private let protocolVersion: Int32 = 70015
     private var sentVersion: Bool = false
     private var sentVerack: Bool = false
 
     private let connection: PeerConnection
-    private var requestedMerkleBlocks: [Data: MerkleBlock?] = [Data: MerkleBlock?]()
+    private var requestedMerkleBlockHashes: [Data] = [Data]()
+    private var requestedMerkleBlocks: [Data: MerkleBlock] = [Data: MerkleBlock]()
     private var relayedTransactions: [Data: Data] = [Data: Data]()
 
     weak var delegate: PeerDelegate?
+    var host: String {
+        return connection.host
+    }
+    var incompleteMerkleBlockHashes: [Data] {
+        var hashes = requestedMerkleBlockHashes
+        for merkleBlock in requestedMerkleBlocks.values {
+            hashes.append(merkleBlock.headerHash)
+        }
+        return hashes
+    }
 
-    init(network: NetworkProtocol = BitcoinTestNet()) {
-        self.connection = PeerConnection(network: network)
+    init(host: String, network: NetworkProtocol = BitcoinTestNet()) {
+        self.connection = PeerConnection(host: host, network: network)
         connection.delegate = self
     }
 
     func connect() {
         connection.connect()
+        setStatus(status: .connecting)
+    }
+
+    private func setStatus(status: Status) {
+        self.status = status
+        if status == .ready {
+            delegate?.peerReady(self)
+        }
     }
 
     func load(filters: [Data]) {
@@ -61,7 +88,7 @@ class Peer {
 
     func requestMerkleBlocks(headerHashes: [Data]) {
         for hash in headerHashes {
-            requestedMerkleBlocks[hash] = nil
+            requestedMerkleBlockHashes.append(hash)
         }
 
         let getDataMessage = GetDataMessage(inventoryItems: headerHashes.map { hash in
@@ -69,16 +96,14 @@ class Peer {
         })
 
         log("<-- GETDATA: \(getDataMessage.inventoryItems.count) items")
+        setStatus(status: .busy)
         connection.send(message: getDataMessage)
     }
 
     func relay(transaction: Transaction) {
-        let transactionData = TransactionSerializer.serialize(transaction: transaction)
-        let transactionHash = Crypto.sha256sha256(transactionData)
-        relayedTransactions[transactionHash] = transactionData
-
+        relayedTransactions[transaction.dataHash] = TransactionSerializer.serialize(transaction: transaction)
         let inventoryMessage = InventoryMessage(inventoryItems: [
-            InventoryItem(type: InventoryItem.ObjectType.transaction.rawValue, hash: transactionHash)
+            InventoryItem(type: InventoryItem.ObjectType.transaction.rawValue, hash: transaction.dataHash)
         ])
 
         log("<-- INV: \(inventoryMessage.inventoryItems) items")
@@ -121,7 +146,7 @@ extension Peer: PeerConnectionDelegate {
     }
 
     func connectionDidDisconnect(_ connection: PeerConnection) {
-        delegate?.peerDidConnect(self)
+        delegate?.peerDidDisconnect(self)
     }
 
     func connection(_ connection: PeerConnection, didReceiveMessage message: IMessage) {
@@ -152,7 +177,11 @@ extension Peer: PeerConnectionDelegate {
 
     private func handleVerackMessage() {
         log("--> VERACK")
-        delegate?.peerDidConnect(self)
+        if let filters = delegate?.bloomFilters {
+            load(filters: filters)
+        }
+        sendMemoryPoolMessage()
+        setStatus(status: .ready)
     }
 
     private func handle(message: AddressMessage) {
@@ -165,13 +194,13 @@ extension Peer: PeerConnectionDelegate {
         var items = [InventoryItem]()
 
         for item in message.inventoryItems {
-            if let delegate = delegate, delegate.shouldRequest(inventoryItem: item) {
+            delegate?.runIfShouldRequest(inventoryItem: item) {
                 var inventoryItem: InventoryItem
                 switch item.objectType {
-                    case .blockMessage:
-                        inventoryItem = InventoryItem(type: InventoryItem.ObjectType.filteredBlockMessage.rawValue, hash: item.hash)
-                    default:
-                        inventoryItem = item
+                case .blockMessage:
+                    inventoryItem = InventoryItem(type: InventoryItem.ObjectType.filteredBlockMessage.rawValue, hash: item.hash)
+                default:
+                    inventoryItem = item
                 }
 
                 items.append(inventoryItem)
@@ -224,10 +253,9 @@ extension Peer: PeerConnectionDelegate {
 
     private func handle(message: TransactionMessage) {
         let transaction = message.transaction
-        let txHash = Crypto.sha256sha256(TransactionSerializer.serialize(transaction: transaction))
-        log("--> TX: \(txHash.reversedHex)")
-        
-        guard var merkleBlock = requestedMerkleBlocks.filter({ _, merkleBlock in merkleBlock?.transactionHashes.contains(txHash) ?? false }).first?.value else {
+        log("--> TX: \(transaction.dataHash.hex)")
+
+        guard let merkleBlock = requestedMerkleBlocks.filter({ _, merkleBlock in merkleBlock.transactionHashes.contains(transaction.dataHash) }).first?.value else {
             delegate?.peer(self, didReceiveTransaction: transaction)
             return
         }
@@ -255,18 +283,30 @@ extension Peer: PeerConnectionDelegate {
     private func merkleBlockCompleted(merkleBlock: MerkleBlock) {
         delegate?.peer(self, didReceiveMerkleBlock: merkleBlock)
         requestedMerkleBlocks.removeValue(forKey: merkleBlock.headerHash)
-//        if requestedMerkleBlocks.isEmpty() {
-//            isFree = true
-//        }
+
+        if let index = requestedMerkleBlockHashes.index(of: merkleBlock.headerHash) {
+            requestedMerkleBlockHashes.remove(at: index)
+        }
+
+        if requestedMerkleBlockHashes.isEmpty && requestedMerkleBlocks.isEmpty {
+            setStatus(status: .ready)
+        }
     }
 
 }
 
+extension Peer: Equatable {
+    static func ==(lhs: Peer, rhs: Peer) -> Bool {
+        return lhs.host == rhs.host
+    }
+}
+
 protocol PeerDelegate: class {
-    func peerDidConnect(_ peer: Peer)
+    var bloomFilters: [Data] { get }
+    func peerReady(_ peer: Peer)
     func peerDidDisconnect(_ peer: Peer)
     func peer(_ peer: Peer, didReceiveHeaders headers: [BlockHeader])
     func peer(_ peer: Peer, didReceiveMerkleBlock merkleBlock: MerkleBlock)
     func peer(_ peer: Peer, didReceiveTransaction transaction: Transaction)
-    func shouldRequest(inventoryItem: InventoryItem) -> Bool
+    func runIfShouldRequest(inventoryItem: InventoryItem, _ block: () -> Swift.Void)
 }

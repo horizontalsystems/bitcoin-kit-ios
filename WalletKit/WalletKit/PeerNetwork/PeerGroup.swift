@@ -8,59 +8,155 @@ class PeerGroup {
         case connected, disconnected
     }
 
+    private let blocksPerPeer: Int = 10
     var statusSubject: PublishSubject<Status> = PublishSubject()
     weak var delegate: PeerGroupDelegate?
 
-    private let realmFactory: RealmFactory
+    private let network: NetworkProtocol
+    var bloomFilters: [Data]
+    private let peerIpManager: PeerIpManager
+    private var peerCount: Int
 
-    private let peer: Peer
+    private var syncPeer: Peer?
+    private var fetchingBlockHashesQueue = [Data]()
+    private let inventoryQueue: DispatchQueue
+    private var requestedInventories = [Data: InventoryItem]()
+    private var requestingBlocks: Bool = false
+    private var peers = [String: Peer]()
 
-    init(realmFactory: RealmFactory, network: NetworkProtocol) {
-        self.realmFactory = realmFactory
-        self.peer = Peer(network: network)
+    var readyNonSyncPeers: [Peer] {
+        let peers = self.peers.values.filter({ peer in peer.status == .ready })
+        guard let syncPeer = self.syncPeer else {
+            return peers
+        }
 
-        peer.delegate = self
+        return peers.filter({ peer in peer != syncPeer })
+    }
+
+    init(network: NetworkProtocol, bloomFilters: [Data], peerIpManager: PeerIpManager, peerCount: Int = 3) {
+        self.network = network
+        self.bloomFilters = bloomFilters
+        self.peerIpManager = peerIpManager
+        self.peerCount = peerCount
+        inventoryQueue = DispatchQueue(label: "PeerGroup Inventory Queue", qos: .background)
     }
 
     func connect() {
-        peer.connect()
+        connectPeersIfRequired()
     }
 
-    func requestHeaders(headerHashes: [Data]) {
-        peer.sendGetHeadersMessage(headerHashes: headerHashes)
+    func connectPeersIfRequired() {
+        for _ in peers.count..<peerCount {
+            if let host = peerIpManager.peerHost {
+                print("Connecting to host: \(host)")
+                let peer = Peer(host: host, network: network)
+                peers[host] = peer
+                peer.delegate = self
+                peer.connect()
+            } else {
+                print("No peers found!")
+                break
+            }
+        }
+    }
+
+    func requestHeaders(headerHashes: [Data], switchPeer: Bool = false) {
+        if switchPeer {
+            switchSyncPeer()
+        }
+
+        syncPeer?.sendGetHeadersMessage(headerHashes: headerHashes)
     }
 
     func requestMerkleBlocks(headerHashes: [Data]) {
-        peer.requestMerkleBlocks(headerHashes: headerHashes)
+        for hash in headerHashes {
+            fetchingBlockHashesQueue.append(hash)
+        }
+
+        for peer in readyNonSyncPeers {
+            requestMerkleBlocksPart(peer: peer)
+        }
     }
 
     func relay(transaction: Transaction) {
-        peer.relay(transaction: transaction)
+        for peerElement in peers {
+            peerElement.value.relay(transaction: transaction)
+        }
     }
 
     func addPublicKeyFilter(pubKey: PublicKey) {
-        peer.addFilter(filter: pubKey.keyHash)
-        peer.addFilter(filter: pubKey.raw!)
+        if !bloomFilters.contains(pubKey.raw!) {
+            bloomFilters.append(pubKey.keyHash)
+            bloomFilters.append(pubKey.raw!)
+        }
+
+        for peerElement in peers {
+            peerElement.value.addFilter(filter: pubKey.keyHash)
+            peerElement.value.addFilter(filter: pubKey.raw!)
+        }
+    }
+
+    private func requestMerkleBlocksPart(peer: Peer) {
+        guard !requestingBlocks else {
+            return
+        }
+        requestingBlocks = true
+
+        let hashes = fetchingBlockHashesQueue.prefix(blocksPerPeer)
+        if !hashes.isEmpty {
+            fetchingBlockHashesQueue.removeFirst(hashes.count)
+            peer.requestMerkleBlocks(headerHashes: Array(hashes))
+        }
+
+        requestingBlocks = false
+    }
+
+    private func switchSyncPeer() {
+        if let readyPeer = readyPeer() {
+            syncPeer = readyPeer
+        }
+    }
+
+    private func readyPeer() -> Peer? {
+        return readyNonSyncPeers.first
     }
 
 }
 
 extension PeerGroup: PeerDelegate {
-
-    func peerDidConnect(_ peer: Peer) {
-        let realm = realmFactory.realm
-        let pubKeys = realm.objects(PublicKey.self)
-        let filters = Array(pubKeys.map { $0.keyHash }) + Array(pubKeys.map { $0.raw! })
-
-        peer.load(filters: filters)
-        peer.sendMemoryPoolMessage()
-
+    func peerReady(_ peer: Peer) {
         statusSubject.onNext(.connected)
 
-        delegate?.peerGroupReady()
+        if syncPeer == nil {
+            print("syncPeer set to \(peer.host)")
+            syncPeer = peer
+        }
+
+        if peers.values.filter({ peer in peer.status.connected }).count == 1 {
+            print("PeerGroup Ready")
+            delegate?.peerGroupReady()
+        }
+
+        requestMerkleBlocksPart(peer: peer)
     }
 
     func peerDidDisconnect(_ peer: Peer) {
+        if let syncPeer = self.syncPeer, syncPeer == peer {
+            // it restores syncPeer on next peer connection
+            self.syncPeer = nil
+        }
+
+        _ = peers.removeValue(forKey: peer.host)
+
+        for hash in peer.incompleteMerkleBlockHashes {
+            fetchingBlockHashesQueue.append(hash)
+        }
+
+        connectPeersIfRequired()
+
+        if peers.values.filter({ peer in peer.status.connected }).isEmpty {
+            // delegate?.peerGroupDidDisconnect
+        }
     }
 
     func peer(_ peer: Peer, didReceiveHeaders headers: [BlockHeader]) {
@@ -68,15 +164,28 @@ extension PeerGroup: PeerDelegate {
     }
 
     func peer(_ peer: Peer, didReceiveMerkleBlock merkleBlock: MerkleBlock) {
+        requestedInventories.removeValue(forKey: merkleBlock.headerHash)
         delegate?.peerGroupDidReceive(blockHeader: merkleBlock.header, withTransactions: merkleBlock.transactions)
     }
 
     func peer(_ peer: Peer, didReceiveTransaction transaction: Transaction) {
+        requestedInventories.removeValue(forKey: transaction.dataHash)
         delegate?.peerGroupDidReceive(transaction: transaction)
     }
 
-    func shouldRequest(inventoryItem: InventoryItem) -> Bool {
-        return delegate?.shouldRequest(inventoryItem: inventoryItem) ?? false
+    func runIfShouldRequest(inventoryItem: InventoryItem, _ block: () -> Swift.Void) {
+        inventoryQueue.sync {
+            if requestedInventories[inventoryItem.hash] != nil {
+                return
+            }
+
+            print("InventoryItem hash: \(inventoryItem.hash.hex)")
+            let shouldRequest = delegate?.shouldRequest(inventoryItem: inventoryItem) ?? false
+            if shouldRequest {
+                requestedInventories[inventoryItem.hash] = inventoryItem
+                block()
+            }
+        }
     }
 
 }

@@ -5,6 +5,7 @@ import RealmSwift
 
 class Transaction: Object {
     @objc dynamic var reversedHashHex: String = ""
+    @objc dynamic var dataHash = Data()
     @objc dynamic var version: Int = 0
     @objc dynamic var lockTime: Int = 0
     @objc dynamic var block: Block?
@@ -29,7 +30,8 @@ class Transaction: Object {
         outputs.forEach { self.outputs.append($0) }
 
         self.lockTime = lockTime
-        reversedHashHex = Crypto.sha256sha256(TransactionSerializer.serialize(transaction: self)).reversedHex
+        dataHash = Crypto.sha256sha256(TransactionSerializer.serialize(transaction: self))
+        reversedHashHex = dataHash.reversedHex
     }
 
 }
