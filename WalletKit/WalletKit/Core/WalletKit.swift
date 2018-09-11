@@ -249,7 +249,7 @@ public class WalletKit {
                     walletKit: self,
                     inserted: insertions.map { collection[$0] }.map { transactionInfo(fromTransaction: $0) },
                     updated: modifications.map { collection[$0] }.map { transactionInfo(fromTransaction: $0) },
-                    deleted: deletions.map { collection[$0] }.map { transactionInfo(fromTransaction: $0) }
+                    deleted: deletions
             )
         }
     }
@@ -333,7 +333,7 @@ public class WalletKit {
 }
 
 public protocol BitcoinKitDelegate: class {
-    func transactionsUpdated(walletKit: WalletKit, inserted: [TransactionInfo], updated: [TransactionInfo], deleted: [TransactionInfo])
+    func transactionsUpdated(walletKit: WalletKit, inserted: [TransactionInfo], updated: [TransactionInfo], deleted: [Int])
     func balanceUpdated(walletKit: WalletKit, balance: Int)
     func lastBlockHeightUpdated(walletKit: WalletKit, lastBlockHeight: Int)
     func progressUpdated(walletKit: WalletKit, progress: Double)
