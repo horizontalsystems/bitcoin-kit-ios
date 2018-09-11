@@ -9,19 +9,25 @@ class InitialSyncer {
     private let hdWallet: HDWallet
     private let stateManager: StateManager
     private let apiManager: ApiManager
+    private let factory: Factory
     private let peerGroup: PeerGroup
+    private let network: NetworkProtocol
+    private let scheduler: ImmediateSchedulerType
 
-    init(realmFactory: RealmFactory, hdWallet: HDWallet, stateManager: StateManager, apiManager: ApiManager, peerGroup: PeerGroup) {
+    init(realmFactory: RealmFactory, hdWallet: HDWallet, stateManager: StateManager, apiManager: ApiManager, factory: Factory, peerGroup: PeerGroup, network: NetworkProtocol, scheduler: ImmediateSchedulerType = ConcurrentDispatchQueueScheduler(qos: .background)) {
         self.realmFactory = realmFactory
         self.hdWallet = hdWallet
         self.stateManager = stateManager
         self.apiManager = apiManager
+        self.factory = factory
         self.peerGroup = peerGroup
+        self.network = network
+        self.scheduler = scheduler
     }
 
     func sync() throws {
         if !stateManager.apiSynced {
-            let maxHeight = 0
+            let maxHeight = network.checkpointBlock.height
 
             let externalObservable = try fetchFromApi(external: true, maxHeight: maxHeight)
             let internalObservable = try fetchFromApi(external: false, maxHeight: maxHeight)
@@ -33,9 +39,13 @@ class InitialSyncer {
 
                         return (externalKeys + internalKeys, externalBlocks + internalBlocks)
                     })
-                    .subscribeInBackground(disposeBag: disposeBag, onNext: { [weak self] keys, blocks in
+                    .subscribeOn(scheduler)
+                    .subscribe(onNext: { [weak self] keys, blocks in
                         try? self?.handle(keys: keys, blocks: blocks)
+                    }, onError: { error in
+                        print("Initial Sync Error: \(error)")
                     })
+                    .disposed(by: disposeBag)
         } else {
             peerGroup.connect()
         }
@@ -55,34 +65,36 @@ class InitialSyncer {
         peerGroup.connect()
     }
 
-    private func fetchFromApi(external: Bool, maxHeight: Int, keys: [PublicKey] = [], blocks: [Block] = []) throws -> Observable<([PublicKey], [Block])> {
+    private func fetchFromApi(external: Bool, maxHeight: Int, lastUsedKeyIndex: Int = -1, keys: [PublicKey] = [], blocks: [Block] = []) throws -> Observable<([PublicKey], [Block])> {
         let count = keys.count
+        let gapLimit = hdWallet.gapLimit
 
-        var newKeys = [PublicKey]()
+        let newKey = try hdWallet.publicKey(index: count, external: external)
 
-        for index in count..<(count + hdWallet.gapLimit) {
-            let key = try hdWallet.publicKey(index: index, external: external)
-            newKeys.append(key)
-        }
+        return apiManager.getBlockHashes(address: newKey.address)
+                .flatMap { [unowned self] blockResponses -> Observable<([PublicKey], [Block])> in
+                    var lastUsedKeyIndex = lastUsedKeyIndex
 
-        return apiManager.getBlockHashes(addresses: newKeys.map { $0.address })
-                .flatMap { blockResponses -> Observable<([PublicKey], [Block])> in
-                    let keys = keys + newKeys
+                    if !blockResponses.isEmpty {
+                        lastUsedKeyIndex = keys.count
+                    }
 
-                    if blockResponses.isEmpty {
+                    let keys = keys + [newKey]
+
+                    if lastUsedKeyIndex < keys.count - gapLimit {
                         return Observable.just((keys, blocks))
                     } else {
                         let validResponses = blockResponses.filter { $0.height < maxHeight }
 
                         let validBlocks = validResponses.compactMap { response -> Block? in
                             if let hash = Data(hex: response.hash) {
-                                return Factory().block(withHeaderHash: Data(hash.reversed()), height: response.height)
+                                return self.factory.block(withHeaderHash: Data(hash.reversed()), height: response.height)
                             }
                             return nil
                         }
 
                         let blocks = blocks + validBlocks
-                        return try self.fetchFromApi(external: external, maxHeight: maxHeight, keys: keys, blocks: blocks)
+                        return try self.fetchFromApi(external: external, maxHeight: maxHeight, lastUsedKeyIndex: lastUsedKeyIndex, keys: keys, blocks: blocks)
                     }
                 }
     }

@@ -42,4 +42,15 @@ class BitcoinRegTest: NetworkProtocol {
             ),
             height: 0)
 
+//    let checkpointBlock = Block(
+//            withHeader: BlockHeader(
+//                    version: 536870912,
+//                    previousBlockHeaderReversedHex: "5dc07110c9986c22d0cf760b68dfec769da89e465c73eb08b0b8bd7a7e9e4743",
+//                    merkleRootReversedHex: "1d9bb98732dad67e431d1983d368a389cb73dbcc495b06de7cd26c9dddccab60",
+//                    timestamp: 1536572186,
+//                    bits: 545259519,
+//                    nonce: 0
+//            ),
+//            height: 2016)
+
 }

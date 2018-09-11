@@ -87,13 +87,13 @@ public class WalletKit {
         hdWallet = HDWallet(seed: Mnemonic.seed(mnemonic: words), network: network)
 
         stateManager = StateManager(realmFactory: realmFactory)
-        apiManager = ApiManager(apiUrl: "http://blocknode.grouvi.org/api/v1/blockchain/btc")
+        apiManager = ApiManager(apiUrl: "http://ipfs.grouvi.org/ipns/QmVefrf2xrWzGzPpERF6fRHeUTh9uVSyfHHh4cWgUBnXpq/io-hs/data/blockstore")
 
         peerGroup = PeerGroup(realmFactory: realmFactory, network: network)
         syncer = Syncer(logger: logger, realmFactory: realmFactory)
         factory = Factory()
 
-        initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, apiManager: apiManager, peerGroup: peerGroup)
+        initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, apiManager: apiManager, factory: factory, peerGroup: peerGroup, network: network)
         addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, peerGroup: peerGroup)
         progressSyncer = ProgressSyncer(realmFactory: realmFactory)
         blockSyncer = BlockSyncer(realmFactory: realmFactory, peerGroup: peerGroup)
