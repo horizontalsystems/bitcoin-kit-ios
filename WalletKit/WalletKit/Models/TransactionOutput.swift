@@ -2,15 +2,15 @@ import Foundation
 import RealmSwift
 
 @objc enum ScriptType: Int {
-    case unknown, p2pkh, p2pk, p2sh, p2wsh, p2wkh
+    case unknown, p2pkh, p2pk, p2sh, p2wsh, p2wpkh
 
     var size: Int {
         switch self {
             case .p2pk: return 35
             case .p2pkh: return 25
             case .p2sh: return 23
-            case .p2wsh: return 23
-            case .p2wkh: return 35
+            case .p2wsh: return 34
+            case .p2wpkh: return 22
             default: return 0
         }
     }
@@ -20,16 +20,16 @@ import RealmSwift
             case .p2pk: return 0x21
             case .p2pkh: return 0x14
             case .p2sh: return 0x14
-            case .p2wsh: return 0x14
-            case .p2wkh: return 0x20
+            case .p2wsh: return 0x20
+            case .p2wpkh: return 0x14
             default: return 0
         }
     }
 
     var addressType: AddressType {
         switch self {
-        case .p2sh, .p2wsh: return .scriptHash
-        default: return .pubKeyHash
+            case .p2sh, .p2wsh: return .scriptHash
+            default: return .pubKeyHash
         }
     }
 

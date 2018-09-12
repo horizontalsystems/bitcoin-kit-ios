@@ -38,9 +38,20 @@ class AddressConverterTests: XCTestCase {
         }
     }
 
-    func testSegWitValidAddressConvert() {
+    func testWPKHValidAddressConvert() {
         let address = "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4"
         let keyHash = "751e76e8199196d454941c45d1b3a323f1433bd6"
+        do {
+            let convertedData = try addressConverter.convert(address: address)
+            XCTAssertEqual(convertedData.keyHash, Data(hex: keyHash))
+        } catch {
+            XCTFail("Error Handled!")
+        }
+    }
+
+    func testWSHValidAddressConvert() {
+        let address = "bc1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qccfmv3"
+        let keyHash = "1863143c14c5166804bd19203356da136c985678cd4d27a1b8c6329604903262"
         do {
             let convertedData = try addressConverter.convert(address: address)
             XCTAssertEqual(convertedData.keyHash, Data(hex: keyHash))

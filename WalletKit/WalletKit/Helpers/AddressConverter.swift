@@ -18,10 +18,10 @@ class AddressConverter {
         let version: UInt8
         let addressType: AddressType
         switch type {
-            case .p2pkh, .p2pk, .p2wkh:
+            case .p2pkh, .p2pk:
                 version = network.pubKeyHash
                 addressType = .pubKeyHash
-            case .p2sh, .p2wsh:
+            case .p2sh, .p2wpkh, .p2wsh:
                 version = network.scriptHash
                 addressType = .scriptHash
             default: throw ConversionError.unknownAddressType

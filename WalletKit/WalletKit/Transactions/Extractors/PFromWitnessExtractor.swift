@@ -1,30 +1,22 @@
 import Foundation
 
-class PFromWitnessExtractor: ScriptExtractor {
-    var type: ScriptType { return .p2wsh }
+class PFromWitnessExtractor: WitnessExtractor {
+    override var type: ScriptType { return .unknown }
 
-    func extract(from script: Script, converter: ScriptConverter) throws -> Data {
-        guard script.length == type.size else {
+    override func extract(from script: Script, converter: ScriptConverter) throws -> Data {
+        let scriptData = try witnessScript(script: script, converter: converter)
+        let segWitScript = try converter.decode(data: scriptData)
+        _ = try super.extract(from: segWitScript, converter: converter)
+        return scriptData
+    }
+
+    private func witnessScript(script: Script, converter: ScriptConverter) throws -> Data {
+        guard script.length == type.size + 1 else { // in witness sigScript added 1 byte for push data command
             throw ScriptError.wrongScriptLength
         }
         guard script.chunks.count == 1, let scriptData = script.chunks[0].data else {
             throw ScriptError.wrongSequence
         }
-        let witnessScript = try converter.decode(data: scriptData)
-        guard witnessScript.chunks.count == 2 else {
-            throw ScriptError.wrongSequence
-        }
-        var allowedPushCode = false
-        for i in 0..<16 {
-            if witnessScript.chunks.first?.opCode == OpCode.push(i).first {
-                allowedPushCode = true
-                break
-            }
-        }
-        guard allowedPushCode, witnessScript.chunks[1].opCode == 0x14 else {
-            throw ScriptError.wrongSequence
-        }
-
         return scriptData
     }
 

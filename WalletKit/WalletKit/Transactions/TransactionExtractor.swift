@@ -8,8 +8,8 @@ protocol ScriptExtractor: class {
 }
 
 class TransactionExtractor {
-    static let defaultInputExtractors: [ScriptExtractor] = [PFromSHExtractor(), PFromPKHExtractor(), PFromWitnessExtractor()]
-    static let defaultOutputExtractors: [ScriptExtractor] = [P2PKHExtractor(), P2PKExtractor(), P2SHExtractor()]
+    static let defaultInputExtractors: [ScriptExtractor] = [PFromSHExtractor(), PFromPKHExtractor(), PFromWPKHExtractor(), PFromWSHExtractor()]
+    static let defaultOutputExtractors: [ScriptExtractor] = [P2PKHExtractor(), P2PKExtractor(), P2SHExtractor(), P2WPKHExtractor(), P2SHExtractor()]
 
     enum ExtractionError: Error {
         case invalid
@@ -69,7 +69,7 @@ class TransactionExtractor {
                 if let payload = payload {
                     valid = true
                     switch extractor.type {
-                        case .p2sh, .p2pkh, .p2wsh:
+                        case .p2sh, .p2pkh, .p2wpkh:
                             let ripemd160 = Crypto.sha256ripemd160(payload)
                             input.keyHash = ripemd160
                             input.address = (try? addressConverter.convert(keyHash: ripemd160, type: extractor.type))?.stringValue
