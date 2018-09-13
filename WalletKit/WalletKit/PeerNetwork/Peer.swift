@@ -133,7 +133,7 @@ class Peer {
     }
 
     private func log(_ message: String) {
-        print("\(connection.host):\(connection.port) \(message)")
+        Logger.shared.log(self, "\(connection.host):\(connection.port) \(message)")
     }
 }
 
@@ -244,10 +244,9 @@ extension Peer: PeerConnectionDelegate {
                 merkleBlockCompleted(merkleBlock: merkleBlock)
             } else {
                 requestedMerkleBlocks[merkleBlock.headerHash] = merkleBlock
-                print("TX COUNT: \(merkleBlock.transactionHashes.count)")
             }
         } catch {
-            print("MERKLE BLOCK MESSAGE ERROR: \(error)")
+            log("MERKLE BLOCK MESSAGE ERROR: \(error)")
         }
     }
 

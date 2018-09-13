@@ -16,7 +16,6 @@ class Syncer {
     weak var transactionSender: TransactionSender?
     weak var blockSyncer: BlockSyncer?
 
-    private let logger: Logger
     private let realmFactory: RealmFactory
 
     let syncSubject = BehaviorSubject<SyncStatus>(value: .synced)
@@ -27,8 +26,7 @@ class Syncer {
         }
     }
 
-    init(logger: Logger, realmFactory: RealmFactory) {
-        self.logger = logger
+    init(realmFactory: RealmFactory) {
         self.realmFactory = realmFactory
     }
 
@@ -44,7 +42,7 @@ extension Syncer: PeerGroupDelegate {
         do {
             try headerSyncer?.sync()
         } catch {
-            logger.log(tag: "Header Syncer Error", message: "\(error)")
+            Logger.shared.log(self, "Header Syncer Error: \(error)")
         }
 
         // TODO: following callbacks need to be covered with tests
@@ -60,7 +58,7 @@ extension Syncer: PeerGroupDelegate {
         do {
             try headerHandler?.handle(headers: headers)
         } catch {
-            logger.log(tag: "Header Handler Error", message: "\(error)")
+            Logger.shared.log(self, "Header Handler Error: \(error)")
         }
     }
 
@@ -68,7 +66,7 @@ extension Syncer: PeerGroupDelegate {
         do {
             try transactionHandler?.handle(blockTransactions: transactions, blockHeader: blockHeader)
         } catch {
-            logger.log(tag: "Transaction Handler Error", message: "\(error)")
+            Logger.shared.log(self, "Transaction Handler Error: \(error)")
         }
     }
 
@@ -76,7 +74,7 @@ extension Syncer: PeerGroupDelegate {
         do {
             try transactionHandler?.handle(memPoolTransactions: [transaction])
         } catch {
-            logger.log(tag: "Transaction Handler Error", message: "\(error)")
+            Logger.shared.log(self, "Transaction Handler Error: \(error)")
         }
     }
 

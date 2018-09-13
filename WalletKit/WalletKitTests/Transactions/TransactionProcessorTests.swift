@@ -7,7 +7,6 @@ class TransactionProcessorTests: XCTestCase {
     private var mockExtractor: MockTransactionExtractor!
     private var mockLinker: MockTransactionLinker!
     private var mockAddressManager: MockAddressManager!
-    private var mockLogger: MockLogger!
     private var transactionProcessor: TransactionProcessor!
 
     private var realm: Realm!
@@ -20,7 +19,6 @@ class TransactionProcessorTests: XCTestCase {
         mockExtractor = mockWalletKit.mockTransactionExtractor
         mockLinker = mockWalletKit.mockTransactionLinker
         mockAddressManager = mockWalletKit.mockAddressManager
-        mockLogger = mockWalletKit.mockLogger
 
         realm = mockWalletKit.realm
 
@@ -33,16 +31,12 @@ class TransactionProcessorTests: XCTestCase {
         stub(mockAddressManager) { mock in
             when(mock.generateKeys()).thenDoNothing()
         }
-        stub(mockLogger) { mock in
-            when(mock.log(tag: any(), message: any())).thenDoNothing()
-        }
 
-        transactionProcessor = TransactionProcessor(realmFactory: mockWalletKit.mockRealmFactory, extractor: mockExtractor, linker: mockLinker, addressManager: mockAddressManager, logger: mockLogger, queue: DispatchQueue.main)
+        transactionProcessor = TransactionProcessor(realmFactory: mockWalletKit.mockRealmFactory, extractor: mockExtractor, linker: mockLinker, addressManager: mockAddressManager, queue: DispatchQueue.main)
     }
 
     override func tearDown() {
         mockExtractor = nil
-        mockLogger = nil
         mockLinker = nil
         mockAddressManager = nil
         transactionProcessor = nil
@@ -92,8 +86,6 @@ class TransactionProcessorTests: XCTestCase {
         transactionProcessor.enqueueRun()
 
         waitForMainQueue()
-
-        verify(mockLogger).log(tag: "Transaction Processor Error", message: "\(error)")
     }
 
     func testNoActionWhenNoTransaction() {

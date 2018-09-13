@@ -27,7 +27,6 @@ public class WalletKit {
     let blockValidator: BlockValidator
 
     let realmFactory: RealmFactory
-    let logger: Logger
 
     let hdWallet: HDWallet
 
@@ -95,7 +94,6 @@ public class WalletKit {
         }
 
         realmFactory = RealmFactory(configuration: realmConfiguration)
-        logger = Logger()
 
         hdWallet = HDWallet(seed: Mnemonic.seed(mnemonic: words), network: network)
 
@@ -109,7 +107,7 @@ public class WalletKit {
 
 
         peerGroup = PeerGroup(network: network, bloomFilters: filters, peerIpManager: peerIpManager)
-        syncer = Syncer(logger: logger, realmFactory: realmFactory)
+        syncer = Syncer(realmFactory: realmFactory)
         factory = Factory()
 
         initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, apiManager: apiManager, factory: factory, peerGroup: peerGroup, network: network)
@@ -133,7 +131,7 @@ public class WalletKit {
         scriptConverter = ScriptConverter()
         transactionExtractor = TransactionExtractor(scriptConverter: scriptConverter, addressConverter: addressConverter)
         transactionLinker = TransactionLinker()
-        transactionProcessor = TransactionProcessor(realmFactory: realmFactory, extractor: transactionExtractor, linker: transactionLinker, addressManager: addressManager, logger: logger)
+        transactionProcessor = TransactionProcessor(realmFactory: realmFactory, extractor: transactionExtractor, linker: transactionLinker, addressManager: addressManager)
         transactionHandler = TransactionHandler(realmFactory: realmFactory, processor: transactionProcessor, progressSyncer: progressSyncer, validateBlockFactory: validatedBlockFactory)
         transactionSender = TransactionSender(realmFactory: realmFactory, peerGroup: peerGroup)
         transactionBuilder = TransactionBuilder(unspentOutputSelector: unspentOutputSelector, unspentOutputProvider: unspentOutputProvider, transactionSizeCalculator: transactionSizeCalculator, addressConverter: addressConverter, inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory)

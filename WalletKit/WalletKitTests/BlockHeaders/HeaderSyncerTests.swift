@@ -22,7 +22,7 @@ class HeaderSyncerTests: XCTestCase {
         checkpointBlock = TestData.checkpointBlock
 
         stub(mockPeerGroup) { mock in
-            when(mock.requestHeaders(headerHashes: any())).thenDoNothing()
+            when(mock.requestHeaders(headerHashes: any(), switchPeer: any())).thenDoNothing()
         }
 
         let mockNetwork = mockWalletKit.mockNetwork
@@ -45,7 +45,7 @@ class HeaderSyncerTests: XCTestCase {
 
     func testSync_NoBlocksInRealm() {
         try! headerSyncer.sync()
-        verify(mockPeerGroup).requestHeaders(headerHashes: equal(to: [checkpointBlock.headerHash]))
+        verify(mockPeerGroup).requestHeaders(headerHashes: equal(to: [checkpointBlock.headerHash]), switchPeer: any())
     }
 
     func testSync_NoBlocksInChain() {
@@ -54,7 +54,7 @@ class HeaderSyncerTests: XCTestCase {
         }
 
         try! headerSyncer.sync()
-        verify(mockPeerGroup).requestHeaders(headerHashes: equal(to: [checkpointBlock.headerHash]))
+        verify(mockPeerGroup).requestHeaders(headerHashes: equal(to: [checkpointBlock.headerHash]), switchPeer: any())
     }
 
     func testSync_SingleBlockInChain() {
@@ -65,7 +65,7 @@ class HeaderSyncerTests: XCTestCase {
         }
 
         try! headerSyncer.sync()
-        verify(mockPeerGroup).requestHeaders(headerHashes: equal(to: [firstBlock.headerHash, checkpointBlock.headerHash]))
+        verify(mockPeerGroup).requestHeaders(headerHashes: equal(to: [firstBlock.headerHash, checkpointBlock.headerHash]), switchPeer: any())
     }
 
     func testSync_SeveralBlocksInChain() {
@@ -76,7 +76,7 @@ class HeaderSyncerTests: XCTestCase {
         }
 
         try! headerSyncer.sync()
-        verify(mockPeerGroup).requestHeaders(headerHashes: equal(to: [thirdBlock.headerHash, checkpointBlock.headerHash]))
+        verify(mockPeerGroup).requestHeaders(headerHashes: equal(to: [thirdBlock.headerHash, checkpointBlock.headerHash]), switchPeer: any())
     }
 
     func testSync_MoreThanThreshold() {
@@ -88,7 +88,7 @@ class HeaderSyncerTests: XCTestCase {
         }
 
         try! headerSyncer.sync()
-        verify(mockPeerGroup).requestHeaders(headerHashes: equal(to: [forthBlock.headerHash, firstBlock.headerHash]))
+        verify(mockPeerGroup).requestHeaders(headerHashes: equal(to: [forthBlock.headerHash, firstBlock.headerHash]), switchPeer: any())
     }
 
 }

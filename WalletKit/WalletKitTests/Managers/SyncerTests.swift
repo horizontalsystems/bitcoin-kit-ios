@@ -10,7 +10,6 @@ class SyncerTests: XCTestCase {
     }
 
     private var mockRealmFactory: MockRealmFactory!
-    private var mockLogger: MockLogger!
     private var mockHeaderSyncer: MockHeaderSyncer!
     private var mockHeaderHandler: MockHeaderHandler!
     private var mockTransactionHandler: MockTransactionHandler!
@@ -24,16 +23,12 @@ class SyncerTests: XCTestCase {
 
         let mockWalletKit = MockWalletKit()
 
-        mockLogger = mockWalletKit.mockLogger
         mockHeaderSyncer = mockWalletKit.mockHeaderSyncer
         mockHeaderHandler = mockWalletKit.mockHeaderHandler
         mockFactory = mockWalletKit.mockFactory
         mockTransactionHandler = mockWalletKit.mockTransactionHandler
         realm = mockWalletKit.realm
 
-        stub(mockLogger) { mock in
-            when(mock.log(tag: any(), message: any())).thenDoNothing()
-        }
         stub(mockHeaderSyncer) { mock in
             when(mock.sync()).thenDoNothing()
         }
@@ -45,14 +40,13 @@ class SyncerTests: XCTestCase {
             when(mock.handle(memPoolTransactions: any())).thenDoNothing()
         }
 
-        syncer = Syncer(logger: mockLogger, realmFactory: mockWalletKit.mockRealmFactory)
+        syncer = Syncer(realmFactory: mockWalletKit.mockRealmFactory)
         syncer.headerSyncer = mockHeaderSyncer
         syncer.headerHandler = mockHeaderHandler
         syncer.transactionHandler = mockTransactionHandler
     }
 
     override func tearDown() {
-        mockLogger = nil
         mockHeaderSyncer = nil
         mockHeaderHandler = nil
         mockTransactionHandler = nil
@@ -77,7 +71,6 @@ class SyncerTests: XCTestCase {
         }
 
         syncer.peerGroupReady()
-        verify(mockLogger).log(tag: "Header Syncer Error", message: "\(error)")
     }
 
     func testRunHeaderHandler() {
@@ -98,8 +91,6 @@ class SyncerTests: XCTestCase {
         let headers: [BlockHeader] = [TestData.firstBlock.header!, TestData.secondBlock.header!]
 
         syncer.peerGroupDidReceive(headers: headers)
-
-        verify(mockLogger).log(tag: "Header Handler Error", message: "\(error)")
     }
 
     func testRunTransactions() {
@@ -120,7 +111,6 @@ class SyncerTests: XCTestCase {
         let transaction = TestData.p2pkhTransaction
 
         syncer.peerGroupDidReceive(blockHeader: blockHeader, withTransactions: [transaction])
-        verify(mockLogger).log(tag: "Transaction Handler Error", message: "\(error)")
     }
 
     func testRunTransactionHandler() {
@@ -139,8 +129,6 @@ class SyncerTests: XCTestCase {
 
         let transaction = TestData.p2pkhTransaction
         syncer.peerGroupDidReceive(transaction: transaction)
-
-        verify(mockLogger).log(tag: "Transaction Handler Error", message: "\(error)")
     }
 
     func testShouldRequest_TransactionExists() {

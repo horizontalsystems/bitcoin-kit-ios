@@ -18,11 +18,11 @@ class PeerGroup {
     private var peerCount: Int
 
     private var syncPeer: Peer?
-    private var fetchingBlockHashesQueue = [Data]()
+    private var fetchingBlockHashesQueue: [Data] = []
     private let inventoryQueue: DispatchQueue
-    private var requestedInventories = [Data: InventoryItem]()
+    private var requestedInventories: [Data: InventoryItem] = [:]
     private var requestingBlocks: Bool = false
-    private var peers = [String: Peer]()
+    private var peers: [String: Peer] = [:]
 
     var readyNonSyncPeers: [Peer] {
         let peers = self.peers.values.filter({ peer in peer.status == .ready })
@@ -48,13 +48,12 @@ class PeerGroup {
     func connectPeersIfRequired() {
         for _ in peers.count..<peerCount {
             if let host = peerIpManager.peerHost {
-                print("Connecting to host: \(host)")
                 let peer = Peer(host: host, network: network)
                 peers[host] = peer
                 peer.delegate = self
                 peer.connect()
             } else {
-                print("No peers found!")
+                Logger.shared.log(self, "No peers found!")
                 break
             }
         }
@@ -128,12 +127,11 @@ extension PeerGroup: PeerDelegate {
         statusSubject.onNext(.connected)
 
         if syncPeer == nil {
-            print("syncPeer set to \(peer.host)")
+            Logger.shared.log(self, "syncPeer set to \(peer.host)")
             syncPeer = peer
         }
 
         if peers.values.filter({ peer in peer.status.connected }).count == 1 {
-            print("PeerGroup Ready")
             delegate?.peerGroupReady()
         }
 
@@ -179,7 +177,6 @@ extension PeerGroup: PeerDelegate {
                 return
             }
 
-            print("InventoryItem hash: \(inventoryItem.hash.hex)")
             let shouldRequest = delegate?.shouldRequest(inventoryItem: inventoryItem) ?? false
             if shouldRequest {
                 requestedInventories[inventoryItem.hash] = inventoryItem

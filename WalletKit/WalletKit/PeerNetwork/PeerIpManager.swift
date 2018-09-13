@@ -9,7 +9,6 @@ class PeerIpManager {
         guard network.dnsSeeds.count > hostIndex else {
             return nil
         }
-        print("returning: \(network.dnsSeeds[hostIndex])")
         return network.dnsSeeds[hostIndex]
     }
 

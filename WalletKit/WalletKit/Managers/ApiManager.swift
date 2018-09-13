@@ -42,8 +42,7 @@ class ApiManager {
 
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
-//        print("API OUT: \(method.rawValue) \(apiUrl)\(path) \(parameters.map { String(describing: $0) } ?? "")")
-        print("API OUT: \(method.rawValue) \(path)")
+        Logger.shared.log(self, "API OUT: \(method.rawValue) \(path) \(parameters.map { String(describing: $0) } ?? "")")
 
         return RequestRouter(request: request, encoding: method == .get ? URLEncoding.default : JSONEncoding.default, parameters: parameters)
     }
@@ -65,15 +64,14 @@ class ApiManager {
         return observable.do(onNext: { dataResponse in
             switch dataResponse.result {
             case .success(let result):
-                print("API IN: SUCCESS: \(dataResponse.request?.url?.path ?? ""): response = \(result)")
-//                print("API IN: SUCCESS: \(dataResponse.request?.url?.path ?? "")")
+                Logger.shared.log(self, "API IN: SUCCESS: \(dataResponse.request?.url?.path ?? ""): response = \(result)")
                 ()
             case .failure:
                 let data = dataResponse.data.flatMap {
                     try? JSONSerialization.jsonObject(with: $0, options: .allowFragments)
                 }
 
-                print("API IN: ERROR: \(dataResponse.request?.url?.path ?? ""): status = \(dataResponse.response?.statusCode ?? 0), response: \(data.map { "\($0)" } ?? "nil")")
+                Logger.shared.log(self, "API IN: ERROR: \(dataResponse.request?.url?.path ?? ""): status = \(dataResponse.response?.statusCode ?? 0), response: \(data.map { "\($0)" } ?? "nil")")
                 ()
             }
         })
