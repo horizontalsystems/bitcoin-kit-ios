@@ -11,7 +11,7 @@ class HDWallet {
     var account: UInt32
     var gapLimit: Int
 
-    init(seed: Data, network: NetworkProtocol, gapLimit: Int = 20) {
+    init(seed: Data, network: NetworkProtocol, gapLimit: Int = 5) {
         self.seed = seed
         self.network = network
         self.gapLimit = gapLimit
