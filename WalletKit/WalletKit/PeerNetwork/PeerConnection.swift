@@ -38,7 +38,7 @@ class PeerConnection: NSObject, StreamDelegate {
                 self.connectAsync()
             }
         } else {
-            print("ALREADY CONNECTED")
+            log("ALREADY CONNECTED")
         }
     }
 
@@ -159,7 +159,7 @@ class PeerConnection: NSObject, StreamDelegate {
     }
 
     private func log(_ message: String) {
-        print("\(host):\(port) \(message)")
+        Logger.shared.log(self, "\(host):\(port) \(message)")
     }
 }
 

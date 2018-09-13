@@ -43,7 +43,7 @@ class InitialSyncer {
                     .subscribe(onNext: { [weak self] keys, blocks in
                         try? self?.handle(keys: keys, blocks: blocks)
                     }, onError: { error in
-                        print("Initial Sync Error: \(error)")
+                        Logger.shared.log(self, "Error: \(error)")
                     })
                     .disposed(by: disposeBag)
         } else {
@@ -52,7 +52,7 @@ class InitialSyncer {
     }
 
     private func handle(keys: [PublicKey], blocks: [Block]) throws {
-        print("SAVING: \(keys.count) keys, \(blocks.count) blocks")
+        Logger.shared.log(self, "SAVING: \(keys.count) keys, \(blocks.count) blocks")
 
         let realm = realmFactory.realm
 

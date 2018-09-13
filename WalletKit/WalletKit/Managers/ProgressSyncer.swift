@@ -24,7 +24,7 @@ class ProgressSyncer {
             do {
                 try self.run()
             } catch {
-                print("PROGRESS SYNCER ERROR: \(error)")
+                Logger.shared.log(self, "\(error)")
             }
         }
     }

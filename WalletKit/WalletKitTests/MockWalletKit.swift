@@ -12,7 +12,6 @@ class MockWalletKit {
     let mockBlockValidator: MockBlockValidator
 
     let mockRealmFactory: MockRealmFactory
-    let mockLogger: MockLogger
 
     let mockHdWallet: MockHDWallet
 
@@ -65,7 +64,6 @@ class MockWalletKit {
         }
 
         mockRealmFactory = MockRealmFactory(configuration: Realm.Configuration())
-        mockLogger = MockLogger()
 
         mockHdWallet = MockHDWallet(seed: Data(), network: mockNetwork)
 
@@ -73,7 +71,7 @@ class MockWalletKit {
         mockApiManager = MockApiManager(apiUrl: "")
 
         mockPeerGroup = MockPeerGroup(realmFactory: mockRealmFactory, network: mockNetwork)
-        mockSyncer = MockSyncer(logger: mockLogger, realmFactory: mockRealmFactory)
+        mockSyncer = MockSyncer(realmFactory: mockRealmFactory)
         mockFactory = MockFactory()
 
         mockInitialSyncer = MockInitialSyncer(realmFactory: mockRealmFactory, hdWallet: mockHdWallet, stateManager: mockStateManager, apiManager: mockApiManager, factory: mockFactory, peerGroup: mockPeerGroup, network: mockNetwork)
@@ -97,7 +95,7 @@ class MockWalletKit {
         mockScriptConverter = MockScriptConverter()
         mockTransactionExtractor = MockTransactionExtractor(scriptConverter: mockScriptConverter, addressConverter: mockAddressConverter)
         mockTransactionLinker = MockTransactionLinker()
-        mockTransactionProcessor = MockTransactionProcessor(realmFactory: mockRealmFactory, extractor: mockTransactionExtractor, linker: mockTransactionLinker, addressManager: mockAddressManager, logger: mockLogger)
+        mockTransactionProcessor = MockTransactionProcessor(realmFactory: mockRealmFactory, extractor: mockTransactionExtractor, linker: mockTransactionLinker, addressManager: mockAddressManager)
         mockTransactionHandler = MockTransactionHandler(realmFactory: mockRealmFactory, processor: mockTransactionProcessor, progressSyncer: mockProgressSyncer, validateBlockFactory: mockValidatedBlockFactory)
         mockTransactionSender = MockTransactionSender(realmFactory: mockRealmFactory, peerGroup: mockPeerGroup)
         mockTransactionBuilder = MockTransactionBuilder(unspentOutputSelector: mockUnspentOutputSelector, unspentOutputProvider: mockUnspentOutputProvider, transactionSizeCalculator: mockTransactionSizeCalculator, addressConverter: mockAddressConverter, inputSigner: mockInputSigner, scriptBuilder: mockScriptBuilder, factory: mockFactory)
