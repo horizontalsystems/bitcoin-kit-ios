@@ -2,7 +2,7 @@ import XCTest
 import Cuckoo
 @testable import WalletKit
 
-class P2WitnessExtractorTests: XCTestCase {
+class WitnessExtractorTests: XCTestCase {
 
     private var scriptConverter: MockScriptConverter!
     private var extractor: ScriptExtractor!
@@ -10,34 +10,24 @@ class P2WitnessExtractorTests: XCTestCase {
     private var data: Data!
     private var redeemScriptData: Data!
 
-    private var mockDataLastChunk: MockChunk!
     private var mockScript: MockScript!
-    private var mockRedeemScript: MockScript!
 
     override func setUp() {
         super.setUp()
 
-        data = Data(hex: "160014e7a4911954ca6a6972d2e6eceae53cd4163dc0ebfe")!
-        redeemScriptData = Data(hex: "0014e7a4911954ca6a6972d2e6eceae53cd4163dc0ebfe")!
+        data = Data(hex: "020000")!
+        redeemScriptData = Data()
 
-        mockDataLastChunk = MockChunk(scriptData: data, index: 0)
 
         mockScript = MockScript(with: Data(), chunks: [])
-        mockRedeemScript = MockScript(with: Data(), chunks: [])
 
         scriptConverter = MockScriptConverter()
-        stub(scriptConverter) { mock in
-            when(mock.decode(data: any())).thenReturn(mockRedeemScript)
-        }
-
-        extractor = PFromWitnessExtractor()
+        extractor = WitnessExtractor()
     }
 
     override func tearDown() {
         data = nil
         redeemScriptData = nil
-        mockDataLastChunk = nil
-        mockRedeemScript = nil
         mockScript = nil
 
         scriptConverter = nil
@@ -47,16 +37,9 @@ class P2WitnessExtractorTests: XCTestCase {
     }
 
     func testValidExtract() {
-        stub(mockDataLastChunk) { mock in
-            when(mock.data.get).thenReturn(redeemScriptData)
-        }
         stub(mockScript) { mock in
-            when(mock.length.get).thenReturn(23)
-            when(mock.chunks.get).thenReturn([mockDataLastChunk])
-        }
-        stub(mockRedeemScript) { mock in
-            when(mock.validate(opCodes: any())).thenDoNothing()
-            when(mock.chunks.get).thenReturn([Chunk(scriptData: Data([0x00]), index: 0), Chunk(scriptData: Data([0x14]), index: 0)])
+            when(mock.length.get).thenReturn(0)
+            when(mock.chunks.get).thenReturn([Chunk(scriptData: Data([0x00]), index: 0), Chunk(scriptData: Data([0x00]), index: 0, payloadRange: 0..<0)])
         }
 
         do {
@@ -69,7 +52,8 @@ class P2WitnessExtractorTests: XCTestCase {
 
     func testWrongScriptLength() {
         stub(mockScript) { mock in
-            when(mock.length.get).thenReturn(20)
+            when(mock.length.get).thenReturn(5)
+            when(mock.chunks.get).thenReturn([Chunk(scriptData: Data([0x00]), index: 0), Chunk(scriptData: Data([0x00]), index: 0), Chunk(scriptData: Data([0x00]), index: 0, payloadRange: 0..<0)])
         }
 
         do {
@@ -82,14 +66,12 @@ class P2WitnessExtractorTests: XCTestCase {
         }
     }
 
-    func testWrongSequence() {
-        stub(mockDataLastChunk) { mock in
-            when(mock.data.get).thenReturn(nil)
-        }
+    func testWrongScriptChunksCount() {
         stub(mockScript) { mock in
-            when(mock.length.get).thenReturn(23)
-            when(mock.chunks.get).thenReturn([mockDataLastChunk])
+            when(mock.length.get).thenReturn(0)
+            when(mock.chunks.get).thenReturn([Chunk(scriptData: Data([0x00]), index: 0), Chunk(scriptData: Data([0x00]), index: 0), Chunk(scriptData: Data([0x00]), index: 0, payloadRange: 0..<0)])
         }
+
         do {
             let _ = try extractor.extract(from: mockScript, converter: scriptConverter)
             XCTFail("No Error found!")
@@ -100,14 +82,12 @@ class P2WitnessExtractorTests: XCTestCase {
         }
     }
 
-    func testWrongSequenceTwoChunks() {
-        stub(mockDataLastChunk) { mock in
-            when(mock.data.get).thenReturn(redeemScriptData)
-        }
+    func testWrongScriptPushCode() {
         stub(mockScript) { mock in
-            when(mock.length.get).thenReturn(23)
-            when(mock.chunks.get).thenReturn([mockDataLastChunk, mockDataLastChunk])
+            when(mock.length.get).thenReturn(0)
+            when(mock.chunks.get).thenReturn([Chunk(scriptData: Data([0x16]), index: 0), Chunk(scriptData: Data([0x00]), index: 0, payloadRange: 0..<0)])
         }
+
         do {
             let _ = try extractor.extract(from: mockScript, converter: scriptConverter)
             XCTFail("No Error found!")

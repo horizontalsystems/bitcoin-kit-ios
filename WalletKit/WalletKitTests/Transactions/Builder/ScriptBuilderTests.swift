@@ -66,6 +66,18 @@ class ScriptBuilderTests: XCTestCase {
         }
     }
 
+    func testP2WPKH() {
+        let data = Data(hex: "751e76e8199196d454941c45d1b3a323f1433bd6")!
+        let pubKey = Data(hex: "0014751e76e8199196d454941c45d1b3a323f1433bd6")!
+
+        do {
+            let test = try builder.lockingScript(type: .p2wpkh, params: [Data([0x00]), data])
+            XCTAssertEqual(test, pubKey)
+        } catch {
+            XCTFail("\(error) Exception Thrown")
+        }
+    }
+
     func testP2PKHSig() {
         let data = Data(hex: "483045022100b78dacbc598d414f29537e33b5e7b209ecde9074b5fb4e68f94e8f5cb88ee9ad02202ef04916e8c1caa8cdb739c9695a51eadeaef6fe8ff7e990cc9031b410a123cc012103ec6877e5c28e459ac4daa3222204e7eef4cb42825b6b43438aeea01dd525b24d")!
         let pubKeys = [Data(hex: "3045022100b78dacbc598d414f29537e33b5e7b209ecde9074b5fb4e68f94e8f5cb88ee9ad02202ef04916e8c1caa8cdb739c9695a51eadeaef6fe8ff7e990cc9031b410a123cc01")!,

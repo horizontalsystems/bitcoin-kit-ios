@@ -36,12 +36,12 @@ class BitcoinTestNet: NetworkProtocol {
     let checkpointBlock = Block(
             withHeader: BlockHeader(
                     version: 536870912,
-                    previousBlockHeaderReversedHex: "000000000000032d74ad8eb0a0be6b39b8e095bd9ca8537da93aae15087aafaf",
-                    merkleRootReversedHex: "dec6a6b395b29be37f4b074ed443c3625fac3ae835b1f1080155f01843a64268",
-                    timestamp: 1533498326,
-                    bits: 436270990,
-                    nonce: 205753354
+                    previousBlockHeaderReversedHex: "00000000000000a5bf9029aebb1956200304ffee31bc09f1323ae412d81fa2b2",
+                    merkleRootReversedHex: "dff076f1f3468f86785b42c10e6f23c849ccbc1d40a0fa8909b20b20fb204de2",
+                    timestamp: 1535560970,
+                    bits: 424329477,
+                    nonce: 2681700833
             ),
-            height: 1380960)
+            height: 1411200)
 
 }

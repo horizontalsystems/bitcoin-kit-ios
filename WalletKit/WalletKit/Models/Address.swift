@@ -43,7 +43,7 @@ class SegWitAddress: Address, Equatable {
 
     var scriptType: ScriptType {
         switch type {
-            case .pubKeyHash: return .p2wkh
+            case .pubKeyHash: return .p2wpkh
             case .scriptHash: return .p2wsh
         }
     }

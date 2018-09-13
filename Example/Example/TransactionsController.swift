@@ -52,4 +52,11 @@ class TransactionsController: UITableViewController {
         }
     }
 
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard indexPath.row < transactions.count else {
+            return
+        }
+        print("hash: \(transactions[indexPath.row].transactionHash)")
+    }
+
 }
