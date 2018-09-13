@@ -18,6 +18,7 @@ class MockWalletKit {
     let mockStateManager: MockStateManager
     let mockApiManager: MockApiManager
     let mockAddressManager: MockAddressManager
+    let mockPeerIpManager: MockPeerIpManager
 
     let mockPeerGroup: MockPeerGroup
     let mockSyncer: MockSyncer
@@ -69,8 +70,9 @@ class MockWalletKit {
 
         mockStateManager = MockStateManager(realmFactory: mockRealmFactory)
         mockApiManager = MockApiManager(apiUrl: "")
+        mockPeerIpManager = MockPeerIpManager(network: mockNetwork)
 
-        mockPeerGroup = MockPeerGroup(realmFactory: mockRealmFactory, network: mockNetwork)
+        mockPeerGroup = MockPeerGroup(network: mockNetwork, bloomFilters: [Data](), peerIpManager: mockPeerIpManager)
         mockSyncer = MockSyncer(realmFactory: mockRealmFactory)
         mockFactory = MockFactory()
 

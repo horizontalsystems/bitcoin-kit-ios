@@ -1015,7 +1015,6 @@
 				"$(SRCROOT)/WalletKit/Managers/UnspentOutputSelector.swift",
 				"$(SRCROOT)/WalletKit/Transactions/Builder/ScriptBuilder.swift",
 				"$(SRCROOT)/WalletKit/Managers/UnspentOutputProvider.swift",
-				"$(SRCROOT)/WalletKit/Core/Logger.swift",
 				"$(SRCROOT)/WalletKit/BlockHeaders/HeaderHandler.swift",
 				"$(SRCROOT)/WalletKit/Blocks/BlockSyncer.swift",
 				"$(SRCROOT)/WalletKit/Transactions/TransactionHandler.swift",
@@ -1036,6 +1035,7 @@
 				"$(SRCROOT)/WalletKit/Managers/AddressManager.swift",
 				"$(SRCROOT)/WalletKit/Managers/ProgressSyncer.swift",
 				"$(SRCROOT)/WalletKit/Blocks/ValidatedBlockFactory.swift",
+				"$(SRCROOT)/WalletKit/PeerNetwork/PeerIpManager.swift",
 			);
 			name = Cuckoo;
 			outputPaths = (
