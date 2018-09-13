@@ -99,7 +99,7 @@ public class WalletKit {
 
         stateManager = StateManager(realmFactory: realmFactory)
         apiManager = ApiManager(apiUrl: "http://ipfs.grouvi.org/ipns/QmVefrf2xrWzGzPpERF6fRHeUTh9uVSyfHHh4cWgUBnXpq/io-hs/data/blockstore")
-        peerIpManager = PeerIpManager(network: network)
+        peerIpManager = PeerIpManager(network: network, realmFactory: realmFactory)
 
         let realm = realmFactory.realm
         let pubKeys = realm.objects(PublicKey.self)

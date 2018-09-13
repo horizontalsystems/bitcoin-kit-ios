@@ -15,7 +15,7 @@ class PeerGroup {
     private let network: NetworkProtocol
     var bloomFilters: [Data]
     private let peerIpManager: PeerIpManager
-    private var peerCount: Int
+    var peerCount: Int
 
     private var syncPeer: Peer?
     private var fetchingBlockHashesQueue: [Data] = []
@@ -38,11 +38,12 @@ class PeerGroup {
         self.bloomFilters = bloomFilters
         self.peerIpManager = peerIpManager
         self.peerCount = peerCount
-        inventoryQueue = DispatchQueue(label: "PeerGroup Inventory Queue", qos: .background)
+        self.inventoryQueue = DispatchQueue(label: "PeerGroup Inventory Queue", qos: .background)
+        self.peerIpManager.delegate = self
     }
 
     func connect() {
-        connectPeersIfRequired()
+        peerIpManager.collectPeerHosts()
     }
 
     func connectPeersIfRequired() {
@@ -138,7 +139,14 @@ extension PeerGroup: PeerDelegate {
         requestMerkleBlocksPart(peer: peer)
     }
 
-    func peerDidDisconnect(_ peer: Peer) {
+    func peerDidDisconnect(_ peer: Peer, withError: Bool) {
+        if withError {
+            Logger.shared.log(self, "Peer with IP \(peer.host) disconnected with error")
+            peerIpManager.markFailed(ip: peer.host)
+        } else {
+            peerIpManager.markSuccess(ip: peer.host)
+        }
+
         if let syncPeer = self.syncPeer, syncPeer == peer {
             // it restores syncPeer on next peer connection
             self.syncPeer = nil
@@ -185,4 +193,10 @@ extension PeerGroup: PeerDelegate {
         }
     }
 
+}
+
+extension PeerGroup: PeerIpManagerDelegate {
+    func ipManagerReady() {
+        connectPeersIfRequired()
+    }
 }
