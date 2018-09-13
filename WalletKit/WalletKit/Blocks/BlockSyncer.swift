@@ -1,6 +1,5 @@
 import Foundation
 import RealmSwift
-import RxSwift
 
 class BlockSyncer {
     let realmFactory: RealmFactory

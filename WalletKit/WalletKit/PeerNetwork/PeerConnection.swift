@@ -9,7 +9,6 @@ class PeerConnection: NSObject, StreamDelegate {
 
     weak var delegate: PeerConnectionDelegate?
 
-    private let queue: DispatchQueue
     private var runLoop: RunLoop?
 
     private var readStream: Unmanaged<CFReadStream>?
@@ -23,8 +22,6 @@ class PeerConnection: NSObject, StreamDelegate {
         self.host = host
         self.port = UInt32(network.port)
         self.network = network
-
-        queue = DispatchQueue(label: host, qos: .background)
     }
 
     deinit {
@@ -33,7 +30,7 @@ class PeerConnection: NSObject, StreamDelegate {
 
     func connect() {
         if runLoop == nil {
-            queue.async {
+            DispatchQueue.global(qos: .userInitiated).async {
                 self.runLoop = .current
                 self.connectAsync()
             }
@@ -142,10 +139,8 @@ class PeerConnection: NSObject, StreamDelegate {
                 return
             }
 
-            autoreleasepool {
-                packets = Data(packets.dropFirst(NetworkMessage.minimumLength + Int(networkMessage.length)))
-                delegate?.connection(self, didReceiveMessage: networkMessage.message)
-            }
+            packets = Data(packets.dropFirst(NetworkMessage.minimumLength + Int(networkMessage.length)))
+            delegate?.connection(self, didReceiveMessage: networkMessage.message)
         }
     }
 

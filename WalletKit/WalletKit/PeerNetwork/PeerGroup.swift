@@ -8,7 +8,7 @@ class PeerGroup {
         case connected, disconnected
     }
 
-    private let blocksPerPeer: Int = 10
+    private let blocksPerPeer: Int = 100
     var statusSubject: PublishSubject<Status> = PublishSubject()
     weak var delegate: PeerGroupDelegate?
 
@@ -24,13 +24,15 @@ class PeerGroup {
     private var requestingBlocks: Bool = false
     private var peers: [String: Peer] = [:]
 
+    private let queue: DispatchQueue
+
     var readyNonSyncPeers: [Peer] {
         let peers = self.peers.values.filter({ peer in peer.status == .ready })
         guard let syncPeer = self.syncPeer else {
             return peers
         }
 
-        return peers.filter({ peer in peer != syncPeer })
+        return peers.filter { peer in peer != syncPeer }
     }
 
     init(network: NetworkProtocol, bloomFilters: [Data], peerIpManager: PeerIpManager, peerCount: Int = 3) {
@@ -38,7 +40,10 @@ class PeerGroup {
         self.bloomFilters = bloomFilters
         self.peerIpManager = peerIpManager
         self.peerCount = peerCount
-        self.inventoryQueue = DispatchQueue(label: "PeerGroup Inventory Queue", qos: .background)
+
+        inventoryQueue = DispatchQueue(label: "PeerGroup Inventory Queue", qos: .background)
+        queue = DispatchQueue(label: "PeerGroup Concurrent Queue", qos: .userInitiated, attributes: .concurrent)
+
         self.peerIpManager.delegate = self
     }
 
@@ -124,6 +129,7 @@ class PeerGroup {
 }
 
 extension PeerGroup: PeerDelegate {
+
     func peerReady(_ peer: Peer) {
         statusSubject.onNext(.connected)
 
@@ -166,17 +172,23 @@ extension PeerGroup: PeerDelegate {
     }
 
     func peer(_ peer: Peer, didReceiveHeaders headers: [BlockHeader]) {
-        delegate?.peerGroupDidReceive(headers: headers)
+        queue.async {
+            self.delegate?.peerGroupDidReceive(headers: headers)
+        }
     }
 
     func peer(_ peer: Peer, didReceiveMerkleBlock merkleBlock: MerkleBlock) {
-        requestedInventories.removeValue(forKey: merkleBlock.headerHash)
-        delegate?.peerGroupDidReceive(blockHeader: merkleBlock.header, withTransactions: merkleBlock.transactions)
+        queue.async {
+            self.requestedInventories.removeValue(forKey: merkleBlock.headerHash)
+            self.delegate?.peerGroupDidReceive(blockHeader: merkleBlock.header, withTransactions: merkleBlock.transactions)
+        }
     }
 
     func peer(_ peer: Peer, didReceiveTransaction transaction: Transaction) {
-        requestedInventories.removeValue(forKey: transaction.dataHash)
-        delegate?.peerGroupDidReceive(transaction: transaction)
+        queue.async {
+            self.requestedInventories.removeValue(forKey: transaction.dataHash)
+            self.delegate?.peerGroupDidReceive(transaction: transaction)
+        }
     }
 
     func runIfShouldRequest(inventoryItem: InventoryItem, _ block: () -> Swift.Void) {

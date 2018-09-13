@@ -1,6 +1,7 @@
 import Foundation
 
 class Peer {
+
     enum Status {
         case connecting, disconnected, ready, busy
         var connected: Bool {
@@ -19,6 +20,8 @@ class Peer {
     private var requestedMerkleBlocks: [Data: MerkleBlock] = [Data: MerkleBlock]()
     private var relayedTransactions: [Data: Data] = [Data: Data]()
 
+    private let queue: DispatchQueue
+
     weak var delegate: PeerDelegate?
     var host: String {
         return connection.host
@@ -32,7 +35,9 @@ class Peer {
     }
 
     init(host: String, network: NetworkProtocol = BitcoinTestNet()) {
-        self.connection = PeerConnection(host: host, network: network)
+        connection = PeerConnection(host: host, network: network)
+        queue = DispatchQueue(label: "Peer: \(host)", qos: .userInitiated)
+
         connection.delegate = self
     }
 
@@ -138,6 +143,7 @@ class Peer {
 }
 
 extension Peer: PeerConnectionDelegate {
+
     func connectionReadyForWrite(_ connection: PeerConnection) {
         if !sentVersion {
             sendVersionMessage()
@@ -150,6 +156,12 @@ extension Peer: PeerConnectionDelegate {
     }
 
     func connection(_ connection: PeerConnection, didReceiveMessage message: IMessage) {
+        queue.async {
+            self.handle(message: message)
+        }
+    }
+
+    private func handle(message: IMessage) {
         switch message {
         case let versionMessage as VersionMessage: handle(message: versionMessage)
         case _ as VerackMessage: handleVerackMessage()
