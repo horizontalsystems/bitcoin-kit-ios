@@ -70,7 +70,11 @@ class MockWalletKit {
 
         mockStateManager = MockStateManager(realmFactory: mockRealmFactory)
         mockApiManager = MockApiManager(apiUrl: "")
-        mockPeerIpManager = MockPeerIpManager(network: mockNetwork)
+        mockPeerIpManager = MockPeerIpManager(network: mockNetwork, realmFactory: mockRealmFactory)
+
+        stub(mockPeerIpManager) { mock in
+            when(mock.delegate.set(any())).thenDoNothing()
+        }
 
         mockPeerGroup = MockPeerGroup(network: mockNetwork, bloomFilters: [Data](), peerIpManager: mockPeerIpManager)
         mockSyncer = MockSyncer(realmFactory: mockRealmFactory)

@@ -13,6 +13,7 @@ class Logger {
         String(describing: PeerConnection.self),
         String(describing: Peer.self),
         String(describing: PeerGroup.self),
+        String(describing: PeerIpManager.self),
         String(describing: InitialSyncer.self),
         String(describing: ProgressSyncer.self),
         ""

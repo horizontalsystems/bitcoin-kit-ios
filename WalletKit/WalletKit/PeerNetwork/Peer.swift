@@ -145,8 +145,8 @@ extension Peer: PeerConnectionDelegate {
         }
     }
 
-    func connectionDidDisconnect(_ connection: PeerConnection) {
-        delegate?.peerDidDisconnect(self)
+    func connectionDidDisconnect(_ connection: PeerConnection, withError: Bool) {
+        delegate?.peerDidDisconnect(self, withError: withError)
     }
 
     func connection(_ connection: PeerConnection, didReceiveMessage message: IMessage) {
@@ -303,7 +303,7 @@ extension Peer: Equatable {
 protocol PeerDelegate: class {
     var bloomFilters: [Data] { get }
     func peerReady(_ peer: Peer)
-    func peerDidDisconnect(_ peer: Peer)
+    func peerDidDisconnect(_ peer: Peer, withError: Bool)
     func peer(_ peer: Peer, didReceiveHeaders headers: [BlockHeader])
     func peer(_ peer: Peer, didReceiveMerkleBlock merkleBlock: MerkleBlock)
     func peer(_ peer: Peer, didReceiveTransaction transaction: Transaction)

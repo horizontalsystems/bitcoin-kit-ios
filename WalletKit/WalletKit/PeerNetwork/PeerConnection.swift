@@ -59,7 +59,7 @@ class PeerConnection: NSObject, StreamDelegate {
         RunLoop.current.run()
     }
 
-    func disconnect() {
+    func disconnect(eventCode: Stream.Event? = nil) {
         guard readStream != nil && readStream != nil else {
             return
         }
@@ -74,7 +74,7 @@ class PeerConnection: NSObject, StreamDelegate {
         writeStream = nil
         runLoop = nil
 
-        delegate?.connectionDidDisconnect(self)
+        delegate?.connectionDidDisconnect(self, withError: eventCode == .errorOccurred)
 
         log("DISCONNECTED")
     }
@@ -92,10 +92,10 @@ class PeerConnection: NSObject, StreamDelegate {
                 break
             case .errorOccurred:
                 log("IN ERROR OCCURRED")
-                disconnect()
+                disconnect(eventCode: eventCode)
             case .endEncountered:
                 log("IN CLOSED")
-                disconnect()
+                disconnect(eventCode: eventCode)
             default:
                 break
             }
@@ -109,10 +109,10 @@ class PeerConnection: NSObject, StreamDelegate {
                 delegate?.connectionReadyForWrite(self)
             case .errorOccurred:
                 log("OUT ERROR OCCURRED")
-                disconnect()
+                disconnect(eventCode: eventCode)
             case .endEncountered:
                 log("OUT CLOSED")
-                disconnect()
+                disconnect(eventCode: eventCode)
             default:
                 break
             }
@@ -165,6 +165,6 @@ class PeerConnection: NSObject, StreamDelegate {
 
 protocol PeerConnectionDelegate : class {
     func connectionReadyForWrite(_ connection: PeerConnection)
-    func connectionDidDisconnect(_ connection: PeerConnection)
+    func connectionDidDisconnect(_ connection: PeerConnection, withError: Bool)
     func connection(_ connection: PeerConnection, didReceiveMessage message: IMessage)
 }

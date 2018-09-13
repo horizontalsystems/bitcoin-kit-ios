@@ -83,6 +83,7 @@
 		11B35FF6B8D6417447158826 /* BlockSyncerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B352782DC699D1FAAD6168 /* BlockSyncerTests.swift */; };
 		1C4551923399839C11A93F12 /* Pods_WalletKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E17E11DAB1BF27E1CA22EB08 /* Pods_WalletKit.framework */; };
 		257C06202EDD99F293FC00DE /* Pods_WalletKitTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83AE8083E82784076DF4BF33 /* Pods_WalletKitTests.framework */; };
+		2FA5D19E18DC7528778D26F0 /* PeerAddress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DDED90E11DEC3647B164 /* PeerAddress.swift */; };
 		2FA5D1EE5C8EF298CD8A6733 /* TransactionSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D880471F191DBCDAE574 /* TransactionSerializer.swift */; };
 		2FA5D1F7E6DABFC12A0AD064 /* HDPrivateKeyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DADEB0FD09138FD308A1 /* HDPrivateKeyTests.swift */; };
 		2FA5D2E6BA34E1A932C9C16B /* AddressManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D5A9656117A6FD41E814 /* AddressManager.swift */; };
@@ -275,6 +276,7 @@
 		2FA5DAE996A847B90E5D033A /* UnspentOutputSelectorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnspentOutputSelectorTests.swift; sourceTree = "<group>"; };
 		2FA5DCD21585D41C520DF764 /* TransactionInputSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionInputSerializer.swift; sourceTree = "<group>"; };
 		2FA5DDAE64200E386070668C /* TransactionBuilderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionBuilderTests.swift; sourceTree = "<group>"; };
+		2FA5DDED90E11DEC3647B164 /* PeerAddress.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerAddress.swift; sourceTree = "<group>"; };
 		2FA5DEC34722F594F85688C0 /* TransactionOutputSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionOutputSerializer.swift; sourceTree = "<group>"; };
 		2FA5DF1470723462D2CF707B /* TransactionProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionProcessor.swift; sourceTree = "<group>"; };
 		2FA5DF9995FA7DD7556893F7 /* InputSigner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputSigner.swift; sourceTree = "<group>"; };
@@ -581,6 +583,7 @@
 				11B3559B75AD75C20287ECC7 /* TransactionOutput.swift */,
 				58AAAB4FF63F2AA59C24E9C0 /* Address.swift */,
 				11B357C9E6B02801B0422881 /* TransactionInfo.swift */,
+				2FA5DDED90E11DEC3647B164 /* PeerAddress.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1233,6 +1236,7 @@
 				58AAA89FADBC936A4C49EAAA /* WitnessExtractor.swift in Sources */,
 				58AAA5871005F6B39B7DA512 /* P2WPKHExtractor.swift in Sources */,
 				58AAA778C1897B283B34835A /* P2WSHExtractor.swift in Sources */,
+				2FA5D19E18DC7528778D26F0 /* PeerAddress.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
