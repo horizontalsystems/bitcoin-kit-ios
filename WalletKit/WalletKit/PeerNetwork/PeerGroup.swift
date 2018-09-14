@@ -48,10 +48,10 @@ class PeerGroup {
     }
 
     func connect() {
-        peerIpManager.collectPeerHosts()
+        connectPeersIfRequired()
     }
 
-    func connectPeersIfRequired() {
+    private func connectPeersIfRequired() {
         for _ in peers.count..<peerCount {
             if let host = peerIpManager.peerHost {
                 let peer = Peer(host: host, network: network)
@@ -145,13 +145,11 @@ extension PeerGroup: PeerDelegate {
         requestMerkleBlocksPart(peer: peer)
     }
 
-    func peerDidDisconnect(_ peer: Peer, withError: Bool) {
-        if withError {
+    func peerDidDisconnect(_ peer: Peer, withError error: Bool) {
+        if error {
             Logger.shared.log(self, "Peer with IP \(peer.host) disconnected with error")
-            peerIpManager.markFailed(ip: peer.host)
-        } else {
-            peerIpManager.markSuccess(ip: peer.host)
         }
+        peerIpManager.hostDisconnected(host: peer.host, withError: error)
 
         if let syncPeer = self.syncPeer, syncPeer == peer {
             // it restores syncPeer on next peer connection
@@ -191,6 +189,13 @@ extension PeerGroup: PeerDelegate {
         }
     }
 
+    func peer(_ peer: Peer, didReceiveAddresses addresses: [NetworkAddress]) {
+        queue.async {
+            let hosts = addresses.map { address in address.address }
+            self.peerIpManager.addPeers(hosts: hosts)
+        }
+    }
+
     func runIfShouldRequest(inventoryItem: InventoryItem, _ block: () -> Swift.Void) {
         inventoryQueue.sync {
             if requestedInventories[inventoryItem.hash] != nil {
@@ -208,7 +213,7 @@ extension PeerGroup: PeerDelegate {
 }
 
 extension PeerGroup: PeerIpManagerDelegate {
-    func ipManagerReady() {
+    func newHostsAdded() {
         connectPeersIfRequired()
     }
 }
