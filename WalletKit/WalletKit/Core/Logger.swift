@@ -23,7 +23,8 @@ class Logger {
         var formatter = DateFormatter()
         formatter.timeZone = TimeZone.autoupdatingCurrent
         formatter.locale = Locale.current
-        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
+//        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
+        formatter.dateFormat = "HH:mm:ss.SSS"
         return formatter
     }()
 

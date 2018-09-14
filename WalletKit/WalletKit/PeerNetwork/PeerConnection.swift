@@ -18,6 +18,11 @@ class PeerConnection: NSObject, StreamDelegate {
 
     private var packets: Data = Data()
 
+    var logName: String {
+        let index = abs(host.hash) % WordList.english.count
+        return "[\(WordList.english[index])]".uppercased()
+    }
+
     init(host: String, network: NetworkProtocol = BitcoinTestNet()) {
         self.host = host
         self.port = UInt32(network.port)
@@ -154,7 +159,7 @@ class PeerConnection: NSObject, StreamDelegate {
     }
 
     private func log(_ message: String) {
-        Logger.shared.log(self, "\(host):\(port) \(message)")
+        Logger.shared.log(self, "\(logName) \(message)")
     }
 }
 

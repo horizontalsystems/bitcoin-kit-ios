@@ -34,6 +34,10 @@ class Peer {
         return hashes
     }
 
+    var logName: String {
+        return connection.logName
+    }
+
     init(host: String, network: NetworkProtocol = BitcoinTestNet()) {
         connection = PeerConnection(host: host, network: network)
         queue = DispatchQueue(label: "Peer: \(host)", qos: .userInitiated)
@@ -138,7 +142,7 @@ class Peer {
     }
 
     private func log(_ message: String) {
-        Logger.shared.log(self, "\(connection.host):\(connection.port) \(message)")
+        Logger.shared.log(self, "\(logName): \(message)")
     }
 }
 

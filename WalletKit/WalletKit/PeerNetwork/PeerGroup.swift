@@ -134,7 +134,7 @@ extension PeerGroup: PeerDelegate {
         statusSubject.onNext(.connected)
 
         if syncPeer == nil {
-            Logger.shared.log(self, "syncPeer set to \(peer.host)")
+            Logger.shared.log(self, "syncPeer set to \(peer.logName)")
             syncPeer = peer
         }
 
