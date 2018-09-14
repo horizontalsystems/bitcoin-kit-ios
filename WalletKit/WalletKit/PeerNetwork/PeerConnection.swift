@@ -165,6 +165,6 @@ class PeerConnection: NSObject, StreamDelegate {
 
 protocol PeerConnectionDelegate : class {
     func connectionReadyForWrite(_ connection: PeerConnection)
-    func connectionDidDisconnect(_ connection: PeerConnection, withError: Bool)
+    func connectionDidDisconnect(_ connection: PeerConnection, withError error: Bool)
     func connection(_ connection: PeerConnection, didReceiveMessage message: IMessage)
 }

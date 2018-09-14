@@ -4,116 +4,99 @@ import RealmSwift
 class PeerIpManager {
     let network: NetworkProtocol
     let realmFactory: RealmFactory
-    let q: DispatchQueue
+    let queue: DispatchQueue
     var collecting: Bool = false
+    var connectedHosts: [String] = []
     weak var delegate: PeerIpManagerDelegate?
 
     var peerHost: String? {
         let realm = realmFactory.realm
-        guard let peerAddress = realm.objects(PeerAddress.self).filter("using = %@", false).sorted(byKeyPath: "score").first else {
-            return nil
+        let addresses = realm.objects(PeerAddress.self).sorted(byKeyPath: "score")
+
+        let peerAddress = addresses.first(where: { !connectedHosts.contains($0.ip) })
+
+        if let peerAddress = peerAddress {
+            connectedHosts.append(peerAddress.ip)
+        } else {
+            collectPeerHosts()
         }
 
-        do {
-            try realm.write {
-                peerAddress.using = true
-            }
-            return peerAddress.ip
-        } catch {
-            return nil
-        }
+        return peerAddress?.ip
     }
 
     init(network: NetworkProtocol, realmFactory: RealmFactory) {
         self.network = network
         self.realmFactory = realmFactory
-        q = DispatchQueue(label: "PeerIpManager Queue", qos: .background)
+        queue = DispatchQueue(label: "PeerIpManager Queue", qos: .background)
     }
 
-    func collectPeerHosts() {
+    func hostDisconnected(host: String, withError error: Bool) {
+        if let index = connectedHosts.index(of: host) {
+            connectedHosts.remove(at: index)
+        }
+
+        let realm = realmFactory.realm
+        if let peerAddress = realm.objects(PeerAddress.self).filter("ip = %@", host).first {
+            do {
+                try realm.write {
+                    if error {
+                        realm.delete(peerAddress)
+                    } else {
+                        peerAddress.score += 1
+                    }
+                }
+            } catch {
+                Logger.shared.log(self, "could not process IP due to error: \(error)")
+            }
+        }
+    }
+
+    private func collectPeerHosts() {
         guard !collecting else {
             return
         }
         collecting = true
 
-        guard let delegate = self.delegate else {
-            return
-        }
-
-        let peerAddressesCount = resetExistingAddresses()
-        guard peerAddressesCount < delegate.peerCount else {
-            delegate.ipManagerReady()
-            return
-        }
-
-        q.async {
-            let realm = self.realmFactory.realm
-            let peerAddresses = realm.objects(PeerAddress.self)
-            var newIps = [String]()
-
+        queue.async {
+            var newHosts = [String]()
             for dnsSeed in self.network.dnsSeeds {
-                newIps.append(contentsOf: self.lookup(dnsSeed: dnsSeed))
+                newHosts.append(contentsOf: self.lookup(dnsSeed: dnsSeed))
             }
 
-            let newPeerAddresses = newIps
-                    .filter({ ip in !peerAddresses.contains(where: { peerAddress in peerAddress.ip == ip }) })
-                    .map({ ip in PeerAddress(ip: ip, score: 0, using: false) })
-
-            do {
-                try realm.write {
-                    realm.add(newPeerAddresses)
-                }
-            } catch {
-                Logger.shared.log(self, "could not add PeerAddresses due to error: \(error)")
-            }
-
-            if peerAddresses.count < delegate.peerCount {
-                delegate.peerCount = peerAddresses.count
-                Logger.shared.log(self, "Not enough IP's found while DNS lookup. Decreasing peerCount to \(delegate.peerCount)")
-            }
-
-            delegate.ipManagerReady()
+            self.addPeers(hosts: newHosts)
             self.collecting = false
         }
     }
 
-    func markSuccess(ip: String) {
-        let realm = realmFactory.realm
-        if let peerAddress = realm.objects(PeerAddress.self).filter("ip = %@", ip).first {
-            do {
-                try realm.write {
-                    peerAddress.using = false
-                    peerAddress.score += 1
+    func addPeers(hosts: [String]) {
+        let realm = self.realmFactory.realm
+        let existingPeerAddresses = realm.objects(PeerAddress.self)
+
+        let newPeerAddresses = hosts
+                .filter({ ip in !existingPeerAddresses.contains(where: { peerAddress in peerAddress.ip == ip }) })
+                .reduce(into: []) {
+                    uniqueElements, element in
+
+                    if !uniqueElements.contains(element) {
+                        uniqueElements.append(element)
+                    }
                 }
-            } catch {
-                Logger.shared.log(self, "could not release using IP due to error: \(error)")
-            }
-        }
-    }
+                .map({ ip in PeerAddress(ip: ip, score: 0) })
 
-    func markFailed(ip: String) {
-        let realm = realmFactory.realm
-        if let peerAddress = realm.objects(PeerAddress.self).filter("ip = %@", ip).first {
-            do {
-                try realm.write {
-                    realm.delete(peerAddress)
-                }
-            } catch {
-                Logger.shared.log(self, "could not remove IP due to error: \(error)")
-            }
-        }
-    }
-
-    private func resetExistingAddresses() -> Int {
-        let realm = realmFactory.realm
-        let peerAddresses = realm.objects(PeerAddress.self)
-        try? realm.write {
-            for peerAddress in peerAddresses {
-                peerAddress.using = false
-            }
+        guard !hosts.isEmpty else {
+            return
         }
 
-        return peerAddresses.count
+        do {
+            Logger.shared.log(self, "Adding new hosts: \(newPeerAddresses.count)")
+            try realm.write {
+                realm.add(newPeerAddresses)
+            }
+        } catch {
+            Logger.shared.log(self, "could not add PeerAddresses due to error: \(error)")
+        }
+
+        self.delegate?.newHostsAdded()
     }
 
     private func lookup(dnsSeed: String) -> [String] {
@@ -145,5 +128,5 @@ class PeerIpManager {
 
 protocol PeerIpManagerDelegate: class {
     var peerCount: Int { get set }
-    func ipManagerReady()
+    func newHostsAdded()
 }

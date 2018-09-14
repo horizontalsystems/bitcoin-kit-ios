@@ -155,8 +155,8 @@ extension Peer: PeerConnectionDelegate {
         }
     }
 
-    func connectionDidDisconnect(_ connection: PeerConnection, withError: Bool) {
-        delegate?.peerDidDisconnect(self, withError: withError)
+    func connectionDidDisconnect(_ connection: PeerConnection, withError error: Bool) {
+        delegate?.peerDidDisconnect(self, withError: error)
     }
 
     func connection(_ connection: PeerConnection, didReceiveMessage message: IMessage) {
@@ -202,6 +202,7 @@ extension Peer: PeerConnectionDelegate {
 
     private func handle(message: AddressMessage) {
         log("--> ADDR: \(message.count) address(es)")
+        delegate?.peer(self, didReceiveAddresses: message.addressList)
     }
 
     private func handle(message: InventoryMessage) {
@@ -319,9 +320,10 @@ extension Peer: Equatable {
 protocol PeerDelegate: class {
     var bloomFilters: [Data] { get }
     func peerReady(_ peer: Peer)
-    func peerDidDisconnect(_ peer: Peer, withError: Bool)
+    func peerDidDisconnect(_ peer: Peer, withError error: Bool)
     func peer(_ peer: Peer, didReceiveHeaders headers: [BlockHeader])
     func peer(_ peer: Peer, didReceiveMerkleBlock merkleBlock: MerkleBlock)
     func peer(_ peer: Peer, didReceiveTransaction transaction: Transaction)
+    func peer(_ peer: Peer, didReceiveAddresses addresses: [NetworkAddress])
     func runIfShouldRequest(inventoryItem: InventoryItem, _ block: () -> Swift.Void)
 }
