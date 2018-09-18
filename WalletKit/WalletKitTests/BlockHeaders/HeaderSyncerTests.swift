@@ -5,7 +5,6 @@ import RealmSwift
 
 class HeaderSyncerTests: XCTestCase {
 
-    private var mockPeerGroup: MockPeerGroup!
     private var headerSyncer: HeaderSyncer!
 
     private var realm: Realm!
@@ -16,25 +15,19 @@ class HeaderSyncerTests: XCTestCase {
 
         let mockWalletKit = MockWalletKit()
 
-        mockPeerGroup = mockWalletKit.mockPeerGroup
         realm = mockWalletKit.realm
 
         checkpointBlock = TestData.checkpointBlock
-
-        stub(mockPeerGroup) { mock in
-            when(mock.requestHeaders(headerHashes: any(), switchPeer: any())).thenDoNothing()
-        }
 
         let mockNetwork = mockWalletKit.mockNetwork
         stub(mockNetwork) { mock in
             when(mock.checkpointBlock.get).thenReturn(checkpointBlock)
         }
 
-        headerSyncer = HeaderSyncer(realmFactory: mockWalletKit.mockRealmFactory, peerGroup: mockPeerGroup, network: mockNetwork, hashCheckpointThreshold: 3)
+        headerSyncer = HeaderSyncer(realmFactory: mockWalletKit.mockRealmFactory, network: mockNetwork, hashCheckpointThreshold: 3)
     }
 
     override func tearDown() {
-        mockPeerGroup = nil
         headerSyncer = nil
 
         realm = nil
@@ -44,8 +37,7 @@ class HeaderSyncerTests: XCTestCase {
     }
 
     func testSync_NoBlocksInRealm() {
-        try! headerSyncer.sync()
-        verify(mockPeerGroup).requestHeaders(headerHashes: equal(to: [checkpointBlock.headerHash]), switchPeer: any())
+        XCTAssertEqual(headerSyncer.getHeaders(), [checkpointBlock.headerHash])
     }
 
     func testSync_NoBlocksInChain() {
@@ -53,8 +45,7 @@ class HeaderSyncerTests: XCTestCase {
             realm.add(TestData.oldBlock)
         }
 
-        try! headerSyncer.sync()
-        verify(mockPeerGroup).requestHeaders(headerHashes: equal(to: [checkpointBlock.headerHash]), switchPeer: any())
+        XCTAssertEqual(headerSyncer.getHeaders(), [checkpointBlock.headerHash])
     }
 
     func testSync_SingleBlockInChain() {
@@ -64,8 +55,7 @@ class HeaderSyncerTests: XCTestCase {
             realm.add(firstBlock)
         }
 
-        try! headerSyncer.sync()
-        verify(mockPeerGroup).requestHeaders(headerHashes: equal(to: [firstBlock.headerHash, checkpointBlock.headerHash]), switchPeer: any())
+        XCTAssertEqual(headerSyncer.getHeaders(), [firstBlock.headerHash, checkpointBlock.headerHash])
     }
 
     func testSync_SeveralBlocksInChain() {
@@ -75,8 +65,7 @@ class HeaderSyncerTests: XCTestCase {
             realm.add(thirdBlock)
         }
 
-        try! headerSyncer.sync()
-        verify(mockPeerGroup).requestHeaders(headerHashes: equal(to: [thirdBlock.headerHash, checkpointBlock.headerHash]), switchPeer: any())
+        XCTAssertEqual(headerSyncer.getHeaders(), [thirdBlock.headerHash, checkpointBlock.headerHash])
     }
 
     func testSync_MoreThanThreshold() {
@@ -87,8 +76,7 @@ class HeaderSyncerTests: XCTestCase {
             realm.add(forthBlock)
         }
 
-        try! headerSyncer.sync()
-        verify(mockPeerGroup).requestHeaders(headerHashes: equal(to: [forthBlock.headerHash, firstBlock.headerHash]), switchPeer: any())
+        XCTAssertEqual(headerSyncer.getHeaders(), [forthBlock.headerHash, firstBlock.headerHash])
     }
 
 }

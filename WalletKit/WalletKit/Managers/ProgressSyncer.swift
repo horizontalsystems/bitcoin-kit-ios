@@ -33,7 +33,7 @@ class ProgressSyncer {
         let realm = realmFactory.realm
 
         let allBlocksCount = realm.objects(Block.self).count
-        let syncedBlocksCount = realm.objects(Block.self).filter("synced = %@", true).count
+        let syncedBlocksCount = realm.objects(Block.self).filter("status = %@", Block.Status.synced.rawValue).count
 
         progress = allBlocksCount == 0 ? 0 : Double(syncedBlocksCount) / Double(allBlocksCount)
     }

@@ -127,6 +127,5 @@ class PeerIpManager {
 }
 
 protocol PeerIpManagerDelegate: class {
-    var peerCount: Int { get set }
     func newHostsAdded()
 }

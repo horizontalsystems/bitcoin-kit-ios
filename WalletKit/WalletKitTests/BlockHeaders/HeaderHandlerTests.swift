@@ -6,7 +6,6 @@ import RealmSwift
 class HeaderHandlerTests: XCTestCase {
 
     private var mockValidatedBlockFactory: MockValidatedBlockFactory!
-    private var mockBlockSyncer: MockBlockSyncer!
     private var headerHandler: HeaderHandler!
 
     private var realm: Realm!
@@ -17,19 +16,13 @@ class HeaderHandlerTests: XCTestCase {
         let mockWalletKit = MockWalletKit()
 
         mockValidatedBlockFactory = mockWalletKit.mockValidatedBlockFactory
-        mockBlockSyncer = mockWalletKit.mockBlockSyncer
         realm = mockWalletKit.realm
 
-        stub(mockBlockSyncer) { mock in
-            when(mock.enqueueRun()).thenDoNothing()
-        }
-
-        headerHandler = HeaderHandler(realmFactory: mockWalletKit.mockRealmFactory, validateBlockFactory: mockValidatedBlockFactory, blockSyncer: mockBlockSyncer)
+        headerHandler = HeaderHandler(realmFactory: mockWalletKit.mockRealmFactory, validateBlockFactory: mockValidatedBlockFactory)
     }
 
     override func tearDown() {
         mockValidatedBlockFactory = nil
-        mockBlockSyncer = nil
         headerHandler = nil
 
         realm = nil
@@ -50,8 +43,6 @@ class HeaderHandlerTests: XCTestCase {
         }
 
         XCTAssertTrue(caught, "emptyHeaders exception not thrown")
-
-        verify(mockBlockSyncer, never()).enqueueRun()
     }
 
     func testValidBlocks() {
@@ -67,8 +58,6 @@ class HeaderHandlerTests: XCTestCase {
 
         XCTAssertNotEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", firstBlock.reversedHeaderHashHex).first, nil)
         XCTAssertNotEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", secondBlock.reversedHeaderHashHex).first, nil)
-
-        verify(mockBlockSyncer).enqueueRun()
     }
 
     func testInvalidBlocks() {
@@ -95,8 +84,6 @@ class HeaderHandlerTests: XCTestCase {
 
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", firstBlock.reversedHeaderHashHex).first, nil)
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", secondBlock.reversedHeaderHashHex).first, nil)
-
-        verify(mockBlockSyncer, never()).enqueueRun()
     }
 
     func testPartialValidBlocks() {
@@ -123,8 +110,6 @@ class HeaderHandlerTests: XCTestCase {
 
         XCTAssertNotEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", firstBlock.reversedHeaderHashHex).first, nil)
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", secondBlock.reversedHeaderHashHex).first, nil)
-
-        verify(mockBlockSyncer).enqueueRun()
     }
 
 }

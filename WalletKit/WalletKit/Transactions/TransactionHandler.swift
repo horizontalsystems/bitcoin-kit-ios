@@ -27,7 +27,7 @@ class TransactionHandler {
         var hasNewSyncedBlocks = false
 
         if let existingBlock = realm.objects(Block.self).filter("reversedHeaderHashHex = %@", reversedHashHex).last {
-            if existingBlock.synced {
+            if existingBlock.status == .synced {
                 return
             }
 
@@ -47,13 +47,13 @@ class TransactionHandler {
                     }
                 }
 
-                existingBlock.synced = true
+                existingBlock.status = .synced
                 hasNewSyncedBlocks = true
             }
         } else {
             let block = try validateBlockFactory.block(fromHeader: blockHeader)
 
-            block.synced = true
+            block.status = .synced
 
             try realm.write {
                 realm.add(block)

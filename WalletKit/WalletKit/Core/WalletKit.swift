@@ -42,8 +42,6 @@ public class WalletKit {
     let initialSyncer: InitialSyncer
     let progressSyncer: ProgressSyncer
 
-    let blockSyncer: BlockSyncer
-
     let validatedBlockFactory: ValidatedBlockFactory
 
     let headerSyncer: HeaderSyncer
@@ -105,20 +103,18 @@ public class WalletKit {
         let pubKeys = realm.objects(PublicKey.self)
         let filters = Array(pubKeys.map { $0.keyHash }) + Array(pubKeys.map { $0.raw! })
 
-
-        peerGroup = PeerGroup(network: network, bloomFilters: filters, peerIpManager: peerIpManager)
+        peerGroup = PeerGroup(network: network, peerIpManager: peerIpManager, bloomFilters: filters)
         syncer = Syncer(realmFactory: realmFactory)
         factory = Factory()
 
         initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, apiManager: apiManager, factory: factory, peerGroup: peerGroup, network: network)
         addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, peerGroup: peerGroup)
         progressSyncer = ProgressSyncer(realmFactory: realmFactory)
-        blockSyncer = BlockSyncer(realmFactory: realmFactory, peerGroup: peerGroup)
 
         validatedBlockFactory = ValidatedBlockFactory(realmFactory: realmFactory, factory: factory, validator: blockValidator, network: network)
 
-        headerSyncer = HeaderSyncer(realmFactory: realmFactory, peerGroup: peerGroup, network: network)
-        headerHandler = HeaderHandler(realmFactory: realmFactory, validateBlockFactory: validatedBlockFactory, blockSyncer: blockSyncer)
+        headerSyncer = HeaderSyncer(realmFactory: realmFactory, network: network)
+        headerHandler = HeaderHandler(realmFactory: realmFactory, validateBlockFactory: validatedBlockFactory)
 
         inputSigner = InputSigner(hdWallet: hdWallet)
         scriptBuilder = ScriptBuilder()
@@ -142,8 +138,6 @@ public class WalletKit {
         syncer.headerSyncer = headerSyncer
         syncer.headerHandler = headerHandler
         syncer.transactionHandler = transactionHandler
-        syncer.transactionSender = transactionSender
-        syncer.blockSyncer = blockSyncer
 
         unspentOutputsNotificationToken = unspentOutputRealmResults.observe { [weak self] changeset in
             self?.handleUnspentOutputs(changeset: changeset)
@@ -162,6 +156,13 @@ public class WalletKit {
         })
 
         progressSyncer.enqueueRun()
+
+        let syncingBlocks = realm.objects(Block.self).filter("status = %@", Block.Status.syncing.rawValue)
+        try? realm.write {
+            for block in syncingBlocks {
+                block.status = .pending
+            }
+        }
     }
 
     deinit {
@@ -174,7 +175,7 @@ public class WalletKit {
         let realm = realmFactory.realm
 
         let blockCount = realm.objects(Block.self).count
-        let syncedBlockCount = realm.objects(Block.self).filter("synced = %@", true).count
+        let syncedBlockCount = realm.objects(Block.self).filter("status = %@", Block.Status.synced.rawValue).count
         let pubKeysCount = realm.objects(PublicKey.self).count
 
         print("BLOCK COUNT: \(blockCount) --- \(syncedBlockCount) synced")

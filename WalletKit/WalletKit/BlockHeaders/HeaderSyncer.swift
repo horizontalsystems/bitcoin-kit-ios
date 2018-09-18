@@ -3,18 +3,16 @@ import RealmSwift
 
 class HeaderSyncer {
     let realmFactory: RealmFactory
-    let peerGroup: PeerGroup
     let network: NetworkProtocol
     let hashCheckpointThreshold: Int
 
-    init(realmFactory: RealmFactory, peerGroup: PeerGroup, network: NetworkProtocol, hashCheckpointThreshold: Int = 100) {
+    init(realmFactory: RealmFactory, network: NetworkProtocol, hashCheckpointThreshold: Int = 100) {
         self.realmFactory = realmFactory
-        self.peerGroup = peerGroup
         self.network = network
         self.hashCheckpointThreshold = hashCheckpointThreshold
     }
 
-    func sync() throws {
+    func getHeaders() -> [Data] {
         let realm = realmFactory.realm
 
         let blocksInChain = realm.objects(Block.self).filter("previousBlock != nil").sorted(byKeyPath: "height")
@@ -33,7 +31,7 @@ class HeaderSyncer {
             blocks.append(network.checkpointBlock)
         }
 
-        peerGroup.requestHeaders(headerHashes: blocks.map { $0.headerHash })
+        return blocks.map { $0.headerHash }
     }
 
 }

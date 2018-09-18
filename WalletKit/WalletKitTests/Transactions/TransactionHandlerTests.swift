@@ -59,7 +59,7 @@ class TransactionHandlerTests: XCTestCase {
 
         assertTransactionEqual(tx1: transaction, tx2: realmTransaction)
         XCTAssertEqual(realmBlock.headerHash, block.headerHash)
-        XCTAssertEqual(realmBlock.synced, true)
+        XCTAssertEqual(realmBlock.status, .synced)
         XCTAssertEqual(realmTransaction.block?.reversedHeaderHashHex, block.reversedHeaderHashHex)
 
         verify(mockProcessor).enqueueRun()
@@ -140,7 +140,7 @@ class TransactionHandlerTests: XCTestCase {
 
         assertTransactionEqual(tx1: transaction, tx2: realmTransaction)
         XCTAssertEqual(realmBlock.headerHash, block.headerHash)
-        XCTAssertEqual(realmBlock.synced, true)
+        XCTAssertEqual(realmBlock.status, .synced)
         XCTAssertEqual(realmTransaction.block, realmBlock)
 
         verify(mockProcessor).enqueueRun()
@@ -164,7 +164,7 @@ class TransactionHandlerTests: XCTestCase {
         assertTransactionEqual(tx1: transaction, tx2: realmTransaction)
         XCTAssertEqual(realmBlock.headerHash, block.headerHash)
         XCTAssertEqual(Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: realmBlock.header!)), Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: block.header!)))
-        XCTAssertEqual(realmBlock.synced, true)
+        XCTAssertEqual(realmBlock.status, .synced)
         XCTAssertEqual(realmTransaction.block, realmBlock)
 
         verify(mockProcessor).enqueueRun()

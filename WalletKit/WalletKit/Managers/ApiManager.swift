@@ -127,15 +127,7 @@ class ApiManager {
         let result: Observable<AddressResponse> = observable(forRequest: request(withMethod: .get, path: "/btc-regtest/address/\(addressPath)/index.json"))
 
         return result
-                .map { address in
-                    var result = [BlockResponse]()
-
-                    for hash in address.blockHashes {
-                        result.append(BlockResponse(hash: hash, height: 0))
-                    }
-
-                    return result
-                }
+                .map { $0.blocks }
                 .catchError { error -> Observable<[BlockResponse]> in
                     if let error = error as? ApiError, case let .serverError(status, _) = error, status == 404 {
                         return Observable.just([])
@@ -147,15 +139,26 @@ class ApiManager {
 }
 
 struct AddressResponse: ImmutableMappable {
-    let blockHashes: [String]
+    let blocks: [BlockResponse]
 
     init(map: Map) throws {
-        blockHashes = try map.value("blocks")
+        blocks = try map.value("blocks")
     }
 
 }
 
-struct BlockResponse {
+struct BlockResponse: ImmutableMappable {
     let hash: String
     let height: Int
+
+    init(hash: String, height: Int) {
+        self.hash = hash
+        self.height = height
+    }
+
+    init(map: Map) throws {
+        hash = try map.value("hash")
+        height = try map.value("height")
+    }
+
 }

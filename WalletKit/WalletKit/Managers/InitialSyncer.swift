@@ -47,7 +47,7 @@ class InitialSyncer {
                     })
                     .disposed(by: disposeBag)
         } else {
-            peerGroup.connect()
+            peerGroup.start()
         }
     }
 
@@ -62,7 +62,7 @@ class InitialSyncer {
         }
 
         stateManager.apiSynced = true
-        peerGroup.connect()
+        peerGroup.start()
     }
 
     private func fetchFromApi(external: Bool, maxHeight: Int, lastUsedKeyIndex: Int = -1, keys: [PublicKey] = [], blocks: [Block] = []) throws -> Observable<([PublicKey], [Block])> {

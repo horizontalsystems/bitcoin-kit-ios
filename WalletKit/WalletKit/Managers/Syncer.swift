@@ -13,8 +13,6 @@ class Syncer {
     weak var headerSyncer: HeaderSyncer?
     weak var headerHandler: HeaderHandler?
     weak var transactionHandler: TransactionHandler?
-    weak var transactionSender: TransactionSender?
-    weak var blockSyncer: BlockSyncer?
 
     private let realmFactory: RealmFactory
 
@@ -38,16 +36,30 @@ class Syncer {
 
 extension Syncer: PeerGroupDelegate {
 
-    func peerGroupReady() {
-        do {
-            try headerSyncer?.sync()
-        } catch {
-            Logger.shared.log(self, "Header Syncer Error: \(error)")
+    func getHeadersHashes() -> [Data] {
+        return headerSyncer?.getHeaders() ?? []
+    }
+
+    func getNonSyncedMerkleBlocksHashes(limit: Int) -> [Data] {
+        let realm = realmFactory.realm
+
+        let pendingBlocks = realm.objects(Block.self).filter("status = %@", Block.Status.pending.rawValue)
+
+        guard !pendingBlocks.isEmpty else {
+            return []
         }
 
-        // TODO: following callbacks need to be covered with tests
-        blockSyncer?.enqueueRun()
-        transactionSender?.enqueueRun()
+        let count = min(limit, pendingBlocks.count)
+
+        let blocks = Array(pendingBlocks.prefix(count))
+
+        try? realm.write {
+            for block in blocks {
+                block.status = .syncing
+            }
+        }
+
+        return blocks.map { $0.headerHash }
     }
 
     func peerGroupDidReceive(headers: [BlockHeader]) {
@@ -78,17 +90,14 @@ extension Syncer: PeerGroupDelegate {
         }
     }
 
-    func shouldRequest(inventoryItem: InventoryItem) -> Bool {
+    func shouldRequestBlock(hash: Data) -> Bool {
         let realm = realmFactory.realm
+        return realm.objects(Block.self).filter("reversedHeaderHashHex = %@", hash.reversedHex).isEmpty
+    }
 
-        switch inventoryItem.objectType {
-            case .transaction:
-                return realm.objects(Transaction.self).filter("reversedHashHex = %@", inventoryItem.hash.reversedHex).isEmpty
-            case .blockMessage:
-                return realm.objects(Block.self).filter("reversedHeaderHashHex = %@", inventoryItem.hash.reversedHex).isEmpty
-            case .filteredBlockMessage, .compactBlockMessage, .unknown, .error:
-                return false
-        }
+    func shouldRequestTransaction(hash: Data) -> Bool {
+        let realm = realmFactory.realm
+        return realm.objects(Transaction.self).filter("reversedHashHex = %@", hash.reversedHex).isEmpty
     }
 
 }

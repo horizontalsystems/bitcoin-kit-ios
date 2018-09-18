@@ -2,36 +2,26 @@ import Foundation
 
 class Peer {
 
-    enum Status {
-        case connecting, disconnected, ready, busy
-        var connected: Bool {
-            return self == .ready || self == .busy
-        }
-    }
-
-    var status: Status = .disconnected
-
     private let protocolVersion: Int32 = 70015
     private var sentVersion: Bool = false
     private var sentVerack: Bool = false
 
+    weak var delegate: PeerDelegate?
+
     private let connection: PeerConnection
-    private var requestedMerkleBlockHashes: [Data] = [Data]()
-    private var requestedMerkleBlocks: [Data: MerkleBlock] = [Data: MerkleBlock]()
-    private var relayedTransactions: [Data: Data] = [Data: Data]()
+    private var tasks: [PeerTask] = []
 
     private let queue: DispatchQueue
 
-    weak var delegate: PeerDelegate?
+    private var connected: Bool = false
+    var headersSynced: Bool = false
+
+    var ready: Bool {
+        return connected && tasks.isEmpty
+    }
+
     var host: String {
         return connection.host
-    }
-    var incompleteMerkleBlockHashes: [Data] {
-        var hashes = requestedMerkleBlockHashes
-        for merkleBlock in requestedMerkleBlocks.values {
-            hashes.append(merkleBlock.headerHash)
-        }
-        return hashes
     }
 
     var logName: String {
@@ -47,33 +37,6 @@ class Peer {
 
     func connect() {
         connection.connect()
-        setStatus(status: .connecting)
-    }
-
-    private func setStatus(status: Status) {
-        self.status = status
-        if status == .ready {
-            delegate?.peerReady(self)
-        }
-    }
-
-    func load(filters: [Data]) {
-        guard !filters.isEmpty else {
-            return
-        }
-
-        let nTweak = arc4random_uniform(UInt32.max)
-        var filter = BloomFilter(elements: filters.count, falsePositiveRate: 0.00005, randomNonce: nTweak)
-
-        for f in filters {
-            filter.insert(f)
-        }
-
-        let filterData = Data(filter.data)
-        let filterLoadMessage = FilterLoadMessage(filter: filterData, nHashFuncs: filter.nHashFuncs, nTweak: nTweak, nFlags: 0)
-
-        log("<-- FILTERLOAD: \(filters.count) item(s)")
-        connection.send(message: filterLoadMessage)
     }
 
     func addFilter(filter: Data) {
@@ -83,40 +46,17 @@ class Peer {
         connection.send(message: filterAddMessage)
     }
 
-    func sendMemoryPoolMessage() {
-        log("<-- MEMPOOL")
-        connection.send(message: MemPoolMessage())
+    func disconnect() {
+        connection.disconnect()
     }
 
-    func sendGetHeadersMessage(headerHashes: [Data]) {
-        let getHeadersMessage = GetHeadersMessage(protocolVersion: protocolVersion, headerHashes: headerHashes)
+    func add(task: PeerTask) {
+        tasks.append(task)
 
-        log("<-- GETHEADERS: \(headerHashes.map { $0.reversedHex })")
-        connection.send(message: getHeadersMessage)
-    }
+        task.delegate = self
+        task.requester = self
 
-    func requestMerkleBlocks(headerHashes: [Data]) {
-        for hash in headerHashes {
-            requestedMerkleBlockHashes.append(hash)
-        }
-
-        let getDataMessage = GetDataMessage(inventoryItems: headerHashes.map { hash in
-            InventoryItem(type: InventoryItem.ObjectType.filteredBlockMessage.rawValue, hash: hash)
-        })
-
-        log("<-- GETDATA: \(getDataMessage.inventoryItems.count) items")
-        setStatus(status: .busy)
-        connection.send(message: getDataMessage)
-    }
-
-    func relay(transaction: Transaction) {
-        relayedTransactions[transaction.dataHash] = TransactionSerializer.serialize(transaction: transaction)
-        let inventoryMessage = InventoryMessage(inventoryItems: [
-            InventoryItem(type: InventoryItem.ObjectType.transaction.rawValue, hash: transaction.dataHash)
-        ])
-
-        log("<-- INV: \(inventoryMessage.inventoryItems) items")
-        connection.send(message: inventoryMessage)
+        task.start()
     }
 
     private func sendVersionMessage() {
@@ -141,28 +81,28 @@ class Peer {
         connection.send(message: VerackMessage())
     }
 
-    private func log(_ message: String) {
-        Logger.shared.log(self, "\(logName): \(message)")
-    }
-}
-
-extension Peer: PeerConnectionDelegate {
-
-    func connectionReadyForWrite(_ connection: PeerConnection) {
-        if !sentVersion {
-            sendVersionMessage()
-            sentVersion = true
+    private func load(filters: [Data]) {
+        guard !filters.isEmpty else {
+            return
         }
-    }
 
-    func connectionDidDisconnect(_ connection: PeerConnection, withError error: Bool) {
-        delegate?.peerDidDisconnect(self, withError: error)
-    }
+        let nTweak = arc4random_uniform(UInt32.max)
+        var filter = BloomFilter(elements: filters.count, falsePositiveRate: 0.00005, randomNonce: nTweak)
 
-    func connection(_ connection: PeerConnection, didReceiveMessage message: IMessage) {
-        queue.async {
-            self.handle(message: message)
+        for f in filters {
+            filter.insert(f)
         }
+
+        let filterData = Data(filter.data)
+        let filterLoadMessage = FilterLoadMessage(filter: filterData, nHashFuncs: filter.nHashFuncs, nTweak: nTweak, nFlags: 0)
+
+        log("<-- FILTERLOAD: \(filters.count) item(s)")
+        connection.send(message: filterLoadMessage)
+    }
+
+    private func sendMemoryPoolMessage() {
+        log("<-- MEMPOOL")
+        connection.send(message: MemPoolMessage())
     }
 
     private func handle(message: IMessage) {
@@ -193,11 +133,16 @@ extension Peer: PeerConnectionDelegate {
 
     private func handleVerackMessage() {
         log("--> VERACK")
-        if let filters = delegate?.bloomFilters {
+
+        if let filters = delegate?.getBloomFilters() {
             load(filters: filters)
         }
         sendMemoryPoolMessage()
-        setStatus(status: .ready)
+
+        log("READY")
+
+        connected = true
+        delegate?.peerReady(self)
     }
 
     private func handle(message: AddressMessage) {
@@ -206,44 +151,48 @@ extension Peer: PeerConnectionDelegate {
     }
 
     private func handle(message: InventoryMessage) {
-        log("--> INV: \(message.count) item(s)")
+        log("--> INV: \(message.inventoryItems.map { "[\($0.objectType): \($0.hash.reversedHex)]" }.joined(separator: ", "))")
 
-        var items = [InventoryItem]()
+        var nonHandledInventoryItems = [InventoryItem]()
 
         for item in message.inventoryItems {
-            delegate?.runIfShouldRequest(inventoryItem: item) {
-                var inventoryItem: InventoryItem
-                switch item.objectType {
-                case .blockMessage:
-                    inventoryItem = InventoryItem(type: InventoryItem.ObjectType.filteredBlockMessage.rawValue, hash: item.hash)
-                default:
-                    inventoryItem = item
-                }
+            var handled = false
 
-                items.append(inventoryItem)
+            for task in tasks {
+                if task.handle(inventoryItem: item) {
+                    handled = true
+                    break
+                }
+            }
+
+            if !handled {
+                nonHandledInventoryItems.append(item)
             }
         }
 
-        if !items.isEmpty {
-            let getDataMessage = GetDataMessage(inventoryItems: items)
-            log("<-- GETDATA: \(getDataMessage.inventoryItems.count) items")
-            connection.send(message: getDataMessage)
+        if !nonHandledInventoryItems.isEmpty {
+            delegate?.peer(self, didReceiveInventoryItems: nonHandledInventoryItems)
         }
     }
 
     private func handle(message: HeadersMessage) {
         log("--> HEADERS: \(message.count) item(s)")
-        delegate?.peer(self, didReceiveHeaders: message.blockHeaders)
+
+        for task in tasks {
+            if task.handle(blockHeaders: message.blockHeaders) {
+                break
+            }
+        }
     }
 
     private func handle(message: GetDataMessage) {
         log("--> GETDATA: \(message.count) item(s)")
 
         for item in message.inventoryItems {
-            if item.objectType == .transaction, let transactionData = relayedTransactions.removeValue(forKey: item.hash) {
-                let transactionMessage = TransactionMessage(transactionData: transactionData)
-                log("<-- TX: \(transactionMessage.transaction.reversedHashHex)")
-                connection.send(message: transactionMessage)
+            for task in tasks {
+                if task.handle(getDataInventoryItem: item) {
+                    break
+                }
             }
         }
     }
@@ -254,13 +203,14 @@ extension Peer: PeerConnectionDelegate {
 
     private func handle(message: MerkleBlockMessage) {
         log("--> MERKLEBLOCK: \(Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: message.blockHeader)).reversedHex)")
+
         do {
             let merkleBlock = try message.getMerkleBlock()
 
-            if merkleBlock.transactionHashes.isEmpty {
-                merkleBlockCompleted(merkleBlock: merkleBlock)
-            } else {
-                requestedMerkleBlocks[merkleBlock.headerHash] = merkleBlock
+            for task in tasks {
+                if task.handle(merkleBlock: merkleBlock) {
+                    break
+                }
             }
         } catch {
             log("MERKLE BLOCK MESSAGE ERROR: \(error)")
@@ -269,16 +219,12 @@ extension Peer: PeerConnectionDelegate {
 
     private func handle(message: TransactionMessage) {
         let transaction = message.transaction
-        log("--> TX: \(transaction.dataHash.hex)")
+        log("--> TX: \(transaction.reversedHashHex)")
 
-        guard let merkleBlock = requestedMerkleBlocks.filter({ _, merkleBlock in merkleBlock.transactionHashes.contains(transaction.dataHash) }).first?.value else {
-            delegate?.peer(self, didReceiveTransaction: transaction)
-            return
-        }
-
-        merkleBlock.transactions.append(transaction)
-        if merkleBlock.transactions.count == merkleBlock.transactionHashes.count {
-            merkleBlockCompleted(merkleBlock: merkleBlock)
+        for task in tasks {
+            if task.handle(transaction: transaction) {
+                break
+            }
         }
     }
 
@@ -295,18 +241,94 @@ extension Peer: PeerConnectionDelegate {
         log("--> REJECT: \(message.message) code: 0x\(String(message.ccode, radix: 16)) reason: \(message.reason)")
     }
 
+    private func log(_ message: String) {
+        Logger.shared.log(self, "\(logName): \(message)")
+    }
 
-    private func merkleBlockCompleted(merkleBlock: MerkleBlock) {
+}
+
+extension Peer: PeerConnectionDelegate {
+
+    func connectionReadyForWrite(_ connection: PeerConnection) {
+        if !sentVersion {
+            sendVersionMessage()
+            sentVersion = true
+        }
+    }
+
+    func connectionDidDisconnect(_ connection: PeerConnection, withError error: Bool) {
+        connected = false
+        delegate?.peerDidDisconnect(self, withError: error)
+    }
+
+    func connection(_ connection: PeerConnection, didReceiveMessage message: IMessage) {
+        queue.async {
+            self.handle(message: message)
+        }
+    }
+
+}
+
+extension Peer: IPeerTaskDelegate {
+
+    func received(blockHeaders: [BlockHeader]) {
+        delegate?.peer(self, didReceiveHeaders: blockHeaders)
+    }
+
+    func received(merkleBlock: MerkleBlock) {
         delegate?.peer(self, didReceiveMerkleBlock: merkleBlock)
-        requestedMerkleBlocks.removeValue(forKey: merkleBlock.headerHash)
+    }
 
-        if let index = requestedMerkleBlockHashes.index(of: merkleBlock.headerHash) {
-            requestedMerkleBlockHashes.remove(at: index)
+    func received(transaction: Transaction) {
+        delegate?.peer(self, didReceiveTransaction: transaction)
+    }
+
+    func completed(task: PeerTask) {
+        if let index = tasks.index(where: { $0 === task }) {
+            tasks.remove(at: index)
         }
 
-        if requestedMerkleBlockHashes.isEmpty && requestedMerkleBlocks.isEmpty {
-            setStatus(status: .ready)
+        if tasks.isEmpty {
+            delegate?.peerReady(self)
         }
+    }
+
+    func failed(task: PeerTask) {
+        // todo
+    }
+
+}
+
+extension Peer: IPeerTaskRequester {
+
+    func requestHeaders(hashes: [Data]) {
+        let message = GetHeadersMessage(protocolVersion: protocolVersion, headerHashes: hashes)
+
+        log("<-- GETHEADERS: \(hashes.map { $0.reversedHex })")
+        connection.send(message: message)
+    }
+
+    func requestData(items: [InventoryItem]) {
+        let message = GetDataMessage(inventoryItems: items)
+
+        log("<-- GETDATA: \(message.inventoryItems.count) items")
+        connection.send(message: message)
+    }
+
+    func sendTransactionInventory(hash: Data) {
+        let message = InventoryMessage(inventoryItems: [
+            InventoryItem(type: InventoryItem.ObjectType.transaction.rawValue, hash: hash)
+        ])
+
+        log("<-- INV: \(message.inventoryItems.map { "[\($0.objectType): \($0.hash.reversedHex)]" }.joined(separator: ", "))")
+        connection.send(message: message)
+    }
+
+    func send(transaction: Transaction) {
+        let message = TransactionMessage(transaction: transaction)
+
+        log("<-- TX: \(message.transaction.reversedHashHex)")
+        connection.send(message: message)
     }
 
 }
@@ -318,12 +340,12 @@ extension Peer: Equatable {
 }
 
 protocol PeerDelegate: class {
-    var bloomFilters: [Data] { get }
+    func getBloomFilters() -> [Data]
     func peerReady(_ peer: Peer)
     func peerDidDisconnect(_ peer: Peer, withError error: Bool)
     func peer(_ peer: Peer, didReceiveHeaders headers: [BlockHeader])
     func peer(_ peer: Peer, didReceiveMerkleBlock merkleBlock: MerkleBlock)
     func peer(_ peer: Peer, didReceiveTransaction transaction: Transaction)
     func peer(_ peer: Peer, didReceiveAddresses addresses: [NetworkAddress])
-    func runIfShouldRequest(inventoryItem: InventoryItem, _ block: () -> Swift.Void)
+    func peer(_ peer: Peer, didReceiveInventoryItems items: [InventoryItem])
 }

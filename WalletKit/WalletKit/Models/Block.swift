@@ -4,10 +4,12 @@ import RealmSwift
 class Block: Object {
     enum BlockError: Error { case noHeader }
 
+    @objc enum Status: Int { case pending, syncing, synced }
+
     @objc dynamic var reversedHeaderHashHex = ""
     @objc dynamic var headerHash = Data()
     @objc dynamic var height: Int = 0
-    @objc dynamic var synced = false
+    @objc dynamic var status: Status = .pending
 
     @objc dynamic var header: BlockHeader?
     @objc dynamic var previousBlock: Block?
