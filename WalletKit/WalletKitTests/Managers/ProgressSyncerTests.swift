@@ -50,8 +50,8 @@ class ProgressSyncerTests: XCTestCase {
 
         try! realm.write {
             realm.add(block)
-            block.synced = true
-            block.previousBlock?.synced = true
+            block.status = .synced
+            block.previousBlock?.status = .synced
         }
 
         syncer.enqueueRun()
@@ -68,9 +68,9 @@ class ProgressSyncerTests: XCTestCase {
 
         try! realm.write {
             realm.add(block)
-            block.synced = true
-            block.previousBlock?.synced = true
-            block.previousBlock?.previousBlock?.synced = true
+            block.status = .synced
+            block.previousBlock?.status = .synced
+            block.previousBlock?.previousBlock?.status = .synced
         }
 
         syncer.enqueueRun()

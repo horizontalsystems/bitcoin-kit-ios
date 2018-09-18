@@ -57,7 +57,7 @@ class InitialSyncerTests: XCTestCase {
             when(mock.apiSynced.set(any())).thenDoNothing()
         }
         stub(mockPeerGroup) { mock in
-            when(mock.connect()).thenDoNothing()
+            when(mock.start()).thenDoNothing()
         }
 
         let checkpointBlock = Block()
@@ -99,7 +99,7 @@ class InitialSyncerTests: XCTestCase {
 
         try! syncer.sync()
 
-        verify(mockPeerGroup).connect()
+        verify(mockPeerGroup).start()
     }
 
     func testSuccessSync() {
@@ -140,7 +140,7 @@ class InitialSyncerTests: XCTestCase {
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", internalResponse0.hash).count, 1)
 
         verify(mockStateManager).apiSynced.set(true)
-        verify(mockPeerGroup).connect()
+        verify(mockPeerGroup).start()
     }
 
     func testSuccessSync_IgnoreBlocksAfterCheckpoint() {
@@ -174,7 +174,7 @@ class InitialSyncerTests: XCTestCase {
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", externalResponse0.hash).count, 1)
 
         verify(mockStateManager).apiSynced.set(true)
-        verify(mockPeerGroup).connect()
+        verify(mockPeerGroup).start()
     }
 
     func testFailedSync_ApiError() {
@@ -200,7 +200,7 @@ class InitialSyncerTests: XCTestCase {
         XCTAssertEqual(realm.objects(Block.self).count, 0)
 
         verify(mockStateManager, never()).apiSynced.set(true)
-        verify(mockPeerGroup, never()).connect()
+        verify(mockPeerGroup, never()).start()
     }
 
     func testSuccessSync_GapLimit() {
@@ -242,7 +242,7 @@ class InitialSyncerTests: XCTestCase {
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", response3.hash).count, 1)
 
         verify(mockStateManager).apiSynced.set(true)
-        verify(mockPeerGroup).connect()
+        verify(mockPeerGroup).start()
     }
 
 }

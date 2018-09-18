@@ -13,7 +13,6 @@ class SyncerTests: XCTestCase {
     private var mockHeaderSyncer: MockHeaderSyncer!
     private var mockHeaderHandler: MockHeaderHandler!
     private var mockTransactionHandler: MockTransactionHandler!
-    private var mockFactory: MockFactory!
     private var syncer: Syncer!
 
     private var realm: Realm!
@@ -25,13 +24,9 @@ class SyncerTests: XCTestCase {
 
         mockHeaderSyncer = mockWalletKit.mockHeaderSyncer
         mockHeaderHandler = mockWalletKit.mockHeaderHandler
-        mockFactory = mockWalletKit.mockFactory
         mockTransactionHandler = mockWalletKit.mockTransactionHandler
         realm = mockWalletKit.realm
 
-        stub(mockHeaderSyncer) { mock in
-            when(mock.sync()).thenDoNothing()
-        }
         stub(mockHeaderHandler) { mock in
             when(mock.handle(headers: any())).thenDoNothing()
         }
@@ -50,7 +45,6 @@ class SyncerTests: XCTestCase {
         mockHeaderSyncer = nil
         mockHeaderHandler = nil
         mockTransactionHandler = nil
-        mockFactory = nil
         syncer = nil
 
         realm = nil
@@ -58,19 +52,14 @@ class SyncerTests: XCTestCase {
         super.tearDown()
     }
 
-    func testRunHeaderSyncerOnConnect() {
-        syncer.peerGroupReady()
-        verify(mockHeaderSyncer).sync()
-    }
-
-    func testRunHeaderSyncerOnConnect_Error() {
-        let error = TestError()
+    func testGetHeaderHashes() {
+        let hashes: [Data] = [Data(bytes: [1, 2, 3])]
 
         stub(mockHeaderSyncer) { mock in
-            when(mock.sync()).thenThrow(error)
+            when(mock.getHeaders()).thenReturn(hashes)
         }
 
-        syncer.peerGroupReady()
+        XCTAssertEqual(syncer.getHeadersHashes(), hashes)
     }
 
     func testRunHeaderHandler() {
@@ -133,51 +122,34 @@ class SyncerTests: XCTestCase {
 
     func testShouldRequest_TransactionExists() {
         let transaction = TestData.p2pkhTransaction
-        let inventoryItem = InventoryItem(type: InventoryItem.ObjectType.transaction.rawValue, hash: transaction.reversedHashHex.reversedData!)
 
         try! realm.write {
             realm.add(transaction)
         }
 
-        XCTAssertEqual(syncer.shouldRequest(inventoryItem: inventoryItem), false)
+        XCTAssertEqual(syncer.shouldRequestTransaction(hash: transaction.dataHash), false)
     }
 
     func testShouldRequest_TransactionDoesntExists() {
         let transaction = TestData.p2pkhTransaction
-        let inventoryItem = InventoryItem(type: InventoryItem.ObjectType.transaction.rawValue, hash: transaction.reversedHashHex.reversedData!)
 
-        XCTAssertEqual(syncer.shouldRequest(inventoryItem: inventoryItem), true)
+        XCTAssertEqual(syncer.shouldRequestTransaction(hash: transaction.dataHash), true)
     }
 
     func testShouldRequest_BlockExists() {
         let block = TestData.firstBlock
-        let inventoryItem = InventoryItem(type: InventoryItem.ObjectType.blockMessage.rawValue, hash: block.reversedHeaderHashHex.reversedData!)
 
         try! realm.write {
             realm.add(block)
         }
 
-        XCTAssertEqual(syncer.shouldRequest(inventoryItem: inventoryItem), false)
+        XCTAssertEqual(syncer.shouldRequestBlock(hash: block.headerHash), false)
     }
 
     func testShouldRequest_BlockDoesntExists() {
         let block = TestData.firstBlock
-        let inventoryItem = InventoryItem(type: InventoryItem.ObjectType.blockMessage.rawValue, hash: block.reversedHeaderHashHex.reversedData!)
 
-        XCTAssertEqual(syncer.shouldRequest(inventoryItem: inventoryItem), true)
-    }
-
-    func testShouldRequest_UnhandledItems() {
-        let items = [
-            InventoryItem(type: InventoryItem.ObjectType.filteredBlockMessage.rawValue, hash: Data()),
-            InventoryItem(type: InventoryItem.ObjectType.compactBlockMessage.rawValue, hash: Data()),
-            InventoryItem(type: InventoryItem.ObjectType.unknown.rawValue, hash: Data()),
-            InventoryItem(type: InventoryItem.ObjectType.error.rawValue, hash: Data())
-        ]
-
-        for item in items {
-            XCTAssertEqual(syncer.shouldRequest(inventoryItem: item), false)
-        }
+        XCTAssertEqual(syncer.shouldRequestBlock(hash: block.headerHash), true)
     }
 
 }
