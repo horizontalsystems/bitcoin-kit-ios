@@ -49,4 +49,37 @@ struct Crypto {
         return der
     }
 
+    static func secp256k1_pubkey_create(privateKeyData: Data, compressed: Bool = false) -> Data {
+        // Convert Data to byte Array
+        let privateKey = privateKeyData.withUnsafeBytes {
+            [UInt8](UnsafeBufferPointer(start: $0, count: privateKeyData.count))
+        }
+
+        // Create signing context
+        let ctx = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_SIGN))!
+        defer { secp256k1_context_destroy(ctx) }
+
+        // Create public key from private key
+        var c_publicKey: secp256k1_pubkey = secp256k1_pubkey()
+        let result = secp256k1_ec_pubkey_create(
+                ctx,
+                &c_publicKey,
+                UnsafePointer<UInt8>(privateKey)
+        )
+
+        // Serialise public key data into byte array (see header docs for secp256k1_pubkey)
+        let keySize = compressed ? 33 : 65
+        let output = UnsafeMutablePointer<UInt8>.allocate(capacity: keySize)
+        let outputLen = UnsafeMutablePointer<Int>.allocate(capacity: 1)
+        defer {
+            output.deallocate()
+            outputLen.deallocate()
+        }
+        outputLen.initialize(to: keySize)
+        secp256k1_ec_pubkey_serialize(ctx, output, outputLen, &c_publicKey, UInt32(compressed ? SECP256K1_EC_COMPRESSED : SECP256K1_EC_UNCOMPRESSED))
+        let publicKey = [UInt8](UnsafeBufferPointer(start: output, count: keySize))
+
+        return Data(bytes: publicKey)
+    }
+
 }
