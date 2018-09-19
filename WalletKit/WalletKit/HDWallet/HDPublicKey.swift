@@ -74,7 +74,7 @@ class HDPublicKey {
     }
 
     static func from(privateKey raw: Data, compression: Bool = false) -> Data {
-        return _Key.computePublicKey(fromPrivateKey: raw, compression: compression)
+        return Crypto.secp256k1_pubkey_create(privateKeyData: raw, compressed: compression)
     }
 
 }
