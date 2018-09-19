@@ -43,10 +43,10 @@ class AddressManager {
 
     private func generateKeys(external: Bool, realm: Realm) throws -> [PublicKey] {
         var keys = [PublicKey]()
-        let allKeys = realm.objects(PublicKey.self).filter("external = %@", external).sorted(byKeyPath: "index")
         let unusedKeysCount = realm.objects(PublicKey.self).filter("external = %@ AND outputs.@count = 0", external).sorted(byKeyPath: "index").count
 
         if unusedKeysCount < hdWallet.gapLimit {
+            let allKeys = realm.objects(PublicKey.self).filter("external = %@", external).sorted(byKeyPath: "index")
             let lastIndex = allKeys.last?.index ?? -1
 
             for i in 1..<(hdWallet.gapLimit - unusedKeysCount + 1) {
