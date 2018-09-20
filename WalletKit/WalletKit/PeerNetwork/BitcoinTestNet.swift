@@ -64,7 +64,7 @@ class BitcoinTestNet: NetworkProtocol {
         }
 
         try headerValidator.validate(candidate: block, block: previousBlock, network: self)
-        if isDifficultyTransitionPoint(height: previousBlock.height) {
+        if isDifficultyTransitionPoint(height: block.height) {
             try legacyDifficultyValidator.validate(candidate: block, block: previousBlock, network: self)
         } else {
             if previousBlockHeader.timestamp > BitcoinTestNet.testNetDiffDate {

@@ -2,6 +2,7 @@ import Foundation
 
 class BlockValidatorFactory {
     enum ValidatorType { case header, bits, legacy, testNet, EDA, DAA }
+
     let difficultyEncoder: DifficultyEncoder
     let blockHelper: BlockHelper
 

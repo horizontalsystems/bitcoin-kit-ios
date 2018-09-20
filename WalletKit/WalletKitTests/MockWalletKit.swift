@@ -1,5 +1,4 @@
 import Foundation
-import BigInt
 import Cuckoo
 import RealmSwift
 @testable import WalletKit
