@@ -62,6 +62,21 @@ extension Syncer: PeerGroupDelegate {
         return blocks.map { $0.headerHash }
     }
 
+    func getNonSentTransactions() -> [Transaction] {
+        let realm = realmFactory.realm
+        let nonSentTransactions = realm.objects(Transaction.self).filter("status = %@", TransactionStatus.new.rawValue)
+
+        var nonManagedTransactions = [Transaction]()
+
+        for transaction in nonSentTransactions {
+            // Transaction is managed by Realm. We need to serialize and deserialize it in order to make it non-managed.
+            let data = TransactionSerializer.serialize(transaction: transaction)
+            nonManagedTransactions.append(TransactionSerializer.deserialize(data: data))
+        }
+
+        return nonManagedTransactions
+    }
+
     func peerGroupDidReceive(headers: [BlockHeader]) {
         if headers.isEmpty {
             return

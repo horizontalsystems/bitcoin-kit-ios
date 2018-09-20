@@ -28,6 +28,14 @@ class PeerTask {
         return false
     }
 
+    func handleRelayedTransaction(hash: Data) -> Bool {
+        return false
+    }
+
+    func isRequestingInventory(hash: Data) -> Bool {
+        return false
+    }
+
 }
 
 protocol IPeerTaskDelegate: class {

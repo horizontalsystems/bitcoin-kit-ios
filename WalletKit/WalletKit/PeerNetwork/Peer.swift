@@ -13,7 +13,7 @@ class Peer {
 
     private let queue: DispatchQueue
 
-    private var connected: Bool = false
+    var connected: Bool = false
     var headersSynced: Bool = false
 
     var ready: Bool {
@@ -57,6 +57,24 @@ class Peer {
         task.requester = self
 
         task.start()
+    }
+
+    func isRequestingInventory(hash: Data) -> Bool {
+        for task in tasks {
+            if task.isRequestingInventory(hash: hash) {
+                return true
+            }
+        }
+        return false
+    }
+
+    func handleRelayedTransaction(hash: Data) -> Bool {
+        for task in tasks {
+            if task.handleRelayedTransaction(hash: hash) {
+                return true
+            }
+        }
+        return false
     }
 
     private func sendVersionMessage() {

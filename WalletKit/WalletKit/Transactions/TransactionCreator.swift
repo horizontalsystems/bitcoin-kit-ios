@@ -11,14 +11,14 @@ class TransactionCreator {
     private let realmFactory: RealmFactory
     private let transactionBuilder: TransactionBuilder
     private let transactionProcessor: TransactionProcessor
-    private let transactionSender: TransactionSender
+    private let peerGroup: PeerGroup
     private let addressManager: AddressManager
 
-    init(realmFactory: RealmFactory, transactionBuilder: TransactionBuilder, transactionProcessor: TransactionProcessor, transactionSender: TransactionSender, addressManager: AddressManager) {
+    init(realmFactory: RealmFactory, transactionBuilder: TransactionBuilder, transactionProcessor: TransactionProcessor, peerGroup: PeerGroup, addressManager: AddressManager) {
         self.realmFactory = realmFactory
         self.transactionBuilder = transactionBuilder
         self.transactionProcessor = transactionProcessor
-        self.transactionSender = transactionSender
+        self.peerGroup = peerGroup
         self.addressManager = addressManager
     }
 
@@ -39,8 +39,8 @@ class TransactionCreator {
             realm.add(transaction)
         }
 
-        transactionSender.enqueueRun()
         transactionProcessor.enqueueRun()
+        peerGroup.sendTransactions()
     }
 
 }
