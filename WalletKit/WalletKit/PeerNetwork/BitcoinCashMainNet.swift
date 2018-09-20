@@ -4,7 +4,6 @@ class BitcoinCashMainNet: NetworkProtocol {
     private static let diffDate = 1510600000 //  2017 November 3, 14:06 GMT
 
     private let headerValidator: IBlockValidator
-    private let bitsValidator: IBlockValidator
     private let legacyDifficultyValidator: IBlockValidator
     private let dAAValidator: IBlockValidator
     private let eDAValidator: IBlockValidator
@@ -56,24 +55,23 @@ class BitcoinCashMainNet: NetworkProtocol {
     required init(validatorFactory: BlockValidatorFactory, blockHelper: BlockHelper) {
         self.blockHelper = blockHelper
         headerValidator = validatorFactory.validator(for: .header)
-        bitsValidator = validatorFactory.validator(for: .bits)
         legacyDifficultyValidator = validatorFactory.validator(for: .legacy)
         dAAValidator = validatorFactory.validator(for: .DAA)
         eDAValidator = validatorFactory.validator(for: .EDA)
     }
 
     func validate(block: Block, previousBlock: Block) throws {
-//        try headerValidator.validate(candidate: block, block: previousBlock, network: self)
+        try headerValidator.validate(candidate: block, block: previousBlock, network: self)
 
-//        if try dAAValidator.medianTimePast(block: block) >= BitcoinCashMainNet.diffDate {
+        if try blockHelper.medianTimePast(block: block) >= BitcoinCashMainNet.diffDate {
             try dAAValidator.validate(candidate: block, block: previousBlock, network: self)
-//        } else {
-//            if isDifficultyTransitionPoint(height: previousBlock.height) {
-//                try legacyDifficultyValidator.validate(candidate: block, block: previousBlock, network: self)
-//            } else {
-//                try eDAValidator.validate(candidate: block, block: previousBlock, network: self)
-//            }
-//        }
+        } else {
+            if isDifficultyTransitionPoint(height: block.height) {
+                try legacyDifficultyValidator.validate(candidate: block, block: previousBlock, network: self)
+            } else {
+                try eDAValidator.validate(candidate: block, block: previousBlock, network: self)
+            }
+        }
     }
 
 }

@@ -60,7 +60,7 @@ class BitcoinMainNet: NetworkProtocol {
 
     func validate(block: Block, previousBlock: Block) throws {
         try headerValidator.validate(candidate: block, block: previousBlock, network: self)
-        if isDifficultyTransitionPoint(height: previousBlock.height) {
+        if isDifficultyTransitionPoint(height: block.height) {
             try difficultyValidator.validate(candidate: block, block: previousBlock, network: self)
         } else {
             try bitsValidator.validate(candidate: block, block: previousBlock, network: self)
