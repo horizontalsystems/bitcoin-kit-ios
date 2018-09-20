@@ -18,19 +18,18 @@ class RelayTransactionPeerTask: PeerTask {
         }
 
         requester?.send(transaction: transaction)
-        delegate?.completed(task: self)
 
         return true
     }
 
-//    override func handle(inventoryItem item: InventoryItem) -> Bool {
-//        guard item.objectType == .transaction && item.hash == transaction.dataHash else {
-//            return false
-//        }
-//
-//        delegate?.completed(task: self)
-//
-//        return true
-//    }
+    override func handleRelayedTransaction(hash: Data) -> Bool {
+        guard hash == transaction.dataHash else {
+            return false
+        }
+
+        delegate?.completed(task: self)
+
+        return true
+    }
 
 }

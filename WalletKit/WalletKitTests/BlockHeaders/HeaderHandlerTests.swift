@@ -6,6 +6,7 @@ import RealmSwift
 class HeaderHandlerTests: XCTestCase {
 
     private var mockValidatedBlockFactory: MockValidatedBlockFactory!
+    private var mockPeerGroup: MockPeerGroup!
     private var headerHandler: HeaderHandler!
 
     private var realm: Realm!
@@ -16,13 +17,19 @@ class HeaderHandlerTests: XCTestCase {
         let mockWalletKit = MockWalletKit()
 
         mockValidatedBlockFactory = mockWalletKit.mockValidatedBlockFactory
+        mockPeerGroup = mockWalletKit.mockPeerGroup
         realm = mockWalletKit.realm
 
-        headerHandler = HeaderHandler(realmFactory: mockWalletKit.mockRealmFactory, validateBlockFactory: mockValidatedBlockFactory)
+        stub(mockPeerGroup) { mock in
+            when(mock.syncBlocks()).thenDoNothing()
+        }
+
+        headerHandler = HeaderHandler(realmFactory: mockWalletKit.mockRealmFactory, validateBlockFactory: mockValidatedBlockFactory, peerGroup: mockPeerGroup)
     }
 
     override func tearDown() {
         mockValidatedBlockFactory = nil
+        mockPeerGroup = nil
         headerHandler = nil
 
         realm = nil
@@ -58,6 +65,8 @@ class HeaderHandlerTests: XCTestCase {
 
         XCTAssertNotEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", firstBlock.reversedHeaderHashHex).first, nil)
         XCTAssertNotEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", secondBlock.reversedHeaderHashHex).first, nil)
+
+        verify(mockPeerGroup).syncBlocks()
     }
 
     func testInvalidBlocks() {
@@ -84,6 +93,8 @@ class HeaderHandlerTests: XCTestCase {
 
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", firstBlock.reversedHeaderHashHex).first, nil)
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", secondBlock.reversedHeaderHashHex).first, nil)
+
+        verify(mockPeerGroup, never()).syncBlocks()
     }
 
     func testPartialValidBlocks() {
@@ -110,6 +121,8 @@ class HeaderHandlerTests: XCTestCase {
 
         XCTAssertNotEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", firstBlock.reversedHeaderHashHex).first, nil)
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", secondBlock.reversedHeaderHashHex).first, nil)
+
+        verify(mockPeerGroup).syncBlocks()
     }
 
 }

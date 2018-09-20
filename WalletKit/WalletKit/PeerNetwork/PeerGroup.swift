@@ -17,7 +17,9 @@ class PeerGroup {
 
     private var peers: [Peer] = []
     private var syncPeer: Peer?
-    private var requestedInventoryHashes: [Data] = []
+
+    private var allBlocksSynced: Bool = false
+    private var allTransactionsRelayed: Bool = false
 
     private let localQueue: DispatchQueue
     private let inventoryQueue: DispatchQueue
@@ -49,6 +51,20 @@ class PeerGroup {
         }
     }
 
+    func syncBlocks() {
+        if allBlocksSynced {
+            allBlocksSynced = false
+            checkReadyPeers()
+        }
+    }
+
+    func sendTransactions() {
+        if allTransactionsRelayed {
+            allTransactionsRelayed = false
+            checkReadyPeers()
+        }
+    }
+
     func addPublicKeyFilter(pubKey: PublicKey) {
         if !bloomFilters.contains(pubKey.raw!) {
             bloomFilters.append(pubKey.keyHash)
@@ -58,15 +74,6 @@ class PeerGroup {
         for peer in peers {
             peer.addFilter(filter: pubKey.keyHash)
             peer.addFilter(filter: pubKey.raw!)
-        }
-    }
-
-    func relay(transaction: Transaction) {
-        let data = TransactionSerializer.serialize(transaction: transaction)
-        let transaction = TransactionSerializer.deserialize(data: data)
-
-        for peer in peers {
-            peer.add(task: RelayTransactionPeerTask(transaction: transaction))
         }
     }
 
@@ -98,8 +105,12 @@ class PeerGroup {
             syncPeer = peer
             handleReadySyncPeer()
         } else {
-            if let hashes = delegate?.getNonSyncedMerkleBlocksHashes(limit: blocksPerPeer), !hashes.isEmpty {
-                peer.add(task: RequestMerkleBlocksPeerTask(hashes: hashes))
+            if !allTransactionsRelayed {
+                relayTransactions(peer: peer)
+            }
+
+            if !allBlocksSynced {
+                syncBlocks(peer: peer)
             }
         }
     }
@@ -110,12 +121,49 @@ class PeerGroup {
         }
     }
 
+    private func relayTransactions(peer: Peer) {
+        if let transactions = delegate?.getNonSentTransactions(), !transactions.isEmpty {
+            for transaction in transactions {
+                peer.add(task: RelayTransactionPeerTask(transaction: transaction))
+            }
+        }
+        allTransactionsRelayed = true
+    }
+
+    private func syncBlocks(peer: Peer) {
+        if let hashes = delegate?.getNonSyncedMerkleBlocksHashes(limit: blocksPerPeer) {
+            if hashes.isEmpty {
+                allBlocksSynced = true
+            } else {
+                peer.add(task: RequestMerkleBlocksPeerTask(hashes: hashes))
+            }
+        }
+    }
+
     private func checkReadyPeers() {
         for peer in peers.filter({ $0 !== syncPeer && $0.ready }) {
             localQueue.async {
                 self.handleReady(peer: peer)
             }
         }
+    }
+
+    private func isRequestingInventory(hash: Data) -> Bool {
+        for peer in peers {
+            if peer.isRequestingInventory(hash: hash) {
+                return true
+            }
+        }
+        return false
+    }
+
+    private func handleRelayedTransaction(hash: Data) -> Bool {
+        for peer in peers {
+            if peer.handleRelayedTransaction(hash: hash) {
+                return true
+            }
+        }
+        return false
     }
 
 }
@@ -169,20 +217,12 @@ extension PeerGroup: PeerDelegate {
     func peer(_ peer: Peer, didReceiveMerkleBlock merkleBlock: MerkleBlock) {
         queue.async {
             self.delegate?.peerGroupDidReceive(blockHeader: merkleBlock.header, withTransactions: merkleBlock.transactions)
-
-            if let index = self.requestedInventoryHashes.index(where: { $0 == merkleBlock.headerHash }) {
-                self.requestedInventoryHashes.remove(at: index)
-            }
         }
     }
 
     func peer(_ peer: Peer, didReceiveTransaction transaction: Transaction) {
         queue.async {
             self.delegate?.peerGroupDidReceive(transaction: transaction)
-
-            if let index = self.requestedInventoryHashes.index(where: { $0 == transaction.dataHash }) {
-                self.requestedInventoryHashes.remove(at: index)
-            }
         }
     }
 
@@ -198,16 +238,18 @@ extension PeerGroup: PeerDelegate {
             var transactionHashes = [Data]()
 
             for item in items {
-                if !self.requestedInventoryHashes.contains(item.hash) {
+                if !self.isRequestingInventory(hash: item.hash) {
                     switch item.objectType {
                     case .blockMessage:
                         if let delegate = self.delegate, delegate.shouldRequestBlock(hash: item.hash) {
-                            self.requestedInventoryHashes.append(item.hash)
                             blockHashes.append(item.hash)
                         }
                     case .transaction:
+                        if self.handleRelayedTransaction(hash: item.hash) {
+                            continue
+                        }
+
                         if let delegate = self.delegate, delegate.shouldRequestTransaction(hash: item.hash) {
-                            self.requestedInventoryHashes.append(item.hash)
                             transactionHashes.append(item.hash)
                         }
                     default: ()

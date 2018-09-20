@@ -9,10 +9,12 @@ class HeaderHandler {
 
     private let realmFactory: RealmFactory
     private let validateBlockFactory: ValidatedBlockFactory
+    private let peerGroup: PeerGroup
 
-    init(realmFactory: RealmFactory, validateBlockFactory: ValidatedBlockFactory) {
+    init(realmFactory: RealmFactory, validateBlockFactory: ValidatedBlockFactory, peerGroup: PeerGroup) {
         self.realmFactory = realmFactory
         self.validateBlockFactory = validateBlockFactory
+        self.peerGroup = peerGroup
     }
 
     func handle(headers: [BlockHeader]) throws {
@@ -30,7 +32,7 @@ class HeaderHandler {
             }
 
             if !blocks.isEmpty {
-                // todo: trigger peer group
+                peerGroup.syncBlocks()
             }
         }
 

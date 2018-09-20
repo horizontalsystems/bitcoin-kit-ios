@@ -48,6 +48,10 @@ class RequestMerkleBlocksPeerTask: PeerTask {
         return false
     }
 
+    override func isRequestingInventory(hash: Data) -> Bool {
+        return hashes.contains(hash)
+    }
+
     private func handle(completeMerkleBlock merkleBlock: MerkleBlock) {
         if let index = hashes.index(where: { $0 == merkleBlock.headerHash }) {
             hashes.remove(at: index)

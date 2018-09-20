@@ -32,4 +32,8 @@ class RequestTransactionsPeerTask: PeerTask {
         return true
     }
 
+    override func isRequestingInventory(hash: Data) -> Bool {
+        return hashes.contains(hash)
+    }
+
 }

@@ -8,7 +8,7 @@ class TransactionCreatorTests: XCTestCase {
     private var realm: Realm!
     private var mockTransactionBuilder: MockTransactionBuilder!
     private var mockTransactionProcessor: MockTransactionProcessor!
-    private var mockTransactionSender: MockTransactionSender!
+    private var mockPeerGroup: MockPeerGroup!
     private var mockAddressManager: MockAddressManager!
 
     private var transactionCreator: TransactionCreator!
@@ -22,7 +22,7 @@ class TransactionCreatorTests: XCTestCase {
 
         mockTransactionBuilder = mockWalletKit.mockTransactionBuilder
         mockTransactionProcessor = mockWalletKit.mockTransactionProcessor
-        mockTransactionSender = mockWalletKit.mockTransactionSender
+        mockPeerGroup = mockWalletKit.mockPeerGroup
         mockAddressManager = mockWalletKit.mockAddressManager
 
         stub(mockTransactionBuilder) { mock in
@@ -31,21 +31,21 @@ class TransactionCreatorTests: XCTestCase {
         stub(mockTransactionProcessor) { mock in
             when(mock.enqueueRun()).thenDoNothing()
         }
-        stub(mockTransactionSender) { mock in
-            when(mock.enqueueRun()).thenDoNothing()
+        stub(mockPeerGroup) { mock in
+            when(mock.sendTransactions()).thenDoNothing()
         }
         stub(mockAddressManager) { mock in
             when(mock.changePublicKey()).thenReturn(TestData.pubKey())
         }
 
-        transactionCreator = TransactionCreator(realmFactory: mockWalletKit.mockRealmFactory, transactionBuilder: mockTransactionBuilder, transactionProcessor: mockTransactionProcessor, transactionSender: mockTransactionSender, addressManager: mockAddressManager)
+        transactionCreator = TransactionCreator(realmFactory: mockWalletKit.mockRealmFactory, transactionBuilder: mockTransactionBuilder, transactionProcessor: mockTransactionProcessor, peerGroup: mockPeerGroup, addressManager: mockAddressManager)
     }
 
     override func tearDown() {
         realm = nil
         mockTransactionBuilder = nil
         mockTransactionProcessor = nil
-        mockTransactionSender = nil
+        mockPeerGroup = nil
         mockAddressManager = nil
         transactionCreator = nil
 
@@ -60,7 +60,7 @@ class TransactionCreatorTests: XCTestCase {
             return
         }
 
-        verify(mockTransactionSender).enqueueRun()
+        verify(mockPeerGroup).sendTransactions()
         verify(mockTransactionProcessor).enqueueRun()
     }
 
@@ -78,7 +78,7 @@ class TransactionCreatorTests: XCTestCase {
             XCTFail("Unexpected exception!")
         }
 
-        verify(mockTransactionSender, never()).enqueueRun()
+        verify(mockPeerGroup, never()).sendTransactions()
         verify(mockTransactionProcessor, never()).enqueueRun()
     }
 
