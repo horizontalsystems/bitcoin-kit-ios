@@ -1,6 +1,8 @@
 import Foundation
 
 class BitcoinCashTestNet: NetworkProtocol {
+    private let headerValidator: IBlockValidator
+
     let name = "bitcoin-cash-test-net"
     let pubKeyHash: UInt8 = 0x6f
     let privateKey: UInt8 = 0xef
@@ -39,5 +41,13 @@ class BitcoinCashTestNet: NetworkProtocol {
                     nonce: 1510232395
             ),
             height: 1253952)
+
+    required init(validatorFactory: BlockValidatorFactory) {
+        headerValidator = validatorFactory.validator(for: .header)
+    }
+
+    func validate(block: Block, previousBlock: Block) throws {
+        try headerValidator.validate(candidate: block, block: previousBlock, network: self)
+    }
 
 }

@@ -1,6 +1,8 @@
 import Foundation
 
 class BitcoinRegTest: NetworkProtocol {
+    private let headerValidator: IBlockValidator
+
     let name = "bitcoin-reg-test"
     let pubKeyHash: UInt8 = 0x6f
     let privateKey: UInt8 = 0xef
@@ -53,5 +55,13 @@ class BitcoinRegTest: NetworkProtocol {
 //                    nonce: 0
 //            ),
 //            height: 2016)
+
+    required init(validatorFactory: BlockValidatorFactory) {
+        headerValidator = validatorFactory.validator(for: .header)
+    }
+
+    func validate(block: Block, previousBlock: Block) throws {
+        try headerValidator.validate(candidate: block, block: previousBlock, network: self)
+    }
 
 }

@@ -176,14 +176,14 @@ class TransactionHandlerTests: XCTestCase {
         let block = TestData.firstBlock
 
         stub(mockValidatedBlockFactory) { mock in
-            when(mock.block(fromHeader: any(), previousBlock: any())).thenThrow(BlockValidator.ValidatorError.noCheckpointBlock)
+            when(mock.block(fromHeader: any(), previousBlock: any())).thenThrow(BlockValidatorError.noCheckpointBlock)
         }
 
         do {
             try transactionHandler.handle(blockTransactions: [transaction], blockHeader: block.header!)
             XCTFail("Expected exception not thrown!")
-        } catch let error as BlockValidator.ValidatorError {
-            XCTAssertEqual(error, BlockValidator.ValidatorError.noCheckpointBlock)
+        } catch let error as BlockValidatorError {
+            XCTAssertEqual(error, BlockValidatorError.noCheckpointBlock)
         } catch {
             XCTFail("Unexpected exception!")
         }

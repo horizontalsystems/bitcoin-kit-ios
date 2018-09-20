@@ -1,4 +1,5 @@
 import Foundation
+import BigInt
 import Cuckoo
 import RealmSwift
 @testable import WalletKit
@@ -6,10 +7,11 @@ import RealmSwift
 class MockWalletKit {
 
     let mockDifficultyEncoder: MockDifficultyEncoder
-    let mockDifficultyCalculator: MockDifficultyCalculator
+    let mockBlockHelper: MockBlockHelper
+    let mockIBlockValidator: MockIBlockValidator
+    let mockValidatorFactory: MockBlockValidatorFactory
 
     let mockNetwork: MockNetworkProtocol
-    let mockBlockValidator: MockBlockValidator
 
     let mockRealmFactory: MockRealmFactory
 
@@ -50,11 +52,20 @@ class MockWalletKit {
     let realm: Realm
 
     public init() {
-        mockDifficultyEncoder = MockDifficultyEncoder()
-        mockDifficultyCalculator = MockDifficultyCalculator(difficultyEncoder: mockDifficultyEncoder)
+        let mockDifficultyEncoder = MockDifficultyEncoder()
+        self.mockDifficultyEncoder = mockDifficultyEncoder
+        let mockBlockHelper = MockBlockHelper()
+        self.mockBlockHelper = mockBlockHelper
+
+        let mockIBlockValidator = MockIBlockValidator()
+        self.mockIBlockValidator = mockIBlockValidator
+
+        mockValidatorFactory = MockBlockValidatorFactory(difficultyEncoder: mockDifficultyEncoder, blockHelper: mockBlockHelper)
+        stub(mockValidatorFactory) { mock in
+            when(mock.validator(for: any())).thenReturn(mockIBlockValidator)
+        }
 
         mockNetwork = MockNetworkProtocol()
-        mockBlockValidator = MockBlockValidator(calculator: mockDifficultyCalculator)
 
         stub(mockNetwork) { mock in
             when(mock.coinType.get).thenReturn(1)
@@ -82,7 +93,7 @@ class MockWalletKit {
         mockProgressSyncer = MockProgressSyncer(realmFactory: mockRealmFactory)
         mockAddressManager = MockAddressManager(realmFactory: mockRealmFactory, hdWallet: mockHdWallet, peerGroup: mockPeerGroup)
 
-        mockValidatedBlockFactory = MockValidatedBlockFactory(realmFactory: mockRealmFactory, factory: mockFactory, validator: mockBlockValidator, network: mockNetwork)
+        mockValidatedBlockFactory = MockValidatedBlockFactory(realmFactory: mockRealmFactory, factory: mockFactory, network: mockNetwork)
 
         mockHeaderSyncer = MockHeaderSyncer(realmFactory: mockRealmFactory, network: mockNetwork)
         mockHeaderHandler = MockHeaderHandler(realmFactory: mockRealmFactory, validateBlockFactory: mockValidatedBlockFactory, peerGroup: mockPeerGroup)

@@ -1,6 +1,13 @@
 import Foundation
 
 class BitcoinTestNet: NetworkProtocol {
+    private static let testNetDiffDate = 1329264000 // February 16th 2012
+
+    private let headerValidator: IBlockValidator
+    private let bitsValidator: IBlockValidator
+    private let legacyDifficultyValidator: IBlockValidator
+    private let testNetDifficultyValidator: IBlockValidator
+
     let name = "bitcoin-test-net"
     let pubKeyHash: UInt8 = 0x6f
     let privateKey: UInt8 = 0xef
@@ -43,5 +50,29 @@ class BitcoinTestNet: NetworkProtocol {
                     nonce: 2681700833
             ),
             height: 1411200)
+
+    required init(validatorFactory: BlockValidatorFactory) {
+        headerValidator = validatorFactory.validator(for: .header)
+        bitsValidator = validatorFactory.validator(for: .bits)
+        legacyDifficultyValidator = validatorFactory.validator(for: .legacy)
+        testNetDifficultyValidator = validatorFactory.validator(for: .testNet)
+    }
+
+    func validate(block: Block, previousBlock: Block) throws {
+        guard let previousBlockHeader = previousBlock.header else {
+            throw Block.BlockError.noHeader
+        }
+
+        try headerValidator.validate(candidate: block, block: previousBlock, network: self)
+        if isDifficultyTransitionPoint(height: previousBlock.height) {
+            try legacyDifficultyValidator.validate(candidate: block, block: previousBlock, network: self)
+        } else {
+            if previousBlockHeader.timestamp > BitcoinTestNet.testNetDiffDate {
+                try testNetDifficultyValidator.validate(candidate: block, block: previousBlock, network: self)
+            } else {
+                try bitsValidator.validate(candidate: block, block: previousBlock, network: self)
+            }
+        }
+    }
 
 }

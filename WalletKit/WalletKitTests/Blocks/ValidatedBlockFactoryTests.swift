@@ -7,7 +7,7 @@ import RxSwift
 class ValidatedBlockFactoryTests: XCTestCase {
 
     private var mockFactory: MockFactory!
-    private var mockBlockValidator: MockBlockValidator!
+    private var mockNetwork: MockNetworkProtocol!
     private var factory: ValidatedBlockFactory!
 
     private var realm: Realm!
@@ -19,26 +19,23 @@ class ValidatedBlockFactoryTests: XCTestCase {
         let mockWalletKit = MockWalletKit()
 
         mockFactory = mockWalletKit.mockFactory
-        mockBlockValidator = mockWalletKit.mockBlockValidator
+        mockNetwork = mockWalletKit.mockNetwork
 
         realm = mockWalletKit.realm
         checkpointBlock = TestData.checkpointBlock
 
-        stub(mockBlockValidator) { mock in
-            when(mock.validate(block: any())).thenDoNothing()
-        }
-
-        let mockNetwork = mockWalletKit.mockNetwork
         stub(mockNetwork) { mock in
             when(mock.checkpointBlock.get).thenReturn(checkpointBlock)
+            when(mock.validate(block: any(), previousBlock: any())).thenDoNothing()
         }
 
-        factory = ValidatedBlockFactory(realmFactory: mockWalletKit.mockRealmFactory, factory: mockFactory, validator: mockBlockValidator, network: mockNetwork)
+
+        factory = ValidatedBlockFactory(realmFactory: mockWalletKit.mockRealmFactory, factory: mockFactory, network: mockNetwork)
     }
 
     override func tearDown() {
         mockFactory = nil
-        mockBlockValidator = nil
+        mockNetwork = nil
         factory = nil
 
         realm = nil
@@ -94,17 +91,17 @@ class ValidatedBlockFactoryTests: XCTestCase {
         stub(mockFactory) { mock in
             when(mock.block(withHeader: equal(to: testBlock.header!), previousBlock: equal(to: testBlock.previousBlock!))).thenReturn(testBlock)
         }
-        stub(mockBlockValidator) { mock in
-            when(mock.validate(block: equal(to: testBlock))).thenThrow(BlockValidator.ValidatorError.notEqualBits)
+        stub(mockNetwork) { mock in
+            when(mock.validate(block: equal(to: testBlock), previousBlock: any())).thenThrow(BlockValidatorError.notEqualBits)
         }
 
         var caught = false
 
         do {
             _ = try factory.block(fromHeader: testBlock.header!, previousBlock: testBlock.previousBlock)
-        } catch let error as BlockValidator.ValidatorError {
+        } catch let error as BlockValidatorError {
             caught = true
-            XCTAssertEqual(error, BlockValidator.ValidatorError.notEqualBits)
+            XCTAssertEqual(error, BlockValidatorError.notEqualBits)
         } catch {
             XCTFail("Unknown exception thrown")
         }
