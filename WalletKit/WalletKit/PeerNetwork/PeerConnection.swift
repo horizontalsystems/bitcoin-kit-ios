@@ -1,5 +1,4 @@
 import Foundation
-import BigInt
 
 class PeerConnection: NSObject, StreamDelegate {
     private let bufferSize = 4096
