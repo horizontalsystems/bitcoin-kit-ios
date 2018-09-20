@@ -21,10 +21,10 @@ public class WalletKit {
     private var blocksNotificationToken: NotificationToken?
 
     let difficultyEncoder: DifficultyEncoder
-    let difficultyCalculator: DifficultyCalculator
+    let blockHelper: BlockHelper
+    let validatorFactory: BlockValidatorFactory
 
     let network: NetworkProtocol
-    let blockValidator: BlockValidator
 
     let realmFactory: RealmFactory
 
@@ -70,24 +70,20 @@ public class WalletKit {
         let realmConfiguration = Realm.Configuration(fileURL: documentsUrl?.appendingPathComponent(realmFileName))
 
         difficultyEncoder = DifficultyEncoder()
-        difficultyCalculator = DifficultyCalculator(difficultyEncoder: difficultyEncoder)
+        blockHelper = BlockHelper()
+        validatorFactory = BlockValidatorFactory(difficultyEncoder: difficultyEncoder, blockHelper: blockHelper)
 
         switch networkType {
         case .bitcoinMainNet:
-            network = BitcoinMainNet()
-            blockValidator = BlockValidator(calculator: difficultyCalculator)
+            network = BitcoinMainNet(validatorFactory: validatorFactory)
         case .bitcoinTestNet:
-            network = BitcoinTestNet()
-            blockValidator = TestNetBlockValidator(calculator: difficultyCalculator)
+            network = BitcoinTestNet(validatorFactory: validatorFactory)
         case .bitcoinRegTest:
-            network = BitcoinRegTest()
-            blockValidator = RegTestBlockValidator(calculator: difficultyCalculator)
+            network = BitcoinRegTest(validatorFactory: validatorFactory)
         case .bitcoinCashMainNet:
-            network = BitcoinCashMainNet()
-            blockValidator = BlockValidator(calculator: difficultyCalculator)
+            network = BitcoinCashMainNet(validatorFactory: validatorFactory, blockHelper: blockHelper)
         case .bitcoinCashTestNet:
-            network = BitcoinCashTestNet()
-            blockValidator = TestNetBlockValidator(calculator: difficultyCalculator)
+            network = BitcoinCashTestNet(validatorFactory: validatorFactory)
         }
 
         realmFactory = RealmFactory(configuration: realmConfiguration)
@@ -110,7 +106,7 @@ public class WalletKit {
         addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, peerGroup: peerGroup)
         progressSyncer = ProgressSyncer(realmFactory: realmFactory)
 
-        validatedBlockFactory = ValidatedBlockFactory(realmFactory: realmFactory, factory: factory, validator: blockValidator, network: network)
+        validatedBlockFactory = ValidatedBlockFactory(realmFactory: realmFactory, factory: factory, network: network)
 
         headerSyncer = HeaderSyncer(realmFactory: realmFactory, network: network)
         headerHandler = HeaderHandler(realmFactory: realmFactory, validateBlockFactory: validatedBlockFactory, peerGroup: peerGroup)

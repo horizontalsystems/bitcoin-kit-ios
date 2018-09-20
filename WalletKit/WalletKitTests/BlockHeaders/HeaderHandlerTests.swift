@@ -74,7 +74,7 @@ class HeaderHandlerTests: XCTestCase {
         let firstBlock = secondBlock.previousBlock!
 
         stub(mockValidatedBlockFactory) { mock in
-            when(mock.block(fromHeader: equal(to: firstBlock.header!), previousBlock: equal(to: nil))).thenThrow(BlockValidator.ValidatorError.notEqualBits)
+            when(mock.block(fromHeader: equal(to: firstBlock.header!), previousBlock: equal(to: nil))).thenThrow(BlockValidatorError.notEqualBits)
             when(mock.block(fromHeader: equal(to: secondBlock.header!), previousBlock: equal(to: firstBlock))).thenReturn(secondBlock)
         }
 
@@ -82,9 +82,9 @@ class HeaderHandlerTests: XCTestCase {
 
         do {
             try headerHandler.handle(headers: [firstBlock.header!, secondBlock.header!])
-        } catch let error as BlockValidator.ValidatorError {
+        } catch let error as BlockValidatorError {
             caught = true
-            XCTAssertEqual(error, BlockValidator.ValidatorError.notEqualBits)
+            XCTAssertEqual(error, BlockValidatorError.notEqualBits)
         } catch {
             XCTFail("Unknown exception thrown")
         }
@@ -103,16 +103,16 @@ class HeaderHandlerTests: XCTestCase {
 
         stub(mockValidatedBlockFactory) { mock in
             when(mock.block(fromHeader: equal(to: firstBlock.header!), previousBlock: equal(to: nil))).thenReturn(firstBlock)
-            when(mock.block(fromHeader: equal(to: secondBlock.header!), previousBlock: equal(to: firstBlock))).thenThrow(BlockValidator.ValidatorError.notEqualBits)
+            when(mock.block(fromHeader: equal(to: secondBlock.header!), previousBlock: equal(to: firstBlock))).thenThrow(BlockValidatorError.notEqualBits)
         }
 
         var caught = false
 
         do {
             try headerHandler.handle(headers: [firstBlock.header!, secondBlock.header!])
-        } catch let error as BlockValidator.ValidatorError {
+        } catch let error as BlockValidatorError {
             caught = true
-            XCTAssertEqual(error, BlockValidator.ValidatorError.notEqualBits)
+            XCTAssertEqual(error, BlockValidatorError.notEqualBits)
         } catch {
             XCTFail("Unknown exception thrown")
         }

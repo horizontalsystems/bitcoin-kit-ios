@@ -22,11 +22,13 @@ class TransactionExtractorTests: XCTestCase {
     override func setUp() {
         super.setUp()
 
+        let mockWalletKit = MockWalletKit()
+
         pfromsh = MockPFromSHExtractor()
         p2pkh = MockP2PKHExtractor()
         p2pk = MockP2PKExtractor()
         p2sh = MockP2SHExtractor()
-        addressConverter = MockAddressConverter(network: BitcoinTestNet())
+        addressConverter = MockAddressConverter(network: BitcoinTestNet(validatorFactory: mockWalletKit.mockValidatorFactory))
         scriptConverter = MockScriptConverter()
 
         inputExtractors = [pfromsh]

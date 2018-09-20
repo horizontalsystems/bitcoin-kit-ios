@@ -28,7 +28,7 @@ class Peer {
         return connection.logName
     }
 
-    init(host: String, network: NetworkProtocol = BitcoinTestNet()) {
+    init(host: String, network: NetworkProtocol) {
         connection = PeerConnection(host: host, network: network)
         queue = DispatchQueue(label: "Peer: \(host)", qos: .userInitiated)
 

@@ -20,7 +20,7 @@ class InputSignerTests: XCTestCase {
         realm = mockWalletKit.realm
 
         // Create private key/address provider for tests
-        let privateKey = HDPrivateKey(privateKey: Data(hex: "4ee8efccaa04495d5d3ab0f847952fcff43ffc0459bd87981b6be485b92f8d64")!, chainCode: Data(), network: BitcoinTestNet())
+        let privateKey = HDPrivateKey(privateKey: Data(hex: "4ee8efccaa04495d5d3ab0f847952fcff43ffc0459bd87981b6be485b92f8d64")!, chainCode: Data(), network: BitcoinTestNet(validatorFactory: mockWalletKit.mockValidatorFactory))
         let publicKeyHash = Data(hex: "e4de5d630c5cacd7af96418a8f35c411c8ff3c06")!
         ownPubKey = PublicKey()
         ownPubKey.raw = Data(hex: "037d56797fbe9aa506fc263751abf23bb46c9770181a6059096808923f0a64cb15")!

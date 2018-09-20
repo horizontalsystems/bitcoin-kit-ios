@@ -1,4 +1,5 @@
 import Foundation
+import BigInt
 
 class PeerConnection: NSObject, StreamDelegate {
     private let bufferSize = 4096
@@ -23,7 +24,7 @@ class PeerConnection: NSObject, StreamDelegate {
         return "[\(WordList.english[index])]".uppercased()
     }
 
-    init(host: String, network: NetworkProtocol = BitcoinTestNet()) {
+    init(host: String, network: NetworkProtocol) {
         self.host = host
         self.port = UInt32(network.port)
         self.network = network

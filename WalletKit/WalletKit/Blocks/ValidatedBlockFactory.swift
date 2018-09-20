@@ -4,13 +4,11 @@ class ValidatedBlockFactory {
 
     private let realmFactory: RealmFactory
     private let factory: Factory
-    private let validator: BlockValidator
     private let network: NetworkProtocol
 
-    init(realmFactory: RealmFactory, factory: Factory, validator: BlockValidator, network: NetworkProtocol) {
+    init(realmFactory: RealmFactory, factory: Factory, network: NetworkProtocol) {
         self.realmFactory = realmFactory
         self.factory = factory
-        self.validator = validator
         self.network = network
     }
 
@@ -26,7 +24,7 @@ class ValidatedBlockFactory {
         }
 
         let block = factory.block(withHeader: header, previousBlock: resolvedPreviousBlock)
-        try validator.validate(block: block)
+        try network.validate(block: block, previousBlock: resolvedPreviousBlock)
         return block
     }
 
