@@ -5,6 +5,8 @@ class PeerTask {
     weak var requester: IPeerTaskRequester?
     weak var delegate: IPeerTaskDelegate?
 
+    var completed: Bool = false
+
     func start() {
     }
 
@@ -39,12 +41,7 @@ class PeerTask {
 }
 
 protocol IPeerTaskDelegate: class {
-    func received(blockHeaders: [BlockHeader])
-    func received(merkleBlock: MerkleBlock)
-    func received(transaction: Transaction)
-
-    func completed(task: PeerTask)
-    func failed(task: PeerTask)
+    func handle(task: PeerTask)
 }
 
 protocol IPeerTaskRequester: class {

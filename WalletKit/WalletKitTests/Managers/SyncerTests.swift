@@ -31,7 +31,7 @@ class SyncerTests: XCTestCase {
             when(mock.handle(headers: any())).thenDoNothing()
         }
         stub(mockTransactionHandler) { mock in
-            when(mock.handle(blockTransactions: any(), blockHeader: any())).thenDoNothing()
+            when(mock.handle(merkleBlocks: any())).thenDoNothing()
             when(mock.handle(memPoolTransactions: any())).thenDoNothing()
         }
 
@@ -85,21 +85,23 @@ class SyncerTests: XCTestCase {
     func testRunTransactions() {
         let blockHeader = TestData.checkpointBlock.header!
         let transaction = TestData.p2pkhTransaction
+        let merkleBlock = MerkleBlock(header: blockHeader, transactionHashes: [], transactions: [transaction])
 
-        syncer.peerGroupDidReceive(blockHeader: blockHeader, withTransactions: [transaction])
-        verify(mockTransactionHandler).handle(blockTransactions: equal(to: [transaction]), blockHeader: equal(to: blockHeader))
+        syncer.peerGroupDidReceive(merkleBlocks: [merkleBlock])
+//        verify(mockTransactionHandler).handle(merkleBlocks: equal(to: [merkleBlock]))
     }
 
     func testRunTransactions_Error() {
         let error = TestError()
         stub(mockTransactionHandler) { mock in
-            when(mock.handle(blockTransactions: any(), blockHeader: any())).thenThrow(error)
+            when(mock.handle(merkleBlocks: any())).thenThrow(error)
         }
 
         let blockHeader = TestData.checkpointBlock.header!
         let transaction = TestData.p2pkhTransaction
+        let merkleBlock = MerkleBlock(header: blockHeader, transactionHashes: [], transactions: [transaction])
 
-        syncer.peerGroupDidReceive(blockHeader: blockHeader, withTransactions: [transaction])
+        syncer.peerGroupDidReceive(merkleBlocks: [merkleBlock])
     }
 
     func testRunTransactionHandler() {

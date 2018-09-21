@@ -32,7 +32,7 @@ class TransactionCreatorTests: XCTestCase {
             when(mock.enqueueRun()).thenDoNothing()
         }
         stub(mockPeerGroup) { mock in
-            when(mock.sendTransactions()).thenDoNothing()
+            when(mock.send(transaction: any())).thenDoNothing()
         }
         stub(mockAddressManager) { mock in
             when(mock.changePublicKey()).thenReturn(TestData.pubKey())
@@ -55,12 +55,12 @@ class TransactionCreatorTests: XCTestCase {
     func testCreateTransaction() {
         try! transactionCreator.create(to: "Address", value: 1)
 
-        guard let _ = realm.objects(Transaction.self).filter("reversedHashHex = %@", TestData.p2pkhTransaction.reversedHashHex).first else {
+        guard let transaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", TestData.p2pkhTransaction.reversedHashHex).first else {
             XCTFail("No transaction record!")
             return
         }
 
-        verify(mockPeerGroup).sendTransactions()
+        verify(mockPeerGroup).send(transaction: equal(to: transaction))
         verify(mockTransactionProcessor).enqueueRun()
     }
 
@@ -78,7 +78,7 @@ class TransactionCreatorTests: XCTestCase {
             XCTFail("Unexpected exception!")
         }
 
-        verify(mockPeerGroup, never()).sendTransactions()
+        verify(mockPeerGroup, never()).send(transaction: any())
         verify(mockTransactionProcessor, never()).enqueueRun()
     }
 

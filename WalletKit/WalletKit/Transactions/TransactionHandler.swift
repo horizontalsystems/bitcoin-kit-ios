@@ -18,58 +18,61 @@ class TransactionHandler {
         self.validateBlockFactory = validateBlockFactory
     }
 
-    func handle(blockTransactions transactions: [Transaction], blockHeader: BlockHeader) throws {
+    func handle(merkleBlocks: [MerkleBlock]) throws {
         let realm = realmFactory.realm
-
-        let reversedHashHex = Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: blockHeader)).reversedHex
 
         var hasNewTransactions = false
         var hasNewSyncedBlocks = false
 
-        if let existingBlock = realm.objects(Block.self).filter("reversedHeaderHashHex = %@", reversedHashHex).last {
-            if existingBlock.status == .synced {
-                return
-            }
+        try realm.write {
+            for merkleBlock in merkleBlocks {
+                let blockHeader = merkleBlock.header
+                let transactions = merkleBlock.transactions
 
-            try realm.write {
-                if existingBlock.header == nil {
-                    existingBlock.header = blockHeader
-                }
+                let reversedHashHex = Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: blockHeader)).reversedHex
 
-                for transaction in transactions {
-                    if let existingTransaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", transaction.reversedHashHex).first {
-                        existingTransaction.block = existingBlock
-                        existingTransaction.status = .relayed
-                    } else {
-                        realm.add(transaction)
-                        transaction.block = existingBlock
-                        hasNewTransactions = true
+                if let existingBlock = realm.objects(Block.self).filter("reversedHeaderHashHex = %@", reversedHashHex).last {
+                    if existingBlock.status == .synced {
+                        return
                     }
-                }
 
-                existingBlock.status = .synced
-                hasNewSyncedBlocks = true
-            }
-        } else {
-            let block = try validateBlockFactory.block(fromHeader: blockHeader)
-
-            block.status = .synced
-
-            try realm.write {
-                realm.add(block)
-
-                for transaction in transactions {
-                    if let existingTransaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", transaction.reversedHashHex).first {
-                        existingTransaction.block = block
-                        existingTransaction.status = .relayed
-                    } else {
-                        realm.add(transaction)
-                        transaction.block = block
-                        hasNewTransactions = true
+                    if existingBlock.header == nil {
+                        existingBlock.header = blockHeader
                     }
-                }
 
-                hasNewSyncedBlocks = true
+                    for transaction in transactions {
+                        if let existingTransaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", transaction.reversedHashHex).first {
+                            existingTransaction.block = existingBlock
+                            existingTransaction.status = .relayed
+                        } else {
+                            realm.add(transaction)
+                            transaction.block = existingBlock
+                            hasNewTransactions = true
+                        }
+                    }
+
+                    existingBlock.status = .synced
+                    hasNewSyncedBlocks = true
+                } else {
+                    let block = try validateBlockFactory.block(fromHeader: blockHeader)
+
+                    block.status = .synced
+
+                    realm.add(block)
+
+                    for transaction in transactions {
+                        if let existingTransaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", transaction.reversedHashHex).first {
+                            existingTransaction.block = block
+                            existingTransaction.status = .relayed
+                        } else {
+                            realm.add(transaction)
+                            transaction.block = block
+                            hasNewTransactions = true
+                        }
+                    }
+
+                    hasNewSyncedBlocks = true
+                }
             }
         }
 

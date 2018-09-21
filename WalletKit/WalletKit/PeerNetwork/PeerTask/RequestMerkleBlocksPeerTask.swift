@@ -4,6 +4,7 @@ class RequestMerkleBlocksPeerTask: PeerTask {
 
     private var hashes: [Data]
     private var pendingMerkleBlocks = [MerkleBlock]()
+    var merkleBlocks = [MerkleBlock]()
 
     init(hashes: [Data]) {
         self.hashes = hashes
@@ -57,10 +58,11 @@ class RequestMerkleBlocksPeerTask: PeerTask {
             hashes.remove(at: index)
         }
 
-        delegate?.received(merkleBlock: merkleBlock)
+        merkleBlocks.append(merkleBlock)
 
         if hashes.isEmpty {
-            delegate?.completed(task: self)
+            completed = true
+            delegate?.handle(task: self)
         }
     }
 

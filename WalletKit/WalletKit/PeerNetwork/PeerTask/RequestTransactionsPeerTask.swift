@@ -3,6 +3,7 @@ import Foundation
 class RequestTransactionsPeerTask: PeerTask {
 
     private var hashes: [Data]
+    var transactions = [Transaction]()
 
     init(hashes: [Data]) {
         self.hashes = hashes
@@ -22,11 +23,11 @@ class RequestTransactionsPeerTask: PeerTask {
         }
 
         hashes.remove(at: index)
-
-        delegate?.received(transaction: transaction)
+        transactions.append(transaction)
 
         if hashes.isEmpty {
-            delegate?.completed(task: self)
+            completed = true
+            delegate?.handle(task: self)
         }
 
         return true

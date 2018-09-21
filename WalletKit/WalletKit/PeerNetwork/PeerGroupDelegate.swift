@@ -2,11 +2,11 @@ import Foundation
 
 protocol PeerGroupDelegate : class {
     func getHeadersHashes() -> [Data]
-    func getNonSyncedMerkleBlocksHashes(limit: Int) -> [Data]
+    func getNonSyncedMerkleBlocksHashes() -> [Data]
     func getNonSentTransactions() -> [Transaction]
 
     func peerGroupDidReceive(headers: [BlockHeader])
-    func peerGroupDidReceive(blockHeader: BlockHeader, withTransactions transactions: [Transaction])
+    func peerGroupDidReceive(merkleBlocks: [MerkleBlock])
     func peerGroupDidReceive(transaction: Transaction)
 
     func shouldRequestBlock(hash: Data) -> Bool

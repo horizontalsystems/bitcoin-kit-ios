@@ -289,30 +289,15 @@ extension Peer: PeerConnectionDelegate {
 
 extension Peer: IPeerTaskDelegate {
 
-    func received(blockHeaders: [BlockHeader]) {
-        delegate?.peer(self, didReceiveHeaders: blockHeaders)
-    }
-
-    func received(merkleBlock: MerkleBlock) {
-        delegate?.peer(self, didReceiveMerkleBlock: merkleBlock)
-    }
-
-    func received(transaction: Transaction) {
-        delegate?.peer(self, didReceiveTransaction: transaction)
-    }
-
-    func completed(task: PeerTask) {
+    func handle(task: PeerTask) {
         if let index = tasks.index(where: { $0 === task }) {
-            tasks.remove(at: index)
+            let task = tasks.remove(at: index)
+            delegate?.peer(self, didHandleTask: task)
         }
 
         if tasks.isEmpty {
             delegate?.peerReady(self)
         }
-    }
-
-    func failed(task: PeerTask) {
-        // todo
     }
 
 }
@@ -359,11 +344,12 @@ extension Peer: Equatable {
 
 protocol PeerDelegate: class {
     func getBloomFilters() -> [Data]
+
     func peerReady(_ peer: Peer)
     func peerDidDisconnect(_ peer: Peer, withError error: Bool)
-    func peer(_ peer: Peer, didReceiveHeaders headers: [BlockHeader])
-    func peer(_ peer: Peer, didReceiveMerkleBlock merkleBlock: MerkleBlock)
-    func peer(_ peer: Peer, didReceiveTransaction transaction: Transaction)
+
+    func peer(_ peer: Peer, didHandleTask task: PeerTask)
+
     func peer(_ peer: Peer, didReceiveAddresses addresses: [NetworkAddress])
     func peer(_ peer: Peer, didReceiveInventoryItems items: [InventoryItem])
 }

@@ -2,7 +2,7 @@ import Foundation
 
 class RelayTransactionPeerTask: PeerTask {
 
-    private var transaction: Transaction
+    var transaction: Transaction
 
     init(transaction: Transaction) {
         self.transaction = transaction
@@ -27,7 +27,8 @@ class RelayTransactionPeerTask: PeerTask {
             return false
         }
 
-        delegate?.completed(task: self)
+        completed = true
+        delegate?.handle(task: self)
 
         return true
     }

@@ -40,7 +40,7 @@ class TransactionCreator {
         }
 
         transactionProcessor.enqueueRun()
-        peerGroup.sendTransactions()
+        peerGroup.send(transaction: transaction)
     }
 
 }

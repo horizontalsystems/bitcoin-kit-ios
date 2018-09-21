@@ -21,7 +21,7 @@ class HeaderHandlerTests: XCTestCase {
         realm = mockWalletKit.realm
 
         stub(mockPeerGroup) { mock in
-            when(mock.syncBlocks()).thenDoNothing()
+            when(mock.syncBlocks(hashes: any())).thenDoNothing()
         }
 
         headerHandler = HeaderHandler(realmFactory: mockWalletKit.mockRealmFactory, validateBlockFactory: mockValidatedBlockFactory, peerGroup: mockPeerGroup)
@@ -66,7 +66,7 @@ class HeaderHandlerTests: XCTestCase {
         XCTAssertNotEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", firstBlock.reversedHeaderHashHex).first, nil)
         XCTAssertNotEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", secondBlock.reversedHeaderHashHex).first, nil)
 
-        verify(mockPeerGroup).syncBlocks()
+        verify(mockPeerGroup).syncBlocks(hashes: equal(to: [firstBlock.headerHash, secondBlock.headerHash]))
     }
 
     func testInvalidBlocks() {
@@ -94,7 +94,7 @@ class HeaderHandlerTests: XCTestCase {
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", firstBlock.reversedHeaderHashHex).first, nil)
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", secondBlock.reversedHeaderHashHex).first, nil)
 
-        verify(mockPeerGroup, never()).syncBlocks()
+        verify(mockPeerGroup, never()).syncBlocks(hashes: any())
     }
 
     func testPartialValidBlocks() {
@@ -122,7 +122,7 @@ class HeaderHandlerTests: XCTestCase {
         XCTAssertNotEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", firstBlock.reversedHeaderHashHex).first, nil)
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", secondBlock.reversedHeaderHashHex).first, nil)
 
-        verify(mockPeerGroup).syncBlocks()
+        verify(mockPeerGroup).syncBlocks(hashes: equal(to: [firstBlock.headerHash]))
     }
 
 }
