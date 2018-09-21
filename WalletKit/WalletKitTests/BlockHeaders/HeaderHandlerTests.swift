@@ -143,6 +143,7 @@ class HeaderHandlerTests: XCTestCase {
 
         try! headerHandler.handle(headers: [secondBlock.previousBlock!.header!, newSecond.header!, newThird.header!])
 
+        verify(mockPeerGroup).syncBlocks(hashes: equal(to: [newSecond, newThird].map{ $0.headerHash }))
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", secondBlockReversedHeaderHashHex).first, nil)
         XCTAssertNotEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", newSecond.reversedHeaderHashHex).first, nil)
         XCTAssertNotEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", newThird.reversedHeaderHashHex).first, nil)
@@ -160,6 +161,7 @@ class HeaderHandlerTests: XCTestCase {
 
         try! headerHandler.handle(headers: [secondBlock.previousBlock!.header!, newSecond.header!, newThird.header!])
 
+        verify(mockPeerGroup, never()).syncBlocks(hashes: any())
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", secondBlockReversedHeaderHashHex).first, nil)
         XCTAssertNotEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", newSecond.reversedHeaderHashHex).first, nil)
         XCTAssertNotEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", newThird.reversedHeaderHashHex).first, nil)
@@ -187,6 +189,7 @@ class HeaderHandlerTests: XCTestCase {
 
         try! headerHandler.handle(headers: [oldCheckPoint.header!, oldFirst.header!, newSecond.header!, newThird.header!])
 
+        verify(mockPeerGroup).syncBlocks(hashes: equal(to: [newSecond, newThird].map{ $0.headerHash }))
         verify(mockValidatedBlockFactory, never()).block(fromHeader: equal(to: oldCheckPoint.header!), previousBlock: equal(to: nil))
         verify(mockValidatedBlockFactory, never()).block(fromHeader: equal(to: oldFirst.header!), previousBlock: equal(to: oldCheckPoint))
         verify(mockValidatedBlockFactory).block(fromHeader: equal(to: newSecondHeader), previousBlock: equal(to: oldFirst))
@@ -223,6 +226,7 @@ class HeaderHandlerTests: XCTestCase {
             XCTFail("Unknown exception thrown")
         }
 
+        verify(mockPeerGroup, never()).syncBlocks(hashes: any())
         XCTAssertTrue(caught, "validation exception not thrown")
         XCTAssertNotEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", oldSecond.reversedHeaderHashHex).first, nil)
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", newSecond.reversedHeaderHashHex).first, nil)

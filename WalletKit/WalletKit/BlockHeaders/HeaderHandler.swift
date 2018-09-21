@@ -42,6 +42,7 @@ class HeaderHandler {
 
         defer {
             if let lastNewBlock = blocks.last {
+                var syncBlocks = false
                 try? realm.write {
                     if let diversionPointBlock = diversionPointBlock {
                         let existingLeafBlocks = realm.objects(Block.self).filter("height > %@", diversionPointBlock.height).sorted(byKeyPath: "height")
@@ -50,13 +51,15 @@ class HeaderHandler {
                             realm.delete(existingLeafBlocks)
                             // Add new blocks to chain
                             realm.add(blocks)
+                            syncBlocks = true
                         }
                     } else {
                         realm.add(blocks)
+                        syncBlocks = true
                     }
                 }
 
-                if !blocks.isEmpty {
+                if syncBlocks {
                     peerGroup.syncBlocks(hashes: blocks.map {
                         $0.headerHash
                     })
