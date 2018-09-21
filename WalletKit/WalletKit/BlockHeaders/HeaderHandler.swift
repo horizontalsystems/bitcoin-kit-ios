@@ -18,6 +18,7 @@ class HeaderHandler {
     }
 
     func handle(headers: [BlockHeader]) throws {
+        var headers = headers
         let realm = realmFactory.realm
 
         guard !headers.isEmpty else {
@@ -26,18 +27,48 @@ class HeaderHandler {
 
         var blocks = [Block]()
 
-        defer {
-            try? realm.write {
-                realm.add(blocks)
-            }
+        // Find diversion point if given blocks list is a new leaf of detected fork
+        var diversionPointBlock: Block?
+        while let firstHeader = headers.first {
+            let headerHash = Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: firstHeader))
 
-            if !blocks.isEmpty {
-                peerGroup.syncBlocks(hashes: blocks.map { $0.headerHash })
+            if let existingBlock = realm.objects(Block.self).filter("reversedHeaderHashHex = %@", headerHash.reversedHex).first {
+                diversionPointBlock = existingBlock
+                headers.removeFirst()
+            } else {
+                break
             }
         }
 
-        var previousBlock: Block?
+        defer {
+            if let lastNewBlock = blocks.last {
+                var syncBlocks = false
+                try? realm.write {
+                    if let diversionPointBlock = diversionPointBlock {
+                        let existingLeafBlocks = realm.objects(Block.self).filter("height > %@", diversionPointBlock.height).sorted(byKeyPath: "height")
+                        if let lastExistingBlock = existingLeafBlocks.last, lastNewBlock.height > lastExistingBlock.height {
+                            // Remove old leaf if shorter than new one
+                            realm.delete(existingLeafBlocks)
+                            // Add new blocks to chain
+                            realm.add(blocks)
+                            syncBlocks = true
+                        }
+                    } else {
+                        realm.add(blocks)
+                        syncBlocks = true
+                    }
+                }
 
+                if syncBlocks {
+                    peerGroup.syncBlocks(hashes: blocks.map {
+                        $0.headerHash
+                    })
+                }
+            }
+        }
+
+        // Validate and chain new blocks
+        var previousBlock: Block? = diversionPointBlock
         for header in headers {
             let block = try validateBlockFactory.block(fromHeader: header, previousBlock: previousBlock)
             blocks.append(block)
