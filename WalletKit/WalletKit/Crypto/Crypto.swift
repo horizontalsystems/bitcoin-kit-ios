@@ -49,7 +49,7 @@ struct Crypto {
         return der
     }
 
-    static func secp256k1_pubkey_create(privateKeyData: Data, compressed: Bool = false) -> Data {
+    static func createPublicKey(fromPrivateKeyData privateKeyData: Data, compressed: Bool = false) -> Data {
         // Convert Data to byte Array
         let privateKey = privateKeyData.withUnsafeBytes {
             [UInt8](UnsafeBufferPointer(start: $0, count: privateKeyData.count))
