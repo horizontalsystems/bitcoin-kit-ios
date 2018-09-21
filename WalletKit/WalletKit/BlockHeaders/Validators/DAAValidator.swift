@@ -23,24 +23,20 @@ class DAAValidator: IBlockValidator {
     }
 
     private func suitableBlock(for block: Block) throws -> Block {
-        guard let prevBlock = block.previousBlock, let prevPrevBlock = prevBlock.previousBlock else {
-            throw BlockValidatorError.noPreviousBlock
+        var blockArray = [(timestamp: Int, block: Block)]()
+        var currentBlock = block
+        for _ in 0..<3 {
+            guard let header = currentBlock.header else {
+                throw Block.BlockError.noHeader
+            }
+            blockArray.append((timestamp: header.timestamp, block: currentBlock))
+            guard let prevBlock = currentBlock.previousBlock else {
+                throw BlockValidatorError.noPreviousBlock
+            }
+            currentBlock = prevBlock
         }
-        guard let blockHeader = block.header, let prevBlockHeader = prevBlock.header, let prevPrevBlockHeader = prevPrevBlock.header else {
-            throw Block.BlockError.noHeader
-        }
-        var blockArray = [prevPrevBlock, prevBlock, block]
-        // Sorting network.
-        if (blockArray[0].header!.timestamp > blockArray[2].header!.timestamp) {
-            blockArray.swapAt(0, 2)
-        }
-        if (blockArray[0].header!.timestamp > blockArray[1].header!.timestamp) {
-            blockArray.swapAt(0, 1)
-        }
-        if (blockArray[1].header!.timestamp > blockArray[2].header!.timestamp) {
-            blockArray.swapAt(1, 2)
-        }
-        return blockArray[1]
+        blockArray.sort { $0.timestamp < $1.timestamp }
+        return blockArray[1].block
     }
 
     func validate(candidate: Block, block: Block, network: NetworkProtocol) throws {

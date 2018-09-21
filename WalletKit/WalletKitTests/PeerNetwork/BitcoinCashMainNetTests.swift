@@ -18,6 +18,7 @@ class BitcoinCashMainNetTests:XCTestCase {
         mockBlockHelper = mockWalletKit.mockBlockHelper
         stub(mockBlockHelper) { mock in
             when(mock.medianTimePast(block: any(), count: any())).thenReturn(0)
+            when(mock.previous(for: any(), index: any())).thenReturn(Block())
         }
         mockNetwork = BitcoinCashMainNet(validatorFactory: mockValidatorHelper.mockFactory, blockHelper: mockWalletKit.mockBlockHelper)
     }
