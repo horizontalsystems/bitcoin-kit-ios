@@ -18,7 +18,7 @@ class LegacyDifficultyAdjustmentValidator: IBlockValidator {
         guard let candidateHeader = candidate.header, let blockHeader = block.header else {
             throw Block.BlockError.noHeader
         }
-        guard let firstBlock = blockHelper.previous(for: block, index: network.heightInterval) else {
+        guard let firstBlock = blockHelper.previous(for: block, index: network.heightInterval - 1) else {
             throw BlockValidatorError.noPreviousBlock
         }
         guard let firstBlockTime = firstBlock.header?.timestamp else {
