@@ -61,8 +61,10 @@ class BitcoinCashMainNet: NetworkProtocol {
     }
 
     func validate(block: Block, previousBlock: Block) throws {
+        if blockHelper.previous(for: previousBlock, index: 147) == nil { //TODO: Remove trust first 147 block (144 + 3) in bitcoin cash
+            return
+        }
         try headerValidator.validate(candidate: block, block: previousBlock, network: self)
-
         if try blockHelper.medianTimePast(block: block) >= BitcoinCashMainNet.diffDate {
             try dAAValidator.validate(candidate: block, block: previousBlock, network: self)
         } else {
