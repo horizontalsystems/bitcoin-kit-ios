@@ -18,8 +18,8 @@ class PeerGroup {
     private var peers: [Peer] = []
     private var syncPeer: Peer?
 
-    private var allBlocksSynced: Bool = false
-    private var allTransactionsRelayed: Bool = false
+    private var pendingBlockHashes: [Data] = []
+    private var pendingTransactions: [Transaction] = []
 
     private let localQueue: DispatchQueue
     private let inventoryQueue: DispatchQueue
@@ -39,7 +39,15 @@ class PeerGroup {
     }
 
     func start() {
+        guard started == false else {
+            return
+        }
+
         started = true
+
+        addNonSyncedtMerkleBlocks()
+        addNonSentTransactions()
+
         connectPeersIfRequired()
     }
 
@@ -51,17 +59,21 @@ class PeerGroup {
         }
     }
 
-    func syncBlocks() {
-        if allBlocksSynced {
-            allBlocksSynced = false
-            checkReadyPeers()
+    func syncBlocks(hashes: [Data]) {
+        localQueue.async {
+            self.pendingBlockHashes.append(contentsOf: hashes)
+            self.dispatchTasks()
         }
     }
 
-    func sendTransactions() {
-        if allTransactionsRelayed {
-            allTransactionsRelayed = false
-            checkReadyPeers()
+    func send(transaction: Transaction) {
+        // Transaction is managed by Realm. We need to serialize and deserialize it in order to make it non-managed.
+        let data = TransactionSerializer.serialize(transaction: transaction)
+        let transaction = TransactionSerializer.deserialize(data: data)
+
+        localQueue.async {
+            self.pendingTransactions.append(transaction)
+            self.dispatchTasks()
         }
     }
 
@@ -105,45 +117,32 @@ class PeerGroup {
             syncPeer = peer
             handleReadySyncPeer()
         } else {
-            if !allTransactionsRelayed {
-                relayTransactions(peer: peer)
-            }
-
-            if !allBlocksSynced {
-                syncBlocks(peer: peer)
-            }
-        }
-    }
-
-    private func handleReadySyncPeer() {
-        if let hashes = delegate?.getHeadersHashes() {
-            syncPeer?.add(task: RequestHeadersPeerTask(hashes: hashes))
-        }
-    }
-
-    private func relayTransactions(peer: Peer) {
-        if let transactions = delegate?.getNonSentTransactions(), !transactions.isEmpty {
-            for transaction in transactions {
+            for transaction in pendingTransactions {
                 peer.add(task: RelayTransactionPeerTask(transaction: transaction))
             }
-        }
-        allTransactionsRelayed = true
-    }
+            pendingTransactions = []
 
-    private func syncBlocks(peer: Peer) {
-        if let hashes = delegate?.getNonSyncedMerkleBlocksHashes(limit: blocksPerPeer) {
-            if hashes.isEmpty {
-                allBlocksSynced = true
-            } else {
+            let hashes = Array(pendingBlockHashes.prefix(blocksPerPeer))
+
+            if !hashes.isEmpty {
+                pendingBlockHashes.removeFirst(hashes.count)
                 peer.add(task: RequestMerkleBlocksPeerTask(hashes: hashes))
             }
         }
     }
 
-    private func checkReadyPeers() {
-        for peer in peers.filter({ $0 !== syncPeer && $0.ready }) {
-            localQueue.async {
-                self.handleReady(peer: peer)
+    private func handleReadySyncPeer() {
+        if let hashes = self.delegate?.getHeadersHashes() {
+            self.syncPeer?.add(task: RequestHeadersPeerTask(hashes: hashes))
+        }
+    }
+
+    private func dispatchTasks(forReadyPeer peer: Peer? = nil) {
+        if let peer = peer {
+            handleReady(peer: peer)
+        } else {
+            for peer in peers.filter({ $0 !== syncPeer && $0.ready }) {
+                handleReady(peer: peer)
             }
         }
     }
@@ -166,6 +165,57 @@ class PeerGroup {
         return false
     }
 
+    private func handle(blockHeaders: [BlockHeader]) {
+        queue.async {
+            self.delegate?.peerGroupDidReceive(headers: blockHeaders)
+
+            if blockHeaders.count < 2000 {
+                Logger.shared.log(self, "UNSETTING SYNC PEER FROM \(self.syncPeer?.logName ?? "")")
+
+                self.localQueue.async {
+                    self.syncPeer?.headersSynced = true
+                    self.syncPeer = nil
+                    self.dispatchTasks()
+                }
+            } else {
+                self.handleReadySyncPeer()
+            }
+        }
+    }
+
+    private func handle(merkleBlocks: [MerkleBlock]) {
+        queue.async {
+            self.delegate?.peerGroupDidReceive(merkleBlocks: merkleBlocks)
+        }
+    }
+
+    private func handle(transaction: Transaction) {
+        queue.async {
+            self.delegate?.peerGroupDidReceive(transaction: transaction)
+        }
+    }
+
+    private func handle(relayedTransaction transaction: Transaction) {
+        // todo: temp solution for setting tx status. It should be handled in more efficient way
+        queue.async {
+            self.delegate?.peerGroupDidReceive(transaction: transaction)
+        }
+    }
+
+    private func addNonSyncedtMerkleBlocks() {
+        if let hashes = delegate?.getNonSyncedMerkleBlocksHashes() {
+            pendingBlockHashes.append(contentsOf: hashes)
+        }
+    }
+
+    private func addNonSentTransactions() {
+        if let transactions = delegate?.getNonSentTransactions() {
+            for transaction in transactions {
+                send(transaction: transaction)
+            }
+        }
+    }
+
 }
 
 extension PeerGroup: PeerDelegate {
@@ -176,7 +226,7 @@ extension PeerGroup: PeerDelegate {
 
     func peerReady(_ peer: Peer) {
         localQueue.async {
-            self.handleReady(peer: peer)
+            self.dispatchTasks(forReadyPeer: peer)
         }
     }
 
@@ -198,31 +248,30 @@ extension PeerGroup: PeerDelegate {
         connectPeersIfRequired()
     }
 
-    func peer(_ peer: Peer, didReceiveHeaders headers: [BlockHeader]) {
-        queue.async {
-            self.delegate?.peerGroupDidReceive(headers: headers)
+    func peer(_ peer: Peer, didHandleTask task: PeerTask) {
+        guard task.completed else {
+            // todo: handle failed task
+            return
+        }
 
-            if headers.count < 2000 {
-                Logger.shared.log(self, "UNSETTING SYNC PEER")
+        switch task {
 
-                self.syncPeer?.headersSynced = true
-                self.syncPeer = nil
-                self.checkReadyPeers()
-            } else {
-                self.handleReadySyncPeer()
+        case let task as RequestHeadersPeerTask:
+            handle(blockHeaders: task.blockHeaders)
+
+        case let task as RequestMerkleBlocksPeerTask:
+            handle(merkleBlocks: task.merkleBlocks)
+
+        case let task as RequestTransactionsPeerTask:
+            for transaction in task.transactions {
+                handle(transaction: transaction)
             }
-        }
-    }
 
-    func peer(_ peer: Peer, didReceiveMerkleBlock merkleBlock: MerkleBlock) {
-        queue.async {
-            self.delegate?.peerGroupDidReceive(blockHeader: merkleBlock.header, withTransactions: merkleBlock.transactions)
-        }
-    }
+        case let task as RelayTransactionPeerTask:
+            handle(relayedTransaction: task.transaction)
 
-    func peer(_ peer: Peer, didReceiveTransaction transaction: Transaction) {
-        queue.async {
-            self.delegate?.peerGroupDidReceive(transaction: transaction)
+        default: ()
+
         }
     }
 

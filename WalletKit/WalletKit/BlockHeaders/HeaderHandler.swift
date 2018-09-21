@@ -32,7 +32,7 @@ class HeaderHandler {
             }
 
             if !blocks.isEmpty {
-                peerGroup.syncBlocks()
+                peerGroup.syncBlocks(hashes: blocks.map { $0.headerHash })
             }
         }
 

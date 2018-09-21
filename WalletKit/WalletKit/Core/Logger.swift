@@ -39,4 +39,12 @@ class Logger {
         }
     }
 
+    static func log(_ log: String) {
+        let name = __dispatch_queue_get_label(nil)
+        if let label = String(cString: name, encoding: .utf8) {
+            let timestamp = Logger.shared.dateFormatter.string(from: Date())
+            print("\(timestamp): \(log) \(Thread.current) \(label)")
+        }
+    }
+
 }

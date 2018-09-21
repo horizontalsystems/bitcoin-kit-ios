@@ -40,41 +40,16 @@ extension Syncer: PeerGroupDelegate {
         return headerSyncer?.getHeaders() ?? []
     }
 
-    func getNonSyncedMerkleBlocksHashes(limit: Int) -> [Data] {
+    func getNonSyncedMerkleBlocksHashes() -> [Data] {
         let realm = realmFactory.realm
-
         let pendingBlocks = realm.objects(Block.self).filter("status = %@", Block.Status.pending.rawValue)
-
-        guard !pendingBlocks.isEmpty else {
-            return []
-        }
-
-        let count = min(limit, pendingBlocks.count)
-
-        let blocks = Array(pendingBlocks.prefix(count))
-
-        try? realm.write {
-            for block in blocks {
-                block.status = .syncing
-            }
-        }
-
-        return blocks.map { $0.headerHash }
+        return pendingBlocks.map { $0.headerHash }
     }
 
     func getNonSentTransactions() -> [Transaction] {
         let realm = realmFactory.realm
         let nonSentTransactions = realm.objects(Transaction.self).filter("status = %@", TransactionStatus.new.rawValue)
-
-        var nonManagedTransactions = [Transaction]()
-
-        for transaction in nonSentTransactions {
-            // Transaction is managed by Realm. We need to serialize and deserialize it in order to make it non-managed.
-            let data = TransactionSerializer.serialize(transaction: transaction)
-            nonManagedTransactions.append(TransactionSerializer.deserialize(data: data))
-        }
-
-        return nonManagedTransactions
+        return Array(nonSentTransactions)
     }
 
     func peerGroupDidReceive(headers: [BlockHeader]) {
@@ -89,9 +64,9 @@ extension Syncer: PeerGroupDelegate {
         }
     }
 
-    func peerGroupDidReceive(blockHeader: BlockHeader, withTransactions transactions: [Transaction]) {
+    func peerGroupDidReceive(merkleBlocks: [MerkleBlock]) {
         do {
-            try transactionHandler?.handle(blockTransactions: transactions, blockHeader: blockHeader)
+            try transactionHandler?.handle(merkleBlocks: merkleBlocks)
         } catch {
             Logger.shared.log(self, "Transaction Handler Error: \(error)")
         }
