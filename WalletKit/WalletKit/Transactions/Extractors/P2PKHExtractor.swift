@@ -3,7 +3,7 @@ import Foundation
 class P2PKHExtractor: ScriptExtractor {
     var type: ScriptType { return .p2pkh }      // lockingScript: 76A914{20-byte-key-hash}88AC
 
-    func extract(from script: Script, converter: ScriptConverter) throws -> Data {
+    func extract(from script: Script, converter: ScriptConverter) throws -> Data? {
         guard script.length == type.size else {
             throw ScriptError.wrongScriptLength
         }
