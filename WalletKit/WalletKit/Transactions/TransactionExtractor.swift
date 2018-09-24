@@ -4,16 +4,12 @@ enum ScriptError: Error { case wrongScriptLength, wrongSequence }
 
 protocol ScriptExtractor: class {
     var type: ScriptType { get }
-    func extract(from script: Script, converter: ScriptConverter) throws -> Data
+    func extract(from script: Script, converter: ScriptConverter) throws -> Data?
 }
 
 class TransactionExtractor {
     static let defaultInputExtractors: [ScriptExtractor] = [PFromSHExtractor(), PFromPKHExtractor(), PFromWPKHExtractor(), PFromWSHExtractor()]
-    static let defaultOutputExtractors: [ScriptExtractor] = [P2PKHExtractor(), P2PKExtractor(), P2SHExtractor(), P2WPKHExtractor(), P2WSHExtractor()]
-
-    enum ExtractionError: Error {
-        case invalid
-    }
+    static let defaultOutputExtractors: [ScriptExtractor] = [P2PKHExtractor(), P2PKExtractor(), P2SHExtractor(), P2WPKHExtractor(), P2WSHExtractor(), P2MultiSigExtractor()]
 
     let scriptInputExtractors: [ScriptExtractor]
     let scriptOutputExtractors: [ScriptExtractor]
@@ -28,27 +24,24 @@ class TransactionExtractor {
         self.addressConverter = addressConverter
     }
 
-    func extract(transaction: Transaction) throws {
-        var valid: Bool = false
+    func extract(transaction: Transaction) {
         transaction.outputs.forEach { output in
-            var payload: Data?
             for extractor in scriptOutputExtractors {
                 do {
                     let script = try scriptConverter.decode(data: output.lockingScript)
-                    payload = try extractor.extract(from: script, converter: scriptConverter)
-                } catch {
-//                    print("\(error)")
-                }
-                if let payload = payload {
-                    valid = true
+                    let payload = try extractor.extract(from: script, converter: scriptConverter)
                     output.scriptType = extractor.type
-                    switch extractor.type {
-                        case .p2pkh: output.keyHash = payload
-                        case .p2pk: output.keyHash = Crypto.sha256ripemd160(payload)
-                        case .p2sh: output.keyHash = payload
-                        default: break
+                    if let payload = payload {
+                        switch extractor.type {
+                            case .p2pkh: output.keyHash = payload
+                            case .p2pk: output.keyHash = Crypto.sha256ripemd160(payload)
+                            case .p2sh: output.keyHash = payload
+                            default: break
+                        }
+                        break
                     }
-                    break
+                } catch {
+//                    print("\(error) can't parse output by this extractor")
                 }
             }
 
@@ -58,30 +51,23 @@ class TransactionExtractor {
         }
 
         transaction.inputs.forEach { input in
-            var payload: Data?
             for extractor in scriptInputExtractors {
                 do {
                     let script = try scriptConverter.decode(data: input.signatureScript)
-                    payload = try extractor.extract(from: script, converter: scriptConverter)
-                } catch {
-//                    print("\(error)")
-                }
-                if let payload = payload {
-                    valid = true
-                    switch extractor.type {
-                        case .p2sh, .p2pkh, .p2wpkh:
-                            let ripemd160 = Crypto.sha256ripemd160(payload)
-                            input.keyHash = ripemd160
-                            input.address = (try? addressConverter.convert(keyHash: ripemd160, type: extractor.type))?.stringValue
-                        default: break
+                    if let payload = try extractor.extract(from: script, converter: scriptConverter) {
+                        switch extractor.type {
+                            case .p2sh, .p2pkh, .p2wpkh:
+                                let ripemd160 = Crypto.sha256ripemd160(payload)
+                                input.keyHash = ripemd160
+                                input.address = (try? addressConverter.convert(keyHash: ripemd160, type: extractor.type))?.stringValue
+                            default: break
+                        }
+                        break
                     }
-                    break
+                } catch {
+//                    print("\(error) can't parse input by this extractor")
                 }
             }
-        }
-
-        if !valid {
-            throw ExtractionError.invalid
         }
     }
 

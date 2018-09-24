@@ -3,7 +3,7 @@ import Foundation
 class PFromSHExtractor: ScriptExtractor {
     var type: ScriptType { return .p2sh }
 
-    func extract(from script: Script, converter: ScriptConverter) throws -> Data {
+    func extract(from script: Script, converter: ScriptConverter) throws -> Data? {
         guard let chunkData = script.chunks.last?.data else {
             throw ScriptError.wrongScriptLength
         }

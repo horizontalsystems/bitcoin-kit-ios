@@ -3,7 +3,7 @@ import Foundation
 class PFromWitnessExtractor: WitnessExtractor {
     override var type: ScriptType { return .unknown }
 
-    override func extract(from script: Script, converter: ScriptConverter) throws -> Data {
+    override func extract(from script: Script, converter: ScriptConverter) throws -> Data? {
         let scriptData = try witnessScript(script: script, converter: converter)
         let segWitScript = try converter.decode(data: scriptData)
         _ = try super.extract(from: segWitScript, converter: converter)
