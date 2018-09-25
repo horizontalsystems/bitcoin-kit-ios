@@ -32,7 +32,7 @@ class PeerHostManagerTests:XCTestCase {
             when(mock.dnsSeeds.get).thenReturn(dnsSeeds)
         }
 
-        manager = PeerHostManager(network: mockWalletKit.mockNetwork, realmFactory: mockWalletKit.mockRealmFactory, hostDiscovery: mockHostDiscovery, queue: queue)
+        manager = PeerHostManager(network: mockWalletKit.mockNetwork, realmFactory: mockWalletKit.mockRealmFactory, hostDiscovery: mockHostDiscovery, dnsLookupQueue: queue, localQueue: queue)
     }
 
     override func tearDown() {
@@ -107,6 +107,7 @@ class PeerHostManagerTests:XCTestCase {
         }
 
         manager.hostDisconnected(host: peerAddress.ip, withError: false)
+        waitForMainQueue()
         XCTAssertEqual(peerAddress.score, 1)
     }
 
@@ -119,6 +120,7 @@ class PeerHostManagerTests:XCTestCase {
         }
 
         manager.hostDisconnected(host: peerAddress.ip, withError: true)
+        waitForMainQueue()
         XCTAssertEqual(realm.objects(PeerAddress.self).count, 0)
     }
 
@@ -132,6 +134,7 @@ class PeerHostManagerTests:XCTestCase {
         let host = manager.peerHost
         waitForMainQueue()
         manager.hostDisconnected(host: host!, withError: false)
+        waitForMainQueue()
         let host2 = manager.peerHost
         XCTAssertEqual(host, host2)
     }
@@ -147,6 +150,7 @@ class PeerHostManagerTests:XCTestCase {
         let realm = mockRealmFactory.realm
 
         manager.addHosts(hosts: ["192.168.0.1", "192.168.0.2"])
+        waitForMainQueue()
 
         XCTAssertEqual(realm.objects(PeerAddress.self).count, 2)
         var peerAddress = realm.objects(PeerAddress.self).first!
@@ -165,6 +169,7 @@ class PeerHostManagerTests:XCTestCase {
         }
 
         manager.addHosts(hosts: ["192.168.0.1", "192.168.0.2"])
+        waitForMainQueue()
 
         XCTAssertEqual(realm.objects(PeerAddress.self).count, 2)
         var newPeerAddress = realm.objects(PeerAddress.self).first!
@@ -178,6 +183,7 @@ class PeerHostManagerTests:XCTestCase {
     func testAddHosts_ShouldHandleDuplicates() {
         let realm = mockRealmFactory.realm
         manager.addHosts(hosts: ["192.168.0.1", "192.168.0.1"])
+        waitForMainQueue()
 
         XCTAssertEqual(realm.objects(PeerAddress.self).count, 1)
         let newPeerAddress = realm.objects(PeerAddress.self).first!
@@ -192,6 +198,8 @@ class PeerHostManagerTests:XCTestCase {
         }
 
         manager.addHosts(hosts: ["192.168.0.1"])
+        waitForMainQueue()
+
         verify(mockPeerHostManagerDelegate).newHostsAdded()
     }
 
@@ -202,6 +210,8 @@ class PeerHostManagerTests:XCTestCase {
         }
 
         manager.addHosts(hosts: [])
+        waitForMainQueue()
+
         verify(mockPeerHostManagerDelegate, never()).newHostsAdded()
     }
 
