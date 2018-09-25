@@ -35,7 +35,7 @@ class DAAValidator: IBlockValidator {
             }
             currentBlock = prevBlock
         }
-        blockArray.sort { $0.timestamp < $1.timestamp }
+        blockArray.sort { $0.timestamp <= $1.timestamp }
         return blockArray[1].block
     }
 
