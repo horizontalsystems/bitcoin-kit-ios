@@ -9,7 +9,7 @@ class PeerGroup {
     weak var delegate: PeerGroupDelegate?
 
     private let network: NetworkProtocol
-    private let peerIpManager: PeerIpManager
+    private let peerHostManager: PeerHostManager
     private var bloomFilters: [Data]
     private var peerCount: Int
 
@@ -25,9 +25,9 @@ class PeerGroup {
     private let inventoryQueue: DispatchQueue
     private let queue: DispatchQueue
 
-    init(network: NetworkProtocol, peerIpManager: PeerIpManager, bloomFilters: [Data], peerCount: Int = 3) {
+    init(network: NetworkProtocol, peerHostManager: PeerHostManager, bloomFilters: [Data], peerCount: Int = 3) {
         self.network = network
-        self.peerIpManager = peerIpManager
+        self.peerHostManager = peerHostManager
         self.bloomFilters = bloomFilters
         self.peerCount = peerCount
 
@@ -35,7 +35,7 @@ class PeerGroup {
         inventoryQueue = DispatchQueue(label: "PeerGroup Inventory Queue", qos: .background)
         queue = DispatchQueue(label: "PeerGroup Concurrent Queue", qos: .userInitiated, attributes: .concurrent)
 
-        self.peerIpManager.delegate = self
+        self.peerHostManager.delegate = self
     }
 
     func start() {
@@ -95,7 +95,7 @@ class PeerGroup {
         }
 
         for _ in peers.count..<peerCount {
-            if let host = peerIpManager.peerHost {
+            if let host = peerHostManager.peerHost {
                 let peer = Peer(host: host, network: network)
                 peers.append(peer)
                 peer.delegate = self
@@ -235,7 +235,7 @@ extension PeerGroup: PeerDelegate {
             Logger.shared.log(self, "Peer with IP \(peer.host) disconnected with error")
         }
 
-        peerIpManager.hostDisconnected(host: peer.host, withError: error)
+        peerHostManager.hostDisconnected(host: peer.host, withError: error)
 
         if peer === syncPeer {
             syncPeer = nil
@@ -277,7 +277,7 @@ extension PeerGroup: PeerDelegate {
 
     func peer(_ peer: Peer, didReceiveAddresses addresses: [NetworkAddress]) {
         queue.async {
-            self.peerIpManager.addPeers(hosts: addresses.map { $0.address })
+            self.peerHostManager.addHosts(hosts: addresses.map { $0.address })
         }
     }
 
@@ -317,7 +317,7 @@ extension PeerGroup: PeerDelegate {
 
 }
 
-extension PeerGroup: PeerIpManagerDelegate {
+extension PeerGroup: PeerHostManagerDelegate {
 
     func newHostsAdded() {
         connectPeersIfRequired()
