@@ -1,13 +1,14 @@
 import Foundation
 import RealmSwift
 
-class PeerIpManager {
+class PeerHostManager {
     let network: NetworkProtocol
     let realmFactory: RealmFactory
-    let queue: DispatchQueue
-    var collecting: Bool = false
-    var connectedHosts: [String] = []
-    weak var delegate: PeerIpManagerDelegate?
+    let hostDiscovery: HostDiscovery
+    private let queue: DispatchQueue
+    private var collecting: Bool = false
+    private var connectedHosts: [String] = []
+    weak var delegate: PeerHostManagerDelegate?
 
     var peerHost: String? {
         let realm = realmFactory.realm
@@ -24,16 +25,15 @@ class PeerIpManager {
         return peerAddress?.ip
     }
 
-    init(network: NetworkProtocol, realmFactory: RealmFactory) {
+    init(network: NetworkProtocol, realmFactory: RealmFactory, hostDiscovery: HostDiscovery = HostDiscovery(), queue: DispatchQueue = DispatchQueue(label: "PeerHostManager Queue", qos: .background, attributes: .concurrent)) {
         self.network = network
         self.realmFactory = realmFactory
-        queue = DispatchQueue(label: "PeerIpManager Queue", qos: .background)
+        self.hostDiscovery = hostDiscovery
+        self.queue = queue
     }
 
     func hostDisconnected(host: String, withError error: Bool) {
-        if let index = connectedHosts.index(of: host) {
-            connectedHosts.remove(at: index)
-        }
+        connectedHosts.removeAll(where: { connectedHost in connectedHost == host })
 
         let realm = realmFactory.realm
         if let peerAddress = realm.objects(PeerAddress.self).filter("ip = %@", host).first {
@@ -56,19 +56,22 @@ class PeerIpManager {
             return
         }
         collecting = true
+        let dispatchGroup = DispatchGroup()
 
-        queue.async {
-            var newHosts = [String]()
-            for dnsSeed in self.network.dnsSeeds {
-                newHosts.append(contentsOf: self.lookup(dnsSeed: dnsSeed))
+        for dnsSeed in self.network.dnsSeeds {
+            dispatchGroup.enter()
+            queue.async {
+                self.addHosts(hosts: self.hostDiscovery.lookup(dnsSeed: dnsSeed))
+                dispatchGroup.leave()
             }
+        }
 
-            self.addPeers(hosts: newHosts)
+        dispatchGroup.notify(queue: queue) {
             self.collecting = false
         }
     }
 
-    func addPeers(hosts: [String]) {
+    func addHosts(hosts: [String]) {
         let realm = self.realmFactory.realm
         let existingPeerAddresses = realm.objects(PeerAddress.self)
 
@@ -99,33 +102,8 @@ class PeerIpManager {
         self.delegate?.newHostsAdded()
     }
 
-    private func lookup(dnsSeed: String) -> [String] {
-        let hostRef = CFHostCreateWithName(kCFAllocatorDefault, dnsSeed as CFString).takeRetainedValue()
-        let resolved = CFHostStartInfoResolution(hostRef, CFHostInfoType.addresses, nil)
-        var resolvedDarwin = DarwinBoolean(resolved)
-        let optionalDataArray = CFHostGetAddressing(hostRef, &resolvedDarwin)?.takeUnretainedValue()
-        var ips = [String]()
-
-        if let dataArray = optionalDataArray {
-            for address in (dataArray as NSArray) {
-                if let address = address as? Data {
-                    let s = address.hex.dropFirst(8).prefix(8)
-                    if let ipPart1 = UInt8(String(s.prefix(2)), radix: 16),
-                       let ipPart2 = UInt8(String(s.dropFirst(2).prefix(2)), radix: 16),
-                       let ipPart3 = UInt8(String(s.dropFirst(4).prefix(2)), radix: 16),
-                       let ipPart4 = UInt8(String(s.dropFirst(6)), radix: 16) {
-                        ips.append("\(ipPart1).\(ipPart2).\(ipPart3).\(ipPart4)")
-                    }
-                }
-            }
-
-        }
-
-        return ips
-    }
-
 }
 
-protocol PeerIpManagerDelegate: class {
+protocol PeerHostManagerDelegate: class {
     func newHostsAdded()
 }
