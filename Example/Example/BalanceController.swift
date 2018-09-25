@@ -1,6 +1,7 @@
 import UIKit
 import RealmSwift
 import RxSwift
+import WalletKit
 
 class BalanceController: UIViewController {
     let disposeBag = DisposeBag()
@@ -8,6 +9,14 @@ class BalanceController: UIViewController {
     @IBOutlet weak var balanceLabel: UILabel?
     @IBOutlet weak var progressLabel: UILabel?
     @IBOutlet weak var lastBlockLabel: UILabel?
+
+    private lazy var dateFormatter: DateFormatter = {
+        var formatter = DateFormatter()
+        formatter.timeZone = TimeZone.autoupdatingCurrent
+        formatter.locale = Locale.current
+        formatter.dateFormat = "MMM d, yyyy, HH:mm"
+        return formatter
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -21,7 +30,10 @@ class BalanceController: UIViewController {
 
         update(balance: walletKit.balance)
         update(progress: walletKit.progress)
-        update(lastBlockHeight: walletKit.lastBlockHeight)
+
+        if let info = walletKit.lastBlockInfo {
+            update(lastBlockInfo: info)
+        }
 
         Manager.shared.balanceSubject.observeOn(MainScheduler.instance).subscribe(onNext: { [weak self] balance in
             self?.update(balance: balance)
@@ -31,8 +43,8 @@ class BalanceController: UIViewController {
             self?.update(progress: progress)
         }).disposed(by: disposeBag)
 
-        Manager.shared.lastBlockHeightSubject.observeOn(MainScheduler.instance).subscribe(onNext: { [weak self] height in
-            self?.update(lastBlockHeight: height)
+        Manager.shared.lastBlockInfoSubject.observeOn(MainScheduler.instance).subscribe(onNext: { [weak self] info in
+            self?.update(lastBlockInfo: info)
         }).disposed(by: disposeBag)
     }
 
@@ -66,8 +78,14 @@ class BalanceController: UIViewController {
         progressLabel?.text = "Sync Progress: \(Int(progress * 100))%"
     }
 
-    private func update(lastBlockHeight: Int) {
-        lastBlockLabel?.text = "Last Block: \(lastBlockHeight)"
+    private func update(lastBlockInfo info: BlockInfo) {
+        var text = "Last Block: \(info.height)"
+
+        if let timestamp = info.timestamp {
+            text += "\n\n\(dateFormatter.string(from: Date(timeIntervalSince1970: Double(timestamp))))"
+        }
+
+        lastBlockLabel?.text = text
     }
 
 }

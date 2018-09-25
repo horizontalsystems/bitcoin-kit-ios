@@ -31,7 +31,7 @@ class TransactionCell: UITableViewCell {
                 "From: \(fromAddress)\n" +
                 "To: \(toAddress)\n" +
                 "Block Height: \(transaction.blockHeight.map { String(describing: $0) } ?? "n/a")\n" +
-                "Confirmations: \(transaction.blockHeight.map { String(describing: lastBlockHeight - $0) } ?? "n/a")"
+                "Confirmations: \(transaction.blockHeight.map { String(describing: lastBlockHeight - $0 + 1) } ?? "n/a")"
     }
 
 }

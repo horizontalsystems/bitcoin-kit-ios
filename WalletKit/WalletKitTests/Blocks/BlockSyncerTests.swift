@@ -3,12 +3,12 @@ import Cuckoo
 import RealmSwift
 @testable import WalletKit
 
-class TransactionHandlerTests: XCTestCase {
+class BlockSyncerTests: XCTestCase {
 
-    private var mockProcessor: MockTransactionProcessor!
     private var mockValidatedBlockFactory: MockValidatedBlockFactory!
+    private var mockProcessor: MockTransactionProcessor!
     private var mockProgressSyncer: MockProgressSyncer!
-    private var transactionHandler: TransactionHandler!
+    private var syncer: BlockSyncer!
 
     private var realm: Realm!
 
@@ -17,8 +17,8 @@ class TransactionHandlerTests: XCTestCase {
 
         let mockWalletKit = MockWalletKit()
 
-        mockProcessor = mockWalletKit.mockTransactionProcessor
         mockValidatedBlockFactory = mockWalletKit.mockValidatedBlockFactory
+        mockProcessor = mockWalletKit.mockTransactionProcessor
         mockProgressSyncer = mockWalletKit.mockProgressSyncer
         realm = mockWalletKit.realm
 
@@ -29,20 +29,20 @@ class TransactionHandlerTests: XCTestCase {
             when(mock.enqueueRun()).thenDoNothing()
         }
 
-        transactionHandler = TransactionHandler(realmFactory: mockWalletKit.mockRealmFactory, processor: mockProcessor, progressSyncer: mockProgressSyncer, validateBlockFactory: mockValidatedBlockFactory)
+        syncer = BlockSyncer(realmFactory: mockWalletKit.mockRealmFactory, validateBlockFactory: mockValidatedBlockFactory, processor: mockProcessor, progressSyncer: mockProgressSyncer, queue: DispatchQueue.main)
     }
 
     override func tearDown() {
-        mockProcessor = nil
         mockValidatedBlockFactory = nil
+        mockProcessor = nil
         mockProgressSyncer = nil
-        transactionHandler = nil
+        syncer = nil
         realm = nil
 
         super.tearDown()
     }
 
-    func testHandleBlockTransactions() {
+    func testHandle() {
         let transaction = TestData.p2pkhTransaction
         let checkpointBlock = TestData.checkpointBlock
         let block = TestData.firstBlock
@@ -52,21 +52,23 @@ class TransactionHandlerTests: XCTestCase {
             realm.add(block, update: true)
         }
 
-        try! transactionHandler.handle(merkleBlocks: [MerkleBlock(header: block.header!, transactionHashes: [], transactions: [transaction])])
+        syncer.handle(merkleBlocks: [MerkleBlock(header: block.header!, transactionHashes: [], transactions: [transaction])])
+
+        waitForMainQueue()
 
         let realmBlock = realm.objects(Block.self).filter("reversedHeaderHashHex = %@", block.reversedHeaderHashHex).last!
         let realmTransaction = realm.objects(Transaction.self).last!
 
         assertTransactionEqual(tx1: transaction, tx2: realmTransaction)
         XCTAssertEqual(realmBlock.headerHash, block.headerHash)
-        XCTAssertEqual(realmBlock.status, .synced)
+        XCTAssertEqual(realmBlock.synced, true)
         XCTAssertEqual(realmTransaction.block?.reversedHeaderHashHex, block.reversedHeaderHashHex)
 
         verify(mockProcessor).enqueueRun()
         verify(mockProgressSyncer).enqueueRun()
     }
 
-    func testHandleBlockTransactions_MultipleBlocks() {
+    func testHandle_MultipleBlocks() {
         let transaction = TestData.p2pkhTransaction
         let transaction2 = TestData.p2pkTransaction
         let transaction3 = TestData.p2shTransaction
@@ -80,17 +82,19 @@ class TransactionHandlerTests: XCTestCase {
         let merkleBlock1 = MerkleBlock(header: firstBlock.header!, transactionHashes: [], transactions: [transaction])
         let merkleBlock2 = MerkleBlock(header: secondBlock.header!, transactionHashes: [], transactions: [transaction2, transaction3])
 
-        try! transactionHandler.handle(merkleBlocks: [merkleBlock1, merkleBlock2])
+        syncer.handle(merkleBlocks: [merkleBlock1, merkleBlock2])
+
+        waitForMainQueue()
 
         let realmBlock = realm.objects(Block.self).filter("reversedHeaderHashHex = %@", firstBlock.reversedHeaderHashHex).last!
         XCTAssertEqual(realmBlock.headerHash, firstBlock.headerHash)
-        XCTAssertEqual(realmBlock.status, .synced)
+        XCTAssertEqual(realmBlock.synced, true)
         let realmTransactions = realmBlock.transactions
         assertTransactionEqual(tx1: transaction, tx2: realmTransactions[0])
 
         let realmBlock2 = realm.objects(Block.self).filter("reversedHeaderHashHex = %@", secondBlock.reversedHeaderHashHex).last!
         XCTAssertEqual(realmBlock.headerHash, firstBlock.headerHash)
-        XCTAssertEqual(realmBlock.status, .synced)
+        XCTAssertEqual(realmBlock.synced, true)
         let realmTransactions2 = realmBlock2.transactions
         assertTransactionEqual(tx1: transaction2, tx2: realmTransactions2[0])
         assertTransactionEqual(tx1: transaction3, tx2: realmTransactions2[1])
@@ -99,20 +103,22 @@ class TransactionHandlerTests: XCTestCase {
         verify(mockProgressSyncer).enqueueRun()
     }
 
-    func testHandleBlockTransactions_EmptyTransactions() {
+    func testHandle_EmptyTransactions() {
         let block = TestData.checkpointBlock
 
         try! realm.write {
             realm.add(block, update: true)
         }
 
-        try! transactionHandler.handle(merkleBlocks: [MerkleBlock(header: block.header!, transactionHashes: [], transactions: [])])
+        syncer.handle(merkleBlocks: [MerkleBlock(header: block.header!, transactionHashes: [], transactions: [])])
+
+        waitForMainQueue()
 
         verify(mockProcessor, never()).enqueueRun()
         verify(mockProgressSyncer).enqueueRun()
     }
 
-    func testHandleBlockTransactions_ExistingTransaction() {
+    func testHandle_ExistingTransaction() {
         let transaction = TestData.p2pkhTransaction
         transaction.status = .new
         let block = TestData.firstBlock
@@ -124,7 +130,9 @@ class TransactionHandlerTests: XCTestCase {
             when(mock.block(fromHeader: any(), previousBlock: any())).thenReturn(block)
         }
 
-        try! transactionHandler.handle(merkleBlocks: [MerkleBlock(header: block.header!, transactionHashes: [], transactions: [transaction])])
+        syncer.handle(merkleBlocks: [MerkleBlock(header: block.header!, transactionHashes: [], transactions: [transaction])])
+
+        waitForMainQueue()
 
         let realmBlock = realm.objects(Block.self).filter("reversedHeaderHashHex = %@", block.reversedHeaderHashHex).last!
         let realmTransaction = realm.objects(Transaction.self).last!
@@ -137,7 +145,7 @@ class TransactionHandlerTests: XCTestCase {
         verify(mockProcessor, never()).enqueueRun()
     }
 
-    func testHandleBlockTransactions_ExistingBlockAndTransaction() {
+    func testHandle_ExistingBlockAndTransaction() {
         let transaction = TestData.p2pkhTransaction
         transaction.status = .new
         let block = TestData.firstBlock
@@ -147,7 +155,9 @@ class TransactionHandlerTests: XCTestCase {
             realm.add(transaction, update: true)
         }
 
-        try! transactionHandler.handle(merkleBlocks: [MerkleBlock(header: block.header!, transactionHashes: [], transactions: [transaction])])
+        syncer.handle(merkleBlocks: [MerkleBlock(header: block.header!, transactionHashes: [], transactions: [transaction])])
+
+        waitForMainQueue()
 
         let realmTransaction = realm.objects(Transaction.self).last!
 
@@ -158,7 +168,7 @@ class TransactionHandlerTests: XCTestCase {
         verify(mockProcessor, never()).enqueueRun()
     }
 
-    func testHandleBlockTransactions_NewBlockHeader() {
+    func testHandle_NewBlockHeader() {
         let transaction = TestData.p2pkhTransaction
         let block = TestData.firstBlock
 
@@ -166,21 +176,23 @@ class TransactionHandlerTests: XCTestCase {
             when(mock.block(fromHeader: any(), previousBlock: any())).thenReturn(block)
         }
 
-        try! transactionHandler.handle(merkleBlocks: [MerkleBlock(header: block.header!, transactionHashes: [], transactions: [transaction])])
+        syncer.handle(merkleBlocks: [MerkleBlock(header: block.header!, transactionHashes: [], transactions: [transaction])])
+
+        waitForMainQueue()
 
         let realmBlock = realm.objects(Block.self).filter("reversedHeaderHashHex = %@", block.headerHash.reversedHex).last!
         let realmTransaction = realm.objects(Transaction.self).last!
 
         assertTransactionEqual(tx1: transaction, tx2: realmTransaction)
         XCTAssertEqual(realmBlock.headerHash, block.headerHash)
-        XCTAssertEqual(realmBlock.status, .synced)
+        XCTAssertEqual(realmBlock.synced, true)
         XCTAssertEqual(realmTransaction.block, realmBlock)
 
         verify(mockProcessor).enqueueRun()
         verify(mockProgressSyncer).enqueueRun()
     }
 
-    func testHandleBlockTransactions_ExistingBlockHeader() {
+    func testHandle_ExistingBlockHeader() {
         let transaction = TestData.p2pkhTransaction
         let block = TestData.checkpointBlock
         let savedBlock = Factory().block(withHeaderHash: block.headerHash, height: 0)
@@ -189,7 +201,9 @@ class TransactionHandlerTests: XCTestCase {
             realm.add(savedBlock, update: true)
         }
 
-        try! transactionHandler.handle(merkleBlocks: [MerkleBlock(header: block.header!, transactionHashes: [], transactions: [transaction])])
+        syncer.handle(merkleBlocks: [MerkleBlock(header: block.header!, transactionHashes: [], transactions: [transaction])])
+
+        waitForMainQueue()
 
         let realmBlock = realm.objects(Block.self).last!
         let realmTransaction = realm.objects(Transaction.self).last!
@@ -197,14 +211,14 @@ class TransactionHandlerTests: XCTestCase {
         assertTransactionEqual(tx1: transaction, tx2: realmTransaction)
         XCTAssertEqual(realmBlock.headerHash, block.headerHash)
         XCTAssertEqual(Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: realmBlock.header!)), Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: block.header!)))
-        XCTAssertEqual(realmBlock.status, .synced)
+        XCTAssertEqual(realmBlock.synced, true)
         XCTAssertEqual(realmTransaction.block, realmBlock)
 
         verify(mockProcessor).enqueueRun()
         verify(mockProgressSyncer).enqueueRun()
     }
 
-    func testHandleBlockTransactions_InvalidBlockHeader() {
+    func testHandle_InvalidBlockHeader() {
         let transaction = TestData.p2pkhTransaction
         let block = TestData.firstBlock
 
@@ -212,52 +226,12 @@ class TransactionHandlerTests: XCTestCase {
             when(mock.block(fromHeader: any(), previousBlock: any())).thenThrow(BlockValidatorError.noCheckpointBlock)
         }
 
-        do {
-            try transactionHandler.handle(merkleBlocks: [MerkleBlock(header: block.header!, transactionHashes: [], transactions: [transaction])])
-            XCTFail("Expected exception not thrown!")
-        } catch let error as BlockValidatorError {
-            XCTAssertEqual(error, BlockValidatorError.noCheckpointBlock)
-        } catch {
-            XCTFail("Unexpected exception!")
-        }
+        syncer.handle(merkleBlocks: [MerkleBlock(header: block.header!, transactionHashes: [], transactions: [transaction])])
+
+        waitForMainQueue()
 
         verify(mockProcessor, never()).enqueueRun()
         verify(mockProgressSyncer, never()).enqueueRun()
-    }
-
-    func testHandleMemPoolTransactions() {
-        let transaction = TestData.p2pkhTransaction
-
-        try! transactionHandler.handle(memPoolTransactions: [transaction])
-
-        let realmTransaction = realm.objects(Transaction.self).last!
-        assertTransactionEqual(tx1: transaction, tx2: realmTransaction)
-        XCTAssertEqual(realmTransaction.block, nil)
-
-        verify(mockProcessor).enqueueRun()
-    }
-
-    func testHandleMemPoolTransactions_EmptyTransactions() {
-        try! transactionHandler.handle(memPoolTransactions: [])
-        verify(mockProcessor, never()).enqueueRun()
-    }
-
-    func testHandleMemPoolTransactions_ExistingTransaction() {
-        let transaction = TestData.p2pkhTransaction
-        transaction.status = .new
-
-        try! realm.write {
-            realm.add(transaction, update: true)
-        }
-
-        try! transactionHandler.handle(memPoolTransactions: [transaction])
-
-        let realmTransaction = realm.objects(Transaction.self).last!
-
-        assertTransactionEqual(tx1: transaction, tx2: realmTransaction)
-        XCTAssertEqual(realmTransaction.status, TransactionStatus.relayed)
-
-        verify(mockProcessor, never()).enqueueRun()
     }
 
     private func assertTransactionEqual(tx1: Transaction, tx2: Transaction) {

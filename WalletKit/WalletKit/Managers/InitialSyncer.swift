@@ -49,6 +49,13 @@ class InitialSyncer {
         } else {
             peerGroup.start()
         }
+
+//        var keys = [PublicKey]()
+//        for i in 0...20 {
+//            keys.append(try hdWallet.publicKey(index: i, external: true))
+//            keys.append(try hdWallet.publicKey(index: i, external: false))
+//        }
+//        try handle(keys: keys, blocks: [])
     }
 
     private func handle(keys: [PublicKey], blocks: [Block]) throws {

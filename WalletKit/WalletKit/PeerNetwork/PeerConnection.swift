@@ -86,7 +86,7 @@ class PeerConnection: NSObject, StreamDelegate {
         case let stream as InputStream:
             switch eventCode {
             case .openCompleted:
-                log("CONNECTED")
+                log("CONNECTION ESTABLISHED")
                 break
             case .hasBytesAvailable:
                 readAvailableBytes(stream: stream)
