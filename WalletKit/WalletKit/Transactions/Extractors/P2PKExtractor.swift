@@ -4,7 +4,7 @@ class P2PKExtractor: ScriptExtractor {
     let minimalKeyLength = 3
     var type: ScriptType { return .p2pk }               // lockingScript: {push-length}{length-byte-key-hash}AC
 
-    func extract(from script: Script, converter: ScriptConverter) throws -> Data {
+    func extract(from script: Script, converter: ScriptConverter) throws -> Data? {
         guard script.length >= minimalKeyLength else {
             throw ScriptError.wrongScriptLength
         }

@@ -35,7 +35,7 @@ class TransactionProcessor {
         if !unprocessedTransactions.isEmpty {
             try realm.write {
                 for transaction in unprocessedTransactions {
-                    try extractor.extract(transaction: transaction)
+                    extractor.extract(transaction: transaction)
                     linker.handle(transaction: transaction, realm: realm)
                     transaction.processed = true
                 }

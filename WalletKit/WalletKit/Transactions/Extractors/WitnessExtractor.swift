@@ -3,7 +3,7 @@ import Foundation
 class WitnessExtractor: ScriptExtractor {
     var type: ScriptType { return .unknown }
 
-    func extract(from script: Script, converter: ScriptConverter) throws -> Data {
+    func extract(from script: Script, converter: ScriptConverter) throws -> Data? {
         let witnessKeyHash = try keyHash(from: script)
 
         return witnessKeyHash

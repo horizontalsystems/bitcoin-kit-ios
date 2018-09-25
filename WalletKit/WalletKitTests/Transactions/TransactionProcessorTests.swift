@@ -71,23 +71,6 @@ class TransactionProcessorTests: XCTestCase {
         XCTAssertEqual(transaction.processed, true)
     }
 
-    func testProcessingError() {
-        let error = TransactionExtractor.ExtractionError.invalid
-        let transaction = TestData.p2pkhTransaction
-
-        try! realm.write {
-            realm.add(transaction)
-        }
-
-        stub(mockExtractor) { mock in
-            when(mock.extract(transaction: any())).thenThrow(error)
-        }
-
-        transactionProcessor.enqueueRun()
-
-        waitForMainQueue()
-    }
-
     func testNoActionWhenNoTransaction() {
         transactionProcessor.enqueueRun()
 

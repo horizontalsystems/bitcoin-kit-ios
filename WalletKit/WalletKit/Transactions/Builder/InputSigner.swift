@@ -37,7 +37,10 @@ class InputSigner {
         let signatureHash = Crypto.sha256sha256(serializedTransaction)
         let signature = try Crypto.sign(data: signatureHash, privateKey: privateKey.raw) + Data(bytes: [0x01])
 
-        return [signature, publicKey]
+        switch prevOutput.scriptType {
+            case .p2pk: return [signature]
+            default: return [signature, publicKey]
+        }
     }
 
 }

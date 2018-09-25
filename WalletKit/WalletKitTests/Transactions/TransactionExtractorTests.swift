@@ -169,15 +169,4 @@ class TransactionExtractorTests: XCTestCase {
         }
     }
 
-    func testWrongTransaction() {
-        do {
-            try extractor.extract(transaction: p2pkhTransaction)
-            XCTFail("No error found!")
-        } catch let error as TransactionExtractor.ExtractionError {
-            XCTAssertEqual(error, TransactionExtractor.ExtractionError.invalid)
-        } catch {
-            XCTFail("\(error) Exception Thrown")
-        }
-    }
-
 }
