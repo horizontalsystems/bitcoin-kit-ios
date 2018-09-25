@@ -160,6 +160,8 @@ class Peer {
         log("READY")
 
         connected = true
+
+        delegate?.peerDidConnect(self)
         delegate?.peerReady(self)
     }
 
@@ -346,6 +348,7 @@ protocol PeerDelegate: class {
     func getBloomFilters() -> [Data]
 
     func peerReady(_ peer: Peer)
+    func peerDidConnect(_ peer: Peer)
     func peerDidDisconnect(_ peer: Peer, withError error: Bool)
 
     func peer(_ peer: Peer, didHandleTask task: PeerTask)

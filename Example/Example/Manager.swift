@@ -13,7 +13,7 @@ class Manager {
     var walletKit: WalletKit!
 
     let balanceSubject = PublishSubject<Int>()
-    let lastBlockHeightSubject = PublishSubject<Int>()
+    let lastBlockInfoSubject = PublishSubject<BlockInfo>()
     let progressSubject = PublishSubject<Double>()
     let transactionsSubject = PublishSubject<Void>()
 
@@ -73,8 +73,8 @@ extension Manager: BitcoinKitDelegate {
         balanceSubject.onNext(balance)
     }
 
-    public func lastBlockHeightUpdated(walletKit: WalletKit, lastBlockHeight: Int) {
-        lastBlockHeightSubject.onNext(lastBlockHeight)
+    public func lastBlockInfoUpdated(walletKit: WalletKit, lastBlockInfo: BlockInfo) {
+        lastBlockInfoSubject.onNext(lastBlockInfo)
     }
 
     public func progressUpdated(walletKit: WalletKit, progress: Double) {

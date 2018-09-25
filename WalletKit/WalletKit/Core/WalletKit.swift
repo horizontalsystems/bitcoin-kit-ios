@@ -36,7 +36,6 @@ public class WalletKit {
     let addressManager: AddressManager
 
     let peerGroup: PeerGroup
-    let syncer: Syncer
     let factory: Factory
 
     let initialSyncer: InitialSyncer
@@ -44,15 +43,12 @@ public class WalletKit {
 
     let validatedBlockFactory: ValidatedBlockFactory
 
-    let headerSyncer: HeaderSyncer
-    let headerHandler: HeaderHandler
-
     let addressConverter: AddressConverter
     let scriptConverter: ScriptConverter
     let transactionProcessor: TransactionProcessor
     let transactionExtractor: TransactionExtractor
     let transactionLinker: TransactionLinker
-    let transactionHandler: TransactionHandler
+    let transactionSyncer: TransactionSyncer
     let transactionCreator: TransactionCreator
     let transactionBuilder: TransactionBuilder
 
@@ -61,6 +57,9 @@ public class WalletKit {
     let transactionSizeCalculator: TransactionSizeCalculator
     let unspentOutputSelector: UnspentOutputSelector
     let unspentOutputProvider: UnspentOutputProvider
+
+    let headerSyncer: HeaderSyncer
+    let blockSyncer: BlockSyncer
 
     public init(withWords words: [String], networkType: NetworkType) {
         let wordsHash = words.joined()
@@ -99,7 +98,6 @@ public class WalletKit {
         let filters = Array(pubKeys.map { $0.keyHash }) + Array(pubKeys.map { $0.raw! })
 
         peerGroup = PeerGroup(network: network, peerHostManager: peerHostManager, bloomFilters: filters)
-        syncer = Syncer(realmFactory: realmFactory)
         factory = Factory()
 
         initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, apiManager: apiManager, factory: factory, peerGroup: peerGroup, network: network)
@@ -107,9 +105,6 @@ public class WalletKit {
         progressSyncer = ProgressSyncer(realmFactory: realmFactory)
 
         validatedBlockFactory = ValidatedBlockFactory(realmFactory: realmFactory, factory: factory, network: network)
-
-        headerSyncer = HeaderSyncer(realmFactory: realmFactory, network: network)
-        headerHandler = HeaderHandler(realmFactory: realmFactory, validateBlockFactory: validatedBlockFactory, peerGroup: peerGroup)
 
         inputSigner = InputSigner(hdWallet: hdWallet)
         scriptBuilder = ScriptBuilder()
@@ -123,15 +118,16 @@ public class WalletKit {
         transactionExtractor = TransactionExtractor(scriptConverter: scriptConverter, addressConverter: addressConverter)
         transactionLinker = TransactionLinker()
         transactionProcessor = TransactionProcessor(realmFactory: realmFactory, extractor: transactionExtractor, linker: transactionLinker, addressManager: addressManager)
-        transactionHandler = TransactionHandler(realmFactory: realmFactory, processor: transactionProcessor, progressSyncer: progressSyncer, validateBlockFactory: validatedBlockFactory)
+        transactionSyncer = TransactionSyncer(realmFactory: realmFactory, processor: transactionProcessor)
         transactionBuilder = TransactionBuilder(unspentOutputSelector: unspentOutputSelector, unspentOutputProvider: unspentOutputProvider, transactionSizeCalculator: transactionSizeCalculator, addressConverter: addressConverter, inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory)
         transactionCreator = TransactionCreator(realmFactory: realmFactory, transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, peerGroup: peerGroup, addressManager: addressManager)
 
-        peerGroup.delegate = syncer
+        headerSyncer = HeaderSyncer(realmFactory: realmFactory, validateBlockFactory: validatedBlockFactory, network: network)
+        blockSyncer = BlockSyncer(realmFactory: realmFactory, validateBlockFactory: validatedBlockFactory, processor: transactionProcessor, progressSyncer: progressSyncer)
 
-        syncer.headerSyncer = headerSyncer
-        syncer.headerHandler = headerHandler
-        syncer.transactionHandler = transactionHandler
+        peerGroup.headersSyncer = headerSyncer
+        peerGroup.blockSyncer = blockSyncer
+        peerGroup.transactionSyncer = transactionSyncer
 
         unspentOutputsNotificationToken = unspentOutputRealmResults.observe { [weak self] changeset in
             self?.handleUnspentOutputs(changeset: changeset)
@@ -150,13 +146,6 @@ public class WalletKit {
         })
 
         progressSyncer.enqueueRun()
-
-        let syncingBlocks = realm.objects(Block.self).filter("status = %@", Block.Status.syncing.rawValue)
-        try? realm.write {
-            for block in syncingBlocks {
-                block.status = .pending
-            }
-        }
     }
 
     deinit {
@@ -169,7 +158,7 @@ public class WalletKit {
         let realm = realmFactory.realm
 
         let blockCount = realm.objects(Block.self).count
-        let syncedBlockCount = realm.objects(Block.self).filter("status = %@", Block.Status.synced.rawValue).count
+        let syncedBlockCount = realm.objects(Block.self).filter("synced = %@", true).count
         let pubKeysCount = realm.objects(PublicKey.self).count
 
         print("BLOCK COUNT: \(blockCount) --- \(syncedBlockCount) synced")
@@ -202,8 +191,8 @@ public class WalletKit {
         return transactionRealmResults.map { transactionInfo(fromTransaction: $0) }
     }
 
-    public var lastBlockHeight: Int {
-        return blockRealmResults.last?.height ?? 0
+    public var lastBlockInfo: BlockInfo? {
+        return blockRealmResults.last.map { blockInfo(fromBlock: $0) }
     }
 
     public var balance: Int {
@@ -248,8 +237,8 @@ public class WalletKit {
     }
 
     private func handleBlocks(changeset: RealmCollectionChange<Results<Block>>) {
-        if case let .update(collection, deletions, insertions, _) = changeset, let height = collection.last?.height, (!deletions.isEmpty || !insertions.isEmpty) {
-            delegate?.lastBlockHeightUpdated(walletKit: self, lastBlockHeight: height)
+        if case let .update(collection, deletions, insertions, _) = changeset, let block = collection.last, (!deletions.isEmpty || !insertions.isEmpty) {
+            delegate?.lastBlockInfoUpdated(walletKit: self, lastBlockInfo: blockInfo(fromBlock: block))
         }
     }
 
@@ -275,7 +264,7 @@ public class WalletKit {
     }
 
     private var blockRealmResults: Results<Block> {
-        return realmFactory.realm.objects(Block.self).sorted(byKeyPath: "height")
+        return realmFactory.realm.objects(Block.self).filter("synced = %@", true).sorted(byKeyPath: "height")
     }
 
     private func transactionInfo(fromTransaction transaction: Transaction) -> TransactionInfo {
@@ -323,11 +312,19 @@ public class WalletKit {
         )
     }
 
+    private func blockInfo(fromBlock block: Block) -> BlockInfo {
+        return BlockInfo(
+                headerHash: block.reversedHeaderHashHex,
+                height: block.height,
+                timestamp: block.header?.timestamp
+        )
+    }
+
 }
 
 public protocol BitcoinKitDelegate: class {
     func transactionsUpdated(walletKit: WalletKit, inserted: [TransactionInfo], updated: [TransactionInfo], deleted: [Int])
     func balanceUpdated(walletKit: WalletKit, balance: Int)
-    func lastBlockHeightUpdated(walletKit: WalletKit, lastBlockHeight: Int)
+    func lastBlockInfoUpdated(walletKit: WalletKit, lastBlockInfo: BlockInfo)
     func progressUpdated(walletKit: WalletKit, progress: Double)
 }
