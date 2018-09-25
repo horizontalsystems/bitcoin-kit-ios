@@ -136,6 +136,7 @@ class PeerHostManagerTests:XCTestCase {
         manager.hostDisconnected(host: host!, withError: false)
         waitForMainQueue()
         let host2 = manager.peerHost
+        waitForMainQueue()
         XCTAssertEqual(host, host2)
     }
 

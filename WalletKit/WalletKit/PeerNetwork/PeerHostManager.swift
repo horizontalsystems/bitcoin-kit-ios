@@ -6,19 +6,20 @@ class PeerHostManager {
     let realmFactory: RealmFactory
     let hostDiscovery: HostDiscovery
     private let dnsLookupQueue: DispatchQueue
+    private let hostsUsageQueue: DispatchQueue
     private let localQueue: DispatchQueue
-    private var collecting: Bool = false
-    private var connectedHosts: [String] = []
+    private var collected: Bool = false
+    private var usedHosts: [String] = []
     weak var delegate: PeerHostManagerDelegate?
 
     var peerHost: String? {
         let realm = realmFactory.realm
-        let addresses = realm.objects(PeerAddress.self).sorted(byKeyPath: "score")
-
-        let peerAddress = addresses.first(where: { !connectedHosts.contains($0.ip) })
+        let peerAddress = realm.objects(PeerAddress.self).sorted(byKeyPath: "score").first(where: { !usedHosts.contains($0.ip) })
 
         if let peerAddress = peerAddress {
-            connectedHosts.append(peerAddress.ip)
+            hostsUsageQueue.sync {
+                self.usedHosts.append(peerAddress.ip)
+            }
         } else {
             collectPeerHosts()
         }
@@ -27,18 +28,22 @@ class PeerHostManager {
     }
 
     init(network: NetworkProtocol, realmFactory: RealmFactory, hostDiscovery: HostDiscovery = HostDiscovery(),
-         dnsLookupQueue: DispatchQueue = DispatchQueue(label: "PeerHostManager Queue", qos: .background, attributes: .concurrent),
-         localQueue: DispatchQueue = DispatchQueue(label: "PeerHostManager Queue", qos: .utility)) {
+         dnsLookupQueue: DispatchQueue = DispatchQueue(label: "PeerHostManager DNSLookupQueue", qos: .background, attributes: .concurrent),
+         localQueue: DispatchQueue = DispatchQueue(label: "PeerHostManager LocalQueue", qos: .utility),
+         hostsUsageQueue: DispatchQueue = DispatchQueue(label: "PeerHostManager HostsUsageQueue", qos: .utility)) {
         self.network = network
         self.realmFactory = realmFactory
         self.hostDiscovery = hostDiscovery
         self.dnsLookupQueue = dnsLookupQueue
+        self.hostsUsageQueue = hostsUsageQueue
         self.localQueue = localQueue
     }
 
     func hostDisconnected(host: String, withError error: Bool) {
         localQueue.async {
-            self.connectedHosts.removeAll(where: { connectedHost in connectedHost == host })
+            self.hostsUsageQueue.sync {
+                self.usedHosts.removeAll(where: { connectedHost in connectedHost == host })
+            }
 
             let realm = self.realmFactory.realm
             if let peerAddress = realm.objects(PeerAddress.self).filter("ip = %@", host).first {
@@ -58,22 +63,15 @@ class PeerHostManager {
     }
 
     private func collectPeerHosts() {
-        guard !collecting else {
+        guard !collected else {
             return
         }
-        collecting = true
-        let dispatchGroup = DispatchGroup()
 
+        collected = true
         for dnsSeed in self.network.dnsSeeds {
-            dispatchGroup.enter()
             dnsLookupQueue.async {
                 self.addHosts(hosts: self.hostDiscovery.lookup(dnsSeed: dnsSeed))
-                dispatchGroup.leave()
             }
-        }
-
-        dispatchGroup.notify(queue: dnsLookupQueue) {
-            self.collecting = false
         }
     }
 
