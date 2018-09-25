@@ -38,19 +38,30 @@ class BitcoinCashMainNet: NetworkProtocol {
             ),
             height: 0)
 
+//    One of the checkpoint blocks before hard fork. Must be tested
+//    let checkpointBlock = Block(
+//            withHeader: BlockHeader(
+//                    version: 536870912,
+//                    previousBlockHeaderReversedHex: "000000000000000000b3ff31d54e9e83515ee18360c7dc59e30697d083c745ff",
+//                    merkleRootReversedHex: "33d4a902daa28d09f9f6a319f538153e4b747938e20e113a2935c8dc0b971584",
+//                    timestamp: 1481765313,
+//                    bits: 0x18038b85,
+//                    nonce: 251583942
+//            ),
+//            height: 443520)
+
     let checkpointBlock = Block(
             withHeader: BlockHeader(
                     version: 536870912,
-                    previousBlockHeaderReversedHex: "000000000000000000c27f91198eb5505005a0863d8deb696a27e2f5bfffe70b",
-                    merkleRootReversedHex: "1530edf433fdfd7252bda07bf38629e2c31f31560dbd30dd7f496c4b6fe7e27d",
-                    timestamp: 1534820198,
-                    bits: 402796414,
-                    nonce: 1748283264
+                    previousBlockHeaderReversedHex: "000000000000000000640772774c4c5c923397129370c8edf05c3792de1dcb4e",
+                    merkleRootReversedHex: "bf78c4852c6fb6a80f47b254dd076e780872958dcaac629e48ba297b7cb5782a",
+                    timestamp: 1535106119,
+                    bits: 0x180215b2,
+                    nonce: 2725498692
             ),
-            height: 544320)
+            height: 544800)
 
-    var targetTimeSpan: Int { return 24 * 60 * 60 }                     // Seconds in Bitcoin cycle
-    var targetSpacing: Int { return 10 * 60 }                           // 10 min. for mining 1 Block
+//    var targetTimeSpan: Int { return 24 * 60 * 60 }                     // Seconds in Bitcoin cycle
 
     required init(validatorFactory: BlockValidatorFactory, blockHelper: BlockHelper) {
         self.blockHelper = blockHelper
@@ -61,11 +72,11 @@ class BitcoinCashMainNet: NetworkProtocol {
     }
 
     func validate(block: Block, previousBlock: Block) throws {
-        if blockHelper.previous(for: previousBlock, index: 147) == nil { //TODO: Remove trust first 147 block (144 + 3) in bitcoin cash
-            return
-        }
         try headerValidator.validate(candidate: block, block: previousBlock, network: self)
-        if try blockHelper.medianTimePast(block: block) >= BitcoinCashMainNet.diffDate {
+        if try blockHelper.medianTimePast(block: block) >= BitcoinCashMainNet.diffDate {            //TODO: change medianTime to number of needed block
+            if blockHelper.previous(for: previousBlock, index: 147) == nil {                        //TODO: Remove trust first 147 block (144 + 3) in bitcoin cash
+                return
+            }
             try dAAValidator.validate(candidate: block, block: previousBlock, network: self)
         } else {
             if isDifficultyTransitionPoint(height: block.height) {

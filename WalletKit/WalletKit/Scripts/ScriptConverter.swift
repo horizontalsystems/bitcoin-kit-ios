@@ -41,6 +41,9 @@ class ScriptConverter {
             case 0x01...0x4b: bytesCount = Int(opCode)
             case 0x4c:                              // The next byte contains the number of bytes to be pushed onto the stack
                 bytesOffset += 1
+                guard data.count > 1 else {
+                    throw ScriptError.wrongScriptLength
+                }
                 bytesCount = Int(data[1])
             case 0x4d:                              // The next two bytes contain the number of bytes to be pushed onto the stack in little endian order
                 bytesOffset += 2
