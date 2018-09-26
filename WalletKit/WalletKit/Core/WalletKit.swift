@@ -100,8 +100,8 @@ public class WalletKit {
         peerGroup = PeerGroup(network: network, peerHostManager: peerHostManager, bloomFilters: filters)
         factory = Factory()
 
-        initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, apiManager: apiManager, factory: factory, peerGroup: peerGroup, network: network)
         addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, peerGroup: peerGroup)
+        initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, apiManager: apiManager, addressManager: addressManager, factory: factory, peerGroup: peerGroup, network: network)
         progressSyncer = ProgressSyncer(realmFactory: realmFactory)
 
         validatedBlockFactory = ValidatedBlockFactory(realmFactory: realmFactory, factory: factory, network: network)

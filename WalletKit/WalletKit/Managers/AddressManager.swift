@@ -15,50 +15,56 @@ class AddressManager {
     }
 
     func changePublicKey() throws -> PublicKey {
-        return try getPublicKey(chain: .internal)
+        return try publicKey(chain: .internal)
     }
 
     func receiveAddress() throws -> String {
-        return try getPublicKey(chain: .external).address
+        return try publicKey(chain: .external).address
     }
 
     func generateKeys() throws {
-        let realm = realmFactory.realm
-        let externalKeys = try generateKeys(external: true, realm: realm)
-        let internalKeys = try generateKeys(external: false, realm: realm)
-
-        try realm.write {
-            realm.add(externalKeys)
-            realm.add(internalKeys)
-        }
-
-        for pubKey in externalKeys {
-            peerGroup.addPublicKeyFilter(pubKey: pubKey)
-        }
-
-        for pubKey in internalKeys {
-            peerGroup.addPublicKeyFilter(pubKey: pubKey)
-        }
+        try generateKeys(external: true)
+        try generateKeys(external: false)
     }
 
-    private func generateKeys(external: Bool, realm: Realm) throws -> [PublicKey] {
-        var keys = [PublicKey]()
-        let unusedKeysCount = realm.objects(PublicKey.self).filter("external = %@ AND outputs.@count = 0", external).sorted(byKeyPath: "index").count
+    private func generateKeys(external: Bool) throws {
+        let realm = realmFactory.realm
+        let publicKeys = realm.objects(PublicKey.self).filter("external = %@", external)
+        var unusedKeysCount = 0
+
+        if let lastUsedKey = publicKeys.filter("outputs.@count > 0").sorted(byKeyPath: "index").last {
+            unusedKeysCount = publicKeys.filter("index > %@", lastUsedKey.index).count
+        } else {
+            unusedKeysCount = publicKeys.count
+        }
 
         if unusedKeysCount < hdWallet.gapLimit {
-            let allKeys = realm.objects(PublicKey.self).filter("external = %@", external).sorted(byKeyPath: "index")
+            let allKeys = publicKeys.sorted(byKeyPath: "index")
             let lastIndex = allKeys.last?.index ?? -1
 
             for i in 1..<(hdWallet.gapLimit - unusedKeysCount + 1) {
-                let newPublicKey = try external ? hdWallet.receivePublicKey(index: lastIndex + i) : hdWallet.changePublicKey(index: lastIndex + i)
-                keys.append(newPublicKey)
+                let _ = try publicKey(index: lastIndex + i, external: external)
             }
         }
-
-        return keys
     }
 
-    private func getPublicKey(chain: HDWallet.Chain) throws -> PublicKey {
+    func publicKey(index: Int, external: Bool) throws -> PublicKey {
+        let realm = realmFactory.realm
+        if let key = realm.objects(PublicKey.self).filter("external = %@ AND index = %@", external, index).last {
+            return key
+        }
+
+        let publicKey = try hdWallet.publicKey(index: index, external: external)
+        try realm.write {
+            realm.add(publicKey)
+        }
+
+        peerGroup.addPublicKeyFilter(pubKey: publicKey)
+
+        return  publicKey
+    }
+
+    private func publicKey(chain: HDWallet.Chain) throws -> PublicKey {
         let realm = realmFactory.realm
 
         if let unusedKey = realm.objects(PublicKey.self).filter("external = %@ AND outputs.@count = 0", chain == .external).sorted(byKeyPath: "index").first {
@@ -66,16 +72,9 @@ class AddressManager {
         }
 
         let existingKeys = realm.objects(PublicKey.self).filter("external = %@", chain == .external).sorted(byKeyPath: "index")
-        let newIndex = (existingKeys.last?.index ?? -1) + 1
-        let newPublicKey = try chain == .external ? hdWallet.receivePublicKey(index: newIndex) : hdWallet.changePublicKey(index: newIndex)
+        let lastIndex = existingKeys.last?.index ?? -1
 
-        try realm.write {
-            realm.add(newPublicKey)
-        }
-
-        peerGroup.addPublicKeyFilter(pubKey: newPublicKey)
-
-        return newPublicKey
+        return try publicKey(index: lastIndex + 1, external: chain == .external)
     }
 
 }
