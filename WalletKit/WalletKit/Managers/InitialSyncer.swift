@@ -68,6 +68,8 @@ class InitialSyncer {
             realm.add(blocks, update: true)
         }
 
+        try addressManager.addKeys(keys: keys)
+
         stateManager.apiSynced = true
         peerGroup.start()
     }
@@ -76,7 +78,7 @@ class InitialSyncer {
         let count = keys.count
         let gapLimit = hdWallet.gapLimit
 
-        let newKey = try addressManager.publicKey(index: count, external: external)
+        let newKey = try hdWallet.publicKey(index: count, external: external)
 
         return apiManager.getBlockHashes(address: newKey.address)
                 .flatMap { [unowned self] blockResponses -> Observable<([PublicKey], [Block])> in

@@ -48,12 +48,13 @@ class InitialSyncerTests: XCTestCase {
 
         stub(mockHDWallet) { mock in
             when(mock.gapLimit.get).thenReturn(2)
-        }
-        stub(mockAddressManager) { mock in
             for i in 0..<5 {
                 when(mock.publicKey(index: equal(to: i), external: equal(to: false))).thenReturn(internalKeys[i])
                 when(mock.publicKey(index: equal(to: i), external: equal(to: true))).thenReturn(externalKeys[i])
             }
+        }
+        stub(mockAddressManager) { mock in
+            when(mock.addKeys(keys: any())).thenDoNothing()
         }
         stub(mockStateManager) { mock in
             when(mock.apiSynced.get).thenReturn(false)
@@ -140,14 +141,9 @@ class InitialSyncerTests: XCTestCase {
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", externalResponse00.hash).count, 1)
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", externalResponse01.hash).count, 1)
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", internalResponse0.hash).count, 1)
-
-        verify(mockAddressManager).publicKey(index: equal(to: 0), external: true)
-        verify(mockAddressManager).publicKey(index: equal(to: 1), external: true)
-        verify(mockAddressManager).publicKey(index: equal(to: 2), external: true)
-        verify(mockAddressManager).publicKey(index: equal(to: 0), external: false)
-        verify(mockAddressManager).publicKey(index: equal(to: 1), external: false)
-        verify(mockAddressManager).publicKey(index: equal(to: 2), external: false)
-        verify(mockAddressManager, never()).publicKey(index: equal(to: 3), external: any())
+        
+        verify(mockAddressManager).addKeys(keys: equal(to: [externalKeys[0], externalKeys[1], externalKeys[2], internalKeys[0], internalKeys[1], internalKeys[2]]))
+        verify(mockHDWallet, never()).publicKey(index: equal(to: 3), external: any())
 
         verify(mockStateManager).apiSynced.set(true)
         verify(mockPeerGroup).start()
@@ -180,14 +176,9 @@ class InitialSyncerTests: XCTestCase {
         XCTAssertEqual(realm.objects(Block.self).count, 1)
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", externalResponse0.hash).count, 1)
 
-        verify(mockAddressManager).publicKey(index: equal(to: 0), external: true)
-        verify(mockAddressManager).publicKey(index: equal(to: 1), external: true)
-        verify(mockAddressManager).publicKey(index: equal(to: 2), external: true)
-        verify(mockAddressManager).publicKey(index: equal(to: 3), external: true)
-        verify(mockAddressManager).publicKey(index: equal(to: 0), external: false)
-        verify(mockAddressManager).publicKey(index: equal(to: 1), external: false)
-        verify(mockAddressManager, never()).publicKey(index: equal(to: 4), external: equal(to: true))
-        verify(mockAddressManager, never()).publicKey(index: equal(to: 2), external: equal(to: false))
+        verify(mockAddressManager).addKeys(keys: equal(to: [externalKeys[0], externalKeys[1], externalKeys[2], externalKeys[3], internalKeys[0], internalKeys[1]]))
+        verify(mockHDWallet, never()).publicKey(index: equal(to: 4), external: equal(to: true))
+        verify(mockHDWallet, never()).publicKey(index: equal(to: 2), external: equal(to: false))
 
         verify(mockStateManager).apiSynced.set(true)
         verify(mockPeerGroup).start()
@@ -253,15 +244,9 @@ class InitialSyncerTests: XCTestCase {
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", response2.hash).count, 1)
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", response3.hash).count, 1)
 
-        verify(mockAddressManager).publicKey(index: equal(to: 0), external: true)
-        verify(mockAddressManager).publicKey(index: equal(to: 1), external: true)
-        verify(mockAddressManager).publicKey(index: equal(to: 2), external: true)
-        verify(mockAddressManager).publicKey(index: equal(to: 3), external: true)
-        verify(mockAddressManager).publicKey(index: equal(to: 4), external: true)
-        verify(mockAddressManager).publicKey(index: equal(to: 0), external: false)
-        verify(mockAddressManager).publicKey(index: equal(to: 1), external: false)
-        verify(mockAddressManager, never()).publicKey(index: equal(to: 5), external: equal(to: true))
-        verify(mockAddressManager, never()).publicKey(index: equal(to: 2), external: equal(to: false))
+        verify(mockAddressManager).addKeys(keys: equal(to: [externalKeys[0], externalKeys[1], externalKeys[2], externalKeys[3], externalKeys[4], internalKeys[0], internalKeys[1]]))
+        verify(mockHDWallet, never()).publicKey(index: equal(to: 5), external: equal(to: true))
+        verify(mockHDWallet, never()).publicKey(index: equal(to: 2), external: equal(to: false))
 
         verify(mockStateManager).apiSynced.set(true)
         verify(mockPeerGroup).start()
