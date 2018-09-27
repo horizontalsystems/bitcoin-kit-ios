@@ -157,21 +157,21 @@ public class WalletKit {
     public func showRealmInfo() {
         let realm = realmFactory.realm
 
-        let blockCount = realm.objects(Block.self).count
-        let syncedBlockCount = realm.objects(Block.self).filter("synced = %@", true).count
-        let pubKeysCount = realm.objects(PublicKey.self).count
+        let blocks = realm.objects(Block.self).sorted(byKeyPath: "height")
+        let syncedBlocks = blocks.filter("synced = %@", true)
+        let pubKeys = realm.objects(PublicKey.self)
 
-        print("BLOCK COUNT: \(blockCount) --- \(syncedBlockCount) synced")
-        if let block = realm.objects(Block.self).first {
-            print("First Block: \(block.height) --- \(block.reversedHeaderHashHex)")
-        }
-        if let block = realm.objects(Block.self).last {
-            print("Last Block: \(block.height) --- \(block.reversedHeaderHashHex)")
-        }
-
-        print("PUBLIC KEYS COUNT: \(pubKeysCount)")
-        for pubKey in realm.objects(PublicKey.self) {
+        for pubKey in pubKeys {
             print("\(pubKey.index) --- \(pubKey.external) --- \(pubKey.address)")
+        }
+        print("PUBLIC KEYS COUNT: \(pubKeys.count)")
+
+        print("BLOCK COUNT: \(blocks.count) --- \(syncedBlocks.count) synced")
+        if let block = syncedBlocks.first {
+            print("First Synced Block: \(block.height) --- \(block.reversedHeaderHashHex)")
+        }
+        if let block = syncedBlocks.last {
+            print("Last Synced Block: \(block.height) --- \(block.reversedHeaderHashHex)")
         }
     }
 

@@ -31,7 +31,7 @@ class PeerGroup {
     private let syncPeerQueue: DispatchQueue
     private let inventoryQueue: DispatchQueue
 
-    init(network: NetworkProtocol, peerHostManager: PeerHostManager, bloomFilters: [Data], peerCount: Int = 3) {
+    init(network: NetworkProtocol, peerHostManager: PeerHostManager, bloomFilters: [Data], peerCount: Int = 10) {
         self.network = network
         self.peerHostManager = peerHostManager
         self.bloomFilters = bloomFilters
@@ -88,18 +88,20 @@ class PeerGroup {
     }
 
     private func connectPeersIfRequired() {
-        guard started else {
-            return
-        }
+        localQueue.async {
+            guard self.started else {
+                return
+            }
 
-        for _ in peers.count..<peerCount {
-            if let host = peerHostManager.peerHost {
-                let peer = Peer(host: host, network: network)
-                peers.append(peer)
-                peer.delegate = self
-                peer.connect()
-            } else {
-                break
+            for _ in self.peers.count..<self.peerCount {
+                if let host = self.peerHostManager.peerHost {
+                    let peer = Peer(host: host, network: self.network)
+                    self.peers.append(peer)
+                    peer.delegate = self
+                    peer.connect()
+                } else {
+                    break
+                }
             }
         }
     }
@@ -129,6 +131,8 @@ class PeerGroup {
         if !hashes.isEmpty {
             pendingBlockHashes.removeFirst(hashes.count)
             peer.add(task: RequestMerkleBlocksPeerTask(hashes: hashes))
+
+            Logger.shared.log(self, "Dispatching \(hashes.count) blocks to \(peer.logName)")
         }
     }
 
@@ -161,7 +165,7 @@ class PeerGroup {
             try? self.headersSyncer?.handle(headers: blockHeaders)
 
             if blockHeaders.count < 2000 {
-                Logger.shared.log(self, "UNSETTING SYNC PEER FROM \(self.syncPeer?.logName ?? "")")
+                Logger.shared.log(self, "Unsetting sync peer from \(self.syncPeer?.logName ?? "")")
                 self.syncPeer?.headersSynced = true
                 self.syncPeer = nil
 
@@ -216,6 +220,7 @@ class PeerGroup {
                     let blocks = self.fetchedBlocks
                     self.fetchedBlocks = []
 
+                    Logger.shared.log(self, "Handle \(blocks.count) blocks")
                     self.blockSyncer?.handle(merkleBlocks: blocks)
 
                     if let hash = self.requestedBlockHashes.last {
@@ -251,7 +256,7 @@ class PeerGroup {
         }
 
         if let nonSyncedPeer = peers.first(where: { $0.connected && !$0.headersSynced }) {
-            Logger.shared.log(self, "SETTING SYNC PEER TO \(nonSyncedPeer.logName)")
+            Logger.shared.log(self, "Setting sync peer to \(nonSyncedPeer.logName)")
             syncPeer = nonSyncedPeer
             handleReadySyncPeer()
         }
@@ -284,12 +289,14 @@ extension PeerGroup: PeerDelegate {
 
         peerHostManager.hostDisconnected(host: peer.host, withError: error)
 
-        if peer === syncPeer {
-            syncPeer = nil
-        }
+        localQueue.async {
+            if peer === self.syncPeer {
+                self.syncPeer = nil
+            }
 
-        if let index = peers.index(where: { $0 === peer }) {
-            peers.remove(at: index)
+            if let index = self.peers.index(where: { $0 === peer }) {
+                self.peers.remove(at: index)
+            }
         }
 
         connectPeersIfRequired()
@@ -307,6 +314,7 @@ extension PeerGroup: PeerDelegate {
             handle(blockHeaders: task.blockHeaders)
 
         case let task as RequestMerkleBlocksPeerTask:
+            Logger.shared.log(self, "Got \(task.merkleBlocks.count) from \(peer.logName)")
             handle(merkleBlocks: task.merkleBlocks)
 
         case let task as RequestTransactionsPeerTask:

@@ -67,7 +67,6 @@
 		11B35DCEE58FE94B5E111622 /* InitialSyncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35660C3F6DE42BC99E350 /* InitialSyncer.swift */; };
 		11B35DD0EE93320729D517CE /* RequestMerkleBlocksPeerTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35AEAAB5F1F7246063AEB /* RequestMerkleBlocksPeerTask.swift */; };
 		11B35DD55E37F22AE1797501 /* Transaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35C67DB63EF992C380513 /* Transaction.swift */; };
-		11B35E6B68D14E5316690567 /* BlockSyncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35C07292793FCE3096D03 /* BlockSyncer.swift */; };
 		11B35EE64EEEE37EB90C5D14 /* PeerGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B359E44D75610DF2841327 /* PeerGroup.swift */; };
 		11B35EEF6EA44EF0378B60A3 /* BitcoinRegTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35A0FD8DBCF14EC9AA8ED /* BitcoinRegTest.swift */; };
 		11B35F02260D5A21CF0EA3B8 /* Factory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B3529A1731702724B0342D /* Factory.swift */; };
@@ -1331,7 +1330,6 @@
 				58AAA7537CABBC438DE391DF /* IBlockValidator.swift in Sources */,
 				2FA5D74EDAFB77BC86918E63 /* HostDiscovery.swift in Sources */,
 				58AAAB17C4576A1C730F65F6 /* P2MultiSigExtractor.swift in Sources */,
-				11B35E6B68D14E5316690567 /* BlockSyncer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

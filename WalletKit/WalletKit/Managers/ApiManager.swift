@@ -147,7 +147,7 @@ struct AddressResponse: ImmutableMappable {
 
 }
 
-struct BlockResponse: ImmutableMappable {
+struct BlockResponse: ImmutableMappable, Hashable {
     let hash: String
     let height: Int
 
@@ -159,6 +159,10 @@ struct BlockResponse: ImmutableMappable {
     init(map: Map) throws {
         hash = try map.value("hash")
         height = try map.value("height")
+    }
+
+    static func ==(lhs: BlockResponse, rhs: BlockResponse) -> Bool {
+        return lhs.height == rhs.height && lhs.hash == rhs.hash
     }
 
 }

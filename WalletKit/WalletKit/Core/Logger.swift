@@ -37,7 +37,7 @@ class Logger {
     func log(_ logTag: String, _ logString: String) {
         if allowedLogs.contains(logTag) {
             let timestamp = dateFormatter.string(from: Date())
-            print("\(timestamp): \(logString)\n")
+            print("\(timestamp): \(logString)")
         }
     }
 
