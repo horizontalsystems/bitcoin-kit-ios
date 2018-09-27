@@ -9,16 +9,18 @@ class InitialSyncer {
     private let hdWallet: HDWallet
     private let stateManager: StateManager
     private let apiManager: ApiManager
+    private let addressManager: AddressManager
     private let factory: Factory
     private let peerGroup: PeerGroup
     private let network: NetworkProtocol
     private let scheduler: ImmediateSchedulerType
 
-    init(realmFactory: RealmFactory, hdWallet: HDWallet, stateManager: StateManager, apiManager: ApiManager, factory: Factory, peerGroup: PeerGroup, network: NetworkProtocol, scheduler: ImmediateSchedulerType = ConcurrentDispatchQueueScheduler(qos: .background)) {
+    init(realmFactory: RealmFactory, hdWallet: HDWallet, stateManager: StateManager, apiManager: ApiManager, addressManager: AddressManager, factory: Factory, peerGroup: PeerGroup, network: NetworkProtocol, scheduler: ImmediateSchedulerType = ConcurrentDispatchQueueScheduler(qos: .background)) {
         self.realmFactory = realmFactory
         self.hdWallet = hdWallet
         self.stateManager = stateManager
         self.apiManager = apiManager
+        self.addressManager = addressManager
         self.factory = factory
         self.peerGroup = peerGroup
         self.network = network
@@ -62,9 +64,7 @@ class InitialSyncer {
         Logger.shared.log(self, "SAVING: \(keys.count) keys, \(blocks.count) blocks")
 
         let realm = realmFactory.realm
-
         try realm.write {
-            realm.add(keys, update: true)
             realm.add(blocks, update: true)
         }
 
@@ -76,7 +76,7 @@ class InitialSyncer {
         let count = keys.count
         let gapLimit = hdWallet.gapLimit
 
-        let newKey = try hdWallet.publicKey(index: count, external: external)
+        let newKey = try addressManager.publicKey(index: count, external: external)
 
         return apiManager.getBlockHashes(address: newKey.address)
                 .flatMap { [unowned self] blockResponses -> Observable<([PublicKey], [Block])> in
