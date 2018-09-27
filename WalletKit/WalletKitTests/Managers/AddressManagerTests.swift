@@ -283,33 +283,6 @@ class AddressManagerTests: XCTestCase {
         XCTAssertEqual(externalKeys[2].address, keys[6].address)
     }
 
-    func testPublicKey() {
-        let publicKey = getPublicKey(withIndex: 0, chain: .external)
-
-        stub(mockHDWallet) { mock in
-            when(mock.publicKey(index: equal(to: 0), external: equal(to: true))).thenReturn(publicKey)
-        }
-
-        let generatedPublicKey = try! manager.publicKey(index: 0, external: true)
-
-        XCTAssertEqual(generatedPublicKey, publicKey)
-        verify(mockPeerGroup).addPublicKeyFilter(pubKey: equal(to: publicKey))
-    }
-
-    func testPublicKey_AlreadyExists() {
-        let publicKey = getPublicKey(withIndex: 0, chain: .external)
-
-        try! mockWalletKit.realm.write {
-            mockWalletKit.realm.add(publicKey)
-        }
-
-        let generatedPublicKey = try! manager.publicKey(index: 0, external: true)
-
-        XCTAssertEqual(generatedPublicKey, publicKey)
-        verify(mockHDWallet, never()).publicKey(index: any(), external: any())
-        verify(mockPeerGroup, never()).addPublicKeyFilter(pubKey: any())
-    }
-
     private func getPublicKey(withIndex index: Int, chain: HDWallet.Chain) -> PublicKey {
         let hdPrivKey = try! hdWallet.privateKey(index: index, chain: chain)
         return PublicKey(withIndex: index, external: chain == .external, hdPublicKey: hdPrivKey.publicKey())
