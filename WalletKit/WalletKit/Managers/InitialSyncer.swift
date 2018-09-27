@@ -35,15 +35,17 @@ class InitialSyncer {
             let internalObservable = try fetchFromApi(external: false, maxHeight: maxHeight)
 
             Observable
-                    .zip(externalObservable, internalObservable, resultSelector: { external, `internal` -> ([PublicKey], [Block]) in
-                        let (externalKeys, externalBlocks) = external
-                        let (internalKeys, internalBlocks) = `internal`
+                    .zip(externalObservable, internalObservable, resultSelector: { external, `internal` -> ([PublicKey], [BlockResponse]) in
+                        let (externalKeys, externalResponses) = external
+                        let (internalKeys, internalResponses) = `internal`
 
-                        return (externalKeys + internalKeys, externalBlocks + internalBlocks)
+                        let set: Set<BlockResponse> = Set(externalResponses + internalResponses)
+
+                        return (externalKeys + internalKeys, Array(set))
                     })
                     .subscribeOn(scheduler)
-                    .subscribe(onNext: { [weak self] keys, blocks in
-                        try? self?.handle(keys: keys, blocks: blocks)
+                    .subscribe(onNext: { [weak self] keys, responses in
+                        try? self?.handle(keys: keys, responses: responses)
                     }, onError: { error in
                         Logger.shared.log(self, "Error: \(error)")
                     })
@@ -60,7 +62,14 @@ class InitialSyncer {
 //        try handle(keys: keys, blocks: [])
     }
 
-    private func handle(keys: [PublicKey], blocks: [Block]) throws {
+    private func handle(keys: [PublicKey], responses: [BlockResponse]) throws {
+        let blocks = responses.compactMap { response -> Block? in
+            if let hash = Data(hex: response.hash) {
+                return self.factory.block(withHeaderHash: Data(hash.reversed()), height: response.height)
+            }
+            return nil
+        }
+
         Logger.shared.log(self, "SAVING: \(keys.count) keys, \(blocks.count) blocks")
 
         let realm = realmFactory.realm
@@ -74,14 +83,14 @@ class InitialSyncer {
         peerGroup.start()
     }
 
-    private func fetchFromApi(external: Bool, maxHeight: Int, lastUsedKeyIndex: Int = -1, keys: [PublicKey] = [], blocks: [Block] = []) throws -> Observable<([PublicKey], [Block])> {
+    private func fetchFromApi(external: Bool, maxHeight: Int, lastUsedKeyIndex: Int = -1, keys: [PublicKey] = [], responses: [BlockResponse] = []) throws -> Observable<([PublicKey], [BlockResponse])> {
         let count = keys.count
         let gapLimit = hdWallet.gapLimit
 
         let newKey = try hdWallet.publicKey(index: count, external: external)
 
         return apiManager.getBlockHashes(address: newKey.address)
-                .flatMap { [unowned self] blockResponses -> Observable<([PublicKey], [Block])> in
+                .flatMap { [unowned self] blockResponses -> Observable<([PublicKey], [BlockResponse])> in
                     var lastUsedKeyIndex = lastUsedKeyIndex
 
                     if !blockResponses.isEmpty {
@@ -91,19 +100,10 @@ class InitialSyncer {
                     let keys = keys + [newKey]
 
                     if lastUsedKeyIndex < keys.count - gapLimit {
-                        return Observable.just((keys, blocks))
+                        return Observable.just((keys, responses))
                     } else {
                         let validResponses = blockResponses.filter { $0.height < maxHeight }
-
-                        let validBlocks = validResponses.compactMap { response -> Block? in
-                            if let hash = Data(hex: response.hash) {
-                                return self.factory.block(withHeaderHash: Data(hash.reversed()), height: response.height)
-                            }
-                            return nil
-                        }
-
-                        let blocks = blocks + validBlocks
-                        return try self.fetchFromApi(external: external, maxHeight: maxHeight, lastUsedKeyIndex: lastUsedKeyIndex, keys: keys, blocks: blocks)
+                        return try self.fetchFromApi(external: external, maxHeight: maxHeight, lastUsedKeyIndex: lastUsedKeyIndex, keys: keys, responses: responses + validResponses)
                     }
                 }
     }
