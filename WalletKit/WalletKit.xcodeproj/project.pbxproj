@@ -115,6 +115,7 @@
 		58AAA3492A592C937473454F /* ScriptBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAF2482982ED7215EEBF9 /* ScriptBuilder.swift */; };
 		58AAA36E48DB45B72112973B /* TransactionCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAC66042A881E2F74AFD6 /* TransactionCreator.swift */; };
 		58AAA3C55F225D1100102F78 /* BitcoinMainNetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAAFCA9E73AD5A7AB4CA6 /* BitcoinMainNetTests.swift */; };
+		58AAA3D1524194EF1232BB6D /* SegWitBech32AddressConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA3D78F9ADAF9CE4E41FC /* SegWitBech32AddressConverterTests.swift */; };
 		58AAA51D2E6F57CEB8947032 /* BitcoinTestNetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAEDC9D0D7BAE56C71DE0 /* BitcoinTestNetTests.swift */; };
 		58AAA570B2234CB9948FA343 /* Bech32AddressConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA1CABE4DFB91FBB71934 /* Bech32AddressConverter.swift */; };
 		58AAA582F0A674E0AA497484 /* PFromWSHExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAD8D50191B34097BF86A /* PFromWSHExtractor.swift */; };
@@ -129,7 +130,6 @@
 		58AAA71254EB5F1E465058E1 /* Bech32.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA87CCEAF26775DD01445 /* Bech32.swift */; };
 		58AAA7537CABBC438DE391DF /* IBlockValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAB4878F15C91F08E0C15 /* IBlockValidator.swift */; };
 		58AAA778C1897B283B34835A /* P2WSHExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA75F8D9B9C8C12379003 /* P2WSHExtractor.swift */; };
-		58AAA77C4BE9D3E7D36FAF3C /* CashAddrBech32Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA44135B0F39B04794AF6 /* CashAddrBech32Tests.swift */; };
 		58AAA86968E9DCA0DDFBDEE8 /* SegWitBech32.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA4F224F87A22FFD76674 /* SegWitBech32.swift */; };
 		58AAA89FADBC936A4C49EAAA /* WitnessExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA35F0BB40A672F776D4A /* WitnessExtractor.swift */; };
 		58AAA8CCA46340450D2912C5 /* UnspentOutputProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA481A82D05C914AB0CCA /* UnspentOutputProvider.swift */; };
@@ -156,6 +156,7 @@
 		58AAADAAFC0B39531EA82DD5 /* BitsValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA3B853B73FE71CEC46DB /* BitsValidator.swift */; };
 		58AAAE1B7C0F5659F2EC9229 /* ChunkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAE1DA82FC3585855DED3 /* ChunkTests.swift */; };
 		58AAAE352FC2FE33B4FB8F53 /* ScriptConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAABDF62BBC64C9A3363A6 /* ScriptConverterTests.swift */; };
+		58AAAF2AED32D100409324E3 /* CashBech32AddressConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA2E07C49CE7ECC366777 /* CashBech32AddressConverterTests.swift */; };
 		58AAAF3EFFA88855ACE404FC /* PFromPKHExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA74DF0D1F82EF49824E3 /* PFromPKHExtractorTests.swift */; };
 		58AAAFC2807F72C22A3E9D08 /* SegWitBech32AddressConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA7903061E05B9698EF80 /* SegWitBech32AddressConverter.swift */; };
 		D00DA94E213E86BC007F82D6 /* MemPoolMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00DA94D213E86BC007F82D6 /* MemPoolMessage.swift */; };
@@ -308,6 +309,7 @@
 		58AAA21C2FD6764CD385663E /* TransactionCreatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionCreatorTests.swift; sourceTree = "<group>"; };
 		58AAA285EFA8FD5B4236D8CC /* BitcoinRegTestNetTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinRegTestNetTests.swift; sourceTree = "<group>"; };
 		58AAA287F4FED7ECEA0C7A6F /* EDAValidator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EDAValidator.swift; sourceTree = "<group>"; };
+		58AAA2E07C49CE7ECC366777 /* CashBech32AddressConverterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CashBech32AddressConverterTests.swift; sourceTree = "<group>"; };
 		58AAA2EC4CAE32237EF4ADA3 /* P2MultiSigExtractorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = P2MultiSigExtractorTests.swift; sourceTree = "<group>"; };
 		58AAA33E4E02571B077022F7 /* UnspentOutputsManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnspentOutputsManagerTests.swift; sourceTree = "<group>"; };
 		58AAA35F0BB40A672F776D4A /* WitnessExtractor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WitnessExtractor.swift; sourceTree = "<group>"; };
@@ -315,9 +317,9 @@
 		58AAA3B853B73FE71CEC46DB /* BitsValidator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitsValidator.swift; sourceTree = "<group>"; };
 		58AAA3BE1CE790EF27E1C922 /* DAAValidator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DAAValidator.swift; sourceTree = "<group>"; };
 		58AAA3BE8FA350BD415CD5B3 /* Chunk.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Chunk.swift; sourceTree = "<group>"; };
+		58AAA3D78F9ADAF9CE4E41FC /* SegWitBech32AddressConverterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegWitBech32AddressConverterTests.swift; sourceTree = "<group>"; };
 		58AAA3EBDA17F35EA4C16C81 /* PFromPKHExtractor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PFromPKHExtractor.swift; sourceTree = "<group>"; };
 		58AAA422686CE355CACA11DF /* ScriptBuilderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScriptBuilderTests.swift; sourceTree = "<group>"; };
-		58AAA44135B0F39B04794AF6 /* CashAddrBech32Tests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CashAddrBech32Tests.swift; sourceTree = "<group>"; };
 		58AAA454CCE3AE60B70E8DAF /* EDAValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EDAValidatorTests.swift; sourceTree = "<group>"; };
 		58AAA481A82D05C914AB0CCA /* UnspentOutputProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnspentOutputProvider.swift; sourceTree = "<group>"; };
 		58AAA4F224F87A22FFD76674 /* SegWitBech32.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegWitBech32.swift; sourceTree = "<group>"; };
@@ -811,7 +813,8 @@
 			children = (
 				2FA5D23A8EC7BB3569F51ABD /* AddressConverterTests.swift */,
 				58AAA0616D186C35DC0F3367 /* BlockHelperTests.swift */,
-				58AAA44135B0F39B04794AF6 /* CashAddrBech32Tests.swift */,
+				58AAA2E07C49CE7ECC366777 /* CashBech32AddressConverterTests.swift */,
+				58AAA3D78F9ADAF9CE4E41FC /* SegWitBech32AddressConverterTests.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -1215,7 +1218,8 @@
 				58AAA69C707D89A9F2EC6075 /* P2MultiSigExtractorTests.swift in Sources */,
 				2FA5DB7F5BD8E25DCAF9AC83 /* PeerHostManagerTests.swift in Sources */,
 				11B35333093D726EC8ECA159 /* BlockSyncerTests.swift in Sources */,
-				58AAA77C4BE9D3E7D36FAF3C /* CashAddrBech32Tests.swift in Sources */,
+				58AAAF2AED32D100409324E3 /* CashBech32AddressConverterTests.swift in Sources */,
+				58AAA3D1524194EF1232BB6D /* SegWitBech32AddressConverterTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

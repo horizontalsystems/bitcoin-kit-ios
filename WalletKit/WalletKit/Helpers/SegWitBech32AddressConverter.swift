@@ -16,6 +16,7 @@ class SegWitBech32AddressConverter: Bech32AddressConverter {
         throw AddressConverter.ConversionError.unknownAddressType
     }
 
+    //TODO: SegWit address must use WitnessProgramm in keyHash, not pubKeyHash or scriptHash. Bacause in versionByte placed in first byte.
     func convert(prefix: String, keyHash: Data, scriptType: ScriptType) throws -> Address {
         let versionByte: UInt8 = 0  // only 0 is support now
         let addressType: AddressType

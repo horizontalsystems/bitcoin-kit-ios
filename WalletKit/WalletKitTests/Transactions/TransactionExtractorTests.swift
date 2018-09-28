@@ -99,11 +99,10 @@ class TransactionExtractorTests: XCTestCase {
     }
 
     func testExtractP2pkTransaction() {
-        let key = Data(hex: "037d56797fbe9aa506fc263751abf23bb46c9770181a6059096808923f0a64cb15")!
         let keyHash = Data(hex: "e4de5d630c5cacd7af96418a8f35c411c8ff3c06")!
 
         stub(p2pk) { mock in
-            when(mock.extract(from: any(), converter: any())).thenReturn(key)
+            when(mock.extract(from: any(), converter: any())).thenReturn(keyHash)
         }
 
         extractor.extract(transaction: p2pkTransaction)

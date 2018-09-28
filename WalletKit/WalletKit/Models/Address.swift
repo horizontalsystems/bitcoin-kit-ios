@@ -45,6 +45,13 @@ class SegWitAddress: Address, Equatable {
     let stringValue: String
     let version: UInt8
 
+    var scriptType: ScriptType {
+        switch type {
+        case .pubKeyHash: return .p2wpkh
+        case .scriptHash: return .p2wsh
+        }
+    }
+
     init(type: AddressType, keyHash: Data, bech32: String, version: UInt8) {
         self.type = type
         self.keyHash = keyHash
