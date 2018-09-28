@@ -9,10 +9,7 @@ protocol Address: class {
     var stringValue: String { get }
 }
 
-class LegacyAddress: Address, Equatable {
-    let type: AddressType
-    let keyHash: Data
-    let stringValue: String
+extension Address {
 
     var scriptType: ScriptType {
         switch type {
@@ -20,6 +17,13 @@ class LegacyAddress: Address, Equatable {
             case .scriptHash: return .p2sh
         }
     }
+
+}
+
+class LegacyAddress: Address, Equatable {
+    let type: AddressType
+    let keyHash: Data
+    let stringValue: String
 
     init(type: AddressType, keyHash: Data, base58: String) {
         self.type = type
@@ -39,16 +43,9 @@ class SegWitAddress: Address, Equatable {
     let type: AddressType
     let keyHash: Data
     let stringValue: String
-    let version: Int
+    let version: UInt8
 
-    var scriptType: ScriptType {
-        switch type {
-            case .pubKeyHash: return .p2wpkh
-            case .scriptHash: return .p2wsh
-        }
-    }
-
-    init(type: AddressType, keyHash: Data, bech32: String, version: Int) {
+    init(type: AddressType, keyHash: Data, bech32: String, version: UInt8) {
         self.type = type
         self.keyHash = keyHash
         self.stringValue = bech32
@@ -61,4 +58,26 @@ class SegWitAddress: Address, Equatable {
         }
         return lhs.type == rhs.type && lhs.keyHash == rhs.keyHash && lhs.version == rhs.version
     }
+}
+
+class CashAddress: Address, Equatable {
+    let type: AddressType
+    let keyHash: Data
+    let stringValue: String
+    let version: UInt8
+
+    init(type: AddressType, keyHash: Data, cashAddrBech32: String, version: UInt8) {
+        self.type = type
+        self.keyHash = keyHash
+        self.stringValue = cashAddrBech32
+        self.version = version
+    }
+
+    static func ==<T: Address>(lhs: CashAddress, rhs: T) -> Bool {
+        guard let rhs = rhs as? CashAddress else {
+            return false
+        }
+        return lhs.type == rhs.type && lhs.keyHash == rhs.keyHash && lhs.version == rhs.version
+    }
+
 }

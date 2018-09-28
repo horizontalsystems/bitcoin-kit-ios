@@ -14,7 +14,7 @@ class PublicKey: Object {
     @objc dynamic var external = true
     @objc dynamic var raw: Data?
     @objc dynamic var keyHash = Data()
-    @objc dynamic var address = ""
+    @objc dynamic var keyHashHex: String = ""
 
     convenience init(withIndex index: Int, external: Bool, hdPublicKey key: HDPublicKey) {
         self.init()
@@ -22,11 +22,11 @@ class PublicKey: Object {
         self.external = external
         self.raw = key.raw
         self.keyHash = Crypto.sha256ripemd160(key.raw)
-        self.address = key.toAddress()
+        self.keyHashHex = keyHash.hex
     }
 
     override class func primaryKey() -> String? {
-        return "address"
+        return "keyHashHex"
     }
 
 }

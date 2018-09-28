@@ -18,7 +18,7 @@ class AddressConverterTests: XCTestCase {
             when(mock.scriptPrefixPattern.get).thenReturn("2")
             when(mock.bech32PrefixPattern.get).thenReturn("bc")
         }
-        addressConverter = AddressConverter(network: mockWalletKit.mockNetwork)
+        addressConverter = AddressConverter(network: mockWalletKit.mockNetwork, bech32AddressConverter: SegWitBech32AddressConverter())
     }
 
     override func tearDown() {

@@ -36,7 +36,7 @@ class TransactionSyncerTests: XCTestCase {
     func testHandle() {
         let transaction = TestData.p2pkhTransaction
 
-        try! syncer.handle(transactions: [transaction])
+        syncer.handle(transactions: [transaction])
 
         waitForMainQueue()
 
@@ -48,7 +48,7 @@ class TransactionSyncerTests: XCTestCase {
     }
 
     func testHandle_EmptyTransactions() {
-        try! syncer.handle(transactions: [])
+        syncer.handle(transactions: [])
 
         waitForMainQueue()
 
@@ -63,7 +63,7 @@ class TransactionSyncerTests: XCTestCase {
             realm.add(transaction, update: true)
         }
 
-        try! syncer.handle(transactions: [transaction])
+        syncer.handle(transactions: [transaction])
 
         waitForMainQueue()
 
