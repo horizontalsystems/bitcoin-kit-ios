@@ -22,6 +22,7 @@ class BitcoinCashMainNet: NetworkProtocol {
     let magic: UInt32 = 0xe3e1f3e8
     let port: UInt32 = 8333
     let coinType: UInt32 = 0
+    let maxBlockSize: UInt32 = 32 * 1024 * 1024
 
     let dnsSeeds = [
         "seed.bitcoinabc.org",

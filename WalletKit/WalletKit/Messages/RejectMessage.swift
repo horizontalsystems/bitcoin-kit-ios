@@ -21,7 +21,7 @@ struct RejectMessage: IMessage {
     /// block header hash of the object being rejected, so the field is 32 bytes.
     let data: Data
 
-    init(data: Data) {
+    init(data: Data, network: NetworkProtocol) {
         let byteStream = ByteStream(data)
 
         message = byteStream.read(VarString.self)

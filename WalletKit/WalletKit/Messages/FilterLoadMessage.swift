@@ -17,7 +17,7 @@ struct FilterLoadMessage: IMessage {
         self.nFlags = nFlags
     }
 
-    init(data: Data) {
+    init(data: Data, network: NetworkProtocol) {
         filter = Data()
         nHashFuncs = 0
         nTweak = 0

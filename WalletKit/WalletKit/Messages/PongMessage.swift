@@ -10,7 +10,7 @@ struct PongMessage: IMessage {
         self.nonce = nonce
     }
 
-    init(data: Data) {
+    init(data: Data, network: NetworkProtocol) {
         let byteStream = ByteStream(data)
         nonce = byteStream.read(UInt64.self)
     }

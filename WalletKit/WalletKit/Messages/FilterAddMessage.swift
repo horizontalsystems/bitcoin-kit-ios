@@ -9,7 +9,7 @@ struct FilterAddMessage: IMessage {
         self.element = filter
     }
 
-    init(data: Data) {
+    init(data: Data, network: NetworkProtocol) {
         elementBytes = 0
         element = Data()
     }

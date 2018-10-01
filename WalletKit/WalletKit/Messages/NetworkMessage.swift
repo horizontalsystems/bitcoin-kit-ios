@@ -14,8 +14,8 @@ struct NetworkMessage {
 
     static let minimumLength = 24
 
-    private init(magic: UInt32, command: String, length: UInt32, checksum: Data, message: IMessage) {
-        self.magic = magic
+    private init(network: NetworkProtocol, command: String, length: UInt32, checksum: Data, message: IMessage) {
+        self.magic = network.magic
         self.command = command
         self.length = length
         self.checksum = checksum
@@ -35,7 +35,7 @@ struct NetworkMessage {
             }
         }
 
-        self.init(magic: network.magic, command: resolvedCommand, length: length, checksum: checksum, message: message)
+        self.init(network: network, command: resolvedCommand, length: length, checksum: checksum, message: message)
     }
 
     func serialized() -> Data {
@@ -68,10 +68,14 @@ struct NetworkMessage {
         "filterload": FilterLoadMessage.self
     ]
 
-    static func deserialize(data: Data) -> NetworkMessage? {
+    static func deserialize(data: Data, network: NetworkProtocol) -> NetworkMessage? {
         let byteStream = ByteStream(data)
 
-        let magic = byteStream.read(UInt32.self)
+        let magic = byteStream.read(UInt32.self).bigEndian
+        guard network.magic == magic else {
+            Logger.shared.log(String(describing: NetworkMessage.self), "Wrong magic number!")
+            return nil
+        }
         let command = byteStream.read(Data.self, count: 12).to(type: String.self)
         let length = byteStream.read(UInt32.self)
         let checksum = byteStream.read(Data.self, count: 4)
@@ -87,8 +91,8 @@ struct NetworkMessage {
         }
 
         let messageClass = messagesMap[command] ?? UnknownMessage.self
-        let message = messageClass.init(data: payload)
+        let message = messageClass.init(data: payload, network: network)
 
-        return NetworkMessage(magic: magic, command: command, length: length, checksum: checksum, message: message)
+        return NetworkMessage(network: network, command: command, length: length, checksum: checksum, message: message)
     }
 }

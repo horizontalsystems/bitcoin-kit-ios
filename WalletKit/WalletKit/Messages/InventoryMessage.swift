@@ -12,7 +12,7 @@ struct InventoryMessage: IMessage {
         self.inventoryItems = inventoryItems
     }
 
-    init(data: Data) {
+    init(data: Data, network: NetworkProtocol) {
         let byteStream = ByteStream(data)
 
         count = byteStream.read(VarInt.self)

@@ -1,6 +1,8 @@
 import Foundation
 
 struct MerkleBlockMessage: IMessage {
+    let maxBlockSize: UInt32
+
     let blockHeader: BlockHeader
 
     /// Number of transactions in the block (including unmatched ones)
@@ -12,7 +14,8 @@ struct MerkleBlockMessage: IMessage {
     let numberOfFlags: VarInt
     let flags: [UInt8]
 
-    init(blockHeader: BlockHeader, totalTransactions: UInt32, numberOfHashes: VarInt, hashes: [Data], numberOfFlags: VarInt, flags: [UInt8]) {
+    init(blockHeader: BlockHeader, totalTransactions: UInt32, numberOfHashes: VarInt, hashes: [Data], numberOfFlags: VarInt, flags: [UInt8], maxBlockSize: UInt32) {
+        self.maxBlockSize = maxBlockSize
         self.blockHeader = blockHeader
         self.totalTransactions = totalTransactions
         self.numberOfHashes = numberOfHashes
@@ -21,7 +24,8 @@ struct MerkleBlockMessage: IMessage {
         self.flags = flags
     }
 
-    init(data: Data) {
+    init(data: Data, network: NetworkProtocol) {
+        maxBlockSize = network.maxBlockSize
         let byteStream = ByteStream(data)
 
         blockHeader = BlockHeaderSerializer.deserialize(byteStream: byteStream)
@@ -90,7 +94,6 @@ extension MerkleBlockMessage {
         case duplicatedLeftOrRightBranches
     }
 
-    static let MAX_BLOCK_SIZE: UInt32 = 1000000
     static let bitMask: [UInt8] = [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80]
 
     /**
@@ -107,7 +110,7 @@ extension MerkleBlockMessage {
         }
 
         // check for excessively high numbers of transactions
-        guard totalTransactions <= MerkleBlockMessage.MAX_BLOCK_SIZE / 60 else { // 60 is the lower bound for the size of a serialized CTransaction
+        guard totalTransactions <= maxBlockSize / 60 else { // 60 is the lower bound for the size of a serialized CTransaction
             throw ValidationError.tooManyTransactions
         }
 

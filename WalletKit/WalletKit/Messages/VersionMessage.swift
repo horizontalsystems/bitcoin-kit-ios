@@ -36,7 +36,7 @@ struct VersionMessage: IMessage {
         self.relay = relay
     }
 
-    init(data: Data) {
+    init(data: Data, network: NetworkProtocol) {
         let byteStream = ByteStream(data)
 
         version = byteStream.read(Int32.self)

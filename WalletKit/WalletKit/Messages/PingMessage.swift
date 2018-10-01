@@ -6,7 +6,7 @@ struct PingMessage: IMessage {
     /// random nonce
     let nonce: UInt64
 
-    init(data: Data) {
+    init(data: Data, network: NetworkProtocol) {
         let byteStream = ByteStream(data)
         nonce = byteStream.read(UInt64.self)
     }

@@ -4,6 +4,7 @@ import RealmSwift
 @testable import WalletKit
 
 class MerkleBlockMessageTests: XCTestCase {
+    private var mockNetwork: MockNetworkProtocol!
     private var message: MerkleBlockMessage!
     private var blockHeader: BlockHeader!
     private var totalTransactions: UInt32!
@@ -14,7 +15,10 @@ class MerkleBlockMessageTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-
+        mockNetwork = MockWalletKit().mockNetwork
+        stub(mockNetwork) {mock in
+            when(mock.maxBlockSize.get).thenReturn(1_000_000)
+        }
         blockHeader = BlockHeader()
         blockHeader.merkleRoot = Data(hex: "2368b4465fe95716f7e8d510eafb26ee72cb843610fe0f38cfdc60561e0b50b2")!
 
@@ -41,13 +45,14 @@ class MerkleBlockMessageTests: XCTestCase {
     }
 
     override func tearDown() {
+        mockNetwork = nil
         super.tearDown()
     }
 
     func getMessage() -> MerkleBlockMessage{
         return MerkleBlockMessage(
                 blockHeader: blockHeader, totalTransactions: totalTransactions,
-                numberOfHashes: numberOfHashes, hashes: hashes, numberOfFlags: numberOfFlags, flags: flags
+                numberOfHashes: numberOfHashes, hashes: hashes, numberOfFlags: numberOfFlags, flags: flags, maxBlockSize: mockNetwork.maxBlockSize
         )
     }
 
@@ -104,7 +109,7 @@ class MerkleBlockMessageTests: XCTestCase {
     }
 
     func testTooManyTransactions() {
-        totalTransactions = MerkleBlockMessage.MAX_BLOCK_SIZE / 60 + 1
+        totalTransactions = mockNetwork.maxBlockSize / 60 + 1
         message = getMessage()
 
         var caught = false

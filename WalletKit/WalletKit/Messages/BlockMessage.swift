@@ -8,7 +8,7 @@ struct BlockMessage: IMessage {
     /// Block transactions, in format of "tx" command
     let transactions: [Transaction]
 
-    init(data: Data) {
+    init(data: Data, network: NetworkProtocol) {
         let byteStream = ByteStream(data)
 
         blockHeaderItem = BlockHeaderSerializer.deserialize(byteStream: byteStream)
