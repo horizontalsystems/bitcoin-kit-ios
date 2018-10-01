@@ -170,7 +170,7 @@ public class WalletKit {
         let pubKeys = realm.objects(PublicKey.self)
 
         for pubKey in pubKeys {
-            print("\(pubKey.index) --- \(pubKey.external) --- \(pubKey.keyHash.hex) --- \(addressConverter.convertToLegacy(keyHash: pubKey.keyHash, version: network.pubKeyHash, addressType: .pubKeyHash).stringValue) --- \(try! addressConverter.convert(keyHash: pubKey.keyHash, type: .p2pkh).stringValue)")
+            print("\(pubKey.index) --- \(pubKey.external) --- \(pubKey.keyHash.hex) --- \(addressConverter.convertToLegacy(keyHash: pubKey.keyHash, version: network.pubKeyHash, addressType: .pubKeyHash).stringValue) --- \(try! addressConverter.convert(keyHash: pubKey.keyHash, type: .p2wpkh).stringValue)")
         }
         print("PUBLIC KEYS COUNT: \(pubKeys.count)")
 
@@ -263,7 +263,7 @@ public class WalletKit {
     private var unspentOutputRealmResults: Results<TransactionOutput> {
         return realmFactory.realm.objects(TransactionOutput.self)
                 .filter("publicKey != nil")
-                .filter("scriptType = %@ OR scriptType = %@", ScriptType.p2pkh.rawValue, ScriptType.p2pk.rawValue)
+                .filter("scriptType != %@", ScriptType.unknown.rawValue)
                 .filter("inputs.@count = %@", 0)
     }
 

@@ -12,7 +12,7 @@ class UnspentOutputProvider {
         let realm = realmFactory.realm
         let allUnspentOutputs = realm.objects(TransactionOutput.self)
                 .filter("publicKey != nil")
-                .filter("scriptType = %@ OR scriptType = %@", ScriptType.p2pkh.rawValue, ScriptType.p2pk.rawValue)
+                .filter("scriptType != %@", ScriptType.unknown.rawValue)
                 .filter("inputs.@count = %@", 0)
 
         return Array(allUnspentOutputs)

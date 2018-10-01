@@ -96,7 +96,7 @@ class TransactionBuilderTests: XCTestCase {
         }
 
         stub(mockScriptBuilder) { mock in
-            when(mock.lockingScript(type: any(), params: any())).thenReturn(Data())
+            when(mock.lockingScript(for: any())).thenReturn(Data())
             when(mock.unlockingScript(params: any())).thenReturn(Data())
         }
 
