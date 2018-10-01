@@ -25,10 +25,10 @@ class EDAValidator: IBlockValidator {
         }
         let mpt6blocks = try blockHelper.medianTimePast(block: block) - blockHelper.medianTimePast(block: cursorBlock)
         if(mpt6blocks >= 12 * 3600) {
-            var pow = difficultyEncoder.decodeCompact(bits: blockHeader.bits) >> 2
-            pow = min(pow, difficultyEncoder.decodeCompact(bits: network.maxTargetBits))
+            let pow = difficultyEncoder.decodeCompact(bits: blockHeader.bits) >> 2
+            let powBits = min(difficultyEncoder.encodeCompact(from: pow), network.maxTargetBits)
 
-            guard difficultyEncoder.encodeCompact(from: pow) == candidateHeader.bits else {
+            guard powBits == candidateHeader.bits else {
                 throw BlockValidatorError.notEqualBits
             }
         } else {

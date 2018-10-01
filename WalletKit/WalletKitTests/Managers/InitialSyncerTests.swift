@@ -10,6 +10,7 @@ class InitialSyncerTests: XCTestCase {
     private var mockStateManager: MockStateManager!
     private var mockApiManager: MockApiManager!
     private var mockAddressManager: MockAddressManager!
+    private var mockAddressConverter: MockAddressConverter!
     private var mockFactory: MockFactory!
     private var mockPeerGroup: MockPeerGroup!
     private var mockNetwork: MockNetworkProtocol!
@@ -18,6 +19,8 @@ class InitialSyncerTests: XCTestCase {
     private var realm: Realm!
     private var internalKeys: [PublicKey]!
     private var externalKeys: [PublicKey]!
+    private var internalAddresses: [LegacyAddress]!
+    private var externalAddresses: [LegacyAddress]!
 
     override func setUp() {
         super.setUp()
@@ -28,6 +31,7 @@ class InitialSyncerTests: XCTestCase {
         mockStateManager = mockWalletKit.mockStateManager
         mockApiManager = mockWalletKit.mockApiManager
         mockAddressManager = mockWalletKit.mockAddressManager
+        mockAddressConverter = mockWalletKit.mockAddressConverter
         mockFactory = mockWalletKit.mockFactory
         mockPeerGroup = mockWalletKit.mockPeerGroup
         mockNetwork = mockWalletKit.mockNetwork
@@ -35,15 +39,21 @@ class InitialSyncerTests: XCTestCase {
 
         internalKeys = []
         externalKeys = []
+        internalAddresses = []
+        externalAddresses = []
         for i in 0..<5 {
             let internalKey = PublicKey()
-            internalKey.address = "internal\(i)"
+            let internalAddress = LegacyAddress(type: .pubKeyHash, keyHash: Data(bytes: [UInt8(1), UInt8(i)]), base58: "internal\(i)")
+            internalKey.keyHash = internalAddress.keyHash
             internalKey.external = false
             internalKeys.append(internalKey)
+            internalAddresses.append(internalAddress)
 
             let externalKey = PublicKey()
-            externalKey.address = "external\(i)"
+            let externalAddress = LegacyAddress(type: .pubKeyHash, keyHash: Data(bytes: [UInt8(0), UInt8(i)]), base58: "external\(i)")
+            externalKey.keyHash = externalAddress.keyHash
             externalKeys.append(externalKey)
+            externalAddresses.append(externalAddress)
         }
 
         stub(mockHDWallet) { mock in
@@ -51,6 +61,12 @@ class InitialSyncerTests: XCTestCase {
             for i in 0..<5 {
                 when(mock.publicKey(index: equal(to: i), external: equal(to: false))).thenReturn(internalKeys[i])
                 when(mock.publicKey(index: equal(to: i), external: equal(to: true))).thenReturn(externalKeys[i])
+            }
+        }
+        stub(mockAddressConverter) { mock in
+            for i in 0..<5 {
+                when(mock.convertToLegacy(keyHash: equal(to: internalKeys[i].keyHash), version: any(), addressType: equal(to: AddressType.pubKeyHash))).thenReturn(internalAddresses[i])
+                when(mock.convertToLegacy(keyHash: equal(to: externalKeys[i].keyHash), version: any(), addressType: equal(to: AddressType.pubKeyHash))).thenReturn(externalAddresses[i])
             }
         }
         stub(mockAddressManager) { mock in
@@ -68,6 +84,7 @@ class InitialSyncerTests: XCTestCase {
         checkpointBlock.height = 100
         stub(mockNetwork) { mock in
             when(mock.checkpointBlock.get).thenReturn(checkpointBlock)
+            when(mock.pubKeyHash.get).thenReturn(UInt8(0x6f))
         }
 
         syncer = InitialSyncer(
@@ -76,6 +93,7 @@ class InitialSyncerTests: XCTestCase {
                 stateManager: mockStateManager,
                 apiManager: mockApiManager,
                 addressManager: mockAddressManager,
+                addressConverter: mockAddressConverter,
                 factory: mockFactory,
                 peerGroup: mockPeerGroup,
                 network: mockNetwork,
@@ -88,6 +106,7 @@ class InitialSyncerTests: XCTestCase {
         mockStateManager = nil
         mockApiManager = nil
         mockAddressManager = nil
+        mockAddressConverter = nil
         mockFactory = nil
         mockPeerGroup = nil
         mockNetwork = nil
@@ -121,12 +140,12 @@ class InitialSyncerTests: XCTestCase {
         let internalResponse0 = BlockResponse(hash: thirdBlock.reversedHeaderHashHex, height: 15)
 
         stub(mockApiManager) { mock in
-            when(mock.getBlockHashes(address: equal(to: externalKeys[0].address))).thenReturn(Observable.just([externalResponse00, externalResponse01]))
-            when(mock.getBlockHashes(address: equal(to: externalKeys[1].address))).thenReturn(Observable.just([]))
-            when(mock.getBlockHashes(address: equal(to: externalKeys[2].address))).thenReturn(Observable.just([]))
-            when(mock.getBlockHashes(address: equal(to: internalKeys[0].address))).thenReturn(Observable.just([internalResponse0]))
-            when(mock.getBlockHashes(address: equal(to: internalKeys[1].address))).thenReturn(Observable.just([]))
-            when(mock.getBlockHashes(address: equal(to: internalKeys[2].address))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[0].stringValue))).thenReturn(Observable.just([externalResponse00, externalResponse01]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[1].stringValue))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[2].stringValue))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[0].stringValue))).thenReturn(Observable.just([internalResponse0]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[1].stringValue))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[2].stringValue))).thenReturn(Observable.just([]))
         }
 
         stub(mockFactory) { mock in
@@ -141,7 +160,7 @@ class InitialSyncerTests: XCTestCase {
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", externalResponse00.hash).count, 1)
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", externalResponse01.hash).count, 1)
         XCTAssertEqual(realm.objects(Block.self).filter("reversedHeaderHashHex = %@", internalResponse0.hash).count, 1)
-        
+
         verify(mockAddressManager).addKeys(keys: equal(to: [externalKeys[0], externalKeys[1], externalKeys[2], internalKeys[0], internalKeys[1], internalKeys[2]]))
         verify(mockHDWallet, never()).publicKey(index: equal(to: 3), external: any())
 
@@ -159,12 +178,12 @@ class InitialSyncerTests: XCTestCase {
         let externalResponse1 = BlockResponse(hash: secondBlock.reversedHeaderHashHex, height: 112)
 
         stub(mockApiManager) { mock in
-            when(mock.getBlockHashes(address: equal(to: externalKeys[0].address))).thenReturn(Observable.just([externalResponse0]))
-            when(mock.getBlockHashes(address: equal(to: externalKeys[1].address))).thenReturn(Observable.just([externalResponse1]))
-            when(mock.getBlockHashes(address: equal(to: externalKeys[2].address))).thenReturn(Observable.just([]))
-            when(mock.getBlockHashes(address: equal(to: externalKeys[3].address))).thenReturn(Observable.just([]))
-            when(mock.getBlockHashes(address: equal(to: internalKeys[0].address))).thenReturn(Observable.just([]))
-            when(mock.getBlockHashes(address: equal(to: internalKeys[1].address))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[0].stringValue))).thenReturn(Observable.just([externalResponse0]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[1].stringValue))).thenReturn(Observable.just([externalResponse1]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[2].stringValue))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[3].stringValue))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[0].stringValue))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[1].stringValue))).thenReturn(Observable.just([]))
         }
 
         stub(mockFactory) { mock in
@@ -191,10 +210,10 @@ class InitialSyncerTests: XCTestCase {
         let externalResponse = BlockResponse(hash: firstBlock.reversedHeaderHashHex, height: 10)
 
         stub(mockApiManager) { mock in
-            when(mock.getBlockHashes(address: equal(to: externalKeys[0].address))).thenReturn(Observable.just([externalResponse]))
-            when(mock.getBlockHashes(address: equal(to: externalKeys[1].address))).thenReturn(Observable.error(ApiError.noConnection))
-            when(mock.getBlockHashes(address: equal(to: internalKeys[0].address))).thenReturn(Observable.just([]))
-            when(mock.getBlockHashes(address: equal(to: internalKeys[1].address))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[0].stringValue))).thenReturn(Observable.just([externalResponse]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[1].stringValue))).thenReturn(Observable.error(ApiError.noConnection))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[0].stringValue))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[1].stringValue))).thenReturn(Observable.just([]))
         }
 
         stub(mockFactory) { mock in
@@ -222,13 +241,13 @@ class InitialSyncerTests: XCTestCase {
         let response3 = BlockResponse(hash: thirdBlock.reversedHeaderHashHex, height: 15)
 
         stub(mockApiManager) { mock in
-            when(mock.getBlockHashes(address: equal(to: externalKeys[0].address))).thenReturn(Observable.just([response1, response2]))
-            when(mock.getBlockHashes(address: equal(to: externalKeys[1].address))).thenReturn(Observable.just([]))
-            when(mock.getBlockHashes(address: equal(to: externalKeys[2].address))).thenReturn(Observable.just([response3]))
-            when(mock.getBlockHashes(address: equal(to: externalKeys[3].address))).thenReturn(Observable.just([]))
-            when(mock.getBlockHashes(address: equal(to: externalKeys[4].address))).thenReturn(Observable.just([]))
-            when(mock.getBlockHashes(address: equal(to: internalKeys[0].address))).thenReturn(Observable.just([]))
-            when(mock.getBlockHashes(address: equal(to: internalKeys[1].address))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[0].stringValue))).thenReturn(Observable.just([response1, response2]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[1].stringValue))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[2].stringValue))).thenReturn(Observable.just([response3]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[3].stringValue))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[4].stringValue))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[0].stringValue))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[1].stringValue))).thenReturn(Observable.just([]))
         }
 
         stub(mockFactory) { mock in

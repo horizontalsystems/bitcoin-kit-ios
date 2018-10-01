@@ -9,7 +9,7 @@ class BitcoinCashTestNet: NetworkProtocol {
     let scriptHash: UInt8 = 0xc4
     let pubKeyPrefixPattern: String = "q"
     let scriptPrefixPattern: String = "p"
-    let bech32PrefixPattern: String = "bitcoincash"
+    let bech32PrefixPattern: String = "bchtest"
     let xPubKey: UInt32 = 0x043587cf
     let xPrivKey: UInt32 = 0x04358394
     let magic: UInt32 = 0xf4e5f3f4
@@ -35,13 +35,13 @@ class BitcoinCashTestNet: NetworkProtocol {
     let checkpointBlock = Block(
             withHeader: BlockHeader(
                     version: 536870912,
-                    previousBlockHeaderReversedHex: "00000000000000e07429b8be0c135297a165c7637ef3941ab3d761a754b61392",
-                    merkleRootReversedHex: "5ab6666b8a31e476e02e46fbe9b3cbae625ebd6514dedc78500340a478a026f0",
-                    timestamp: 1535342611,
-                    bits: 436465949,
-                    nonce: 1510232395
+                    previousBlockHeaderReversedHex: "00000000000002724a16527c4b048a811ee7821c54bf8daf9e7eb8c07df7f982",
+                    merkleRootReversedHex: "027db423d24edcd6238234e0ddfe988ee6847abb3e64173b928799071ae32676",
+                    timestamp: 1537393033,
+                    bits: 436481402,
+                    nonce: 408109711
             ),
-            height: 1253952)
+            height: 1257984)
 
     required init(validatorFactory: BlockValidatorFactory) {
         headerValidator = validatorFactory.validator(for: .header)

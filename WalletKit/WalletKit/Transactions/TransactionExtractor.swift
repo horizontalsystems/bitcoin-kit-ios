@@ -31,15 +31,8 @@ class TransactionExtractor {
                     let script = try scriptConverter.decode(data: output.lockingScript)
                     let payload = try extractor.extract(from: script, converter: scriptConverter)
                     output.scriptType = extractor.type
-                    if let payload = payload {
-                        switch extractor.type {
-                            case .p2pkh: output.keyHash = payload
-                            case .p2pk: output.keyHash = Crypto.sha256ripemd160(payload)
-                            case .p2sh: output.keyHash = payload
-                            default: break
-                        }
-                        break
-                    }
+                    output.keyHash = payload
+                    break
                 } catch {
 //                    print("\(error) can't parse output by this extractor")
                 }

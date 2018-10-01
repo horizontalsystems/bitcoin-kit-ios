@@ -10,17 +10,19 @@ class InitialSyncer {
     private let stateManager: StateManager
     private let apiManager: ApiManager
     private let addressManager: AddressManager
+    private let addressConverter: AddressConverter
     private let factory: Factory
     private let peerGroup: PeerGroup
     private let network: NetworkProtocol
     private let scheduler: ImmediateSchedulerType
 
-    init(realmFactory: RealmFactory, hdWallet: HDWallet, stateManager: StateManager, apiManager: ApiManager, addressManager: AddressManager, factory: Factory, peerGroup: PeerGroup, network: NetworkProtocol, scheduler: ImmediateSchedulerType = ConcurrentDispatchQueueScheduler(qos: .background)) {
+    init(realmFactory: RealmFactory, hdWallet: HDWallet, stateManager: StateManager, apiManager: ApiManager, addressManager: AddressManager, addressConverter: AddressConverter, factory: Factory, peerGroup: PeerGroup, network: NetworkProtocol, scheduler: ImmediateSchedulerType = ConcurrentDispatchQueueScheduler(qos: .background)) {
         self.realmFactory = realmFactory
         self.hdWallet = hdWallet
         self.stateManager = stateManager
         self.apiManager = apiManager
         self.addressManager = addressManager
+        self.addressConverter = addressConverter
         self.factory = factory
         self.peerGroup = peerGroup
         self.network = network
@@ -59,7 +61,7 @@ class InitialSyncer {
 //            keys.append(try hdWallet.publicKey(index: i, external: true))
 //            keys.append(try hdWallet.publicKey(index: i, external: false))
 //        }
-//        try handle(keys: keys, blocks: [])
+//        try handle(keys: keys, responses: [])
     }
 
     private func handle(keys: [PublicKey], responses: [BlockResponse]) throws {
@@ -89,7 +91,7 @@ class InitialSyncer {
 
         let newKey = try hdWallet.publicKey(index: count, external: external)
 
-        return apiManager.getBlockHashes(address: newKey.address)
+        return apiManager.getBlockHashes(address: addressConverter.convertToLegacy(keyHash: newKey.keyHash, version: network.pubKeyHash, addressType: .pubKeyHash).stringValue)
                 .flatMap { [unowned self] blockResponses -> Observable<([PublicKey], [BlockResponse])> in
                     var lastUsedKeyIndex = lastUsedKeyIndex
 

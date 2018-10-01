@@ -14,8 +14,8 @@ class BitcoinCashMainNet: NetworkProtocol {
     let pubKeyHash: UInt8 = 0x00
     let privateKey: UInt8 = 0x80
     let scriptHash: UInt8 = 0x05
-    let pubKeyPrefixPattern: String = "q"
-    let scriptPrefixPattern: String = "p"
+    let pubKeyPrefixPattern: String = "1"
+    let scriptPrefixPattern: String = "3"
     let bech32PrefixPattern: String = "bitcoincash"
     let xPubKey: UInt32 = 0x0488b21e
     let xPrivKey: UInt32 = 0x0488ade4

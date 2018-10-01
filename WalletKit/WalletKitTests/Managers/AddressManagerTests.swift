@@ -10,6 +10,7 @@ class AddressManagerTests: XCTestCase {
     private var mockPeerGroup: MockPeerGroup!
     private var hdWallet: HDWallet!
     private var manager: AddressManager!
+    private var mockAddressConverter: MockAddressConverter!
 
     override func setUp() {
         super.setUp()
@@ -25,14 +26,15 @@ class AddressManagerTests: XCTestCase {
         stub(mockPeerGroup) { mock in
             when(mock.addPublicKeyFilter(pubKey: any())).thenDoNothing()
         }
-
-        manager = AddressManager(realmFactory: mockWalletKit.mockRealmFactory, hdWallet: mockHDWallet, peerGroup: mockPeerGroup)
+        mockAddressConverter = mockWalletKit.mockAddressConverter
+        manager = AddressManager(realmFactory: mockWalletKit.mockRealmFactory, hdWallet: mockHDWallet, peerGroup: mockPeerGroup, addressConverter: mockAddressConverter)
     }
 
     override func tearDown() {
         mockWalletKit = nil
         mockHDWallet = nil
         mockPeerGroup = nil
+        mockAddressConverter = nil
         hdWallet = nil
         manager = nil
 
@@ -57,7 +59,7 @@ class AddressManagerTests: XCTestCase {
         }
 
         let changePublicKey = try! manager.changePublicKey()
-        XCTAssertEqual(changePublicKey.address, publicKeys[3].address)
+        XCTAssertEqual(changePublicKey.keyHash, publicKeys[3].keyHash)
     }
 
     func testChangePublicKey_NoUnusedPublicKey() {
@@ -78,7 +80,7 @@ class AddressManagerTests: XCTestCase {
         }
 
         let changePublicKey = try! manager.changePublicKey()
-        XCTAssertEqual(changePublicKey.address, publicKey1.address)
+        XCTAssertEqual(changePublicKey.keyHash, publicKey1.keyHash)
         verify(mockHDWallet).publicKey(index: equal(to: 1), external: equal(to: false))
         verify(mockPeerGroup).addPublicKeyFilter(pubKey: equal(to: publicKey1))
     }
@@ -92,7 +94,7 @@ class AddressManagerTests: XCTestCase {
         }
 
         let changePublicKey = try! manager.changePublicKey()
-        XCTAssertEqual(changePublicKey.address, publicKey.address)
+        XCTAssertEqual(changePublicKey.keyHash, publicKey.keyHash)
         verify(mockHDWallet).publicKey(index: equal(to: 0), external: equal(to: false))
         verify(mockPeerGroup).addPublicKeyFilter(pubKey: equal(to: publicKey))
     }
@@ -106,8 +108,8 @@ class AddressManagerTests: XCTestCase {
         }
 
         let changePublicKey = try! manager.changePublicKey()
-        XCTAssertEqual(changePublicKey.address, publicKey.address)
-        let saved = mockWalletKit.realm.objects(PublicKey.self).filter("address = %@", publicKey.address).last
+        XCTAssertEqual(changePublicKey.keyHash, publicKey.keyHash)
+        let saved = mockWalletKit.realm.objects(PublicKey.self).filter("keyHash = %@", publicKey.keyHash).last
         XCTAssertNotEqual(saved, nil)
     }
 
@@ -128,7 +130,13 @@ class AddressManagerTests: XCTestCase {
             txOutput.publicKey = publicKeys[0]
         }
 
-        XCTAssertEqual(try? manager.receiveAddress(), publicKeys[3].address)
+        let address = LegacyAddress(type: .pubKeyHash, keyHash: publicKeys[3].keyHash, base58: "receiveAddress")
+        stub(mockAddressConverter) { mock in
+            when(mock.convert(keyHash: equal(to: publicKeys[3].keyHash), type: equal(to: ScriptType.p2pkh))).thenReturn(address)
+        }
+
+        XCTAssertEqual(try? manager.receiveAddress(), address.stringValue)
+        verify(mockAddressConverter).convert(keyHash: equal(to: publicKeys[3].keyHash), type: equal(to: ScriptType.p2pkh))
     }
 
     func testReceivePublicKey_NoUnusedPublicKey() {
@@ -143,12 +151,17 @@ class AddressManagerTests: XCTestCase {
 
         let hdPrivKey = try! hdWallet.privateKey(index: 1, chain: .external)
         let publicKey1 = PublicKey(withIndex: 1, external: false, hdPublicKey: hdPrivKey.publicKey())
+        let address = LegacyAddress(type: .pubKeyHash, keyHash: publicKey1.keyHash, base58: "receiveAddress")
 
         stub(mockHDWallet) { mock in
             when(mock.publicKey(index: any(), external: equal(to: true))).thenReturn(publicKey1)
         }
+        stub(mockAddressConverter) { mock in
+            when(mock.convert(keyHash: equal(to: publicKey1.keyHash), type: equal(to: ScriptType.p2pkh))).thenReturn(address)
+        }
 
-        XCTAssertEqual(try? manager.receiveAddress(), publicKey1.address)
+        XCTAssertEqual(try? manager.receiveAddress(), address.stringValue)
+        verify(mockAddressConverter).convert(keyHash: equal(to: publicKey1.keyHash), type: equal(to: ScriptType.p2pkh))
         verify(mockHDWallet).publicKey(index: equal(to: 1), external: equal(to: true))
         verify(mockPeerGroup).addPublicKeyFilter(pubKey: equal(to: publicKey1))
     }
@@ -188,9 +201,9 @@ class AddressManagerTests: XCTestCase {
 
         XCTAssertEqual(internalKeys.count, 3)
         XCTAssertEqual(externalKeys.count, 2)
-        XCTAssertEqual(internalKeys[2].address, keys[2].address)
-        XCTAssertEqual(externalKeys[0].address, keys[3].address)
-        XCTAssertEqual(externalKeys[1].address, keys[4].address)
+        XCTAssertEqual(internalKeys[2].keyHash, keys[2].keyHash)
+        XCTAssertEqual(externalKeys[0].keyHash, keys[3].keyHash)
+        XCTAssertEqual(externalKeys[1].keyHash, keys[4].keyHash)
     }
 
     func testGenerateKeys_NoUnusedKeys() {
@@ -230,10 +243,10 @@ class AddressManagerTests: XCTestCase {
 
         XCTAssertEqual(internalKeys.count, 3)
         XCTAssertEqual(externalKeys.count, 2)
-        XCTAssertEqual(internalKeys[1].address, keys[1].address)
-        XCTAssertEqual(internalKeys[2].address, keys[2].address)
-        XCTAssertEqual(externalKeys[0].address, keys[3].address)
-        XCTAssertEqual(externalKeys[1].address, keys[4].address)
+        XCTAssertEqual(internalKeys[1].keyHash, keys[1].keyHash)
+        XCTAssertEqual(internalKeys[2].keyHash, keys[2].keyHash)
+        XCTAssertEqual(externalKeys[0].keyHash, keys[3].keyHash)
+        XCTAssertEqual(externalKeys[1].keyHash, keys[4].keyHash)
     }
 
     func testGenerateKeys_NonSequentiallyUsedKeys() {
@@ -275,12 +288,12 @@ class AddressManagerTests: XCTestCase {
 
         XCTAssertEqual(internalKeys.count, 4)
         XCTAssertEqual(externalKeys.count, 3)
-        XCTAssertEqual(internalKeys[1].address, keys[1].address)
-        XCTAssertEqual(internalKeys[2].address, keys[2].address)
-        XCTAssertEqual(internalKeys[3].address, keys[5].address)
-        XCTAssertEqual(externalKeys[0].address, keys[3].address)
-        XCTAssertEqual(externalKeys[1].address, keys[4].address)
-        XCTAssertEqual(externalKeys[2].address, keys[6].address)
+        XCTAssertEqual(internalKeys[1].keyHash, keys[1].keyHash)
+        XCTAssertEqual(internalKeys[2].keyHash, keys[2].keyHash)
+        XCTAssertEqual(internalKeys[3].keyHash, keys[5].keyHash)
+        XCTAssertEqual(externalKeys[0].keyHash, keys[3].keyHash)
+        XCTAssertEqual(externalKeys[1].keyHash, keys[4].keyHash)
+        XCTAssertEqual(externalKeys[2].keyHash, keys[6].keyHash)
     }
 
     private func getPublicKey(withIndex index: Int, chain: HDWallet.Chain) -> PublicKey {

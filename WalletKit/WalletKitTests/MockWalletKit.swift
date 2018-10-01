@@ -29,6 +29,7 @@ class MockWalletKit {
 
     let mockValidatedBlockFactory: MockValidatedBlockFactory
 
+    let mockBech32AddressConverter: MockBech32AddressConverter
     let mockAddressConverter: MockAddressConverter
     let mockScriptConverter: MockScriptConverter
     let mockTransactionProcessor: MockTransactionProcessor
@@ -86,8 +87,10 @@ class MockWalletKit {
         mockPeerGroup = MockPeerGroup(network: mockNetwork, peerHostManager: mockPeerHostManager, bloomFilters: [Data]())
         mockFactory = MockFactory()
 
-        mockAddressManager = MockAddressManager(realmFactory: mockRealmFactory, hdWallet: mockHdWallet, peerGroup: mockPeerGroup)
-        mockInitialSyncer = MockInitialSyncer(realmFactory: mockRealmFactory, hdWallet: mockHdWallet, stateManager: mockStateManager, apiManager: mockApiManager, addressManager: mockAddressManager, factory: mockFactory, peerGroup: mockPeerGroup, network: mockNetwork)
+        mockBech32AddressConverter = MockBech32AddressConverter()
+        mockAddressConverter = MockAddressConverter(network: mockNetwork, bech32AddressConverter: mockBech32AddressConverter)
+        mockAddressManager = MockAddressManager(realmFactory: mockRealmFactory, hdWallet: mockHdWallet, peerGroup: mockPeerGroup, addressConverter: mockAddressConverter)
+        mockInitialSyncer = MockInitialSyncer(realmFactory: mockRealmFactory, hdWallet: mockHdWallet, stateManager: mockStateManager, apiManager: mockApiManager, addressManager: mockAddressManager, addressConverter: mockAddressConverter, factory: mockFactory, peerGroup: mockPeerGroup, network: mockNetwork)
         mockProgressSyncer = MockProgressSyncer(realmFactory: mockRealmFactory)
 
         mockValidatedBlockFactory = MockValidatedBlockFactory(realmFactory: mockRealmFactory, factory: mockFactory, network: mockNetwork)
@@ -99,7 +102,6 @@ class MockWalletKit {
         mockUnspentOutputSelector = MockUnspentOutputSelector(calculator: mockTransactionSizeCalculator)
         mockUnspentOutputProvider = MockUnspentOutputProvider(realmFactory: mockRealmFactory)
 
-        mockAddressConverter = MockAddressConverter(network: mockNetwork)
         mockScriptConverter = MockScriptConverter()
         mockTransactionExtractor = MockTransactionExtractor(scriptConverter: mockScriptConverter, addressConverter: mockAddressConverter)
         mockTransactionLinker = MockTransactionLinker()

@@ -28,7 +28,7 @@ class TransactionExtractorTests: XCTestCase {
         p2pkh = MockP2PKHExtractor()
         p2pk = MockP2PKExtractor()
         p2sh = MockP2SHExtractor()
-        addressConverter = MockAddressConverter(network: BitcoinTestNet(validatorFactory: mockWalletKit.mockValidatorFactory))
+        addressConverter = MockAddressConverter(network: BitcoinTestNet(validatorFactory: mockWalletKit.mockValidatorFactory), bech32AddressConverter: SegWitBech32AddressConverter())
         scriptConverter = MockScriptConverter()
 
         inputExtractors = [pfromsh]
@@ -88,39 +88,30 @@ class TransactionExtractorTests: XCTestCase {
         stub(p2pkh) { mock in
             when(mock.extract(from: any(), converter: any())).thenReturn(keyHash)
         }
-        do {
-            try extractor.extract(transaction: p2pkhTransaction)
+        extractor.extract(transaction: p2pkhTransaction)
 
-            if let testHash = p2pkhTransaction.outputs[0].keyHash {
-                XCTAssertEqual(testHash, keyHash)
-                XCTAssertEqual(p2pkhTransaction.outputs[0].scriptType, .p2pkh)
-            } else {
-                XCTFail("KeyHash not found!")
-            }
-        } catch let error {
-            XCTFail("\(error) Exception Thrown")
+        if let testHash = p2pkhTransaction.outputs[0].keyHash {
+            XCTAssertEqual(testHash, keyHash)
+            XCTAssertEqual(p2pkhTransaction.outputs[0].scriptType, .p2pkh)
+        } else {
+            XCTFail("KeyHash not found!")
         }
     }
 
     func testExtractP2pkTransaction() {
-        let key = Data(hex: "037d56797fbe9aa506fc263751abf23bb46c9770181a6059096808923f0a64cb15")!
         let keyHash = Data(hex: "e4de5d630c5cacd7af96418a8f35c411c8ff3c06")!
 
         stub(p2pk) { mock in
-            when(mock.extract(from: any(), converter: any())).thenReturn(key)
+            when(mock.extract(from: any(), converter: any())).thenReturn(keyHash)
         }
 
-        do {
-            try extractor.extract(transaction: p2pkTransaction)
+        extractor.extract(transaction: p2pkTransaction)
 
-            if let testHash = p2pkTransaction.outputs[0].keyHash {
-                XCTAssertEqual(testHash, keyHash)
-                XCTAssertEqual(p2pkTransaction.outputs[0].scriptType, .p2pk)
-            } else {
-                XCTFail("KeyHash not found!")
-            }
-        } catch let error {
-            XCTFail("\(error) Exception Thrown")
+        if let testHash = p2pkTransaction.outputs[0].keyHash {
+            XCTAssertEqual(testHash, keyHash)
+            XCTAssertEqual(p2pkTransaction.outputs[0].scriptType, .p2pk)
+        } else {
+            XCTFail("KeyHash not found!")
         }
     }
 
@@ -131,17 +122,13 @@ class TransactionExtractorTests: XCTestCase {
             when(mock.extract(from: any(), converter: any())).thenReturn(keyHash)
         }
 
-        do {
-            try extractor.extract(transaction: p2shTransaction)
+        extractor.extract(transaction: p2shTransaction)
 
-            if let testHash = p2shTransaction.outputs[0].keyHash {
-                XCTAssertEqual(testHash, keyHash)
-                XCTAssertEqual(p2shTransaction.outputs[0].scriptType, .p2sh)
-            } else {
-                XCTFail("KeyHash not found!")
-            }
-        } catch let error {
-            XCTFail("\(error) Exception Thrown")
+        if let testHash = p2shTransaction.outputs[0].keyHash {
+            XCTAssertEqual(testHash, keyHash)
+            XCTAssertEqual(p2shTransaction.outputs[0].scriptType, .p2sh)
+        } else {
+            XCTFail("KeyHash not found!")
         }
     }
 
@@ -156,16 +143,12 @@ class TransactionExtractorTests: XCTestCase {
             when(mock.convert(keyHash: any(), type: any())).thenReturn(LegacyAddress(type: .pubKeyHash, keyHash: Data(), base58: address))
         }
 
-        do {
-            try extractor.extract(transaction: p2pkhTransaction)
+        extractor.extract(transaction: p2pkhTransaction)
 
-            if let assignedAddress = p2pkhTransaction.outputs[0].address {
-                XCTAssertEqual(assignedAddress, address)
-            } else {
-                XCTFail("Address not found!")
-            }
-        } catch let error {
-            XCTFail("\(error) Exception Thrown")
+        if let assignedAddress = p2pkhTransaction.outputs[0].address {
+            XCTAssertEqual(assignedAddress, address)
+        } else {
+            XCTFail("Address not found!")
         }
     }
 

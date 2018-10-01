@@ -41,7 +41,7 @@ public class SegWitBech32 {
     }
     
     /// Decode segwit address
-    public static func decode(hrp: String, addr: String) throws -> (version: Int, program: Data) {
+    public static func decode(hrp: String, addr: String) throws -> (version: UInt8, program: Data) {
         let dec = try bech32.decode(addr)
         guard dec.hrp == hrp else {
             throw CoderError.hrpMismatch(dec.hrp, hrp)
@@ -59,12 +59,12 @@ public class SegWitBech32 {
         if dec.checksum[0] == 0 && conv.count != 20 && conv.count != 32 {
             throw CoderError.segwitV0ProgramSizeMismatch(conv.count)
         }
-        return (Int(dec.checksum[0]), conv)
+        return (dec.checksum[0], conv)
     }
     
     /// Encode segwit address
-    public static func encode(hrp: String, version: Int, program: Data) throws -> String {
-        var enc = Data([UInt8(version)])
+    public static func encode(hrp: String, version: UInt8, program: Data) throws -> String {
+        var enc = Data([version])
         enc.append(try convertBits(from: 8, to: 5, pad: true, idata: program))
         let result = bech32.encode(hrp, values: enc)
         guard let _ = try? decode(hrp: hrp, addr: result) else {
