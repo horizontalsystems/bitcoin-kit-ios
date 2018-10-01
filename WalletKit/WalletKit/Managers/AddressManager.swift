@@ -6,10 +6,12 @@ class AddressManager {
 
     private let realmFactory: RealmFactory
     private let hdWallet: HDWallet
+    private let addressConverter: AddressConverter
     private let peerGroup: PeerGroup
 
-    init(realmFactory: RealmFactory, hdWallet: HDWallet, peerGroup: PeerGroup) {
+    init(realmFactory: RealmFactory, hdWallet: HDWallet, peerGroup: PeerGroup, addressConverter: AddressConverter) {
         self.realmFactory = realmFactory
+        self.addressConverter = addressConverter
         self.hdWallet = hdWallet
         self.peerGroup = peerGroup
     }
@@ -19,7 +21,7 @@ class AddressManager {
     }
 
     func receiveAddress() throws -> String {
-        return try publicKey(chain: .external).address
+        return try addressConverter.convert(keyHash: publicKey(chain: .external).keyHash, type: .p2pkh).stringValue
     }
 
     func generateKeys() throws {

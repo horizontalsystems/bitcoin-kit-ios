@@ -27,6 +27,7 @@ class TransactionBuilderTests: XCTestCase {
     private var feeRate: Int!
     private var fee: Int!
     private var changePubKey: PublicKey!
+    private var changePubKeyAddress: String!
     private var toAddress: String!
     private var toAddressSH: String!
 
@@ -48,6 +49,8 @@ class TransactionBuilderTests: XCTestCase {
         transactionBuilder = TransactionBuilder(unspentOutputSelector: mockUnspentOutputSelector, unspentOutputProvider: mockUnspentOutputProvider, transactionSizeCalculator: mockTransactionSizeCalculator, addressConverter: mockAddressConverter, inputSigner: mockInputSigner, scriptBuilder: mockScriptBuilder, factory: mockFactory)
 
         changePubKey = TestData.pubKey()
+        changePubKeyAddress = "Rsfz3aRmCwTe2J8pSWSYRNYmweJ"
+
         toAddress = "mzwSXvtPs7MFbW2ysNA4Gw3P2KjrcEWaE5"
         toAddressSH = "2MyQWMrsLsqAMSUeusduAzN6pWuH2V27ykE"
 
@@ -87,7 +90,8 @@ class TransactionBuilderTests: XCTestCase {
         stub(mockAddressConverter) { mock in
             when(mock.convert(address: toAddress)).thenReturn(LegacyAddress(type: .pubKeyHash, keyHash: Data(hex: "d50bf226c9ff3bcf06f13d8ca129f24bedeef594")!, base58: "mzwSXvtPs7MFbW2ysNA4Gw3P2KjrcEWaE5"))
             when(mock.convert(address: toAddressSH)).thenReturn(LegacyAddress(type: .scriptHash, keyHash: Data(hex: "43922a3f1dc4569f9eccce9a71549d5acabbc0ca")!, base58: toAddressSH))
-            when(mock.convert(address: changePubKey.address)).thenReturn(LegacyAddress(type: .pubKeyHash, keyHash: changePubKey.keyHash, base58: changePubKey.address))
+            when(mock.convert(address: changePubKeyAddress)).thenReturn(LegacyAddress(type: .pubKeyHash, keyHash: changePubKey.keyHash, base58: changePubKeyAddress))
+            when(mock.convert(keyHash: equal(to: changePubKey.keyHash), type: equal(to: .p2pkh))).thenReturn(LegacyAddress(type: .pubKeyHash, keyHash: changePubKey.keyHash, base58: changePubKeyAddress))
 //            when(mock.convert(address: any())).thenReturn(Address(type: .pubKeyHash, keyHash: Data(), base58: ""))
         }
 
@@ -107,7 +111,7 @@ class TransactionBuilderTests: XCTestCase {
         stub(mockFactory) { mock in
             when(mock.transactionOutput(withValue: any(), index: any(), lockingScript: any(), type: equal(to: ScriptType.p2pkh), address: equal(to: toAddress), keyHash: any(), publicKey: any())).thenReturn(toOutput)
             when(mock.transactionOutput(withValue: any(), index: any(), lockingScript: any(), type: equal(to: ScriptType.p2sh), address: equal(to: toAddressSH), keyHash: any(), publicKey: any())).thenReturn(toOutputSH)
-            when(mock.transactionOutput(withValue: any(), index: any(), lockingScript: any(), type: equal(to: ScriptType.p2pkh), address: equal(to: changePubKey.address), keyHash: any(), publicKey: any())).thenReturn(changeOutput)
+            when(mock.transactionOutput(withValue: any(), index: any(), lockingScript: any(), type: equal(to: ScriptType.p2pkh), address: equal(to: changePubKeyAddress), keyHash: any(), publicKey: any())).thenReturn(changeOutput)
         }
     }
 
@@ -179,7 +183,7 @@ class TransactionBuilderTests: XCTestCase {
         }
 
         XCTAssertEqual(resultTx.outputs[0].value, value)  // value - fee
-        verify(mockFactory).transactionOutput(withValue: unspentOutputs.outputs[0].value - value - fee, index: 1, lockingScript: any(), type: equal(to: ScriptType.p2pkh), address: equal(to: changePubKey.address), keyHash: any(), publicKey: any())
+        verify(mockFactory).transactionOutput(withValue: unspentOutputs.outputs[0].value - value - fee, index: 1, lockingScript: any(), type: equal(to: ScriptType.p2pkh), address: equal(to: changePubKeyAddress), keyHash: any(), publicKey: any())
     }
 
     func testWithoutChangeOutput() {

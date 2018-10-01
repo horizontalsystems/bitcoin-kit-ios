@@ -24,7 +24,7 @@ class P2PKExtractorTests: XCTestCase {
     }
 
     func testValidExtract() {
-        let pubKey = Data(hex: "030e7061b9fb18571cf2441b2a7ee2419933ddaa423bc178672cd11e87911616d1")!
+        let keyHash = Data(hex: "030e7061b9fb18571cf2441b2a7ee2419933ddaa423bc178672cd11e87911616d1")!
         let data = Data(hex: "21030e7061b9fb18571cf2441b2a7ee2419933ddaa423bc178672cd11e87911616d1ac")!
         let chunks = [Chunk(scriptData: data, index: 0, payloadRange: 1..<34), Chunk(scriptData: data, index: 34)]
 
@@ -37,7 +37,7 @@ class P2PKExtractorTests: XCTestCase {
 
         do {
             let test = try extractor.extract(from: script, converter: scriptConverter)
-            XCTAssertEqual(test, pubKey)
+            XCTAssertEqual(test, Crypto.sha256ripemd160(keyHash))
         } catch let error {
             XCTFail("\(error) Exception Thrown")
         }

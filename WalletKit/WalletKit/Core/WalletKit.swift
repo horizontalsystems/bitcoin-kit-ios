@@ -1,6 +1,7 @@
 import Foundation
 import RealmSwift
 import RxSwift
+import BigInt
 
 public class WalletKit {
 
@@ -43,6 +44,7 @@ public class WalletKit {
 
     let validatedBlockFactory: ValidatedBlockFactory
 
+    let bech32AddressConverter: Bech32AddressConverter
     let addressConverter: AddressConverter
     let scriptConverter: ScriptConverter
     let transactionProcessor: TransactionProcessor
@@ -75,14 +77,19 @@ public class WalletKit {
         switch networkType {
         case .bitcoinMainNet:
             network = BitcoinMainNet(validatorFactory: validatorFactory)
+            bech32AddressConverter = SegWitBech32AddressConverter()
         case .bitcoinTestNet:
             network = BitcoinTestNet(validatorFactory: validatorFactory)
+            bech32AddressConverter = SegWitBech32AddressConverter()
         case .bitcoinRegTest:
             network = BitcoinRegTest(validatorFactory: validatorFactory)
+            bech32AddressConverter = SegWitBech32AddressConverter()
         case .bitcoinCashMainNet:
             network = BitcoinCashMainNet(validatorFactory: validatorFactory, blockHelper: blockHelper)
+            bech32AddressConverter = CashBech32AddressConverter()
         case .bitcoinCashTestNet:
             network = BitcoinCashTestNet(validatorFactory: validatorFactory)
+            bech32AddressConverter = CashBech32AddressConverter()
         }
 
         realmFactory = RealmFactory(configuration: realmConfiguration)
@@ -100,8 +107,10 @@ public class WalletKit {
         peerGroup = PeerGroup(network: network, peerHostManager: peerHostManager, bloomFilters: filters)
         factory = Factory()
 
-        addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, peerGroup: peerGroup)
-        initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, apiManager: apiManager, addressManager: addressManager, factory: factory, peerGroup: peerGroup, network: network)
+        addressConverter = AddressConverter(network: network, bech32AddressConverter: bech32AddressConverter)
+
+        addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, peerGroup: peerGroup, addressConverter: addressConverter)
+        initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, apiManager: apiManager, addressManager: addressManager, addressConverter: addressConverter, factory: factory, peerGroup: peerGroup, network: network)
         progressSyncer = ProgressSyncer(realmFactory: realmFactory)
 
         validatedBlockFactory = ValidatedBlockFactory(realmFactory: realmFactory, factory: factory, network: network)
@@ -113,7 +122,6 @@ public class WalletKit {
         unspentOutputSelector = UnspentOutputSelector(calculator: transactionSizeCalculator)
         unspentOutputProvider = UnspentOutputProvider(realmFactory: realmFactory)
 
-        addressConverter = AddressConverter(network: network)
         scriptConverter = ScriptConverter()
         transactionExtractor = TransactionExtractor(scriptConverter: scriptConverter, addressConverter: addressConverter)
         transactionLinker = TransactionLinker()
@@ -162,7 +170,7 @@ public class WalletKit {
         let pubKeys = realm.objects(PublicKey.self)
 
         for pubKey in pubKeys {
-            print("\(pubKey.index) --- \(pubKey.external) --- \(pubKey.address)")
+            print("\(pubKey.index) --- \(pubKey.external) --- \(pubKey.keyHash.hex) --- \(addressConverter.convertToLegacy(keyHash: pubKey.keyHash, version: network.pubKeyHash, addressType: .pubKeyHash).stringValue) --- \(try! addressConverter.convert(keyHash: pubKey.keyHash, type: .p2pkh).stringValue)")
         }
         print("PUBLIC KEYS COUNT: \(pubKeys.count)")
 

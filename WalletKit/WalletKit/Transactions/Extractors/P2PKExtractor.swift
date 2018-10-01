@@ -11,7 +11,7 @@ class P2PKExtractor: ScriptExtractor {
         guard script.chunks.count == 2, script.chunks.last?.opCode == OpCode.checkSig, let result = script.chunks[0].data else {
             throw ScriptError.wrongSequence
         }
-        return result
+        return Crypto.sha256ripemd160(result)
     }
 
 }

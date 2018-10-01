@@ -67,7 +67,7 @@ class TransactionBuilder {
 
         transaction.outputs[0].value = receivedValue
         if selectedOutputsInfo.totalValue > sentValue + transactionSizeCalculator.outputSize(type: changeScriptType) * feeRate {
-            let changeAddress = LegacyAddress(type: changeScriptType.addressType, keyHash: changePubKey.keyHash, base58: changePubKey.address)
+            let changeAddress = try addressConverter.convert(keyHash: changePubKey.keyHash, type: .p2pkh)
             try addOutputToTransaction(transaction: transaction, address: changeAddress, value: selectedOutputsInfo.totalValue - sentValue)
         }
 
