@@ -1,6 +1,8 @@
 import Foundation
 
 protocol NetworkProtocol: class {
+    var merkleBlockValidator: MerkleBlockValidator { get }
+
     var name: String { get }
     var pubKeyHash: UInt8 { get }
     var privateKey: UInt8 { get }

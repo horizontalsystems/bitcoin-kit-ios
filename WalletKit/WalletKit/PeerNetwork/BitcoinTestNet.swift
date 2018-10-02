@@ -8,6 +8,8 @@ class BitcoinTestNet: NetworkProtocol {
     private let legacyDifficultyValidator: IBlockValidator
     private let testNetDifficultyValidator: IBlockValidator
 
+    let merkleBlockValidator: MerkleBlockValidator
+
     let name = "bitcoin-test-net"
     let pubKeyHash: UInt8 = 0x6f
     let privateKey: UInt8 = 0xef
@@ -56,6 +58,8 @@ class BitcoinTestNet: NetworkProtocol {
         bitsValidator = validatorFactory.validator(for: .bits)
         legacyDifficultyValidator = validatorFactory.validator(for: .legacy)
         testNetDifficultyValidator = validatorFactory.validator(for: .testNet)
+
+        merkleBlockValidator = MerkleBlockValidator(maxBlockSize: 1_000_000)
     }
 
     func validate(block: Block, previousBlock: Block) throws {
