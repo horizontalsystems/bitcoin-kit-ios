@@ -155,6 +155,7 @@
 		58AAAD9224BAB440C1B6E033 /* BitsValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAC3F1788B8AFC44F6A4E /* BitsValidatorTests.swift */; };
 		58AAADAAFC0B39531EA82DD5 /* BitsValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA3B853B73FE71CEC46DB /* BitsValidator.swift */; };
 		58AAAE00FA79BB744B0EEA9C /* MerkleBlockValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA5EE018C74544938121F /* MerkleBlockValidatorTests.swift */; };
+		58AAAE17248A670EE4E588A3 /* TransactionWitnessSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAB709C58E0E9DC3F074B /* TransactionWitnessSerializer.swift */; };
 		58AAAE1B7C0F5659F2EC9229 /* ChunkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAE1DA82FC3585855DED3 /* ChunkTests.swift */; };
 		58AAAE352FC2FE33B4FB8F53 /* ScriptConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAABDF62BBC64C9A3363A6 /* ScriptConverterTests.swift */; };
 		58AAAF2AED32D100409324E3 /* CashBech32AddressConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA2E07C49CE7ECC366777 /* CashBech32AddressConverterTests.swift */; };
@@ -346,6 +347,7 @@
 		58AAAB325675496E79BC6EC6 /* P2MultiSigExtractor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = P2MultiSigExtractor.swift; sourceTree = "<group>"; };
 		58AAAB4878F15C91F08E0C15 /* IBlockValidator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IBlockValidator.swift; sourceTree = "<group>"; };
 		58AAAB4FF63F2AA59C24E9C0 /* Address.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Address.swift; sourceTree = "<group>"; };
+		58AAAB709C58E0E9DC3F074B /* TransactionWitnessSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionWitnessSerializer.swift; sourceTree = "<group>"; };
 		58AAABDF62BBC64C9A3363A6 /* ScriptConverterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScriptConverterTests.swift; sourceTree = "<group>"; };
 		58AAAC2509D14580B4A36FAC /* DAAValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DAAValidatorTests.swift; sourceTree = "<group>"; };
 		58AAAC3F1788B8AFC44F6A4E /* BitsValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitsValidatorTests.swift; sourceTree = "<group>"; };
@@ -830,6 +832,7 @@
 				2FA5DCD21585D41C520DF764 /* TransactionInputSerializer.swift */,
 				2FA5DEC34722F594F85688C0 /* TransactionOutputSerializer.swift */,
 				2FA5D880471F191DBCDAE574 /* TransactionSerializer.swift */,
+				58AAAB709C58E0E9DC3F074B /* TransactionWitnessSerializer.swift */,
 			);
 			path = Serializers;
 			sourceTree = "<group>";
@@ -1351,6 +1354,7 @@
 				58AAAFC2807F72C22A3E9D08 /* SegWitBech32AddressConverter.swift in Sources */,
 				58AAA570B2234CB9948FA343 /* Bech32AddressConverter.swift in Sources */,
 				58AAA8C5908EBFA5BCC2B5FC /* MerkleBlockValidator.swift in Sources */,
+				58AAAE17248A670EE4E588A3 /* TransactionWitnessSerializer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

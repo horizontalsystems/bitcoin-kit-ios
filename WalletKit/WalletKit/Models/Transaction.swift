@@ -14,6 +14,8 @@ class Transaction: Object {
     @objc dynamic var isMine: Bool = false
     @objc dynamic var status: TransactionStatus = .relayed
 
+    @objc dynamic var segWit: Bool = false
+
     let inputs = List<TransactionInput>()
     let outputs = List<TransactionOutput>()
 

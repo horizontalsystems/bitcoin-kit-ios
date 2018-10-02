@@ -16,6 +16,10 @@ class ByteStream {
         return data.count - offset
     }
 
+    var last: UInt8? {
+        return data[offset]
+    }
+
     init(_ data: Data) {
         self.data = data
     }

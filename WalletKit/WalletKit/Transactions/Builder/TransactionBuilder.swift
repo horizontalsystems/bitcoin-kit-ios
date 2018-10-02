@@ -74,7 +74,12 @@ class TransactionBuilder {
         // Sign inputs
         for i in 0..<transaction.inputs.count {
             let sigScriptData = try inputSigner.sigScriptData(transaction: transaction, index: i)
-            transaction.inputs[i].signatureScript = scriptBuilder.unlockingScript(params: sigScriptData)
+            let scriptType = selectedOutputsInfo.outputs[i].scriptType
+            switch scriptType {
+                case .p2wpkh: transaction.segWit = true
+                    transaction.inputs[i].witnessData = sigScriptData
+                default: transaction.inputs[i].signatureScript = scriptBuilder.unlockingScript(params: sigScriptData)
+            }
         }
 
         transaction.status = .new
@@ -94,7 +99,7 @@ class TransactionBuilder {
     }
 
     private func addOutputToTransaction(transaction: Transaction, address: Address, pubKey: PublicKey? = nil, value: Int) throws {
-        let script = try scriptBuilder.lockingScript(type: address.scriptType, params: [address.keyHash])
+        let script = try scriptBuilder.lockingScript(for: address)
         let output = try factory.transactionOutput(withValue: value, index: transaction.outputs.count, lockingScript: script, type: address.scriptType, address: address.stringValue, keyHash: address.keyHash, publicKey: pubKey)
         transaction.outputs.append(output)
     }

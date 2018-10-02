@@ -38,7 +38,7 @@ class InputSigner {
         let signature = try Crypto.sign(data: signatureHash, privateKey: privateKey.raw) + Data(bytes: [0x01])
 
         switch prevOutput.scriptType {
-            case .p2pk: return [signature]
+            case .p2pk, .p2wpkh: return [signature]
             default: return [signature, publicKey]
         }
     }
