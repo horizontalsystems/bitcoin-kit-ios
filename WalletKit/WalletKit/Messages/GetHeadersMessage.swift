@@ -17,7 +17,7 @@ struct GetHeadersMessage: IMessage {
         hashStop = Data(count: 32)
     }
 
-    init(data: Data, network: NetworkProtocol) {
+    init(data: Data) {
         version = 0
         hashCount = 0
         blockLocatorHashes = [Data]()

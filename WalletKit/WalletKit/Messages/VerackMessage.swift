@@ -7,7 +7,7 @@ struct VerackMessage: IMessage {
     init() {
     }
 
-    init(data: Data, network: NetworkProtocol) {
+    init(data: Data) {
     }
 
     func serialized() -> Data {

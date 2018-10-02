@@ -12,6 +12,7 @@ class Peer {
     private var tasks: [PeerTask] = []
 
     private let queue: DispatchQueue
+    private let network: NetworkProtocol
 
     var connected: Bool = false
     var headersSynced: Bool = false
@@ -31,6 +32,7 @@ class Peer {
     init(host: String, network: NetworkProtocol) {
         connection = PeerConnection(host: host, network: network)
         queue = DispatchQueue(label: "Peer: \(host)", qos: .userInitiated)
+        self.network = network
 
         connection.delegate = self
     }
@@ -225,7 +227,7 @@ class Peer {
         log("--> MERKLEBLOCK: \(Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: message.blockHeader)).reversedHex)")
 
         do {
-            let merkleBlock = try message.getMerkleBlock()
+            let merkleBlock = try network.merkleBlockValidator.merkleBlock(from: message)
 
             for task in tasks {
                 if task.handle(merkleBlock: merkleBlock) {

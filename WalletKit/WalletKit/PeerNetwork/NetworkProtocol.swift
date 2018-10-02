@@ -1,6 +1,8 @@
 import Foundation
 
 protocol NetworkProtocol: class {
+    var merkleBlockValidator: MerkleBlockValidator { get }
+
     var name: String { get }
     var pubKeyHash: UInt8 { get }
     var privateKey: UInt8 { get }
@@ -16,7 +18,6 @@ protocol NetworkProtocol: class {
     var genesisBlock: Block { get }
     var checkpointBlock: Block { get }
     var coinType: UInt32 { get }
-    var maxBlockSize: UInt32 { get }
 
     // difficulty adjustment params
     var maxTargetBits: Int { get }                                      // Maximum difficulty.
@@ -29,8 +30,6 @@ protocol NetworkProtocol: class {
 }
 
 extension NetworkProtocol {
-    var maxBlockSize: UInt32 { return 1_000_000 }
-
     var maxTargetBits: Int { return 0x1d00ffff }
 
     var targetTimeSpan: Int { return 14 * 24 * 60 * 60 }                // Seconds in Bitcoin cycle

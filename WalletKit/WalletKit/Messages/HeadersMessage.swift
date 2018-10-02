@@ -4,7 +4,7 @@ struct HeadersMessage: IMessage {
     let count: VarInt
     let blockHeaders: [BlockHeader]
 
-    init(data: Data, network: NetworkProtocol) {
+    init(data: Data) {
         let byteStream = ByteStream(data)
 
         count = byteStream.read(VarInt.self)

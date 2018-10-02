@@ -16,7 +16,7 @@ struct GetDataMessage: IMessage {
         self.inventoryItems = inventoryItems
     }
 
-    init(data: Data, network: NetworkProtocol) {
+    init(data: Data) {
         let byteStream = ByteStream(data)
 
         count = byteStream.read(VarInt.self)

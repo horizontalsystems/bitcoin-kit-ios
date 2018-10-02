@@ -2,7 +2,7 @@ import Foundation
 
 struct UnknownMessage: IMessage {
 
-    init(data: Data, network: NetworkProtocol) {
+    init(data: Data) {
     }
 
     func serialized() -> Data {

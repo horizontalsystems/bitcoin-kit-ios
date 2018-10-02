@@ -3,6 +3,8 @@ import Foundation
 class BitcoinRegTest: NetworkProtocol {
     private let headerValidator: IBlockValidator
 
+    let merkleBlockValidator: MerkleBlockValidator
+
     let name = "bitcoin-reg-test"
     let pubKeyHash: UInt8 = 0x6f
     let privateKey: UInt8 = 0xef
@@ -58,6 +60,8 @@ class BitcoinRegTest: NetworkProtocol {
 
     required init(validatorFactory: BlockValidatorFactory) {
         headerValidator = validatorFactory.validator(for: .header)
+
+        merkleBlockValidator = MerkleBlockValidator(maxBlockSize: 1_000_000)
     }
 
     func validate(block: Block, previousBlock: Block) throws {

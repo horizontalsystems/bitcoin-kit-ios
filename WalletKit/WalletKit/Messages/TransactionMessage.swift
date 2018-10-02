@@ -7,7 +7,7 @@ struct TransactionMessage: IMessage {
         self.transaction = transaction
     }
 
-    init(data: Data, network: NetworkProtocol) {
+    init(data: Data) {
         transaction = TransactionSerializer.deserialize(data: data)
     }
 

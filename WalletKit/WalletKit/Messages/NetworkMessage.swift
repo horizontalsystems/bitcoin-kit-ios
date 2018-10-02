@@ -91,7 +91,7 @@ struct NetworkMessage {
         }
 
         let messageClass = messagesMap[command] ?? UnknownMessage.self
-        let message = messageClass.init(data: payload, network: network)
+        let message = messageClass.init(data: payload)
 
         return NetworkMessage(network: network, command: command, length: length, checksum: checksum, message: message)
     }

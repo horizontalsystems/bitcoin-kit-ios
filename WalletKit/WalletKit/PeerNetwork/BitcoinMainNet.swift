@@ -5,6 +5,8 @@ class BitcoinMainNet: NetworkProtocol {
     private let bitsValidator: IBlockValidator
     private let difficultyValidator: IBlockValidator
 
+    let merkleBlockValidator: MerkleBlockValidator
+
     let name = "bitcoin-main-net"
     let pubKeyHash: UInt8 = 0x00
     let privateKey: UInt8 = 0x80
@@ -53,6 +55,8 @@ class BitcoinMainNet: NetworkProtocol {
         headerValidator = validatorFactory.validator(for: .header)
         bitsValidator = validatorFactory.validator(for: .bits)
         difficultyValidator = validatorFactory.validator(for: .legacy)
+
+        merkleBlockValidator = MerkleBlockValidator(maxBlockSize: 1_000_000)
     }
 
     func validate(block: Block, previousBlock: Block) throws {

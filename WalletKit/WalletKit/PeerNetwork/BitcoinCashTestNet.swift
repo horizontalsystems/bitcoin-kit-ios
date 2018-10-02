@@ -17,6 +17,8 @@ class BitcoinCashTestNet: NetworkProtocol {
     let coinType: UInt32 = 1
     let maxBlockSize: UInt32 = 32 * 1024 * 1024
 
+    let merkleBlockValidator: MerkleBlockValidator
+
     let dnsSeeds = [
         "testnet-seed.bitcoinabc.org",
     ]
@@ -45,6 +47,8 @@ class BitcoinCashTestNet: NetworkProtocol {
 
     required init(validatorFactory: BlockValidatorFactory) {
         headerValidator = validatorFactory.validator(for: .header)
+
+        merkleBlockValidator = MerkleBlockValidator(maxBlockSize: 32 * 1024 * 1024)
     }
 
     func validate(block: Block, previousBlock: Block) throws {
