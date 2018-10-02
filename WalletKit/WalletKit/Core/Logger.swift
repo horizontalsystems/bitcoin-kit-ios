@@ -18,6 +18,7 @@ class Logger {
         String(describing: HeaderSyncer.self),
         String(describing: BlockSyncer.self),
         String(describing: TransactionSyncer.self),
+        String(describing: NetworkMessage.self),
         ""
     ]
 

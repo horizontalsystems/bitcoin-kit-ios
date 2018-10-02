@@ -8,6 +8,8 @@ class BitcoinCashMainNet: NetworkProtocol {
     private let dAAValidator: IBlockValidator
     private let eDAValidator: IBlockValidator
 
+    let merkleBlockValidator: MerkleBlockValidator
+
     private let blockHelper: BlockHelper
 
     let name = "bitcoin-cash-main-net"
@@ -69,6 +71,8 @@ class BitcoinCashMainNet: NetworkProtocol {
         legacyDifficultyValidator = validatorFactory.validator(for: .legacy)
         dAAValidator = validatorFactory.validator(for: .DAA)
         eDAValidator = validatorFactory.validator(for: .EDA)
+
+        merkleBlockValidator = MerkleBlockValidator(maxBlockSize: 32 * 1024 * 1024)
     }
 
     func validate(block: Block, previousBlock: Block) throws {

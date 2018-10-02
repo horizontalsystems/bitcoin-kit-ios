@@ -59,7 +59,6 @@
 		11B35BEAB8E94403F66BEF75 /* WalletKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35CDB306DF2676A56216B /* WalletKit.swift */; };
 		11B35BF7FB1E62417FFF5CD1 /* ValidatedBlockFactoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B352D2B22AD843B83D889A /* ValidatedBlockFactoryTests.swift */; };
 		11B35C8F2A29CA171165BF7A /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35F3FD9CCB938B62D07EA /* Observable.swift */; };
-		11B35CDFF90E2447AB536BDB /* MerkleBlockMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B3549DFD32AC3E74C3AE66 /* MerkleBlockMessageTests.swift */; };
 		11B35CEAD9ADE1922CD7912A /* TransactionLinkerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35DB7140D86176157F8CA /* TransactionLinkerTests.swift */; };
 		11B35D0A90AD484F62B69A1B /* WalletKitPrivate.m in Sources */ = {isa = PBXBuildFile; fileRef = 11B35C3A9EC92678307977F7 /* WalletKitPrivate.m */; };
 		11B35D21CC4F7BE641851E83 /* TransactionExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B357AFD2F27913B7451ACA /* TransactionExtractorTests.swift */; };
@@ -132,6 +131,7 @@
 		58AAA778C1897B283B34835A /* P2WSHExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA75F8D9B9C8C12379003 /* P2WSHExtractor.swift */; };
 		58AAA86968E9DCA0DDFBDEE8 /* SegWitBech32.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA4F224F87A22FFD76674 /* SegWitBech32.swift */; };
 		58AAA89FADBC936A4C49EAAA /* WitnessExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA35F0BB40A672F776D4A /* WitnessExtractor.swift */; };
+		58AAA8C5908EBFA5BCC2B5FC /* MerkleBlockValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAC9FD7A9AD220E52F974 /* MerkleBlockValidator.swift */; };
 		58AAA8CCA46340450D2912C5 /* UnspentOutputProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA481A82D05C914AB0CCA /* UnspentOutputProvider.swift */; };
 		58AAA8D1CC0EF3A2A0B46F38 /* PFromWitnessExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA8BFDC46BFB687C0F835 /* PFromWitnessExtractorTests.swift */; };
 		58AAA933A59176BE7FCA2754 /* BlockHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA1FDBCCE65EF6ADDBE2C /* BlockHelper.swift */; };
@@ -154,6 +154,7 @@
 		58AAAD86E3A2A31C2D2A705B /* Script.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA11CDED1A6F7663DEA37 /* Script.swift */; };
 		58AAAD9224BAB440C1B6E033 /* BitsValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAC3F1788B8AFC44F6A4E /* BitsValidatorTests.swift */; };
 		58AAADAAFC0B39531EA82DD5 /* BitsValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA3B853B73FE71CEC46DB /* BitsValidator.swift */; };
+		58AAAE00FA79BB744B0EEA9C /* MerkleBlockValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA5EE018C74544938121F /* MerkleBlockValidatorTests.swift */; };
 		58AAAE17248A670EE4E588A3 /* TransactionWitnessSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAB709C58E0E9DC3F074B /* TransactionWitnessSerializer.swift */; };
 		58AAAE1B7C0F5659F2EC9229 /* ChunkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAE1DA82FC3585855DED3 /* ChunkTests.swift */; };
 		58AAAE352FC2FE33B4FB8F53 /* ScriptConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAABDF62BBC64C9A3363A6 /* ScriptConverterTests.swift */; };
@@ -226,7 +227,6 @@
 		11B353B145524AAE2A1B76A6 /* HeadersMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeadersMessage.swift; sourceTree = "<group>"; };
 		11B35413F7A859F19D27BA39 /* RequestTransactionsPeerTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestTransactionsPeerTask.swift; sourceTree = "<group>"; };
 		11B35466922671F6E3523611 /* ProgressSyncerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressSyncerTests.swift; sourceTree = "<group>"; };
-		11B3549DFD32AC3E74C3AE66 /* MerkleBlockMessageTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MerkleBlockMessageTests.swift; sourceTree = "<group>"; };
 		11B354D856797A77A814998A /* Logger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		11B354DDB46C9DE37375424D /* OpCode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpCode.swift; sourceTree = "<group>"; };
 		11B354EF0F404DF96E765CA1 /* DifficultyEncoder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DifficultyEncoder.swift; sourceTree = "<group>"; };
@@ -324,6 +324,7 @@
 		58AAA454CCE3AE60B70E8DAF /* EDAValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EDAValidatorTests.swift; sourceTree = "<group>"; };
 		58AAA481A82D05C914AB0CCA /* UnspentOutputProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnspentOutputProvider.swift; sourceTree = "<group>"; };
 		58AAA4F224F87A22FFD76674 /* SegWitBech32.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegWitBech32.swift; sourceTree = "<group>"; };
+		58AAA5EE018C74544938121F /* MerkleBlockValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MerkleBlockValidatorTests.swift; sourceTree = "<group>"; };
 		58AAA6970A592ECB1C6E73D3 /* LegacyDifficultyAdjustmentValidator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LegacyDifficultyAdjustmentValidator.swift; sourceTree = "<group>"; };
 		58AAA6BB66ECE0543BE377E3 /* ScriptTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScriptTests.swift; sourceTree = "<group>"; };
 		58AAA6E376400C5BFF7DDCDB /* LegacyTestNetDifficultyValidator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LegacyTestNetDifficultyValidator.swift; sourceTree = "<group>"; };
@@ -352,6 +353,7 @@
 		58AAAC3F1788B8AFC44F6A4E /* BitsValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitsValidatorTests.swift; sourceTree = "<group>"; };
 		58AAAC66042A881E2F74AFD6 /* TransactionCreator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionCreator.swift; sourceTree = "<group>"; };
 		58AAAC8BAD29CC18864884DB /* ScriptConverter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScriptConverter.swift; sourceTree = "<group>"; };
+		58AAAC9FD7A9AD220E52F974 /* MerkleBlockValidator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MerkleBlockValidator.swift; sourceTree = "<group>"; };
 		58AAACDCDC4B51B6E2C9C07D /* HeaderValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeaderValidatorTests.swift; sourceTree = "<group>"; };
 		58AAAD8D50191B34097BF86A /* PFromWSHExtractor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PFromWSHExtractor.swift; sourceTree = "<group>"; };
 		58AAAE1DA82FC3585855DED3 /* ChunkTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChunkTests.swift; sourceTree = "<group>"; };
@@ -494,6 +496,7 @@
 			children = (
 				11B35C07292793FCE3096D03 /* BlockSyncer.swift */,
 				11B35031DF14FCC6D0BC8A2F /* ValidatedBlockFactory.swift */,
+				58AAAC9FD7A9AD220E52F974 /* MerkleBlockValidator.swift */,
 			);
 			path = Blocks;
 			sourceTree = "<group>";
@@ -694,6 +697,7 @@
 			children = (
 				11B352A955F667DC0C23CE1C /* BlockSyncerTests.swift */,
 				11B352D2B22AD843B83D889A /* ValidatedBlockFactoryTests.swift */,
+				58AAA5EE018C74544938121F /* MerkleBlockValidatorTests.swift */,
 			);
 			path = Blocks;
 			sourceTree = "<group>";
@@ -802,14 +806,6 @@
 			path = Scripts;
 			sourceTree = "<group>";
 		};
-		D00DA94F2140E37C007F82D6 /* Messages */ = {
-			isa = PBXGroup;
-			children = (
-				11B3549DFD32AC3E74C3AE66 /* MerkleBlockMessageTests.swift */,
-			);
-			path = Messages;
-			sourceTree = "<group>";
-		};
 		D01B6FAA21230AE80085010F /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
@@ -867,7 +863,6 @@
 				D0FCA7092133D250008169E1 /* HDWallet */,
 				D01B6FAA21230AE80085010F /* Helpers */,
 				11B352462C0F682238607E64 /* Managers */,
-				D00DA94F2140E37C007F82D6 /* Messages */,
 				11B358FC5E5FE51671115A95 /* Models */,
 				58AAA80C18459F9822D75EC3 /* PeerNetwork */,
 				58AAAE8C826DAC0CB77E8521 /* Scripts */,
@@ -1175,7 +1170,6 @@
 				11B35D23B451CFB803F69CA0 /* TestData.swift in Sources */,
 				11B35F93D7F1778A0A0BDC81 /* HeaderSyncerTests.swift in Sources */,
 				11B35A0F40D42FCAA4633D8A /* DifficultyEncoderTests.swift in Sources */,
-				11B35CDFF90E2447AB536BDB /* MerkleBlockMessageTests.swift in Sources */,
 				11B35D21CC4F7BE641851E83 /* TransactionExtractorTests.swift in Sources */,
 				11B35CEAD9ADE1922CD7912A /* TransactionLinkerTests.swift in Sources */,
 				11B359DB9F6FFA8EE7C8EA6E /* P2PKHExtractorTests.swift in Sources */,
@@ -1223,6 +1217,7 @@
 				11B35333093D726EC8ECA159 /* BlockSyncerTests.swift in Sources */,
 				58AAAF2AED32D100409324E3 /* CashBech32AddressConverterTests.swift in Sources */,
 				58AAA3D1524194EF1232BB6D /* SegWitBech32AddressConverterTests.swift in Sources */,
+				58AAAE00FA79BB744B0EEA9C /* MerkleBlockValidatorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1358,6 +1353,7 @@
 				58AAA9F174660A9C83CB1495 /* CashBech32AddressConverter.swift in Sources */,
 				58AAAFC2807F72C22A3E9D08 /* SegWitBech32AddressConverter.swift in Sources */,
 				58AAA570B2234CB9948FA343 /* Bech32AddressConverter.swift in Sources */,
+				58AAA8C5908EBFA5BCC2B5FC /* MerkleBlockValidator.swift in Sources */,
 				58AAAE17248A670EE4E588A3 /* TransactionWitnessSerializer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
