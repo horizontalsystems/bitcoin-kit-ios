@@ -1,8 +1,6 @@
 import Foundation
 
 struct MerkleBlockMessage: IMessage {
-    var maxBlockSize: UInt32 = 1000000
-
     let blockHeader: BlockHeader
 
     /// Number of transactions in the block (including unmatched ones)
