@@ -15,7 +15,6 @@ class BitcoinCashTestNet: NetworkProtocol {
     let magic: UInt32 = 0xf4e5f3f4
     let port: UInt32 = 18333
     let coinType: UInt32 = 1
-    let maxBlockSize: UInt32 = 32 * 1024 * 1024
 
     let merkleBlockValidator: MerkleBlockValidator
 
