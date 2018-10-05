@@ -1,8 +1,6 @@
 import Foundation
 
 class HDWallet {
-    let network: NetworkProtocol
-
     private let seed: Data
     private let keychain: HDKeychain
 
@@ -11,14 +9,13 @@ class HDWallet {
     var account: UInt32
     var gapLimit: Int
 
-    init(seed: Data, network: NetworkProtocol, gapLimit: Int = 5) {
+    init(seed: Data, coinType: UInt32, xPrivKey: UInt32, xPubKey: UInt32, gapLimit: Int = 5) {
         self.seed = seed
-        self.network = network
         self.gapLimit = gapLimit
 
-        keychain = HDKeychain(seed: seed, network: network)
+        keychain = HDKeychain(seed: seed, xPrivKey: xPrivKey, xPubKey: xPubKey)
         purpose = 44
-        coinType = network.coinType
+        self.coinType = coinType
         account = 0
     }
 

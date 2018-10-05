@@ -10,7 +10,7 @@ import Foundation
 import WalletKit.Private
 
 class HDPublicKey {
-    let network: NetworkProtocol
+    let xPubKey: UInt32
     let depth: UInt8
     let fingerprint: UInt32
     let childIndex: UInt32
@@ -18,8 +18,8 @@ class HDPublicKey {
     let raw: Data
     let chainCode: Data
 
-    init(privateKey: HDPrivateKey, network: NetworkProtocol) {
-        self.network = network
+    init(privateKey: HDPrivateKey, xPubKey: UInt32) {
+        self.xPubKey = xPubKey
         self.raw = HDPublicKey.from(privateKey: privateKey.raw, compression: true)
         self.chainCode = privateKey.chainCode
         self.depth = 0
@@ -27,8 +27,8 @@ class HDPublicKey {
         self.childIndex = 0
     }
 
-    init(privateKey: HDPrivateKey, chainCode: Data, network: NetworkProtocol, depth: UInt8, fingerprint: UInt32, childIndex: UInt32) {
-        self.network = network
+    init(privateKey: HDPrivateKey, chainCode: Data, xPubKey: UInt32, depth: UInt8, fingerprint: UInt32, childIndex: UInt32) {
+        self.xPubKey = xPubKey
         self.raw = HDPublicKey.from(privateKey: privateKey.raw, compression: true)
         self.chainCode = chainCode
         self.depth = depth
@@ -36,8 +36,8 @@ class HDPublicKey {
         self.childIndex = childIndex
     }
 
-    init(raw: Data, chainCode: Data, network: NetworkProtocol, depth: UInt8, fingerprint: UInt32, childIndex: UInt32) {
-        self.network = network
+    init(raw: Data, chainCode: Data, xPubKey: UInt32, depth: UInt8, fingerprint: UInt32, childIndex: UInt32) {
+        self.xPubKey = xPubKey
         self.raw = raw
         self.chainCode = chainCode
         self.depth = depth
@@ -47,7 +47,7 @@ class HDPublicKey {
 
     func extended() -> String {
         var data = Data()
-        data += network.xPubKey.bigEndian
+        data += xPubKey.bigEndian
         data += depth.littleEndian
         data += fingerprint.littleEndian
         data += childIndex.littleEndian
@@ -55,11 +55,6 @@ class HDPublicKey {
         data += raw
         let checksum = Crypto.sha256sha256(data).prefix(4)
         return Base58.encode(data + checksum)
-    }
-
-    func toAddress() -> String {
-        let hash = Data([network.pubKeyHash]) + Crypto.sha256ripemd160(raw)
-        return publicKeyHashToAddress(hash)
     }
 
     func derived(at index: UInt32) throws -> HDPublicKey {
@@ -70,7 +65,7 @@ class HDPublicKey {
         guard let derivedKey = _HDKey(privateKey: nil, publicKey: raw, chainCode: chainCode, depth: depth, fingerprint: fingerprint, childIndex: childIndex).derived(at: index, hardened: false) else {
             throw DerivationError.derivateionFailed
         }
-        return HDPublicKey(raw: derivedKey.publicKey!, chainCode: derivedKey.chainCode, network: network, depth: derivedKey.depth, fingerprint: derivedKey.fingerprint, childIndex: derivedKey.childIndex)
+        return HDPublicKey(raw: derivedKey.publicKey!, chainCode: derivedKey.chainCode, xPubKey: xPubKey, depth: derivedKey.depth, fingerprint: derivedKey.fingerprint, childIndex: derivedKey.childIndex)
     }
 
     static func from(privateKey raw: Data, compression: Bool = false) -> Data {

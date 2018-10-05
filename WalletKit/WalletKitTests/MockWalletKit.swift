@@ -70,11 +70,13 @@ class MockWalletKit {
             when(mock.coinType.get).thenReturn(1)
             when(mock.dnsSeeds.get).thenReturn([""])
             when(mock.port.get).thenReturn(0)
+            when(mock.xPrivKey.get).thenReturn(0x04358394)
+            when(mock.xPubKey.get).thenReturn(0x043587cf)
         }
 
         mockRealmFactory = MockRealmFactory(configuration: Realm.Configuration())
 
-        mockHdWallet = MockHDWallet(seed: Data(), network: mockNetwork)
+        mockHdWallet = MockHDWallet(seed: Data(),coinType: mockNetwork.coinType, xPrivKey: mockNetwork.xPrivKey, xPubKey: mockNetwork.xPubKey)
 
         mockStateManager = MockStateManager(realmFactory: mockRealmFactory)
         mockApiManager = MockApiManager(apiUrl: "")

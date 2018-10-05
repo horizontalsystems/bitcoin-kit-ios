@@ -94,7 +94,7 @@ public class WalletKit {
 
         realmFactory = RealmFactory(configuration: realmConfiguration)
 
-        hdWallet = HDWallet(seed: Mnemonic.seed(mnemonic: words), network: network)
+        hdWallet = HDWallet(seed: Mnemonic.seed(mnemonic: words), coinType: network.coinType, xPrivKey: network.xPrivKey, xPubKey: network.xPubKey)
 
         stateManager = StateManager(realmFactory: realmFactory)
         apiManager = ApiManager(apiUrl: "http://ipfs.grouvi.org/ipns/QmVefrf2xrWzGzPpERF6fRHeUTh9uVSyfHHh4cWgUBnXpq/io-hs/data/blockstore")
