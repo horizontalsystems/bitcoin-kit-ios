@@ -2,33 +2,48 @@ import Foundation
 import WalletKit.Private
 import secp256k1
 
-struct Crypto {
-    enum CryptoError: Error {
+public struct Crypto {
+
+    public enum CryptoError: Error {
         case signFailed
         case noEnoughSpace
     }
 
-    static func sha256(_ data: Data) -> Data {
+    public static func sha256(_ data: Data) -> Data {
         return _Hash.sha256(data)
     }
-    
-    static func sha256sha256(_ data: Data) -> Data {
+
+    public static func sha256sha256(_ data: Data) -> Data {
         return sha256(sha256(data))
     }
 
-    static func ripemd160(_ data: Data) -> Data {
+    public static func ripemd160(_ data: Data) -> Data {
         return _Hash.ripemd160(data)
     }
 
-    static func sha256ripemd160(_ data: Data) -> Data {
+    public static func sha256ripemd160(_ data: Data) -> Data {
         return ripemd160(sha256(data))
     }
 
-    static func hmacsha512(data: Data, key: Data) -> Data {
+    public static func hmacsha512(data: Data, key: Data) -> Data {
         return _Hash.hmacsha512(data, key: key)
     }
 
-    static func sign(data: Data, privateKey: Data) throws -> Data {
+    public static func deriveKey(password: Data, salt: Data, iterations: Int, keyLength: Int) -> Data {
+        return _Key.deriveKey(password, salt: salt, iterations: iterations, keyLength: keyLength)
+    }
+
+    public static func derivedHDKey(hdKey: HDKey, at: UInt32, hardened: Bool) -> HDKey? {
+        let key = _HDKey(privateKey: hdKey.privateKey, publicKey: hdKey.publicKey, chainCode: hdKey.chainCode, depth: hdKey.depth, fingerprint: hdKey.fingerprint, childIndex: hdKey.childIndex)
+
+        if let derivedKey = key.derived(at: at, hardened: hardened) {
+            return HDKey(privateKey: derivedKey.privateKey, publicKey: derivedKey.publicKey, chainCode: derivedKey.chainCode, depth: derivedKey.depth, fingerprint: derivedKey.fingerprint, childIndex: derivedKey.childIndex)
+        }
+
+        return nil
+    }
+
+    public static func sign(data: Data, privateKey: Data) throws -> Data {
         let ctx = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_SIGN))!
         defer { secp256k1_context_destroy(ctx) }
 
@@ -49,7 +64,7 @@ struct Crypto {
         return der
     }
 
-    static func createPublicKey(fromPrivateKeyData privateKeyData: Data, compressed: Bool = false) -> Data {
+    public static func createPublicKey(fromPrivateKeyData privateKeyData: Data, compressed: Bool = false) -> Data {
         // Convert Data to byte Array
         let privateKey = privateKeyData.withUnsafeBytes {
             [UInt8](UnsafeBufferPointer(start: $0, count: privateKeyData.count))
@@ -82,4 +97,13 @@ struct Crypto {
         return Data(bytes: publicKey)
     }
 
+}
+
+public struct HDKey {
+    let privateKey: Data?
+    let publicKey: Data?
+    let chainCode: Data
+    let depth: UInt8
+    let fingerprint: UInt32
+    let childIndex: UInt32
 }

@@ -1,13 +1,4 @@
-//
-//  Mnemonic.swift
-//  BitcoinKit
-//
-//  Created by Kishikawa Katsumi on 2018/02/04.
-//  Copyright © 2018 Kishikawa Katsumi. All rights reserved.
-//
-
 import Foundation
-import WalletKit.Private
 
 public struct Mnemonic {
     public enum Strength : Int {
@@ -65,7 +56,7 @@ public struct Mnemonic {
     static func seed(mnemonic m: [String], passphrase: String = "") -> Data {
         let mnemonic = m.joined(separator: " ").decomposedStringWithCompatibilityMapping.data(using: .utf8)!
         let salt = ("mnemonic" + passphrase).decomposedStringWithCompatibilityMapping.data(using: .utf8)!
-        let seed = _Key.deriveKey(mnemonic, salt: salt, iterations: 2048, keyLength: 64)
+        let seed = Crypto.deriveKey(password: mnemonic, salt: salt, iterations: 2048, keyLength: 64)
         return seed
     }
 

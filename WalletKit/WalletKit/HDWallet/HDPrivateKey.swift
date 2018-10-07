@@ -1,13 +1,4 @@
-//
-//  DeterministicKey.swift
-//  BitcoinKit
-//
-//  Created by Kishikawa Katsumi on 2018/02/04.
-//  Copyright © 2018 Kishikawa Katsumi. All rights reserved.
-//
-
 import Foundation
-import WalletKit.Private
 
 class HDPrivateKey {
     let xPrivKey: UInt32
@@ -65,7 +56,7 @@ class HDPrivateKey {
             fatalError("invalid child index")
         }
 
-        guard let derivedKey = _HDKey(privateKey: raw, publicKey: publicKey().raw, chainCode: chainCode, depth: depth, fingerprint: fingerprint, childIndex: childIndex).derived(at: index, hardened: hardened) else {
+        guard let derivedKey = Crypto.derivedHDKey(hdKey: HDKey(privateKey: raw, publicKey: publicKey().raw, chainCode: chainCode, depth: depth, fingerprint: fingerprint, childIndex: childIndex), at: index, hardened: hardened) else {
             throw DerivationError.derivateionFailed
         }
         return HDPrivateKey(privateKey: derivedKey.privateKey!, chainCode: derivedKey.chainCode, xPrivKey: xPrivKey, xPubKey: xPubKey, depth: derivedKey.depth, fingerprint: derivedKey.fingerprint, childIndex: derivedKey.childIndex)

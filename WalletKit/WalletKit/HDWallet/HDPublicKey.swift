@@ -1,13 +1,4 @@
-//
-//  HDPublicKey.swift
-//  BitcoinKit
-//
-//  Created by Kishikawa Katsumi on 2018/02/04.
-//  Copyright © 2018 Kishikawa Katsumi. All rights reserved.
-//
-
 import Foundation
-import WalletKit.Private
 
 class HDPublicKey {
     let xPubKey: UInt32
@@ -62,7 +53,7 @@ class HDPublicKey {
         if ((0x80000000 & index) != 0) {
             fatalError("invalid child index")
         }
-        guard let derivedKey = _HDKey(privateKey: nil, publicKey: raw, chainCode: chainCode, depth: depth, fingerprint: fingerprint, childIndex: childIndex).derived(at: index, hardened: false) else {
+        guard let derivedKey = Crypto.derivedHDKey(hdKey: HDKey(privateKey: nil, publicKey: raw, chainCode: chainCode, depth: depth, fingerprint: fingerprint, childIndex: childIndex), at: index, hardened: false) else {
             throw DerivationError.derivateionFailed
         }
         return HDPublicKey(raw: derivedKey.publicKey!, chainCode: derivedKey.chainCode, xPubKey: xPubKey, depth: derivedKey.depth, fingerprint: derivedKey.fingerprint, childIndex: derivedKey.childIndex)
