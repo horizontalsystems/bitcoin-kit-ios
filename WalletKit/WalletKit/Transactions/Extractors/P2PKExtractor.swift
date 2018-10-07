@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 class P2PKExtractor: ScriptExtractor {
     let minimalKeyLength = 3
@@ -11,7 +12,7 @@ class P2PKExtractor: ScriptExtractor {
         guard script.chunks.count == 2, script.chunks.last?.opCode == OpCode.checkSig, let result = script.chunks[0].data else {
             throw ScriptError.wrongSequence
         }
-        return Crypto.sha256ripemd160(result)
+        return CryptoKit.sha256ripemd160(result)
     }
 
 }

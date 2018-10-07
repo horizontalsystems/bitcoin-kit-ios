@@ -10,7 +10,6 @@
 		11B350895B60D5941F788B85 /* BitcoinCashMainNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B3538AE4523B395063F66D /* BitcoinCashMainNet.swift */; };
 		11B350E0BC835C79DEDFF2C7 /* BitcoinTestNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35E92D4F8CF1524F98F7A /* BitcoinTestNet.swift */; };
 		11B351037B1E147824A217B9 /* RequestHeadersPeerTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35EE64056C0F307A76EAC /* RequestHeadersPeerTask.swift */; };
-		11B3511B6F41679F062F356C /* Crypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35EBE4F0C6D40981BF52B /* Crypto.swift */; };
 		11B35178BC28AE1B995DE8E3 /* VarInt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B355C0072CA13ADBAC1351 /* VarInt.swift */; };
 		11B351810EDEC4CA2EE5444B /* BitcoinCashTestNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35F5A8D3919A80AD2DBF3 /* BitcoinCashTestNet.swift */; };
 		11B351E3E2B8E34D9ECAB6B6 /* RelayTransactionPeerTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B350832C84DD224B3E8AF2 /* RelayTransactionPeerTask.swift */; };
@@ -60,7 +59,6 @@
 		11B35BF7FB1E62417FFF5CD1 /* ValidatedBlockFactoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B352D2B22AD843B83D889A /* ValidatedBlockFactoryTests.swift */; };
 		11B35C8F2A29CA171165BF7A /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35F3FD9CCB938B62D07EA /* Observable.swift */; };
 		11B35CEAD9ADE1922CD7912A /* TransactionLinkerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35DB7140D86176157F8CA /* TransactionLinkerTests.swift */; };
-		11B35D0A90AD484F62B69A1B /* WalletKitPrivate.m in Sources */ = {isa = PBXBuildFile; fileRef = 11B35C3A9EC92678307977F7 /* WalletKitPrivate.m */; };
 		11B35D21CC4F7BE641851E83 /* TransactionExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B357AFD2F27913B7451ACA /* TransactionExtractorTests.swift */; };
 		11B35D23B451CFB803F69CA0 /* TestData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B358F56F6298016B1A8AFD /* TestData.swift */; };
 		11B35DCEE58FE94B5E111622 /* InitialSyncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35660C3F6DE42BC99E350 /* InitialSyncer.swift */; };
@@ -70,7 +68,6 @@
 		11B35EEF6EA44EF0378B60A3 /* BitcoinRegTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35A0FD8DBCF14EC9AA8ED /* BitcoinRegTest.swift */; };
 		11B35F02260D5A21CF0EA3B8 /* Factory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B3529A1731702724B0342D /* Factory.swift */; };
 		11B35F79192D8E7F80BEEC1C /* BlockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B3527FFC458AEFC035AC35 /* BlockTests.swift */; };
-		11B35F8A1F85697DC88C7777 /* WalletKitPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 11B35EDCF37AAE69A74FB0F5 /* WalletKitPrivate.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		11B35F93D7F1778A0A0BDC81 /* HeaderSyncerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35D5481EB03B08C1E8C30 /* HeaderSyncerTests.swift */; };
 		11B35FC6819CD5A9B94A85BF /* BitcoinMainNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35D44C0F5847D5B6EDEBC /* BitcoinMainNet.swift */; };
 		1C4551923399839C11A93F12 /* Pods_WalletKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E17E11DAB1BF27E1CA22EB08 /* Pods_WalletKit.framework */; };
@@ -180,7 +177,6 @@
 		D317121020F7193000AEF61B /* VerackMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31711FC20F7193000AEF61B /* VerackMessage.swift */; };
 		D317121120F7193000AEF61B /* PongMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31711FD20F7193000AEF61B /* PongMessage.swift */; };
 		D317121820F719A900AEF61B /* MurmurHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = D317121720F719A900AEF61B /* MurmurHash.swift */; };
-		D33FD6B520F382DC00EC10DB /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D33FD6B320F3782600EC10DB /* libcrypto.a */; };
 		D33FD6BC20F385D700EC10DB /* HDPublicKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33FD6B820F385D700EC10DB /* HDPublicKey.swift */; };
 		D33FD6BD20F385D700EC10DB /* HDWallet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33FD6B920F385D700EC10DB /* HDWallet.swift */; };
 		D33FD6BE20F385D700EC10DB /* HDPrivateKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33FD6BA20F385D700EC10DB /* HDPrivateKey.swift */; };
@@ -254,7 +250,6 @@
 		11B35AEAAB5F1F7246063AEB /* RequestMerkleBlocksPeerTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestMerkleBlocksPeerTask.swift; sourceTree = "<group>"; };
 		11B35B089F5CA8D468EDA813 /* P2PKHExtractorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = P2PKHExtractorTests.swift; sourceTree = "<group>"; };
 		11B35C07292793FCE3096D03 /* BlockSyncer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockSyncer.swift; sourceTree = "<group>"; };
-		11B35C3A9EC92678307977F7 /* WalletKitPrivate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WalletKitPrivate.m; sourceTree = "<group>"; };
 		11B35C47D552B7AC5EA8C463 /* VarString.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VarString.swift; sourceTree = "<group>"; };
 		11B35C4D04E14399067D5E8C /* PFromSHExtractorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PFromSHExtractorTests.swift; sourceTree = "<group>"; };
 		11B35C67DB63EF992C380513 /* Transaction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Transaction.swift; sourceTree = "<group>"; };
@@ -267,8 +262,6 @@
 		11B35DE14DB8DA22E71A1E35 /* RealmFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealmFactory.swift; sourceTree = "<group>"; };
 		11B35E7E6BB3227429A41B13 /* PublicKey.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PublicKey.swift; sourceTree = "<group>"; };
 		11B35E92D4F8CF1524F98F7A /* BitcoinTestNet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinTestNet.swift; sourceTree = "<group>"; };
-		11B35EBE4F0C6D40981BF52B /* Crypto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Crypto.swift; sourceTree = "<group>"; };
-		11B35EDCF37AAE69A74FB0F5 /* WalletKitPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WalletKitPrivate.h; sourceTree = "<group>"; };
 		11B35EE64056C0F307A76EAC /* RequestHeadersPeerTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestHeadersPeerTask.swift; sourceTree = "<group>"; };
 		11B35EFFF54C384CC4107EE9 /* ProgressSyncer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressSyncer.swift; sourceTree = "<group>"; };
 		11B35F3FD9CCB938B62D07EA /* Observable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Observable.swift; sourceTree = "<group>"; };
@@ -404,7 +397,6 @@
 		D3FD450520F354EF00F472B9 /* WalletKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = WalletKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3FD450820F354EF00F472B9 /* WalletKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WalletKit.h; sourceTree = "<group>"; };
 		D3FD450920F354EF00F472B9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		D3FD451620F364DF00F472B9 /* WalletKit.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; name = WalletKit.modulemap; path = WalletKit/WalletKit.modulemap; sourceTree = SOURCE_ROOT; };
 		E17E11DAB1BF27E1CA22EB08 /* Pods_WalletKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_WalletKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -422,7 +414,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D33FD6B520F382DC00EC10DB /* libcrypto.a in Frameworks */,
 				1C4551923399839C11A93F12 /* Pods_WalletKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -684,10 +675,7 @@
 			isa = PBXGroup;
 			children = (
 				11B350F93CE46013514830A3 /* BloomFilter.swift */,
-				11B35EBE4F0C6D40981BF52B /* Crypto.swift */,
 				D317121720F719A900AEF61B /* MurmurHash.swift */,
-				11B35C3A9EC92678307977F7 /* WalletKitPrivate.m */,
-				11B35EDCF37AAE69A74FB0F5 /* WalletKitPrivate.h */,
 			);
 			path = Crypto;
 			sourceTree = "<group>";
@@ -915,7 +903,6 @@
 				D0F02417213CF40F002629EF /* Serializers */,
 				58AAA11F421202A1ADFF0CE2 /* Scripts */,
 				11B35BC0CDFD3512DD636A78 /* Transactions */,
-				D3FD451620F364DF00F472B9 /* WalletKit.modulemap */,
 				D3FD450820F354EF00F472B9 /* WalletKit.h */,
 				D3FD450920F354EF00F472B9 /* Info.plist */,
 			);
@@ -930,7 +917,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D3FD450A20F354EF00F472B9 /* WalletKit.h in Headers */,
-				11B35F8A1F85697DC88C7777 /* WalletKitPrivate.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1039,6 +1025,7 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/../Pods/Target Support Files/Pods-WalletKitTests/Pods-WalletKitTests-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/CryptoKit/CryptoKit.framework",
 				"${BUILT_PRODUCTS_DIR}/Cuckoo/Cuckoo.framework",
 				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
 				"${BUILT_PRODUCTS_DIR}/BigInt/BigInt.framework",
@@ -1051,6 +1038,7 @@
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CryptoKit.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Cuckoo.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/BigInt.framework",
@@ -1235,14 +1223,12 @@
 				D317121120F7193000AEF61B /* PongMessage.swift in Sources */,
 				D33FD6BD20F385D700EC10DB /* HDWallet.swift in Sources */,
 				D093F45E21414CC000C5D8CD /* PeerHostManager.swift in Sources */,
-				11B35D0A90AD484F62B69A1B /* WalletKitPrivate.m in Sources */,
 				D33FD6C120F3863D00EC10DB /* NetworkProtocol.swift in Sources */,
 				D33FD6D520F3890700EC10DB /* WordList.swift in Sources */,
 				D33FD6BF20F385D700EC10DB /* HDKeychain.swift in Sources */,
 				D33FD6C920F3876800EC10DB /* Serialization.swift in Sources */,
 				D373EB83215A2A6C00124298 /* TransactionSyncer.swift in Sources */,
 				D317120520F7193000AEF61B /* VersionMessage.swift in Sources */,
-				11B3511B6F41679F062F356C /* Crypto.swift in Sources */,
 				D33FD6D120F3885400EC10DB /* Helpers.swift in Sources */,
 				D317121820F719A900AEF61B /* MurmurHash.swift in Sources */,
 				D317120F20F7193000AEF61B /* MerkleBlockMessage.swift in Sources */,
@@ -1542,11 +1528,6 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Libraries/secp256k1/include",
-					"$(SRCROOT)/Libraries/openssl/include",
-				);
 				INFOPLIST_FILE = WalletKit/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1554,17 +1535,9 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Libraries/secp256k1/lib",
-					"$(SRCROOT)/Libraries/openssl/lib",
-					"$(PROJECT_DIR)/Libraries/openssl/lib",
-				);
-				MODULEMAP_FILE = "$(SRCROOT)/WalletKit/WalletKit.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = io.horizontalsystems.walletkit;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/Libraries";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1584,11 +1557,6 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Libraries/secp256k1/include",
-					"$(SRCROOT)/Libraries/openssl/include",
-				);
 				INFOPLIST_FILE = WalletKit/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1596,17 +1564,9 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Libraries/secp256k1/lib",
-					"$(SRCROOT)/Libraries/openssl/lib",
-					"$(PROJECT_DIR)/Libraries/openssl/lib",
-				);
-				MODULEMAP_FILE = "$(SRCROOT)/WalletKit/WalletKit.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = io.horizontalsystems.walletkit;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/Libraries";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

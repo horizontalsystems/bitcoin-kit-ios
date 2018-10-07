@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 class MerkleBlockValidator {
 
@@ -130,7 +131,7 @@ class MerkleBlockValidator {
         result.append(Data(left))
         result.append(Data(right))
 
-        let hash = Crypto.sha256sha256(result)
+        let hash = CryptoKit.sha256sha256(result)
 
         return Data(hash)
     }

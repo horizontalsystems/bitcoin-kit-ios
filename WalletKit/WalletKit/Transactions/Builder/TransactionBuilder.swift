@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 class TransactionBuilder {
     enum BuildError: Error {
@@ -84,7 +85,7 @@ class TransactionBuilder {
 
         transaction.status = .new
         transaction.isMine = true
-        transaction.reversedHashHex = Crypto.sha256sha256(TransactionSerializer.serialize(transaction: transaction)).reversedHex
+        transaction.reversedHashHex = CryptoKit.sha256sha256(TransactionSerializer.serialize(transaction: transaction)).reversedHex
         return transaction
     }
 

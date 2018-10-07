@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 enum ScriptError: Error { case wrongScriptLength, wrongSequence }
 
@@ -50,7 +51,7 @@ class TransactionExtractor {
                     if let payload = try extractor.extract(from: script, converter: scriptConverter) {
                         switch extractor.type {
                             case .p2sh, .p2pkh, .p2wpkh:
-                                let ripemd160 = Crypto.sha256ripemd160(payload)
+                                let ripemd160 = CryptoKit.sha256ripemd160(payload)
                                 input.keyHash = ripemd160
                                 input.address = (try? addressConverter.convert(keyHash: ripemd160, type: extractor.type))?.stringValue
                             default: break

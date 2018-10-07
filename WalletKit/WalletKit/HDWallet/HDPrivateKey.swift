@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 class HDPrivateKey {
     let xPrivKey: UInt32
@@ -27,7 +28,7 @@ class HDPrivateKey {
     }
 
     convenience init(seed: Data, xPrivKey: UInt32, xPubKey: UInt32) {
-        let hmac = Crypto.hmacsha512(data: seed, key: "Bitcoin seed".data(using: .ascii)!)
+        let hmac = CryptoKit.hmacsha512(data: seed, key: "Bitcoin seed".data(using: .ascii)!)
         let privateKey = hmac[0..<32]
         let chainCode = hmac[32..<64]
         self.init(privateKey: privateKey, chainCode: chainCode, xPrivKey: xPrivKey, xPubKey: xPubKey)
@@ -46,7 +47,7 @@ class HDPrivateKey {
         data += chainCode
         data += UInt8(0)
         data += raw
-        let checksum = Crypto.sha256sha256(data).prefix(4)
+        let checksum = CryptoKit.sha256sha256(data).prefix(4)
         return Base58.encode(data + checksum)
     }
 
@@ -56,7 +57,7 @@ class HDPrivateKey {
             fatalError("invalid child index")
         }
 
-        guard let derivedKey = Crypto.derivedHDKey(hdKey: HDKey(privateKey: raw, publicKey: publicKey().raw, chainCode: chainCode, depth: depth, fingerprint: fingerprint, childIndex: childIndex), at: index, hardened: hardened) else {
+        guard let derivedKey = CryptoKit.derivedHDKey(hdKey: HDKey(privateKey: raw, publicKey: publicKey().raw, chainCode: chainCode, depth: depth, fingerprint: fingerprint, childIndex: childIndex), at: index, hardened: hardened) else {
             throw DerivationError.derivateionFailed
         }
         return HDPrivateKey(privateKey: derivedKey.privateKey!, chainCode: derivedKey.chainCode, xPrivKey: xPrivKey, xPubKey: xPubKey, depth: derivedKey.depth, fingerprint: derivedKey.fingerprint, childIndex: derivedKey.childIndex)

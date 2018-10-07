@@ -1,12 +1,5 @@
-//
-//  Helpers.swift
-//  BitcoinKit
-//
-//  Created by Kishikawa Katsumi on 2018/01/31.
-//  Copyright © 2018 Kishikawa Katsumi. All rights reserved.
-//
-
 import Foundation
+import CryptoKit
 
 func ipv4(from data: Data) -> String {
     return Data(data.dropFirst(12)).map { String($0) }.joined(separator: ".")
@@ -31,7 +24,7 @@ func pton(_ address: String) -> Data {
 /// Checksum = 1st 4 bytes of SHA-256(SHA-256(Key hash))
 /// Bitcoin Address = Base58Encode(Key hash concatenated with Checksum)
 func publicKeyHashToAddress(_ hash: Data) -> String {
-    let checksum = Crypto.sha256sha256(hash).prefix(4)
+    let checksum = CryptoKit.sha256sha256(hash).prefix(4)
     let address = Base58.encode(hash + checksum)
     return address
 }

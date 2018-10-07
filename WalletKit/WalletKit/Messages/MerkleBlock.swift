@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 class MerkleBlock {
     let header: BlockHeader
@@ -6,7 +7,7 @@ class MerkleBlock {
     var transactions: [Transaction]
 
     var headerHash: Data {
-        return Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: header))
+        return CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: header))
     }
 
     var complete: Bool {

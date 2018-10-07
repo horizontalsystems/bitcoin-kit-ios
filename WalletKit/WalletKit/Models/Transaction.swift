@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 import RealmSwift
 
 @objc enum TransactionStatus: Int { case new, relayed, invalid }
@@ -32,7 +33,7 @@ class Transaction: Object {
         outputs.forEach { self.outputs.append($0) }
 
         self.lockTime = lockTime
-        dataHash = Crypto.sha256sha256(TransactionSerializer.serialize(transaction: self))
+        dataHash = CryptoKit.sha256sha256(TransactionSerializer.serialize(transaction: self))
         reversedHashHex = dataHash.reversedHex
     }
 

@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 class HDPublicKey {
     let xPubKey: UInt32
@@ -44,7 +45,7 @@ class HDPublicKey {
         data += childIndex.littleEndian
         data += chainCode
         data += raw
-        let checksum = Crypto.sha256sha256(data).prefix(4)
+        let checksum = CryptoKit.sha256sha256(data).prefix(4)
         return Base58.encode(data + checksum)
     }
 
@@ -53,14 +54,14 @@ class HDPublicKey {
         if ((0x80000000 & index) != 0) {
             fatalError("invalid child index")
         }
-        guard let derivedKey = Crypto.derivedHDKey(hdKey: HDKey(privateKey: nil, publicKey: raw, chainCode: chainCode, depth: depth, fingerprint: fingerprint, childIndex: childIndex), at: index, hardened: false) else {
+        guard let derivedKey = CryptoKit.derivedHDKey(hdKey: HDKey(privateKey: nil, publicKey: raw, chainCode: chainCode, depth: depth, fingerprint: fingerprint, childIndex: childIndex), at: index, hardened: false) else {
             throw DerivationError.derivateionFailed
         }
         return HDPublicKey(raw: derivedKey.publicKey!, chainCode: derivedKey.chainCode, xPubKey: xPubKey, depth: derivedKey.depth, fingerprint: derivedKey.fingerprint, childIndex: derivedKey.childIndex)
     }
 
     static func from(privateKey raw: Data, compression: Bool = false) -> Data {
-        return Crypto.createPublicKey(fromPrivateKeyData: raw, compressed: compression)
+        return CryptoKit.createPublicKey(fromPrivateKeyData: raw, compressed: compression)
     }
 
 }

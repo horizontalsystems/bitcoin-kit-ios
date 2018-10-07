@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 class AddressConverter {
     enum ConversionError: Error {
@@ -36,7 +37,7 @@ class AddressConverter {
 
     func convertToLegacy(keyHash: Data, version: UInt8, addressType: AddressType) -> LegacyAddress {
         var withVersion = (Data([version])) + keyHash
-        let doubleSHA256 = Crypto.sha256sha256(withVersion)
+        let doubleSHA256 = CryptoKit.sha256sha256(withVersion)
         let checksum = doubleSHA256.prefix(4)
         withVersion += checksum
         let base58 = Base58.encode(withVersion)
@@ -62,7 +63,7 @@ class AddressConverter {
         }
         let hex = Base58.decode(address)
         let givenChecksum = hex.suffix(4)
-        let doubleSHA256 = Crypto.sha256sha256(hex.prefix(hex.count - 4))
+        let doubleSHA256 = CryptoKit.sha256sha256(hex.prefix(hex.count - 4))
         let actualChecksum = doubleSHA256.prefix(4)
         guard givenChecksum == actualChecksum else {
             throw ConversionError.invalidChecksum

@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 import RealmSwift
 
 class PublicKey: Object {
@@ -21,7 +22,7 @@ class PublicKey: Object {
         self.index = index
         self.external = external
         self.raw = key.raw
-        self.keyHash = Crypto.sha256ripemd160(key.raw)
+        self.keyHash = CryptoKit.sha256ripemd160(key.raw)
         self.keyHashHex = keyHash.hex
     }
 

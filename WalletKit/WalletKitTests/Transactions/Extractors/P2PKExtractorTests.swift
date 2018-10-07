@@ -1,5 +1,6 @@
 import XCTest
 import Cuckoo
+import CryptoKit
 @testable import WalletKit
 
 class P2PKExtractorTests: XCTestCase {
@@ -37,7 +38,7 @@ class P2PKExtractorTests: XCTestCase {
 
         do {
             let test = try extractor.extract(from: script, converter: scriptConverter)
-            XCTAssertEqual(test, Crypto.sha256ripemd160(keyHash))
+            XCTAssertEqual(test, CryptoKit.sha256ripemd160(keyHash))
         } catch let error {
             XCTFail("\(error) Exception Thrown")
         }

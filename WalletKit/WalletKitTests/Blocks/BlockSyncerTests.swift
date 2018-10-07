@@ -1,5 +1,6 @@
 import XCTest
 import Cuckoo
+import CryptoKit
 import RealmSwift
 @testable import WalletKit
 
@@ -210,7 +211,7 @@ class BlockSyncerTests: XCTestCase {
 
         assertTransactionEqual(tx1: transaction, tx2: realmTransaction)
         XCTAssertEqual(realmBlock.headerHash, block.headerHash)
-        XCTAssertEqual(Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: realmBlock.header!)), Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: block.header!)))
+        XCTAssertEqual(CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: realmBlock.header!)), CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: block.header!)))
         XCTAssertEqual(realmBlock.synced, true)
         XCTAssertEqual(realmTransaction.block, realmBlock)
 

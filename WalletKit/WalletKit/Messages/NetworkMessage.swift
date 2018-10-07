@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 struct NetworkMessage {
     /// Magic value indicating message origin network, and used to seek to next message when stream state is unknown
@@ -24,7 +25,7 @@ struct NetworkMessage {
 
     init(network: NetworkProtocol, message: IMessage) {
         let serializedMessage = message.serialized()
-        let checksum = Data(Crypto.sha256sha256(serializedMessage).prefix(4))
+        let checksum = Data(CryptoKit.sha256sha256(serializedMessage).prefix(4))
         let length = UInt32(serializedMessage.count)
 
         var resolvedCommand: String = ""
@@ -85,7 +86,7 @@ struct NetworkMessage {
         }
         let payload = byteStream.read(Data.self, count: Int(length))
 
-        let checksumConfirm = Crypto.sha256sha256(payload).prefix(4)
+        let checksumConfirm = CryptoKit.sha256sha256(payload).prefix(4)
         guard checksum == checksumConfirm else {
             return nil
         }

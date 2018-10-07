@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 class Peer {
 
@@ -220,11 +221,11 @@ class Peer {
     }
 
     private func handle(message: BlockMessage) {
-        log("--> BLOCK: \(Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: message.blockHeaderItem)).reversedHex)")
+        log("--> BLOCK: \(CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: message.blockHeaderItem)).reversedHex)")
     }
 
     private func handle(message: MerkleBlockMessage) {
-        log("--> MERKLEBLOCK: \(Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: message.blockHeader)).reversedHex)")
+        log("--> MERKLEBLOCK: \(CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: message.blockHeader)).reversedHex)")
 
         do {
             let merkleBlock = try network.merkleBlockValidator.merkleBlock(from: message)

@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 class TransactionSerializer {
 
@@ -74,7 +75,7 @@ class TransactionSerializer {
         }
 
         transaction.lockTime = Int(byteStream.read(UInt32.self))
-        transaction.dataHash = Crypto.sha256sha256(serialize(transaction: transaction))
+        transaction.dataHash = CryptoKit.sha256sha256(serialize(transaction: transaction))
         transaction.reversedHashHex = transaction.dataHash.reversedHex
 
         return transaction

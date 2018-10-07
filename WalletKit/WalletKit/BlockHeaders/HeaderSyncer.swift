@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 import RealmSwift
 
 class HeaderSyncer {
@@ -56,7 +57,7 @@ extension HeaderSyncer: IHeaderSyncer {
         // Find diversion point if given blocks list is a new leaf of detected fork
         var diversionPointBlock: Block?
         while let firstHeader = headers.first {
-            let headerHash = Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: firstHeader))
+            let headerHash = CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: firstHeader))
 
             if let existingBlock = realm.objects(Block.self).filter("reversedHeaderHashHex = %@", headerHash.reversedHex).first {
                 diversionPointBlock = existingBlock

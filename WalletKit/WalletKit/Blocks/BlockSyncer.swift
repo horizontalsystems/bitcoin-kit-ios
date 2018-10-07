@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 import RealmSwift
 
 class BlockSyncer {
@@ -28,7 +29,7 @@ class BlockSyncer {
                 let blockHeader = merkleBlock.header
                 let transactions = merkleBlock.transactions
 
-                let reversedHashHex = Crypto.sha256sha256(BlockHeaderSerializer.serialize(header: blockHeader)).reversedHex
+                let reversedHashHex = CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: blockHeader)).reversedHex
 
                 if let existingBlock = realm.objects(Block.self).filter("reversedHeaderHashHex = %@", reversedHashHex).last {
                     if existingBlock.synced {

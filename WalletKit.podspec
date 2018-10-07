@@ -14,18 +14,11 @@ Pod::Spec.new do |spec|
   spec.requires_arc = true
   spec.source = { git: 'https://github.com/horizontalsystems/WalletKit-iOS.git', tag: "v#{spec.version}" }
   spec.source_files = 'WalletKit/WalletKit/**/*.{h,m,swift}'
-  spec.private_header_files = 'WalletKit/WalletKit/**/WalletKitInternal.h'
-  spec.module_map = 'WalletKit/WalletKit/WalletKit.modulemap'
   spec.ios.deployment_target = '11.0'
   spec.swift_version = '4.1'
 
   spec.pod_target_xcconfig = { 'SWIFT_WHOLE_MODULE_OPTIMIZATION' => 'YES',
-                               'APPLICATION_EXTENSION_API_ONLY' => 'YES',
-                               'SWIFT_INCLUDE_PATHS' => '${PODS_ROOT}/WalletKit/WalletKit/Libraries',
-                               'HEADER_SEARCH_PATHS' => '"${PODS_ROOT}/WalletKit/WalletKit/Libraries/openssl/include" "${PODS_ROOT}/WalletKit/WalletKit/Libraries/secp256k1/include"',
-                               'LIBRARY_SEARCH_PATHS' => '"${PODS_ROOT}/WalletKit/WalletKit/Libraries/openssl/lib" "${PODS_ROOT}/WalletKit/WalletKit/Libraries/secp256k1/lib"' }
-  spec.preserve_paths = ['WalletKit/setup', 'WalletKit/Libraries']
-  # spec.prepare_command = 'sh WalletKit/setup/build_libraries.sh'
+                               'APPLICATION_EXTENSION_API_ONLY' => 'YES' }
 
   spec.dependency 'Alamofire'
   spec.dependency 'ObjectMapper'
