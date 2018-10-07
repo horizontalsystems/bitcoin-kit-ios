@@ -18,7 +18,9 @@ class AddressManagerTests: XCTestCase {
         mockWalletKit = MockWalletKit()
         mockHDWallet = mockWalletKit.mockHdWallet
         mockPeerGroup = mockWalletKit.mockPeerGroup
-        hdWallet = HDWallet(seed: Data(), network: mockWalletKit.mockNetwork)
+
+        let mockNetwork = mockWalletKit.mockNetwork
+        hdWallet = HDWallet(seed: Data(), coinType: mockNetwork.coinType, xPrivKey: mockNetwork.xPrivKey, xPubKey: mockNetwork.xPubKey)
 
         stub(mockWalletKit.mockNetwork) { mock in
             when(mock.pubKeyHash.get).thenReturn(UInt8(0x6f))
