@@ -2,8 +2,10 @@ PODS:
   - Alamofire (4.7.3)
   - BigInt (3.1.0):
     - SipHash (~> 1.2)
-  - CryptoKit (0.1.0)
   - Cuckoo (0.11.3)
+  - HSCryptoKit (0.1.0)
+  - HSHDWalletKit (0.1.0):
+    - HSCryptoKit
   - ObjectMapper (3.3.0)
   - Realm (3.11.0):
     - Realm/Headers (= 3.11.0)
@@ -19,8 +21,9 @@ PODS:
 DEPENDENCIES:
   - Alamofire
   - BigInt
-  - CryptoKit (from `https://github.com/horizontalsystems/crypto-kit-ios`)
   - Cuckoo
+  - HSCryptoKit (from `https://github.com/horizontalsystems/crypto-kit-ios`)
+  - HSHDWalletKit (from `https://github.com/horizontalsystems/hd-wallet-kit-ios`)
   - ObjectMapper
   - RealmSwift
   - RxRealm
@@ -39,19 +42,25 @@ SPEC REPOS:
     - SipHash
 
 EXTERNAL SOURCES:
-  CryptoKit:
+  HSCryptoKit:
     :git: https://github.com/horizontalsystems/crypto-kit-ios
+  HSHDWalletKit:
+    :git: https://github.com/horizontalsystems/hd-wallet-kit-ios
 
 CHECKOUT OPTIONS:
-  CryptoKit:
-    :commit: 167262b02041e0b2ce91643003e3e957033641eb
+  HSCryptoKit:
+    :commit: 194cdd408f6a1ce14fe12970298600bcbc0074f7
     :git: https://github.com/horizontalsystems/crypto-kit-ios
+  HSHDWalletKit:
+    :commit: 9ad7bcc00d0cba3e0e4ab7ee6ab5773488d80afa
+    :git: https://github.com/horizontalsystems/hd-wallet-kit-ios
 
 SPEC CHECKSUMS:
   Alamofire: c7287b6e5d7da964a70935e5db17046b7fde6568
   BigInt: 76b5dfdfa3e2e478d4ffdf161aeede5502e2742f
-  CryptoKit: 2e48694f3554577affc9f55b772eba1e63a5ad32
   Cuckoo: 97522dd7ac6f18adba6022bdc74aa69e82ca691a
+  HSCryptoKit: 87ee986be4d760cfa711376b1a715c608a5fd237
+  HSHDWalletKit: 74390d26110f4ed58eb11d78b92c8d945b29fc76
   ObjectMapper: b612bf8c8e99c4dc0bb6013a51f7c27966ed5da9
   Realm: 92f09a102692b96a9a10e9617f214f15c5ab85fc
   RealmSwift: 5f0481cd658bb751c509314b964a35eaa264d2cf
@@ -59,6 +68,6 @@ SPEC CHECKSUMS:
   RxSwift: fe0fd770a43acdb7d0a53da411c9b892e69bb6e4
   SipHash: fad90a4683e420c52ef28063063dbbce248ea6d4
 
-PODFILE CHECKSUM: b5cbac6c2d2bf8a45cd3314bcb7362a39d2beb91
+PODFILE CHECKSUM: 0eb95cad397d4b921e6ef18b37f574bf48a93789
 
 COCOAPODS: 1.5.3

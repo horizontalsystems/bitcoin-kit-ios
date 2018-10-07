@@ -1,6 +1,7 @@
+import Foundation
+import HSHDWalletKit
 import Realm
 import RealmSwift
-import Foundation
 
 class AddressManager {
 

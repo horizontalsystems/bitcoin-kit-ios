@@ -1,5 +1,5 @@
 import Foundation
-import CryptoKit
+import HSCryptoKit
 
 class AddressConverter {
     enum ConversionError: Error {

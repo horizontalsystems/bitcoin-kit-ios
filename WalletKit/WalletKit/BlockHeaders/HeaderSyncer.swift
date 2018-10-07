@@ -1,5 +1,5 @@
 import Foundation
-import CryptoKit
+import HSCryptoKit
 import RealmSwift
 
 class HeaderSyncer {

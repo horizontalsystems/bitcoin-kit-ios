@@ -9,12 +9,13 @@ project 'Example/Example'
 project 'WalletKit/WalletKit'
 
 
-def crypto_pods
-  pod "CryptoKit", git: "https://github.com/horizontalsystems/crypto-kit-ios"
+def internal_pods
+  pod "HSCryptoKit", git: "https://github.com/horizontalsystems/crypto-kit-ios"
+  pod "HSHDWalletKit", git: "https://github.com/horizontalsystems/hd-wallet-kit-ios"
 end
 
 def kit_pods
-  crypto_pods
+  internal_pods
 
   pod 'Alamofire'
   pod 'ObjectMapper'
@@ -39,6 +40,6 @@ end
 target :WalletKitTests do
   project 'WalletKit/WalletKit'
 
-  crypto_pods
+  internal_pods
   pod "Cuckoo"
 end

@@ -1,5 +1,5 @@
 import Foundation
-import CryptoKit
+import HSCryptoKit
 
 func ipv4(from data: Data) -> String {
     return Data(data.dropFirst(12)).map { String($0) }.joined(separator: ".")

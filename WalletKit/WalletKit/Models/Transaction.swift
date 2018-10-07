@@ -1,5 +1,5 @@
 import Foundation
-import CryptoKit
+import HSCryptoKit
 import RealmSwift
 
 @objc enum TransactionStatus: Int { case new, relayed, invalid }

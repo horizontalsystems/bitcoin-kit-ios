@@ -20,6 +20,8 @@ Pod::Spec.new do |spec|
   spec.pod_target_xcconfig = { 'SWIFT_WHOLE_MODULE_OPTIMIZATION' => 'YES',
                                'APPLICATION_EXTENSION_API_ONLY' => 'YES' }
 
+  spec.dependency 'HSCryptoKit'
+  spec.dependency 'HSHDWalletKit'
   spec.dependency 'Alamofire'
   spec.dependency 'ObjectMapper'
   spec.dependency 'RxSwift'

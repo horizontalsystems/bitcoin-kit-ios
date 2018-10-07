@@ -1,5 +1,5 @@
 import Foundation
-import CryptoKit
+import HSCryptoKit
 
 class MerkleBlock {
     let header: BlockHeader

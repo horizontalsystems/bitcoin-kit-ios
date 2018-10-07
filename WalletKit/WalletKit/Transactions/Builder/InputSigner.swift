@@ -1,5 +1,6 @@
 import Foundation
-import CryptoKit
+import HSCryptoKit
+import HSHDWalletKit
 
 class InputSigner {
     enum SignError: Error {

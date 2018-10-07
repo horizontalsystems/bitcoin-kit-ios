@@ -1,4 +1,5 @@
 import Foundation
+import HSCryptoKit
 
 class TransactionInputSerializer {
 

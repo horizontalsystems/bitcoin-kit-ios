@@ -1,6 +1,6 @@
 import XCTest
 import Cuckoo
-import CryptoKit
+import HSCryptoKit
 @testable import WalletKit
 
 class P2PKExtractorTests: XCTestCase {

@@ -1,5 +1,6 @@
 import Foundation
-import CryptoKit
+import HSCryptoKit
+import HSHDWalletKit
 import RealmSwift
 
 class PublicKey: Object {
@@ -28,6 +29,22 @@ class PublicKey: Object {
 
     override class func primaryKey() -> String? {
         return "keyHashHex"
+    }
+
+}
+
+extension HDWallet {
+
+    func publicKey(index: Int, external: Bool) throws -> PublicKey {
+        return PublicKey(withIndex: index, external: external, hdPublicKey: try publicKey(index: index, chain: external ? .external : .internal))
+    }
+
+    func receivePublicKey(index: Int) throws -> PublicKey {
+        return PublicKey(withIndex: index, external: true, hdPublicKey: try publicKey(index: index, chain: .external))
+    }
+
+    func changePublicKey(index: Int) throws -> PublicKey {
+        return PublicKey(withIndex: index, external: false, hdPublicKey: try publicKey(index: index, chain: .internal))
     }
 
 }

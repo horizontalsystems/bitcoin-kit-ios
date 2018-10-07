@@ -1,5 +1,5 @@
 import Foundation
-import CryptoKit
+import HSCryptoKit
 
 enum ScriptError: Error { case wrongScriptLength, wrongSequence }
 

@@ -1,4 +1,5 @@
 import Foundation
+import HSCryptoKit
 
 struct FilterLoadMessage: IMessage {
     /// The filter itself is simply a bit field of arbitrary byte-aligned size. The maximum size is 36,000 bytes.

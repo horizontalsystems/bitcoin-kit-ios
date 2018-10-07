@@ -1,4 +1,5 @@
 import Foundation
+import HSCryptoKit
 
 class OpCode {
     static let p2pkhStart = Data(bytes: [OpCode.dup, OpCode.hash160])

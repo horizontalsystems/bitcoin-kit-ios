@@ -1,4 +1,5 @@
 import Foundation
+import HSCryptoKit
 
 struct MerkleBlockMessage: IMessage {
     let blockHeader: BlockHeader

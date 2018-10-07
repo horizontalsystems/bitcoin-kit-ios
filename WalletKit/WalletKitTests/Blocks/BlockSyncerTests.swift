@@ -1,6 +1,6 @@
 import XCTest
 import Cuckoo
-import CryptoKit
+import HSCryptoKit
 import RealmSwift
 @testable import WalletKit
 

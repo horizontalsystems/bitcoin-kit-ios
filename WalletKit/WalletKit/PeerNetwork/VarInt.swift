@@ -1,12 +1,5 @@
-//
-//  VarInt.swift
-//  BitcoinKit
-//
-//  Created by Kishikawa Katsumi on 2018/02/11.
-//  Copyright © 2018 Kishikawa Katsumi. All rights reserved.
-//
-
 import Foundation
+import HSCryptoKit
 
 /// Integer can be encoded depending on the represented value to save space.
 /// Variable length integers always precede an array/vector of a type of data that may vary in length.

@@ -1,4 +1,5 @@
 import Foundation
+import HSCryptoKit
 
 struct GetHeadersMessage: IMessage {
     /// the protocol version

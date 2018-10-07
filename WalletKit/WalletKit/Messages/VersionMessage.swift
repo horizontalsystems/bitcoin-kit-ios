@@ -1,4 +1,5 @@
 import Foundation
+import HSCryptoKit
 
 /// When a node creates an outgoing connection, it will immediately advertise its version.
 /// The remote node will respond with its version. No further communication is possible until both peers have exchanged their version.

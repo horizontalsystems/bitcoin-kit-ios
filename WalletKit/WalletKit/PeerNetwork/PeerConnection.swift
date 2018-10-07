@@ -1,4 +1,5 @@
 import Foundation
+import HSHDWalletKit
 
 class PeerConnection: NSObject, StreamDelegate {
     private let bufferSize = 4096

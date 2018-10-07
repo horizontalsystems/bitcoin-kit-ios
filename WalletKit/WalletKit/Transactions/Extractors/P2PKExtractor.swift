@@ -1,5 +1,5 @@
 import Foundation
-import CryptoKit
+import HSCryptoKit
 
 class P2PKExtractor: ScriptExtractor {
     let minimalKeyLength = 3

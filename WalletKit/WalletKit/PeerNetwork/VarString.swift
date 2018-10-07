@@ -1,12 +1,5 @@
-//
-//  VarString.swift
-//  BitcoinKit
-//
-//  Created by Kishikawa Katsumi on 2018/02/11.
-//  Copyright © 2018 Kishikawa Katsumi. All rights reserved.
-//
-
 import Foundation
+import HSCryptoKit
 
 /// Variable length string can be stored using a variable length integer followed by the string itself.
 struct VarString : ExpressibleByStringLiteral {

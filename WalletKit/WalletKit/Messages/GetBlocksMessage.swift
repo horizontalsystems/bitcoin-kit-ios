@@ -1,4 +1,5 @@
 import Foundation
+import HSCryptoKit
 
 struct GetBlocksMessage: IMessage {
     /// the protocol version

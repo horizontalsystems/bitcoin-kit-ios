@@ -1,4 +1,5 @@
 import Foundation
+import HSHDWalletKit
 import RxSwift
 import RealmSwift
 

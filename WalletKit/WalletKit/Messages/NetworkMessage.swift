@@ -1,5 +1,5 @@
 import Foundation
-import CryptoKit
+import HSCryptoKit
 
 struct NetworkMessage {
     /// Magic value indicating message origin network, and used to seek to next message when stream state is unknown
