@@ -10,8 +10,8 @@ project 'WalletKit/WalletKit'
 
 
 def internal_pods
-  pod "HSCryptoKit", git: "https://github.com/horizontalsystems/crypto-kit-ios"
-  pod "HSHDWalletKit", git: "https://github.com/horizontalsystems/hd-wallet-kit-ios"
+  pod "HSCryptoKit"
+  pod "HSHDWalletKit"
 end
 
 def kit_pods
