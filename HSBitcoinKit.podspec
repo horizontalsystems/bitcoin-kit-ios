@@ -1,5 +1,5 @@
 Pod::Spec.new do |spec|
-  spec.name = 'HSBitcointKit'
+  spec.name = 'HSBitcoinKit'
   spec.version = '0.1.0'
   spec.summary = 'Bitcoin wallet library for Swift'
   spec.description = <<-DESC
@@ -13,7 +13,7 @@ Pod::Spec.new do |spec|
 
   spec.requires_arc = true
   spec.source = { git: 'https://github.com/horizontalsystems/bitcoin-kit-ios.git', tag: "v#{spec.version}" }
-  spec.source_files = 'HSBitcointKit/HSBitcointKit/**/*.{h,m,swift}'
+  spec.source_files = 'HSBitcoinKit/HSBitcoinKit/**/*.{h,m,swift}'
   spec.ios.deployment_target = '11.0'
   spec.swift_version = '4.1'
 
