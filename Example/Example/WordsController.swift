@@ -25,12 +25,7 @@ class WordsController: UIViewController {
     }
 
     @IBAction func login() {
-//        let words = textView?.text.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty } ?? []
-
-        let words = ["fossil", "tone", "series", "matrix", "echo", "snap", "prosper", "grit", "depart", "usual", "bird", "worry"] // regtest with few transactions
-//        let words = ["used", "ugly", "meat", "glad", "balance", "divorce", "inner", "artwork", "hire", "invest", "already", "piano"] // mainnet common account
-//        let words = ["market", "crowd", "vault", "speak", "enemy", "suggest", "patrol", "foot", "punch", "cycle", "game", "drip"] // regtest with lots of transactions
-//        let words = ["rather", "cricket", "moon", "movie", "material", "walk", "settle", "glide", "since", "soldier", "exact", "cabbage"] // don't know
+        let words = textView?.text.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty } ?? []
 
         do {
             try Mnemonic.validate(words: words)
