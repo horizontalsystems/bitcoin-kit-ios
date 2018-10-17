@@ -27,8 +27,7 @@ class RelayTransactionPeerTask: PeerTask {
             return false
         }
 
-        completed = true
-        delegate?.handle(task: self)
+        delegate?.handle(completedTask: self)
 
         return true
     }

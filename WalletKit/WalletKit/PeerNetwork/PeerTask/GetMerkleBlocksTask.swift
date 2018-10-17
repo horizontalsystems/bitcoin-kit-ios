@@ -1,25 +1,27 @@
 import Foundation
 
-class RequestMerkleBlocksPeerTask: PeerTask {
+class GetMerkleBlocksTask: PeerTask {
 
-    private var hashes: [Data]
+    var givenBlockHashes: [Data]
+    private var hashesToDownload: [Data]
     private var pendingMerkleBlocks = [MerkleBlock]()
-    var merkleBlocks = [MerkleBlock]()
+    private var nextBlockNotFull = true
 
     init(hashes: [Data]) {
-        self.hashes = hashes
+        self.givenBlockHashes = hashes
+        self.hashesToDownload = hashes
     }
 
     override func start() {
-        let items = hashes.map { hash in
+        let items = hashesToDownload.map { hash in
             InventoryItem(type: InventoryItem.ObjectType.filteredBlockMessage.rawValue, hash: hash)
         }
 
-        requester?.requestData(items: items)
+        requester?.getData(items: items)
     }
 
     override func handle(merkleBlock: MerkleBlock) -> Bool {
-        guard hashes.contains(merkleBlock.headerHash) else {
+        guard hashesToDownload.contains(merkleBlock.headerHash) else {
             return false
         }
 
@@ -50,19 +52,24 @@ class RequestMerkleBlocksPeerTask: PeerTask {
     }
 
     override func isRequestingInventory(hash: Data) -> Bool {
-        return hashes.contains(hash)
+        return hashesToDownload.contains(hash)
     }
 
     private func handle(completeMerkleBlock merkleBlock: MerkleBlock) {
-        if let index = hashes.index(where: { $0 == merkleBlock.headerHash }) {
-            hashes.remove(at: index)
+        if let index = hashesToDownload.index(where: { $0 == merkleBlock.headerHash }) {
+            hashesToDownload.remove(at: index)
         }
 
-        merkleBlocks.append(merkleBlock)
+        do {
+            try delegate?.handle(merkleBlock: merkleBlock, fullBlock: nextBlockNotFull)
+        } catch {
+            if type(of: error) == BlockSyncer.BlockSyncerError.self {
+                nextBlockNotFull = false
+            }
+        }
 
-        if hashes.isEmpty {
-            completed = true
-            delegate?.handle(task: self)
+        if hashesToDownload.isEmpty {
+            delegate?.handle(completedTask: self)
         }
     }
 

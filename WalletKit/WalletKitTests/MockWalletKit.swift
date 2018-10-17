@@ -2,6 +2,7 @@ import Foundation
 import Cuckoo
 import RealmSwift
 @testable import WalletKit
+@testable import HSHDWalletKit
 
 class MockWalletKit {
 
@@ -14,20 +15,19 @@ class MockWalletKit {
 
     let mockRealmFactory: MockRealmFactory
 
-    let mockHdWallet: MockHDWallet
+    let mockHdWallet: HDWallet
 
     let mockStateManager: MockStateManager
     let mockApiManager: MockApiManager
     let mockAddressManager: MockAddressManager
     let mockPeerHostManager: MockPeerHostManager
+    let mockBloomFilterManager: MockBloomFilterManager
 
     let mockPeerGroup: MockPeerGroup
     let mockFactory: MockFactory
 
     let mockInitialSyncer: MockInitialSyncer
     let mockProgressSyncer: MockProgressSyncer
-
-    let mockValidatedBlockFactory: MockValidatedBlockFactory
 
     let mockBech32AddressConverter: MockBech32AddressConverter
     let mockAddressConverter: MockAddressConverter
@@ -38,6 +38,7 @@ class MockWalletKit {
     let mockTransactionSyncer: MockTransactionSyncer
     let mockTransactionCreator: MockTransactionCreator
     let mockTransactionBuilder: MockTransactionBuilder
+    let mockBlockchain: MockBlockchain
 
     let mockInputSigner: MockInputSigner
     let mockScriptBuilder: MockScriptBuilder
@@ -45,7 +46,6 @@ class MockWalletKit {
     let mockUnspentOutputSelector: MockUnspentOutputSelector
     let mockUnspentOutputProvider: MockUnspentOutputProvider
 
-    let mockHeaderSyncer: MockHeaderSyncer
     let mockBlockSyncer: MockBlockSyncer
 
     let realm: Realm
@@ -65,8 +65,17 @@ class MockWalletKit {
         }
 
         mockNetwork = MockNetworkProtocol()
+        mockRealmFactory = MockRealmFactory(configuration: Realm.Configuration())
+
+        let realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
+        try! realm.write { realm.deleteAll() }
+        stub(mockRealmFactory) { mock in
+            when(mock.realm.get).thenReturn(realm)
+        }
+        self.realm = realm
 
         stub(mockNetwork) { mock in
+            when(mock.checkpointBlock.get).thenReturn(TestData.checkpointBlock)
             when(mock.coinType.get).thenReturn(1)
             when(mock.dnsSeeds.get).thenReturn([""])
             when(mock.port.get).thenReturn(0)
@@ -74,28 +83,28 @@ class MockWalletKit {
             when(mock.xPubKey.get).thenReturn(0x043587cf)
         }
 
-        mockRealmFactory = MockRealmFactory(configuration: Realm.Configuration())
-
-        mockHdWallet = MockHDWallet(seed: Data(),coinType: mockNetwork.coinType, xPrivKey: mockNetwork.xPrivKey, xPubKey: mockNetwork.xPubKey)
+        mockHdWallet = HDWallet(seed: Data(),coinType: mockNetwork.coinType, xPrivKey: mockNetwork.xPrivKey, xPubKey: mockNetwork.xPubKey)
 
         mockStateManager = MockStateManager(realmFactory: mockRealmFactory)
         mockApiManager = MockApiManager(apiUrl: "")
         mockPeerHostManager = MockPeerHostManager(network: mockNetwork, realmFactory: mockRealmFactory)
+        mockBloomFilterManager = MockBloomFilterManager(realmFactory: mockRealmFactory)
 
         stub(mockPeerHostManager) { mock in
             when(mock.delegate.set(any())).thenDoNothing()
         }
+        stub(mockBloomFilterManager) { mock in
+            when(mock.delegate.set(any())).thenDoNothing()
+        }
 
-        mockPeerGroup = MockPeerGroup(network: mockNetwork, peerHostManager: mockPeerHostManager, bloomFilters: [Data]())
         mockFactory = MockFactory()
+        mockPeerGroup = MockPeerGroup(factory: mockFactory, network: mockNetwork, peerHostManager: mockPeerHostManager, bloomFilterManager: mockBloomFilterManager)
 
         mockBech32AddressConverter = MockBech32AddressConverter()
         mockAddressConverter = MockAddressConverter(network: mockNetwork, bech32AddressConverter: mockBech32AddressConverter)
-        mockAddressManager = MockAddressManager(realmFactory: mockRealmFactory, hdWallet: mockHdWallet, peerGroup: mockPeerGroup, addressConverter: mockAddressConverter)
+        mockAddressManager = MockAddressManager(realmFactory: mockRealmFactory, hdWallet: mockHdWallet, bloomFilterManager: mockBloomFilterManager, addressConverter: mockAddressConverter)
         mockInitialSyncer = MockInitialSyncer(realmFactory: mockRealmFactory, hdWallet: mockHdWallet, stateManager: mockStateManager, apiManager: mockApiManager, addressManager: mockAddressManager, addressConverter: mockAddressConverter, factory: mockFactory, peerGroup: mockPeerGroup, network: mockNetwork)
         mockProgressSyncer = MockProgressSyncer(realmFactory: mockRealmFactory)
-
-        mockValidatedBlockFactory = MockValidatedBlockFactory(realmFactory: mockRealmFactory, factory: mockFactory, network: mockNetwork)
 
         mockInputSigner = MockInputSigner(hdWallet: mockHdWallet)
         mockScriptBuilder = MockScriptBuilder()
@@ -111,16 +120,9 @@ class MockWalletKit {
         mockTransactionSyncer = MockTransactionSyncer(realmFactory: mockRealmFactory, processor: mockTransactionProcessor)
         mockTransactionBuilder = MockTransactionBuilder(unspentOutputSelector: mockUnspentOutputSelector, unspentOutputProvider: mockUnspentOutputProvider, transactionSizeCalculator: mockTransactionSizeCalculator, addressConverter: mockAddressConverter, inputSigner: mockInputSigner, scriptBuilder: mockScriptBuilder, factory: mockFactory)
         mockTransactionCreator = MockTransactionCreator(realmFactory: mockRealmFactory, transactionBuilder: mockTransactionBuilder, transactionProcessor: mockTransactionProcessor, peerGroup: mockPeerGroup, addressManager: mockAddressManager)
+        mockBlockchain = MockBlockchain(network: mockNetwork, factory: mockFactory)
 
-        mockHeaderSyncer = MockHeaderSyncer(realmFactory: mockRealmFactory, validateBlockFactory: mockValidatedBlockFactory, network: mockNetwork)
-        mockBlockSyncer = MockBlockSyncer(realmFactory: mockRealmFactory, validateBlockFactory: mockValidatedBlockFactory, processor: mockTransactionProcessor, progressSyncer: mockProgressSyncer)
-
-        realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
-        try! realm.write { realm.deleteAll() }
-
-        stub(mockRealmFactory) { mock in
-            when(mock.realm.get).thenReturn(realm)
-        }
+        mockBlockSyncer = MockBlockSyncer(realmFactory: mockRealmFactory, network: mockNetwork, progressSyncer: mockProgressSyncer, transactionProcessor: mockTransactionProcessor, blockchain: mockBlockchain, addressManager: mockAddressManager)
     }
 
 }

@@ -15,7 +15,6 @@ class Logger {
         String(describing: PeerHostManager.self),
         String(describing: InitialSyncer.self),
         String(describing: ProgressSyncer.self),
-        String(describing: HeaderSyncer.self),
         String(describing: BlockSyncer.self),
         String(describing: TransactionSyncer.self),
         String(describing: NetworkMessage.self),

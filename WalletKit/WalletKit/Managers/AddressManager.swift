@@ -8,13 +8,13 @@ class AddressManager {
     private let realmFactory: RealmFactory
     private let hdWallet: HDWallet
     private let addressConverter: AddressConverter
-    private let peerGroup: PeerGroup
+    private let bloomFilterManager: BloomFilterManager
 
-    init(realmFactory: RealmFactory, hdWallet: HDWallet, peerGroup: PeerGroup, addressConverter: AddressConverter) {
+    init(realmFactory: RealmFactory, hdWallet: HDWallet, bloomFilterManager: BloomFilterManager, addressConverter: AddressConverter) {
         self.realmFactory = realmFactory
         self.addressConverter = addressConverter
         self.hdWallet = hdWallet
-        self.peerGroup = peerGroup
+        self.bloomFilterManager = bloomFilterManager
     }
 
     func changePublicKey() throws -> PublicKey {
@@ -25,28 +25,43 @@ class AddressManager {
         return try addressConverter.convert(keyHash: publicKey(chain: .external).keyHash, type: .p2pkh).stringValue
     }
 
-    func generateKeys() throws {
-        try generateKeys(external: true)
-        try generateKeys(external: false)
+    func fillGap(afterExternalKey externalKey: PublicKey? = nil, afterInternalKey internalKey: PublicKey? = nil) throws {
+        try fillGap(external: true, afterKey: externalKey)
+        try fillGap(external: false, afterKey: internalKey)
     }
 
-    private func generateKeys(external: Bool) throws {
-        let realm = realmFactory.realm
-        let publicKeys = realm.objects(PublicKey.self).filter("external = %@", external)
-        var unusedKeysCount = 0
+    func addKeys(keys: [PublicKey]) throws {
+//        guard !keys.isEmpty else {
+//            return
+//        }
 
-        if let lastUsedKey = publicKeys.filter("outputs.@count > 0").sorted(byKeyPath: "index").last {
-            unusedKeysCount = publicKeys.filter("index > %@", lastUsedKey.index).count
-        } else {
-            unusedKeysCount = publicKeys.count
+        let realm = realmFactory.realm
+        try realm.write {
+            realm.add(keys, update: true)
         }
 
+        bloomFilterManager.regenerateBloomFilter()
+    }
+
+    func gapShifts() -> Bool {
+        let realm = realmFactory.realm
+
+        let externalPublicKeys = realm.objects(PublicKey.self).filter("external = %@", true)
+        let internalPublicKeys = realm.objects(PublicKey.self).filter("external = %@", false)
+
+        return gapKeysCount(publicKeyResults: externalPublicKeys) < hdWallet.gapLimit || gapKeysCount(publicKeyResults: internalPublicKeys) < hdWallet.gapLimit
+    }
+
+    private func fillGap(external: Bool, afterKey key: PublicKey?) throws {
+        let realm = realmFactory.realm
+        let publicKeys = realm.objects(PublicKey.self).filter("external = %@", external)
+        let gapKeysCount = self.gapKeysCount(publicKeyResults: publicKeys, afterKey: key)
         var keys = [PublicKey]()
-        if unusedKeysCount < hdWallet.gapLimit {
+        if gapKeysCount < hdWallet.gapLimit {
             let allKeys = publicKeys.sorted(byKeyPath: "index")
             let lastIndex = allKeys.last?.index ?? -1
 
-            for i in 1..<(hdWallet.gapLimit - unusedKeysCount + 1) {
+            for i in 1..<(hdWallet.gapLimit - gapKeysCount + 1) {
                 let publicKey = try hdWallet.publicKey(index: lastIndex + i, external: external)
                 keys.append(publicKey)
             }
@@ -55,16 +70,19 @@ class AddressManager {
         try addKeys(keys: keys)
     }
 
-    func addKeys(keys: [PublicKey]) throws {
-        let realm = realmFactory.realm
+    private func gapKeysCount(publicKeyResults publicKeys: Results<PublicKey>, afterKey key: PublicKey? = nil) -> Int {
+        var gapKeysCount = 0
 
-        try realm.write {
-            realm.add(keys, update: true)
+        if var lastUsedKey = publicKeys.filter("outputs.@count > 0").sorted(byKeyPath: "index").last {
+            if let key = key, lastUsedKey.index < key.index {
+                lastUsedKey = key
+            }
+            gapKeysCount = publicKeys.filter("index > %@", lastUsedKey.index).count
+        } else {
+            gapKeysCount = publicKeys.count
         }
 
-        for key in keys {
-            peerGroup.addPublicKeyFilter(pubKey: key)
-        }
+        return gapKeysCount
     }
 
     private func publicKey(chain: HDWallet.Chain) throws -> PublicKey {
@@ -81,7 +99,7 @@ class AddressManager {
         try realm.write {
             realm.add(newKey)
         }
-        peerGroup.addPublicKeyFilter(pubKey: newKey)
+        bloomFilterManager.regenerateBloomFilter()
 
         return newKey
     }

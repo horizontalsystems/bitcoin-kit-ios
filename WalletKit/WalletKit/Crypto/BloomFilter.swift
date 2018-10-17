@@ -12,14 +12,24 @@ struct BloomFilter {
     let nHashFuncs: UInt32
     let nTweak: UInt32
     let size: UInt32
+    let nFlag: UInt8 = 2
+    var filter: [UInt8]
 
-    private var filter: [UInt8]
     var data: Data {
         return Data(filter)
     }
 
     let MAX_FILTER_SIZE: UInt32 = 36000
     let MAX_HASH_FUNCS: UInt32 = 50
+
+    init(elements: [Data]) {
+        let nTweak = arc4random_uniform(UInt32.max)
+        self.init(elements: elements.count, falsePositiveRate: 0.00005, randomNonce: nTweak)
+
+        for element in elements {
+            self.insert(element)
+        }
+    }
 
     init(elements: Int, falsePositiveRate: Double, randomNonce nTweak: UInt32) {
         self.size = max(1, min(UInt32(-1.0 / pow(log(2), 2) * Double(elements) * log(falsePositiveRate)), MAX_FILTER_SIZE * 8) / 8)

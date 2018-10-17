@@ -11,6 +11,13 @@ struct GetBlocksMessage: IMessage {
     /// hash of the last desired block; set to zero to get as many blocks as possible (500)
     let hashStop: Data
 
+    init(protocolVersion: Int32, headerHashes: [Data]) {
+        version = UInt32(protocolVersion)
+        hashCount = VarInt(headerHashes.count)
+        blockLocatorHashes = headerHashes
+        hashStop = Data(count: 32)
+    }
+
     init(data: Data) {
         version = 0
         hashCount = 0
@@ -28,4 +35,5 @@ struct GetBlocksMessage: IMessage {
         data += hashStop
         return data
     }
+
 }

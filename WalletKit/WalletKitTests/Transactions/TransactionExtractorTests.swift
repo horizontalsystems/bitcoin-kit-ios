@@ -11,6 +11,7 @@ class TransactionExtractorTests: XCTestCase {
     private var p2sh: MockP2SHExtractor!
     private var addressConverter: MockAddressConverter!
     private var scriptConverter: MockScriptConverter!
+    private var realm: Realm!
     private var inputExtractors: [ScriptExtractor]!
     private var outputExtractors: [ScriptExtractor]!
     private var extractor: TransactionExtractor!
@@ -30,6 +31,7 @@ class TransactionExtractorTests: XCTestCase {
         p2sh = MockP2SHExtractor()
         addressConverter = MockAddressConverter(network: BitcoinTestNet(validatorFactory: mockWalletKit.mockValidatorFactory), bech32AddressConverter: SegWitBech32AddressConverter())
         scriptConverter = MockScriptConverter()
+        realm = mockWalletKit.realm
 
         inputExtractors = [pfromsh]
         outputExtractors = [p2pkh, p2pk, p2sh]
@@ -70,6 +72,7 @@ class TransactionExtractorTests: XCTestCase {
         outputExtractors = nil
         addressConverter = nil
         scriptConverter = nil
+        realm = nil
 
         pfromsh = nil
         p2pkh = nil
@@ -88,7 +91,7 @@ class TransactionExtractorTests: XCTestCase {
         stub(p2pkh) { mock in
             when(mock.extract(from: any(), converter: any())).thenReturn(keyHash)
         }
-        extractor.extract(transaction: p2pkhTransaction)
+        extractor.extract(transaction: p2pkhTransaction, realm: realm)
 
         if let testHash = p2pkhTransaction.outputs[0].keyHash {
             XCTAssertEqual(testHash, keyHash)
@@ -105,7 +108,7 @@ class TransactionExtractorTests: XCTestCase {
             when(mock.extract(from: any(), converter: any())).thenReturn(keyHash)
         }
 
-        extractor.extract(transaction: p2pkTransaction)
+        extractor.extract(transaction: p2pkTransaction, realm: realm)
 
         if let testHash = p2pkTransaction.outputs[0].keyHash {
             XCTAssertEqual(testHash, keyHash)
@@ -122,7 +125,7 @@ class TransactionExtractorTests: XCTestCase {
             when(mock.extract(from: any(), converter: any())).thenReturn(keyHash)
         }
 
-        extractor.extract(transaction: p2shTransaction)
+        extractor.extract(transaction: p2shTransaction, realm: realm)
 
         if let testHash = p2shTransaction.outputs[0].keyHash {
             XCTAssertEqual(testHash, keyHash)
@@ -143,7 +146,7 @@ class TransactionExtractorTests: XCTestCase {
             when(mock.convert(keyHash: any(), type: any())).thenReturn(LegacyAddress(type: .pubKeyHash, keyHash: Data(), base58: address))
         }
 
-        extractor.extract(transaction: p2pkhTransaction)
+        extractor.extract(transaction: p2pkhTransaction, realm: realm)
 
         if let assignedAddress = p2pkhTransaction.outputs[0].address {
             XCTAssertEqual(assignedAddress, address)

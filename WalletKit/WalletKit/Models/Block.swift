@@ -8,8 +8,6 @@ class Block: Object {
     @objc dynamic var reversedHeaderHashHex = ""
     @objc dynamic var headerHash = Data()
     @objc dynamic var height: Int = 0
-    @objc dynamic var synced: Bool = false
-
     @objc dynamic var header: BlockHeader?
     @objc dynamic var previousBlock: Block?
 

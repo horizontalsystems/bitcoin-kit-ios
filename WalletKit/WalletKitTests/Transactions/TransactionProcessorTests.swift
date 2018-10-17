@@ -26,10 +26,10 @@ class TransactionProcessorTests: XCTestCase {
             when(mock.handle(transaction: any(), realm: any())).thenDoNothing()
         }
         stub(mockExtractor) { mock in
-            when(mock.extract(transaction: any())).thenDoNothing()
+            when(mock.extract(transaction: any(), realm: any())).thenDoNothing()
         }
         stub(mockAddressManager) { mock in
-            when(mock.generateKeys()).thenDoNothing()
+            when(mock.fillGap(afterExternalKey: any(), afterInternalKey: any())).thenDoNothing()
         }
 
         transactionProcessor = TransactionProcessor(realmFactory: mockWalletKit.mockRealmFactory, extractor: mockExtractor, linker: mockLinker, addressManager: mockAddressManager, queue: DispatchQueue.main)
@@ -60,13 +60,13 @@ class TransactionProcessorTests: XCTestCase {
 
         waitForMainQueue()
 
-        verify(mockExtractor).extract(transaction: equal(to: transaction))
-        verify(mockExtractor, never()).extract(transaction: equal(to: processedTransaction))
+        verify(mockExtractor).extract(transaction: equal(to: transaction), realm: any())
+        verify(mockExtractor, never()).extract(transaction: equal(to: processedTransaction), realm: any())
 
         verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
         verify(mockLinker, never()).handle(transaction: equal(to: processedTransaction), realm: equal(to: realm))
 
-        verify(mockAddressManager).generateKeys()
+        verify(mockAddressManager).fillGap(afterExternalKey: any(), afterInternalKey: any())
 
         XCTAssertEqual(transaction.processed, true)
     }

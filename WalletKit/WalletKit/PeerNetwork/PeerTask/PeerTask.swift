@@ -5,8 +5,6 @@ class PeerTask {
     weak var requester: IPeerTaskRequester?
     weak var delegate: IPeerTaskDelegate?
 
-    var completed: Bool = false
-
     func start() {
     }
 
@@ -26,7 +24,7 @@ class PeerTask {
         return false
     }
 
-    func handle(inventoryItem item: InventoryItem) -> Bool {
+    func handle(items: [InventoryItem]) -> Bool {
         return false
     }
 
@@ -38,15 +36,20 @@ class PeerTask {
         return false
     }
 
+    func handle(pongNonce: UInt64) -> Bool {
+        return false
+    }
 }
 
 protocol IPeerTaskDelegate: class {
-    func handle(task: PeerTask)
+    func handle(completedTask task: PeerTask)
+    func handle(merkleBlock: MerkleBlock, fullBlock: Bool) throws
 }
 
 protocol IPeerTaskRequester: class {
-    func requestHeaders(hashes: [Data])
-    func requestData(items: [InventoryItem])
+    func ping(nonce: UInt64)
+    func getBlocks(hashes: [Data])
+    func getData(items: [InventoryItem])
     func sendTransactionInventory(hash: Data)
     func send(transaction: Transaction)
 }

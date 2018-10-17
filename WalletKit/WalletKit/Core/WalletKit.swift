@@ -36,14 +36,13 @@ public class WalletKit {
     let stateManager: StateManager
     let apiManager: ApiManager
     let addressManager: AddressManager
+    let bloomFilterManager: BloomFilterManager
 
     let peerGroup: PeerGroup
     let factory: Factory
 
     let initialSyncer: InitialSyncer
     let progressSyncer: ProgressSyncer
-
-    let validatedBlockFactory: ValidatedBlockFactory
 
     let bech32AddressConverter: Bech32AddressConverter
     let addressConverter: AddressConverter
@@ -54,6 +53,7 @@ public class WalletKit {
     let transactionSyncer: TransactionSyncer
     let transactionCreator: TransactionCreator
     let transactionBuilder: TransactionBuilder
+    let blockchain: Blockchain
 
     let inputSigner: InputSigner
     let scriptBuilder: ScriptBuilder
@@ -61,7 +61,6 @@ public class WalletKit {
     let unspentOutputSelector: UnspentOutputSelector
     let unspentOutputProvider: UnspentOutputProvider
 
-    let headerSyncer: HeaderSyncer
     let blockSyncer: BlockSyncer
 
     public init(withWords words: [String], networkType: NetworkType) {
@@ -101,20 +100,15 @@ public class WalletKit {
         apiManager = ApiManager(apiUrl: "http://ipfs.grouvi.org/ipns/QmVefrf2xrWzGzPpERF6fRHeUTh9uVSyfHHh4cWgUBnXpq/io-hs/data/blockstore")
         peerHostManager = PeerHostManager(network: network, realmFactory: realmFactory)
 
-        let realm = realmFactory.realm
-        let pubKeys = realm.objects(PublicKey.self)
-        let filters = Array(pubKeys.map { $0.keyHash }) + Array(pubKeys.map { $0.raw! })
-
-        peerGroup = PeerGroup(network: network, peerHostManager: peerHostManager, bloomFilters: filters)
         factory = Factory()
+        bloomFilterManager = BloomFilterManager(realmFactory: realmFactory)
+        peerGroup = PeerGroup(factory: factory, network: network, peerHostManager: peerHostManager, bloomFilterManager: bloomFilterManager)
 
         addressConverter = AddressConverter(network: network, bech32AddressConverter: bech32AddressConverter)
 
-        addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, peerGroup: peerGroup, addressConverter: addressConverter)
+        addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, bloomFilterManager: bloomFilterManager, addressConverter: addressConverter)
         initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, apiManager: apiManager, addressManager: addressManager, addressConverter: addressConverter, factory: factory, peerGroup: peerGroup, network: network)
         progressSyncer = ProgressSyncer(realmFactory: realmFactory)
-
-        validatedBlockFactory = ValidatedBlockFactory(realmFactory: realmFactory, factory: factory, network: network)
 
         inputSigner = InputSigner(hdWallet: hdWallet)
         scriptBuilder = ScriptBuilder()
@@ -130,11 +124,10 @@ public class WalletKit {
         transactionSyncer = TransactionSyncer(realmFactory: realmFactory, processor: transactionProcessor)
         transactionBuilder = TransactionBuilder(unspentOutputSelector: unspentOutputSelector, unspentOutputProvider: unspentOutputProvider, transactionSizeCalculator: transactionSizeCalculator, addressConverter: addressConverter, inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory)
         transactionCreator = TransactionCreator(realmFactory: realmFactory, transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, peerGroup: peerGroup, addressManager: addressManager)
+        blockchain = Blockchain(network: network, factory: factory)
 
-        headerSyncer = HeaderSyncer(realmFactory: realmFactory, validateBlockFactory: validatedBlockFactory, network: network)
-        blockSyncer = BlockSyncer(realmFactory: realmFactory, validateBlockFactory: validatedBlockFactory, processor: transactionProcessor, progressSyncer: progressSyncer)
+        blockSyncer = BlockSyncer(realmFactory: realmFactory, network: network, progressSyncer: progressSyncer, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager)
 
-        peerGroup.headersSyncer = headerSyncer
         peerGroup.blockSyncer = blockSyncer
         peerGroup.transactionSyncer = transactionSyncer
 
@@ -155,6 +148,7 @@ public class WalletKit {
         })
 
         progressSyncer.enqueueRun()
+        bloomFilterManager.regenerateBloomFilter()
     }
 
     deinit {
@@ -167,7 +161,7 @@ public class WalletKit {
         let realm = realmFactory.realm
 
         let blocks = realm.objects(Block.self).sorted(byKeyPath: "height")
-        let syncedBlocks = blocks.filter("synced = %@", true)
+        let syncedBlocks = blocks
         let pubKeys = realm.objects(PublicKey.self)
 
         for pubKey in pubKeys {
@@ -273,7 +267,7 @@ public class WalletKit {
     }
 
     private var blockRealmResults: Results<Block> {
-        return realmFactory.realm.objects(Block.self).filter("synced = %@", true).sorted(byKeyPath: "height")
+        return realmFactory.realm.objects(Block.self).sorted(byKeyPath: "height")
     }
 
     private func transactionInfo(fromTransaction transaction: Transaction) -> TransactionInfo {
