@@ -165,7 +165,9 @@ public class WalletKit {
         let pubKeys = realm.objects(PublicKey.self)
 
         for pubKey in pubKeys {
-            print("\(pubKey.index) --- \(pubKey.external) --- \(pubKey.keyHash.hex) --- \(addressConverter.convertToLegacy(keyHash: pubKey.keyHash, version: network.pubKeyHash, addressType: .pubKeyHash).stringValue) --- \(try! addressConverter.convert(keyHash: pubKey.keyHash, type: .p2wpkh).stringValue)")
+            let scriptType: ScriptType = (network is BitcoinCashMainNet || network is BitcoinCashTestNet) ? .p2pkh : .p2wpkh
+            let bechAddress = (try? addressConverter.convert(keyHash: pubKey.keyHash, type: scriptType).stringValue) ?? "none"
+            print("\(pubKey.index) --- \(pubKey.external) --- \(pubKey.keyHash.hex) --- \(addressConverter.convertToLegacy(keyHash: pubKey.keyHash, version: network.pubKeyHash, addressType: .pubKeyHash).stringValue) --- \(bechAddress)")
         }
         print("PUBLIC KEYS COUNT: \(pubKeys.count)")
 
@@ -273,8 +275,8 @@ public class WalletKit {
     private func transactionInfo(fromTransaction transaction: Transaction) -> TransactionInfo {
         var totalMineInput: Int = 0
         var totalMineOutput: Int = 0
-        var fromAddresses = [TransactionAddress]()
-        var toAddresses = [TransactionAddress]()
+        var fromAddresses = [TransactionAddressInfo]()
+        var toAddresses = [TransactionAddressInfo]()
 
         for input in transaction.inputs {
             if let previousOutput = input.previousOutput {
@@ -286,7 +288,7 @@ public class WalletKit {
             let mine = input.previousOutput?.publicKey != nil
 
             if let address = input.address {
-                fromAddresses.append(TransactionAddress(address: address, mine: mine))
+                fromAddresses.append(TransactionAddressInfo(address: address, mine: mine))
             }
         }
 
@@ -299,7 +301,7 @@ public class WalletKit {
             }
 
             if let address = output.address {
-                toAddresses.append(TransactionAddress(address: address, mine: mine))
+                toAddresses.append(TransactionAddressInfo(address: address, mine: mine))
             }
         }
 
