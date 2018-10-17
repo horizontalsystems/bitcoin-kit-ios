@@ -5,6 +5,7 @@ import RxSwift
 class ProgressSyncer {
     private let realmFactory: RealmFactory
     private let queue: DispatchQueue
+    var lastBlockHeight: Int = 0
 
     let subject = PublishSubject<Double>()
 
@@ -31,11 +32,9 @@ class ProgressSyncer {
 
     private func run() throws {
         let realm = realmFactory.realm
+        let blocksCount = realm.objects(Block.self).count
 
-        let allBlocksCount = realm.objects(Block.self).count
-        let syncedBlocksCount = realm.objects(Block.self).filter("synced = %@", true).count
-
-        progress = allBlocksCount == 0 ? 0 : Double(syncedBlocksCount) / Double(allBlocksCount)
+        progress = lastBlockHeight == 0 ? 0 : Double(blocksCount) / Double(lastBlockHeight)
     }
 
 }

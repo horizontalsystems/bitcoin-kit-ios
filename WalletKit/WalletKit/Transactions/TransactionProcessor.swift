@@ -27,6 +27,12 @@ class TransactionProcessor {
         }
     }
 
+    func process(transaction: Transaction, realm: Realm) {
+        extractor.extract(transaction: transaction, realm: realm)
+        linker.handle(transaction: transaction, realm: realm)
+        transaction.processed = true
+    }
+
     private func run() throws {
         let realm = realmFactory.realm
 
@@ -35,13 +41,11 @@ class TransactionProcessor {
         if !unprocessedTransactions.isEmpty {
             try realm.write {
                 for transaction in unprocessedTransactions {
-                    extractor.extract(transaction: transaction)
-                    linker.handle(transaction: transaction, realm: realm)
-                    transaction.processed = true
+                    process(transaction: transaction, realm: realm)
                 }
             }
 
-            try addressManager.generateKeys()
+            try addressManager.fillGap()
         }
     }
 

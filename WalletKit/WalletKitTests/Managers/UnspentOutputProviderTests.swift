@@ -68,38 +68,38 @@ class UnspentOutputProviderTests: XCTestCase {
         XCTAssertEqual(unspentOutputs.count, 0)
     }
 
-    func testEmptyValidScriptOutputs() {
-        outputs.forEach {
-            $0.publicKey = pubKey
-            $0.scriptType = .p2sh
-        }
-        let transaction = Transaction(version: 0, inputs: [], outputs: outputs)
-        try? realm.write {
-            realm.add(transaction, update: true)
-        }
-        let inputTransaction = Transaction(version: 0, inputs: inputsWithPreviousOutputs(range: 0..<1), outputs: [])
-        try? realm.write {
-            realm.add(inputTransaction, update: true)
-        }
-        let unspentOutputs = unspentOutputProvider.allUnspentOutputs()
-        XCTAssertEqual(unspentOutputs.count, 0)
-    }
+//    func testEmptyValidScriptOutputs() {
+//        outputs.forEach {
+//            $0.publicKey = pubKey
+//            $0.scriptType = .p2sh
+//        }
+//        let transaction = Transaction(version: 0, inputs: [], outputs: outputs)
+//        try? realm.write {
+//            realm.add(transaction, update: true)
+//        }
+//        let inputTransaction = Transaction(version: 0, inputs: inputsWithPreviousOutputs(range: 0..<1), outputs: [])
+//        try? realm.write {
+//            realm.add(inputTransaction, update: true)
+//        }
+//        let unspentOutputs = unspentOutputProvider.allUnspentOutputs()
+//        XCTAssertEqual(unspentOutputs.count, 0)
+//    }
 
-    func testEmptyValidInputOutputs() {
-        outputs.forEach {
-            $0.publicKey = pubKey
-        }
-        let transaction = Transaction(version: 0, inputs: [], outputs: outputs)
-        try? realm.write {
-            realm.add(transaction, update: true)
-        }
-        let inputTransaction = Transaction(version: 0, inputs: inputsWithPreviousOutputs(range: 0..<4), outputs: [])
-        try? realm.write {
-            realm.add(inputTransaction, update: true)
-        }
-        let unspentOutputs = unspentOutputProvider.allUnspentOutputs()
-        XCTAssertEqual(unspentOutputs.count, 0)
-    }
+//    func testEmptyValidInputOutputs() {
+//        outputs.forEach {
+//            $0.publicKey = pubKey
+//        }
+//        let transaction = Transaction(version: 0, inputs: [], outputs: outputs)
+//        try? realm.write {
+//            realm.add(transaction, update: true)
+//        }
+//        let inputTransaction = Transaction(version: 0, inputs: inputsWithPreviousOutputs(range: 0..<4), outputs: [])
+//        try? realm.write {
+//            realm.add(inputTransaction, update: true)
+//        }
+//        let unspentOutputs = unspentOutputProvider.allUnspentOutputs()
+//        XCTAssertEqual(unspentOutputs.count, 0)
+//    }
 
     private func inputsWithPreviousOutputs(range: Range<Int>) -> [TransactionInput] {
         let transaction = outputs[0].transaction!

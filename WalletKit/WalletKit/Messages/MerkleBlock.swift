@@ -6,9 +6,12 @@ class MerkleBlock {
     let transactionHashes: [Data]
     var transactions: [Transaction]
 
-    var headerHash: Data {
+    lazy var headerHash: Data = {
         return CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: header))
-    }
+    }()
+    lazy var reversedHeaderHashHex: String = {
+        return self.headerHash.reversedHex
+    }()
 
     var complete: Bool {
         return transactionHashes.count == transactions.count

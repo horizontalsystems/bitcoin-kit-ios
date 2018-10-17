@@ -14,7 +14,7 @@ class RequestTransactionsPeerTask: PeerTask {
             InventoryItem(type: InventoryItem.ObjectType.transaction.rawValue, hash: hash)
         }
 
-        requester?.requestData(items: items)
+        requester?.getData(items: items)
     }
 
     override func handle(transaction: Transaction) -> Bool {
@@ -26,8 +26,7 @@ class RequestTransactionsPeerTask: PeerTask {
         transactions.append(transaction)
 
         if hashes.isEmpty {
-            completed = true
-            delegate?.handle(task: self)
+            delegate?.handle(completedTask: self)
         }
 
         return true

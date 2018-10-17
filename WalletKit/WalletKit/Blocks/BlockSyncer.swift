@@ -4,128 +4,173 @@ import RealmSwift
 
 class BlockSyncer {
 
-    private let realmFactory: RealmFactory
-    private let validateBlockFactory: ValidatedBlockFactory
-    private let processor: TransactionProcessor
-    private let progressSyncer: ProgressSyncer
-    private let queue: DispatchQueue
-
-    init(realmFactory: RealmFactory, validateBlockFactory: ValidatedBlockFactory, processor: TransactionProcessor, progressSyncer: ProgressSyncer, queue: DispatchQueue = DispatchQueue(label: "BlockSyncer", qos: .userInitiated)) {
-        self.realmFactory = realmFactory
-        self.validateBlockFactory = validateBlockFactory
-        self.processor = processor
-        self.progressSyncer = progressSyncer
-        self.queue = queue
+    enum BlockSyncerError: Error {
+        case nextBlockNotFull
     }
 
-    func _handle(merkleBlocks: [MerkleBlock]) throws {
+    private let realmFactory: RealmFactory
+    private let network: NetworkProtocol
+    private let progressSyncer: ProgressSyncer
+    private let transactionProcessor: TransactionProcessor
+    private let blockchain: Blockchain
+    private let addressManager: AddressManager
+
+    private let hashCheckpointThreshold: Int
+
+    init(realmFactory: RealmFactory, network: NetworkProtocol, progressSyncer: ProgressSyncer,
+         transactionProcessor: TransactionProcessor, blockchain: Blockchain, addressManager: AddressManager,
+         hashCheckpointThreshold: Int = 100) {
+        self.realmFactory = realmFactory
+        self.network = network
+        self.progressSyncer = progressSyncer
+        self.transactionProcessor = transactionProcessor
+        self.blockchain = blockchain
+        self.addressManager = addressManager
+        self.hashCheckpointThreshold = hashCheckpointThreshold
+
+        let realm = realmFactory.realm
+        if realm.objects(Block.self).count == 0, let checkpointBlockHeader = network.checkpointBlock.header {
+            let checkpointBlock = Block(withHeader: checkpointBlockHeader, height: network.checkpointBlock.height)
+            try? realm.write {
+                realm.add(checkpointBlock)
+            }
+        }
+    }
+
+    func getBlockHashes() -> [Data] {
+        let realm = realmFactory.realm
+        let blockHashes = realm.objects(BlockHash.self).sorted(byKeyPath: "order")
+
+        return blockHashes.prefix(500).map { blockHash in blockHash.headerHash }
+    }
+
+    // We need to clear block hashes when sync peer is disconnected
+    func clearBlockHashes() {
         let realm = realmFactory.realm
 
-        var hasNewTransactions = false
-        var hasNewSyncedBlocks = false
+        try? realm.write {
+            realm.delete(realm.objects(BlockHash.self).filter("height = 0"))
+        }
+    }
+
+    func getBlockLocatorHashes() -> [Data] {
+        let realm = realmFactory.realm
+        var blockLocatorHashes = [Data]()
+
+        if let lastBlockHash = realm.objects(BlockHash.self).filter("height = 0").sorted(byKeyPath: "order").last {
+            blockLocatorHashes.append(lastBlockHash.headerHash)
+        }
+
+        if blockLocatorHashes.isEmpty {
+            realm.objects(Block.self).sorted(byKeyPath: "height", ascending: false).prefix(10).forEach { block in
+                blockLocatorHashes.append(block.headerHash)
+            }
+        }
+
+        blockLocatorHashes.append(network.checkpointBlock.headerHash)
+
+        return blockLocatorHashes
+    }
+
+    func add(blockHashes: [Data]) {
+        let realm = realmFactory.realm
+        var lastOrder = 0
+
+        if let lastHash = realm.objects(BlockHash.self).sorted(byKeyPath: "order").last {
+            lastOrder = lastHash.order
+        }
+
+        var hashes = [BlockHash]()
+        for hash in blockHashes {
+            lastOrder = lastOrder + 1
+            hashes.append(BlockHash(withHeaderHash: hash, height: 0, order: lastOrder))
+        }
+
+        try? realm.write {
+            realm.add(hashes)
+        }
+    }
+
+    func handle(merkleBlock: MerkleBlock, fullBlock: Bool) throws {
+        let realm = realmFactory.realm
+
+        guard let block = try blockchain.connect(merkleBlock: merkleBlock, realm: realm) else {
+            return
+        }
+
+        var newUnspentOutput = false
+
+        try? realm.write {
+            realm.add(block)
+
+            for transaction in merkleBlock.transactions {
+                transactionProcessor.process(transaction: transaction, realm: realm)
+
+                if transaction.isMine {
+                    transaction.block = block
+
+                    if let existingTransaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", transaction.reversedHashHex).first {
+                        existingTransaction.status = .relayed
+                    } else {
+                        realm.add(transaction)
+                    }
+
+                    if fullBlock && !newUnspentOutput {
+                        for output in transaction.outputs {
+                            if output.scriptType == .p2wpkh {
+                                newUnspentOutput = true
+                            }
+                        }
+                    }
+                }
+            }
+
+            if fullBlock, let headerHash = realm.objects(BlockHash.self).filter("headerHash = %@", block.headerHash).first {
+                realm.delete(headerHash)
+            }
+        }
+
+        if fullBlock && (addressManager.gapShifts() || newUnspentOutput) {
+            throw BlockSyncerError.nextBlockNotFull
+        }
+    }
+
+    func merkleBlocksDownloadCompleted() throws {
+        try addressManager.fillGap()
+
+        let realm = realmFactory.realm
+        guard let blockHash = realm.objects(BlockHash.self).filter("height = 0").sorted(byKeyPath: "order").first else {
+            return
+        }
+        
+        var block = realm.objects(Block.self).filter("headerHash = %@", blockHash.headerHash).first
 
         try realm.write {
-            for merkleBlock in merkleBlocks {
-                let blockHeader = merkleBlock.header
-                let transactions = merkleBlock.transactions
+            while let resolvedBlock = block {
+                block = nil
+                let blockHash = resolvedBlock.headerHash
 
-                let reversedHashHex = CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: blockHeader)).reversedHex
-
-                if let existingBlock = realm.objects(Block.self).filter("reversedHeaderHashHex = %@", reversedHashHex).last {
-                    if existingBlock.synced {
-                        return
+                for transaction in resolvedBlock.transactions {
+                    for output in transaction.outputs {
+                        realm.delete(output)
                     }
-
-                    if existingBlock.header == nil {
-                        existingBlock.header = blockHeader
+                    for input in transaction.inputs {
+                        realm.delete(input)
                     }
+                    realm.delete(transaction)
+                }
+                realm.delete(resolvedBlock)
 
-                    for transaction in transactions {
-                        if let existingTransaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", transaction.reversedHashHex).first {
-                            existingTransaction.block = existingBlock
-                            existingTransaction.status = .relayed
-                        } else {
-                            realm.add(transaction)
-                            transaction.block = existingBlock
-                            hasNewTransactions = true
-                        }
-                    }
-
-                    existingBlock.synced = true
-                    hasNewSyncedBlocks = true
-                } else {
-                    let block = try validateBlockFactory.block(fromHeader: blockHeader)
-
-                    block.synced = true
-
-                    realm.add(block)
-
-                    for transaction in transactions {
-                        if let existingTransaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", transaction.reversedHashHex).first {
-                            existingTransaction.block = block
-                            existingTransaction.status = .relayed
-                        } else {
-                            realm.add(transaction)
-                            transaction.block = block
-                            hasNewTransactions = true
-                        }
-                    }
-
-                    hasNewSyncedBlocks = true
+                if let blockHeader = realm.objects(BlockHeader.self).filter("previousBlockHeaderHash = %@", blockHash).first {
+                    block = realm.objects(Block.self).filter("header = %@", blockHeader).first
                 }
             }
         }
-
-        if hasNewTransactions {
-            processor.enqueueRun()
-        }
-
-        if hasNewSyncedBlocks {
-            progressSyncer.enqueueRun()
-        }
     }
 
-}
-
-extension BlockSyncer: IBlockSyncer {
-
-    func getHashes(afterHash hash: Data?, limit: Int) -> [Data] {
+    func shouldRequestBlock(withHash hash: Data) -> Bool {
         let realm = realmFactory.realm
-        realm.refresh()
-
-        let pendingBlocks: Results<Block>
-
-        if let hash = hash, let block = realm.objects(Block.self).filter("headerHash = %@", hash).first {
-            pendingBlocks = realm.objects(Block.self).filter("synced = %@ AND height > %@", false, block.height).sorted(byKeyPath: "height")
-        } else {
-            pendingBlocks = realm.objects(Block.self).filter("synced = %@", false).sorted(byKeyPath: "height")
-        }
-
-        let count = min(pendingBlocks.count, limit)
-        return pendingBlocks.prefix(count).map { $0.headerHash }
+        return realm.objects(Block.self).filter("headerHash == %@", hash).count == 0
     }
-
-    func handle(merkleBlocks: [MerkleBlock]) {
-        queue.async {
-            do {
-                try self._handle(merkleBlocks: merkleBlocks)
-            } catch {
-                Logger.shared.log(self, "Handle Error: \(error)")
-            }
-        }
-    }
-
-    func shouldRequestBlock(hash: Data) -> Bool {
-        let realm = realmFactory.realm
-        return realm.objects(Block.self).filter("reversedHeaderHashHex = %@", hash.reversedHex).isEmpty
-    }
-
-}
-
-protocol IBlockSyncer: class {
-
-    func getHashes(afterHash hash: Data?, limit: Int) -> [Data]
-    func handle(merkleBlocks: [MerkleBlock])
-    func shouldRequestBlock(hash: Data) -> Bool
 
 }

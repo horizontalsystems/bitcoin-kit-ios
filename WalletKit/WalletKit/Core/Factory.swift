@@ -26,4 +26,11 @@ class Factory {
         return TransactionOutput(withValue: value, index: index, lockingScript: script, type: type, address: address, keyHash: keyHash, publicKey: publicKey)
     }
 
+    func peer(withHost host: String, network: NetworkProtocol) -> Peer {
+        return Peer(host: host, network: network)
+    }
+
+    func blockHash(withHeaderHash headerHash: Data, height: Int) -> BlockHash {
+        return BlockHash(withHeaderHash: headerHash, height: height)
+    }
 }

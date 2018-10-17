@@ -2,36 +2,23 @@ import Foundation
 import HSCryptoKit
 
 struct FilterLoadMessage: IMessage {
-    /// The filter itself is simply a bit field of arbitrary byte-aligned size. The maximum size is 36,000 bytes.
-    let filter: Data
-    /// The number of hash functions to use in this filter. The maximum value allowed in this field is 50.
-    let nHashFuncs: UInt32
-    /// A random value to add to the seed value in the hash function used by the bloom filter.
-    let nTweak: UInt32
-    /// A set of flags that control how matched items are added to the filter.
-    let nFlags: UInt8
+    let bloomFilter: BloomFilter
 
-    init(filter: Data, nHashFuncs: UInt32, nTweak: UInt32, nFlags: UInt8) {
-        self.filter = filter
-        self.nHashFuncs = nHashFuncs
-        self.nTweak = nTweak
-        self.nFlags = nFlags
+    init(bloomFilter: BloomFilter) {
+        self.bloomFilter = bloomFilter
     }
 
     init(data: Data) {
-        filter = Data()
-        nHashFuncs = 0
-        nTweak = 0
-        nFlags = 0
+        self.bloomFilter = BloomFilter(elements: [Data]())
     }
 
     func serialized() -> Data {
         var data = Data()
-        data += VarInt(filter.count).serialized()
-        data += filter
-        data += nHashFuncs
-        data += nTweak
-        data += nFlags
+        data += VarInt(bloomFilter.filter.count).serialized()
+        data += bloomFilter.filter
+        data += bloomFilter.nHashFuncs
+        data += bloomFilter.nTweak
+        data += bloomFilter.nFlag
         return data
     }
 

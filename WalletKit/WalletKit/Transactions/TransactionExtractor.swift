@@ -1,3 +1,4 @@
+import RealmSwift
 import Foundation
 import HSCryptoKit
 
@@ -25,7 +26,7 @@ class TransactionExtractor {
         self.addressConverter = addressConverter
     }
 
-    func extract(transaction: Transaction) {
+    func extract(transaction: Transaction, realm: Realm) {
         transaction.outputs.forEach { output in
             for extractor in scriptOutputExtractors {
                 do {
@@ -41,6 +42,11 @@ class TransactionExtractor {
 
             if let keyHash = output.keyHash, let address = try? addressConverter.convert(keyHash: keyHash, type: output.scriptType) {
                 output.address = address.stringValue
+
+                if !keyHash.isEmpty, let pubKey = realm.objects(PublicKey.self).filter("keyHash = %@", keyHash).first {
+                    transaction.isMine = true
+                    output.publicKey = pubKey
+                }
             }
         }
 
