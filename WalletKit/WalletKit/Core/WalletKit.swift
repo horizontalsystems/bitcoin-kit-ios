@@ -171,7 +171,9 @@ public class WalletKit {
         let pubKeys = realm.objects(PublicKey.self)
 
         for pubKey in pubKeys {
-            print("\(pubKey.index) --- \(pubKey.external) --- \(pubKey.keyHash.hex) --- \(addressConverter.convertToLegacy(keyHash: pubKey.keyHash, version: network.pubKeyHash, addressType: .pubKeyHash).stringValue) --- \(try! addressConverter.convert(keyHash: pubKey.keyHash, type: .p2wpkh).stringValue)")
+            let scriptType: ScriptType = (network is BitcoinCashMainNet || network is BitcoinCashTestNet) ? .p2pkh : .p2wpkh
+            let bechAddress = (try? addressConverter.convert(keyHash: pubKey.keyHash, type: scriptType).stringValue) ?? "none"
+            print("\(pubKey.index) --- \(pubKey.external) --- \(pubKey.keyHash.hex) --- \(addressConverter.convertToLegacy(keyHash: pubKey.keyHash, version: network.pubKeyHash, addressType: .pubKeyHash).stringValue) --- \(bechAddress)")
         }
         print("PUBLIC KEYS COUNT: \(pubKeys.count)")
 
