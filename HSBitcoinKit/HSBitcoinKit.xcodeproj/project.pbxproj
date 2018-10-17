@@ -158,6 +158,7 @@
 		58AAAF3EFFA88855ACE404FC /* PFromPKHExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA74DF0D1F82EF49824E3 /* PFromPKHExtractorTests.swift */; };
 		58AAAFC2807F72C22A3E9D08 /* SegWitBech32AddressConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA7903061E05B9698EF80 /* SegWitBech32AddressConverter.swift */; };
 		73CCAF11A9BCDCAF9242BC41 /* Pods_HSBitcoinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 30C70D5B1A6435BFE9B244ED /* Pods_HSBitcoinKit.framework */; };
+		80B18C5C460869800C695CE9 /* Pods_HSBitcoinKitTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2C6FEBBDAA35CAE1B816EAC /* Pods_HSBitcoinKitTests.framework */; };
 		D00DA94E213E86BC007F82D6 /* MemPoolMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00DA94D213E86BC007F82D6 /* MemPoolMessage.swift */; };
 		D093F45E21414CC000C5D8CD /* PeerHostManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D093F45D21414CC000C5D8CD /* PeerHostManager.swift */; };
 		D31711EA20F7192400AEF61B /* PeerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31711E920F7192300AEF61B /* PeerConnection.swift */; };
@@ -354,6 +355,7 @@
 		58AAAED5E10009C0720D949E /* TransactionSizeCalculatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionSizeCalculatorTests.swift; sourceTree = "<group>"; };
 		58AAAEDC9D0D7BAE56C71DE0 /* BitcoinTestNetTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinTestNetTests.swift; sourceTree = "<group>"; };
 		58AAAF2482982ED7215EEBF9 /* ScriptBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScriptBuilder.swift; sourceTree = "<group>"; };
+		A2C6FEBBDAA35CAE1B816EAC /* Pods_HSBitcoinKitTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_HSBitcoinKitTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D00DA94D213E86BC007F82D6 /* MemPoolMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemPoolMessage.swift; sourceTree = "<group>"; };
 		D093F45D21414CC000C5D8CD /* PeerHostManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerHostManager.swift; sourceTree = "<group>"; };
 		D31711E920F7192300AEF61B /* PeerConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerConnection.swift; sourceTree = "<group>"; };
@@ -392,6 +394,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D380FD6020FCC04400276993 /* HSBitcoinKit.framework in Frameworks */,
+				80B18C5C460869800C695CE9 /* Pods_HSBitcoinKitTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -818,6 +821,7 @@
 			children = (
 				D33FD6B320F3782600EC10DB /* libcrypto.a */,
 				30C70D5B1A6435BFE9B244ED /* Pods_HSBitcoinKit.framework */,
+				A2C6FEBBDAA35CAE1B816EAC /* Pods_HSBitcoinKitTests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
