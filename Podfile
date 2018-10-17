@@ -3,10 +3,10 @@ use_frameworks!
 
 inhibit_all_warnings!
 
-workspace 'Example'
+workspace 'HSBitcoinKit'
 
-project 'Example/Example'
-project 'WalletKit/WalletKit'
+project 'HSBitcoinKitDemo/HSBitcoinKitDemo'
+project 'HSBitcoinKit/HSBitcoinKit'
 
 
 def internal_pods
@@ -27,18 +27,18 @@ def kit_pods
   pod "RxRealm"
 end
 
-target :Example do
-  project 'Example/Example'
+target :HSBitcoinKitDemo do
+  project 'HSBitcoinKitDemo/HSBitcoinKitDemo'
   kit_pods
 end
 
-target :WalletKit do
-  project 'WalletKit/WalletKit'
+target :HSBitcoinKit do
+  project 'HSBitcoinKit/HSBitcoinKit'
   kit_pods
 end
 
-target :WalletKitTests do
-  project 'WalletKit/WalletKit'
+target :HSBitcoinKitTests do
+  project 'HSBitcoinKit/HSBitcoinKit'
 
   internal_pods
   pod "Cuckoo"
