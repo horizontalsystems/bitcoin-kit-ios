@@ -12,14 +12,6 @@ class AddressConverterTests: XCTestCase {
 
         let mockNetwork = MockINetwork()
 
-//        stub(mockNetwork) { mock in
-//            when(mock.pubKeyHash.get).thenReturn(0x6f)
-//            when(mock.scriptHash.get).thenReturn(0xc4)
-//            when(mock.pubKeyPrefixPattern.get).thenReturn("m|n")
-//            when(mock.scriptPrefixPattern.get).thenReturn("2")
-//            when(mock.bech32PrefixPattern.get).thenReturn("bc")
-//        }
-
         stub(mockNetwork) { mock in
             when(mock.pubKeyHash.get).thenReturn(0x6f)
             when(mock.scriptHash.get).thenReturn(0xc4)
