@@ -26,7 +26,7 @@ class CashBech32AddressConverter: IBech32AddressConverter {
         throw AddressConverter.ConversionError.unknownAddressType
     }
 
-    func convert(prefix: String, keyHash: Data, scriptType: ScriptType) throws -> Address {
+    func convert(prefix: String, keyData: Data, scriptType: ScriptType) throws -> Address {
         let addressType: AddressType
         switch scriptType {
             case .p2pkh, .p2pk:
@@ -37,15 +37,15 @@ class CashBech32AddressConverter: IBech32AddressConverter {
         }
         var versionByte = addressType.rawValue
         // make version byte use rules in convert address method
-        let sizeOffset = keyHash.count >= 40
+        let sizeOffset = keyData.count >= 40
         let divider = sizeOffset ? 8 : 4
-        let size = keyHash.count - (sizeOffset ? 20 : 0) - 20
+        let size = keyData.count - (sizeOffset ? 20 : 0) - 20
         if size % divider != 0 {
             throw AddressConverter.ConversionError.invalidAddressLength
         }
         versionByte = versionByte + (sizeOffset ? 1 : 0) << 2 + UInt8(size / divider)
-        let bech32 = CashAddrBech32.encode(Data([versionByte]) + keyHash, prefix: prefix)
-        return CashAddress(type: addressType, keyHash: keyHash, cashAddrBech32: bech32, version: versionByte)
+        let bech32 = CashAddrBech32.encode(Data([versionByte]) + keyData, prefix: prefix)
+        return CashAddress(type: addressType, keyHash: keyData, cashAddrBech32: bech32, version: versionByte)
     }
 
 }

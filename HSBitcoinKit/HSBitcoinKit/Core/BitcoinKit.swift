@@ -75,16 +75,17 @@ public class BitcoinKit {
         blockHelper = BlockHelper()
         validatorFactory = BlockValidatorFactory(difficultyEncoder: difficultyEncoder, blockHelper: blockHelper)
 
+        scriptConverter = ScriptConverter()
         switch networkType {
         case .bitcoinMainNet:
             network = BitcoinMainNet(validatorFactory: validatorFactory)
-            bech32AddressConverter = SegWitBech32AddressConverter()
+            bech32AddressConverter = SegWitBech32AddressConverter(scriptConverter: scriptConverter)
         case .bitcoinTestNet:
             network = BitcoinTestNet(validatorFactory: validatorFactory)
-            bech32AddressConverter = SegWitBech32AddressConverter()
+            bech32AddressConverter = SegWitBech32AddressConverter(scriptConverter: scriptConverter)
         case .bitcoinRegTest:
             network = BitcoinRegTest(validatorFactory: validatorFactory)
-            bech32AddressConverter = SegWitBech32AddressConverter()
+            bech32AddressConverter = SegWitBech32AddressConverter(scriptConverter: scriptConverter)
         case .bitcoinCashMainNet:
             network = BitcoinCashMainNet(validatorFactory: validatorFactory, blockHelper: blockHelper)
             bech32AddressConverter = CashBech32AddressConverter()
@@ -118,7 +119,6 @@ public class BitcoinKit {
         unspentOutputSelector = UnspentOutputSelector(calculator: transactionSizeCalculator)
         unspentOutputProvider = UnspentOutputProvider(realmFactory: realmFactory)
 
-        scriptConverter = ScriptConverter()
         transactionExtractor = TransactionExtractor(scriptConverter: scriptConverter, addressConverter: addressConverter)
         transactionLinker = TransactionLinker()
         transactionProcessor = TransactionProcessor(realmFactory: realmFactory, extractor: transactionExtractor, linker: transactionLinker, addressManager: addressManager)

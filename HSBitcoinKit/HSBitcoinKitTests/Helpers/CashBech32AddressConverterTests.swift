@@ -109,7 +109,7 @@ class CashBech32AddressConverterTests: XCTestCase {
         //Encode
         let data = Data(hex: hex)!
         do {
-            let address = try cashBech32Converter.convert(prefix: prefix, keyHash: data, scriptType: scriptType)
+            let address = try cashBech32Converter.convert(prefix: prefix, keyData: data, scriptType: scriptType)
             XCTAssertEqual(address.scriptType, scriptType)
             XCTAssertEqual(address.keyHash, data)
             XCTAssertEqual(address.stringValue, cashBech32)

@@ -25,6 +25,18 @@ class OpCode {
     static let checkMultiSigVerify: UInt8 = 0xAF
     static let endIf: UInt8 = 0x68
 
+    static func value(fromPush code: UInt8) -> UInt8? {
+        if code == 0 {
+            return 0
+        }
+
+        let represent = Int(code) - 0x50
+        if represent >= 1, represent <= 16 {
+            return UInt8(represent)
+        }
+        return nil
+    }
+
     static func push(_ value: Int) -> Data {
         guard value != 0 else {
             return Data([0])
