@@ -16,6 +16,23 @@ class TransactionInputSerializer {
         return data
     }
 
+    static func serializedOutPoint(input: TransactionInput) throws -> Data {
+        var data = Data()
+
+        guard let output = input.previousOutput else {
+            throw SerializationError.noPreviousOutput
+        }
+
+        guard let previousTransactionData = output.transaction?.dataHash else {
+            throw SerializationError.noPreviousTransaction
+        }
+
+        data += previousTransactionData
+        data += UInt32(output.index)
+
+        return data
+    }
+
     static func serializedForSignature(input: TransactionInput, forCurrentInputSignature: Bool) throws -> Data {
         var data = Data()
 
@@ -23,7 +40,7 @@ class TransactionInputSerializer {
             throw SerializationError.noPreviousOutput
         }
 
-        guard let previousTransactionData = output.transaction?.reversedHashHex.reversedData else {
+        guard let previousTransactionData = output.transaction?.dataHash else {
             throw SerializationError.noPreviousTransaction
         }
         data += previousTransactionData

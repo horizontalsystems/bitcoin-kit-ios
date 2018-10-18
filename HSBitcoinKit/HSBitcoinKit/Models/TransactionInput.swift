@@ -10,7 +10,7 @@ class TransactionInput: Object {
     @objc dynamic var keyHash: Data?
     @objc dynamic var address: String?
 
-    var witnessData = [Data]()
+    var witnessData = List<Data>()
 
     let transactions = LinkingObjects(fromType: Transaction.self, property: "inputs")
     var transaction: Transaction? {

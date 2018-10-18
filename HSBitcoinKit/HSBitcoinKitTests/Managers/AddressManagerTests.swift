@@ -1,77 +1,79 @@
-//import XCTest
-//import Cuckoo
-//import HSHDWalletKit
-//import RealmSwift
-//@testable import HSBitcoinKit
-//
-//class AddressManagerTests: XCTestCase {
-//
-//    private var mockBitcoinKit: MockWalletKit!
-//    private var mockHDWallet: MockHDWallet!
-//    private var mockPeerGroup: MockPeerGroup!
-//    private var hdWallet: HDWallet!
-//    private var manager: AddressManager!
-//    private var mockAddressConverter: MockAddressConverter!
-//
-//    override func setUp() {
-//        super.setUp()
-//
-//        mockBitcoinKit = MockWalletKit()
-//        mockHDWallet = mockBitcoinKit.mockHdWallet
-//        mockPeerGroup = mockBitcoinKit.mockPeerGroup
-//
-//        let mockNetwork = mockBitcoinKit.mockNetwork
-//        hdWallet = HDWallet(seed: Data(), coinType: mockNetwork.coinType, xPrivKey: mockNetwork.xPrivKey, xPubKey: mockNetwork.xPubKey)
-//
-//        stub(mockBitcoinKit.mockNetwork) { mock in
-//            when(mock.pubKeyHash.get).thenReturn(UInt8(0x6f))
-//        }
-//        stub(mockPeerGroup) { mock in
-//            when(mock.addPublicKeyFilter(pubKey: any())).thenDoNothing()
-//        }
-//        mockAddressConverter = mockBitcoinKit.mockAddressConverter
-//        manager = AddressManager(realmFactory: mockBitcoinKit.mockRealmFactory, hdWallet: mockHDWallet, peerGroup: mockPeerGroup, addressConverter: mockAddressConverter)
-//    }
-//
-//    override func tearDown() {
-//        mockBitcoinKit = nil
-//        mockHDWallet = nil
-//        mockPeerGroup = nil
-//        mockAddressConverter = nil
-//        hdWallet = nil
-//        manager = nil
-//
-//        super.tearDown()
-//    }
-//
-//    func testChangePublicKey() {
-//        let publicKeys = [
-//            getPublicKey(withIndex: 0, chain: .internal),
-//            getPublicKey(withIndex: 0, chain: .external),
-//            getPublicKey(withIndex: 3, chain: .internal),
-//            getPublicKey(withIndex: 1, chain: .internal),
-//            getPublicKey(withIndex: 2, chain: .internal),
-//            getPublicKey(withIndex: 1, chain: .external)
-//        ]
-//        let txOutput = TestData.p2pkhTransaction.outputs[0]
-//
-//        try! mockBitcoinKit.realm.write {
-//            mockBitcoinKit.realm.add(publicKeys)
-//            mockBitcoinKit.realm.add(txOutput)
-//            txOutput.publicKey = publicKeys[0]
-//        }
-//
-//        let changePublicKey = try! manager.changePublicKey()
-//        XCTAssertEqual(changePublicKey.keyHash, publicKeys[3].keyHash)
-//    }
+import XCTest
+import Cuckoo
+import HSHDWalletKit
+import RealmSwift
+import HSHDWalletKit
+@testable import HSBitcoinKit
+
+class AddressManagerTests: XCTestCase {
+
+    private var realm: Realm!
+    private var mockRealmFactory: MockIRealmFactory!
+    private var mockHDWallet: MockIHDWallet!
+    private var mockBloomFilterManager: MockIBloomFilterManager!
+    private var mockAddressConverter: MockIAddressConverter!
+
+    private var hdWallet: IHDWallet!
+    private var manager: AddressManager!
+
+    override func setUp() {
+        super.setUp()
+
+        mockRealmFactory = MockIRealmFactory()
+        realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
+        try! realm.write { realm.deleteAll() }
+        stub(mockRealmFactory) {mock in
+            when(mock.realm.get).thenReturn(realm)
+        }
+
+        mockHDWallet = MockIHDWallet()
+        mockBloomFilterManager = MockIBloomFilterManager()
+        mockAddressConverter = MockIAddressConverter()
+
+        hdWallet = HDWallet(seed: Data(), coinType: UInt32(1), xPrivKey: UInt32(0x04358394), xPubKey: UInt32(0x043587cf))
+        manager = AddressManager(realmFactory: mockRealmFactory, hdWallet: mockHDWallet, bloomFilterManager: mockBloomFilterManager, addressConverter: mockAddressConverter)
+    }
+
+    override func tearDown() {
+        mockRealmFactory = nil
+        mockHDWallet = nil
+        mockBloomFilterManager = nil
+        mockAddressConverter = nil
+
+        hdWallet = nil
+        manager = nil
+
+        super.tearDown()
+    }
+
+    func testChangePublicKey() {
+        let publicKeys = [
+            getPublicKey(withIndex: 0, chain: .internal),
+            getPublicKey(withIndex: 0, chain: .external),
+            getPublicKey(withIndex: 3, chain: .internal),
+            getPublicKey(withIndex: 1, chain: .internal),
+            getPublicKey(withIndex: 2, chain: .internal),
+            getPublicKey(withIndex: 1, chain: .external)
+        ]
+        let txOutput = TestData.p2pkhTransaction.outputs[0]
+
+        try! realm.write {
+            realm.add(publicKeys)
+            realm.add(txOutput)
+            txOutput.publicKey = publicKeys[0]
+        }
+
+        let changePublicKey = try! manager.changePublicKey()
+        XCTAssertEqual(changePublicKey.keyHash, publicKeys[3].keyHash)
+    }
 //
 //    func testChangePublicKey_NoUnusedPublicKey() {
 //        let publicKey =  getPublicKey(withIndex: 0, chain: .internal)
 //        let txOutput = TestData.p2pkhTransaction.outputs[0]
 //
-//        try! mockBitcoinKit.realm.write {
-//            mockBitcoinKit.realm.add(publicKey)
-//            mockBitcoinKit.realm.add(txOutput)
+//        try! realm.write {
+//            realm.add(publicKey)
+//            realm.add(txOutput)
 //            txOutput.publicKey = publicKey
 //        }
 //
@@ -85,7 +87,7 @@
 //        let changePublicKey = try! manager.changePublicKey()
 //        XCTAssertEqual(changePublicKey.keyHash, publicKey1.keyHash)
 //        verify(mockHDWallet).publicKey(index: equal(to: 1), external: equal(to: false))
-//        verify(mockPeerGroup).addPublicKeyFilter(pubKey: equal(to: publicKey1))
+//        verify(mockBloomFilterManager).regenerateBloomFilter()
 //    }
 //
 //    func testChangePublicKey_NoPublicKey() {
@@ -99,7 +101,7 @@
 //        let changePublicKey = try! manager.changePublicKey()
 //        XCTAssertEqual(changePublicKey.keyHash, publicKey.keyHash)
 //        verify(mockHDWallet).publicKey(index: equal(to: 0), external: equal(to: false))
-//        verify(mockPeerGroup).addPublicKeyFilter(pubKey: equal(to: publicKey))
+//        verify(mockBloomFilterManager).regenerateBloomFilter()
 //    }
 //
 //    func testChangePublicKey_ShouldSaveNewKey() {
@@ -112,11 +114,11 @@
 //
 //        let changePublicKey = try! manager.changePublicKey()
 //        XCTAssertEqual(changePublicKey.keyHash, publicKey.keyHash)
-//        let saved = mockBitcoinKit.realm.objects(PublicKey.self).filter("keyHash = %@", publicKey.keyHash).last
+//        let saved = realm.objects(PublicKey.self).filter("keyHash = %@", publicKey.keyHash).last
 //        XCTAssertNotEqual(saved, nil)
 //    }
 //
-//    func testReceivePublicKey() {
+//    func testReceiveAddress() {
 //        let publicKeys = [
 //            getPublicKey(withIndex: 0, chain: .external),
 //            getPublicKey(withIndex: 0, chain: .internal),
@@ -127,9 +129,9 @@
 //        ]
 //        let txOutput = TestData.p2pkhTransaction.outputs[0]
 //
-//        try! mockBitcoinKit.realm.write {
-//            mockBitcoinKit.realm.add(publicKeys)
-//            mockBitcoinKit.realm.add(txOutput)
+//        try! realm.write {
+//            realm.add(publicKeys)
+//            realm.add(txOutput)
 //            txOutput.publicKey = publicKeys[0]
 //        }
 //
@@ -142,13 +144,13 @@
 //        verify(mockAddressConverter).convert(keyHash: equal(to: publicKeys[3].keyHash), type: equal(to: ScriptType.p2pkh))
 //    }
 //
-//    func testReceivePublicKey_NoUnusedPublicKey() {
+//    func testReceiveAddress_NoUnusedPublicKey() {
 //        let publicKey =  getPublicKey(withIndex: 0, chain: .external)
 //        let txOutput = TestData.p2pkhTransaction.outputs[0]
 //
-//        try! mockBitcoinKit.realm.write {
-//            mockBitcoinKit.realm.add(publicKey)
-//            mockBitcoinKit.realm.add(txOutput)
+//        try! realm.write {
+//            realm.add(publicKey)
+//            realm.add(txOutput)
 //            txOutput.publicKey = publicKey
 //        }
 //
@@ -166,10 +168,10 @@
 //        XCTAssertEqual(try? manager.receiveAddress(), address.stringValue)
 //        verify(mockAddressConverter).convert(keyHash: equal(to: publicKey1.keyHash), type: equal(to: ScriptType.p2pkh))
 //        verify(mockHDWallet).publicKey(index: equal(to: 1), external: equal(to: true))
-//        verify(mockPeerGroup).addPublicKeyFilter(pubKey: equal(to: publicKey1))
+//        verify(mockBloomFilterManager).regenerateBloomFilter()
 //    }
 //
-//    func testGenerateKeys() {
+//    func testFillGap() {
 //        let keys = [
 //            getPublicKey(withIndex: 0, chain: .internal),
 //            getPublicKey(withIndex: 1, chain: .internal),
@@ -179,9 +181,9 @@
 //        ]
 //        let txOutput = TestData.p2pkhTransaction.outputs[0]
 //
-//        try! mockBitcoinKit.realm.write {
-//            mockBitcoinKit.realm.add([keys[0], keys[1]])
-//            mockBitcoinKit.realm.add(txOutput)
+//        try! realm.write {
+//            realm.add([keys[0], keys[1]])
+//            realm.add(txOutput)
 //            txOutput.publicKey = keys[0]
 //        }
 //
@@ -192,15 +194,13 @@
 //            when(mock.publicKey(index: equal(to: 1), external: equal(to: true))).thenReturn(keys[4])
 //        }
 //
-//        try! manager.generateKeys()
+//        try! manager.fillGap()
 //        verify(mockHDWallet, times(1)).publicKey(index: any(), external: equal(to: false))
 //        verify(mockHDWallet, times(2)).publicKey(index: any(), external: equal(to: true))
-//        verify(mockPeerGroup).addPublicKeyFilter(pubKey: equal(to: keys[2]))
-//        verify(mockPeerGroup).addPublicKeyFilter(pubKey: equal(to: keys[3]))
-//        verify(mockPeerGroup).addPublicKeyFilter(pubKey: equal(to: keys[4]))
+//        verify(mockBloomFilterManager).regenerateBloomFilter()
 //
-//        let internalKeys = mockBitcoinKit.realm.objects(PublicKey.self).filter("external = false").sorted(byKeyPath: "index")
-//        let externalKeys = mockBitcoinKit.realm.objects(PublicKey.self).filter("external = true").sorted(byKeyPath: "index")
+//        let internalKeys = realm.objects(PublicKey.self).filter("external = false").sorted(byKeyPath: "index")
+//        let externalKeys = realm.objects(PublicKey.self).filter("external = true").sorted(byKeyPath: "index")
 //
 //        XCTAssertEqual(internalKeys.count, 3)
 //        XCTAssertEqual(externalKeys.count, 2)
@@ -209,7 +209,7 @@
 //        XCTAssertEqual(externalKeys[1].keyHash, keys[4].keyHash)
 //    }
 //
-//    func testGenerateKeys_NoUnusedKeys() {
+//    func testFillGap_NoUnusedKeys() {
 //        let keys = [
 //            getPublicKey(withIndex: 0, chain: .internal),
 //            getPublicKey(withIndex: 1, chain: .internal),
@@ -219,9 +219,9 @@
 //        ]
 //        let txOutput = TestData.p2pkhTransaction.outputs[0]
 //
-//        try! mockBitcoinKit.realm.write {
-//            mockBitcoinKit.realm.add([keys[0]])
-//            mockBitcoinKit.realm.add(txOutput)
+//        try! realm.write {
+//            realm.add([keys[0]])
+//            realm.add(txOutput)
 //            txOutput.publicKey = keys[0]
 //        }
 //
@@ -233,16 +233,13 @@
 //            when(mock.publicKey(index: equal(to: 1), external: equal(to: true))).thenReturn(keys[4])
 //        }
 //
-//        try! manager.generateKeys()
+//        try! manager.fillGap()
 //        verify(mockHDWallet, times(2)).publicKey(index: any(), external: equal(to: false))
 //        verify(mockHDWallet, times(2)).publicKey(index: any(), external: equal(to: true))
-//        verify(mockPeerGroup).addPublicKeyFilter(pubKey: equal(to: keys[1]))
-//        verify(mockPeerGroup).addPublicKeyFilter(pubKey: equal(to: keys[2]))
-//        verify(mockPeerGroup).addPublicKeyFilter(pubKey: equal(to: keys[3]))
-//        verify(mockPeerGroup).addPublicKeyFilter(pubKey: equal(to: keys[4]))
+//        verify(mockBloomFilterManager).regenerateBloomFilter()
 //
-//        let internalKeys = mockBitcoinKit.realm.objects(PublicKey.self).filter("external = false").sorted(byKeyPath: "index")
-//        let externalKeys = mockBitcoinKit.realm.objects(PublicKey.self).filter("external = true").sorted(byKeyPath: "index")
+//        let internalKeys = realm.objects(PublicKey.self).filter("external = false").sorted(byKeyPath: "index")
+//        let externalKeys = realm.objects(PublicKey.self).filter("external = true").sorted(byKeyPath: "index")
 //
 //        XCTAssertEqual(internalKeys.count, 3)
 //        XCTAssertEqual(externalKeys.count, 2)
@@ -252,7 +249,7 @@
 //        XCTAssertEqual(externalKeys[1].keyHash, keys[4].keyHash)
 //    }
 //
-//    func testGenerateKeys_NonSequentiallyUsedKeys() {
+//    func testFillGap_NonSequentiallyUsedKeys() {
 //        let keys = [
 //            getPublicKey(withIndex: 0, chain: .internal),
 //            getPublicKey(withIndex: 1, chain: .internal),
@@ -266,9 +263,9 @@
 //        let txOutput2 = TestData.p2pkTransaction.outputs[0]
 //        let txOutput3 = TestData.p2shTransaction.outputs[0]
 //
-//        try! mockBitcoinKit.realm.write {
-//            mockBitcoinKit.realm.add([keys[0], keys[1], keys[2], keys[3], keys[4]])
-//            mockBitcoinKit.realm.add([txOutput, txOutput2, txOutput3])
+//        try! realm.write {
+//            realm.add([keys[0], keys[1], keys[2], keys[3], keys[4]])
+//            realm.add([txOutput, txOutput2, txOutput3])
 //            txOutput.publicKey = keys[0]
 //            txOutput2.publicKey = keys[2]
 //            txOutput3.publicKey = keys[4]
@@ -280,14 +277,13 @@
 //            when(mock.publicKey(index: equal(to: 2), external: equal(to: true))).thenReturn(keys[6])
 //        }
 //
-//        try! manager.generateKeys()
+//        try! manager.fillGap()
 //        verify(mockHDWallet, times(1)).publicKey(index: any(), external: equal(to: false))
 //        verify(mockHDWallet, times(1)).publicKey(index: any(), external: equal(to: true))
-//        verify(mockPeerGroup).addPublicKeyFilter(pubKey: equal(to: keys[5]))
-//        verify(mockPeerGroup).addPublicKeyFilter(pubKey: equal(to: keys[6]))
+//        verify(mockBloomFilterManager).regenerateBloomFilter()
 //
-//        let internalKeys = mockBitcoinKit.realm.objects(PublicKey.self).filter("external = false").sorted(byKeyPath: "index")
-//        let externalKeys = mockBitcoinKit.realm.objects(PublicKey.self).filter("external = true").sorted(byKeyPath: "index")
+//        let internalKeys = realm.objects(PublicKey.self).filter("external = false").sorted(byKeyPath: "index")
+//        let externalKeys = realm.objects(PublicKey.self).filter("external = true").sorted(byKeyPath: "index")
 //
 //        XCTAssertEqual(internalKeys.count, 4)
 //        XCTAssertEqual(externalKeys.count, 3)
@@ -299,8 +295,17 @@
 //        XCTAssertEqual(externalKeys[2].keyHash, keys[6].keyHash)
 //    }
 //
-//    private func getPublicKey(withIndex index: Int, chain: HDWallet.Chain) -> PublicKey {
-//        let hdPrivKey = try! hdWallet.privateKey(index: index, chain: chain)
-//        return PublicKey(withIndex: index, external: chain == .external, hdPublicKey: hdPrivKey.publicKey())
+//    func testAddKeys() {
+//
 //    }
-//}
+//
+//    func testGapShifts() {
+//
+//    }
+
+
+    private func getPublicKey(withIndex index: Int, chain: HDWallet.Chain) -> PublicKey {
+        let hdPrivKeyData = try! hdWallet.privateKeyData(index: index, external: chain == .external)
+        return PublicKey(withIndex: index, external: chain == .external, hdPublicKeyData: hdPrivKeyData)
+    }
+}

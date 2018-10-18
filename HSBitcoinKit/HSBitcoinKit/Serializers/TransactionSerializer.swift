@@ -3,18 +3,19 @@ import HSCryptoKit
 
 class TransactionSerializer {
 
-    static func serialize(transaction: Transaction) -> Data {
+    static func serialize(transaction: Transaction, withoutWitness: Bool = false) -> Data {
         var data = Data()
 
         data += UInt32(transaction.version)
-        if transaction.segWit {
-            data += UInt16(1)  // marker 0x00 + flag 0x01
+        if transaction.segWit && !withoutWitness {
+            data += UInt8(0)       // marker 0x00
+            data += UInt8(1)       // flag 0x01
         }
         data += VarInt(transaction.inputs.count).serialized()
         data += transaction.inputs.flatMap { TransactionInputSerializer.serialize(input: $0) }
         data += VarInt(transaction.outputs.count).serialized()
         data += transaction.outputs.flatMap { TransactionOutputSerializer.serialize(output: $0) }
-        if transaction.segWit {
+        if transaction.segWit && !withoutWitness {
             data += transaction.inputs.flatMap {
                 TransactionWitnessSerializer.serialize(witnessData: $0.witnessData)
             }
@@ -27,14 +28,46 @@ class TransactionSerializer {
     static func serializedForSignature(transaction: Transaction, inputIndex: Int) throws -> Data {
         var data = Data()
 
-        data += UInt32(transaction.version)
-        data += VarInt(transaction.inputs.count).serialized()
-        data += try transaction.inputs.enumerated().flatMap { index, input in
-            try TransactionInputSerializer.serializedForSignature(input: input, forCurrentInputSignature: inputIndex == index)
+        if transaction.segWit {
+            let inputToSign = transaction.inputs[inputIndex]
+
+            data += UInt32(transaction.version)
+
+            let hashPrevouts = try transaction.inputs.flatMap { input in
+                try TransactionInputSerializer.serializedOutPoint(input: input)
+            }
+            data += CryptoKit.sha256sha256((Data(hashPrevouts)))
+
+            var sequences = Data()
+            for input in transaction.inputs {
+                sequences += UInt32(input.sequence)
+            }
+            data += CryptoKit.sha256sha256(sequences)
+
+            data += try TransactionInputSerializer.serializedOutPoint(input: inputToSign)
+
+            guard let previousOutput = inputToSign.previousOutput else {
+                throw SerializationError.noPreviousOutput
+            }
+
+            data += OpCode.push(OpCode.p2pkhStart + OpCode.push(previousOutput.keyHash!) + OpCode.p2pkhFinish)
+            data += previousOutput.value
+            data += UInt32(inputToSign.sequence)
+
+            let hashOutputs = transaction.outputs.flatMap { TransactionOutputSerializer.serialize(output: $0) }
+            data += CryptoKit.sha256sha256((Data(hashOutputs)))
+        } else {
+            data += UInt32(transaction.version)
+            data += VarInt(transaction.inputs.count).serialized()
+            data += try transaction.inputs.enumerated().flatMap { index, input in
+                try TransactionInputSerializer.serializedForSignature(input: input, forCurrentInputSignature: inputIndex == index)
+            }
+            data += VarInt(transaction.outputs.count).serialized()
+            data += transaction.outputs.flatMap { TransactionOutputSerializer.serialize(output: $0) }
         }
-        data += VarInt(transaction.outputs.count).serialized()
-        data += transaction.outputs.flatMap { TransactionOutputSerializer.serialize(output: $0) }
+
         data += UInt32(transaction.lockTime)
+        data += UInt32(1)
 
         return data
     }
@@ -75,7 +108,7 @@ class TransactionSerializer {
         }
 
         transaction.lockTime = Int(byteStream.read(UInt32.self))
-        transaction.dataHash = CryptoKit.sha256sha256(serialize(transaction: transaction))
+        transaction.dataHash = CryptoKit.sha256sha256(serialize(transaction: transaction, withoutWitness: true))
         transaction.reversedHashHex = transaction.dataHash.reversedHex
 
         return transaction

@@ -109,11 +109,11 @@ extension BlockSyncer: IBlockSyncer {
                 transactionProcessor.process(transaction: transaction, realm: realm)
 
                 if transaction.isMine {
-                    transaction.block = block
-
                     if let existingTransaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", transaction.reversedHashHex).first {
+                        existingTransaction.block = block
                         existingTransaction.status = .relayed
                     } else {
+                        transaction.block = block
                         realm.add(transaction)
                     }
 

@@ -5,7 +5,6 @@ class InputSigner {
     enum SignError: Error {
         case noPreviousOutput
         case noPreviousOutputAddress
-        case noPublicKeyInAddress
         case noPrivateKey
     }
 
@@ -30,20 +29,18 @@ extension InputSigner: IInputSigner {
             throw SignError.noPreviousOutputAddress
         }
 
-        guard let publicKey = pubKey.raw else {
-            throw SignError.noPublicKeyInAddress
-        }
+        let publicKey = pubKey.raw
 
         guard let privateKeyData = try? hdWallet.privateKeyData(index: pubKey.index, external: pubKey.external) else {
             throw SignError.noPrivateKey
         }
 
-        let serializedTransaction = try TransactionSerializer.serializedForSignature(transaction: transaction, inputIndex: index) + UInt32(1)
+        let serializedTransaction = try TransactionSerializer.serializedForSignature(transaction: transaction, inputIndex: index)
         let signatureHash = CryptoKit.sha256sha256(serializedTransaction)
         let signature = try CryptoKit.sign(data: signatureHash, privateKey: privateKeyData) + Data(bytes: [0x01])
 
         switch prevOutput.scriptType {
-        case .p2pk, .p2wpkh: return [signature]
+        case .p2pk: return [signature]
         default: return [signature, publicKey]
         }
     }
