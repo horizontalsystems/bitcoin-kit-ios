@@ -9,7 +9,7 @@ class LegacyTestNetDifficultyValidatorTests: XCTestCase {
     let heightInterval = 2016
 
     private var validator: LegacyTestNetDifficultyValidator!
-    private var mockNetwork: MockNetworkProtocol!
+    private var mockNetwork: MockINetwork!
 
     private var checkPointBlock: Block!
     private var block: Block!
@@ -17,8 +17,8 @@ class LegacyTestNetDifficultyValidatorTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        let mockBitcoinKit = MockBitcoinKit()
-        mockNetwork = mockBitcoinKit.mockNetwork
+
+        mockNetwork = MockINetwork()
         stub(mockNetwork) { mock in
             when(mock.heightInterval.get).thenReturn(heightInterval)
             when(mock.targetTimeSpan.get).thenReturn(targetSpacing * heightInterval)

@@ -1,6 +1,4 @@
-import Foundation
-
-class TransactionSizeCalculator {
+class TransactionSizeCalculator: ITransactionSizeCalculator {
     static let scriptSigLength = 73 + 1
     static let p2pkhLength = 33 + 1
     static let p2shLength = 20 + 1

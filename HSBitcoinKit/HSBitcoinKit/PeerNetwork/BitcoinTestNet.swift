@@ -1,6 +1,6 @@
 import Foundation
 
-class BitcoinTestNet: NetworkProtocol {
+class BitcoinTestNet: INetwork {
     private static let testNetDiffDate = 1329264000 // February 16th 2012
 
     private let headerValidator: IBlockValidator
@@ -53,7 +53,7 @@ class BitcoinTestNet: NetworkProtocol {
             ),
             height: 1411200)
 
-    required init(validatorFactory: BlockValidatorFactory) {
+    required init(validatorFactory: IBlockValidatorFactory) {
         headerValidator = validatorFactory.validator(for: .header)
         bitsValidator = validatorFactory.validator(for: .bits)
         legacyDifficultyValidator = validatorFactory.validator(for: .legacy)

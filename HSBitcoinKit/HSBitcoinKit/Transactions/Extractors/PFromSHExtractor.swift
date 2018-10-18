@@ -1,9 +1,7 @@
-import Foundation
-
-class PFromSHExtractor: ScriptExtractor {
+class PFromSHExtractor: IScriptExtractor {
     var type: ScriptType { return .p2sh }
 
-    func extract(from script: Script, converter: ScriptConverter) throws -> Data? {
+    func extract(from script: Script, converter: IScriptConverter) throws -> Data? {
         guard let chunkData = script.chunks.last?.data else {
             throw ScriptError.wrongScriptLength
         }

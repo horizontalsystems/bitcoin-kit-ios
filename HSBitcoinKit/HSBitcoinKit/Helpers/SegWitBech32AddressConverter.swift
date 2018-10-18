@@ -1,6 +1,6 @@
 import Foundation
 
-class SegWitBech32AddressConverter: Bech32AddressConverter {
+class SegWitBech32AddressConverter: IBech32AddressConverter {
 
     func convert(prefix: String, address: String) throws -> Address {
         if let segWitData = try? SegWitBech32.decode(hrp: prefix, addr: address) {

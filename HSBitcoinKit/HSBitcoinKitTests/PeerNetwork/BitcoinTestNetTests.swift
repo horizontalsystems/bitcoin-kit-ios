@@ -11,9 +11,7 @@ class BitcoinTestNetTests:XCTestCase {
     override func setUp() {
         super.setUp()
 
-        let mockBitcoinKit = MockBitcoinKit()
-        mockValidatorHelper = MockValidatorHelper(mockBitcoinKit: mockBitcoinKit)
-
+        mockValidatorHelper = MockValidatorHelper()
         mockNetwork = BitcoinTestNet(validatorFactory: mockValidatorHelper.mockFactory)
     }
 

@@ -6,24 +6,28 @@ import RealmSwift
 class TransactionCreatorTests: XCTestCase {
 
     private var realm: Realm!
-    private var mockTransactionBuilder: MockTransactionBuilder!
-    private var mockTransactionProcessor: MockTransactionProcessor!
-    private var mockPeerGroup: MockPeerGroup!
-    private var mockAddressManager: MockAddressManager!
+    private var mockTransactionBuilder: MockITransactionBuilder!
+    private var mockTransactionProcessor: MockITransactionProcessor!
+    private var mockPeerGroup: MockIPeerGroup!
+    private var mockAddressManager: MockIAddressManager!
 
     private var transactionCreator: TransactionCreator!
 
     override func setUp() {
         super.setUp()
 
-        let mockBitcoinKit = MockBitcoinKit()
+        realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
+        try! realm.write { realm.deleteAll() }
 
-        realm = mockBitcoinKit.realm
+        let mockRealmFactory = MockIRealmFactory()
+        stub(mockRealmFactory) { mock in
+            when(mock.realm.get).thenReturn(realm)
+        }
 
-        mockTransactionBuilder = mockBitcoinKit.mockTransactionBuilder
-        mockTransactionProcessor = mockBitcoinKit.mockTransactionProcessor
-        mockPeerGroup = mockBitcoinKit.mockPeerGroup
-        mockAddressManager = mockBitcoinKit.mockAddressManager
+        mockTransactionBuilder = MockITransactionBuilder()
+        mockTransactionProcessor = MockITransactionProcessor()
+        mockPeerGroup = MockIPeerGroup()
+        mockAddressManager = MockIAddressManager()
 
         stub(mockTransactionBuilder) { mock in
             when(mock.buildTransaction(value: any(), feeRate: any(), senderPay: any(), changeScriptType: any(), changePubKey: any(), toAddress: any())).thenReturn(TestData.p2pkhTransaction)
@@ -38,7 +42,7 @@ class TransactionCreatorTests: XCTestCase {
             when(mock.changePublicKey()).thenReturn(TestData.pubKey())
         }
 
-        transactionCreator = TransactionCreator(realmFactory: mockBitcoinKit.mockRealmFactory, transactionBuilder: mockTransactionBuilder, transactionProcessor: mockTransactionProcessor, peerGroup: mockPeerGroup, addressManager: mockAddressManager)
+        transactionCreator = TransactionCreator(realmFactory: mockRealmFactory, transactionBuilder: mockTransactionBuilder, transactionProcessor: mockTransactionProcessor, peerGroup: mockPeerGroup, addressManager: mockAddressManager)
     }
 
     override func tearDown() {

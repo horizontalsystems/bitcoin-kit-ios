@@ -5,7 +5,7 @@ import RealmSwift
 
 class TransactionSyncerTests: XCTestCase {
 
-    private var mockProcessor: MockTransactionProcessor!
+    private var mockProcessor: MockITransactionProcessor!
     private var syncer: TransactionSyncer!
 
     private var realm: Realm!
@@ -13,16 +13,21 @@ class TransactionSyncerTests: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        let mockBitcoinKit = MockBitcoinKit()
+        realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
+        try! realm.write { realm.deleteAll() }
 
-        mockProcessor = mockBitcoinKit.mockTransactionProcessor
-        realm = mockBitcoinKit.realm
+        let mockRealmFactory = MockIRealmFactory()
+        stub(mockRealmFactory) { mock in
+            when(mock.realm.get).thenReturn(realm)
+        }
+
+        mockProcessor = MockITransactionProcessor()
 
         stub(mockProcessor) { mock in
             when(mock.enqueueRun()).thenDoNothing()
         }
 
-        syncer = TransactionSyncer(realmFactory: mockBitcoinKit.mockRealmFactory, processor: mockProcessor, queue: DispatchQueue.main)
+        syncer = TransactionSyncer(realmFactory: mockRealmFactory, processor: mockProcessor, queue: DispatchQueue.main)
     }
 
     override func tearDown() {

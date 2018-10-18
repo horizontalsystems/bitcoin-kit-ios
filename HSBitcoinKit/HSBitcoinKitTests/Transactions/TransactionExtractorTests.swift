@@ -5,15 +5,15 @@ import RealmSwift
 
 class TransactionExtractorTests: XCTestCase {
 
-    private var pfromsh: MockPFromSHExtractor!
-    private var p2pkh: MockP2PKHExtractor!
-    private var p2pk: MockP2PKExtractor!
-    private var p2sh: MockP2SHExtractor!
-    private var addressConverter: MockAddressConverter!
-    private var scriptConverter: MockScriptConverter!
+    private var pfromsh: MockIScriptExtractor!
+    private var p2pkh: MockIScriptExtractor!
+    private var p2pk: MockIScriptExtractor!
+    private var p2sh: MockIScriptExtractor!
+    private var addressConverter: MockIAddressConverter!
+    private var scriptConverter: MockIScriptConverter!
     private var realm: Realm!
-    private var inputExtractors: [ScriptExtractor]!
-    private var outputExtractors: [ScriptExtractor]!
+    private var inputExtractors: [IScriptExtractor]!
+    private var outputExtractors: [IScriptExtractor]!
     private var extractor: TransactionExtractor!
 
     private var p2pkhTransaction: Transaction!
@@ -23,15 +23,20 @@ class TransactionExtractorTests: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        let mockBitcoinKit = MockBitcoinKit()
+        realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
+        try! realm.write { realm.deleteAll() }
 
-        pfromsh = MockPFromSHExtractor()
-        p2pkh = MockP2PKHExtractor()
-        p2pk = MockP2PKExtractor()
-        p2sh = MockP2SHExtractor()
-        addressConverter = MockAddressConverter(network: BitcoinTestNet(validatorFactory: mockBitcoinKit.mockValidatorFactory), bech32AddressConverter: SegWitBech32AddressConverter())
-        scriptConverter = MockScriptConverter()
-        realm = mockBitcoinKit.realm
+        let mockRealmFactory = MockIRealmFactory()
+        stub(mockRealmFactory) { mock in
+            when(mock.realm.get).thenReturn(realm)
+        }
+
+        pfromsh = MockIScriptExtractor()
+        p2pkh = MockIScriptExtractor()
+        p2pk = MockIScriptExtractor()
+        p2sh = MockIScriptExtractor()
+        addressConverter = MockIAddressConverter()
+        scriptConverter = MockIScriptConverter()
 
         inputExtractors = [pfromsh]
         outputExtractors = [p2pkh, p2pk, p2sh]

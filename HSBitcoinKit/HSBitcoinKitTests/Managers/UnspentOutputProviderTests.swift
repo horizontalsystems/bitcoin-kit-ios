@@ -14,13 +14,17 @@ class UnspentOutputProviderTests: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        let mockBitcoinKit = MockBitcoinKit()
+        realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
+        try! realm.write { realm.deleteAll() }
 
-        realm = mockBitcoinKit.realm
+        let mockRealmFactory = MockIRealmFactory()
+        stub(mockRealmFactory) { mock in
+            when(mock.realm.get).thenReturn(realm)
+        }
 
         pubKey = TestData.pubKey()
 
-        unspentOutputProvider = UnspentOutputProvider(realmFactory: mockBitcoinKit.mockRealmFactory)
+        unspentOutputProvider = UnspentOutputProvider(realmFactory: mockRealmFactory)
         outputs = [TransactionOutput(withValue: 1, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data(hex: "000010000")!),
                    TransactionOutput(withValue: 2, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data(hex: "000010001")!),
                    TransactionOutput(withValue: 4, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data(hex: "000010002")!),

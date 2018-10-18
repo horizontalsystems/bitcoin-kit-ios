@@ -1,12 +1,9 @@
-import Foundation
-
 class TransactionSyncer {
-
-    private let realmFactory: RealmFactory
-    private let processor: TransactionProcessor
+    private let realmFactory: IRealmFactory
+    private let processor: ITransactionProcessor
     private let queue: DispatchQueue
 
-    init(realmFactory: RealmFactory, processor: TransactionProcessor, queue: DispatchQueue = DispatchQueue(label: "TransactionSyncer", qos: .userInitiated)) {
+    init(realmFactory: IRealmFactory, processor: ITransactionProcessor, queue: DispatchQueue = DispatchQueue(label: "TransactionSyncer", qos: .userInitiated)) {
         self.realmFactory = realmFactory
         self.processor = processor
         self.queue = queue
@@ -61,13 +58,5 @@ extension TransactionSyncer: ITransactionSyncer {
         let realm = realmFactory.realm
         return realm.objects(Transaction.self).filter("reversedHashHex = %@", hash.reversedHex).isEmpty
     }
-
-}
-
-protocol ITransactionSyncer: class {
-
-    func getNonSentTransactions() -> [Transaction]
-    func handle(transactions: [Transaction])
-    func shouldRequestTransaction(hash: Data) -> Bool
 
 }

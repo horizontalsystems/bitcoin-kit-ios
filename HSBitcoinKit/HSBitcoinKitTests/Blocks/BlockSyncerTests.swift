@@ -5,13 +5,11 @@ import RealmSwift
 @testable import HSBitcoinKit
 
 class BlockSyncerTests: XCTestCase {
-
-    private var mockRealmFactory: MockRealmFactory!
-    private var mockNetwork: MockNetworkProtocol!
-    private var mockProgressSyncer: MockProgressSyncer!
-    private var mockTransactionProcessor: MockTransactionProcessor!
-    private var mockBlockchain: MockBlockchain!
-    private var mockAddressManager: MockAddressManager!
+    private var mockNetwork: MockINetwork!
+    private var mockProgressSyncer: MockIProgressSyncer!
+    private var mockTransactionProcessor: MockITransactionProcessor!
+    private var mockBlockchain: MockIBlockchain!
+    private var mockAddressManager: MockIAddressManager!
 
     private var checkpointBlock: Block!
     private var newBlock1: Block!
@@ -28,15 +26,19 @@ class BlockSyncerTests: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        let mockBitcoinKit = MockBitcoinKit()
+        realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
+        try! realm.write { realm.deleteAll() }
 
-        mockRealmFactory = mockBitcoinKit.mockRealmFactory
-        mockNetwork = mockBitcoinKit.mockNetwork
-        mockProgressSyncer = mockBitcoinKit.mockProgressSyncer
-        mockTransactionProcessor = mockBitcoinKit.mockTransactionProcessor
-        mockBlockchain = mockBitcoinKit.mockBlockchain
-        mockAddressManager = mockBitcoinKit.mockAddressManager
-        realm = mockBitcoinKit.realm
+        let mockRealmFactory = MockIRealmFactory()
+        stub(mockRealmFactory) { mock in
+            when(mock.realm.get).thenReturn(realm)
+        }
+
+        mockNetwork = MockINetwork()
+        mockProgressSyncer = MockIProgressSyncer()
+        mockTransactionProcessor = MockITransactionProcessor()
+        mockBlockchain = MockIBlockchain()
+        mockAddressManager = MockIAddressManager()
 
         checkpointBlock = realm.objects(Block.self).filter("reversedHeaderHashHex = %@", TestData.checkpointBlock.reversedHeaderHashHex).first!
         newBlock2 = TestData.secondBlock
@@ -59,7 +61,7 @@ class BlockSyncerTests: XCTestCase {
 //            when(mock.connect((merkleBlock: any(), realm: any())).thenReturn(newBlock1))
         }
         stub(mockAddressManager) { mock in
-            when(mock.fillGap(afterExternalKey: any(), afterInternalKey: any())).thenDoNothing()
+            when(mock.fillGap()).thenDoNothing()
         }
 
         syncer = BlockSyncer(
@@ -70,7 +72,6 @@ class BlockSyncerTests: XCTestCase {
     }
 
     override func tearDown() {
-        mockRealmFactory = nil
         mockNetwork = nil
         mockProgressSyncer = nil
         mockTransactionProcessor = nil

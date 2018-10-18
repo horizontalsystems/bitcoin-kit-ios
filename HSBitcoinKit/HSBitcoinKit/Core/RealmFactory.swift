@@ -1,4 +1,3 @@
-import Foundation
 import RealmSwift
 
 class RealmFactory {
@@ -7,6 +6,10 @@ class RealmFactory {
     init(configuration: Realm.Configuration) {
         self.configuration = configuration
     }
+
+}
+
+extension RealmFactory: IRealmFactory {
 
     var realm: Realm {
         return try! Realm(configuration: configuration)

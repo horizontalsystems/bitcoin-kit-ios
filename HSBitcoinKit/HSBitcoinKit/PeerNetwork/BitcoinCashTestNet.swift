@@ -1,6 +1,6 @@
 import Foundation
 
-class BitcoinCashTestNet: NetworkProtocol {
+class BitcoinCashTestNet: INetwork {
     private let headerValidator: IBlockValidator
 
     let name = "bitcoin-cash-test-net"
@@ -44,7 +44,7 @@ class BitcoinCashTestNet: NetworkProtocol {
             ),
             height: 1257984)
 
-    required init(validatorFactory: BlockValidatorFactory) {
+    required init(validatorFactory: IBlockValidatorFactory) {
         headerValidator = validatorFactory.validator(for: .header)
 
         merkleBlockValidator = MerkleBlockValidator(maxBlockSize: 32 * 1024 * 1024)

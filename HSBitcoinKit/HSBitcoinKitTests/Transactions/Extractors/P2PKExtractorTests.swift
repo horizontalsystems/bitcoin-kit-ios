@@ -5,15 +5,13 @@ import HSCryptoKit
 
 class P2PKExtractorTests: XCTestCase {
 
-    private var scriptConverter: MockScriptConverter!
-    private var extractor: ScriptExtractor!
+    private var scriptConverter: MockIScriptConverter!
+    private var extractor: IScriptExtractor!
 
     override func setUp() {
         super.setUp()
 
-        let mockBitcoinKit = MockBitcoinKit()
-
-        scriptConverter = mockBitcoinKit.mockScriptConverter
+        scriptConverter = MockIScriptConverter()
         extractor = P2PKExtractor()
     }
 

@@ -5,7 +5,7 @@ import Cuckoo
 class EDAValidatorTests: XCTestCase {
 
 //    private var validator: EDAValidator!
-//    private var network: MockNetworkProtocol!
+//    private var network: MockINetwork!
 //
 //    private var block: Block!
 //    private var candidate: Block!

@@ -1,9 +1,8 @@
-import Foundation
 import RealmSwift
 import RxSwift
 
 class ProgressSyncer {
-    private let realmFactory: RealmFactory
+    private let realmFactory: IRealmFactory
     private let queue: DispatchQueue
     var lastBlockHeight: Int = 0
 
@@ -15,10 +14,21 @@ class ProgressSyncer {
         }
     }
 
-    init(realmFactory: RealmFactory, queue: DispatchQueue = DispatchQueue(label: "ProgressManager", qos: .background)) {
+    init(realmFactory: IRealmFactory, queue: DispatchQueue = DispatchQueue(label: "ProgressManager", qos: .background)) {
         self.realmFactory = realmFactory
         self.queue = queue
     }
+
+    private func run() throws {
+        let realm = realmFactory.realm
+        let blocksCount = realm.objects(Block.self).count
+
+        progress = lastBlockHeight == 0 ? 0 : Double(blocksCount) / Double(lastBlockHeight)
+    }
+
+}
+
+extension ProgressSyncer: IProgressSyncer {
 
     func enqueueRun() {
         queue.async {
@@ -28,13 +38,6 @@ class ProgressSyncer {
                 Logger.shared.log(self, "\(error)")
             }
         }
-    }
-
-    private func run() throws {
-        let realm = realmFactory.realm
-        let blocksCount = realm.objects(Block.self).count
-
-        progress = lastBlockHeight == 0 ? 0 : Double(blocksCount) / Double(lastBlockHeight)
     }
 
 }

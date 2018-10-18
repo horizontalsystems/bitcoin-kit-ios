@@ -1,9 +1,7 @@
-import Foundation
-
-class WitnessExtractor: ScriptExtractor {
+class WitnessExtractor: IScriptExtractor {
     var type: ScriptType { return .unknown }
 
-    func extract(from script: Script, converter: ScriptConverter) throws -> Data? {
+    func extract(from script: Script, converter: IScriptConverter) throws -> Data? {
         let witnessKeyHash = try keyHash(from: script)
 
         return witnessKeyHash

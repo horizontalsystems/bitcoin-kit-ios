@@ -3,7 +3,7 @@ import BigInt
 
 class LegacyTestNetDifficultyValidator: IBlockValidator {
 
-    func validate(candidate: Block, block: Block, network: NetworkProtocol) throws {
+    func validate(candidate: Block, block: Block, network: INetwork) throws {
         guard let candidateHeader = candidate.header, let previousBlockHeader = block.header else {
             throw Block.BlockError.noHeader
         }

@@ -4,13 +4,13 @@ import RxSwift
 
 class PeerGroup {
 
-    weak var blockSyncer: BlockSyncer?
+    weak var blockSyncer: IBlockSyncer?
     weak var transactionSyncer: ITransactionSyncer?
 
-    private let factory: Factory
-    private let network: NetworkProtocol
-    private let peerHostManager: PeerHostManager
-    private var bloomFilterManager: BloomFilterManager
+    private let factory: IFactory
+    private let network: INetwork
+    private var peerHostManager: IPeerHostManager
+    private var bloomFilterManager: IBloomFilterManager
     private var peerCount: Int
 
     private var started: Bool = false
@@ -26,7 +26,7 @@ class PeerGroup {
     private let syncPeerQueue: DispatchQueue
     private let inventoryQueue: DispatchQueue
 
-    init(factory: Factory, network: NetworkProtocol, peerHostManager: PeerHostManager, bloomFilterManager: BloomFilterManager, peerCount: Int = 10,
+    init(factory: IFactory, network: INetwork, peerHostManager: IPeerHostManager, bloomFilterManager: IBloomFilterManager, peerCount: Int = 10,
          localQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Local Queue", qos: .userInitiated),
          syncPeerQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Sync Peer Queue", qos: .userInitiated),
          inventoryQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Inventory Queue", qos: .background)) {
@@ -42,36 +42,6 @@ class PeerGroup {
 
         self.peerHostManager.delegate = self
         self.bloomFilterManager.delegate = self
-    }
-
-    func start() {
-        guard started == false else {
-            return
-        }
-
-        started = true
-
-        addNonSentTransactions()
-        connectPeersIfRequired()
-    }
-
-    func stop() {
-        started = false
-
-        for peer in connectedPeers {
-            peer.disconnect()
-        }
-    }
-
-    func send(transaction: Transaction) {
-        // Transaction is managed by Realm. We need to serialize and deserialize it in order to make it non-managed.
-        let data = TransactionSerializer.serialize(transaction: transaction)
-        let transaction = TransactionSerializer.deserialize(data: data)
-
-        localQueue.async {
-            self.pendingTransactions.append(transaction)
-            self.dispatchTasks()
-        }
     }
 
     private func connectPeersIfRequired() {
@@ -206,6 +176,40 @@ class PeerGroup {
                 self.syncPeer = nonSyncedPeer
                 self.downloadBlockchain()
             }
+        }
+    }
+
+}
+
+extension PeerGroup: IPeerGroup {
+
+    func start() {
+        guard started == false else {
+            return
+        }
+
+        started = true
+
+        addNonSentTransactions()
+        connectPeersIfRequired()
+    }
+
+    func stop() {
+        started = false
+
+        for peer in connectedPeers {
+            peer.disconnect()
+        }
+    }
+
+    func send(transaction: Transaction) {
+        // Transaction is managed by Realm. We need to serialize and deserialize it in order to make it non-managed.
+        let data = TransactionSerializer.serialize(transaction: transaction)
+        let transaction = TransactionSerializer.deserialize(data: data)
+
+        localQueue.async {
+            self.pendingTransactions.append(transaction)
+            self.dispatchTasks()
         }
     }
 

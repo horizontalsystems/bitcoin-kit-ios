@@ -1,5 +1,3 @@
-import Foundation
-
 class ScriptConverter {
 
     func encode(script: Script) -> Data {
@@ -12,24 +10,6 @@ class ScriptConverter {
             }
         }
         return scriptData
-    }
-
-    func decode(data: Data) throws -> Script {
-        var chunks = [Chunk]()
-        var it = 0
-        while it < data.count {
-            let opCode = data[it]
-            switch opCode {
-                case 0x01...0x4e:
-                    let range = try getPushRange(data: data, it: it)
-                    chunks.append(Chunk(scriptData: data, index: it, payloadRange: range))
-                    it = range.upperBound
-                default:
-                    chunks.append(Chunk(scriptData: data, index: it, payloadRange: nil))
-                    it += 1
-            }
-        }
-        return Script(with: data, chunks: chunks)
     }
 
     private func getPushRange(data: Data, it: Int) throws -> Range<Int> {
@@ -69,6 +49,28 @@ class ScriptConverter {
             throw ScriptError.wrongScriptLength
         }
         return Range(uncheckedBounds: (lower: it + bytesOffset, upper: it + bytesOffset + keyLength))
+    }
+
+}
+
+extension ScriptConverter: IScriptConverter {
+
+    func decode(data: Data) throws -> Script {
+        var chunks = [Chunk]()
+        var it = 0
+        while it < data.count {
+            let opCode = data[it]
+            switch opCode {
+            case 0x01...0x4e:
+                let range = try getPushRange(data: data, it: it)
+                chunks.append(Chunk(scriptData: data, index: it, payloadRange: range))
+                it = range.upperBound
+            default:
+                chunks.append(Chunk(scriptData: data, index: it, payloadRange: nil))
+                it += 1
+            }
+        }
+        return Script(with: data, chunks: chunks)
     }
 
 }

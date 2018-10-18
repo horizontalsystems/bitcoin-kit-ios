@@ -16,9 +16,8 @@ class TransactionLinkerTests: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        let mockBitcoinKit = MockBitcoinKit()
-
-        realm = mockBitcoinKit.realm
+        realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
+        try! realm.write { realm.deleteAll() }
 
         linker = TransactionLinker()
         transaction = TestData.p2pkhTransaction

@@ -1,5 +1,3 @@
-import Foundation
-
 class TransactionCreator {
     enum CreationError: Error {
         case noChangeAddress
@@ -8,19 +6,23 @@ class TransactionCreator {
 
     let feeRate: Int = 60
 
-    private let realmFactory: RealmFactory
-    private let transactionBuilder: TransactionBuilder
-    private let transactionProcessor: TransactionProcessor
-    private let peerGroup: PeerGroup
-    private let addressManager: AddressManager
+    private let realmFactory: IRealmFactory
+    private let transactionBuilder: ITransactionBuilder
+    private let transactionProcessor: ITransactionProcessor
+    private let peerGroup: IPeerGroup
+    private let addressManager: IAddressManager
 
-    init(realmFactory: RealmFactory, transactionBuilder: TransactionBuilder, transactionProcessor: TransactionProcessor, peerGroup: PeerGroup, addressManager: AddressManager) {
+    init(realmFactory: IRealmFactory, transactionBuilder: ITransactionBuilder, transactionProcessor: ITransactionProcessor, peerGroup: IPeerGroup, addressManager: IAddressManager) {
         self.realmFactory = realmFactory
         self.transactionBuilder = transactionBuilder
         self.transactionProcessor = transactionProcessor
         self.peerGroup = peerGroup
         self.addressManager = addressManager
     }
+
+}
+
+extension TransactionCreator: ITransactionCreator {
 
     func create(to address: String, value: Int) throws {
         let realm = realmFactory.realm
@@ -29,7 +31,7 @@ class TransactionCreator {
             throw CreationError.noChangeAddress
         }
 
-        let transaction = try transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: true, changePubKey: changePubKey, toAddress: address)
+        let transaction = try transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: true, changeScriptType: .p2pkh, changePubKey: changePubKey, toAddress: address)
 
         if realm.objects(Transaction.self).filter("reversedHashHex = %@", transaction.reversedHashHex).first != nil {
             throw CreationError.transactionAlreadyExists

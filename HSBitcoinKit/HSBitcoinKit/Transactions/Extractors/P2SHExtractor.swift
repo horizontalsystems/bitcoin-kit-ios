@@ -1,9 +1,7 @@
-import Foundation
-
-class P2SHExtractor: ScriptExtractor {
+class P2SHExtractor: IScriptExtractor {
     var type: ScriptType { return .p2sh }                   // lockingScript: A914{20-byte-script-hash}87
 
-    func extract(from script: Script, converter: ScriptConverter) throws -> Data? {
+    func extract(from script: Script, converter: IScriptConverter) throws -> Data? {
         guard script.length == type.size else {
             throw ScriptError.wrongScriptLength
         }

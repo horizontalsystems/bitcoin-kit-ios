@@ -4,7 +4,7 @@ import Cuckoo
 
 class MockValidatorHelper {
 
-    var mockFactory: MockBlockValidatorFactory
+    var mockFactory: MockIBlockValidatorFactory
 
     var mockHeaderValidator: MockIBlockValidator
     var mockBitsValidator: MockIBlockValidator
@@ -13,8 +13,8 @@ class MockValidatorHelper {
     var mockDAAValidator: MockIBlockValidator
     var mockEDAValidator: MockIBlockValidator
 
-    init(mockBitcoinKit: MockBitcoinKit) {
-        mockFactory = mockBitcoinKit.mockValidatorFactory
+    init() {
+        mockFactory = MockIBlockValidatorFactory()
 
         mockHeaderValidator = MockIBlockValidator()
         stub(mockHeaderValidator) { mock in

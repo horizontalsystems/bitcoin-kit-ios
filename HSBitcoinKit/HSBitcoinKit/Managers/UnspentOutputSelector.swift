@@ -12,11 +12,15 @@ class UnspentOutputSelector {
         case notEnough
     }
 
-    let calculator: TransactionSizeCalculator
+    let calculator: ITransactionSizeCalculator
 
-    init(calculator: TransactionSizeCalculator) {
+    init(calculator: ITransactionSizeCalculator) {
         self.calculator = calculator
     }
+
+}
+
+extension UnspentOutputSelector: IUnspentOutputSelector {
 
     func select(value: Int, feeRate: Int, outputType: ScriptType = .p2pkh, senderPay: Bool, outputs: [TransactionOutput]) throws -> SelectedUnspentOutputInfo {
         guard !outputs.isEmpty else {

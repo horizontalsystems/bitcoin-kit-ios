@@ -4,8 +4,8 @@ import Cuckoo
 
 class PFromSHExtractorTests: XCTestCase {
 
-    private var scriptConverter: MockScriptConverter!
-    private var extractor: ScriptExtractor!
+    private var scriptConverter: MockIScriptConverter!
+    private var extractor: IScriptExtractor!
 
     private var data: Data!
     private var redeemScriptData: Data!
@@ -27,7 +27,7 @@ class PFromSHExtractorTests: XCTestCase {
         mockScript = MockScript(with: Data(), chunks: [])
         mockRedeemScript = MockScript(with: Data(), chunks: [])
 
-        scriptConverter = MockScriptConverter()
+        scriptConverter = MockIScriptConverter()
         stub(scriptConverter) { mock in
             when(mock.decode(data: any())).thenReturn(mockRedeemScript)
         }

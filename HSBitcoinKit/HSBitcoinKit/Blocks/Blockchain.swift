@@ -1,14 +1,17 @@
 import RealmSwift
-import Foundation
 
 class Blockchain {
-    private let network: NetworkProtocol
-    private let factory: Factory
+    private let network: INetwork
+    private let factory: IFactory
 
-    init(network: NetworkProtocol, factory: Factory) {
+    init(network: INetwork, factory: IFactory) {
         self.network = network
         self.factory = factory
     }
+
+}
+
+extension Blockchain: IBlockchain {
 
     func connect(merkleBlock: MerkleBlock, realm: Realm) throws -> Block? {
         if let _ = realm.objects(Block.self).filter("headerHash = %@", merkleBlock.headerHash).first {
@@ -25,4 +28,5 @@ class Blockchain {
 
         return block
     }
+
 }

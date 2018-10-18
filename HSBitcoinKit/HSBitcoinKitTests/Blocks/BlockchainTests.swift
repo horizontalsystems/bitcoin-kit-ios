@@ -6,20 +6,15 @@ import RealmSwift
 
 class BlockChainBuilderTest: XCTestCase {
 
-    private var mockNetwork: MockNetworkProtocol!
-    private var mockFactory: MockFactory!
+    private var mockNetwork: MockINetwork!
+    private var mockFactory: MockIFactory!
     private var builder: Blockchain!
-
-    private var realm: Realm!
 
     override func setUp() {
         super.setUp()
 
-        let mockBitcoinKit = MockBitcoinKit()
-
-        mockNetwork = mockBitcoinKit.mockNetwork
-        mockFactory = mockBitcoinKit.mockFactory
-        realm = mockBitcoinKit.realm
+        mockNetwork = MockINetwork()
+        mockFactory = MockIFactory()
 
         builder = Blockchain(network: mockNetwork, factory: mockFactory)
     }
@@ -27,7 +22,6 @@ class BlockChainBuilderTest: XCTestCase {
     override func tearDown() {
         mockNetwork = nil
         mockFactory = nil
-        realm = nil
         builder = nil
 
         super.tearDown()

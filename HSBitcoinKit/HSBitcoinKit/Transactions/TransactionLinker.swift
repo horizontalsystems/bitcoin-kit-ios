@@ -1,7 +1,6 @@
-import Foundation
 import RealmSwift
 
-class TransactionLinker {
+class TransactionLinker: ITransactionLinker {
 
     func handle(transaction: Transaction, realm: Realm) {
         for input in transaction.inputs {

@@ -5,14 +5,13 @@ import RealmSwift
 
 class TransactionBuilderTests: XCTestCase {
 
-    private var realm: Realm!
-    private var mockUnspentOutputSelector: MockUnspentOutputSelector!
-    private var mockUnspentOutputProvider: MockUnspentOutputProvider!
-    private var mockTransactionSizeCalculator: MockTransactionSizeCalculator!
-    private var mockAddressConverter: MockAddressConverter!
-    private var mockInputSigner: MockInputSigner!
-    private var mockScriptBuilder:  MockScriptBuilder!
-    private var mockFactory: MockFactory!
+    private var mockUnspentOutputSelector: MockIUnspentOutputSelector!
+    private var mockUnspentOutputProvider: MockIUnspentOutputProvider!
+    private var mockTransactionSizeCalculator: MockITransactionSizeCalculator!
+    private var mockAddressConverter: MockIAddressConverter!
+    private var mockInputSigner: MockIInputSigner!
+    private var mockScriptBuilder: MockIScriptBuilder!
+    private var mockFactory: MockIFactory!
 
     private var transactionBuilder: TransactionBuilder!
 
@@ -34,17 +33,13 @@ class TransactionBuilderTests: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        let mockBitcoinKit = MockBitcoinKit()
-
-        realm = mockBitcoinKit.realm
-
-        mockUnspentOutputSelector = mockBitcoinKit.mockUnspentOutputSelector
-        mockUnspentOutputProvider = mockBitcoinKit.mockUnspentOutputProvider
-        mockTransactionSizeCalculator = mockBitcoinKit.mockTransactionSizeCalculator
-        mockAddressConverter = mockBitcoinKit.mockAddressConverter
-        mockInputSigner = mockBitcoinKit.mockInputSigner
-        mockScriptBuilder = mockBitcoinKit.mockScriptBuilder
-        mockFactory = mockBitcoinKit.mockFactory
+        mockUnspentOutputSelector = MockIUnspentOutputSelector()
+        mockUnspentOutputProvider = MockIUnspentOutputProvider()
+        mockTransactionSizeCalculator = MockITransactionSizeCalculator()
+        mockAddressConverter = MockIAddressConverter()
+        mockInputSigner = MockIInputSigner()
+        mockScriptBuilder = MockIScriptBuilder()
+        mockFactory = MockIFactory()
 
         transactionBuilder = TransactionBuilder(unspentOutputSelector: mockUnspentOutputSelector, unspentOutputProvider: mockUnspentOutputProvider, transactionSizeCalculator: mockTransactionSizeCalculator, addressConverter: mockAddressConverter, inputSigner: mockInputSigner, scriptBuilder: mockScriptBuilder, factory: mockFactory)
 
@@ -55,9 +50,6 @@ class TransactionBuilderTests: XCTestCase {
         toAddressSH = "2MyQWMrsLsqAMSUeusduAzN6pWuH2V27ykE"
 
         let previousTransaction = TestData.p2pkhTransaction
-        try! realm.write {
-            realm.add(previousTransaction, update: true)
-        }
 
         unspentOutputs = SelectedUnspentOutputInfo(outputs: [previousTransaction.outputs[0]], totalValue: previousTransaction.outputs[0].value, fee: 1008)
         totalInputValue = unspentOutputs.outputs[0].value
@@ -116,7 +108,6 @@ class TransactionBuilderTests: XCTestCase {
     }
 
     override func tearDown() {
-        realm = nil
         unspentOutputs = nil
         mockUnspentOutputSelector = nil
         mockUnspentOutputProvider = nil

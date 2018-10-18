@@ -1,6 +1,4 @@
-import Foundation
-
-class ScriptBuilder {
+class ScriptBuilder: IScriptBuilder {
 
     enum BuildError: Error { case wrongDataCount, unknownType }
 

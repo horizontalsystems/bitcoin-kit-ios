@@ -4,8 +4,8 @@ import Cuckoo
 
 class P2MultiSigExtractorTests: XCTestCase {
 
-    private var extractor: ScriptExtractor!
-    private var scriptConverter: MockScriptConverter!
+    private var extractor: IScriptExtractor!
+    private var scriptConverter: MockIScriptConverter!
     private var script: MockScript!
     private var data: Data!
 
@@ -17,11 +17,9 @@ class P2MultiSigExtractorTests: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        let mockBitcoinKit = MockBitcoinKit()
-
         data = Data(hex: "522102d83bba35a8022c247b645eed6f81ac41b7c1580de550e7e82c75ad63ee9ac2fe2103aeb681df5ac19e449a872b9e9347f1db5a0394d2ec5caf2a9c143f86e232b0d82103d728ad6757d4784effea04d47baafa216cf474866c2d4dc99b1e8e3eb936e73153ae")!
 
-        scriptConverter = mockBitcoinKit.mockScriptConverter
+        scriptConverter = MockIScriptConverter()
         script = MockScript(with: Data(), chunks: [])
 
         mChunk = MockChunk(scriptData: data, index: 0)

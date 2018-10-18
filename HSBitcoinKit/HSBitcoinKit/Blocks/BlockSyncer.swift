@@ -1,4 +1,3 @@
-import Foundation
 import HSCryptoKit
 import RealmSwift
 
@@ -8,17 +7,17 @@ class BlockSyncer {
         case nextBlockNotFull
     }
 
-    private let realmFactory: RealmFactory
-    private let network: NetworkProtocol
-    private let progressSyncer: ProgressSyncer
-    private let transactionProcessor: TransactionProcessor
-    private let blockchain: Blockchain
-    private let addressManager: AddressManager
+    private let realmFactory: IRealmFactory
+    private let network: INetwork
+    private let progressSyncer: IProgressSyncer
+    private let transactionProcessor: ITransactionProcessor
+    private let blockchain: IBlockchain
+    private let addressManager: IAddressManager
 
     private let hashCheckpointThreshold: Int
 
-    init(realmFactory: RealmFactory, network: NetworkProtocol, progressSyncer: ProgressSyncer,
-         transactionProcessor: TransactionProcessor, blockchain: Blockchain, addressManager: AddressManager,
+    init(realmFactory: IRealmFactory, network: INetwork, progressSyncer: IProgressSyncer,
+         transactionProcessor: ITransactionProcessor, blockchain: IBlockchain, addressManager: IAddressManager,
          hashCheckpointThreshold: Int = 100) {
         self.realmFactory = realmFactory
         self.network = network
@@ -36,6 +35,9 @@ class BlockSyncer {
             }
         }
     }
+}
+
+extension BlockSyncer: IBlockSyncer {
 
     func getBlockHashes() -> [Data] {
         let realm = realmFactory.realm

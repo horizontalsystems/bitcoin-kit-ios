@@ -1,6 +1,6 @@
 import Foundation
 
-class BitcoinMainNet: NetworkProtocol {
+class BitcoinMainNet: INetwork {
     private let headerValidator: IBlockValidator
     private let bitsValidator: IBlockValidator
     private let difficultyValidator: IBlockValidator
@@ -51,7 +51,7 @@ class BitcoinMainNet: NetworkProtocol {
             ),
             height: 536256)
 
-    required init(validatorFactory: BlockValidatorFactory) {
+    required init(validatorFactory: IBlockValidatorFactory) {
         headerValidator = validatorFactory.validator(for: .header)
         bitsValidator = validatorFactory.validator(for: .bits)
         difficultyValidator = validatorFactory.validator(for: .legacy)

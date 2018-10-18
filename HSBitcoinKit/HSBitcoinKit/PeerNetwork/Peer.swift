@@ -13,7 +13,7 @@ class Peer {
     private var tasks: [PeerTask] = []
 
     private let queue: DispatchQueue
-    private let network: NetworkProtocol
+    private let network: INetwork
 
     var connected: Bool = false
     var blockHashesSynced: Bool = false
@@ -31,7 +31,7 @@ class Peer {
         return connection.logName
     }
 
-    init(host: String, network: NetworkProtocol) {
+    init(host: String, network: INetwork) {
         connection = PeerConnection(host: host, network: network)
         queue = DispatchQueue(label: "Peer: \(host)", qos: .userInitiated)
         self.network = network

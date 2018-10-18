@@ -117,6 +117,10 @@ class ApiManager {
         })
     }
 
+}
+
+extension ApiManager: IApiManager {
+
     func getBlockHashes(address: String) -> Observable<[BlockResponse]> {
         let addressPath = [
             String(address.prefix(3)),

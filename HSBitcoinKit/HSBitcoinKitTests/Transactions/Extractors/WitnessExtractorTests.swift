@@ -4,8 +4,8 @@ import Cuckoo
 
 class WitnessExtractorTests: XCTestCase {
 
-    private var scriptConverter: MockScriptConverter!
-    private var extractor: ScriptExtractor!
+    private var scriptConverter: MockIScriptConverter!
+    private var extractor: IScriptExtractor!
 
     private var data: Data!
     private var redeemScriptData: Data!
@@ -21,7 +21,7 @@ class WitnessExtractorTests: XCTestCase {
 
         mockScript = MockScript(with: Data(), chunks: [])
 
-        scriptConverter = MockScriptConverter()
+        scriptConverter = MockIScriptConverter()
         extractor = WitnessExtractor()
     }
 

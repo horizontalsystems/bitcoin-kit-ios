@@ -4,9 +4,9 @@ import RealmSwift
 @testable import HSBitcoinKit
 
 class TransactionProcessorTests: XCTestCase {
-    private var mockExtractor: MockTransactionExtractor!
-    private var mockLinker: MockTransactionLinker!
-    private var mockAddressManager: MockAddressManager!
+    private var mockExtractor: MockITransactionExtractor!
+    private var mockLinker: MockITransactionLinker!
+    private var mockAddressManager: MockIAddressManager!
     private var transactionProcessor: TransactionProcessor!
 
     private var realm: Realm!
@@ -14,13 +14,17 @@ class TransactionProcessorTests: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        let mockBitcoinKit = MockBitcoinKit()
+        realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
+        try! realm.write { realm.deleteAll() }
 
-        mockExtractor = mockBitcoinKit.mockTransactionExtractor
-        mockLinker = mockBitcoinKit.mockTransactionLinker
-        mockAddressManager = mockBitcoinKit.mockAddressManager
+        let mockRealmFactory = MockIRealmFactory()
+        stub(mockRealmFactory) { mock in
+            when(mock.realm.get).thenReturn(realm)
+        }
 
-        realm = mockBitcoinKit.realm
+        mockExtractor = MockITransactionExtractor()
+        mockLinker = MockITransactionLinker()
+        mockAddressManager = MockIAddressManager()
 
         stub(mockLinker) { mock in
             when(mock.handle(transaction: any(), realm: any())).thenDoNothing()
@@ -29,10 +33,10 @@ class TransactionProcessorTests: XCTestCase {
             when(mock.extract(transaction: any(), realm: any())).thenDoNothing()
         }
         stub(mockAddressManager) { mock in
-            when(mock.fillGap(afterExternalKey: any(), afterInternalKey: any())).thenDoNothing()
+            when(mock.fillGap()).thenDoNothing()
         }
 
-        transactionProcessor = TransactionProcessor(realmFactory: mockBitcoinKit.mockRealmFactory, extractor: mockExtractor, linker: mockLinker, addressManager: mockAddressManager, queue: DispatchQueue.main)
+        transactionProcessor = TransactionProcessor(realmFactory: mockRealmFactory, extractor: mockExtractor, linker: mockLinker, addressManager: mockAddressManager, queue: DispatchQueue.main)
     }
 
     override func tearDown() {
@@ -66,7 +70,7 @@ class TransactionProcessorTests: XCTestCase {
         verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
         verify(mockLinker, never()).handle(transaction: equal(to: processedTransaction), realm: equal(to: realm))
 
-        verify(mockAddressManager).fillGap(afterExternalKey: any(), afterInternalKey: any())
+        verify(mockAddressManager).fillGap()
 
         XCTAssertEqual(transaction.processed, true)
     }

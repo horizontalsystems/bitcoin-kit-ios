@@ -15,7 +15,7 @@ struct NetworkMessage {
 
     static let minimumLength = 24
 
-    private init(network: NetworkProtocol, command: String, length: UInt32, checksum: Data, message: IMessage) {
+    private init(network: INetwork, command: String, length: UInt32, checksum: Data, message: IMessage) {
         self.magic = network.magic
         self.command = command
         self.length = length
@@ -23,7 +23,7 @@ struct NetworkMessage {
         self.message = message
     }
 
-    init(network: NetworkProtocol, message: IMessage) {
+    init(network: INetwork, message: IMessage) {
         let serializedMessage = message.serialized()
         let checksum = Data(CryptoKit.sha256sha256(serializedMessage).prefix(4))
         let length = UInt32(serializedMessage.count)
@@ -69,7 +69,7 @@ struct NetworkMessage {
         "filterload": FilterLoadMessage.self
     ]
 
-    static func deserialize(data: Data, network: NetworkProtocol) -> NetworkMessage? {
+    static func deserialize(data: Data, network: INetwork) -> NetworkMessage? {
         let byteStream = ByteStream(data)
 
         let magic = byteStream.read(UInt32.self).bigEndian
