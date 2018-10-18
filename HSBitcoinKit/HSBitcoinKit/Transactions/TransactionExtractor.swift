@@ -26,19 +26,21 @@ extension TransactionExtractor: ITransactionExtractor {
 
     func extract(transaction: Transaction, realm: Realm) {
         transaction.outputs.forEach { output in
+            var keyHash: Data?
             for extractor in scriptOutputExtractors {
                 do {
                     let script = try scriptConverter.decode(data: output.lockingScript)
                     let payload = try extractor.extract(from: script, converter: scriptConverter)
                     output.scriptType = extractor.type
-                    output.keyHash = payload
+                    keyHash = payload
                     break
                 } catch {
                     //                    print("\(error) can't parse output by this extractor")
                 }
             }
 
-            if let keyHash = output.keyHash, let address = try? addressConverter.convert(keyHash: keyHash, type: output.scriptType) {
+            if let keyHash = keyHash, let address = try? addressConverter.convert(keyHash: keyHash, type: output.scriptType) {
+                output.keyHash = address.keyHash
                 output.address = address.stringValue
 
                 if !keyHash.isEmpty, let pubKey = realm.objects(PublicKey.self).filter("keyHash = %@", keyHash).first {
@@ -53,12 +55,17 @@ extension TransactionExtractor: ITransactionExtractor {
                 do {
                     let script = try scriptConverter.decode(data: input.signatureScript)
                     if let payload = try extractor.extract(from: script, converter: scriptConverter) {
+                        var keyHash: Data?
                         switch extractor.type {
-                        case .p2sh, .p2pkh, .p2wpkh:
-                            let ripemd160 = CryptoKit.sha256ripemd160(payload)
-                            input.keyHash = ripemd160
-                            input.address = (try? addressConverter.convert(keyHash: ripemd160, type: extractor.type))?.stringValue
+                        case .p2wpkh:
+                            keyHash = payload
+                        case .p2sh, .p2pkh:
+                            keyHash = CryptoKit.sha256ripemd160(payload)
                         default: break
+                        }
+                        if let keyHash = keyHash, let address = try? addressConverter.convert(keyHash: keyHash, type: extractor.type) {
+                            input.keyHash = address.keyHash
+                            input.address = address.stringValue
                         }
                         break
                     }
