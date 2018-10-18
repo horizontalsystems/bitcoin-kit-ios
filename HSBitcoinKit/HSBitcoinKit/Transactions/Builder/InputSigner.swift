@@ -34,13 +34,13 @@ extension InputSigner: IInputSigner {
             throw SignError.noPublicKeyInAddress
         }
 
-        guard let privateKey = try? hdWallet.privateKey(index: pubKey.index, chain: pubKey.external ? .external : .internal) else {
+        guard let privateKeyData = try? hdWallet.privateKeyData(index: pubKey.index, external: pubKey.external) else {
             throw SignError.noPrivateKey
         }
 
         let serializedTransaction = try TransactionSerializer.serializedForSignature(transaction: transaction, inputIndex: index) + UInt32(1)
         let signatureHash = CryptoKit.sha256sha256(serializedTransaction)
-        let signature = try CryptoKit.sign(data: signatureHash, privateKey: privateKey.raw) + Data(bytes: [0x01])
+        let signature = try CryptoKit.sign(data: signatureHash, privateKey: privateKeyData) + Data(bytes: [0x01])
 
         switch prevOutput.scriptType {
         case .p2pk, .p2wpkh: return [signature]
