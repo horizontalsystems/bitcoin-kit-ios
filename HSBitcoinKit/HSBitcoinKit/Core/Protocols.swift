@@ -184,6 +184,21 @@ protocol IBlockSyncer: class {
     func shouldRequestBlock(withHash hash: Data) -> Bool
 }
 
+protocol IDataProvider {
+    var delegate: DataProviderDelegate? { get set }
+
+    var transactions: [TransactionInfo] { get }
+    var lastBlockInfo: BlockInfo? { get }
+    var balance: Int { get }
+    var receiveAddress: String { get }
+    var progress: Double { get }
+    func send(to address: String, value: Int) throws
+    func validate(address: String) throws
+    func fee(for value: Int, toAddress: String?, senderPay: Bool) throws -> Int
+
+    var debugInfo: String { get }
+}
+
 protocol INetwork: class {
     var merkleBlockValidator: MerkleBlockValidator { get }
 

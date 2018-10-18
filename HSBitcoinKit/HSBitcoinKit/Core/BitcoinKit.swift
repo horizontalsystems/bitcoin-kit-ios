@@ -1,7 +1,6 @@
 import Foundation
 import HSHDWalletKit
 import RealmSwift
-import RxSwift
 import BigInt
 import HSCryptoKit
 
@@ -15,54 +14,54 @@ public class BitcoinKit {
         case bitcoinCashTestNet
     }
 
-    let disposeBag = DisposeBag()
-
     public weak var delegate: BitcoinKitDelegate?
 
     private var unspentOutputsNotificationToken: NotificationToken?
     private var transactionsNotificationToken: NotificationToken?
     private var blocksNotificationToken: NotificationToken?
 
-    let difficultyEncoder: IDifficultyEncoder
-    let blockHelper: IBlockHelper
-    let validatorFactory: IBlockValidatorFactory
+    private let difficultyEncoder: IDifficultyEncoder
+    private let blockHelper: IBlockHelper
+    private let validatorFactory: IBlockValidatorFactory
 
-    let network: INetwork
+    private let network: INetwork
 
-    let realmFactory: IRealmFactory
+    private let realmFactory: IRealmFactory
 
-    let hdWallet: IHDWallet
+    private let hdWallet: IHDWallet
 
-    let peerHostManager: IPeerHostManager
-    let stateManager: IStateManager
-    let apiManager: IApiManager
-    let addressManager: IAddressManager
-    let bloomFilterManager: IBloomFilterManager
+    private let peerHostManager: IPeerHostManager
+    private let stateManager: IStateManager
+    private let apiManager: IApiManager
+    private let addressManager: IAddressManager
+    private let bloomFilterManager: IBloomFilterManager
 
-    var peerGroup: IPeerGroup
-    let factory: IFactory
+    private var peerGroup: IPeerGroup
+    private let factory: IFactory
 
-    let initialSyncer: IInitialSyncer
-    let progressSyncer: IProgressSyncer
+    private let initialSyncer: IInitialSyncer
+    private let progressSyncer: IProgressSyncer
 
-    let bech32AddressConverter: IBech32AddressConverter
-    let addressConverter: IAddressConverter
-    let scriptConverter: IScriptConverter
-    let transactionProcessor: ITransactionProcessor
-    let transactionExtractor: ITransactionExtractor
-    let transactionLinker: ITransactionLinker
-    let transactionSyncer: ITransactionSyncer
-    let transactionCreator: ITransactionCreator
-    let transactionBuilder: ITransactionBuilder
-    let blockchain: IBlockchain
+    private let bech32AddressConverter: IBech32AddressConverter
+    private let addressConverter: IAddressConverter
+    private let scriptConverter: IScriptConverter
+    private let transactionProcessor: ITransactionProcessor
+    private let transactionExtractor: ITransactionExtractor
+    private let transactionLinker: ITransactionLinker
+    private let transactionSyncer: ITransactionSyncer
+    private let transactionCreator: ITransactionCreator
+    private let transactionBuilder: ITransactionBuilder
+    private let blockchain: IBlockchain
 
-    let inputSigner: IInputSigner
-    let scriptBuilder: IScriptBuilder
-    let transactionSizeCalculator: ITransactionSizeCalculator
-    let unspentOutputSelector: IUnspentOutputSelector
-    let unspentOutputProvider: IUnspentOutputProvider
+    private let inputSigner: IInputSigner
+    private let scriptBuilder: IScriptBuilder
+    private let transactionSizeCalculator: ITransactionSizeCalculator
+    private let unspentOutputSelector: IUnspentOutputSelector
+    private let unspentOutputProvider: IUnspentOutputProvider
 
-    let blockSyncer: BlockSyncer
+    private let blockSyncer: IBlockSyncer
+
+    private var dataProvider: IDataProvider
 
     public init(withWords words: [String], networkType: NetworkType) {
         let wordsHash = words.joined().data(using: .utf8).map { CryptoKit.sha256($0).hex } ?? words[0]
@@ -133,56 +132,17 @@ public class BitcoinKit {
         peerGroup.blockSyncer = blockSyncer
         peerGroup.transactionSyncer = transactionSyncer
 
-        unspentOutputsNotificationToken = unspentOutputRealmResults.observe { [weak self] changeset in
-            self?.handleUnspentOutputs(changeset: changeset)
-        }
-
-        transactionsNotificationToken = transactionRealmResults.observe { [weak self] changeset in
-            self?.handleTransactions(changeset: changeset)
-        }
-
-        blocksNotificationToken = blockRealmResults.observe { [weak self] changeset in
-            self?.handleBlocks(changeset: changeset)
-        }
-
-        progressSyncer.subject.subscribeInBackground(disposeBag: disposeBag, onNext: { [weak self] progress in
-            self?.handleProgressUpdate(progress: progress)
-        })
-
-        progressSyncer.enqueueRun()
-        bloomFilterManager.regenerateBloomFilter()
+        dataProvider = DataProvider(realmFactory: realmFactory, progressSyncer: progressSyncer, addressManager: addressManager, addressConverter: addressConverter, transactionCreator: transactionCreator, transactionBuilder: transactionBuilder, network: network)
+        dataProvider.delegate = self
     }
 
-    deinit {
-        unspentOutputsNotificationToken?.invalidate()
-        transactionsNotificationToken?.invalidate()
-        blocksNotificationToken?.invalidate()
-    }
+}
 
-    public func showRealmInfo() {
-        let realm = realmFactory.realm
-
-        let blocks = realm.objects(Block.self).sorted(byKeyPath: "height")
-        let syncedBlocks = blocks
-        let pubKeys = realm.objects(PublicKey.self)
-
-        for pubKey in pubKeys {
-            let scriptType: ScriptType = (network is BitcoinCashMainNet || network is BitcoinCashTestNet) ? .p2pkh : .p2wpkh
-            let bechAddress = (try? addressConverter.convert(keyHash: pubKey.keyHash, type: scriptType).stringValue) ?? "none"
-            print("\(pubKey.index) --- \(pubKey.external) --- \(pubKey.keyHash.hex) --- \(addressConverter.convertToLegacy(keyHash: pubKey.keyHash, version: network.pubKeyHash, addressType: .pubKeyHash).stringValue) --- \(bechAddress)")
-        }
-        print("PUBLIC KEYS COUNT: \(pubKeys.count)")
-
-        print("BLOCK COUNT: \(blocks.count) --- \(syncedBlocks.count) synced")
-        if let block = syncedBlocks.first {
-            print("First Synced Block: \(block.height) --- \(block.reversedHeaderHashHex)")
-        }
-        if let block = syncedBlocks.last {
-            print("Last Synced Block: \(block.height) --- \(block.reversedHeaderHashHex)")
-        }
-    }
+extension BitcoinKit {
 
     public func start() throws {
+        progressSyncer.enqueueRun()
+        bloomFilterManager.regenerateBloomFilter()
         try initialSyncer.sync()
     }
 
@@ -194,137 +154,64 @@ public class BitcoinKit {
         }
     }
 
+}
+
+extension BitcoinKit {
+
     public var transactions: [TransactionInfo] {
-        return transactionRealmResults.map { transactionInfo(fromTransaction: $0) }
+        return dataProvider.transactions
     }
 
     public var lastBlockInfo: BlockInfo? {
-        return blockRealmResults.last.map { blockInfo(fromBlock: $0) }
+        return dataProvider.lastBlockInfo
     }
 
     public var balance: Int {
-        var balance = 0
-
-        for output in unspentOutputRealmResults {
-            balance += output.value
-        }
-
-        return balance
+        return dataProvider.balance
     }
 
     public func send(to address: String, value: Int) throws {
-        try transactionCreator.create(to: address, value: value)
+        try dataProvider.send(to: address, value: value)
     }
 
     public func validate(address: String) throws {
-       _ = try addressConverter.convert(address: address)
+       try dataProvider.validate(address: address)
     }
 
     public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool) throws -> Int {
-        return try transactionBuilder.fee(for: value, feeRate: transactionCreator.feeRate, senderPay: true, address: toAddress)
+        return try dataProvider.fee(for: value, toAddress: toAddress, senderPay: senderPay)
     }
 
     public var receiveAddress: String {
-        return (try? addressManager.receiveAddress()) ?? ""
+        return dataProvider.receiveAddress
     }
 
     public var progress: Double {
-        return progressSyncer.progress
+        return dataProvider.progress
     }
 
-    private func handleTransactions(changeset: RealmCollectionChange<Results<Transaction>>) {
-        if case let .update(collection, deletions, insertions, modifications) = changeset {
-            delegate?.transactionsUpdated(
-                    bitcoinKit: self,
-                    inserted: insertions.map { collection[$0] }.map { transactionInfo(fromTransaction: $0) },
-                    updated: modifications.map { collection[$0] }.map { transactionInfo(fromTransaction: $0) },
-                    deleted: deletions
-            )
-        }
+    public var debugInfo: String {
+        return dataProvider.debugInfo
     }
 
-    private func handleBlocks(changeset: RealmCollectionChange<Results<Block>>) {
-        if case let .update(collection, deletions, insertions, _) = changeset, let block = collection.last, (!deletions.isEmpty || !insertions.isEmpty) {
-            delegate?.lastBlockInfoUpdated(bitcoinKit: self, lastBlockInfo: blockInfo(fromBlock: block))
-        }
+}
+
+extension BitcoinKit: DataProviderDelegate {
+
+    func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo], deleted: [Int]) {
+        delegate?.transactionsUpdated(bitcoinKit: self, inserted: inserted, updated: updated, deleted: deleted)
     }
 
-    private func handleUnspentOutputs(changeset: RealmCollectionChange<Results<TransactionOutput>>) {
-        if case .update = changeset {
-            delegate?.balanceUpdated(bitcoinKit: self, balance: balance)
-        }
+    func balanceUpdated(balance: Int) {
+        delegate?.balanceUpdated(bitcoinKit: self, balance: balance)
     }
 
-    private func handleProgressUpdate(progress: Double) {
+    func lastBlockInfoUpdated(lastBlockInfo: BlockInfo) {
+        delegate?.lastBlockInfoUpdated(bitcoinKit: self, lastBlockInfo: lastBlockInfo)
+    }
+
+    func progressUpdated(progress: Double) {
         delegate?.progressUpdated(bitcoinKit: self, progress: progress)
-    }
-
-    private var unspentOutputRealmResults: Results<TransactionOutput> {
-        return realmFactory.realm.objects(TransactionOutput.self)
-                .filter("publicKey != nil")
-                .filter("scriptType != %@", ScriptType.unknown.rawValue)
-                .filter("inputs.@count = %@", 0)
-    }
-
-    private var transactionRealmResults: Results<Transaction> {
-        return realmFactory.realm.objects(Transaction.self).filter("isMine = %@", true).sorted(byKeyPath: "block.height", ascending: false)
-    }
-
-    private var blockRealmResults: Results<Block> {
-        return realmFactory.realm.objects(Block.self).sorted(byKeyPath: "height")
-    }
-
-    private func transactionInfo(fromTransaction transaction: Transaction) -> TransactionInfo {
-        var totalMineInput: Int = 0
-        var totalMineOutput: Int = 0
-        var fromAddresses = [TransactionAddressInfo]()
-        var toAddresses = [TransactionAddressInfo]()
-
-        for input in transaction.inputs {
-            if let previousOutput = input.previousOutput {
-                if previousOutput.publicKey != nil {
-                    totalMineInput += previousOutput.value
-                }
-            }
-
-            let mine = input.previousOutput?.publicKey != nil
-
-            if let address = input.address {
-                fromAddresses.append(TransactionAddressInfo(address: address, mine: mine))
-            }
-        }
-
-        for output in transaction.outputs {
-            var mine = false
-
-            if output.publicKey != nil {
-                totalMineOutput += output.value
-                mine = true
-            }
-
-            if let address = output.address {
-                toAddresses.append(TransactionAddressInfo(address: address, mine: mine))
-            }
-        }
-
-        let amount = totalMineOutput - totalMineInput
-
-        return TransactionInfo(
-                transactionHash: transaction.reversedHashHex,
-                from: fromAddresses,
-                to: toAddresses,
-                amount: amount,
-                blockHeight: transaction.block?.height,
-                timestamp: transaction.block?.header?.timestamp
-        )
-    }
-
-    private func blockInfo(fromBlock block: Block) -> BlockInfo {
-        return BlockInfo(
-                headerHash: block.reversedHeaderHashHex,
-                height: block.height,
-                timestamp: block.header?.timestamp
-        )
     }
 
 }

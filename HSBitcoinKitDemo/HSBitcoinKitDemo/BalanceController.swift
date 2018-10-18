@@ -67,7 +67,7 @@ class BalanceController: UIViewController {
     }
 
     @IBAction func showRealmInfo() {
-        Manager.shared.bitcoinKit.showRealmInfo()
+        print(Manager.shared.bitcoinKit.debugInfo)
     }
 
     private func update(balance: Int) {
