@@ -42,6 +42,7 @@
 		11B3580E3ED73322D657644F /* StateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B358481D7E7EB156912F52 /* StateManager.swift */; };
 		11B35823EEDAE4C578F2EA02 /* RequestTransactionsPeerTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35413F7A859F19D27BA39 /* RequestTransactionsPeerTask.swift */; };
 		11B358A4D0D687298E84A6C8 /* RealmFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35DE14DB8DA22E71A1E35 /* RealmFactory.swift */; };
+		11B358B84B9C6B09ADB8A0B0 /* HDWallet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35F8792CA3A0945C18200 /* HDWallet.swift */; };
 		11B358B90F025DAA99D015CC /* P2PKHExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B350E70F0721BE279DC91A /* P2PKHExtractor.swift */; };
 		11B359142169EC6D44E21F59 /* ByteStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35AEA9C74CB8AFFFE9D8E /* ByteStream.swift */; };
 		11B35935E1D1B614A254BFD5 /* PFromSHExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35668E26F88DC1FFAE6F1 /* PFromSHExtractor.swift */; };
@@ -256,6 +257,7 @@
 		11B35EFFF54C384CC4107EE9 /* ProgressSyncer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressSyncer.swift; sourceTree = "<group>"; };
 		11B35F3FD9CCB938B62D07EA /* Observable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Observable.swift; sourceTree = "<group>"; };
 		11B35F5A8D3919A80AD2DBF3 /* BitcoinCashTestNet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinCashTestNet.swift; sourceTree = "<group>"; };
+		11B35F8792CA3A0945C18200 /* HDWallet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HDWallet.swift; sourceTree = "<group>"; };
 		11B35F9A349EC7EF0DD5BA96 /* InitialSyncerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InitialSyncerTests.swift; sourceTree = "<group>"; };
 		11B35FF2F94006C73B7773BC /* GetHeadersMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetHeadersMessage.swift; sourceTree = "<group>"; };
 		124B6AC5B90586420443B1B2 /* Pods-HSBitcoinKitTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HSBitcoinKitTests.release.xcconfig"; path = "../Pods/Target Support Files/Pods-HSBitcoinKitTests/Pods-HSBitcoinKitTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -440,6 +442,7 @@
 				11B35CDB306DF2676A56216B /* BitcoinKit.swift */,
 				11B3501384C4274027587EB4 /* Protocols.swift */,
 				11B3525D146F1119A0A9128A /* DataProvider.swift */,
+				11B35F8792CA3A0945C18200 /* HDWallet.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -1275,6 +1278,7 @@
 				2FA5D166F7AD6D1E7A81CB4D /* Blockchain.swift in Sources */,
 				11B3534C9529906826754D6E /* Protocols.swift in Sources */,
 				11B35468A2ACF4B8534BB719 /* DataProvider.swift in Sources */,
+				11B358B84B9C6B09ADB8A0B0 /* HDWallet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

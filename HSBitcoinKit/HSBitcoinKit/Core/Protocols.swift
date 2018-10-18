@@ -1,7 +1,6 @@
 import BigInt
 import RxSwift
 import RealmSwift
-import HSHDWalletKit
 
 enum BlockValidatorType { case header, bits, legacy, testNet, EDA, DAA }
 
@@ -31,7 +30,7 @@ protocol IRealmFactory {
 protocol IHDWallet {
     var gapLimit: Int { get }
     func publicKey(index: Int, external: Bool) throws -> PublicKey
-    func privateKey(index: Int, chain: HDWallet.Chain) throws -> HDPrivateKey
+    func privateKeyData(index: Int, external: Bool) throws -> Data
 }
 
 protocol IPeerHostManager {
@@ -240,7 +239,4 @@ extension INetwork {
         return height % heightInterval == 0
     }
 
-}
-
-extension HDWallet: IHDWallet {
 }
