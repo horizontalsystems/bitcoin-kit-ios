@@ -1,15 +1,27 @@
 import RealmSwift
-import Foundation
 
 class BloomFilterManager {
-    private let realmFactory: RealmFactory
+    private let realmFactory: IRealmFactory
     weak var delegate: BloomFilterManagerDelegate?
 
     var bloomFilter: BloomFilter?
 
-    init(realmFactory: RealmFactory) {
+    init(realmFactory: IRealmFactory) {
         self.realmFactory = realmFactory
     }
+
+    // This method is a workaround
+    private func byteArrayLittleEndian(int: Int) -> [UInt8] {
+        return [
+            UInt8(int & 0x000000FF),
+            UInt8((int & 0x0000FF00) >> 8),
+            UInt8((int & 0x00FF0000) >> 16),
+            UInt8((int & 0xFF000000) >> 24)
+        ]
+    }
+}
+
+extension BloomFilterManager: IBloomFilterManager {
 
     func regenerateBloomFilter() {
         let realm = realmFactory.realm
@@ -43,15 +55,6 @@ class BloomFilterManager {
         }
     }
 
-    // This method is a workaround
-    private func byteArrayLittleEndian(int: Int) -> [UInt8] {
-        return [
-            UInt8(int & 0x000000FF),
-            UInt8((int & 0x0000FF00) >> 8),
-            UInt8((int & 0x00FF0000) >> 16),
-            UInt8((int & 0xFF000000) >> 24)
-        ]
-    }
 }
 
 protocol BloomFilterManagerDelegate: class {

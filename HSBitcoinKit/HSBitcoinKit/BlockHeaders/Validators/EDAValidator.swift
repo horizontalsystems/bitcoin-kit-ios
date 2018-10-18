@@ -1,16 +1,15 @@
-import Foundation
 import BigInt
 
 class EDAValidator: IBlockValidator {
-    let difficultyEncoder: DifficultyEncoder
-    let blockHelper: BlockHelper
+    let difficultyEncoder: IDifficultyEncoder
+    let blockHelper: IBlockHelper
 
-    init(encoder: DifficultyEncoder, blockHelper: BlockHelper) {
+    init(encoder: IDifficultyEncoder, blockHelper: IBlockHelper) {
         difficultyEncoder = encoder
         self.blockHelper = blockHelper
     }
 
-    func validate(candidate: Block, block: Block, network: NetworkProtocol) throws {
+    func validate(candidate: Block, block: Block, network: INetwork) throws {
         guard let candidateHeader = candidate.header, let blockHeader = block.header else {
             throw Block.BlockError.noHeader
         }

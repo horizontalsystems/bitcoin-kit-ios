@@ -7,7 +7,3 @@ enum BlockValidatorError: Error {
     case notEqualBits
     case notDifficultyTransitionEqualBits
 }
-
-protocol IBlockValidator: class {
-    func validate(candidate: Block, block: Block, network: NetworkProtocol) throws
-}

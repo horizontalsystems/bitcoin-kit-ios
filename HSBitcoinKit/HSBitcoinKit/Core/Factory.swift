@@ -1,6 +1,4 @@
-import Foundation
-
-class Factory {
+class Factory: IFactory {
 
     func block(withHeader header: BlockHeader, previousBlock: Block) -> Block {
         return Block(withHeader: header, previousBlock: previousBlock)
@@ -26,11 +24,12 @@ class Factory {
         return TransactionOutput(withValue: value, index: index, lockingScript: script, type: type, address: address, keyHash: keyHash, publicKey: publicKey)
     }
 
-    func peer(withHost host: String, network: NetworkProtocol) -> Peer {
+    func peer(withHost host: String, network: INetwork) -> Peer {
         return Peer(host: host, network: network)
     }
 
     func blockHash(withHeaderHash headerHash: Data, height: Int) -> BlockHash {
         return BlockHash(withHeaderHash: headerHash, height: height)
     }
+
 }

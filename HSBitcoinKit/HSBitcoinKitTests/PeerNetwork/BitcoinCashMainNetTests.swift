@@ -3,24 +3,23 @@ import Cuckoo
 import RealmSwift
 @testable import HSBitcoinKit
 
-class BitcoinCashMainNetTests:XCTestCase {
+class BitcoinCashMainNetTests: XCTestCase {
 
     private var mockNetwork: BitcoinCashMainNet!
     private var mockValidatorHelper: MockValidatorHelper!
-    private var mockBlockHelper: MockBlockHelper!
+    private var mockBlockHelper: MockIBlockHelper!
 
     override func setUp() {
         super.setUp()
 
-        let mockBitcoinKit = MockBitcoinKit()
-        mockValidatorHelper = MockValidatorHelper(mockBitcoinKit: mockBitcoinKit)
+        mockValidatorHelper = MockValidatorHelper()
 
-        mockBlockHelper = mockBitcoinKit.mockBlockHelper
+        mockBlockHelper = MockIBlockHelper()
         stub(mockBlockHelper) { mock in
-            when(mock.medianTimePast(block: any(), count: any())).thenReturn(0)
+            when(mock.medianTimePast(block: any())).thenReturn(0)
             when(mock.previous(for: any(), index: any())).thenReturn(Block())
         }
-        mockNetwork = BitcoinCashMainNet(validatorFactory: mockValidatorHelper.mockFactory, blockHelper: mockBitcoinKit.mockBlockHelper)
+        mockNetwork = BitcoinCashMainNet(validatorFactory: mockValidatorHelper.mockFactory, blockHelper: mockBlockHelper)
     }
 
     override func tearDown() {
@@ -60,7 +59,7 @@ class BitcoinCashMainNetTests:XCTestCase {
 
     func testValidateDAABits() {
         stub(mockBlockHelper) { mock in
-            when(mock.medianTimePast(block: any(), count: any())).thenReturn(1510600000)
+            when(mock.medianTimePast(block: any())).thenReturn(1510600000)
         }
         let block = TestData.firstBlock
         do {

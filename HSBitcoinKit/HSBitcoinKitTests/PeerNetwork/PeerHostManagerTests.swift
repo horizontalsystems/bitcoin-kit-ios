@@ -5,23 +5,30 @@ import RealmSwift
 
 class PeerHostManagerTests:XCTestCase {
 
-    private var mockBitcoinKit: MockBitcoinKit!
     private var mockPeerHostManagerDelegate: MockPeerHostManagerDelegate!
-    private var mockNetwork: MockNetworkProtocol!
-    private var mockRealmFactory: MockRealmFactory!
-    private var mockHostDiscovery: MockHostDiscovery!
+    private var mockNetwork: MockINetwork!
+    private var mockRealmFactory: MockIRealmFactory!
+    private var mockHostDiscovery: MockIHostDiscovery!
     private var queue: DispatchQueue!
     private var dnsSeeds: [String]!
     private var manager: PeerHostManager!
 
+    private var realm: Realm!
+
     override func setUp() {
         super.setUp()
 
-        mockBitcoinKit = MockBitcoinKit()
+        realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
+        try! realm.write { realm.deleteAll() }
+
+        let mockRealmFactory = MockIRealmFactory()
+        stub(mockRealmFactory) { mock in
+            when(mock.realm.get).thenReturn(realm)
+        }
+
         mockPeerHostManagerDelegate = MockPeerHostManagerDelegate()
-        mockNetwork = mockBitcoinKit.mockNetwork
-        mockRealmFactory = mockBitcoinKit.mockRealmFactory
-        mockHostDiscovery = MockHostDiscovery()
+        mockNetwork = MockINetwork()
+        mockHostDiscovery = MockIHostDiscovery()
         queue = DispatchQueue.main
         dnsSeeds = ["some.seed"]
 
@@ -32,23 +39,22 @@ class PeerHostManagerTests:XCTestCase {
             when(mock.dnsSeeds.get).thenReturn(dnsSeeds)
         }
 
-        manager = PeerHostManager(network: mockBitcoinKit.mockNetwork, realmFactory: mockBitcoinKit.mockRealmFactory, hostDiscovery: mockHostDiscovery, dnsLookupQueue: queue, localQueue: queue)
+        manager = PeerHostManager(network: mockNetwork, realmFactory: mockRealmFactory, hostDiscovery: mockHostDiscovery, dnsLookupQueue: queue, localQueue: queue)
     }
 
     override func tearDown() {
-        mockBitcoinKit = nil
         mockPeerHostManagerDelegate = nil
         mockNetwork = nil
         mockRealmFactory = nil
         mockHostDiscovery = nil
         queue = nil
         manager = nil
+        realm = nil
 
         super.tearDown()
     }
 
     func testPeerHost_HasFreePeerAddress() {
-        let realm = mockRealmFactory.realm
         let peerAddress = PeerAddress(ip: "192.168.0.1", score: 0)
 
         try! realm.write {
@@ -62,7 +68,6 @@ class PeerHostManagerTests:XCTestCase {
     }
 
     func testPeerHost_HasNoFreePeerAddress() {
-        let realm = mockRealmFactory.realm
         let peerAddress = PeerAddress(ip: "192.168.0.1", score: 0)
 
         try! realm.write {
@@ -84,7 +89,6 @@ class PeerHostManagerTests:XCTestCase {
     }
 
     func testPeerHost_ShouldReturnAddressWithLowestScore() {
-        let realm = mockRealmFactory.realm
         let peerAddress = PeerAddress(ip: "192.168.0.1", score: 1)
         let peerAddress2 = PeerAddress(ip: "192.168.0.2", score: 0)
 
@@ -99,7 +103,6 @@ class PeerHostManagerTests:XCTestCase {
     }
 
     func testHostDisconnected() {
-        let realm = mockRealmFactory.realm
         let peerAddress = PeerAddress(ip: "192.168.0.1", score: 0)
 
         try! realm.write {
@@ -112,7 +115,6 @@ class PeerHostManagerTests:XCTestCase {
     }
 
     func testHostDisconnected_WithError() {
-        let realm = mockRealmFactory.realm
         let peerAddress = PeerAddress(ip: "192.168.0.1", score: 0)
 
         try! realm.write {
@@ -125,7 +127,6 @@ class PeerHostManagerTests:XCTestCase {
     }
 
     func testHostDisconnected_ShouldFreeHost() {
-        let realm = mockRealmFactory.realm
         let peerAddress = PeerAddress(ip: "192.168.0.1", score: 0)
         try! realm.write {
             realm.add(peerAddress)
@@ -148,8 +149,6 @@ class PeerHostManagerTests:XCTestCase {
     }
 
     func testAddHosts() {
-        let realm = mockRealmFactory.realm
-
         manager.addHosts(hosts: ["192.168.0.1", "192.168.0.2"])
         waitForMainQueue()
 
@@ -163,7 +162,6 @@ class PeerHostManagerTests:XCTestCase {
     }
 
     func testAddHosts_ShouldAddOnlyNewHosts() {
-        let realm = mockRealmFactory.realm
         let peerAddress = PeerAddress(ip: "192.168.0.1", score: 0)
         try! realm.write {
             realm.add(peerAddress)
@@ -182,7 +180,6 @@ class PeerHostManagerTests:XCTestCase {
     }
 
     func testAddHosts_ShouldHandleDuplicates() {
-        let realm = mockRealmFactory.realm
         manager.addHosts(hosts: ["192.168.0.1", "192.168.0.1"])
         waitForMainQueue()
 

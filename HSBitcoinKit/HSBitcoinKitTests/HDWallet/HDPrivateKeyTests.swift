@@ -5,12 +5,17 @@ import RealmSwift
 @testable import HSBitcoinKit
 
 class HDPrivateKeyTests: XCTestCase {
-    private var mockNetwork: MockNetworkProtocol!
+    private var mockNetwork: MockINetwork!
 
     override func setUp() {
         super.setUp()
 
-        mockNetwork = MockBitcoinKit().mockNetwork
+        mockNetwork = MockINetwork()
+
+        stub(mockNetwork) { mock in
+            when(mock.xPrivKey.get).thenReturn(0x04358394)
+            when(mock.xPubKey.get).thenReturn(0x043587cf)
+        }
     }
 
     override func tearDown() {

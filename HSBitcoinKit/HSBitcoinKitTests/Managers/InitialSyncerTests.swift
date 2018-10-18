@@ -13,7 +13,7 @@
 //    private var mockAddressConverter: MockAddressConverter!
 //    private var mockFactory: MockFactory!
 //    private var mockPeerGroup: MockPeerGroup!
-//    private var mockNetwork: MockNetworkProtocol!
+//    private var mockNetwork: MockINetwork!
 //    private var syncer: InitialSyncer!
 //
 //    private var realm: Realm!

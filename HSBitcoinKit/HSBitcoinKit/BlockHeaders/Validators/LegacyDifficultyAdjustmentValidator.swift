@@ -1,11 +1,10 @@
-import Foundation
 import BigInt
 
 class LegacyDifficultyAdjustmentValidator: IBlockValidator {
-    let difficultyEncoder: DifficultyEncoder
-    let blockHelper: BlockHelper
+    let difficultyEncoder: IDifficultyEncoder
+    let blockHelper: IBlockHelper
 
-    init(encoder: DifficultyEncoder, blockHelper: BlockHelper) {
+    init(encoder: IDifficultyEncoder, blockHelper: IBlockHelper) {
         difficultyEncoder = encoder
         self.blockHelper = blockHelper
     }
@@ -14,7 +13,7 @@ class LegacyDifficultyAdjustmentValidator: IBlockValidator {
         return min(max(timeSpan, targetTimeSpan / 4), targetTimeSpan * 4)
     }
 
-    func validate(candidate: Block, block: Block, network: NetworkProtocol) throws {
+    func validate(candidate: Block, block: Block, network: INetwork) throws {
         guard let candidateHeader = candidate.header, let blockHeader = block.header else {
             throw Block.BlockError.noHeader
         }

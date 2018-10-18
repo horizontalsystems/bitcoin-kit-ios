@@ -1,13 +1,12 @@
-import Foundation
 import BigInt
 
 class DAAValidator: IBlockValidator {
     private let largestHash = BigInt(1) << 256
 
-    let difficultyEncoder: DifficultyEncoder
-    let blockHelper: BlockHelper
+    let difficultyEncoder: IDifficultyEncoder
+    let blockHelper: IBlockHelper
 
-    init(encoder: DifficultyEncoder, blockHelper: BlockHelper) {
+    init(encoder: IDifficultyEncoder, blockHelper: IBlockHelper) {
         difficultyEncoder = encoder
         self.blockHelper = blockHelper
     }
@@ -39,7 +38,7 @@ class DAAValidator: IBlockValidator {
         return blockArray[1].block
     }
 
-    func validate(candidate: Block, block: Block, network: NetworkProtocol) throws {
+    func validate(candidate: Block, block: Block, network: INetwork) throws {
         guard let candidateHeader = candidate.header else {
             throw Block.BlockError.noHeader
         }

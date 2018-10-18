@@ -6,7 +6,7 @@ class PeerConnection: NSObject, StreamDelegate {
 
     let host: String
     let port: UInt32
-    private let network: NetworkProtocol
+    private let network: INetwork
 
     weak var delegate: PeerConnectionDelegate?
 
@@ -24,7 +24,7 @@ class PeerConnection: NSObject, StreamDelegate {
         return "[\(WordList.english[index])]".uppercased()
     }
 
-    init(host: String, network: NetworkProtocol) {
+    init(host: String, network: INetwork) {
         self.host = host
         self.port = UInt32(network.port)
         self.network = network

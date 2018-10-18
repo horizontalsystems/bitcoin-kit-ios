@@ -1,4 +1,3 @@
-import Foundation
 import HSCryptoKit
 
 class TransactionBuilder {
@@ -7,15 +6,15 @@ class TransactionBuilder {
         case feeMoreThanValue
     }
 
-    let unspentOutputSelector: UnspentOutputSelector
-    let unspentOutputProvider: UnspentOutputProvider
-    let transactionSizeCalculator: TransactionSizeCalculator
-    let addressConverter: AddressConverter
-    let inputSigner: InputSigner
-    let scriptBuilder: ScriptBuilder
-    let factory: Factory
+    let unspentOutputSelector: IUnspentOutputSelector
+    let unspentOutputProvider: IUnspentOutputProvider
+    let transactionSizeCalculator: ITransactionSizeCalculator
+    let addressConverter: IAddressConverter
+    let inputSigner: IInputSigner
+    let scriptBuilder: IScriptBuilder
+    let factory: IFactory
 
-    init(unspentOutputSelector: UnspentOutputSelector, unspentOutputProvider: UnspentOutputProvider, transactionSizeCalculator: TransactionSizeCalculator, addressConverter: AddressConverter, inputSigner: InputSigner, scriptBuilder: ScriptBuilder, factory: Factory) {
+    init(unspentOutputSelector: IUnspentOutputSelector, unspentOutputProvider: IUnspentOutputProvider, transactionSizeCalculator: ITransactionSizeCalculator, addressConverter: IAddressConverter, inputSigner: IInputSigner, scriptBuilder: IScriptBuilder, factory: IFactory) {
         self.unspentOutputSelector = unspentOutputSelector
         self.unspentOutputProvider = unspentOutputProvider
         self.addressConverter = addressConverter
@@ -24,6 +23,26 @@ class TransactionBuilder {
         self.scriptBuilder = scriptBuilder
         self.factory = factory
     }
+
+    private func addInputToTransaction(transaction: Transaction, fromUnspentOutput output: TransactionOutput) throws {
+        guard let previousTransaction = output.transaction else {
+            throw BuildError.noPreviousTransaction
+        }
+
+        let input = factory.transactionInput(withPreviousOutputTxReversedHex: previousTransaction.reversedHashHex, previousOutputIndex: output.index, script: Data(), sequence: 0)
+        input.previousOutput = output
+        transaction.inputs.append(input)
+    }
+
+    private func addOutputToTransaction(transaction: Transaction, address: Address, pubKey: PublicKey? = nil, value: Int) throws {
+        let script = try scriptBuilder.lockingScript(for: address)
+        let output = try factory.transactionOutput(withValue: value, index: transaction.outputs.count, lockingScript: script, type: address.scriptType, address: address.stringValue, keyHash: address.keyHash, publicKey: pubKey)
+        transaction.outputs.append(output)
+    }
+
+}
+
+extension TransactionBuilder: ITransactionBuilder {
 
     func fee(for value: Int, feeRate: Int, senderPay: Bool, address: String? = nil) throws -> Int {
         var outputType: ScriptType = .p2pkh
@@ -77,9 +96,9 @@ class TransactionBuilder {
             let sigScriptData = try inputSigner.sigScriptData(transaction: transaction, index: i)
             let scriptType = selectedOutputsInfo.outputs[i].scriptType
             switch scriptType {
-                case .p2wpkh: transaction.segWit = true
-                    transaction.inputs[i].witnessData = sigScriptData
-                default: transaction.inputs[i].signatureScript = scriptBuilder.unlockingScript(params: sigScriptData)
+            case .p2wpkh: transaction.segWit = true
+                transaction.inputs[i].witnessData = sigScriptData
+            default: transaction.inputs[i].signatureScript = scriptBuilder.unlockingScript(params: sigScriptData)
             }
         }
 
@@ -87,22 +106,6 @@ class TransactionBuilder {
         transaction.isMine = true
         transaction.reversedHashHex = CryptoKit.sha256sha256(TransactionSerializer.serialize(transaction: transaction)).reversedHex
         return transaction
-    }
-
-    private func addInputToTransaction(transaction: Transaction, fromUnspentOutput output: TransactionOutput) throws {
-        guard let previousTransaction = output.transaction else {
-            throw BuildError.noPreviousTransaction
-        }
-
-        let input = factory.transactionInput(withPreviousOutputTxReversedHex: previousTransaction.reversedHashHex, previousOutputIndex: output.index, script: Data(), sequence: 0)
-        input.previousOutput = output
-        transaction.inputs.append(input)
-    }
-
-    private func addOutputToTransaction(transaction: Transaction, address: Address, pubKey: PublicKey? = nil, value: Int) throws {
-        let script = try scriptBuilder.lockingScript(for: address)
-        let output = try factory.transactionOutput(withValue: value, index: transaction.outputs.count, lockingScript: script, type: address.scriptType, address: address.stringValue, keyHash: address.keyHash, publicKey: pubKey)
-        transaction.outputs.append(output)
     }
 
 }

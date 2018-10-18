@@ -1,30 +1,28 @@
 import RealmSwift
-import Foundation
 import HSCryptoKit
 
 enum ScriptError: Error { case wrongScriptLength, wrongSequence }
 
-protocol ScriptExtractor: class {
-    var type: ScriptType { get }
-    func extract(from script: Script, converter: ScriptConverter) throws -> Data?
-}
-
 class TransactionExtractor {
-    static let defaultInputExtractors: [ScriptExtractor] = [PFromSHExtractor(), PFromPKHExtractor(), PFromWPKHExtractor(), PFromWSHExtractor()]
-    static let defaultOutputExtractors: [ScriptExtractor] = [P2PKHExtractor(), P2PKExtractor(), P2SHExtractor(), P2WPKHExtractor(), P2WSHExtractor(), P2MultiSigExtractor()]
+    static let defaultInputExtractors: [IScriptExtractor] = [PFromSHExtractor(), PFromPKHExtractor(), PFromWPKHExtractor(), PFromWSHExtractor()]
+    static let defaultOutputExtractors: [IScriptExtractor] = [P2PKHExtractor(), P2PKExtractor(), P2SHExtractor(), P2WPKHExtractor(), P2WSHExtractor(), P2MultiSigExtractor()]
 
-    let scriptInputExtractors: [ScriptExtractor]
-    let scriptOutputExtractors: [ScriptExtractor]
-    let scriptConverter: ScriptConverter
-    let addressConverter: AddressConverter
+    let scriptInputExtractors: [IScriptExtractor]
+    let scriptOutputExtractors: [IScriptExtractor]
+    let scriptConverter: IScriptConverter
+    let addressConverter: IAddressConverter
 
-    init(scriptInputExtractors: [ScriptExtractor] = TransactionExtractor.defaultInputExtractors, scriptOutputExtractors: [ScriptExtractor] = TransactionExtractor.defaultOutputExtractors,
-         scriptConverter: ScriptConverter, addressConverter: AddressConverter) {
+    init(scriptInputExtractors: [IScriptExtractor] = TransactionExtractor.defaultInputExtractors, scriptOutputExtractors: [IScriptExtractor] = TransactionExtractor.defaultOutputExtractors,
+         scriptConverter: IScriptConverter, addressConverter: IAddressConverter) {
         self.scriptInputExtractors = scriptInputExtractors
         self.scriptOutputExtractors = scriptOutputExtractors
         self.scriptConverter = scriptConverter
         self.addressConverter = addressConverter
     }
+
+}
+
+extension TransactionExtractor: ITransactionExtractor {
 
     func extract(transaction: Transaction, realm: Realm) {
         transaction.outputs.forEach { output in
@@ -36,7 +34,7 @@ class TransactionExtractor {
                     output.keyHash = payload
                     break
                 } catch {
-//                    print("\(error) can't parse output by this extractor")
+                    //                    print("\(error) can't parse output by this extractor")
                 }
             }
 
@@ -56,16 +54,16 @@ class TransactionExtractor {
                     let script = try scriptConverter.decode(data: input.signatureScript)
                     if let payload = try extractor.extract(from: script, converter: scriptConverter) {
                         switch extractor.type {
-                            case .p2sh, .p2pkh, .p2wpkh:
-                                let ripemd160 = CryptoKit.sha256ripemd160(payload)
-                                input.keyHash = ripemd160
-                                input.address = (try? addressConverter.convert(keyHash: ripemd160, type: extractor.type))?.stringValue
-                            default: break
+                        case .p2sh, .p2pkh, .p2wpkh:
+                            let ripemd160 = CryptoKit.sha256ripemd160(payload)
+                            input.keyHash = ripemd160
+                            input.address = (try? addressConverter.convert(keyHash: ripemd160, type: extractor.type))?.stringValue
+                        default: break
                         }
                         break
                     }
                 } catch {
-//                    print("\(error) can't parse input by this extractor")
+                    //                    print("\(error) can't parse input by this extractor")
                 }
             }
         }

@@ -1,11 +1,10 @@
-import Foundation
 import HSCryptoKit
 
-class P2PKExtractor: ScriptExtractor {
+class P2PKExtractor: IScriptExtractor {
     let minimalKeyLength = 3
     var type: ScriptType { return .p2pk }               // lockingScript: {push-length}{length-byte-key-hash}AC
 
-    func extract(from script: Script, converter: ScriptConverter) throws -> Data? {
+    func extract(from script: Script, converter: IScriptConverter) throws -> Data? {
         guard script.length >= minimalKeyLength else {
             throw ScriptError.wrongScriptLength
         }

@@ -1,6 +1,6 @@
 import Foundation
 
-class CashBech32AddressConverter: Bech32AddressConverter {
+class CashBech32AddressConverter: IBech32AddressConverter {
 
     func convert(prefix: String, address: String) throws -> Address {
         if let cashAddrData = CashAddrBech32.decode(address) {

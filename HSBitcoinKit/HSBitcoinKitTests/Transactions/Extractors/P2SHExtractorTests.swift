@@ -4,15 +4,13 @@ import Cuckoo
 
 class P2SHExtractorTests: XCTestCase {
 
-    private var extractor: ScriptExtractor!
-    private var scriptConverter: MockScriptConverter!
+    private var extractor: IScriptExtractor!
+    private var scriptConverter: MockIScriptConverter!
 
     override func setUp() {
         super.setUp()
 
-        let mockBitcoinKit = MockBitcoinKit()
-
-        scriptConverter = mockBitcoinKit.mockScriptConverter
+        scriptConverter = MockIScriptConverter()
         extractor = P2SHExtractor()
     }
 

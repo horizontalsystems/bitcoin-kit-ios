@@ -23,44 +23,44 @@ public class BitcoinKit {
     private var transactionsNotificationToken: NotificationToken?
     private var blocksNotificationToken: NotificationToken?
 
-    let difficultyEncoder: DifficultyEncoder
-    let blockHelper: BlockHelper
-    let validatorFactory: BlockValidatorFactory
+    let difficultyEncoder: IDifficultyEncoder
+    let blockHelper: IBlockHelper
+    let validatorFactory: IBlockValidatorFactory
 
-    let network: NetworkProtocol
+    let network: INetwork
 
-    let realmFactory: RealmFactory
+    let realmFactory: IRealmFactory
 
-    let hdWallet: HDWallet
+    let hdWallet: IHDWallet
 
-    let peerHostManager: PeerHostManager
-    let stateManager: StateManager
-    let apiManager: ApiManager
-    let addressManager: AddressManager
-    let bloomFilterManager: BloomFilterManager
+    let peerHostManager: IPeerHostManager
+    let stateManager: IStateManager
+    let apiManager: IApiManager
+    let addressManager: IAddressManager
+    let bloomFilterManager: IBloomFilterManager
 
-    let peerGroup: PeerGroup
-    let factory: Factory
+    var peerGroup: IPeerGroup
+    let factory: IFactory
 
-    let initialSyncer: InitialSyncer
-    let progressSyncer: ProgressSyncer
+    let initialSyncer: IInitialSyncer
+    let progressSyncer: IProgressSyncer
 
-    let bech32AddressConverter: Bech32AddressConverter
-    let addressConverter: AddressConverter
-    let scriptConverter: ScriptConverter
-    let transactionProcessor: TransactionProcessor
-    let transactionExtractor: TransactionExtractor
-    let transactionLinker: TransactionLinker
-    let transactionSyncer: TransactionSyncer
-    let transactionCreator: TransactionCreator
-    let transactionBuilder: TransactionBuilder
-    let blockchain: Blockchain
+    let bech32AddressConverter: IBech32AddressConverter
+    let addressConverter: IAddressConverter
+    let scriptConverter: IScriptConverter
+    let transactionProcessor: ITransactionProcessor
+    let transactionExtractor: ITransactionExtractor
+    let transactionLinker: ITransactionLinker
+    let transactionSyncer: ITransactionSyncer
+    let transactionCreator: ITransactionCreator
+    let transactionBuilder: ITransactionBuilder
+    let blockchain: IBlockchain
 
-    let inputSigner: InputSigner
-    let scriptBuilder: ScriptBuilder
-    let transactionSizeCalculator: TransactionSizeCalculator
-    let unspentOutputSelector: UnspentOutputSelector
-    let unspentOutputProvider: UnspentOutputProvider
+    let inputSigner: IInputSigner
+    let scriptBuilder: IScriptBuilder
+    let transactionSizeCalculator: ITransactionSizeCalculator
+    let unspentOutputSelector: IUnspentOutputSelector
+    let unspentOutputProvider: IUnspentOutputProvider
 
     let blockSyncer: BlockSyncer
 

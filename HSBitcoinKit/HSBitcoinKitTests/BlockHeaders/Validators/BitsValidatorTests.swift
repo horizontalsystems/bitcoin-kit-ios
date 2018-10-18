@@ -5,7 +5,7 @@ import Cuckoo
 class BitsValidatorTests: XCTestCase {
 
     private var validator: BitsValidator!
-    private var network: MockNetworkProtocol!
+    private var network: MockINetwork!
 
     private var block: Block!
     private var candidate: Block!
@@ -13,8 +13,7 @@ class BitsValidatorTests: XCTestCase {
     override func setUp() {
         super.setUp()
         validator = BitsValidator()
-        let mockBitcoinKit = MockBitcoinKit()
-        network = mockBitcoinKit.mockNetwork
+        network = MockINetwork()
 
         block = TestData.firstBlock
         candidate = TestData.secondBlock

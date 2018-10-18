@@ -1,7 +1,5 @@
-import Foundation
-
-class BlockHelper {
-    static let medianTimeSpan = 11
+class BlockHelper: IBlockHelper {
+    private let medianTimeSpan = 11
 
     func previous(for block: Block, index: Int) -> Block? {
         return previousWindow(for: block, count: index)?.first
@@ -24,10 +22,10 @@ class BlockHelper {
         return blocks
     }
 
-    func medianTimePast(block: Block, count: Int = BlockHelper.medianTimeSpan) throws -> Int {
+    func medianTimePast(block: Block) throws -> Int {
         var median = [Int]()
         var currentBlock = block
-        for _ in 0..<count {
+        for _ in 0..<medianTimeSpan {
             guard let header = currentBlock.header else {
                 throw Block.BlockError.noHeader
             }

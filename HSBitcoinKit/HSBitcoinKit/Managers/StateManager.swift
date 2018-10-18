@@ -1,23 +1,10 @@
-import Foundation
 import RealmSwift
 
 class StateManager {
+    private let realmFactory: IRealmFactory
 
-    private let realmFactory: RealmFactory
-
-    init(realmFactory: RealmFactory) {
+    init(realmFactory: IRealmFactory) {
         self.realmFactory = realmFactory
-    }
-
-    var apiSynced: Bool {
-        get {
-            return getKitState().apiSynced
-        }
-        set {
-            setKitState { kitState in
-                kitState.apiSynced = newValue
-            }
-        }
     }
 
     private func getKitState() -> KitState {
@@ -32,6 +19,21 @@ class StateManager {
         try? realm.write {
             block(kitState)
             realm.add(kitState, update: true)
+        }
+    }
+
+}
+
+extension StateManager: IStateManager {
+
+    var apiSynced: Bool {
+        get {
+            return getKitState().apiSynced
+        }
+        set {
+            setKitState { kitState in
+                kitState.apiSynced = newValue
+            }
         }
     }
 

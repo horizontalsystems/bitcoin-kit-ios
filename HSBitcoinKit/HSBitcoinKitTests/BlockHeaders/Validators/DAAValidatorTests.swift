@@ -26,16 +26,15 @@ class DAAValidatorTests: XCTestCase {
                                   1534807636, 1534808886, 1534809025, 1534809060, 1534809128, 1534809700, 1534811600, 1534812360, 1534813513, 1534814559, 1534815216, 1534816810, 1534816866, 1534817055, 1534817207, 1534817720, 1534817840, 1534818838, 1534819474, 1534820021] // 544319
 
     private var validator: DAAValidator!
-    private var network: MockNetworkProtocol!
+    private var network: MockINetwork!
 
     private var candidate: Block!
 
     override func setUp() {
         super.setUp()
-        let mockBitcoinKit = MockBitcoinKit()
 
         validator = DAAValidator(encoder: DifficultyEncoder(), blockHelper: BlockHelper())
-        network = mockBitcoinKit.mockNetwork
+        network = MockINetwork()
         stub(network) { mock in
             when(mock.heightInterval.get).thenReturn(144)
             when(mock.targetTimeSpan.get).thenReturn(86400)

@@ -1,6 +1,6 @@
 import Foundation
 
-class BitcoinRegTest: NetworkProtocol {
+class BitcoinRegTest: INetwork {
     private let headerValidator: IBlockValidator
 
     let merkleBlockValidator: MerkleBlockValidator
@@ -58,7 +58,7 @@ class BitcoinRegTest: NetworkProtocol {
 //            ),
 //            height: 2016)
 
-    required init(validatorFactory: BlockValidatorFactory) {
+    required init(validatorFactory: IBlockValidatorFactory) {
         headerValidator = validatorFactory.validator(for: .header)
 
         merkleBlockValidator = MerkleBlockValidator(maxBlockSize: 1_000_000)

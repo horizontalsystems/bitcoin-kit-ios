@@ -1,6 +1,7 @@
 import Foundation
 
-class HostDiscovery {
+class HostDiscovery: IHostDiscovery {
+
     func lookup(dnsSeed: String) -> [String] {
         let hostRef = CFHostCreateWithName(kCFAllocatorDefault, dnsSeed as CFString).takeRetainedValue()
         let resolved = CFHostStartInfoResolution(hostRef, CFHostInfoType.addresses, nil)

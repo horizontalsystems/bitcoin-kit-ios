@@ -1,4 +1,3 @@
-import Foundation
 import HSCryptoKit
 
 class AddressConverter {
@@ -9,13 +8,17 @@ class AddressConverter {
         case wrongAddressPrefix
     }
 
-    let network: NetworkProtocol
-    let bech32AddressConverter: Bech32AddressConverter
+    let network: INetwork
+    let bech32AddressConverter: IBech32AddressConverter
 
-    init(network: NetworkProtocol, bech32AddressConverter: Bech32AddressConverter) {
+    init(network: INetwork, bech32AddressConverter: IBech32AddressConverter) {
         self.bech32AddressConverter = bech32AddressConverter
         self.network = network
     }
+
+}
+
+extension AddressConverter: IAddressConverter {
 
     func convert(keyHash: Data, type: ScriptType) throws -> Address {
         if let address = try? bech32AddressConverter.convert(prefix: network.bech32PrefixPattern, keyHash: keyHash, scriptType: type) {
@@ -24,13 +27,13 @@ class AddressConverter {
         let version: UInt8
         let addressType: AddressType
         switch type {
-            case .p2pkh, .p2pk:
-                version = network.pubKeyHash
-                addressType = .pubKeyHash
-            case .p2sh:
-                version = network.scriptHash
-                addressType = .scriptHash
-            default: throw ConversionError.unknownAddressType
+        case .p2pkh, .p2pk:
+            version = network.pubKeyHash
+            addressType = .pubKeyHash
+        case .p2sh:
+            version = network.scriptHash
+            addressType = .scriptHash
+        default: throw ConversionError.unknownAddressType
         }
         return convertToLegacy(keyHash: keyHash, version: version, addressType: addressType)
     }
@@ -49,7 +52,7 @@ class AddressConverter {
             return address
         }
         guard address.count >= 34 && address.count <= 55 else {
-           throw ConversionError.invalidAddressLength
+            throw ConversionError.invalidAddressLength
         }
         let pattern = ["^\(network.scriptPrefixPattern)", "^\(network.pubKeyPrefixPattern)"]
         var unknownPrefix = true
@@ -71,11 +74,11 @@ class AddressConverter {
 
         let type: AddressType
         switch hex[0] {
-            case network.scriptHash: type = .scriptHash
-            default: type = .pubKeyHash
+        case network.scriptHash: type = .scriptHash
+        default: type = .pubKeyHash
         }
         let keyHash = hex.dropFirst().dropLast(4)
         return LegacyAddress(type: type, keyHash: keyHash, base58: address)
-   }
+    }
 
 }

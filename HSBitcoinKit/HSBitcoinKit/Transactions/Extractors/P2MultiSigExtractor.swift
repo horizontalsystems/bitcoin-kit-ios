@@ -1,6 +1,4 @@
-import Foundation
-
-class P2MultiSigExtractor: ScriptExtractor {
+class P2MultiSigExtractor: IScriptExtractor {
     let minimalChunkCount = 4
     var type: ScriptType { return .p2multi }                            // [M][pubKey1][pubKey2]..[pubKeyN][N][CHECKMULTISIG]
 
@@ -12,7 +10,7 @@ class P2MultiSigExtractor: ScriptExtractor {
         return codes
     }
 
-    func extract(from script: Script, converter: ScriptConverter) throws -> Data? {
+    func extract(from script: Script, converter: IScriptConverter) throws -> Data? {
         guard script.chunks.count >= minimalChunkCount else {
             throw ScriptError.wrongSequence
         }

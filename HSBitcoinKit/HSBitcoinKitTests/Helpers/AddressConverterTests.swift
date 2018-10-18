@@ -9,16 +9,16 @@ class AddressConverterTests: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        let mockBitcoinKit = MockBitcoinKit()
+        let mockNetwork = MockINetwork()
 
-        stub(mockBitcoinKit.mockNetwork) { mock in
+        stub(mockNetwork) { mock in
             when(mock.pubKeyHash.get).thenReturn(0x6f)
             when(mock.scriptHash.get).thenReturn(0xc4)
             when(mock.pubKeyPrefixPattern.get).thenReturn("m|n")
             when(mock.scriptPrefixPattern.get).thenReturn("2")
             when(mock.bech32PrefixPattern.get).thenReturn("bc")
         }
-        addressConverter = AddressConverter(network: mockBitcoinKit.mockNetwork, bech32AddressConverter: SegWitBech32AddressConverter())
+        addressConverter = AddressConverter(network: mockNetwork, bech32AddressConverter: SegWitBech32AddressConverter())
     }
 
     override func tearDown() {

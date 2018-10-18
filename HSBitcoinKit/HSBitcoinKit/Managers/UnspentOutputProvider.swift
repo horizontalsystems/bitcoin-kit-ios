@@ -1,12 +1,12 @@
-import Foundation
-
 class UnspentOutputProvider {
+    let realmFactory: IRealmFactory
 
-    let realmFactory: RealmFactory
-
-    init(realmFactory: RealmFactory) {
+    init(realmFactory: IRealmFactory) {
         self.realmFactory = realmFactory
     }
+}
+
+extension UnspentOutputProvider: IUnspentOutputProvider {
 
     func allUnspentOutputs() -> [TransactionOutput] {
         let realm = realmFactory.realm

@@ -11,14 +11,16 @@ class UnspentOutputSelectorTests: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        let mockBitcoinKit = MockBitcoinKit()
+        let mockTransactionSizeCalculator = MockITransactionSizeCalculator()
 
-        unspentOutputSelector = UnspentOutputSelector(calculator: mockBitcoinKit.mockTransactionSizeCalculator)
-        stub(mockBitcoinKit.mockTransactionSizeCalculator) { mock in
+        stub(mockTransactionSizeCalculator) { mock in
             when(mock.inputSize(type: any())).thenReturn(149)
             when(mock.outputSize(type: any())).thenReturn(34)
             when(mock.transactionSize()).thenReturn(10)
         }
+
+        unspentOutputSelector = UnspentOutputSelector(calculator: mockTransactionSizeCalculator)
+
         outputs = [TransactionOutput(withValue: 100000, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data()),
                    TransactionOutput(withValue: 200000, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data()),
                    TransactionOutput(withValue: 400000, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data()),

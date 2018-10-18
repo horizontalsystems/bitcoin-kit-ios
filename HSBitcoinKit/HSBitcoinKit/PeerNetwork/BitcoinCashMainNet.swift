@@ -1,6 +1,4 @@
-import Foundation
-
-class BitcoinCashMainNet: NetworkProtocol {
+class BitcoinCashMainNet: INetwork {
     private static let diffDate = 1510600000 //  2017 November 3, 14:06 GMT
 
     private let headerValidator: IBlockValidator
@@ -10,7 +8,7 @@ class BitcoinCashMainNet: NetworkProtocol {
 
     let merkleBlockValidator: MerkleBlockValidator
 
-    private let blockHelper: BlockHelper
+    private let blockHelper: IBlockHelper
 
     let name = "bitcoin-cash-main-net"
     let pubKeyHash: UInt8 = 0x00
@@ -65,7 +63,7 @@ class BitcoinCashMainNet: NetworkProtocol {
 
 //    var targetTimeSpan: Int { return 24 * 60 * 60 }                     // Seconds in Bitcoin cycle
 
-    required init(validatorFactory: BlockValidatorFactory, blockHelper: BlockHelper) {
+    required init(validatorFactory: IBlockValidatorFactory, blockHelper: IBlockHelper) {
         self.blockHelper = blockHelper
         headerValidator = validatorFactory.validator(for: .header)
         legacyDifficultyValidator = validatorFactory.validator(for: .legacy)
