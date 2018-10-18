@@ -21,7 +21,7 @@ class AddressConverter {
 extension AddressConverter: IAddressConverter {
 
     func convert(keyHash: Data, type: ScriptType) throws -> Address {
-        if let address = try? bech32AddressConverter.convert(prefix: network.bech32PrefixPattern, keyHash: keyHash, scriptType: type) {
+        if let address = try? bech32AddressConverter.convert(prefix: network.bech32PrefixPattern, keyData: keyHash, scriptType: type) {
             return address
         }
         let version: UInt8

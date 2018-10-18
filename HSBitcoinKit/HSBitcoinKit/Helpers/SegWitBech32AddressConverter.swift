@@ -1,6 +1,11 @@
 import Foundation
 
 class SegWitBech32AddressConverter: IBech32AddressConverter {
+    private let scriptConverter: IScriptConverter
+
+    init(scriptConverter: IScriptConverter) {
+        self.scriptConverter = scriptConverter
+    }
 
     func convert(prefix: String, address: String) throws -> Address {
         if let segWitData = try? SegWitBech32.decode(hrp: prefix, addr: address) {
@@ -16,9 +21,14 @@ class SegWitBech32AddressConverter: IBech32AddressConverter {
         throw AddressConverter.ConversionError.unknownAddressType
     }
 
-    //TODO: SegWit address must use WitnessProgramm in keyHash, not pubKeyHash or scriptHash. Bacause in versionByte placed in first byte.
-    func convert(prefix: String, keyHash: Data, scriptType: ScriptType) throws -> Address {
-        let versionByte: UInt8 = 0  // only 0 is support now
+    func convert(prefix: String, keyData: Data, scriptType: ScriptType) throws -> Address {
+        let script = try scriptConverter.decode(data: keyData)
+        guard script.chunks.count == 2,
+              let versionCode = script.chunks.first?.opCode,
+              let versionByte = OpCode.value(fromPush: versionCode),
+              let keyHash = script.chunks.last?.data else {
+            throw AddressConverter.ConversionError.invalidAddressLength
+        }
         let addressType: AddressType
         switch scriptType {
             case .p2wpkh:

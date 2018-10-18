@@ -99,7 +99,7 @@ protocol IProgressSyncer {
 
 protocol IBech32AddressConverter {
     func convert(prefix: String, address: String) throws -> Address
-    func convert(prefix: String, keyHash: Data, scriptType: ScriptType) throws -> Address
+    func convert(prefix: String, keyData: Data, scriptType: ScriptType) throws -> Address
 }
 
 protocol IAddressConverter {

@@ -5,6 +5,7 @@ import RealmSwift
 
 class AddressConverterTests: XCTestCase {
     private var addressConverter: AddressConverter!
+    private var mockBech32: MockIBech32AddressConverter!
 
     override func setUp() {
         super.setUp()
@@ -18,11 +19,17 @@ class AddressConverterTests: XCTestCase {
             when(mock.scriptPrefixPattern.get).thenReturn("2")
             when(mock.bech32PrefixPattern.get).thenReturn("bc")
         }
-        addressConverter = AddressConverter(network: mockNetwork, bech32AddressConverter: SegWitBech32AddressConverter())
+        mockBech32 = MockIBech32AddressConverter()
+        stub(mockBech32) { mock in
+            when(mock.convert(prefix: any(), address: any())).thenThrow(AddressConverter.ConversionError.unknownAddressType)
+            when(mock.convert(prefix: any(), keyData: any(), scriptType: any())).thenThrow(AddressConverter.ConversionError.unknownAddressType)
+        }
+        addressConverter = AddressConverter(network: mockNetwork, bech32AddressConverter: mockBech32)
     }
 
     override func tearDown() {
         addressConverter = nil
+        mockBech32 = nil
 
         super.tearDown()
     }
@@ -30,28 +37,6 @@ class AddressConverterTests: XCTestCase {
     func testValidAddressConvert() {
         let address = "msGCb97sW9s9Mt7gN5m7TGmwLqhqGaFqYz"
         let keyHash = "80d733d7a4c02aba01da9370afc954c73a32dba5"
-        do {
-            let convertedData = try addressConverter.convert(address: address)
-            XCTAssertEqual(convertedData.keyHash, Data(hex: keyHash))
-        } catch {
-            XCTFail("Error Handled!")
-        }
-    }
-
-    func testWPKHValidAddressConvert() {
-        let address = "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4"
-        let keyHash = "751e76e8199196d454941c45d1b3a323f1433bd6"
-        do {
-            let convertedData = try addressConverter.convert(address: address)
-            XCTAssertEqual(convertedData.keyHash, Data(hex: keyHash))
-        } catch {
-            XCTFail("Error Handled!")
-        }
-    }
-
-    func testWSHValidAddressConvert() {
-        let address = "bc1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qccfmv3"
-        let keyHash = "1863143c14c5166804bd19203356da136c985678cd4d27a1b8c6329604903262"
         do {
             let convertedData = try addressConverter.convert(address: address)
             XCTAssertEqual(convertedData.keyHash, Data(hex: keyHash))

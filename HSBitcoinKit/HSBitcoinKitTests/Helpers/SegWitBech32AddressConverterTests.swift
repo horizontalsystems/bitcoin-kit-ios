@@ -4,14 +4,16 @@ import Cuckoo
 
 class SegWitBech32AddressConverterTests: XCTestCase {
     private var segWitBech32Converter: SegWitBech32AddressConverter!
-
+    private var mockScriptConverter: MockIScriptConverter!
     override func setUp() {
         super.setUp()
-        segWitBech32Converter = SegWitBech32AddressConverter()
+        mockScriptConverter = MockIScriptConverter()
+        segWitBech32Converter = SegWitBech32AddressConverter(scriptConverter: mockScriptConverter)
     }
 
     override func tearDown() {
         segWitBech32Converter = nil
+        mockScriptConverter = nil
 
         super.tearDown()
     }
@@ -37,8 +39,28 @@ class SegWitBech32AddressConverterTests: XCTestCase {
         // empty HRP
         checkError(prefix: "", address: "10a06t8")
 
-        HexEncodesToBech32(hex: "751e76e8199196d454941c45d1b3a323f1433bd6", prefix: "bc", cashBech32: "BC1QW508D6QEJXTDG4Y5R3ZARVARY0C5XW7KV8F3T4", version: 0, scriptType: .p2wpkh)
-        HexEncodesToBech32(hex: "1863143c14c5166804bd19203356da136c985678cd4d27a1b8c6329604903262", prefix: "tb", cashBech32: "tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7", version: 0, scriptType: .p2wpkh)
+        var dataString = "0014751e76e8199196d454941c45d1b3a323f1433bd6"
+        var data = Data(hex: dataString)!
+
+        stub(mockScriptConverter) { mock in
+            when(mock.decode(data: any())).thenReturn(Script(with: data, chunks: [Chunk(scriptData: data, index: 0), Chunk(scriptData: data, index: 1, payloadRange: 2..<22)]))
+        }
+
+        HexEncodesToBech32(hex: dataString, keyHash: Data(hex: "751e76e8199196d454941c45d1b3a323f1433bd6")!, prefix: "bc", cashBech32: "BC1QW508D6QEJXTDG4Y5R3ZARVARY0C5XW7KV8F3T4", version: 0, scriptType: .p2wpkh)
+
+        dataString = "00201863143c14c5166804bd19203356da136c985678cd4d27a1b8c6329604903262"
+        data = Data(hex: dataString)!
+        stub(mockScriptConverter) { mock in
+            when(mock.decode(data: any())).thenReturn(Script(with: data, chunks: [Chunk(scriptData: data, index: 0), Chunk(scriptData: data, index: 1, payloadRange: 2..<34)]))
+        }
+        HexEncodesToBech32(hex: dataString, keyHash: Data(hex: "1863143c14c5166804bd19203356da136c985678cd4d27a1b8c6329604903262")!, prefix: "tb", cashBech32: "tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7", version: 0, scriptType: .p2wpkh)
+
+        dataString = "5128751e76e8199196d454941c45d1b3a323f1433bd6751e76e8199196d454941c45d1b3a323f1433bd6"
+        data = Data(hex: dataString)!
+        stub(mockScriptConverter) { mock in
+            when(mock.decode(data: any())).thenReturn(Script(with: data, chunks: [Chunk(scriptData: data, index: 0), Chunk(scriptData: data, index: 1, payloadRange: 2..<42)]))
+        }
+        HexEncodesToBech32(hex: dataString, keyHash: Data(hex: "751e76e8199196d454941c45d1b3a323f1433bd6751e76e8199196d454941c45d1b3a323f1433bd6")!, prefix: "bc", cashBech32: "bc1pw508d6qejxtdg4y5r3zarvary0c5xw7kw508d6qejxtdg4y5r3zarvary0c5xw7k7grplx", version: 1, scriptType: .p2wpkh)
     }
 
     func checkError(prefix: String, address: String) {
@@ -51,13 +73,13 @@ class SegWitBech32AddressConverterTests: XCTestCase {
         }
     }
 
-    func HexEncodesToBech32(hex: String, prefix: String, cashBech32: String, version: UInt8, scriptType: ScriptType) {
+    func HexEncodesToBech32(hex: String, keyHash: Data, prefix: String, cashBech32: String, version: UInt8, scriptType: ScriptType) {
         //Encode
         let data = Data(hex: hex)!
         do {
-            let address = try segWitBech32Converter.convert(prefix: prefix, keyHash: data, scriptType: scriptType)
+            let address = try segWitBech32Converter.convert(prefix: prefix, keyData: data, scriptType: scriptType)
             XCTAssertEqual(address.scriptType, scriptType)
-            XCTAssertEqual(address.keyHash, data)
+            XCTAssertEqual(address.keyHash, keyHash)
             XCTAssertEqual(address.stringValue, cashBech32.lowercased())
         } catch {
             XCTFail("Exception \(error)")
