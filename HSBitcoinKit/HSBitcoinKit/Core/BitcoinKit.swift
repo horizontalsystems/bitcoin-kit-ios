@@ -3,6 +3,7 @@ import HSHDWalletKit
 import RealmSwift
 import RxSwift
 import BigInt
+import HSCryptoKit
 
 public class BitcoinKit {
 
@@ -64,7 +65,8 @@ public class BitcoinKit {
     let blockSyncer: BlockSyncer
 
     public init(withWords words: [String], networkType: NetworkType) {
-        let wordsHash = words.joined()
+        let wordsHash = words.joined().data(using: .utf8).map { CryptoKit.sha256($0).hex } ?? words[0]
+
         let realmFileName = "\(wordsHash)-\(networkType).realm"
 
         let documentsUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
