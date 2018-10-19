@@ -43,9 +43,9 @@ extension TransactionExtractor: ITransactionExtractor {
                 output.keyHash = address.keyHash
                 output.address = address.stringValue
 
-                if !keyHash.isEmpty, let pubKey = realm.objects(PublicKey.self).filter("keyHash = %@", keyHash).first {
-                    transaction.isMine = true
-                    output.publicKey = pubKey
+                if !keyHash.isEmpty, let pubKey = realm.objects(PublicKey.self).filter("keyHash = %@ OR scriptHashForP2WPKH = %@", keyHash).first {
+                        transaction.isMine = true
+                        output.publicKey = pubKey
                 }
             }
         }
