@@ -33,7 +33,7 @@ class Transaction: Object {
         outputs.forEach { self.outputs.append($0) }
 
         self.lockTime = lockTime
-        dataHash = CryptoKit.sha256sha256(TransactionSerializer.serialize(transaction: self))
+        dataHash = CryptoKit.sha256sha256(TransactionSerializer.serialize(transaction: self, withoutWitness: true))
         reversedHashHex = dataHash.reversedHex
     }
 

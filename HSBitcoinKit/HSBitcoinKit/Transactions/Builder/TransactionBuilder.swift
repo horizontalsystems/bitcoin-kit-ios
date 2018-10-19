@@ -93,18 +93,22 @@ extension TransactionBuilder: ITransactionBuilder {
 
         // Sign inputs
         for i in 0..<transaction.inputs.count {
-            let sigScriptData = try inputSigner.sigScriptData(transaction: transaction, index: i)
             let scriptType = selectedOutputsInfo.outputs[i].scriptType
+            if scriptType == .p2wpkh {
+                transaction.segWit = true
+            }
+
+            let sigScriptData = try inputSigner.sigScriptData(transaction: transaction, index: i)
             switch scriptType {
-            case .p2wpkh: transaction.segWit = true
-                transaction.inputs[i].witnessData = sigScriptData
+            case .p2wpkh: transaction.inputs[i].witnessData.append(objectsIn: sigScriptData)
             default: transaction.inputs[i].signatureScript = scriptBuilder.unlockingScript(params: sigScriptData)
             }
         }
 
         transaction.status = .new
         transaction.isMine = true
-        transaction.reversedHashHex = CryptoKit.sha256sha256(TransactionSerializer.serialize(transaction: transaction)).reversedHex
+        transaction.dataHash = CryptoKit.sha256sha256(TransactionSerializer.serialize(transaction: transaction, withoutWitness: true))
+        transaction.reversedHashHex = transaction.dataHash.reversedHex
         return transaction
     }
 

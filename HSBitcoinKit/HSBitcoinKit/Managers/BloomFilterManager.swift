@@ -30,7 +30,7 @@ extension BloomFilterManager: IBloomFilterManager {
         let publicKeys = realm.objects(PublicKey.self)
         for publicKey in publicKeys {
             elements.append(publicKey.keyHash)
-            elements.append(publicKey.raw!)
+            elements.append(publicKey.raw)
             elements.append(publicKey.scriptHashForP2WPKH)
         }
 
