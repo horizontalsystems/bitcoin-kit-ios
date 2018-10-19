@@ -7,25 +7,22 @@ class PFromWitnessExtractorTests: XCTestCase {
     private var scriptConverter: MockIScriptConverter!
     private var extractor: IScriptExtractor!
 
-    private var data: Data!
     private var redeemScriptData: Data!
 
-    private var mockDataLastChunk: MockChunk!
+    private var dataLastChunk: Chunk!
     private var mockScript: MockScript!
     private var mockRedeemScript: MockScript!
 
     override func setUp() {
         super.setUp()
 
-        data = Data(hex: "020000")!
-        redeemScriptData = Data()
-
-        mockDataLastChunk = MockChunk(scriptData: data, index: 0)
+        redeemScriptData = Data(hex: "020000")!
+        dataLastChunk = Chunk(scriptData: redeemScriptData, index: 0, payloadRange: 0..<redeemScriptData.count)
 
         mockScript = MockScript(with: Data(), chunks: [])
         stub(mockScript) { mock in
             when(mock.length.get).thenReturn(1)
-            when(mock.chunks.get).thenReturn([mockDataLastChunk])
+            when(mock.chunks.get).thenReturn([dataLastChunk])
         }
         mockRedeemScript = MockScript(with: Data(), chunks: [])
 
@@ -38,9 +35,8 @@ class PFromWitnessExtractorTests: XCTestCase {
     }
 
     override func tearDown() {
-        data = nil
         redeemScriptData = nil
-        mockDataLastChunk = nil
+        dataLastChunk = nil
         mockRedeemScript = nil
         mockScript = nil
 
@@ -51,9 +47,6 @@ class PFromWitnessExtractorTests: XCTestCase {
     }
 
     func testValidExtract() {
-        stub(mockDataLastChunk) { mock in
-            when(mock.data.get).thenReturn(redeemScriptData)
-        }
         stub(mockRedeemScript) { mock in
             when(mock.length.get).thenReturn(0)
             when(mock.validate(opCodes: any())).thenDoNothing()
@@ -84,8 +77,9 @@ class PFromWitnessExtractorTests: XCTestCase {
     }
 
     func testWrongSequence() {
-        stub(mockDataLastChunk) { mock in
-            when(mock.data.get).thenReturn(nil)
+        dataLastChunk = Chunk(scriptData: Data([0x00]), index: 0)
+        stub(mockScript) { mock in
+            when(mock.chunks.get).thenReturn([dataLastChunk])
         }
         do {
             let _ = try extractor.extract(from: mockScript, converter: scriptConverter)
@@ -98,11 +92,8 @@ class PFromWitnessExtractorTests: XCTestCase {
     }
 
     func testWrongSequenceTwoChunks() {
-        stub(mockDataLastChunk) { mock in
-            when(mock.data.get).thenReturn(redeemScriptData)
-        }
         stub(mockScript) { mock in
-            when(mock.chunks.get).thenReturn([mockDataLastChunk, mockDataLastChunk])
+            when(mock.chunks.get).thenReturn([dataLastChunk, dataLastChunk])
         }
         do {
             let _ = try extractor.extract(from: mockScript, converter: scriptConverter)

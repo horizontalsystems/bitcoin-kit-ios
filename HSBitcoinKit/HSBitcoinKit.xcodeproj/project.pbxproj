@@ -1064,7 +1064,6 @@
 			inputPaths = (
 				"$(SRCROOT)/${PROJECT_NAME}/Core/Protocols.swift",
 				"$(SRCROOT)/${PROJECT_NAME}/Scripts/Script.swift",
-				"$(SRCROOT)/${PROJECT_NAME}/Scripts/Chunk.swift",
 			);
 			name = Cuckoo;
 			outputPaths = (

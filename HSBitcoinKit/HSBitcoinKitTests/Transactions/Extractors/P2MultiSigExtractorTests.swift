@@ -7,43 +7,28 @@ class P2MultiSigExtractorTests: XCTestCase {
     private var extractor: IScriptExtractor!
     private var scriptConverter: MockIScriptConverter!
     private var script: MockScript!
-    private var data: Data!
 
     private var chunks: [Chunk]!
-    private var mChunk: MockChunk!
-    private var nChunk: MockChunk!
-    private var checkChunk: MockChunk!
+    private var mChunk: Chunk!
+    private var nChunk: Chunk!
+    private var checkChunk: Chunk!
 
     override func setUp() {
         super.setUp()
 
-        data = Data(hex: "522102d83bba35a8022c247b645eed6f81ac41b7c1580de550e7e82c75ad63ee9ac2fe2103aeb681df5ac19e449a872b9e9347f1db5a0394d2ec5caf2a9c143f86e232b0d82103d728ad6757d4784effea04d47baafa216cf474866c2d4dc99b1e8e3eb936e73153ae")!
-
         scriptConverter = MockIScriptConverter()
         script = MockScript(with: Data(), chunks: [])
 
-        mChunk = MockChunk(scriptData: data, index: 0)
-        stub(mChunk) { mock in
-            when(mock.opCode.get).thenReturn(0x52)
-        }
-        nChunk = MockChunk(scriptData: data, index: 103)
-        stub(nChunk) { mock in
-            when(mock.opCode.get).thenReturn(0x53)
-        }
-        checkChunk = MockChunk(scriptData: data, index: 104)
-        stub(checkChunk) { mock in
-            when(mock.opCode.get).thenReturn(UInt8(0xAE))
-        }
-        chunks = [mChunk, Chunk(scriptData: data, index: 1, payloadRange: 2..<35), Chunk(scriptData: data, index: 35, payloadRange: 36..<69), Chunk(scriptData: data, index: 69, payloadRange: 36..<103), nChunk, checkChunk]
-        stub(script) { mock in
-            when(mock.chunks.get).thenReturn(chunks)
-        }
+        mChunk = Chunk(scriptData: Data([0x52]), index: 0)
+        nChunk = Chunk(scriptData: Data([0x53]), index: 0)
+        checkChunk = Chunk(scriptData: Data([0xAE]), index: 0)
 
+        let stubChunk = Chunk(scriptData: Data([0]), index: 0)
+        chunks = [mChunk, stubChunk, nChunk, checkChunk]
         extractor = P2MultiSigExtractor()
     }
 
     override func tearDown() {
-        data = nil
         scriptConverter = nil
         script = nil
         extractor = nil
@@ -52,6 +37,9 @@ class P2MultiSigExtractorTests: XCTestCase {
     }
 
     func testValidExtract() {
+        stub(script) { mock in
+            when(mock.chunks.get).thenReturn(chunks)
+        }
         do {
             let test = try extractor.extract(from: script, converter: scriptConverter)
             XCTAssertEqual(test, nil)
@@ -61,48 +49,36 @@ class P2MultiSigExtractorTests: XCTestCase {
     }
 
     func testMinimalChunkCount() {
-        let chunks = [Chunk(scriptData: data, index: 0), Chunk(scriptData: data, index: 103), Chunk(scriptData: data, index: 104)]
-        stub(script) { mock in
-            when(mock.chunks.get).thenReturn(chunks)
-        }
+        let stubChunk = Chunk(scriptData: Data([0]), index: 0)
+        chunks = [stubChunk, stubChunk, stubChunk]
         checkWrongSequenceError()
     }
 
     func testWrongM() {
-        stub(mChunk) { mock in
-            when(mock.opCode.get).thenReturn(0)
-        }
+        chunks[0] = Chunk(scriptData: Data([3]), index: 0)
         checkWrongSequenceError()
     }
 
     func testWrongN() {
-        stub(nChunk) { mock in
-            when(mock.opCode.get).thenReturn(0x88)
-        }
+        chunks[2] = Chunk(scriptData: Data([3]), index: 0)
         checkWrongSequenceError()
     }
 
     func testWrongMLessN() {
-        stub(mChunk) { mock in
-            when(mock.opCode.get).thenReturn(0x58)
-        }
-        stub(nChunk) { mock in
-            when(mock.opCode.get).thenReturn(0x54)
-        }
+        chunks[0] = Chunk(scriptData: Data([0x58]), index: 0)
+        chunks[2] = Chunk(scriptData: Data([0x54]), index: 0)
         checkWrongSequenceError()
     }
 
     func testCheckChunk() {
-        stub(checkChunk) { mock in
-            when(mock.opCode.get).thenReturn(0)
-        }
-        stub(script) { mock in
-            when(mock.chunks.get).thenReturn(chunks)
-        }
+        chunks[3] = Chunk(scriptData: Data([3]), index: 0)
         checkWrongSequenceError()
     }
 
     func checkWrongSequenceError() {
+        stub(script) { mock in
+            when(mock.chunks.get).thenReturn(chunks)
+        }
         do {
             _ = try extractor.extract(from: script, converter: scriptConverter)
             XCTFail("No Exception Thrown")
