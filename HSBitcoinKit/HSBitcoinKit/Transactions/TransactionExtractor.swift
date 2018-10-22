@@ -43,14 +43,17 @@ extension TransactionExtractor: ITransactionExtractor {
                 output.keyHash = address.keyHash
                 output.address = address.stringValue
 
-                if !keyHash.isEmpty, let pubKey = realm.objects(PublicKey.self).filter("keyHash = %@ OR scriptHashForP2WPKH = %@", keyHash).first {
-                        transaction.isMine = true
-                        output.publicKey = pubKey
+                if !keyHash.isEmpty, let pubKey = realm.objects(PublicKey.self).filter("keyHash = %@ OR scriptHashForP2WPKH = %@", keyHash, keyHash).first {
+                    if realm.objects(PublicKey.self).filter("scriptHashForP2WPKH = %@", keyHash).first != nil {
+                        output.scriptType = .p2wpkhSh
+                    }
+                    transaction.isMine = true
+                    output.publicKey = pubKey
                 }
             }
         }
 
-        transaction.inputs.forEach { input in
+         transaction.inputs.forEach { input in
             for extractor in scriptInputExtractors {
                 do {
                     let script = try scriptConverter.decode(data: input.signatureScript)

@@ -3,6 +3,7 @@ import HSCryptoKit
 class TransactionBuilder {
     enum BuildError: Error {
         case noPreviousTransaction
+        case noOutputKeyHash
         case feeMoreThanValue
     }
 
@@ -94,13 +95,21 @@ extension TransactionBuilder: ITransactionBuilder {
         // Sign inputs
         for i in 0..<transaction.inputs.count {
             let scriptType = selectedOutputsInfo.outputs[i].scriptType
-            if scriptType == .p2wpkh {
+            if scriptType == .p2wpkh || scriptType == .p2wpkhSh {
                 transaction.segWit = true
             }
 
             let sigScriptData = try inputSigner.sigScriptData(transaction: transaction, index: i)
             switch scriptType {
             case .p2wpkh: transaction.inputs[i].witnessData.append(objectsIn: sigScriptData)
+            case .p2wpkhSh:
+                guard sigScriptData.count == 2 else {
+                    throw BuildError.noOutputKeyHash
+                }
+                let keyHash = CryptoKit.sha256ripemd160(sigScriptData[1])
+                let redeemScript = OpCode.push(0) + OpCode.push(keyHash)
+                transaction.inputs[i].signatureScript = scriptBuilder.unlockingScript(params: [redeemScript])
+                transaction.inputs[i].witnessData.append(objectsIn: sigScriptData)
             default: transaction.inputs[i].signatureScript = scriptBuilder.unlockingScript(params: sigScriptData)
             }
         }
