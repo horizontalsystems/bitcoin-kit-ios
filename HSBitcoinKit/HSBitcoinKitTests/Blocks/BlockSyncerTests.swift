@@ -10,6 +10,7 @@ class BlockSyncerTests: XCTestCase {
     private var mockTransactionProcessor: MockITransactionProcessor!
     private var mockBlockchain: MockIBlockchain!
     private var mockAddressManager: MockIAddressManager!
+    private var mockBloomFilterManager: MockIBloomFilterManager!
 
     private var checkpointBlock: Block!
     private var newBlock1: Block!
@@ -39,6 +40,7 @@ class BlockSyncerTests: XCTestCase {
         mockTransactionProcessor = MockITransactionProcessor()
         mockBlockchain = MockIBlockchain()
         mockAddressManager = MockIAddressManager()
+        mockBloomFilterManager = MockIBloomFilterManager()
 
         checkpointBlock = realm.objects(Block.self).filter("reversedHeaderHashHex = %@", TestData.checkpointBlock.reversedHeaderHashHex).first!
         newBlock2 = TestData.secondBlock
@@ -66,7 +68,7 @@ class BlockSyncerTests: XCTestCase {
 
         syncer = BlockSyncer(
                 realmFactory: mockRealmFactory, network: mockNetwork, progressSyncer: mockProgressSyncer,
-                transactionProcessor: mockTransactionProcessor, blockchain: mockBlockchain, addressManager: mockAddressManager,
+                transactionProcessor: mockTransactionProcessor, blockchain: mockBlockchain, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager,
                 hashCheckpointThreshold: 100
         )
     }

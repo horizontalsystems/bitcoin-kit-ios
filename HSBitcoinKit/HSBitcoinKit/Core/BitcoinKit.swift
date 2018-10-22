@@ -106,7 +106,7 @@ public class BitcoinKit {
 
         addressConverter = AddressConverter(network: network, bech32AddressConverter: bech32AddressConverter)
 
-        addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, bloomFilterManager: bloomFilterManager, addressConverter: addressConverter)
+        addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, addressConverter: addressConverter)
         initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, apiManager: apiManager, addressManager: addressManager, addressConverter: addressConverter, factory: factory, peerGroup: peerGroup, network: network)
         progressSyncer = ProgressSyncer(realmFactory: realmFactory)
 
@@ -119,13 +119,13 @@ public class BitcoinKit {
 
         transactionExtractor = TransactionExtractor(scriptConverter: scriptConverter, addressConverter: addressConverter)
         transactionLinker = TransactionLinker()
-        transactionProcessor = TransactionProcessor(realmFactory: realmFactory, extractor: transactionExtractor, linker: transactionLinker, addressManager: addressManager)
+        transactionProcessor = TransactionProcessor(extractor: transactionExtractor, linker: transactionLinker)
         transactionSyncer = TransactionSyncer(realmFactory: realmFactory, processor: transactionProcessor)
         transactionBuilder = TransactionBuilder(unspentOutputSelector: unspentOutputSelector, unspentOutputProvider: unspentOutputProvider, transactionSizeCalculator: transactionSizeCalculator, addressConverter: addressConverter, inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory)
         transactionCreator = TransactionCreator(realmFactory: realmFactory, transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, peerGroup: peerGroup, addressManager: addressManager)
         blockchain = Blockchain(network: network, factory: factory)
 
-        blockSyncer = BlockSyncer(realmFactory: realmFactory, network: network, progressSyncer: progressSyncer, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager)
+        blockSyncer = BlockSyncer(realmFactory: realmFactory, network: network, progressSyncer: progressSyncer, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager)
 
         peerGroup.blockSyncer = blockSyncer
         peerGroup.transactionSyncer = transactionSyncer

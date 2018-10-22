@@ -43,7 +43,7 @@ class PeerTask {
 
 protocol IPeerTaskDelegate: class {
     func handle(completedTask task: PeerTask)
-    func handle(merkleBlock: MerkleBlock, fullBlock: Bool) throws
+    func handle(merkleBlock: MerkleBlock)
 }
 
 protocol IPeerTaskRequester: class {

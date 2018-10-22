@@ -33,7 +33,7 @@ class TransactionCreatorTests: XCTestCase {
             when(mock.buildTransaction(value: any(), feeRate: any(), senderPay: any(), changeScriptType: any(), changePubKey: any(), toAddress: any())).thenReturn(TestData.p2pkhTransaction)
         }
         stub(mockTransactionProcessor) { mock in
-            when(mock.enqueueRun()).thenDoNothing()
+            when(mock.process(transaction: any(), realm: any())).thenDoNothing()
         }
         stub(mockPeerGroup) { mock in
             when(mock.send(transaction: any())).thenDoNothing()
@@ -65,7 +65,7 @@ class TransactionCreatorTests: XCTestCase {
         }
 
         verify(mockPeerGroup).send(transaction: equal(to: transaction))
-        verify(mockTransactionProcessor).enqueueRun()
+        verify(mockTransactionProcessor).process(transaction: equal(to: transaction), realm: any())
     }
 
     func testNoChangeAddress() {
@@ -83,7 +83,7 @@ class TransactionCreatorTests: XCTestCase {
         }
 
         verify(mockPeerGroup, never()).send(transaction: any())
-        verify(mockTransactionProcessor, never()).enqueueRun()
+        verify(mockTransactionProcessor, never()).process(transaction: any(), realm: any())
     }
 
 }

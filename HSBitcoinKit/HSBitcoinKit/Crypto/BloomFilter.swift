@@ -12,7 +12,7 @@ struct BloomFilter {
     let nHashFuncs: UInt32
     let nTweak: UInt32
     let size: UInt32
-    let nFlag: UInt8 = 2
+    let nFlag: UInt8 = 0
     var filter: [UInt8]
 
     var data: Data {

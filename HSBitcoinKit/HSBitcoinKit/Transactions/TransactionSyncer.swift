@@ -16,21 +16,17 @@ class TransactionSyncer {
 
         let realm = realmFactory.realm
 
-        var hasNewTransactions = false
-
         try realm.write {
             for transaction in transactions {
                 if let existingTransaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", transaction.reversedHashHex).first {
                     existingTransaction.status = .relayed
                 } else {
-                    realm.add(transaction)
-                    hasNewTransactions = true
+                    processor.process(transaction: transaction, realm: realm)
+                    if transaction.isMine {
+                        realm.add(transaction)
+                    }
                 }
             }
-        }
-
-        if hasNewTransactions {
-            processor.enqueueRun()
         }
     }
 

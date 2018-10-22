@@ -3,16 +3,19 @@ import Realm
 import RealmSwift
 
 class AddressManager {
+
+    enum AddressManagerError: Error {
+        case noUnusedPublicKey
+    }
+
     private let realmFactory: IRealmFactory
     private let hdWallet: IHDWallet
     private let addressConverter: IAddressConverter
-    private let bloomFilterManager: IBloomFilterManager
 
-    init(realmFactory: IRealmFactory, hdWallet: IHDWallet, bloomFilterManager: IBloomFilterManager, addressConverter: IAddressConverter) {
+    init(realmFactory: IRealmFactory, hdWallet: IHDWallet, addressConverter: IAddressConverter) {
         self.realmFactory = realmFactory
         self.addressConverter = addressConverter
         self.hdWallet = hdWallet
-        self.bloomFilterManager = bloomFilterManager
     }
 
     private func fillGap(external: Bool) throws {
@@ -48,22 +51,12 @@ class AddressManager {
     private func publicKey(external: Bool) throws -> PublicKey {
         let realm = realmFactory.realm
 
-        if let unusedKey = realm.objects(PublicKey.self).filter("external = %@ AND outputs.@count = 0", external).sorted(byKeyPath: "index").first {
-            return unusedKey
+        guard let unusedKey = realm.objects(PublicKey.self).filter("external = %@ AND outputs.@count = 0", external).sorted(byKeyPath: "index").first else {
+            throw AddressManagerError.noUnusedPublicKey
         }
 
-        let existingKeys = realm.objects(PublicKey.self).filter("external = %@", external).sorted(byKeyPath: "index")
-        let lastIndex = existingKeys.last?.index ?? -1
-        let newKey = try hdWallet.publicKey(index: lastIndex + 1, external: external)
-
-        try realm.write {
-            realm.add(newKey)
-        }
-        bloomFilterManager.regenerateBloomFilter()
-
-        return newKey
+        return unusedKey
     }
-
 }
 
 extension AddressManager: IAddressManager {
@@ -82,16 +75,14 @@ extension AddressManager: IAddressManager {
     }
 
     func addKeys(keys: [PublicKey]) throws {
-        //        guard !keys.isEmpty else {
-        //            return
-        //        }
+        guard !keys.isEmpty else {
+            return
+        }
 
         let realm = realmFactory.realm
         try realm.write {
             realm.add(keys, update: true)
         }
-
-        bloomFilterManager.regenerateBloomFilter()
     }
 
     func gapShifts() -> Bool {

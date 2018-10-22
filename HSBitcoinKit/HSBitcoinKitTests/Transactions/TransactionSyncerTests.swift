@@ -24,7 +24,7 @@ class TransactionSyncerTests: XCTestCase {
         mockProcessor = MockITransactionProcessor()
 
         stub(mockProcessor) { mock in
-            when(mock.enqueueRun()).thenDoNothing()
+            when(mock.process(transaction: any(), realm: any())).thenDoNothing()
         }
 
         syncer = TransactionSyncer(realmFactory: mockRealmFactory, processor: mockProcessor, queue: DispatchQueue.main)
@@ -49,7 +49,7 @@ class TransactionSyncerTests: XCTestCase {
         assertTransactionEqual(tx1: transaction, tx2: realmTransaction)
         XCTAssertEqual(realmTransaction.block, nil)
 
-        verify(mockProcessor).enqueueRun()
+        verify(mockProcessor).process(transaction: any(), realm: any())
     }
 
     func testHandle_EmptyTransactions() {
@@ -57,7 +57,7 @@ class TransactionSyncerTests: XCTestCase {
 
         waitForMainQueue()
 
-        verify(mockProcessor, never()).enqueueRun()
+        verify(mockProcessor, never()).process(transaction: any(), realm: any())
     }
 
     func testHandle_ExistingTransaction() {
@@ -77,7 +77,7 @@ class TransactionSyncerTests: XCTestCase {
         assertTransactionEqual(tx1: transaction, tx2: realmTransaction)
         XCTAssertEqual(realmTransaction.status, TransactionStatus.relayed)
 
-        verify(mockProcessor, never()).enqueueRun()
+        verify(mockProcessor, never()).process(transaction: any(), realm: any())
     }
 
     private func assertTransactionEqual(tx1: Transaction, tx2: Transaction) {

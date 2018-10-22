@@ -118,7 +118,6 @@ protocol IScriptExtractor: class {
 }
 
 protocol ITransactionProcessor {
-    func enqueueRun()
     func process(transaction: Transaction, realm: Realm)
 }
 
@@ -174,12 +173,15 @@ protocol IUnspentOutputProvider {
 }
 
 protocol IBlockSyncer: class {
+    func prepareForDownload()
+    func downloadStarted()
+    func downloadIterationCompleted()
+    func downloadCompleted()
+    func downloadFailed()
     func getBlockHashes() -> [Data]
-    func clearBlockHashes()
     func getBlockLocatorHashes() -> [Data]
     func add(blockHashes: [Data])
-    func handle(merkleBlock: MerkleBlock, fullBlock: Bool) throws
-    func merkleBlocksDownloadCompleted() throws
+    func handle(merkleBlock: MerkleBlock) throws
     func shouldRequestBlock(withHash hash: Data) -> Bool
 }
 

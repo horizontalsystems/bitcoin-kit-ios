@@ -19,6 +19,21 @@ class BloomFilterManager {
             UInt8((int & 0xFF000000) >> 24)
         ]
     }
+
+    private func needToSetToBloomFilter(output: TransactionOutput, bestBlockHeight: Int) -> Bool {
+        // Need to set if output is unspent
+        if output.inputs.count == 0 {
+            return true
+        }
+
+        if let outputSpentBlockHeight = output.inputs.first?.transaction?.block?.height {
+            // If output is spent, we still need to set to bloom filter if it hasn't at least 100 confirmations 
+            return bestBlockHeight - outputSpentBlockHeight < 100
+        }
+
+        // if output is spent by a mempool transaction, that is, spending input's transaction has not a block
+        return true
+    }
 }
 
 extension BloomFilterManager: IBloomFilterManager {
@@ -34,12 +49,19 @@ extension BloomFilterManager: IBloomFilterManager {
             elements.append(publicKey.scriptHashForP2WPKH)
         }
 
-        let unspentOutputs = realm.objects(TransactionOutput.self)
-                .filter("publicKey != nil")
-                .filter("scriptType = %@ OR scriptType = %@", ScriptType.p2wpkh.rawValue, ScriptType.p2pk.rawValue)
-                .filter("inputs.@count = %@", 0)
+        var transactionOutputs = Array(
+                realm.objects(TransactionOutput.self)
+                        .filter("publicKey != nil")
+                        .filter("scriptType = %@ OR scriptType = %@", ScriptType.p2wpkh.rawValue, ScriptType.p2pk.rawValue)
+        )
 
-        for output in unspentOutputs {
+        if let bestBlockHeight = realm.objects(Block.self).sorted(byKeyPath: "height").last?.height {
+            transactionOutputs = transactionOutputs.filter {
+                self.needToSetToBloomFilter(output: $0, bestBlockHeight: bestBlockHeight)
+            }
+        }
+
+        for output in transactionOutputs {
             if let transaction = output.transaction {
                 let outpoint = transaction.dataHash + byteArrayLittleEndian(int: output.index)
                 elements.append(outpoint)
