@@ -8,7 +8,7 @@ class Manager {
 
     private let keyWords = "mnemonic_words"
 
-    let networkType: BitcoinKit.NetworkType = .bitcoinRegTest
+    let coin: BitcoinKit.Coin = .bitcoin(network: .regTest)
 
     var bitcoinKit: BitcoinKit!
 
@@ -40,7 +40,7 @@ class Manager {
     }
 
     private func initWalletKit(words: [String]) {
-        bitcoinKit = BitcoinKit(withWords: words, networkType: networkType)
+        bitcoinKit = BitcoinKit(withWords: words, coin: coin)
         bitcoinKit.delegate = self
     }
 

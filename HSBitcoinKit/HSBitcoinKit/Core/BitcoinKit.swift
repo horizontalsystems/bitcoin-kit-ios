@@ -6,14 +6,6 @@ import HSCryptoKit
 
 public class BitcoinKit {
 
-    public enum NetworkType {
-        case bitcoinMainNet
-        case bitcoinTestNet
-        case bitcoinRegTest
-        case bitcoinCashMainNet
-        case bitcoinCashTestNet
-    }
-
     public weak var delegate: BitcoinKitDelegate?
 
     private var unspentOutputsNotificationToken: NotificationToken?
@@ -63,10 +55,10 @@ public class BitcoinKit {
 
     private var dataProvider: IDataProvider
 
-    public init(withWords words: [String], networkType: NetworkType) {
+    public init(withWords words: [String], coin: Coin) {
         let wordsHash = words.joined().data(using: .utf8).map { CryptoKit.sha256($0).hex } ?? words[0]
 
-        let realmFileName = "\(wordsHash)-\(networkType).realm"
+        let realmFileName = "\(wordsHash)-\(coin.rawValue).realm"
 
         let documentsUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
         let realmConfiguration = Realm.Configuration(fileURL: documentsUrl?.appendingPathComponent(realmFileName))
@@ -76,22 +68,28 @@ public class BitcoinKit {
         validatorFactory = BlockValidatorFactory(difficultyEncoder: difficultyEncoder, blockHelper: blockHelper)
 
         scriptConverter = ScriptConverter()
-        switch networkType {
-        case .bitcoinMainNet:
-            network = BitcoinMainNet(validatorFactory: validatorFactory)
-            bech32AddressConverter = SegWitBech32AddressConverter(scriptConverter: scriptConverter)
-        case .bitcoinTestNet:
-            network = BitcoinTestNet(validatorFactory: validatorFactory)
-            bech32AddressConverter = SegWitBech32AddressConverter(scriptConverter: scriptConverter)
-        case .bitcoinRegTest:
-            network = BitcoinRegTest(validatorFactory: validatorFactory)
-            bech32AddressConverter = SegWitBech32AddressConverter(scriptConverter: scriptConverter)
-        case .bitcoinCashMainNet:
-            network = BitcoinCashMainNet(validatorFactory: validatorFactory, blockHelper: blockHelper)
-            bech32AddressConverter = CashBech32AddressConverter()
-        case .bitcoinCashTestNet:
-            network = BitcoinCashTestNet(validatorFactory: validatorFactory)
-            bech32AddressConverter = CashBech32AddressConverter()
+        switch coin {
+        case .bitcoin(let networkType):
+            switch networkType {
+            case .mainNet:
+                network = BitcoinMainNet(validatorFactory: validatorFactory)
+                bech32AddressConverter = SegWitBech32AddressConverter(scriptConverter: scriptConverter)
+            case .testNet:
+                network = BitcoinTestNet(validatorFactory: validatorFactory)
+                bech32AddressConverter = SegWitBech32AddressConverter(scriptConverter: scriptConverter)
+            case .regTest:
+                network = BitcoinRegTest(validatorFactory: validatorFactory)
+                bech32AddressConverter = SegWitBech32AddressConverter(scriptConverter: scriptConverter)
+            }
+        case .bitcoinCash(let networkType):
+            switch networkType {
+            case .mainNet:
+                network = BitcoinCashMainNet(validatorFactory: validatorFactory, blockHelper: blockHelper)
+                bech32AddressConverter = CashBech32AddressConverter()
+            case .testNet, .regTest:
+                network = BitcoinCashTestNet(validatorFactory: validatorFactory)
+                bech32AddressConverter = CashBech32AddressConverter()
+            }
         }
 
         realmFactory = RealmFactory(configuration: realmConfiguration)
@@ -221,4 +219,28 @@ public protocol BitcoinKitDelegate: class {
     func balanceUpdated(bitcoinKit: BitcoinKit, balance: Int)
     func lastBlockInfoUpdated(bitcoinKit: BitcoinKit, lastBlockInfo: BlockInfo)
     func progressUpdated(bitcoinKit: BitcoinKit, progress: Double)
+}
+
+extension BitcoinKit {
+
+    public enum Coin {
+        case bitcoin(network: Network)
+        case bitcoinCash(network: Network)
+
+        var rawValue: String {
+            switch self {
+            case .bitcoin(let network):
+                return "btc-\(network)"
+            case .bitcoinCash(let network):
+                return "bch-\(network)"
+            }
+        }
+    }
+
+    public enum Network {
+        case mainNet
+        case testNet
+        case regTest
+    }
+
 }
