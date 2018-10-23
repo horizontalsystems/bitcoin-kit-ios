@@ -39,13 +39,14 @@ extension TransactionExtractor: ITransactionExtractor {
                 }
             }
 
-            if let keyHash = keyHash, let address = try? addressConverter.convert(keyHash: keyHash, type: output.scriptType) {
+            if let keyHash = keyHash, let address = try? addressConverter.convert(keyHash: output.scriptType == .p2wpkh ? output.lockingScript: keyHash, type: output.scriptType) {
                 output.keyHash = address.keyHash
                 output.address = address.stringValue
 
-                if !keyHash.isEmpty, let pubKey = realm.objects(PublicKey.self).filter("keyHash = %@ OR scriptHashForP2WPKH = %@", keyHash, keyHash).first {
+                if !address.keyHash.isEmpty, let pubKey = realm.objects(PublicKey.self).filter("keyHash = %@ OR scriptHashForP2WPKH = %@", address.keyHash, address.keyHash).first {
                     if realm.objects(PublicKey.self).filter("scriptHashForP2WPKH = %@", keyHash).first != nil {
                         output.scriptType = .p2wpkhSh
+                        output.keyHash = CryptoKit.sha256ripemd160(pubKey.raw)
                     }
                     transaction.isMine = true
                     output.publicKey = pubKey

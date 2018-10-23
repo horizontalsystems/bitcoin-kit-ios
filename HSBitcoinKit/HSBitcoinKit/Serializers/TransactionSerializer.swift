@@ -28,9 +28,13 @@ class TransactionSerializer {
     static func serializedForSignature(transaction: Transaction, inputIndex: Int) throws -> Data {
         var data = Data()
 
-        if transaction.segWit {
-            let inputToSign = transaction.inputs[inputIndex]
+        let inputToSign = transaction.inputs[inputIndex]
 
+        guard let previousOutput = inputToSign.previousOutput else {
+            throw SerializationError.noPreviousOutput
+        }
+
+        if previousOutput.scriptType == .p2wpkh || previousOutput.scriptType == .p2wpkhSh {
             data += UInt32(transaction.version)
 
             let hashPrevouts = try transaction.inputs.flatMap { input in
@@ -45,10 +49,6 @@ class TransactionSerializer {
             data += CryptoKit.sha256sha256(sequences)
 
             data += try TransactionInputSerializer.serializedOutPoint(input: inputToSign)
-
-            guard let previousOutput = inputToSign.previousOutput else {
-                throw SerializationError.noPreviousOutput
-            }
 
             data += OpCode.push(OpCode.p2pkhStart + OpCode.push(previousOutput.keyHash!) + OpCode.p2pkhFinish)
             data += previousOutput.value
