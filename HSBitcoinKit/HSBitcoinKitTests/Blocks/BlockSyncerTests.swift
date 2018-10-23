@@ -6,7 +6,6 @@ import RealmSwift
 
 class BlockSyncerTests: XCTestCase {
     private var mockNetwork: MockINetwork!
-    private var mockProgressSyncer: MockIProgressSyncer!
     private var mockTransactionProcessor: MockITransactionProcessor!
     private var mockBlockchain: MockIBlockchain!
     private var mockAddressManager: MockIAddressManager!
@@ -36,7 +35,6 @@ class BlockSyncerTests: XCTestCase {
         }
 
         mockNetwork = MockINetwork()
-        mockProgressSyncer = MockIProgressSyncer()
         mockTransactionProcessor = MockITransactionProcessor()
         mockBlockchain = MockIBlockchain()
         mockAddressManager = MockIAddressManager()
@@ -53,9 +51,6 @@ class BlockSyncerTests: XCTestCase {
         merkleBlock1 = MerkleBlock(header: newBlock1.header!, transactionHashes: [], transactions: [newTransaction1, newTransaction2])
         merkleBlock2 = MerkleBlock(header: newBlock2.header!, transactionHashes: [], transactions: [])
 
-        stub(mockProgressSyncer) { mock in
-            when(mock.enqueueRun()).thenDoNothing()
-        }
         stub(mockTransactionProcessor) { mock in
             when(mock.process(transaction: any(), realm: any())).thenDoNothing()
         }
@@ -67,7 +62,7 @@ class BlockSyncerTests: XCTestCase {
         }
 
         syncer = BlockSyncer(
-                realmFactory: mockRealmFactory, network: mockNetwork, progressSyncer: mockProgressSyncer,
+                realmFactory: mockRealmFactory, network: mockNetwork,
                 transactionProcessor: mockTransactionProcessor, blockchain: mockBlockchain, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager,
                 hashCheckpointThreshold: 100
         )
@@ -75,7 +70,6 @@ class BlockSyncerTests: XCTestCase {
 
     override func tearDown() {
         mockNetwork = nil
-        mockProgressSyncer = nil
         mockTransactionProcessor = nil
         mockBlockchain = nil
         mockAddressManager = nil

@@ -38,19 +38,19 @@ class TransactionSyncerTests: XCTestCase {
         super.tearDown()
     }
 
-    func testHandle() {
-        let transaction = TestData.p2pkhTransaction
-
-        syncer.handle(transactions: [transaction])
-
-        waitForMainQueue()
-
-        let realmTransaction = realm.objects(Transaction.self).last!
-        assertTransactionEqual(tx1: transaction, tx2: realmTransaction)
-        XCTAssertEqual(realmTransaction.block, nil)
-
-        verify(mockProcessor).process(transaction: any(), realm: any())
-    }
+//    func testHandle() {
+//        let transaction = TestData.p2pkhTransaction
+//
+//        syncer.handle(transactions: [transaction])
+//
+//        waitForMainQueue()
+//
+//        let realmTransaction = realm.objects(Transaction.self).last!
+//        assertTransactionEqual(tx1: transaction, tx2: realmTransaction)
+//        XCTAssertEqual(realmTransaction.block, nil)
+//
+//        verify(mockProcessor).process(transaction: any(), realm: any())
+//    }
 
     func testHandle_EmptyTransactions() {
         syncer.handle(transactions: [])

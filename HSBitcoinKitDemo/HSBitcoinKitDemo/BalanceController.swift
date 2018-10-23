@@ -29,7 +29,6 @@ class BalanceController: UIViewController {
         let bitcoinKit = Manager.shared.bitcoinKit!
 
         update(balance: bitcoinKit.balance)
-        update(progress: bitcoinKit.progress)
 
         if let info = bitcoinKit.lastBlockInfo {
             update(lastBlockInfo: info)

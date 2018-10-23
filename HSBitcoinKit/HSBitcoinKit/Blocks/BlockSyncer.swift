@@ -5,7 +5,6 @@ class BlockSyncer {
 
     private let realmFactory: IRealmFactory
     private let network: INetwork
-    private let progressSyncer: IProgressSyncer
     private let transactionProcessor: ITransactionProcessor
     private let blockchain: IBlockchain
     private let addressManager: IAddressManager
@@ -14,12 +13,11 @@ class BlockSyncer {
     private let hashCheckpointThreshold: Int
     private var needToReDownload = false
 
-    init(realmFactory: IRealmFactory, network: INetwork, progressSyncer: IProgressSyncer,
+    init(realmFactory: IRealmFactory, network: INetwork,
          transactionProcessor: ITransactionProcessor, blockchain: IBlockchain, addressManager: IAddressManager, bloomFilterManager: IBloomFilterManager,
          hashCheckpointThreshold: Int = 100) {
         self.realmFactory = realmFactory
         self.network = network
-        self.progressSyncer = progressSyncer
         self.transactionProcessor = transactionProcessor
         self.blockchain = blockchain
         self.addressManager = addressManager

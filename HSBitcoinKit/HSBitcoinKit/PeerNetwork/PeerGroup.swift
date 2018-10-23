@@ -6,6 +6,7 @@ class PeerGroup {
 
     weak var blockSyncer: IBlockSyncer?
     weak var transactionSyncer: ITransactionSyncer?
+    weak var bestBlockHeightDelegate: BestBlockHeightDelegate?
 
     private let factory: IFactory
     private let network: INetwork
@@ -259,6 +260,10 @@ extension PeerGroup: PeerDelegate {
         }
 
         connectPeersIfRequired()
+    }
+
+    func peer(_ peer: Peer, didReceiveBestBlockHeight bestBlockHeight: Int32) {
+        bestBlockHeightDelegate?.bestBlockHeightReceived(height: bestBlockHeight)
     }
 
     func peer(_ peer: Peer, didCompleteTask task: PeerTask) {

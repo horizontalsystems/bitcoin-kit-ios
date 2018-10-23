@@ -32,7 +32,6 @@ public class BitcoinKit {
     private let factory: IFactory
 
     private let initialSyncer: IInitialSyncer
-    private let progressSyncer: IProgressSyncer
 
     private let bech32AddressConverter: IBech32AddressConverter
     private let addressConverter: IAddressConverter
@@ -53,7 +52,7 @@ public class BitcoinKit {
 
     private let blockSyncer: IBlockSyncer
 
-    private var dataProvider: IDataProvider
+    private var dataProvider: IDataProvider & BestBlockHeightDelegate
 
     public init(withWords words: [String], coin: Coin) {
         let wordsHash = words.joined().data(using: .utf8).map { CryptoKit.sha256($0).hex } ?? words[0]
@@ -108,7 +107,6 @@ public class BitcoinKit {
 
         addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, addressConverter: addressConverter)
         initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, apiManager: apiManager, addressManager: addressManager, addressConverter: addressConverter, factory: factory, peerGroup: peerGroup, network: network)
-        progressSyncer = ProgressSyncer(realmFactory: realmFactory)
 
         inputSigner = InputSigner(hdWallet: hdWallet)
         scriptBuilder = ScriptBuilder()
@@ -125,12 +123,13 @@ public class BitcoinKit {
         transactionCreator = TransactionCreator(realmFactory: realmFactory, transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, peerGroup: peerGroup, addressManager: addressManager)
         blockchain = Blockchain(network: network, factory: factory)
 
-        blockSyncer = BlockSyncer(realmFactory: realmFactory, network: network, progressSyncer: progressSyncer, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager)
+        dataProvider = DataProvider(realmFactory: realmFactory, addressManager: addressManager, addressConverter: addressConverter, transactionCreator: transactionCreator, transactionBuilder: transactionBuilder, network: network)
+        blockSyncer = BlockSyncer(realmFactory: realmFactory, network: network, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager)
 
         peerGroup.blockSyncer = blockSyncer
         peerGroup.transactionSyncer = transactionSyncer
+        peerGroup.bestBlockHeightDelegate = dataProvider
 
-        dataProvider = DataProvider(realmFactory: realmFactory, progressSyncer: progressSyncer, addressManager: addressManager, addressConverter: addressConverter, transactionCreator: transactionCreator, transactionBuilder: transactionBuilder, network: network)
         dataProvider.delegate = self
     }
 
@@ -139,7 +138,6 @@ public class BitcoinKit {
 extension BitcoinKit {
 
     public func start() throws {
-        progressSyncer.enqueueRun()
         bloomFilterManager.regenerateBloomFilter()
         try initialSyncer.sync()
     }
@@ -182,10 +180,6 @@ extension BitcoinKit {
 
     public var receiveAddress: String {
         return dataProvider.receiveAddress
-    }
-
-    public var progress: Double {
-        return dataProvider.progress
     }
 
     public var debugInfo: String {
