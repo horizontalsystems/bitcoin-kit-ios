@@ -62,4 +62,8 @@ class OpCode {
         return bytes + data
     }
 
+    static func scriptWPKH(_ data: Data, versionByte: Int = 0) -> Data {
+        return OpCode.push(versionByte) + OpCode.push(data)
+    }
+
 }

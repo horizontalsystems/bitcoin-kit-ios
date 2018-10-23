@@ -29,10 +29,7 @@ class PublicKey: Object {
         raw = data
         keyHash = CryptoKit.sha256ripemd160(data)
 
-        let versionByte = 0
-        let redeemScript = OpCode.push(versionByte) + OpCode.push(keyHash)
-        scriptHashForP2WPKH = CryptoKit.sha256ripemd160(redeemScript)
-
+        scriptHashForP2WPKH = CryptoKit.sha256ripemd160(OpCode.scriptWPKH(keyHash))
         keyHashHex = keyHash.hex
     }
 

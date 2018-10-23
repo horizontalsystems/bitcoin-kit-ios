@@ -35,7 +35,8 @@ extension InputSigner: IInputSigner {
             throw SignError.noPrivateKey
         }
 
-        let serializedTransaction = try TransactionSerializer.serializedForSignature(transaction: transaction, inputIndex: index)
+        let witness = prevOutput.scriptType == .p2wpkh || prevOutput.scriptType == .p2wpkhSh
+        let serializedTransaction = try TransactionSerializer.serializedForSignature(transaction: transaction, inputIndex: index, witness: witness)
         let signatureHash = CryptoKit.sha256sha256(serializedTransaction)
         let signature = try CryptoKit.sign(data: signatureHash, privateKey: privateKeyData) + Data(bytes: [0x01])
 

@@ -119,7 +119,7 @@ class InputSignerTests: XCTestCase {
 
 
         var resultSignature = [Data()]
-        let signature = Data(hex: "3045022100d6e87d7200b4837b08e5e249cc4175d457c1bec8d11b20802116caf776dde51a0220146aef186f40cd49a3c720ed9d0c829551993779d13d0b1e524033278527a69b01")!
+        let signature = Data(hex: "304402201c3b884a2ba6ee643036e9a3724132375e3aef0a56574dcae63c9ae408db26a5022049bc6b406ecff48a47cdf9830f6cdab6b95abb4021ee3f75e625a95b8624a99a01")!
 
         do {
             resultSignature = try inputSigner.sigScriptData(transaction: transaction, index: 0)

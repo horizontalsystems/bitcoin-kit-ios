@@ -201,8 +201,7 @@ extension DataProvider: IDataProvider {
 
         for pubKey in pubKeys {
             let scriptType: ScriptType = (network is BitcoinCashMainNet || network is BitcoinCashTestNet) ? .p2pkh : .p2wpkh
-            let bitcoinSegwitKeyData = Data([0x00]) + OpCode.push(pubKey.keyHash)  // TODO: Make one place to create segWit keyData from Hash
-            let bechAddress = (try? addressConverter.convert(keyHash: bitcoinSegwitKeyData, type: scriptType).stringValue) ?? "none"
+            let bechAddress = (try? addressConverter.convert(keyHash: OpCode.scriptWPKH(pubKey.keyHash), type: scriptType).stringValue) ?? "none"
             lines.append("\(pubKey.index) --- \(pubKey.external) --- hash: \(pubKey.keyHash.hex) --- p2wkph(SH) hash: \(pubKey.scriptHashForP2WPKH.hex)")
             lines.append("legacy: \(addressConverter.convertToLegacy(keyHash: pubKey.keyHash, version: network.pubKeyHash, addressType: .pubKeyHash).stringValue) --- bech32: \(bechAddress) --- SH(WPKH): \(addressConverter.convertToLegacy(keyHash: pubKey.scriptHashForP2WPKH, version: network.scriptHash, addressType: .scriptHash).stringValue) \n")
         }

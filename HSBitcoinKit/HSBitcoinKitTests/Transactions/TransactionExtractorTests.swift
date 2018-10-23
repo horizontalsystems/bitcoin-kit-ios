@@ -70,11 +70,15 @@ class TransactionExtractorTests: XCTestCase {
         super.tearDown()
     }
 
-    func testExtractP2pkhTransaction() {
+    func testExtractP2Transaction() {
         let transactionTypes: [ScriptType] = [.p2pkh, .p2pk, .p2sh, .p2wpkh, .p2wsh]
-
+        let address = LegacyAddress(type: .pubKeyHash, keyHash: Data(hex: "0000")!, base58: "0000")
+        let publicKey = PublicKey()
+        publicKey.keyHash = address.keyHash
+        try? realm.write {
+            realm.add(publicKey)
+        }
         for type in transactionTypes {
-            let address = LegacyAddress(type: .pubKeyHash, keyHash: Data(hex: "0000")!, base58: "0000")
             stub(secondExtractor) { mock in
                 when(mock.type.get).thenReturn(type)
                 when(mock.extract(from: any(), converter: any())).thenReturn(address.keyHash)
@@ -91,6 +95,32 @@ class TransactionExtractorTests: XCTestCase {
             XCTAssertEqual(transaction.inputs[0].keyHash!, address.keyHash)
             XCTAssertEqual(transaction.inputs[0].address!, address.stringValue)
         }
+    }
+
+    func testExtractP2WPKHSHTransaction() {
+        let address = LegacyAddress(type: .pubKeyHash, keyHash: Data(hex: "0000")!, base58: "0000")
+        let publicKey = PublicKey()
+        publicKey.scriptHashForP2WPKH = address.keyHash
+        let rightKeyHash = Data(hex: "1111")!
+        publicKey.keyHash = rightKeyHash
+        try? realm.write {
+            realm.add(publicKey)
+        }
+        stub(secondExtractor) { mock in
+            when(mock.type.get).thenReturn(.p2wpkh)
+            when(mock.extract(from: any(), converter: any())).thenReturn(address.keyHash)
+        }
+        stub(addressConverter) { mock in
+            when(mock.convert(keyHash: any(), type: any())).thenReturn(address)
+        }
+        extractor.extract(transaction: transaction, realm: realm)
+
+        XCTAssertEqual(transaction.outputs[0].keyHash!, rightKeyHash)
+        XCTAssertEqual(transaction.outputs[0].address!, address.stringValue)
+        XCTAssertEqual(transaction.outputs[0].scriptType, .p2wpkhSh)
+
+        XCTAssertEqual(transaction.inputs[0].keyHash!, address.keyHash)
+        XCTAssertEqual(transaction.inputs[0].address!, address.stringValue)
     }
 
     func testSecondExtractorCallingCount() {

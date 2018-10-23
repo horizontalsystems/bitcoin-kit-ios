@@ -25,30 +25,33 @@ class TransactionExtractor {
 extension TransactionExtractor: ITransactionExtractor {
 
     func extract(transaction: Transaction, realm: Realm) {
-        transaction.outputs.forEach { output in
-            var keyHash: Data?
+        let realmPublicKeys = realm.objects(PublicKey.self)
+        for output in transaction.outputs {
+            var payload: Data?
+            var validScriptType: ScriptType = .unknown
             for extractor in scriptOutputExtractors {
                 do {
                     let script = try scriptConverter.decode(data: output.lockingScript)
-                    let payload = try extractor.extract(from: script, converter: scriptConverter)
-                    output.scriptType = extractor.type
-                    keyHash = payload
+                    payload = try extractor.extract(from: script, converter: scriptConverter)
+                    validScriptType = extractor.type
                     break
                 } catch {
                     //                    print("\(error) can't parse output by this extractor")
                 }
             }
+            guard let addressKeyHash = payload else { continue }
 
-            if let keyHash = keyHash, let address = try? addressConverter.convert(keyHash: keyHash, type: output.scriptType) {
-                output.keyHash = address.keyHash
+            if let address = try? addressConverter.convert(keyHash: addressKeyHash, type: validScriptType) {
+                output.scriptType = validScriptType
                 output.address = address.stringValue
 
-                if !keyHash.isEmpty, let pubKey = realm.objects(PublicKey.self).filter("keyHash = %@ OR scriptHashForP2WPKH = %@", keyHash, keyHash).first {
-                    if realm.objects(PublicKey.self).filter("scriptHashForP2WPKH = %@", keyHash).first != nil {
+                if let keyData = seek(key: address.keyHash, in: realmPublicKeys) {
+                    if keyData.wpkhSh {
                         output.scriptType = .p2wpkhSh
                     }
+                    output.publicKey = keyData.pubKey
+                    output.keyHash = keyData.pubKey.keyHash
                     transaction.isMine = true
-                    output.publicKey = pubKey
                 }
             }
         }
@@ -77,6 +80,18 @@ extension TransactionExtractor: ITransactionExtractor {
                 }
             }
         }
+    }
+
+    private func seek(key: Data, in results: Results<PublicKey>) -> (pubKey: PublicKey, wpkhSh: Bool)? {
+        for result in results {
+            if result.keyHash == key {
+                return (pubKey: result, wpkhSh: false)
+            }
+            if result.scriptHashForP2WPKH == key {
+                return (pubKey: result, wpkhSh: true)
+            }
+        }
+        return nil
     }
 
 }
