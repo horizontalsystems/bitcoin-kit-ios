@@ -76,7 +76,7 @@ class BlockSyncer {
     }
 
     private func handleFork() {
-        // todo
+        blockchain.handleFork(realm: realmFactory.realm)
     }
 
     private func hasUnspentOutputs(transaction: Transaction) -> Bool {
@@ -172,7 +172,7 @@ extension BlockSyncer: IBlockSyncer {
     func handle(merkleBlock: MerkleBlock) throws {
         let realm = realmFactory.realm
 
-        try? realm.write {
+        try realm.write {
             guard let block = try blockchain.connect(merkleBlock: merkleBlock, realm: realm) else {
                 return
             }

@@ -10,6 +10,7 @@ class Block: Object {
     @objc dynamic var height: Int = 0
     @objc dynamic var header: BlockHeader?
     @objc dynamic var previousBlock: Block?
+    @objc dynamic var stale: Bool = false
 
     let transactions = LinkingObjects(fromType: Transaction.self, property: "block")
 

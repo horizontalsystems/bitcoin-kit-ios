@@ -147,6 +147,7 @@ protocol ITransactionBuilder {
 
 protocol IBlockchain {
     func connect(merkleBlock: MerkleBlock, realm: Realm) throws -> Block?
+    func handleFork(realm: Realm)
 }
 
 protocol IInputSigner {
