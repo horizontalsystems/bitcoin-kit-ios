@@ -22,6 +22,7 @@ class BitcoinTestNet: INetwork {
     let magic: UInt32 = 0x0b110907
     let port: UInt32 = 18333
     let coinType: UInt32 = 1
+    let sigHash: SigHashType = .bitcoinAll
 
     let dnsSeeds = [
         "testnet-seed.bitcoin.petertodd.org",    // Peter Todd

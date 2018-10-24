@@ -15,6 +15,7 @@ class BitcoinCashTestNet: INetwork {
     let magic: UInt32 = 0xf4e5f3f4
     let port: UInt32 = 18333
     let coinType: UInt32 = 1
+    let sigHash: SigHashType = .bitcoinCashAll
 
     let merkleBlockValidator: MerkleBlockValidator
 
