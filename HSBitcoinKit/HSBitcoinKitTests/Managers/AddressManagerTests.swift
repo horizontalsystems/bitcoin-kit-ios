@@ -10,7 +10,6 @@ class AddressManagerTests: XCTestCase {
     private var realm: Realm!
     private var mockRealmFactory: MockIRealmFactory!
     private var mockHDWallet: MockIHDWallet!
-    private var mockBloomFilterManager: MockIBloomFilterManager!
     private var mockAddressConverter: MockIAddressConverter!
 
     private var hdWallet: IHDWallet!
@@ -27,17 +26,15 @@ class AddressManagerTests: XCTestCase {
         }
 
         mockHDWallet = MockIHDWallet()
-        mockBloomFilterManager = MockIBloomFilterManager()
         mockAddressConverter = MockIAddressConverter()
 
         hdWallet = HDWallet(seed: Data(), coinType: UInt32(1), xPrivKey: UInt32(0x04358394), xPubKey: UInt32(0x043587cf))
-        manager = AddressManager(realmFactory: mockRealmFactory, hdWallet: mockHDWallet, bloomFilterManager: mockBloomFilterManager, addressConverter: mockAddressConverter)
+        manager = AddressManager(realmFactory: mockRealmFactory, hdWallet: mockHDWallet, addressConverter: mockAddressConverter)
     }
 
     override func tearDown() {
         mockRealmFactory = nil
         mockHDWallet = nil
-        mockBloomFilterManager = nil
         mockAddressConverter = nil
 
         hdWallet = nil

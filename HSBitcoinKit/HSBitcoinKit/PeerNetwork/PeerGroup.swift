@@ -6,6 +6,7 @@ class PeerGroup {
 
     weak var blockSyncer: IBlockSyncer?
     weak var transactionSyncer: ITransactionSyncer?
+    weak var bestBlockHeightDelegate: BestBlockHeightDelegate?
 
     private let factory: IFactory
     private let network: INetwork
@@ -107,7 +108,7 @@ class PeerGroup {
         }
 
         if syncPeer.synced {
-            Logger.shared.log(self, "Unsetting sync peer from \(syncPeer.logName)")
+            blockSyncer?.downloadCompleted()
             self.syncPeer = nil
             assignNextSyncPeer()
         }
@@ -141,11 +142,7 @@ class PeerGroup {
     }
 
     private func handle(peer: Peer, task: GetMerkleBlocksTask) {
-        do {
-            try self.blockSyncer?.merkleBlocksDownloadCompleted()
-        } catch {
-            peer.disconnect()
-        }
+        self.blockSyncer?.downloadIterationCompleted()
     }
 
     private func handle(transactions: [Transaction]) {
@@ -174,6 +171,7 @@ class PeerGroup {
             if let nonSyncedPeer = self.connectedPeers.first(where: { !$0.synced }) {
                 Logger.shared.log(self, "Setting sync peer to \(nonSyncedPeer.logName)")
                 self.syncPeer = nonSyncedPeer
+                self.blockSyncer?.downloadStarted()
                 self.downloadBlockchain()
             }
         }
@@ -191,6 +189,7 @@ extension PeerGroup: IPeerGroup {
         started = true
 
         addNonSentTransactions()
+        blockSyncer?.prepareForDownload()
         connectPeersIfRequired()
     }
 
@@ -249,8 +248,9 @@ extension PeerGroup: PeerDelegate {
         localQueue.async {
             self.syncPeerQueue.async {
                 if peer === self.syncPeer {
+                    self.blockSyncer?.downloadFailed()
                     self.syncPeer = nil
-                    self.blockSyncer?.clearBlockHashes()
+                    self.assignNextSyncPeer()
                 }
             }
 
@@ -260,6 +260,10 @@ extension PeerGroup: PeerDelegate {
         }
 
         connectPeersIfRequired()
+    }
+
+    func peer(_ peer: Peer, didReceiveBestBlockHeight bestBlockHeight: Int32) {
+        bestBlockHeightDelegate?.bestBlockHeightReceived(height: bestBlockHeight)
     }
 
     func peer(_ peer: Peer, didCompleteTask task: PeerTask) {
@@ -282,11 +286,9 @@ extension PeerGroup: PeerDelegate {
         }
     }
 
-    func handle(_ peer: Peer, merkleBlock: MerkleBlock, fullBlock: Bool) throws {
+    func handle(_ peer: Peer, merkleBlock: MerkleBlock) {
         do {
-            try blockSyncer?.handle(merkleBlock: merkleBlock, fullBlock: fullBlock)
-        } catch let error as BlockSyncer.BlockSyncerError {
-            throw error
+            try blockSyncer?.handle(merkleBlock: merkleBlock)
         } catch {
             peer.disconnect()
         }

@@ -5,7 +5,6 @@ class GetMerkleBlocksTask: PeerTask {
     var givenBlockHashes: [Data]
     private var hashesToDownload: [Data]
     private var pendingMerkleBlocks = [MerkleBlock]()
-    private var nextBlockNotFull = true
 
     init(hashes: [Data]) {
         self.givenBlockHashes = hashes
@@ -60,13 +59,7 @@ class GetMerkleBlocksTask: PeerTask {
             hashesToDownload.remove(at: index)
         }
 
-        do {
-            try delegate?.handle(merkleBlock: merkleBlock, fullBlock: nextBlockNotFull)
-        } catch {
-            if type(of: error) == BlockSyncer.BlockSyncerError.self {
-                nextBlockNotFull = false
-            }
-        }
+        delegate?.handle(merkleBlock: merkleBlock)
 
         if hashesToDownload.isEmpty {
             delegate?.handle(completedTask: self)

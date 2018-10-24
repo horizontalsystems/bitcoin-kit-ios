@@ -65,9 +65,14 @@ protocol IBloomFilterManager {
 protocol IPeerGroup {
     var blockSyncer: IBlockSyncer? { get set }
     var transactionSyncer: ITransactionSyncer? { get set }
+    var bestBlockHeightDelegate: BestBlockHeightDelegate? { get set }
     func start()
     func stop()
     func send(transaction: Transaction)
+}
+
+protocol BestBlockHeightDelegate: class {
+    func bestBlockHeightReceived(height: Int32)
 }
 
 protocol PeerHostManagerDelegate: class {
@@ -91,12 +96,6 @@ protocol IInitialSyncer {
     func sync() throws
 }
 
-protocol IProgressSyncer {
-    var subject: PublishSubject<Double> { get }
-    var progress: Double { get }
-    func enqueueRun()
-}
-
 protocol IBech32AddressConverter {
     func convert(prefix: String, address: String) throws -> Address
     func convert(prefix: String, keyData: Data, scriptType: ScriptType) throws -> Address
@@ -118,7 +117,6 @@ protocol IScriptExtractor: class {
 }
 
 protocol ITransactionProcessor {
-    func enqueueRun()
     func process(transaction: Transaction, realm: Realm)
 }
 
@@ -148,6 +146,7 @@ protocol ITransactionBuilder {
 
 protocol IBlockchain {
     func connect(merkleBlock: MerkleBlock, realm: Realm) throws -> Block?
+    func handleFork(realm: Realm)
 }
 
 protocol IInputSigner {
@@ -174,12 +173,15 @@ protocol IUnspentOutputProvider {
 }
 
 protocol IBlockSyncer: class {
+    func prepareForDownload()
+    func downloadStarted()
+    func downloadIterationCompleted()
+    func downloadCompleted()
+    func downloadFailed()
     func getBlockHashes() -> [Data]
-    func clearBlockHashes()
     func getBlockLocatorHashes() -> [Data]
     func add(blockHashes: [Data])
-    func handle(merkleBlock: MerkleBlock, fullBlock: Bool) throws
-    func merkleBlocksDownloadCompleted() throws
+    func handle(merkleBlock: MerkleBlock) throws
     func shouldRequestBlock(withHash hash: Data) -> Bool
 }
 
@@ -190,7 +192,6 @@ protocol IDataProvider {
     var lastBlockInfo: BlockInfo? { get }
     var balance: Int { get }
     var receiveAddress: String { get }
-    var progress: Double { get }
     func send(to address: String, value: Int) throws
     func validate(address: String) throws
     func fee(for value: Int, toAddress: String?, senderPay: Bool) throws -> Int

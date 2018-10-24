@@ -132,6 +132,10 @@ class Peer {
             sendVerackMessage()
             sentVerack = true
         }
+
+        if let startHeight = message.startHeight {
+            delegate?.peer(self, didReceiveBestBlockHeight: startHeight)
+        }
     }
 
     private func handleVerackMessage() {
@@ -266,8 +270,8 @@ extension Peer: IPeerTaskDelegate {
         }
     }
 
-    func handle(merkleBlock: MerkleBlock, fullBlock: Bool) throws {
-        try delegate?.handle(self, merkleBlock: merkleBlock, fullBlock: fullBlock)
+    func handle(merkleBlock: MerkleBlock) {
+        delegate?.handle(self, merkleBlock: merkleBlock)
     }
 
 }
@@ -320,11 +324,12 @@ extension Peer: Equatable {
 }
 
 protocol PeerDelegate: class {
-    func handle(_ peer: Peer, merkleBlock: MerkleBlock, fullBlock: Bool) throws
+    func handle(_ peer: Peer, merkleBlock: MerkleBlock)
     func peerReady(_ peer: Peer)
     func peerDidConnect(_ peer: Peer)
     func peerDidDisconnect(_ peer: Peer, withError error: Bool)
 
+    func peer(_ peer: Peer, didReceiveBestBlockHeight bestBlockHeight: Int32)
     func peer(_ peer: Peer, didCompleteTask task: PeerTask)
     func peer(_ peer: Peer, didReceiveAddresses addresses: [NetworkAddress])
     func peer(_ peer: Peer, didReceiveInventoryItems items: [InventoryItem])

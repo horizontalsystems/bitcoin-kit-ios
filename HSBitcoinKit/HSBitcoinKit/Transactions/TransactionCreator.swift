@@ -39,9 +39,9 @@ extension TransactionCreator: ITransactionCreator {
 
         try realm.write {
             realm.add(transaction)
+            transactionProcessor.process(transaction: transaction, realm: realm)
         }
 
-        transactionProcessor.enqueueRun()
         peerGroup.send(transaction: transaction)
     }
 

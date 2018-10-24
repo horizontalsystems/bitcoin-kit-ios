@@ -7,9 +7,9 @@ import HSCryptoKit
 
 class DataProvider {
     private let disposeBag = DisposeBag()
+    private var knownBestBlockHeight: Int = 0
 
     private let realmFactory: IRealmFactory
-    private let progressSyncer: IProgressSyncer
     private let addressManager: IAddressManager
     private let addressConverter: IAddressConverter
     private let transactionCreator: ITransactionCreator
@@ -22,9 +22,8 @@ class DataProvider {
 
     weak var delegate: DataProviderDelegate?
 
-    init(realmFactory: IRealmFactory, progressSyncer: IProgressSyncer, addressManager: IAddressManager, addressConverter: IAddressConverter, transactionCreator: ITransactionCreator, transactionBuilder: ITransactionBuilder, network: INetwork) {
+    init(realmFactory: IRealmFactory, addressManager: IAddressManager, addressConverter: IAddressConverter, transactionCreator: ITransactionCreator, transactionBuilder: ITransactionBuilder, network: INetwork) {
         self.realmFactory = realmFactory
-        self.progressSyncer = progressSyncer
         self.addressManager = addressManager
         self.addressConverter = addressConverter
         self.transactionCreator = transactionCreator
@@ -42,10 +41,6 @@ class DataProvider {
         blocksNotificationToken = blockRealmResults.observe { [weak self] changeset in
             self?.handleBlocks(changeset: changeset)
         }
-
-        progressSyncer.subject.subscribeInBackground(disposeBag: disposeBag, onNext: { [weak self] progress in
-            self?.handleProgressUpdate(progress: progress)
-        })
     }
 
     deinit {
@@ -67,6 +62,7 @@ class DataProvider {
     private func handleBlocks(changeset: RealmCollectionChange<Results<Block>>) {
         if case let .update(collection, deletions, insertions, _) = changeset, let block = collection.last, (!deletions.isEmpty || !insertions.isEmpty) {
             delegate?.lastBlockInfoUpdated(lastBlockInfo: blockInfo(fromBlock: block))
+            handleProgressUpdate(block: block)
         }
     }
 
@@ -76,7 +72,21 @@ class DataProvider {
         }
     }
 
-    private func handleProgressUpdate(progress: Double) {
+    private func handleProgressUpdate(block: Block) {
+        let progress: Double!
+
+        if knownBestBlockHeight == 0 {
+            progress = 0
+        } else {
+            if knownBestBlockHeight < block.height {
+                knownBestBlockHeight = block.height
+            }
+
+            progress = knownBestBlockHeight == network.checkpointBlock.height
+                    ? 1
+                    : Double(block.height - network.checkpointBlock.height) / Double(knownBestBlockHeight - network.checkpointBlock.height)
+        }
+
         delegate?.progressUpdated(progress: progress)
     }
 
@@ -186,10 +196,6 @@ extension DataProvider: IDataProvider {
         return (try? addressManager.receiveAddress()) ?? ""
     }
 
-    var progress: Double {
-        return progressSyncer.progress
-    }
-
     var debugInfo: String {
         var lines = [String]()
 
@@ -216,6 +222,19 @@ extension DataProvider: IDataProvider {
         }
 
         return lines.joined(separator: "\n")
+    }
+
+}
+
+extension DataProvider: BestBlockHeightDelegate {
+
+    func bestBlockHeightReceived(height: Int32) {
+        if height > knownBestBlockHeight {
+            knownBestBlockHeight = Int(height)
+            if let lastBlock = blockRealmResults.last {
+                handleProgressUpdate(block: lastBlock)
+            }
+        }
     }
 
 }

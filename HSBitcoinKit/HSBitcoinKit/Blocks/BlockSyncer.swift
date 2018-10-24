@@ -3,28 +3,25 @@ import RealmSwift
 
 class BlockSyncer {
 
-    enum BlockSyncerError: Error {
-        case nextBlockNotFull
-    }
-
     private let realmFactory: IRealmFactory
     private let network: INetwork
-    private let progressSyncer: IProgressSyncer
     private let transactionProcessor: ITransactionProcessor
     private let blockchain: IBlockchain
     private let addressManager: IAddressManager
+    private let bloomFilterManager: IBloomFilterManager
 
     private let hashCheckpointThreshold: Int
+    private var needToReDownload = false
 
-    init(realmFactory: IRealmFactory, network: INetwork, progressSyncer: IProgressSyncer,
-         transactionProcessor: ITransactionProcessor, blockchain: IBlockchain, addressManager: IAddressManager,
+    init(realmFactory: IRealmFactory, network: INetwork,
+         transactionProcessor: ITransactionProcessor, blockchain: IBlockchain, addressManager: IAddressManager, bloomFilterManager: IBloomFilterManager,
          hashCheckpointThreshold: Int = 100) {
         self.realmFactory = realmFactory
         self.network = network
-        self.progressSyncer = progressSyncer
         self.transactionProcessor = transactionProcessor
         self.blockchain = blockchain
         self.addressManager = addressManager
+        self.bloomFilterManager = bloomFilterManager
         self.hashCheckpointThreshold = hashCheckpointThreshold
 
         let realm = realmFactory.realm
@@ -35,24 +32,101 @@ class BlockSyncer {
             }
         }
     }
+
+    // We need to clear block hashes when sync peer is disconnected
+    private func clearBlockHashes() throws {
+        let realm = realmFactory.realm
+
+        try realm.write {
+            realm.delete(realm.objects(BlockHash.self).filter("height = 0"))
+        }
+    }
+
+    private func clearNotFullBlocks() throws {
+        let realm = realmFactory.realm
+        guard let blockHash = realm.objects(BlockHash.self).filter("height = 0").sorted(byKeyPath: "order").first else {
+            return
+        }
+
+        var block = realm.objects(Block.self).filter("headerHash = %@", blockHash.headerHash).first
+
+        try realm.write {
+            while let resolvedBlock = block {
+                block = nil
+                let blockHash = resolvedBlock.headerHash
+
+                for transaction in resolvedBlock.transactions {
+                    for output in transaction.outputs {
+                        realm.delete(output)
+                    }
+                    for input in transaction.inputs {
+                        realm.delete(input)
+                    }
+                    realm.delete(transaction)
+                }
+                realm.delete(resolvedBlock)
+
+                if let blockHeader = realm.objects(BlockHeader.self).filter("previousBlockHeaderHash = %@", blockHash).first {
+                    block = realm.objects(Block.self).filter("header = %@", blockHeader).first
+                }
+            }
+        }
+    }
+
+    private func handleFork() {
+        blockchain.handleFork(realm: realmFactory.realm)
+    }
+
+    private func hasUnspentOutputs(transaction: Transaction) -> Bool {
+        for output in transaction.outputs {
+            if output.scriptType == .p2wpkh || output.scriptType == .p2pk  {
+                return true
+            }
+        }
+
+        return false
+    }
 }
 
 extension BlockSyncer: IBlockSyncer {
+
+    func prepareForDownload() {
+        do {
+            try addressManager.fillGap()
+            bloomFilterManager.regenerateBloomFilter()
+            needToReDownload = false
+
+            try clearNotFullBlocks()
+            try clearBlockHashes()
+
+            handleFork()
+        } catch {
+            print(error)
+        }
+    }
+
+    func downloadStarted() {
+    }
+
+    func downloadIterationCompleted() {
+        try? addressManager.fillGap()
+        bloomFilterManager.regenerateBloomFilter()
+        needToReDownload = false
+    }
+
+    func downloadCompleted() {
+        handleFork()
+    }
+
+    func downloadFailed() {
+        prepareForDownload()
+    }
 
     func getBlockHashes() -> [Data] {
         let realm = realmFactory.realm
         let blockHashes = realm.objects(BlockHash.self).sorted(byKeyPath: "order")
 
         return blockHashes.prefix(500).map { blockHash in blockHash.headerHash }
-    }
-
-    // We need to clear block hashes when sync peer is disconnected
-    func clearBlockHashes() {
-        let realm = realmFactory.realm
-
-        try? realm.write {
-            realm.delete(realm.objects(BlockHash.self).filter("height = 0"))
-        }
     }
 
     func getBlockLocatorHashes() -> [Data] {
@@ -93,79 +167,33 @@ extension BlockSyncer: IBlockSyncer {
         }
     }
 
-    func handle(merkleBlock: MerkleBlock, fullBlock: Bool) throws {
+    func handle(merkleBlock: MerkleBlock) throws {
         let realm = realmFactory.realm
 
-        guard let block = try blockchain.connect(merkleBlock: merkleBlock, realm: realm) else {
-            return
-        }
-
-        var newUnspentOutput = false
-
-        try? realm.write {
-            realm.add(block)
+        try realm.write {
+            guard let block = try blockchain.connect(merkleBlock: merkleBlock, realm: realm) else {
+                return
+            }
 
             for transaction in merkleBlock.transactions {
+                if let existingTransaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", transaction.reversedHashHex).first {
+                    existingTransaction.block = block
+                    existingTransaction.status = .relayed
+                    continue
+                }
+
                 transactionProcessor.process(transaction: transaction, realm: realm)
 
                 if transaction.isMine {
-                    if let existingTransaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", transaction.reversedHashHex).first {
-                        existingTransaction.block = block
-                        existingTransaction.status = .relayed
-                    } else {
-                        transaction.block = block
-                        realm.add(transaction)
-                    }
+                    transaction.block = block
+                    realm.add(transaction)
 
-                    if fullBlock && !newUnspentOutput {
-                        for output in transaction.outputs {
-                            if output.scriptType == .p2wpkh {
-                                newUnspentOutput = true
-                            }
-                        }
-                    }
+                    self.needToReDownload = self.needToReDownload || self.addressManager.gapShifts() || self.hasUnspentOutputs(transaction: transaction)
                 }
             }
-
-            if fullBlock, let headerHash = realm.objects(BlockHash.self).filter("headerHash = %@", block.headerHash).first {
-                realm.delete(headerHash)
-            }
-        }
-
-        if fullBlock && (addressManager.gapShifts() || newUnspentOutput) {
-            throw BlockSyncerError.nextBlockNotFull
-        }
-    }
-
-    func merkleBlocksDownloadCompleted() throws {
-        try addressManager.fillGap()
-
-        let realm = realmFactory.realm
-        guard let blockHash = realm.objects(BlockHash.self).filter("height = 0").sorted(byKeyPath: "order").first else {
-            return
-        }
-        
-        var block = realm.objects(Block.self).filter("headerHash = %@", blockHash.headerHash).first
-
-        try realm.write {
-            while let resolvedBlock = block {
-                block = nil
-                let blockHash = resolvedBlock.headerHash
-
-                for transaction in resolvedBlock.transactions {
-                    for output in transaction.outputs {
-                        realm.delete(output)
-                    }
-                    for input in transaction.inputs {
-                        realm.delete(input)
-                    }
-                    realm.delete(transaction)
-                }
-                realm.delete(resolvedBlock)
-
-                if let blockHeader = realm.objects(BlockHeader.self).filter("previousBlockHeaderHash = %@", blockHash).first {
-                    block = realm.objects(Block.self).filter("header = %@", blockHeader).first
-                }
+            
+            if !self.needToReDownload, let blockHash = realm.objects(BlockHash.self).filter("headerHash = %@", block.headerHash).first {
+                realm.delete(blockHash)
             }
         }
     }
