@@ -117,6 +117,7 @@ protocol IScriptExtractor: class {
 }
 
 protocol ITransactionProcessor {
+    func process(transactions: [Transaction], inBlock block: Block?, checkBloomFilter: Bool, realm: Realm) throws
     func process(transaction: Transaction, realm: Realm)
 }
 

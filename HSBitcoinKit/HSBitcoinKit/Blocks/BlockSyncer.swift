@@ -73,19 +73,6 @@ class BlockSyncer {
         }
     }
 
-    private func handleFork() {
-        blockchain.handleFork(realm: realmFactory.realm)
-    }
-
-    private func hasUnspentOutputs(transaction: Transaction) -> Bool {
-        for output in transaction.outputs {
-            if output.scriptType == .p2wpkh || output.scriptType == .p2pk  {
-                return true
-            }
-        }
-
-        return false
-    }
 }
 
 extension BlockSyncer: IBlockSyncer {
@@ -99,7 +86,7 @@ extension BlockSyncer: IBlockSyncer {
             try clearNotFullBlocks()
             try clearBlockHashes()
 
-            handleFork()
+            blockchain.handleFork(realm: realmFactory.realm)
         } catch {
             print(error)
         }
@@ -109,13 +96,15 @@ extension BlockSyncer: IBlockSyncer {
     }
 
     func downloadIterationCompleted() {
-        try? addressManager.fillGap()
-        bloomFilterManager.regenerateBloomFilter()
-        needToReDownload = false
+        if needToReDownload {
+            try? addressManager.fillGap()
+            bloomFilterManager.regenerateBloomFilter()
+            needToReDownload = false
+        }
     }
 
     func downloadCompleted() {
-        handleFork()
+        blockchain.handleFork(realm: realmFactory.realm)
     }
 
     func downloadFailed() {
@@ -175,23 +164,12 @@ extension BlockSyncer: IBlockSyncer {
                 return
             }
 
-            for transaction in merkleBlock.transactions {
-                if let existingTransaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", transaction.reversedHashHex).first {
-                    existingTransaction.block = block
-                    existingTransaction.status = .relayed
-                    continue
-                }
-
-                transactionProcessor.process(transaction: transaction, realm: realm)
-
-                if transaction.isMine {
-                    transaction.block = block
-                    realm.add(transaction)
-
-                    self.needToReDownload = self.needToReDownload || self.addressManager.gapShifts() || self.hasUnspentOutputs(transaction: transaction)
-                }
+            do {
+                try transactionProcessor.process(transactions: merkleBlock.transactions, inBlock: block, checkBloomFilter: !self.needToReDownload, realm: realm)
+            } catch _ as BloomFilterManager.BloomFilterExpired {
+                self.needToReDownload = true
             }
-            
+
             if !self.needToReDownload, let blockHash = realm.objects(BlockHash.self).filter("headerHash = %@", block.headerHash).first {
                 realm.delete(blockHash)
             }

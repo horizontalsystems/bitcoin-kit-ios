@@ -117,8 +117,8 @@ public class BitcoinKit {
 
         transactionExtractor = TransactionExtractor(scriptConverter: scriptConverter, addressConverter: addressConverter)
         transactionLinker = TransactionLinker()
-        transactionProcessor = TransactionProcessor(extractor: transactionExtractor, linker: transactionLinker)
-        transactionSyncer = TransactionSyncer(realmFactory: realmFactory, processor: transactionProcessor)
+        transactionProcessor = TransactionProcessor(extractor: transactionExtractor, linker: transactionLinker, addressManager: addressManager)
+        transactionSyncer = TransactionSyncer(realmFactory: realmFactory, processor: transactionProcessor, addressManager: addressManager, bloomFilterManager: bloomFilterManager)
         transactionBuilder = TransactionBuilder(unspentOutputSelector: unspentOutputSelector, unspentOutputProvider: unspentOutputProvider, transactionSizeCalculator: transactionSizeCalculator, addressConverter: addressConverter, inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory)
         transactionCreator = TransactionCreator(realmFactory: realmFactory, transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, peerGroup: peerGroup, addressManager: addressManager)
         blockchain = Blockchain(network: network, factory: factory)
