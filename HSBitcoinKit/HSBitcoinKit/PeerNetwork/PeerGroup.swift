@@ -85,7 +85,7 @@ class PeerGroup {
         }
 
         for transaction in pendingTransactions {
-            peer.add(task: RelayTransactionPeerTask(transaction: transaction))
+            peer.add(task: RelayTransactionTask(transaction: transaction))
         }
         pendingTransactions = []
     }
@@ -109,6 +109,7 @@ class PeerGroup {
 
         if syncPeer.synced {
             blockSyncer?.downloadCompleted()
+            syncPeer.sendMemoryPoolMessage()
             self.syncPeer = nil
             assignNextSyncPeer()
         }
@@ -275,10 +276,10 @@ extension PeerGroup: PeerDelegate {
         case let task as GetMerkleBlocksTask:
             handle(peer: peer, task: task)
 
-        case let task as RequestTransactionsPeerTask:
+        case let task as RequestTransactionsTask:
             handle(transactions: task.transactions)
 
-        case let task as RelayTransactionPeerTask:
+        case let task as RelayTransactionTask:
             handle(relayedTransaction: task.transaction)
 
         default: ()
@@ -332,7 +333,7 @@ extension PeerGroup: PeerDelegate {
             }
 
             if !transactionHashes.isEmpty {
-                peer.add(task: RequestTransactionsPeerTask(hashes: transactionHashes))
+                peer.add(task: RequestTransactionsTask(hashes: transactionHashes))
             }
         }
     }

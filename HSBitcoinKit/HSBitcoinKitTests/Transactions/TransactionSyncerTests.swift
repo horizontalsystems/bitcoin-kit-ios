@@ -5,105 +5,120 @@ import RealmSwift
 
 class TransactionSyncerTests: XCTestCase {
 
-    private var mockProcessor: MockITransactionProcessor!
-    private var syncer: TransactionSyncer!
+    private var mockRealmFactory: MockIRealmFactory!
+    private var mockTransactionProcessor: MockITransactionProcessor!
+    private var mockAddressManager: MockIAddressManager!
+    private var mockBloomFilterManager: MockIBloomFilterManager!
 
     private var realm: Realm!
+    private var syncer: TransactionSyncer!
 
     override func setUp() {
         super.setUp()
 
         realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
-        try! realm.write { realm.deleteAll() }
+        try! realm.write {
+            realm.deleteAll()
+        }
 
-        let mockRealmFactory = MockIRealmFactory()
+        mockRealmFactory = MockIRealmFactory()
         stub(mockRealmFactory) { mock in
             when(mock.realm.get).thenReturn(realm)
         }
 
-        mockProcessor = MockITransactionProcessor()
+        mockTransactionProcessor = MockITransactionProcessor()
+        mockAddressManager = MockIAddressManager()
+        mockBloomFilterManager = MockIBloomFilterManager()
 
-        stub(mockProcessor) { mock in
-            when(mock.process(transaction: any(), realm: any())).thenDoNothing()
+        stub(mockTransactionProcessor) { mock in
+            when(mock.process(transactions: any(), inBlock: any(), checkBloomFilter: any(), realm: any())).thenDoNothing()
+        }
+        stub(mockAddressManager) { mock in
+            when(mock.fillGap()).thenDoNothing()
+        }
+        stub(mockBloomFilterManager) { mock in
+            when(mock.regenerateBloomFilter()).thenDoNothing()
         }
 
-        syncer = TransactionSyncer(realmFactory: mockRealmFactory, processor: mockProcessor, queue: DispatchQueue.main)
+        syncer = TransactionSyncer(realmFactory: mockRealmFactory, processor: mockTransactionProcessor, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager)
     }
 
     override func tearDown() {
-        mockProcessor = nil
-        syncer = nil
+        mockRealmFactory = nil
+        mockTransactionProcessor = nil
+        mockAddressManager = nil
+        mockBloomFilterManager = nil
+
         realm = nil
+        syncer = nil
 
         super.tearDown()
     }
 
-//    func testHandle() {
-//        let transaction = TestData.p2pkhTransaction
-//
-//        syncer.handle(transactions: [transaction])
-//
-//        waitForMainQueue()
-//
-//        let realmTransaction = realm.objects(Transaction.self).last!
-//        assertTransactionEqual(tx1: transaction, tx2: realmTransaction)
-//        XCTAssertEqual(realmTransaction.block, nil)
-//
-//        verify(mockProcessor).process(transaction: any(), realm: any())
-//    }
-
-    func testHandle_EmptyTransactions() {
-        syncer.handle(transactions: [])
-
-        waitForMainQueue()
-
-        verify(mockProcessor, never()).process(transaction: any(), realm: any())
-    }
-
-    func testHandle_ExistingTransaction() {
-        let transaction = TestData.p2pkhTransaction
-        transaction.status = .new
+    func testNonSentTransactions() {
+        let relayedTransaction = TestData.p2pkhTransaction
+        let newTransaction = TestData.p2wpkhTransaction
+        relayedTransaction.status = .relayed
+        newTransaction.status = .new
 
         try! realm.write {
-            realm.add(transaction, update: true)
+            realm.add(relayedTransaction)
+            realm.add(newTransaction)
         }
 
-        syncer.handle(transactions: [transaction])
-
-        waitForMainQueue()
-
-        let realmTransaction = realm.objects(Transaction.self).last!
-
-        assertTransactionEqual(tx1: transaction, tx2: realmTransaction)
-        XCTAssertEqual(realmTransaction.status, TransactionStatus.relayed)
-
-        verify(mockProcessor, never()).process(transaction: any(), realm: any())
+        let transactions = syncer.getNonSentTransactions()
+        XCTAssertEqual(transactions.count, 1)
+        XCTAssertEqual(transactions.first!.dataHash, newTransaction.dataHash)
     }
 
-    private func assertTransactionEqual(tx1: Transaction, tx2: Transaction) {
-        XCTAssertEqual(tx1, tx2)
-        XCTAssertEqual(tx1.reversedHashHex, tx2.reversedHashHex)
-        XCTAssertEqual(tx1.version, tx2.version)
-        XCTAssertEqual(tx1.lockTime, tx2.lockTime)
-        XCTAssertEqual(tx1.inputs.count, tx2.inputs.count)
-        XCTAssertEqual(tx1.outputs.count, tx2.outputs.count)
+    func testHandle_emptyTransactions() {
+        syncer.handle(transactions: [])
 
-        for i in 0..<tx1.inputs.count {
-            XCTAssertEqual(tx1.inputs[i].previousOutputTxReversedHex, tx2.inputs[i].previousOutputTxReversedHex)
-            XCTAssertEqual(tx1.inputs[i].previousOutputIndex, tx2.inputs[i].previousOutputIndex)
-            XCTAssertEqual(tx1.inputs[i].signatureScript, tx2.inputs[i].signatureScript)
-            XCTAssertEqual(tx1.inputs[i].sequence, tx2.inputs[i].sequence)
-        }
-
-        for i in 0..<tx2.outputs.count {
-            assertOutputEqual(out1: tx1.outputs[i], out2: tx2.outputs[i])
-        }
+        verify(mockTransactionProcessor, never()).process(transactions: any(), inBlock: any(), checkBloomFilter: any(), realm: any())
+        verify(mockAddressManager, never()).fillGap()
+        verify(mockBloomFilterManager, never()).regenerateBloomFilter()
     }
 
-    private func assertOutputEqual(out1: TransactionOutput, out2: TransactionOutput) {
-        XCTAssertEqual(out1.value, out2.value)
-        XCTAssertEqual(out1.lockingScript, out2.lockingScript)
-        XCTAssertEqual(out1.index, out2.index)
+    func testHandle_NeedToUpdateBloomFilter() {
+        let transactions = [TestData.p2pkhTransaction]
+
+        stub(mockTransactionProcessor) { mock in
+            when(mock.process(transactions: equal(to: transactions), inBlock: any(), checkBloomFilter: any(), realm: any())).thenThrow(BloomFilterManager.BloomFilterExpired())
+        }
+
+        syncer.handle(transactions: transactions)
+        verify(mockTransactionProcessor).process(transactions: equal(to: transactions), inBlock: equal(to: nil), checkBloomFilter: equal(to: true), realm: any())
+        verify(mockAddressManager).fillGap()
+        verify(mockBloomFilterManager).regenerateBloomFilter()
+    }
+
+    func testHandle_NotNeedToUpdateBloomFilter() {
+        let transactions = [TestData.p2pkhTransaction]
+
+        stub(mockTransactionProcessor) { mock in
+            when(mock.process(transactions: equal(to: transactions), inBlock: any(), checkBloomFilter: equal(to: true), realm: any())).thenDoNothing()
+        }
+
+        syncer.handle(transactions: transactions)
+        verify(mockTransactionProcessor).process(transactions: equal(to: transactions), inBlock: equal(to: nil), checkBloomFilter: equal(to: true), realm: any())
+        verify(mockAddressManager, never()).fillGap()
+        verify(mockBloomFilterManager, never()).regenerateBloomFilter()
+    }
+
+    func testShouldRequestTransaction_TransactionExists() {
+        let transaction = TestData.p2wpkhTransaction
+
+        try! realm.write {
+            realm.add(transaction)
+        }
+
+        XCTAssertEqual(syncer.shouldRequestTransaction(hash: transaction.dataHash), false)
+    }
+
+    func testShouldRequestTransaction_TransactionNotExists() {
+        let transaction = TestData.p2wpkhTransaction
+
+        XCTAssertEqual(syncer.shouldRequestTransaction(hash: transaction.dataHash), true)
     }
 
 }

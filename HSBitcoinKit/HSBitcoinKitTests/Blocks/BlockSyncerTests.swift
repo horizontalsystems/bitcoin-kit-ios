@@ -60,6 +60,9 @@ class BlockSyncerTests: XCTestCase {
         stub(mockAddressManager) { mock in
             when(mock.fillGap()).thenDoNothing()
         }
+        stub(mockBloomFilterManager) { mock in
+            when(mock.regenerateBloomFilter()).thenDoNothing()
+        }
 
         syncer = BlockSyncer(
                 realmFactory: mockRealmFactory, network: mockNetwork,

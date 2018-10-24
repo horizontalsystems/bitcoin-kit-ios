@@ -1,6 +1,6 @@
 import Foundation
 
-class RelayTransactionPeerTask: PeerTask {
+class RelayTransactionTask: PeerTask {
 
     var transaction: Transaction
 

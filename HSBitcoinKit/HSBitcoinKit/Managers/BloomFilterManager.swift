@@ -1,6 +1,8 @@
 import RealmSwift
 
 class BloomFilterManager {
+    class BloomFilterExpired: Error {}
+
     private let realmFactory: IRealmFactory
     weak var delegate: BloomFilterManagerDelegate?
 

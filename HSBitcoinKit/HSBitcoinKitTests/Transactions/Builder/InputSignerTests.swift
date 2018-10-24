@@ -6,6 +6,7 @@ import RealmSwift
 class InputSignerTests: XCTestCase {
 
     private var mockHDWallet: MockIHDWallet!
+    private var mockNetwork: MockINetwork!
 
     private var realm: Realm!
     private var transaction: Transaction!
@@ -40,16 +41,21 @@ class InputSignerTests: XCTestCase {
         transaction.outputs.append(payOutput)
 
         mockHDWallet = MockIHDWallet()
+        mockNetwork = MockINetwork()
 
         stub(mockHDWallet) { mock in
             when(mock.privateKeyData(index: any(), external: any())).thenReturn(privateKey)
         }
+        stub(mockNetwork) { mock in
+            when(mock.sigHash.get).thenReturn(SigHashType.bitcoinAll)
+        }
 
-        inputSigner = InputSigner(hdWallet: mockHDWallet)
+        inputSigner = InputSigner(hdWallet: mockHDWallet, network: mockNetwork)
     }
 
     override func tearDown() {
         realm = nil
+        mockNetwork = nil
         mockHDWallet = nil
         inputSigner = nil
         transaction = nil

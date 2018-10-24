@@ -18,6 +18,7 @@ class Peer {
     var connected: Bool = false
     var blockHashesSynced: Bool = false
     var synced: Bool = false
+    var mempoolSent: Bool = false
 
     var ready: Bool {
         return connected && tasks.isEmpty
@@ -82,8 +83,11 @@ class Peer {
     }
 
     func sendMemoryPoolMessage() {
-        log("--> MEMPOOL")
-        connection.send(message: MemPoolMessage())
+        if !mempoolSent {
+            log("--> MEMPOOL")
+            connection.send(message: MemPoolMessage())
+            mempoolSent = true
+        }
     }
 
     private func sendVersionMessage() {

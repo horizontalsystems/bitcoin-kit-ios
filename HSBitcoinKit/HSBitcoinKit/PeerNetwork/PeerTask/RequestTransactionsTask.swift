@@ -1,6 +1,6 @@
 import Foundation
 
-class RequestTransactionsPeerTask: PeerTask {
+class RequestTransactionsTask: PeerTask {
 
     private var hashes: [Data]
     var transactions = [Transaction]()

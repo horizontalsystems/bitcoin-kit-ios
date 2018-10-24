@@ -1,33 +1,17 @@
+import Foundation
+import RealmSwift
+
 class TransactionSyncer {
     private let realmFactory: IRealmFactory
-    private let processor: ITransactionProcessor
-    private let queue: DispatchQueue
+    private let transactionProcessor: ITransactionProcessor
+    private let addressManager: IAddressManager
+    private let bloomFilterManager: IBloomFilterManager
 
-    init(realmFactory: IRealmFactory, processor: ITransactionProcessor, queue: DispatchQueue = DispatchQueue(label: "TransactionSyncer", qos: .userInitiated)) {
+    init(realmFactory: IRealmFactory, processor: ITransactionProcessor, addressManager: IAddressManager, bloomFilterManager: IBloomFilterManager) {
         self.realmFactory = realmFactory
-        self.processor = processor
-        self.queue = queue
-    }
-
-    private func _handle(transactions: [Transaction]) throws {
-        guard !transactions.isEmpty else {
-            return
-        }
-
-        let realm = realmFactory.realm
-
-        try realm.write {
-            for transaction in transactions {
-                if let existingTransaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", transaction.reversedHashHex).first {
-                    existingTransaction.status = .relayed
-                } else {
-                    processor.process(transaction: transaction, realm: realm)
-                    if transaction.isMine {
-                        realm.add(transaction)
-                    }
-                }
-            }
-        }
+        self.transactionProcessor = processor
+        self.addressManager = addressManager
+        self.bloomFilterManager = bloomFilterManager
     }
 
 }
@@ -41,12 +25,24 @@ extension TransactionSyncer: ITransactionSyncer {
     }
 
     func handle(transactions: [Transaction]) {
-        queue.async {
+        guard !transactions.isEmpty else {
+            return
+        }
+
+        let realm = realmFactory.realm
+        var needToUpdateBloomFilter = false
+
+        try? realm.write {
             do {
-                try self._handle(transactions: transactions)
-            } catch {
-                Logger.shared.log(self, "Handle Error: \(error)")
+                try self.transactionProcessor.process(transactions: transactions, inBlock: nil, checkBloomFilter: true, realm: realm)
+            } catch _ as BloomFilterManager.BloomFilterExpired {
+                needToUpdateBloomFilter = true
             }
+        }
+
+        if needToUpdateBloomFilter {
+            try? addressManager.fillGap()
+            bloomFilterManager.regenerateBloomFilter()
         }
     }
 
