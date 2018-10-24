@@ -217,6 +217,7 @@ protocol INetwork: class {
     var genesisBlock: Block { get }
     var checkpointBlock: Block { get }
     var coinType: UInt32 { get }
+    var sigHash: SigHashType { get }
 
     // difficulty adjustment params
     var maxTargetBits: Int { get }                                      // Maximum difficulty.

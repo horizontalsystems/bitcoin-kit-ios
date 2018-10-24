@@ -25,10 +25,10 @@ class TransactionSerializer {
         return data
     }
 
-    static func serializedForSignature(transaction: Transaction, inputIndex: Int, witness: Bool = false) throws -> Data {
+    static func serializedForSignature(transaction: Transaction, inputIndex: Int, forked: Bool = false) throws -> Data {
         var data = Data()
 
-        if witness {
+        if forked {     // use bip143 for new transaction digest algorithm
             data += UInt32(transaction.version)
 
             let hashPrevouts = try transaction.inputs.flatMap { input in
@@ -66,7 +66,6 @@ class TransactionSerializer {
         }
 
         data += UInt32(transaction.lockTime)
-        data += UInt32(1)
 
         return data
     }

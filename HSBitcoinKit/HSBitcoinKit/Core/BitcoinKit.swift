@@ -108,7 +108,7 @@ public class BitcoinKit {
         addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, addressConverter: addressConverter)
         initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, apiManager: apiManager, addressManager: addressManager, addressConverter: addressConverter, factory: factory, peerGroup: peerGroup, network: network)
 
-        inputSigner = InputSigner(hdWallet: hdWallet)
+        inputSigner = InputSigner(hdWallet: hdWallet, network: network)
         scriptBuilder = ScriptBuilder()
 
         transactionSizeCalculator = TransactionSizeCalculator()

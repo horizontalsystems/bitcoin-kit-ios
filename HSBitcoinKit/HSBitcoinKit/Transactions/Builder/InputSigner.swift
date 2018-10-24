@@ -9,9 +9,11 @@ class InputSigner {
     }
 
     let hdWallet: IHDWallet
+    let network: INetwork
 
-    init(hdWallet: IHDWallet) {
+    init(hdWallet: IHDWallet, network: INetwork) {
         self.hdWallet = hdWallet
+        self.network = network
     }
 
 }
@@ -34,11 +36,12 @@ extension InputSigner: IInputSigner {
         guard let privateKeyData = try? hdWallet.privateKeyData(index: pubKey.index, external: pubKey.external) else {
             throw SignError.noPrivateKey
         }
-
         let witness = prevOutput.scriptType == .p2wpkh || prevOutput.scriptType == .p2wpkhSh
-        let serializedTransaction = try TransactionSerializer.serializedForSignature(transaction: transaction, inputIndex: index, witness: witness)
+
+        var serializedTransaction = try TransactionSerializer.serializedForSignature(transaction: transaction, inputIndex: index, forked: witness || network.sigHash.forked)
+        serializedTransaction += UInt32(network.sigHash.value)
         let signatureHash = CryptoKit.sha256sha256(serializedTransaction)
-        let signature = try CryptoKit.sign(data: signatureHash, privateKey: privateKeyData) + Data(bytes: [0x01])
+        let signature = try CryptoKit.sign(data: signatureHash, privateKey: privateKeyData) + Data(bytes: [network.sigHash.value])
 
         switch prevOutput.scriptType {
         case .p2pk: return [signature]

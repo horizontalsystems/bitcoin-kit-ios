@@ -17,6 +17,7 @@ class BitcoinRegTest: INetwork {
     let magic: UInt32 = 0xfabfb5da
     let port: UInt32 = 18444
     let coinType: UInt32 = 1
+    let sigHash: SigHashType = .bitcoinAll
 
     let dnsSeeds = [
         "blocknode01.grouvi.org",
