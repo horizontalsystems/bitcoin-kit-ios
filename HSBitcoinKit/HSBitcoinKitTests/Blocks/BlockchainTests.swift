@@ -126,6 +126,25 @@ class BlockChainBuilderTest: XCTestCase {
         }
     }
 
+    func testForceAdd() {
+        let merkleBlock = MerkleBlock(header: TestData.firstBlock.header!, transactionHashes: [Data](), transactions: [Transaction]())
+        let newBlock = Block(withHeader: merkleBlock.header, height: 1)
+
+        stub(mockFactory) { mock in
+            when(mock.block(withHeader: equal(to: merkleBlock.header), height: equal(to: 1))).thenReturn(newBlock)
+        }
+
+        try! realm.write {
+            let block = blockchain.forceAdd(merkleBlock: merkleBlock, height: 1, realm: realm)
+        }
+
+        verify(mockNetwork, never()).validate(block: any(), previousBlock: any())
+
+        let realmBlocks = realm.objects(Block.self)
+        XCTAssertEqual(realmBlocks.count, 1)
+        XCTAssertEqual(realmBlocks.last!.headerHash, merkleBlock.headerHash)
+    }
+
     func testHandleFork_noFork() {
         let blocksInChain = [1: "00000001", 2: "00000002", 3: "00000003"]
         let newBlocks = [4: "11111114", 5: "11111115", 6: "11111116"]

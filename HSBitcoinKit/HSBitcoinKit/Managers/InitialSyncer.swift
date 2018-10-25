@@ -69,7 +69,7 @@ class InitialSyncer {
                     if lastUsedKeyIndex < keys.count - gapLimit {
                         return Observable.just((keys, responses))
                     } else {
-                        let validResponses = blockResponses.filter { $0.height < maxHeight }
+                        let validResponses = blockResponses.filter { $0.height <= maxHeight }
                         return try self.fetchFromApi(external: external, maxHeight: maxHeight, lastUsedKeyIndex: lastUsedKeyIndex, keys: keys, responses: responses + validResponses)
                     }
                 }
