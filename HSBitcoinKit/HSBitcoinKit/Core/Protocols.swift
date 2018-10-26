@@ -137,7 +137,7 @@ protocol ITransactionSyncer: class {
 
 protocol ITransactionCreator {
     var feeRate: Int { get }
-    func create(to address: String, value: Int) throws
+    func create(to address: String, value: Int, feeRate: Int, senderPay: Bool) throws
 }
 
 protocol ITransactionBuilder {
@@ -160,13 +160,14 @@ protocol IScriptBuilder {
 }
 
 protocol ITransactionSizeCalculator {
-    func transactionSize() -> Int
+    func transactionSize(inputs: [ScriptType], outputs: [ScriptType]) -> Int
     func outputSize(type: ScriptType) -> Int
     func inputSize(type: ScriptType) -> Int
+    func toBytes(fee: Int) -> Int
 }
 
 protocol IUnspentOutputSelector {
-    func select(value: Int, feeRate: Int, outputType: ScriptType, senderPay: Bool, outputs: [TransactionOutput]) throws -> SelectedUnspentOutputInfo
+    func select(value: Int, feeRate: Int, outputType: ScriptType, changeType: ScriptType, senderPay: Bool, outputs: [TransactionOutput]) throws -> SelectedUnspentOutputInfo
 }
 
 protocol IUnspentOutputProvider {

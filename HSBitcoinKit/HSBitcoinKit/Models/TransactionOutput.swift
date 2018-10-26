@@ -11,6 +11,7 @@ import RealmSwift
             case .p2sh: return 23
             case .p2wsh: return 34
             case .p2wpkh: return 22
+            case .p2wpkhSh: return 23
             default: return 0
         }
     }
@@ -22,6 +23,7 @@ import RealmSwift
             case .p2sh: return 0x14
             case .p2wsh: return 0x20
             case .p2wpkh: return 0x14
+            case .p2wpkhSh: return 0x14
             default: return 0
         }
     }
@@ -31,6 +33,10 @@ import RealmSwift
             case .p2sh, .p2wsh: return .scriptHash
             default: return .pubKeyHash
         }
+    }
+
+    var witness: Bool {
+        return self == .p2wpkh || self == .p2wpkhSh || self == .p2wsh
     }
 
 }

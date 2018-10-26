@@ -63,7 +63,7 @@ class TransactionBuilderTests: XCTestCase {
             realm.add(previousTransaction)
         }
 
-        unspentOutputs = SelectedUnspentOutputInfo(outputs: [previousTransaction.outputs[0]], totalValue: previousTransaction.outputs[0].value, fee: 1008)
+        unspentOutputs = SelectedUnspentOutputInfo(outputs: [previousTransaction.outputs[0]], totalValue: previousTransaction.outputs[0].value, fee: 1008, addChangeOutput: true)
         totalInputValue = unspentOutputs.outputs[0].value
         value = 10782000
         feeRate = 6
@@ -77,7 +77,7 @@ class TransactionBuilderTests: XCTestCase {
         changeOutput = TransactionOutput(withValue: totalInputValue - value, index: 1, lockingScript: Data(), type: .p2pkh, keyHash: changePubKey.keyHash)
 
         stub(mockUnspentOutputSelector) { mock in
-            when(mock.select(value: any(), feeRate: any(), outputType: any(), senderPay: any(), outputs: any())).thenReturn(unspentOutputs)
+            when(mock.select(value: any(), feeRate: any(), outputType: any(), changeType: any(), senderPay: any(), outputs: any())).thenReturn(unspentOutputs)
         }
 
         stub(mockUnspentOutputProvider) { mock in
@@ -170,14 +170,14 @@ class TransactionBuilderTests: XCTestCase {
             realm.add(previousTransaction)
         }
 
-        unspentOutputs = SelectedUnspentOutputInfo(outputs: [previousTransaction.outputs[0]], totalValue: previousTransaction.outputs[0].value, fee: 1008)
+        unspentOutputs = SelectedUnspentOutputInfo(outputs: [previousTransaction.outputs[0]], totalValue: previousTransaction.outputs[0].value, fee: 1008, addChangeOutput: true)
         totalInputValue = unspentOutputs.outputs[0].value
         value = 10782000
         feeRate = 6
         fee = 1008
 
         stub(mockUnspentOutputSelector) { mock in
-            when(mock.select(value: any(), feeRate: any(), outputType: any(), senderPay: any(), outputs: any())).thenReturn(unspentOutputs)
+            when(mock.select(value: any(), feeRate: any(), outputType: any(), changeType: any(), senderPay: any(), outputs: any())).thenReturn(unspentOutputs)
         }
 
         stub(mockUnspentOutputProvider) { mock in
@@ -241,6 +241,10 @@ class TransactionBuilderTests: XCTestCase {
 
     func testWithoutChangeOutput() {
         value = totalInputValue
+        unspentOutputs = SelectedUnspentOutputInfo(outputs: unspentOutputs.outputs, totalValue: unspentOutputs.totalValue, fee: unspentOutputs.fee, addChangeOutput: false)
+        stub(mockUnspentOutputSelector) { mock in
+            when(mock.select(value: any(), feeRate: any(), outputType: any(), changeType: any(), senderPay: any(), outputs: any())).thenReturn(unspentOutputs)
+        }
 
         var resultTx = Transaction()
         do {
@@ -258,6 +262,10 @@ class TransactionBuilderTests: XCTestCase {
 
     func testChangeNotAddedForDust() {
         value = totalInputValue - mockTransactionSizeCalculator.outputSize(type: .p2pkh) * feeRate
+        unspentOutputs = SelectedUnspentOutputInfo(outputs: unspentOutputs.outputs, totalValue: unspentOutputs.totalValue, fee: unspentOutputs.fee, addChangeOutput: false)
+        stub(mockUnspentOutputSelector) { mock in
+            when(mock.select(value: any(), feeRate: any(), outputType: any(), changeType: any(), senderPay: any(), outputs: any())).thenReturn(unspentOutputs)
+        }
 
         var resultTx = Transaction()
         do {
@@ -301,12 +309,12 @@ class TransactionBuilderTests: XCTestCase {
         outputTx.outputs[0].scriptType = .p2pkh
 
         stub(mockUnspentOutputSelector) { mock in
-            when(mock.select(value: any(), feeRate: any(), outputType: any(), senderPay: any(), outputs: any())).thenReturn(SelectedUnspentOutputInfo(outputs: [outputTx.outputs[0]], totalValue: 11805400, fee: 112800))
+            when(mock.select(value: any(), feeRate: any(), outputType: any(), changeType: any(), senderPay: any(), outputs: any())).thenReturn(SelectedUnspentOutputInfo(outputs: [outputTx.outputs[0]], totalValue: 11805400, fee: 112800, addChangeOutput: false))
         }
 
         do {
             let result = try transactionBuilder.fee(for: value, feeRate: 600, senderPay: true, address: toAdressPKH)
-            XCTAssertEqual(result, 133200)
+            XCTAssertEqual(result, 112800)
         } catch let error {
             XCTFail(error.localizedDescription)
         }
