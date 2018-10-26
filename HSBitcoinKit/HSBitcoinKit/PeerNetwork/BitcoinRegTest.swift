@@ -20,11 +20,10 @@ class BitcoinRegTest: INetwork {
     let sigHash: SigHashType = .bitcoinAll
 
     let dnsSeeds = [
-        // "blocknode01.grouvi.org",
-        // "blocknode02.grouvi.org",
-        // "blocknode03.grouvi.org",
-        // "blocknode04.grouvi.org",
-        "localhost"
+         "blocknode01.grouvi.org",
+         "blocknode02.grouvi.org",
+         "blocknode03.grouvi.org",
+         "blocknode04.grouvi.org",
     ]
 
     let genesisBlock = Block(
