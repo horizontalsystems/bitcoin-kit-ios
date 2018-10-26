@@ -181,7 +181,7 @@ extension DataProvider: IDataProvider {
     }
 
     func send(to address: String, value: Int) throws {
-        try transactionCreator.create(to: address, value: value)
+        try transactionCreator.create(to: address, value: value, feeRate: transactionCreator.feeRate, senderPay: true)
     }
 
     func validate(address: String) throws {
@@ -189,7 +189,7 @@ extension DataProvider: IDataProvider {
     }
 
     func fee(for value: Int, toAddress: String? = nil, senderPay: Bool) throws -> Int {
-        return try transactionBuilder.fee(for: value, feeRate: transactionCreator.feeRate, senderPay: true, address: toAddress)
+        return try transactionBuilder.fee(for: value, feeRate: transactionCreator.feeRate, senderPay: senderPay, address: toAddress)
     }
 
     var receiveAddress: String {

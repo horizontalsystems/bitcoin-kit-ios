@@ -50,20 +50,14 @@ extension TransactionBuilder: ITransactionBuilder {
         if let string = address, let address = try? addressConverter.convert(address: string) {
             outputType = address.scriptType
         }
-        let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputType: outputType, senderPay: senderPay, outputs: unspentOutputProvider.allUnspentOutputs())
-
-        let feeWithChangeOutput = selectedOutputsInfo.fee + transactionSizeCalculator.outputSize(type: .p2pkh) * feeRate
-        if selectedOutputsInfo.totalValue > value + (senderPay ? feeWithChangeOutput : 0) {
-            return feeWithChangeOutput
-        } else {
-            return selectedOutputsInfo.fee
-        }
+        let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputType: outputType, changeType: .p2pkh, senderPay: senderPay, outputs: unspentOutputProvider.allUnspentOutputs())
+        return selectedOutputsInfo.fee
     }
 
     func buildTransaction(value: Int, feeRate: Int, senderPay: Bool, changeScriptType: ScriptType = .p2pkh, changePubKey: PublicKey, toAddress: String) throws -> Transaction {
         let address = try addressConverter.convert(address: toAddress)
 
-        let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputType: address.scriptType, senderPay: senderPay, outputs: unspentOutputProvider.allUnspentOutputs())
+        let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputType: address.scriptType, changeType: changeScriptType, senderPay: senderPay, outputs: unspentOutputProvider.allUnspentOutputs())
 
         // Build transaction
         let transaction = factory.transaction(version: 1, inputs: [], outputs: [], lockTime: 0)
@@ -87,8 +81,8 @@ extension TransactionBuilder: ITransactionBuilder {
         let sentValue = senderPay ? value + selectedOutputsInfo.fee : value
 
         transaction.outputs[0].value = receivedValue
-        if selectedOutputsInfo.totalValue > sentValue + transactionSizeCalculator.outputSize(type: changeScriptType) * feeRate {
-            let changeAddress = try addressConverter.convert(keyHash: changePubKey.keyHash, type: .p2pkh)
+        if selectedOutputsInfo.addChangeOutput {
+            let changeAddress = try addressConverter.convert(keyHash: changePubKey.keyHash, type: changeScriptType)
             try addOutputToTransaction(transaction: transaction, address: changeAddress, value: selectedOutputsInfo.totalValue - sentValue)
         }
 

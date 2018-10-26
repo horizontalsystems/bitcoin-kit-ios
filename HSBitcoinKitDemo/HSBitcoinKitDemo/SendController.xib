@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14313.18" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14283.14"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="SendController" customModule="Example" customModuleProvider="target">
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="SendController" customModule="HSBitcoinKitDemo" customModuleProvider="target">
             <connections>
                 <outlet property="addressTextField" destination="eid-xi-6C6" id="FDB-s1-Rsb"/>
                 <outlet property="amountTextField" destination="0XQ-lU-qZQ" id="7BO-ra-IQ8"/>
+                <outlet property="feeLabel" destination="lNG-nB-b3A" id="xZz-Ul-oAJ"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
             </connections>
         </placeholder>
@@ -44,30 +46,42 @@
                     <nil key="textColor"/>
                     <fontDescription key="fontDescription" type="system" pointSize="12"/>
                     <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
+                    <connections>
+                        <action selector="amountTextFieldChanged:" destination="-1" eventType="editingChanged" id="wI2-TY-Im9"/>
+                    </connections>
                 </textField>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PLD-Gr-HJH">
-                    <rect key="frame" x="169.5" y="202" width="36" height="30"/>
+                    <rect key="frame" x="169.5" y="228" width="36" height="30"/>
                     <state key="normal" title="Send"/>
                     <connections>
                         <action selector="send" destination="-1" eventType="touchUpInside" id="Vnt-9y-eGe"/>
                     </connections>
                 </button>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Fee:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lNG-nB-b3A">
+                    <rect key="frame" x="20" y="190" width="335" height="18"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                    <nil key="textColor"/>
+                    <nil key="highlightedColor"/>
+                </label>
             </subviews>
             <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <constraints>
-                <constraint firstItem="PLD-Gr-HJH" firstAttribute="top" secondItem="0XQ-lU-qZQ" secondAttribute="bottom" constant="20" id="8Gc-PY-90f"/>
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="cps-kG-bsH" secondAttribute="trailing" constant="20" id="8Hi-St-88k"/>
                 <constraint firstItem="PLD-Gr-HJH" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="9lm-9e-KVJ"/>
                 <constraint firstItem="cps-kG-bsH" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="20" id="At9-LT-Xly"/>
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="iZq-bw-BVE" secondAttribute="trailing" constant="20" id="FtC-On-tnr"/>
                 <constraint firstItem="iZq-bw-BVE" firstAttribute="top" secondItem="eid-xi-6C6" secondAttribute="bottom" constant="20" id="G42-yg-Qup"/>
+                <constraint firstItem="lNG-nB-b3A" firstAttribute="trailing" secondItem="0XQ-lU-qZQ" secondAttribute="trailing" id="Hde-hS-VKM"/>
                 <constraint firstItem="cps-kG-bsH" firstAttribute="top" secondItem="fnl-2z-Ty3" secondAttribute="top" constant="20" id="S75-aY-4wk"/>
+                <constraint firstItem="PLD-Gr-HJH" firstAttribute="top" secondItem="lNG-nB-b3A" secondAttribute="bottom" constant="20" id="SMe-U7-XAe"/>
                 <constraint firstItem="eid-xi-6C6" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="20" id="WtW-ac-K0H"/>
                 <constraint firstItem="0XQ-lU-qZQ" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="20" id="X8x-c2-LvQ"/>
                 <constraint firstItem="eid-xi-6C6" firstAttribute="top" secondItem="cps-kG-bsH" secondAttribute="bottom" constant="10" id="bLS-Wt-GSX"/>
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="0XQ-lU-qZQ" secondAttribute="trailing" constant="20" id="eDK-1S-mrh"/>
+                <constraint firstItem="lNG-nB-b3A" firstAttribute="leading" secondItem="0XQ-lU-qZQ" secondAttribute="leading" id="fCq-06-jo1"/>
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="eid-xi-6C6" secondAttribute="trailing" constant="20" id="haZ-oO-cOI"/>
                 <constraint firstItem="iZq-bw-BVE" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="20" id="jIW-px-cgJ"/>
+                <constraint firstItem="lNG-nB-b3A" firstAttribute="top" secondItem="0XQ-lU-qZQ" secondAttribute="bottom" constant="8" id="vND-Jh-Nc2"/>
                 <constraint firstItem="0XQ-lU-qZQ" firstAttribute="top" secondItem="iZq-bw-BVE" secondAttribute="bottom" constant="10" id="zxL-s7-GWn"/>
             </constraints>
             <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
