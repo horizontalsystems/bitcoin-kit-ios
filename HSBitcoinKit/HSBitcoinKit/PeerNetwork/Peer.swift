@@ -78,7 +78,7 @@ class Peer {
     func filterLoad(bloomFilter: BloomFilter) {
         let filterLoadMessage = FilterLoadMessage(bloomFilter: bloomFilter)
 
-        log("--> FILTERLOAD: \(bloomFilter.size) item(s)")
+        log("--> FILTERLOAD: \(bloomFilter.elementsCount) item(s)")
         connection.send(message: filterLoadMessage)
     }
 

@@ -13,7 +13,7 @@ class Blockchain {
 
 extension Blockchain: IBlockchain {
 
-    func connect(merkleBlock: MerkleBlock, realm: Realm) throws -> Block? {
+    func connect(merkleBlock: MerkleBlock, realm: Realm) throws -> Block {
         if let existingBlock = realm.objects(Block.self).filter("headerHash = %@", merkleBlock.headerHash).first {
             return existingBlock
         }
@@ -26,6 +26,13 @@ extension Blockchain: IBlockchain {
         let block = factory.block(withHeader: merkleBlock.header, previousBlock: previousBlock)
         try network.validate(block: block, previousBlock: previousBlock)
         block.stale = true
+        realm.add(block)
+
+        return block
+    }
+
+    func forceAdd(merkleBlock: MerkleBlock, height: Int, realm: Realm) -> Block {
+        let block = factory.block(withHeader: merkleBlock.header, height: height)
         realm.add(block)
 
         return block

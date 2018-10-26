@@ -85,6 +85,7 @@ protocol IHostDiscovery {
 
 protocol IFactory {
     func block(withHeader header: BlockHeader, previousBlock: Block) -> Block
+    func block(withHeader header: BlockHeader, height: Int) -> Block
     func blockHash(withHeaderHash headerHash: Data, height: Int) -> BlockHash
     func peer(withHost host: String, network: INetwork) -> Peer
     func transaction(version: Int, inputs: [TransactionInput], outputs: [TransactionOutput], lockTime: Int) -> Transaction
@@ -146,7 +147,8 @@ protocol ITransactionBuilder {
 }
 
 protocol IBlockchain {
-    func connect(merkleBlock: MerkleBlock, realm: Realm) throws -> Block?
+    func connect(merkleBlock: MerkleBlock, realm: Realm) throws -> Block
+    func forceAdd(merkleBlock: MerkleBlock, height: Int, realm: Realm) -> Block
     func handleFork(realm: Realm)
 }
 

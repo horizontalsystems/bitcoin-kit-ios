@@ -44,18 +44,16 @@ class BlockSyncer {
 
     private func clearNotFullBlocks() throws {
         let realm = realmFactory.realm
-        guard let blockHash = realm.objects(BlockHash.self).filter("height = 0").sorted(byKeyPath: "order").first else {
-            return
-        }
 
-        var block = realm.objects(Block.self).filter("headerHash = %@", blockHash.headerHash).first
+        let blockReversedHashes = realm.objects(BlockHash.self)
+                .filter("reversedHeaderHashHex != %@", network.checkpointBlock.reversedHeaderHashHex)
+                .map { $0.reversedHeaderHashHex }
+
+        let blocksToDelete = realm.objects(Block.self).filter(NSPredicate(format: "reversedHeaderHashHex IN %@", Array(blockReversedHashes)))
 
         try realm.write {
-            while let resolvedBlock = block {
-                block = nil
-                let blockHash = resolvedBlock.headerHash
-
-                for transaction in resolvedBlock.transactions {
+            for block in blocksToDelete {
+                for transaction in block.transactions {
                     for output in transaction.outputs {
                         realm.delete(output)
                     }
@@ -64,12 +62,9 @@ class BlockSyncer {
                     }
                     realm.delete(transaction)
                 }
-                realm.delete(resolvedBlock)
-
-                if let blockHeader = realm.objects(BlockHeader.self).filter("previousBlockHeaderHash = %@", blockHash).first {
-                    block = realm.objects(Block.self).filter("header = %@", blockHeader).first
-                }
             }
+
+            realm.delete(blocksToDelete)
         }
     }
 
@@ -160,8 +155,20 @@ extension BlockSyncer: IBlockSyncer {
         let realm = realmFactory.realm
 
         try realm.write {
-            guard let block = try blockchain.connect(merkleBlock: merkleBlock, realm: realm) else {
-                return
+            var block: Block!
+            do {
+                block = try blockchain.connect(merkleBlock: merkleBlock, realm: realm)
+            } catch let error as BlockValidatorError {
+                if error != BlockValidatorError.noPreviousBlock {
+                    throw error
+                }
+
+                let height = realm.objects(BlockHash.self).filter("headerHash = %@", merkleBlock.headerHash).first?.height ?? 0
+                if height > 0 {
+                    block = blockchain.forceAdd(merkleBlock: merkleBlock, height: height, realm: realm)
+                } else {
+                    throw error
+                }
             }
 
             do {

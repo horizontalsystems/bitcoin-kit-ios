@@ -14,6 +14,7 @@ struct BloomFilter {
     let size: UInt32
     let nFlag: UInt8 = 0
     var filter: [UInt8]
+    var elementsCount: Int
 
     var data: Data {
         return Data(filter)
@@ -32,6 +33,7 @@ struct BloomFilter {
     }
 
     init(elements: Int, falsePositiveRate: Double, randomNonce nTweak: UInt32) {
+        self.elementsCount = elements
         self.size = max(1, min(UInt32(-1.0 / pow(log(2), 2) * Double(elements) * log(falsePositiveRate)), MAX_FILTER_SIZE * 8) / 8)
         filter = [UInt8](repeating: 0, count: Int(size))
         self.nHashFuncs = max(1, min(UInt32(Double(size * UInt32(8)) / Double(elements) * log(2)), MAX_HASH_FUNCS))
