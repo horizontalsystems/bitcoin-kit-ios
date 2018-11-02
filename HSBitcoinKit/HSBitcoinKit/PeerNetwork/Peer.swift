@@ -40,57 +40,7 @@ class Peer {
         connection.delegate = self
     }
 
-    func connect() {
-        connection.connect()
-    }
-
-    func disconnect() {
-        connection.disconnect()
-    }
-
-    func add(task: PeerTask) {
-        tasks.append(task)
-
-        task.delegate = self
-        task.requester = self
-
-        task.start()
-    }
-
-    func isRequestingInventory(hash: Data) -> Bool {
-        for task in tasks {
-            if task.isRequestingInventory(hash: hash) {
-                return true
-            }
-        }
-        return false
-    }
-
-    func handleRelayedTransaction(hash: Data) -> Bool {
-        for task in tasks {
-            if task.handleRelayedTransaction(hash: hash) {
-                return true
-            }
-        }
-        return false
-    }
-
-    func filterLoad(bloomFilter: BloomFilter) {
-        let filterLoadMessage = FilterLoadMessage(bloomFilter: bloomFilter)
-
-        log("--> FILTERLOAD: \(bloomFilter.elementsCount) item(s)")
-        connection.send(message: filterLoadMessage)
-    }
-
-    func sendMemoryPoolMessage() {
-        if !mempoolSent {
-            log("--> MEMPOOL")
-            connection.send(message: MemPoolMessage())
-            mempoolSent = true
-        }
-    }
-
-    private func sendVersionMessage() {
+    private func sendVersion() {
         let versionMessage = VersionMessage(
                 version: protocolVersion,
                 services: 0x00,
@@ -107,7 +57,7 @@ class Peer {
         connection.send(message: versionMessage)
     }
 
-    private func sendVerackMessage() {
+    private func sendVerack() {
         log("--> VERACK")
         connection.send(message: VerackMessage())
     }
@@ -133,7 +83,7 @@ class Peer {
         log("<-- VERSION: \(message.version) --- \(message.userAgent?.value ?? "") --- \(ServiceFlags(rawValue: message.services)) -- \(String(describing: message.startHeight ?? 0))")
 
         if !sentVerack {
-            sendVerackMessage()
+            sendVerack()
             sentVerack = true
         }
 
@@ -238,11 +188,69 @@ class Peer {
 
 }
 
+extension Peer: IPeer {
+
+    func connect() {
+        connection.connect()
+    }
+
+    func disconnect() {
+        connection.disconnect()
+    }
+
+    func add(task: PeerTask) {
+        tasks.append(task)
+
+        task.delegate = self
+        task.requester = self
+
+        task.start()
+    }
+
+    func isRequestingInventory(hash: Data) -> Bool {
+        for task in tasks {
+            if task.isRequestingInventory(hash: hash) {
+                return true
+            }
+        }
+        return false
+    }
+
+    func handleRelayedTransaction(hash: Data) -> Bool {
+        for task in tasks {
+            if task.handleRelayedTransaction(hash: hash) {
+                return true
+            }
+        }
+        return false
+    }
+
+    func filterLoad(bloomFilter: BloomFilter) {
+        let filterLoadMessage = FilterLoadMessage(bloomFilter: bloomFilter)
+
+        log("--> FILTERLOAD: \(bloomFilter.elementsCount) item(s)")
+        connection.send(message: filterLoadMessage)
+    }
+
+    func sendMempoolMessage() {
+        if !mempoolSent {
+            log("--> MEMPOOL")
+            connection.send(message: MemPoolMessage())
+            mempoolSent = true
+        }
+    }
+
+    func equalTo(_ other: IPeer?) -> Bool {
+        return self.host == other?.host
+    }
+
+}
+
 extension Peer: PeerConnectionDelegate {
 
     func connectionReadyForWrite(_ connection: PeerConnection) {
         if !sentVersion {
-            sendVersionMessage()
+            sendVersion()
             sentVersion = true
         }
     }
@@ -321,20 +329,14 @@ extension Peer: IPeerTaskRequester {
 
 }
 
-extension Peer: Equatable {
-    static func ==(lhs: Peer, rhs: Peer) -> Bool {
-        return lhs.host == rhs.host
-    }
-}
-
 protocol PeerDelegate: class {
-    func handle(_ peer: Peer, merkleBlock: MerkleBlock)
-    func peerReady(_ peer: Peer)
-    func peerDidConnect(_ peer: Peer)
-    func peerDidDisconnect(_ peer: Peer, withError error: Bool)
+    func handle(_ peer: IPeer, merkleBlock: MerkleBlock)
+    func peerReady(_ peer: IPeer)
+    func peerDidConnect(_ peer: IPeer)
+    func peerDidDisconnect(_ peer: IPeer, withError error: Bool)
 
-    func peer(_ peer: Peer, didReceiveBestBlockHeight bestBlockHeight: Int32)
-    func peer(_ peer: Peer, didCompleteTask task: PeerTask)
-    func peer(_ peer: Peer, didReceiveAddresses addresses: [NetworkAddress])
-    func peer(_ peer: Peer, didReceiveInventoryItems items: [InventoryItem])
+    func peer(_ peer: IPeer, didReceiveBestBlockHeight bestBlockHeight: Int32)
+    func peer(_ peer: IPeer, didCompleteTask task: PeerTask)
+    func peer(_ peer: IPeer, didReceiveAddresses addresses: [NetworkAddress])
+    func peer(_ peer: IPeer, didReceiveInventoryItems items: [InventoryItem])
 }

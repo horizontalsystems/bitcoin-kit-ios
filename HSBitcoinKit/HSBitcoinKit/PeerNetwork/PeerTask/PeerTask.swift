@@ -45,11 +45,3 @@ protocol IPeerTaskDelegate: class {
     func handle(completedTask task: PeerTask)
     func handle(merkleBlock: MerkleBlock)
 }
-
-protocol IPeerTaskRequester: class {
-    func ping(nonce: UInt64)
-    func getBlocks(hashes: [Data])
-    func getData(items: [InventoryItem])
-    func sendTransactionInventory(hash: Data)
-    func send(transaction: Transaction)
-}

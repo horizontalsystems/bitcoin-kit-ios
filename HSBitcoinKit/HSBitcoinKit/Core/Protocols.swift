@@ -62,13 +62,38 @@ protocol IBloomFilterManager {
     func regenerateBloomFilter()
 }
 
-protocol IPeerGroup {
+protocol IPeerGroup: class {
     var blockSyncer: IBlockSyncer? { get set }
     var transactionSyncer: ITransactionSyncer? { get set }
     var bestBlockHeightDelegate: BestBlockHeightDelegate? { get set }
     func start()
     func stop()
     func send(transaction: Transaction)
+}
+
+protocol IPeer: class {
+    var delegate: PeerDelegate? { get set }
+    var host: String { get }
+    var logName: String { get }
+    var ready: Bool { get }
+    var synced: Bool { get set }
+    var blockHashesSynced: Bool { get set }
+    func connect()
+    func disconnect()
+    func add(task: PeerTask)
+    func isRequestingInventory(hash: Data) -> Bool
+    func handleRelayedTransaction(hash: Data) -> Bool
+    func filterLoad(bloomFilter: BloomFilter)
+    func sendMempoolMessage()
+    func equalTo(_ peer: IPeer?) -> Bool
+}
+
+protocol IPeerTaskRequester: class {
+    func getBlocks(hashes: [Data])
+    func getData(items: [InventoryItem])
+    func sendTransactionInventory(hash: Data)
+    func send(transaction: Transaction)
+    func ping(nonce: UInt64)
 }
 
 protocol BestBlockHeightDelegate: class {
@@ -87,7 +112,7 @@ protocol IFactory {
     func block(withHeader header: BlockHeader, previousBlock: Block) -> Block
     func block(withHeader header: BlockHeader, height: Int) -> Block
     func blockHash(withHeaderHash headerHash: Data, height: Int) -> BlockHash
-    func peer(withHost host: String, network: INetwork) -> Peer
+    func peer(withHost host: String, network: INetwork) -> IPeer
     func transaction(version: Int, inputs: [TransactionInput], outputs: [TransactionOutput], lockTime: Int) -> Transaction
     func transactionInput(withPreviousOutputTxReversedHex previousOutputTxReversedHex: String, previousOutputIndex: Int, script: Data, sequence: Int) -> TransactionInput
     func transactionOutput(withValue value: Int, index: Int, lockingScript script: Data, type: ScriptType, address: String?, keyHash: Data?, publicKey: PublicKey?) throws -> TransactionOutput

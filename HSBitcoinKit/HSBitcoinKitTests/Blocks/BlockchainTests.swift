@@ -4,7 +4,7 @@ import HSCryptoKit
 import RealmSwift
 @testable import HSBitcoinKit
 
-class BlockChainBuilderTest: XCTestCase {
+class BlockchainTest: XCTestCase {
 
     private var mockNetwork: MockINetwork!
     private var mockFactory: MockIFactory!
@@ -135,7 +135,7 @@ class BlockChainBuilderTest: XCTestCase {
         }
 
         try! realm.write {
-            let block = blockchain.forceAdd(merkleBlock: merkleBlock, height: 1, realm: realm)
+            let _ = blockchain.forceAdd(merkleBlock: merkleBlock, height: 1, realm: realm)
         }
 
         verify(mockNetwork, never()).validate(block: any(), previousBlock: any())
