@@ -24,6 +24,8 @@ class BitcoinTestNet: INetwork {
     let coinType: UInt32 = 1
     let sigHash: SigHashType = .bitcoinAll
 
+    let explorerUrl = "https://tchain.api.btc.com/v3"
+
     let dnsSeeds = [
         "testnet-seed.bitcoin.petertodd.org",    // Peter Todd
         "testnet-seed.bitcoin.jonasschnelli.ch", // Jonas Schnelli

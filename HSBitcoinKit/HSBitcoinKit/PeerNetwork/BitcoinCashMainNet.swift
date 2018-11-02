@@ -24,6 +24,8 @@ class BitcoinCashMainNet: INetwork {
     let coinType: UInt32 = 0
     let sigHash: SigHashType = .bitcoinCashAll
 
+    let explorerUrl = "https://bch-chain.api.btc.com/v3"
+
     let dnsSeeds = [
         "seed.bitcoinabc.org",
     ]

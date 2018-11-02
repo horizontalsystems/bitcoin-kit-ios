@@ -25,6 +25,7 @@ public class BitcoinKit {
     private let peerHostManager: IPeerHostManager
     private let stateManager: IStateManager
     private let apiManager: IApiManager
+    private let btcApiSyncer: IApiSyncer
     private let addressManager: IAddressManager
     private let bloomFilterManager: IBloomFilterManager
 
@@ -90,23 +91,33 @@ public class BitcoinKit {
                 bech32AddressConverter = CashBech32AddressConverter()
             }
         }
+        addressConverter = AddressConverter(network: network, bech32AddressConverter: bech32AddressConverter)
 
         realmFactory = RealmFactory(configuration: realmConfiguration)
 
         hdWallet = HDWallet(seed: Mnemonic.seed(mnemonic: words), coinType: network.coinType, xPrivKey: network.xPrivKey, xPubKey: network.xPubKey)
 
         stateManager = StateManager(realmFactory: realmFactory)
-        apiManager = ApiManager(apiUrl: "http://ipfs.grouvi.org/ipns/QmVefrf2xrWzGzPpERF6fRHeUTh9uVSyfHHh4cWgUBnXpq/io-hs/data/blockstore")
+
+//        apiManager = ApiManager(apiUrl: "http://ipfs.grouvi.org/ipns/QmVefrf2xrWzGzPpERF6fRHeUTh9uVSyfHHh4cWgUBnXpq/io-hs/data/blockstore")
+        apiManager = ApiManager(apiUrl: network.explorerUrl)
+
+        let addressSelector: IAddressSelector
+        switch coin {
+        case .bitcoin: addressSelector = BitcoinAddressSelector(addressConverter: addressConverter)
+        case .bitcoinCash: addressSelector = BitcoinCashAddressSelector(addressConverter: addressConverter)
+        }
+        btcApiSyncer = BTCApiSyncer(apiRequester: ApiRequesterBtcCom(url: network.explorerUrl, apiManager: apiManager), addressSelector: addressSelector)
+
         peerHostManager = PeerHostManager(network: network, realmFactory: realmFactory)
 
         factory = Factory()
         bloomFilterManager = BloomFilterManager(realmFactory: realmFactory)
         peerGroup = PeerGroup(factory: factory, network: network, peerHostManager: peerHostManager, bloomFilterManager: bloomFilterManager)
 
-        addressConverter = AddressConverter(network: network, bech32AddressConverter: bech32AddressConverter)
 
         addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, addressConverter: addressConverter)
-        initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, apiManager: apiManager, addressManager: addressManager, addressConverter: addressConverter, factory: factory, peerGroup: peerGroup, network: network)
+        initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, apiSyncer: btcApiSyncer, addressManager: addressManager, addressConverter: addressConverter, factory: factory, peerGroup: peerGroup, network: network)
 
         inputSigner = InputSigner(hdWallet: hdWallet, network: network)
         scriptBuilder = ScriptBuilder()

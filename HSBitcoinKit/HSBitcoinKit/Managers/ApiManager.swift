@@ -10,6 +10,13 @@ enum ApiError: Error {
     case serverError(status: Int, data: Any?)
 }
 
+protocol IApiManager {
+    func request(withMethod method: HTTPMethod, path: String, parameters: [String: Any]?) -> URLRequestConvertible
+    func observable<T>(forRequest request: URLRequestConvertible, mapper: @escaping (Any) -> T?) -> Observable<T>
+    func observable<T: ImmutableMappable>(forRequest request: URLRequestConvertible) -> Observable<[T]>
+    func observable<T: ImmutableMappable>(forRequest request: URLRequestConvertible) -> Observable<T>
+}
+
 class RequestRouter: URLRequestConvertible {
 
     private let request: URLRequest
@@ -28,14 +35,14 @@ class RequestRouter: URLRequestConvertible {
 
 }
 
-class ApiManager {
+class ApiManager: IApiManager {
     private let apiUrl: String
 
     required init(apiUrl: String) {
         self.apiUrl = apiUrl
     }
 
-    private func request(withMethod method: HTTPMethod, path: String, parameters: [String: Any]? = nil) -> URLRequestConvertible {
+    func request(withMethod method: HTTPMethod, path: String, parameters: [String: Any]? = nil) -> URLRequestConvertible {
         let baseUrl = URL(string: apiUrl)!
         var request = URLRequest(url: baseUrl.appendingPathComponent(path))
         request.httpMethod = method.rawValue
@@ -78,7 +85,7 @@ class ApiManager {
 
     }
 
-    private func observable<T>(forRequest request: URLRequestConvertible, mapper: @escaping (Any) -> T?) -> Observable<T> {
+    func observable<T>(forRequest request: URLRequestConvertible, mapper: @escaping (Any) -> T?) -> Observable<T> {
         return self.observable(forRequest: request)
                 .flatMap { dataResponse -> Observable<T> in
                     switch dataResponse.result {
@@ -99,7 +106,7 @@ class ApiManager {
                 }
     }
 
-    private func observable<T: ImmutableMappable>(forRequest request: URLRequestConvertible) -> Observable<[T]> {
+    func observable<T: ImmutableMappable>(forRequest request: URLRequestConvertible) -> Observable<[T]> {
         return observable(forRequest: request, mapper: { json in
             if let jsonArray = json as? [[String: Any]] {
                 return jsonArray.compactMap { try? T(JSONObject: $0) }
@@ -108,7 +115,7 @@ class ApiManager {
         })
     }
 
-    private func observable<T: ImmutableMappable>(forRequest request: URLRequestConvertible) -> Observable<T> {
+    func observable<T: ImmutableMappable>(forRequest request: URLRequestConvertible) -> Observable<T> {
         return observable(forRequest: request, mapper: { json in
             if let jsonObject = json as? [String: Any], let object = try? T(JSONObject: jsonObject) {
                 return object
@@ -119,34 +126,26 @@ class ApiManager {
 
 }
 
-extension ApiManager: IApiManager {
-
-    func getBlockHashes(address: String) -> Observable<[BlockResponse]> {
-        let addressPath = [
-            String(address.prefix(3)),
-            String(address[address.index(address.startIndex, offsetBy: 3)..<address.index(address.startIndex, offsetBy: 6)]),
-            String(address[address.index(address.startIndex, offsetBy: 6)...])
-        ].joined(separator: "/")
-
-        let result: Observable<AddressResponse> = observable(forRequest: request(withMethod: .get, path: "/btc-regtest/address/\(addressPath)/index.json"))
-
-        return result
-                .map { $0.blocks }
-                .catchError { error -> Observable<[BlockResponse]> in
-                    if let error = error as? ApiError, case let .serverError(status, _) = error, status == 404 {
-                        return Observable.just([])
-                    }
-                    return Observable.error(error)
-                }
-    }
-
-}
-
 struct AddressResponse: ImmutableMappable {
     let blocks: [BlockResponse]
 
     init(map: Map) throws {
         blocks = try map.value("blocks")
+    }
+
+}
+
+class ApiAddressTxResponse {
+    let totalCount: Int
+    let page: Int
+    let pageSize: Int
+    let list: Set<BlockResponse>
+
+    init(totalCount: Int = 0, page: Int = 0, pageSize: Int = 1, list: Set<BlockResponse> = Set()) {
+        self.totalCount = totalCount
+        self.page = page
+        self.pageSize = pageSize
+        self.list = list
     }
 
 }
