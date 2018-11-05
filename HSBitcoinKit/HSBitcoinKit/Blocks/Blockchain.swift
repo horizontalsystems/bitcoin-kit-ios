@@ -51,10 +51,10 @@ extension Blockchain: IBlockchain {
 
                 if (lastStaleHeight > lastNotStaleHeight) {
                     let notStaleBlocks = realm.objects(Block.self).filter("stale = %@ AND height >= %@", false, firstStaleHeight)
-                    realm.delete(notStaleBlocks)
+                    deleteBlocks(blocks: notStaleBlocks, realm: realm)
                 } else {
                     let staleBlocks = realm.objects(Block.self).filter("stale = %@", true)
-                    realm.delete(staleBlocks)
+                    deleteBlocks(blocks: staleBlocks, realm: realm)
                 }
             }
 
@@ -62,7 +62,18 @@ extension Blockchain: IBlockchain {
                 block.stale = false
             }
         }
+    }
 
+    func deleteBlocks(blocks: Results<Block>, realm: Realm) {
+        for block in blocks {
+            for transaction in block.transactions {
+                realm.delete(transaction.outputs)
+                realm.delete(transaction.inputs)
+            }
+            realm.delete(block.transactions)
+        }
+
+        realm.delete(blocks)
     }
 
 }

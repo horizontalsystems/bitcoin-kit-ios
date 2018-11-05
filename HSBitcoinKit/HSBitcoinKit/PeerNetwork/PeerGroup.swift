@@ -51,7 +51,7 @@ class PeerGroup {
                 return
             }
 
-            for _ in (self.connectedPeers.count+self.connectingPeerHosts.count)..<self.peerCount {
+            for _ in (self.connectedPeers.count + self.connectingPeerHosts.count)..<self.peerCount {
                 if let host = self.peerHostManager.peerHost {
                     let peer = self.factory.peer(withHost: host, network: self.network)
                     self.connectingPeerHosts.append(peer)
@@ -95,15 +95,15 @@ class PeerGroup {
             return
         }
 
-        if let listHashes = self.blockSyncer?.getBlockHashes() {
-            if (listHashes.isEmpty) {
+        if let blockHashes = self.blockSyncer?.getBlockHashes() {
+            if (blockHashes.isEmpty) {
                 syncPeer.synced = syncPeer.blockHashesSynced
             } else {
-                syncPeer.add(task: GetMerkleBlocksTask(hashes: listHashes))
+                syncPeer.add(task: GetMerkleBlocksTask(blockHashes: blockHashes))
             }
         }
 
-        if !syncPeer.blockHashesSynced, let blockLocatorHashes = self.blockSyncer?.getBlockLocatorHashes() {
+        if !syncPeer.blockHashesSynced, let blockLocatorHashes = self.blockSyncer?.getBlockLocatorHashes(peerLastBlockHeight: syncPeer.announcedLastBlockHeight) {
             syncPeer.add(task: GetBlockHashesTask(hashes: blockLocatorHashes))
         }
 
@@ -203,9 +203,7 @@ extension PeerGroup: IPeerGroup {
     }
 
     func send(transaction: Transaction) {
-        // Transaction is managed by Realm. We need to serialize and deserialize it in order to make it non-managed.
-        let data = TransactionSerializer.serialize(transaction: transaction)
-        let transaction = TransactionSerializer.deserialize(data: data)
+        let transaction = Transaction(value: transaction)
 
         localQueue.async {
             self.pendingTransactions.append(transaction)

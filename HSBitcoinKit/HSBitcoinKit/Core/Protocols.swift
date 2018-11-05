@@ -73,6 +73,7 @@ protocol IPeerGroup: class {
 
 protocol IPeer: class {
     var delegate: PeerDelegate? { get set }
+    var announcedLastBlockHeight: Int { get }
     var host: String { get }
     var logName: String { get }
     var ready: Bool { get }
@@ -143,7 +144,7 @@ protocol IScriptExtractor: class {
 }
 
 protocol ITransactionProcessor {
-    func process(transactions: [Transaction], inBlock block: Block?, checkBloomFilter: Bool, realm: Realm) throws
+    func process(transactions: [Transaction], inBlock block: Block?, skipCheckBloomFilter: Bool, realm: Realm) throws
     func process(transaction: Transaction, realm: Realm)
 }
 
@@ -175,6 +176,7 @@ protocol IBlockchain {
     func connect(merkleBlock: MerkleBlock, realm: Realm) throws -> Block
     func forceAdd(merkleBlock: MerkleBlock, height: Int, realm: Realm) -> Block
     func handleFork(realm: Realm)
+    func deleteBlocks(blocks: Results<Block>, realm: Realm)
 }
 
 protocol IInputSigner {
@@ -207,8 +209,8 @@ protocol IBlockSyncer: class {
     func downloadIterationCompleted()
     func downloadCompleted()
     func downloadFailed()
-    func getBlockHashes() -> [Data]
-    func getBlockLocatorHashes() -> [Data]
+    func getBlockHashes() -> [BlockHash]
+    func getBlockLocatorHashes(peerLastBlockHeight: Int) -> [Data]
     func add(blockHashes: [Data])
     func handle(merkleBlock: MerkleBlock) throws
     func shouldRequestBlock(withHash hash: Data) -> Bool

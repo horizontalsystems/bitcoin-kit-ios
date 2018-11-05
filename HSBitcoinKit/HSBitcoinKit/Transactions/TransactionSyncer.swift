@@ -34,7 +34,7 @@ extension TransactionSyncer: ITransactionSyncer {
 
         try? realm.write {
             do {
-                try self.transactionProcessor.process(transactions: transactions, inBlock: nil, checkBloomFilter: true, realm: realm)
+                try self.transactionProcessor.process(transactions: transactions, inBlock: nil, skipCheckBloomFilter: false, realm: realm)
             } catch _ as BloomFilterManager.BloomFilterExpired {
                 needToUpdateBloomFilter = true
             }

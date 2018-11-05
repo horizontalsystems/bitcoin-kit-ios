@@ -195,7 +195,7 @@ class BlockchainTest: XCTestCase {
         assertBlocksNotPresent(blocks: newBlocks, realm: realm)
     }
 
-    func testHandleFork_xxx_noNewBlocks() {
+    func testHandleFork_noNewBlocks() {
         let blocksInChain = [1: "00000001", 2: "00000002", 3: "00000003"]
         let newBlocks = [Int: String]()
 
@@ -217,10 +217,26 @@ class BlockchainTest: XCTestCase {
         assertNotStaleBlocksPresent(realm: realm)
     }
 
+    func testRemoveBlocks() {
+        let newBlocks = [2: "11111112", 3: "11111113", 4: "11111114"]
+
+        prefillBlocks(blocksInChain: [Int: String](), newBlocks: newBlocks)
+
+        try! realm.write {
+            blockchain.deleteBlocks(blocks: realm.objects(Block.self), realm: realm)
+        }
+
+        assertBlocksNotPresent(blocks: newBlocks, realm: realm)
+    }
+
     private func assertBlocksPresent(blocks: [Int: String], realm: Realm) {
         for (height, id) in blocks {
             if realm.objects(Block.self).filter("height = %@ AND headerHash = %@", height, Data(hex: id)!).count == 0 {
                 XCTFail("Block \(id)(\(height)) not found")
+            }
+
+            if realm.objects(Transaction.self).filter("dataHash = %@", Data(hex: id)!).count == 0 {
+                XCTFail("Transaction \(id) not found")
             }
         }
     }
@@ -229,6 +245,10 @@ class BlockchainTest: XCTestCase {
         for (height, id) in blocks {
             if realm.objects(Block.self).filter("height = %@ AND headerHash = %@", height, Data(hex: id)!).count > 0 {
                 XCTFail("Block \(id)(\(height)) should not present")
+            }
+
+            if realm.objects(Transaction.self).filter("dataHash = %@", Data(hex: id)!).count > 0 {
+                XCTFail("Transaction \(id) should not present")
             }
         }
     }
@@ -245,12 +265,24 @@ class BlockchainTest: XCTestCase {
                 let block = Block(withHeaderHash: Data(hex: id)!, height: height)
                 block.stale = false
                 realm.add(block)
+
+                let transaction = TestData.p2pkTransaction
+                transaction.dataHash = block.headerHash
+                transaction.reversedHashHex = block.headerHash.reversedHex
+                transaction.block = block
+                realm.add(transaction)
             }
 
             for (height, id) in newBlocks {
                 let block = Block(withHeaderHash: Data(hex: id)!, height: height)
                 block.stale = true
                 realm.add(block)
+
+                let transaction = TestData.p2pkTransaction
+                transaction.dataHash = block.headerHash
+                transaction.reversedHashHex = block.headerHash.reversedHex
+                transaction.block = block
+                realm.add(transaction)
             }
         }
     }

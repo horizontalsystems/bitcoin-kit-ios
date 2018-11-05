@@ -72,7 +72,7 @@ class TransactionProcessorTests: XCTestCase {
         }
 
         try! realm.write {
-            try! transactionProcessor.process(transactions: [transaction], inBlock: nil, checkBloomFilter: true, realm: realm)
+            try! transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
         }
 
         verify(mockExtractor, never()).extract(transaction: equal(to: transaction), realm: equal(to: realm))
@@ -90,7 +90,7 @@ class TransactionProcessorTests: XCTestCase {
         transaction.isMine = true
 
         try! realm.write {
-            try! transactionProcessor.process(transactions: [transaction], inBlock: nil, checkBloomFilter: true, realm: realm)
+            try! transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
         }
 
         verify(mockExtractor).extract(transaction: equal(to: transaction), realm: equal(to: realm))
@@ -108,7 +108,7 @@ class TransactionProcessorTests: XCTestCase {
         transaction.isMine = false
 
         try! realm.write {
-            try! transactionProcessor.process(transactions: [transaction], inBlock: nil, checkBloomFilter: true, realm: realm)
+            try! transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
         }
 
         verify(mockExtractor).extract(transaction: equal(to: transaction), realm: equal(to: realm))
@@ -128,7 +128,7 @@ class TransactionProcessorTests: XCTestCase {
 
         try! realm.write {
             do {
-                try transactionProcessor.process(transactions: [transaction], inBlock: nil, checkBloomFilter: true, realm: realm)
+                try transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
                 XCTFail("Should throw exception")
             } catch _ as BloomFilterManager.BloomFilterExpired {
             } catch {
@@ -158,7 +158,7 @@ class TransactionProcessorTests: XCTestCase {
 
         try! realm.write {
             do {
-                try transactionProcessor.process(transactions: [transaction], inBlock: nil, checkBloomFilter: true, realm: realm)
+                try transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
                 XCTFail("Should throw exception")
             } catch _ as BloomFilterManager.BloomFilterExpired {
             } catch {
@@ -186,7 +186,7 @@ class TransactionProcessorTests: XCTestCase {
 
         try! realm.write {
             do {
-                try transactionProcessor.process(transactions: [transaction], inBlock: nil, checkBloomFilter: false, realm: realm)
+                try transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: true, realm: realm)
             } catch {
                 XCTFail("Shouldn't throw exception")
             }
@@ -212,7 +212,7 @@ class TransactionProcessorTests: XCTestCase {
 
         try! realm.write {
             do {
-                try transactionProcessor.process(transactions: [transaction], inBlock: nil, checkBloomFilter: true, realm: realm)
+                try transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
             } catch {
                 XCTFail("Shouldn't throw exception")
             }

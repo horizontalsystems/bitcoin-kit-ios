@@ -15,6 +15,7 @@ class Peer {
     private let queue: DispatchQueue
     private let network: INetwork
 
+    var announcedLastBlockHeight: Int = 0
     var connected: Bool = false
     var blockHashesSynced: Bool = false
     var synced: Bool = false
@@ -81,6 +82,8 @@ class Peer {
 
     private func handle(message: VersionMessage) {
         log("<-- VERSION: \(message.version) --- \(message.userAgent?.value ?? "") --- \(ServiceFlags(rawValue: message.services)) -- \(String(describing: message.startHeight ?? 0))")
+
+        self.announcedLastBlockHeight = Int(message.startHeight ?? 0)
 
         if !sentVerack {
             sendVerack()

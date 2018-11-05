@@ -33,3 +33,11 @@ class RelayTransactionTask: PeerTask {
     }
 
 }
+
+extension RelayTransactionTask: Equatable {
+
+    static func ==(lhs: RelayTransactionTask, rhs: RelayTransactionTask) -> Bool {
+        return lhs.transaction.reversedHashHex == rhs.transaction.reversedHashHex
+    }
+
+}

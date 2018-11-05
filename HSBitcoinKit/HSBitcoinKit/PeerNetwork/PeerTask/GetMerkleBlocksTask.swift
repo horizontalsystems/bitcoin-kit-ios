@@ -2,27 +2,27 @@ import Foundation
 
 class GetMerkleBlocksTask: PeerTask {
 
-    var givenBlockHashes: [Data]
-    private var hashesToDownload: [Data]
+    private var blockHashes: [BlockHash]
     private var pendingMerkleBlocks = [MerkleBlock]()
 
-    init(hashes: [Data]) {
-        self.givenBlockHashes = hashes
-        self.hashesToDownload = hashes
+    init(blockHashes: [BlockHash]) {
+        self.blockHashes = blockHashes
     }
 
     override func start() {
-        let items = hashesToDownload.map { hash in
-            InventoryItem(type: InventoryItem.ObjectType.filteredBlockMessage.rawValue, hash: hash)
+        let items = blockHashes.map { blockHash in
+            InventoryItem(type: InventoryItem.ObjectType.filteredBlockMessage.rawValue, hash: blockHash.headerHash)
         }
 
         requester?.getData(items: items)
     }
 
     override func handle(merkleBlock: MerkleBlock) -> Bool {
-        guard hashesToDownload.contains(merkleBlock.headerHash) else {
+        guard let blockHash = blockHashes.first(where: { blockHash in blockHash.headerHash == merkleBlock.headerHash }) else {
             return false
         }
+
+        merkleBlock.height = blockHash.height > 0 ? blockHash.height : nil
 
         if merkleBlock.complete {
             handle(completeMerkleBlock: merkleBlock)
@@ -50,20 +50,24 @@ class GetMerkleBlocksTask: PeerTask {
         return false
     }
 
-    override func isRequestingInventory(hash: Data) -> Bool {
-        return hashesToDownload.contains(hash)
-    }
-
     private func handle(completeMerkleBlock merkleBlock: MerkleBlock) {
-        if let index = hashesToDownload.index(where: { $0 == merkleBlock.headerHash }) {
-            hashesToDownload.remove(at: index)
+        if let index = blockHashes.index(where: { $0.headerHash == merkleBlock.headerHash }) {
+            blockHashes.remove(at: index)
         }
 
         delegate?.handle(merkleBlock: merkleBlock)
 
-        if hashesToDownload.isEmpty {
+        if blockHashes.isEmpty {
             delegate?.handle(completedTask: self)
         }
+    }
+
+}
+
+extension GetMerkleBlocksTask: Equatable {
+
+    static func ==(lhs: GetMerkleBlocksTask, rhs: GetMerkleBlocksTask) -> Bool {
+        return lhs.blockHashes == rhs.blockHashes
     }
 
 }

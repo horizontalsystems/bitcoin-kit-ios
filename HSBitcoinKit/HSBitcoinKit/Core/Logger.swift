@@ -8,6 +8,7 @@ class Logger {
 
     private let allowedLogs = [
         String(describing: ApiManager.self),
+        String(describing: BlockSyncer.self),
         String(describing: TransactionProcessor.self),
         String(describing: PeerConnection.self),
         String(describing: Peer.self),
