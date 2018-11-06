@@ -2,6 +2,12 @@ import Foundation
 import HSCryptoKit
 
 class Peer {
+    enum PeerError: Error {
+        case peerBestBlockIsLessThanOne
+        case peerHasExpiredBlockChain(localHeight: Int32, peerHeight: Int32)
+        case peerNotFullNode
+        case peerDoesNotSupportBloomFilter
+    }
 
     private let protocolVersion: Int32 = 70015
     private var sentVersion: Bool = false
@@ -15,7 +21,8 @@ class Peer {
     private let queue: DispatchQueue
     private let network: INetwork
 
-    var announcedLastBlockHeight: Int = 0
+    var announcedLastBlockHeight: Int32 = 0
+    var localBestBlockHeight: Int32 = 0
     var connected: Bool = false
     var blockHashesSynced: Bool = false
     var synced: Bool = false
@@ -50,7 +57,7 @@ class Peer {
                 myAddress: NetworkAddress(services: 0x00, address: "::ffff:127.0.0.1", port: UInt16(connection.port)),
                 nonce: 0,
                 userAgent: "/WalletKit:0.1.0/",
-                startHeight: -1,
+                startHeight: localBestBlockHeight,
                 relay: false
         )
 
@@ -82,8 +89,13 @@ class Peer {
 
     private func handle(message: VersionMessage) {
         log("<-- VERSION: \(message.version) --- \(message.userAgent?.value ?? "") --- \(ServiceFlags(rawValue: message.services)) -- \(String(describing: message.startHeight ?? 0))")
+        do {
+            try validatePeerVersion(message: message)
+        } catch {
+            disconnect(error: error)
+        }
 
-        self.announcedLastBlockHeight = Int(message.startHeight ?? 0)
+        self.announcedLastBlockHeight = message.startHeight ?? 0
 
         if !sentVerack {
             sendVerack()
@@ -92,6 +104,24 @@ class Peer {
 
         if let startHeight = message.startHeight {
             delegate?.peer(self, didReceiveBestBlockHeight: startHeight)
+        }
+    }
+
+    private func validatePeerVersion(message: VersionMessage) throws {
+        guard let startHeight = message.startHeight, startHeight > 0 else {
+            throw PeerError.peerBestBlockIsLessThanOne
+        }
+
+        guard startHeight >= localBestBlockHeight else {
+            throw PeerError.peerHasExpiredBlockChain(localHeight: localBestBlockHeight, peerHeight: startHeight)
+        }
+
+        guard message.hasBlockChain(network: network) else {
+            throw PeerError.peerNotFullNode
+        }
+
+        guard message.supportsBloomFilter(network: network) else {
+            throw PeerError.peerDoesNotSupportBloomFilter
         }
     }
 

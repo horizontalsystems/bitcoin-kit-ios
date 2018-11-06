@@ -73,7 +73,8 @@ protocol IPeerGroup: class {
 
 protocol IPeer: class {
     var delegate: PeerDelegate? { get set }
-    var announcedLastBlockHeight: Int { get }
+    var localBestBlockHeight: Int32 { get set }
+    var announcedLastBlockHeight: Int32 { get }
     var host: String { get }
     var logName: String { get }
     var ready: Bool { get }
@@ -204,13 +205,14 @@ protocol IUnspentOutputProvider {
 }
 
 protocol IBlockSyncer: class {
+    var localBestBlockHeight: Int32 { get }
     func prepareForDownload()
     func downloadStarted()
     func downloadIterationCompleted()
     func downloadCompleted()
     func downloadFailed()
     func getBlockHashes() -> [BlockHash]
-    func getBlockLocatorHashes(peerLastBlockHeight: Int) -> [Data]
+    func getBlockLocatorHashes(peerLastBlockHeight: Int32) -> [Data]
     func add(blockHashes: [Data])
     func handle(merkleBlock: MerkleBlock) throws
     func shouldRequestBlock(withHash hash: Data) -> Bool
@@ -261,6 +263,8 @@ protocol INetwork: class {
 }
 
 extension INetwork {
+    var serviceFullNode: UInt64 { return 1 }
+    var bloomFilter: Int32 { return 70000 }
     var maxTargetBits: Int { return 0x1d00ffff }
 
     var targetTimeSpan: Int { return 14 * 24 * 60 * 60 }                // Seconds in Bitcoin cycle

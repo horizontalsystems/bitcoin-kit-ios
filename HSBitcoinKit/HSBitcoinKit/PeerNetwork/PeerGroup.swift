@@ -55,6 +55,7 @@ class PeerGroup {
                 if let host = self.peerHostManager.peerHost {
                     let peer = self.factory.peer(withHost: host, network: self.network)
                     self.connectingPeerHosts.append(peer)
+                    peer.localBestBlockHeight = self.blockSyncer?.localBestBlockHeight ?? 0
                     peer.delegate = self
                     peer.connect()
                 } else {
@@ -237,8 +238,8 @@ extension PeerGroup: PeerDelegate {
     }
 
     func peerDidDisconnect(_ peer: IPeer, withError error: Error?) {
-        if error != nil {
-            Logger.shared.log(self, "Peer with IP \(peer.host) disconnected with error: \(error)")
+        if let error = error {
+            Logger.shared.log(self, "Peer \(peer.logName)(\(peer.host)) disconnected with error: \(error)")
         }
 
         peerHostManager.hostDisconnected(host: peer.host, withError: error != nil)

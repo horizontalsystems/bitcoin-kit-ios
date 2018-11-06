@@ -77,4 +77,12 @@ struct VersionMessage: IMessage {
         return data
     }
 
+    func hasBlockChain(network: INetwork) -> Bool {
+        return (services & network.serviceFullNode) == network.serviceFullNode
+    }
+
+    func supportsBloomFilter(network: INetwork) -> Bool {
+        return version >= network.bloomFilter
+    }
+
 }

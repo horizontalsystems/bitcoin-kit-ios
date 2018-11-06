@@ -13,6 +13,11 @@ class BlockSyncer {
     private let hashCheckpointThreshold: Int
     private var needToReDownload = false
 
+    var localBestBlockHeight: Int32 {
+        let height = realmFactory.realm.objects(Block.self).sorted(byKeyPath: "height").last?.height
+        return Int32(height ?? 0)
+    }
+
     init(realmFactory: IRealmFactory, network: INetwork,
          transactionProcessor: ITransactionProcessor, blockchain: IBlockchain, addressManager: IAddressManager, bloomFilterManager: IBloomFilterManager,
          hashCheckpointThreshold: Int = 100) {
@@ -101,7 +106,7 @@ extension BlockSyncer: IBlockSyncer {
         return blockHashes.prefix(500).map { BlockHash(value: $0) }
     }
 
-    func getBlockLocatorHashes(peerLastBlockHeight: Int) -> [Data] {
+    func getBlockLocatorHashes(peerLastBlockHeight: Int32) -> [Data] {
         let realm = realmFactory.realm
         var blockLocatorHashes = [Data]()
 
