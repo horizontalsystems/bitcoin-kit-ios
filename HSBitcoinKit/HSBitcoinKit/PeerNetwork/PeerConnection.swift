@@ -2,6 +2,8 @@ import Foundation
 import HSHDWalletKit
 
 class PeerConnection: NSObject, StreamDelegate {
+    class ConnectionClosedWithUnknownError: Error {}
+
     private let bufferSize = 4096
 
     let host: String
@@ -62,7 +64,7 @@ class PeerConnection: NSObject, StreamDelegate {
         RunLoop.current.run()
     }
 
-    func disconnect(eventCode: Stream.Event? = nil) {
+    func disconnect(error: Error? = nil) {
         guard readStream != nil && readStream != nil else {
             return
         }
@@ -77,7 +79,7 @@ class PeerConnection: NSObject, StreamDelegate {
         writeStream = nil
         runLoop = nil
 
-        delegate?.connectionDidDisconnect(self, withError: eventCode == .errorOccurred)
+        delegate?.connectionDidDisconnect(self, withError: error)
 
         log("DISCONNECTED")
     }
@@ -95,10 +97,10 @@ class PeerConnection: NSObject, StreamDelegate {
                 break
             case .errorOccurred:
                 log("IN ERROR OCCURRED")
-                disconnect(eventCode: eventCode)
+                disconnect(error: ConnectionClosedWithUnknownError())
             case .endEncountered:
                 log("IN CLOSED")
-                disconnect(eventCode: eventCode)
+                disconnect()
             default:
                 break
             }
@@ -112,10 +114,10 @@ class PeerConnection: NSObject, StreamDelegate {
                 delegate?.connectionReadyForWrite(self)
             case .errorOccurred:
                 log("OUT ERROR OCCURRED")
-                disconnect(eventCode: eventCode)
+                disconnect()
             case .endEncountered:
                 log("OUT CLOSED")
-                disconnect(eventCode: eventCode)
+                disconnect()
             default:
                 break
             }
@@ -166,6 +168,6 @@ class PeerConnection: NSObject, StreamDelegate {
 
 protocol PeerConnectionDelegate : class {
     func connectionReadyForWrite(_ connection: PeerConnection)
-    func connectionDidDisconnect(_ connection: PeerConnection, withError error: Bool)
+    func connectionDidDisconnect(_ connection: PeerConnection, withError error: Error?)
     func connection(_ connection: PeerConnection, didReceiveMessage message: IMessage)
 }

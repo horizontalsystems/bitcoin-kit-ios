@@ -43,5 +43,6 @@ class PeerTask {
 
 protocol IPeerTaskDelegate: class {
     func handle(completedTask task: PeerTask)
+    func handle(failedTask task: PeerTask, error: Error)
     func handle(merkleBlock: MerkleBlock)
 }

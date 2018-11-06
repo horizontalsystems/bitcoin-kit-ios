@@ -1,12 +1,15 @@
 import Foundation
 
 class GetMerkleBlocksTask: PeerTask {
+    class MerkleBlocksNotReceived: Error {}
 
     private var blockHashes: [BlockHash]
     private var pendingMerkleBlocks = [MerkleBlock]()
+    private var pingNonce: UInt64
 
     init(blockHashes: [BlockHash]) {
         self.blockHashes = blockHashes
+        self.pingNonce = UInt64.random(in: 0..<UINT64_MAX)
     }
 
     override func start() {
@@ -15,6 +18,7 @@ class GetMerkleBlocksTask: PeerTask {
         }
 
         requester?.getData(items: items)
+        requester?.ping(nonce: pingNonce)
     }
 
     override func handle(merkleBlock: MerkleBlock) -> Bool {
@@ -42,6 +46,20 @@ class GetMerkleBlocksTask: PeerTask {
             if block.complete {
                 pendingMerkleBlocks.remove(at: index)
                 handle(completeMerkleBlock: block)
+            }
+
+            return true
+        }
+
+        return false
+    }
+
+    override func handle(pongNonce: UInt64) -> Bool {
+        if pongNonce == pingNonce {
+            if blockHashes.isEmpty {
+                delegate?.handle(completedTask: self)
+            } else {
+                delegate?.handle(failedTask: self, error: MerkleBlocksNotReceived())
             }
 
             return true

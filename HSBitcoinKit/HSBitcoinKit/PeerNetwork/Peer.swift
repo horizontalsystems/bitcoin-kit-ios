@@ -197,8 +197,8 @@ extension Peer: IPeer {
         connection.connect()
     }
 
-    func disconnect() {
-        connection.disconnect()
+    func disconnect(error: Error? = nil) {
+        connection.disconnect(error: error)
     }
 
     func add(task: PeerTask) {
@@ -258,7 +258,7 @@ extension Peer: PeerConnectionDelegate {
         }
     }
 
-    func connectionDidDisconnect(_ connection: PeerConnection, withError error: Bool) {
+    func connectionDidDisconnect(_ connection: PeerConnection, withError error: Error?) {
         connected = false
         delegate?.peerDidDisconnect(self, withError: error)
     }
@@ -283,6 +283,11 @@ extension Peer: IPeerTaskDelegate {
         if tasks.isEmpty {
             delegate?.peerReady(self)
         }
+    }
+
+    func handle(failedTask task: PeerTask, error: Error) {
+        log("Handling failed task: \(type(of: task))")
+        connection.disconnect(error: error)
     }
 
     func handle(merkleBlock: MerkleBlock) {
@@ -336,7 +341,7 @@ protocol PeerDelegate: class {
     func handle(_ peer: IPeer, merkleBlock: MerkleBlock)
     func peerReady(_ peer: IPeer)
     func peerDidConnect(_ peer: IPeer)
-    func peerDidDisconnect(_ peer: IPeer, withError error: Bool)
+    func peerDidDisconnect(_ peer: IPeer, withError error: Error?)
 
     func peer(_ peer: IPeer, didReceiveBestBlockHeight bestBlockHeight: Int32)
     func peer(_ peer: IPeer, didCompleteTask task: PeerTask)

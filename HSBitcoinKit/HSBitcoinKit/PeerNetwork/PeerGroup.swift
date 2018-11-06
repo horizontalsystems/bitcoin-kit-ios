@@ -198,7 +198,7 @@ extension PeerGroup: IPeerGroup {
         started = false
 
         for peer in connectedPeers {
-            peer.disconnect()
+            peer.disconnect(error: nil)
         }
     }
 
@@ -236,12 +236,12 @@ extension PeerGroup: PeerDelegate {
         self.assignNextSyncPeer()
     }
 
-    func peerDidDisconnect(_ peer: IPeer, withError error: Bool) {
-        if error {
-            Logger.shared.log(self, "Peer with IP \(peer.host) disconnected with error")
+    func peerDidDisconnect(_ peer: IPeer, withError error: Error?) {
+        if error != nil {
+            Logger.shared.log(self, "Peer with IP \(peer.host) disconnected with error: \(error)")
         }
 
-        peerHostManager.hostDisconnected(host: peer.host, withError: error)
+        peerHostManager.hostDisconnected(host: peer.host, withError: error != nil)
 
         localQueue.async {
             self.syncPeerQueue.async {
@@ -288,7 +288,7 @@ extension PeerGroup: PeerDelegate {
         do {
             try blockSyncer?.handle(merkleBlock: merkleBlock)
         } catch {
-            peer.disconnect()
+            peer.disconnect(error: error)
         }
     }
 

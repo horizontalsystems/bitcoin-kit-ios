@@ -80,7 +80,7 @@ protocol IPeer: class {
     var synced: Bool { get set }
     var blockHashesSynced: Bool { get set }
     func connect()
-    func disconnect()
+    func disconnect(error: Error?)
     func add(task: PeerTask)
     func isRequestingInventory(hash: Data) -> Bool
     func handleRelayedTransaction(hash: Data) -> Bool
