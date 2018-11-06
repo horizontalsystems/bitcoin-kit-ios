@@ -18,6 +18,7 @@ class PeerConnection: NSObject, StreamDelegate {
     private var writeStream: Unmanaged<CFWriteStream>?
     private var inputStream: InputStream?
     private var outputStream: OutputStream?
+    private var peerTimer: PeerTimer
 
     private var packets: Data = Data()
 
@@ -30,6 +31,7 @@ class PeerConnection: NSObject, StreamDelegate {
         self.host = host
         self.port = UInt32(network.port)
         self.network = network
+        self.peerTimer = PeerTimer()
     }
 
     deinit {
@@ -61,6 +63,8 @@ class PeerConnection: NSObject, StreamDelegate {
         inputStream?.open()
         outputStream?.open()
 
+        peerTimer.peerConnection = self
+        RunLoop.current.add(peerTimer.timer, forMode: .commonModes)
         RunLoop.current.run()
     }
 
@@ -75,6 +79,7 @@ class PeerConnection: NSObject, StreamDelegate {
         outputStream?.close()
         inputStream?.remove(from: .current, forMode: .commonModes)
         outputStream?.remove(from: .current, forMode: .commonModes)
+        peerTimer.timer.invalidate()
         readStream = nil
         writeStream = nil
         runLoop = nil
@@ -127,6 +132,7 @@ class PeerConnection: NSObject, StreamDelegate {
     }
 
     private func readAvailableBytes(stream: InputStream) {
+        peerTimer.reset()
         let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
 
         defer { buffer.deallocate() }

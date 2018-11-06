@@ -36,10 +36,11 @@ class PeerManagementTests: XCTestCase {
                 when(mock.synced.get).thenReturn(false)
                 when(mock.blockHashesSynced.get).thenReturn(false)
                 when(mock.delegate.set(any())).thenDoNothing()
+                when(mock.localBestBlockHeight.set(any())).thenDoNothing()
                 when(mock.host.get).thenReturn(hostString)
 
                 when(mock.connect()).thenDoNothing()
-                when(mock.disconnect()).thenDoNothing()
+                when(mock.disconnect(error: any())).thenDoNothing()
                 when(mock.add(task: any())).thenDoNothing()
                 when(mock.isRequestingInventory(hash: any())).thenReturn(false)
                 when(mock.handleRelayedTransaction(hash: any())).thenReturn(false)
@@ -119,7 +120,7 @@ class PeerManagementTests: XCTestCase {
         verify(peers["1"]!).connect()
         verify(peers["2"]!, never()).connect()
 
-        peerGroup.peerDidDisconnect(peers["0"]!, withError: false)
+        peerGroup.peerDidDisconnect(peers["0"]!, withError: nil)
         waitForMainQueue()
         verify(mockPeerHostManager, times(1)).peerHost.get
         verify(peers["2"]!).connect()
@@ -132,7 +133,7 @@ class PeerManagementTests: XCTestCase {
         waitForMainQueue()
         testConnectedPeersList([peers["0"]!])
 
-        peerGroup.peerDidDisconnect(peers["0"]!, withError: false)
+        peerGroup.peerDidDisconnect(peers["0"]!, withError: nil)
         waitForMainQueue()
         verify(mockPeerHostManager, never()).peerHost.get
     }

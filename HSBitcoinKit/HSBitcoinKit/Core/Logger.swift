@@ -11,6 +11,7 @@ class Logger {
         String(describing: BlockSyncer.self),
         String(describing: TransactionProcessor.self),
         String(describing: PeerConnection.self),
+        String(describing: PeerTimer.self),
         String(describing: Peer.self),
         String(describing: PeerGroup.self),
         String(describing: PeerHostManager.self),
