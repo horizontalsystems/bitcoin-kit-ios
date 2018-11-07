@@ -207,7 +207,9 @@ extension PeerGroup: IPeerGroup {
     }
 
     func send(transaction: Transaction) {
-        let transaction = Transaction(value: transaction)
+        // Transaction is managed by Realm. We need to serialize and deserialize it in order to make it non-managed.
+        let data = TransactionSerializer.serialize(transaction: transaction)
+        let transaction = TransactionSerializer.deserialize(data: data)
 
         localQueue.async {
             self.pendingTransactions.append(transaction)
