@@ -2,9 +2,9 @@ import XCTest
 
 extension XCTestCase {
 
-    func waitForMainQueue() {
+    func waitForMainQueue(queue: DispatchQueue = DispatchQueue.main) {
         let e = expectation(description: "Wait for Main Queue")
-        DispatchQueue.main.async { e.fulfill() }
+        queue.async { e.fulfill() }
         waitForExpectations(timeout: 2)
     }
 

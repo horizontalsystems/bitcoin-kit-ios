@@ -2,7 +2,10 @@ import Foundation
 import HSHDWalletKit
 
 class PeerConnection: NSObject, StreamDelegate {
-    class ConnectionClosedWithUnknownError: Error {}
+    enum PeerConnectionError: Error {
+        case connectionClosedWithUnknownError
+        case connectionClosedByPeer
+    }
 
     private let bufferSize = 4096
 
@@ -102,9 +105,10 @@ class PeerConnection: NSObject, StreamDelegate {
                 break
             case .errorOccurred:
                 log("IN ERROR OCCURRED")
-                disconnect(error: ConnectionClosedWithUnknownError())
+                disconnect(error: PeerConnectionError.connectionClosedWithUnknownError)
             case .endEncountered:
                 log("IN CLOSED")
+                disconnect(error: PeerConnectionError.connectionClosedByPeer)
                 disconnect()
             default:
                 break
