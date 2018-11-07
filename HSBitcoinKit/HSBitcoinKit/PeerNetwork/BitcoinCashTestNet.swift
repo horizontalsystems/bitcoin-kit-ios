@@ -17,8 +17,6 @@ class BitcoinCashTestNet: INetwork {
     let coinType: UInt32 = 1
     let sigHash: SigHashType = .bitcoinCashAll
 
-    let explorerUrl = "https://bch-tchain.api.btc.com/v3"
-
     let merkleBlockValidator: MerkleBlockValidator
 
     let dnsSeeds = [

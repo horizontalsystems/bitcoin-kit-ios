@@ -225,7 +225,7 @@ extension PeerGroup: PeerDelegate {
     }
 
     func peerDidConnect(_ peer: Peer) {
-        print("Peer \(peer.logName) didConnect")
+        Logger.shared.log(self, "Peer \(peer.logName) didConnect")
         if let bloomFilter = bloomFilterManager.bloomFilter {
             peer.filterLoad(bloomFilter: bloomFilter)
         }

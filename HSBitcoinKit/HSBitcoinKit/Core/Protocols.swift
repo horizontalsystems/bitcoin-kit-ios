@@ -44,12 +44,8 @@ protocol IStateManager {
     var apiSynced: Bool { get set }
 }
 
-protocol IApiRequester {
-    func requestTransactions(address: String, page: Int) -> Observable<ApiAddressTxResponse>
-}
-
-protocol IApiSyncer {
-    func getBlockHashes(publicKey: PublicKey) -> Observable<Set<BlockResponse>>
+protocol IInitialSyncApi {
+    func getBlockHashes(address: String) -> Observable<Set<BlockResponse>>
 }
 
 protocol IAddressSelector {
@@ -230,8 +226,6 @@ protocol INetwork: class {
     var checkpointBlock: Block { get }
     var coinType: UInt32 { get }
     var sigHash: SigHashType { get }
-
-    var explorerUrl: String { get }
 
     // difficulty adjustment params
     var maxTargetBits: Int { get }                                      // Maximum difficulty.

@@ -19,8 +19,6 @@ class BitcoinRegTest: INetwork {
     let coinType: UInt32 = 1
     let sigHash: SigHashType = .bitcoinAll
 
-    let explorerUrl: String = "N/A"
-
     let dnsSeeds = [
          "blocknode01.grouvi.org",
          "blocknode02.grouvi.org",

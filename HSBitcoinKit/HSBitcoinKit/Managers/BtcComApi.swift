@@ -1,16 +1,37 @@
 import Foundation
 import RxSwift
 
-class ApiRequesterBtcCom: IApiRequester {
-    private let apiManager: IApiManager
-    private let url: String
+class BtcComApi {
+    enum SyncerError: Error { case syncError }
 
-    init(url: String, apiManager: IApiManager) {
-        self.url = url
-        self.apiManager = apiManager
+    private let apiManager: ApiManager
+
+    init(network: INetwork) {
+        let url: String
+
+        switch network {
+        case is BitcoinMainNet: url = "https://chain.api.btc.com/v3"
+        case is BitcoinTestNet: url = "https://tchain.api.btc.com/v3"
+        case is BitcoinCashMainNet: url = "https://bch-chain.api.btc.com/v3"
+        case is BitcoinCashTestNet: url = "https://bch-tchain.api.btc.com/v3"
+        default: url = "https://tchain.api.btc.com/v3"
+        }
+
+        apiManager = ApiManager(apiUrl: url)
     }
 
-    func requestTransactions(address: String, page: Int) -> Observable<ApiAddressTxResponse> {
+    private func handleRequest(address: String, page: Int = 1, result: Set<BlockResponse> = []) -> Observable<Set<BlockResponse>> {
+        return requestTransactions(address: address, page: page)
+                .flatMap { [weak self] (response: ApiAddressTxResponse) -> Observable<Set<BlockResponse>> in
+                    let union = result.union(response.list)
+                    if response.totalCount > response.page * response.pageSize {
+                        return self?.handleRequest(address: address, page: response.page + 1, result: union) ?? Observable.just(union)
+                    }
+                    return Observable.just(union)
+                 }
+    }
+
+    private func requestTransactions(address: String, page: Int) -> Observable<ApiAddressTxResponse> {
         return observable(address: address, page: page).flatMap { [weak self] (response: ApiAddressTxResponse) -> Observable<ApiAddressTxResponse> in
             let emptyBlockHashes = response.list.filter { $0.hash.isEmpty }
             var observable: Observable<ApiAddressTxResponse>?
@@ -75,6 +96,29 @@ class ApiRequesterBtcCom: IApiRequester {
             }
             return set
         })
+    }
+
+}
+
+extension BtcComApi: IInitialSyncApi {
+
+    func getBlockHashes(address: String) -> Observable<Set<BlockResponse>> {
+        return handleRequest(address: address)
+    }
+
+}
+
+class ApiAddressTxResponse {
+    let totalCount: Int
+    let page: Int
+    let pageSize: Int
+    let list: Set<BlockResponse>
+
+    init(totalCount: Int = 0, page: Int = 0, pageSize: Int = 1, list: Set<BlockResponse> = Set()) {
+        self.totalCount = totalCount
+        self.page = page
+        self.pageSize = pageSize
+        self.list = list
     }
 
 }

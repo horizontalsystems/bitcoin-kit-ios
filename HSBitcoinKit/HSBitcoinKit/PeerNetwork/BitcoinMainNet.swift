@@ -21,8 +21,6 @@ class BitcoinMainNet: INetwork {
     let coinType: UInt32 = 0
     let sigHash: SigHashType = .bitcoinAll
 
-    let explorerUrl = "https://chain.api.btc.com/v3"
-
     let dnsSeeds = [
         "seed.bitcoin.sipa.be",         // Pieter Wuille
         "dnsseed.bluematt.me",          // Matt Corallo

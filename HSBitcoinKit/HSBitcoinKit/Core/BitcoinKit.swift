@@ -24,8 +24,7 @@ public class BitcoinKit {
 
     private let peerHostManager: IPeerHostManager
     private let stateManager: IStateManager
-    private let apiManager: IApiManager
-    private let btcApiSyncer: IApiSyncer
+    private let initialSyncApi: IInitialSyncApi
     private let addressManager: IAddressManager
     private let bloomFilterManager: IBloomFilterManager
 
@@ -99,15 +98,13 @@ public class BitcoinKit {
 
         stateManager = StateManager(realmFactory: realmFactory)
 
-//        apiManager = ApiManager(apiUrl: "http://ipfs.grouvi.org/ipns/QmVefrf2xrWzGzPpERF6fRHeUTh9uVSyfHHh4cWgUBnXpq/io-hs/data/blockstore")
-        apiManager = ApiManager(apiUrl: network.explorerUrl)
-
         let addressSelector: IAddressSelector
         switch coin {
         case .bitcoin: addressSelector = BitcoinAddressSelector(addressConverter: addressConverter)
         case .bitcoinCash: addressSelector = BitcoinCashAddressSelector(addressConverter: addressConverter)
         }
-        btcApiSyncer = BTCApiSyncer(apiRequester: ApiRequesterBtcCom(url: network.explorerUrl, apiManager: apiManager), addressSelector: addressSelector)
+
+        initialSyncApi = BtcComApi(network: network)
 
         peerHostManager = PeerHostManager(network: network, realmFactory: realmFactory)
 
@@ -115,9 +112,8 @@ public class BitcoinKit {
         bloomFilterManager = BloomFilterManager(realmFactory: realmFactory)
         peerGroup = PeerGroup(factory: factory, network: network, peerHostManager: peerHostManager, bloomFilterManager: bloomFilterManager)
 
-
         addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, addressConverter: addressConverter)
-        initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, apiSyncer: btcApiSyncer, addressManager: addressManager, addressConverter: addressConverter, factory: factory, peerGroup: peerGroup, network: network)
+        initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, api: initialSyncApi, addressManager: addressManager, addressSelector: addressSelector, factory: factory, peerGroup: peerGroup, network: network)
 
         inputSigner = InputSigner(hdWallet: hdWallet, network: network)
         scriptBuilder = ScriptBuilder()
