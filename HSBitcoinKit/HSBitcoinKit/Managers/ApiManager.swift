@@ -35,20 +35,61 @@ class ApiManager {
         self.apiUrl = apiUrl
     }
 
-    private func request(withMethod method: HTTPMethod, path: String, parameters: [String: Any]? = nil) -> URLRequestConvertible {
+    func request(withMethod method: HTTPMethod, path: String, parameters: [String: Any]? = nil) -> URLRequestConvertible {
         let baseUrl = URL(string: apiUrl)!
         var request = URLRequest(url: baseUrl.appendingPathComponent(path))
         request.httpMethod = method.rawValue
 
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
-        Logger.shared.log(self, "API OUT: \(method.rawValue) \(path) \(parameters.map { String(describing: $0) } ?? "")")
+//        Logger.shared.log(self, "API OUT: \(method.rawValue) \(path) \(parameters.map { String(describing: $0) } ?? "")")
 
         return RequestRouter(request: request, encoding: method == .get ? URLEncoding.default : JSONEncoding.default, parameters: parameters)
     }
 
+    func observable<T>(forRequest request: URLRequestConvertible, mapper: @escaping (Any) -> T?) -> Observable<T> {
+        return self.observable(forRequest: request)
+                .flatMap { dataResponse -> Observable<T> in
+                    switch dataResponse.result {
+                    case .success(let result):
+                        if let value = mapper(result) {
+                            return Observable.just(value)
+                        } else {
+                            return Observable.error(ApiError.mappingError)
+                        }
+                    case .failure:
+                        if let response = dataResponse.response {
+                            let data = dataResponse.data.flatMap { try? JSONSerialization.jsonObject(with: $0, options: .allowFragments) }
+                            return Observable.error(ApiError.serverError(status: response.statusCode, data: data))
+                        } else {
+                            return Observable.error(ApiError.noConnection)
+                        }
+                    }
+                }
+    }
+
+    func observable<T: ImmutableMappable>(forRequest request: URLRequestConvertible) -> Observable<[T]> {
+        return observable(forRequest: request, mapper: { json in
+            if let jsonArray = json as? [[String: Any]] {
+                return jsonArray.compactMap { try? T(JSONObject: $0) }
+            }
+            return nil
+        })
+    }
+
+    func observable<T: ImmutableMappable>(forRequest request: URLRequestConvertible) -> Observable<T> {
+        return observable(forRequest: request, mapper: { json in
+            if let jsonObject = json as? [String: Any], let object = try? T(JSONObject: jsonObject) {
+                return object
+            }
+            return nil
+        })
+    }
+
     private func observable(forRequest request: URLRequestConvertible) -> Observable<DataResponse<Any>> {
         let observable = Observable<DataResponse<Any>>.create { observer in
+            self.log(string: "API OUT: \(request.urlRequest?.httpMethod ?? "") \(request.urlRequest?.url?.path ?? "")")
+
             let requestReference = Alamofire.request(request)
                     .validate()
                     .responseJSON(queue: DispatchQueue.global(qos: .background), completionHandler: { response in
@@ -78,95 +119,8 @@ class ApiManager {
 
     }
 
-    private func observable<T>(forRequest request: URLRequestConvertible, mapper: @escaping (Any) -> T?) -> Observable<T> {
-        return self.observable(forRequest: request)
-                .flatMap { dataResponse -> Observable<T> in
-                    switch dataResponse.result {
-                    case .success(let result):
-                        if let value = mapper(result) {
-                            return Observable.just(value)
-                        } else {
-                            return Observable.error(ApiError.mappingError)
-                        }
-                    case .failure:
-                        if let response = dataResponse.response {
-                            let data = dataResponse.data.flatMap { try? JSONSerialization.jsonObject(with: $0, options: .allowFragments) }
-                            return Observable.error(ApiError.serverError(status: response.statusCode, data: data))
-                        } else {
-                            return Observable.error(ApiError.noConnection)
-                        }
-                    }
-                }
-    }
-
-    private func observable<T: ImmutableMappable>(forRequest request: URLRequestConvertible) -> Observable<[T]> {
-        return observable(forRequest: request, mapper: { json in
-            if let jsonArray = json as? [[String: Any]] {
-                return jsonArray.compactMap { try? T(JSONObject: $0) }
-            }
-            return nil
-        })
-    }
-
-    private func observable<T: ImmutableMappable>(forRequest request: URLRequestConvertible) -> Observable<T> {
-        return observable(forRequest: request, mapper: { json in
-            if let jsonObject = json as? [String: Any], let object = try? T(JSONObject: jsonObject) {
-                return object
-            }
-            return nil
-        })
-    }
-
-}
-
-extension ApiManager: IApiManager {
-
-    func getBlockHashes(address: String) -> Observable<[BlockResponse]> {
-        let addressPath = [
-            String(address.prefix(3)),
-            String(address[address.index(address.startIndex, offsetBy: 3)..<address.index(address.startIndex, offsetBy: 6)]),
-            String(address[address.index(address.startIndex, offsetBy: 6)...])
-        ].joined(separator: "/")
-
-        let result: Observable<AddressResponse> = observable(forRequest: request(withMethod: .get, path: "/btc-regtest/address/\(addressPath)/index.json"))
-
-        return result
-                .map { $0.blocks }
-                .catchError { error -> Observable<[BlockResponse]> in
-                    if let error = error as? ApiError, case let .serverError(status, _) = error, status == 404 {
-                        return Observable.just([])
-                    }
-                    return Observable.error(error)
-                }
-    }
-
-}
-
-struct AddressResponse: ImmutableMappable {
-    let blocks: [BlockResponse]
-
-    init(map: Map) throws {
-        blocks = try map.value("blocks")
-    }
-
-}
-
-struct BlockResponse: ImmutableMappable, Hashable {
-    let hash: String
-    let height: Int
-
-    init(hash: String, height: Int) {
-        self.hash = hash
-        self.height = height
-    }
-
-    init(map: Map) throws {
-        hash = try map.value("hash")
-        height = try map.value("height")
-    }
-
-    static func ==(lhs: BlockResponse, rhs: BlockResponse) -> Bool {
-        return lhs.height == rhs.height && lhs.hash == rhs.hash
+    private func log(string: String) {
+        Logger.shared.log(self, string)
     }
 
 }

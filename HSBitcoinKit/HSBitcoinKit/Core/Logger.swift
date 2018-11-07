@@ -7,16 +7,16 @@ class Logger {
     }
 
     private let allowedLogs = [
-        String(describing: ApiManager.self),
-        String(describing: TransactionProcessor.self),
-        String(describing: PeerConnection.self),
-        String(describing: Peer.self),
-        String(describing: PeerGroup.self),
-        String(describing: PeerHostManager.self),
-        String(describing: InitialSyncer.self),
-        String(describing: BlockSyncer.self),
-        String(describing: TransactionSyncer.self),
-        String(describing: NetworkMessage.self),
+//        String(describing: ApiManager.self),
+//        String(describing: TransactionProcessor.self),
+//        String(describing: PeerConnection.self),
+//        String(describing: Peer.self),
+//        String(describing: PeerGroup.self),
+//        String(describing: PeerHostManager.self),
+//        String(describing: InitialSyncer.self),
+//        String(describing: BlockSyncer.self),
+//        String(describing: TransactionSyncer.self),
+//        String(describing: NetworkMessage.self),
         ""
     ]
 

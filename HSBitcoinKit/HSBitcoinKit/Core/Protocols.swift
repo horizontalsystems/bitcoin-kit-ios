@@ -44,8 +44,12 @@ protocol IStateManager {
     var apiSynced: Bool { get set }
 }
 
-protocol IApiManager {
-    func getBlockHashes(address: String) -> Observable<[BlockResponse]>
+protocol IInitialSyncApi {
+    func getBlockHashes(address: String) -> Observable<Set<BlockResponse>>
+}
+
+protocol IAddressSelector {
+    func getAddressVariants(publicKey: PublicKey) -> [String]
 }
 
 protocol IAddressManager {
