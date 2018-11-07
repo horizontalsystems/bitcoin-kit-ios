@@ -101,10 +101,6 @@ class Peer {
             sendVerack()
             sentVerack = true
         }
-
-        if let startHeight = message.startHeight {
-            delegate?.peer(self, didReceiveBestBlockHeight: startHeight)
-        }
     }
 
     private func validatePeerVersion(message: VersionMessage) throws {
@@ -365,16 +361,4 @@ extension Peer: IPeerTaskRequester {
         connection.send(message: message)
     }
 
-}
-
-protocol PeerDelegate: class {
-    func handle(_ peer: IPeer, merkleBlock: MerkleBlock)
-    func peerReady(_ peer: IPeer)
-    func peerDidConnect(_ peer: IPeer)
-    func peerDidDisconnect(_ peer: IPeer, withError error: Error?)
-
-    func peer(_ peer: IPeer, didReceiveBestBlockHeight bestBlockHeight: Int32)
-    func peer(_ peer: IPeer, didCompleteTask task: PeerTask)
-    func peer(_ peer: IPeer, didReceiveAddresses addresses: [NetworkAddress])
-    func peer(_ peer: IPeer, didReceiveInventoryItems items: [InventoryItem])
 }

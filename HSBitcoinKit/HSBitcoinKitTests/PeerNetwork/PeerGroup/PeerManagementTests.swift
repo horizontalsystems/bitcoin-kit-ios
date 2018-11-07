@@ -8,6 +8,7 @@ class PeerManagementTests: XCTestCase {
 
     private var mockFactory: MockIFactory!
     private var mockNetwork: MockINetwork!
+    private var mockBestBlockHeightListener: MockBestBlockHeightListener!
     private var mockPeerHostManager: MockIPeerHostManager!
     private var mockBloomFilterManager: MockIBloomFilterManager!
 
@@ -21,6 +22,7 @@ class PeerManagementTests: XCTestCase {
 
         mockFactory = MockIFactory()
         mockNetwork = MockINetwork()
+        mockBestBlockHeightListener = MockBestBlockHeightListener()
         mockPeerHostManager = MockIPeerHostManager()
         mockBloomFilterManager = MockIBloomFilterManager()
         peers = [String: MockIPeer]()
@@ -36,6 +38,7 @@ class PeerManagementTests: XCTestCase {
                 when(mock.synced.get).thenReturn(false)
                 when(mock.blockHashesSynced.get).thenReturn(false)
                 when(mock.delegate.set(any())).thenDoNothing()
+                when(mock.announcedLastBlockHeight.get).thenReturn(0)
                 when(mock.localBestBlockHeight.set(any())).thenDoNothing()
                 when(mock.host.get).thenReturn(hostString)
 
@@ -58,6 +61,9 @@ class PeerManagementTests: XCTestCase {
         let hdPrivKeyData = try! hdWallet.privateKeyData(index: 0, external: true)
         publicKey = PublicKey(withIndex: 0, external: true, hdPublicKeyData: hdPrivKeyData)
 
+        stub(mockBestBlockHeightListener) { mock in
+            when(mock.bestBlockHeightReceived(height: any())).thenDoNothing()
+        }
         stub(mockPeerHostManager) { mock in
             when(mock.delegate.set(any())).thenDoNothing()
             when(mock.peerHost.get).thenReturn("0").thenReturn("1").thenReturn("2").thenReturn("3")
@@ -69,7 +75,7 @@ class PeerManagementTests: XCTestCase {
         }
 
         peerGroup = PeerGroup(
-                factory: mockFactory, network: mockNetwork, peerHostManager: mockPeerHostManager, bloomFilterManager: mockBloomFilterManager, peerCount: 3,
+                factory: mockFactory, network: mockNetwork, listener: mockBestBlockHeightListener, peerHostManager: mockPeerHostManager, bloomFilterManager: mockBloomFilterManager, peerCount: 3,
                 localQueue: DispatchQueue.main, syncPeerQueue: DispatchQueue.main, inventoryQueue: DispatchQueue.main
         )
     }

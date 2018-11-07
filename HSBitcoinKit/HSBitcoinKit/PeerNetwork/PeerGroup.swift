@@ -6,7 +6,7 @@ class PeerGroup {
 
     weak var blockSyncer: IBlockSyncer?
     weak var transactionSyncer: ITransactionSyncer?
-    weak var bestBlockHeightDelegate: BestBlockHeightDelegate?
+    private var bestBlockHeightListener: BestBlockHeightListener
 
     private let factory: IFactory
     private let network: INetwork
@@ -27,12 +27,14 @@ class PeerGroup {
     private let syncPeerQueue: DispatchQueue
     private let inventoryQueue: DispatchQueue
 
-    init(factory: IFactory, network: INetwork, peerHostManager: IPeerHostManager, bloomFilterManager: IBloomFilterManager, peerCount: Int = 10,
+    init(factory: IFactory, network: INetwork, listener: BestBlockHeightListener,
+         peerHostManager: IPeerHostManager, bloomFilterManager: IBloomFilterManager, peerCount: Int = 10,
          localQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Local Queue", qos: .userInitiated),
          syncPeerQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Sync Peer Queue", qos: .userInitiated),
          inventoryQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Inventory Queue", qos: .background)) {
         self.factory = factory
         self.network = network
+        self.bestBlockHeightListener = listener
         self.peerHostManager = peerHostManager
         self.bloomFilterManager = bloomFilterManager
         self.peerCount = peerCount
@@ -174,6 +176,7 @@ class PeerGroup {
                 Logger.shared.log(self, "Setting sync peer to \(nonSyncedPeer.logName)")
                 self.syncPeer = nonSyncedPeer
                 self.blockSyncer?.downloadStarted()
+                self.bestBlockHeightListener.bestBlockHeightReceived(height: nonSyncedPeer.announcedLastBlockHeight)
                 self.downloadBlockchain()
             }
         }
@@ -261,10 +264,6 @@ extension PeerGroup: PeerDelegate {
         connectPeersIfRequired()
     }
 
-    func peer(_ peer: IPeer, didReceiveBestBlockHeight bestBlockHeight: Int32) {
-        bestBlockHeightDelegate?.bestBlockHeightReceived(height: bestBlockHeight)
-    }
-
     func peer(_ peer: IPeer, didCompleteTask task: PeerTask) {
         switch task {
 
@@ -346,9 +345,11 @@ extension PeerGroup: PeerHostManagerDelegate {
 }
 
 extension PeerGroup: BloomFilterManagerDelegate {
+
     func bloomFilterUpdated(bloomFilter: BloomFilter) {
         for peer in self.connectedPeers {
             peer.filterLoad(bloomFilter: bloomFilter)
         }
     }
+
 }

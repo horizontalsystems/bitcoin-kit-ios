@@ -69,7 +69,6 @@ protocol IBloomFilterManager {
 protocol IPeerGroup: class {
     var blockSyncer: IBlockSyncer? { get set }
     var transactionSyncer: ITransactionSyncer? { get set }
-    var bestBlockHeightDelegate: BestBlockHeightDelegate? { get set }
     func start()
     func stop()
     func send(transaction: Transaction)
@@ -94,6 +93,17 @@ protocol IPeer: class {
     func equalTo(_ peer: IPeer?) -> Bool
 }
 
+protocol PeerDelegate: class {
+    func handle(_ peer: IPeer, merkleBlock: MerkleBlock)
+    func peerReady(_ peer: IPeer)
+    func peerDidConnect(_ peer: IPeer)
+    func peerDidDisconnect(_ peer: IPeer, withError error: Error?)
+
+    func peer(_ peer: IPeer, didCompleteTask task: PeerTask)
+    func peer(_ peer: IPeer, didReceiveAddresses addresses: [NetworkAddress])
+    func peer(_ peer: IPeer, didReceiveInventoryItems items: [InventoryItem])
+}
+
 protocol IPeerTaskRequester: class {
     func getBlocks(hashes: [Data])
     func getData(items: [InventoryItem])
@@ -102,7 +112,7 @@ protocol IPeerTaskRequester: class {
     func ping(nonce: UInt64)
 }
 
-protocol BestBlockHeightDelegate: class {
+protocol BestBlockHeightListener: class {
     func bestBlockHeightReceived(height: Int32)
 }
 
@@ -220,6 +230,19 @@ protocol IBlockSyncer: class {
     func add(blockHashes: [Data])
     func handle(merkleBlock: MerkleBlock) throws
     func shouldRequestBlock(withHash hash: Data) -> Bool
+}
+
+protocol BlockSyncerListener: class {
+    func initialBestBlockHeightUpdated(height: Int32)
+    func currentBestBlockHeightUpdated(height: Int32)
+}
+
+protocol IProgressSyncer: class {
+    var delegate: ProgressSyncerDelegate? { get set }
+}
+
+protocol ProgressSyncerDelegate: class {
+    func handleProgressUpdate(progress: Double)
 }
 
 protocol IDataProvider {

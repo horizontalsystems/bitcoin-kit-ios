@@ -3,6 +3,7 @@ import RealmSwift
 
 class BlockSyncer {
 
+    private let listener: BlockSyncerListener
     private let realmFactory: IRealmFactory
     private let network: INetwork
     private let transactionProcessor: ITransactionProcessor
@@ -18,7 +19,7 @@ class BlockSyncer {
         return Int32(height ?? 0)
     }
 
-    init(realmFactory: IRealmFactory, network: INetwork,
+    init(realmFactory: IRealmFactory, network: INetwork, listener: BlockSyncerListener,
          transactionProcessor: ITransactionProcessor, blockchain: IBlockchain, addressManager: IAddressManager, bloomFilterManager: IBloomFilterManager,
          hashCheckpointThreshold: Int = 100) {
         self.realmFactory = realmFactory
@@ -28,6 +29,7 @@ class BlockSyncer {
         self.addressManager = addressManager
         self.bloomFilterManager = bloomFilterManager
         self.hashCheckpointThreshold = hashCheckpointThreshold
+        self.listener = listener
 
         let realm = realmFactory.realm
         if realm.objects(Block.self).count == 0, let checkpointBlockHeader = network.checkpointBlock.header {
@@ -36,6 +38,8 @@ class BlockSyncer {
                 realm.add(checkpointBlock)
             }
         }
+
+        listener.initialBestBlockHeightUpdated(height: localBestBlockHeight)
     }
 
     // We need to clear block hashes when sync peer is disconnected
@@ -149,8 +153,8 @@ extension BlockSyncer: IBlockSyncer {
     func handle(merkleBlock: MerkleBlock) throws {
         let realm = realmFactory.realm
 
+        var block: Block!
         try realm.write {
-            var block: Block!
 
             if let height = merkleBlock.height {
                 block = blockchain.forceAdd(merkleBlock: merkleBlock, height: height, realm: realm)
@@ -168,6 +172,8 @@ extension BlockSyncer: IBlockSyncer {
                 realm.delete(blockHash)
             }
         }
+
+        listener.currentBestBlockHeightUpdated(height: Int32(block.height))
     }
 
     func shouldRequestBlock(withHash hash: Data) -> Bool {

@@ -6,6 +6,7 @@ import RealmSwift
 
 class BlockSyncerTests: XCTestCase {
     private var mockNetwork: MockINetwork!
+    private var mockBlockSyncerListener: MockBlockSyncerListener!
     private var mockTransactionProcessor: MockITransactionProcessor!
     private var mockBlockchain: MockIBlockchain!
     private var mockAddressManager: MockIAddressManager!
@@ -35,6 +36,7 @@ class BlockSyncerTests: XCTestCase {
         }
 
         mockNetwork = MockINetwork()
+        mockBlockSyncerListener = MockBlockSyncerListener()
         mockTransactionProcessor = MockITransactionProcessor()
         mockBlockchain = MockIBlockchain()
         mockAddressManager = MockIAddressManager()
@@ -42,6 +44,10 @@ class BlockSyncerTests: XCTestCase {
 
         stub(mockNetwork) { mock in
             when(mock.checkpointBlock.get).thenReturn(TestData.checkpointBlock)
+        }
+        stub(mockBlockSyncerListener) { mock in
+            when(mock.initialBestBlockHeightUpdated(height: any())).thenDoNothing()
+            when(mock.currentBestBlockHeightUpdated(height: any())).thenDoNothing()
         }
 
         stub(mockTransactionProcessor) { mock in
@@ -59,7 +65,7 @@ class BlockSyncerTests: XCTestCase {
         }
 
         syncer = BlockSyncer(
-                realmFactory: mockRealmFactory, network: mockNetwork,
+                realmFactory: mockRealmFactory, network: mockNetwork, listener: mockBlockSyncerListener,
                 transactionProcessor: mockTransactionProcessor, blockchain: mockBlockchain, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager,
                 hashCheckpointThreshold: 100
         )
