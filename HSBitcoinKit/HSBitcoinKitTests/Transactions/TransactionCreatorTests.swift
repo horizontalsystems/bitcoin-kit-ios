@@ -57,7 +57,7 @@ class TransactionCreatorTests: XCTestCase {
     }
 
     func testCreateTransaction() {
-        try! transactionCreator.create(to: "Address", value: 1, feeRate: 5, senderPay: false)
+        try! transactionCreator.create(to: "Address", value: 1, feeRate: 1, senderPay: true)
 
         guard let transaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", TestData.p2pkhTransaction.reversedHashHex).first else {
             XCTFail("No transaction record!")
@@ -74,7 +74,7 @@ class TransactionCreatorTests: XCTestCase {
         }
 
         do {
-            try transactionCreator.create(to: "Address", value: 1, feeRate: 10, senderPay: false)
+            try transactionCreator.create(to: "Address", value: 1, feeRate: 1, senderPay: true)
             XCTFail("No exception!")
         } catch let error as TransactionCreator.CreationError {
             XCTAssertEqual(error, TransactionCreator.CreationError.noChangeAddress)
