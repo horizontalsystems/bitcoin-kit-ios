@@ -1,7 +1,6 @@
 import HSHDWalletKit
 import RxSwift
 import RealmSwift
-import ObjectMapper
 
 class InitialSyncer {
     private let disposeBag = DisposeBag()
@@ -127,18 +126,17 @@ extension InitialSyncer: IInitialSyncer {
 
 }
 
-struct BlockResponse: ImmutableMappable, Hashable {
+struct BlockResponse: Hashable {
     let hash: String
     let height: Int
 
-    init(hash: String, height: Int) {
-        self.hash = hash
-        self.height = height
+    var hashValue: Int {
+        return hash.hashValue ^ height.hashValue
     }
 
-    init(map: Map) throws {
-        hash = try map.value("hash")
-        height = try map.value("height")
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(hash)
+        hasher.combine(height)
     }
 
     static func ==(lhs: BlockResponse, rhs: BlockResponse) -> Bool {

@@ -2,8 +2,6 @@ import Foundation
 import RxSwift
 
 class BtcComApi {
-    enum SyncerError: Error { case syncError }
-
     private let apiManager: ApiManager
 
     init(network: INetwork) {

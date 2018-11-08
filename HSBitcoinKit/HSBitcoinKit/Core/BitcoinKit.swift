@@ -105,7 +105,8 @@ public class BitcoinKit {
         case .bitcoinCash: addressSelector = BitcoinCashAddressSelector(addressConverter: addressConverter)
         }
 
-        initialSyncApi = BtcComApi(network: network)
+//        initialSyncApi = BtcComApi(network: network)
+        initialSyncApi = BcoinApi(network: network)
 
         peerHostManager = PeerHostManager(network: network, realmFactory: realmFactory)
 

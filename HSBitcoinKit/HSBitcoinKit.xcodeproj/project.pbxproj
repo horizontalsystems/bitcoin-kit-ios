@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		11B35076CF1D00DD9863DD0B /* BcoinApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35959F0347D6C6866E616 /* BcoinApi.swift */; };
 		11B350895B60D5941F788B85 /* BitcoinCashMainNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B3538AE4523B395063F66D /* BitcoinCashMainNet.swift */; };
 		11B350E0BC835C79DEDFF2C7 /* BitcoinTestNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35E92D4F8CF1524F98F7A /* BitcoinTestNet.swift */; };
 		11B35178BC28AE1B995DE8E3 /* VarInt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B355C0072CA13ADBAC1351 /* VarInt.swift */; };
@@ -241,6 +242,7 @@
 		11B358F56F6298016B1A8AFD /* TestData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestData.swift; sourceTree = "<group>"; };
 		11B3590614D2772B1436542A /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		11B359294D97AEDB1835AB4C /* P2SHExtractor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = P2SHExtractor.swift; sourceTree = "<group>"; };
+		11B35959F0347D6C6866E616 /* BcoinApi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BcoinApi.swift; sourceTree = "<group>"; };
 		11B3597DE3169FD250A982D5 /* ApiManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ApiManager.swift; sourceTree = "<group>"; };
 		11B35996E6FEE15BB533D965 /* P2PKExtractorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = P2PKExtractorTests.swift; sourceTree = "<group>"; };
 		11B359BE3932E0E1F2AA9E76 /* BlockHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockHeader.swift; sourceTree = "<group>"; };
@@ -696,6 +698,7 @@
 				58AAA61E4ACBB9264D501BB2 /* BtcComApi.swift */,
 				58AAA55E49708A950F951E2D /* BitcoinAddressSelector.swift */,
 				58AAAF2DEF2097D0BAE1487B /* BitcoinCashAddressSelector.swift */,
+				11B35959F0347D6C6866E616 /* BcoinApi.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -1304,6 +1307,7 @@
 				58AAA80E3D7A474D0BFA96E9 /* BtcComApi.swift in Sources */,
 				58AAA7912B48C0C21F50DBF2 /* BitcoinAddressSelector.swift in Sources */,
 				58AAAC2B5D2BA0B33514E44F /* BitcoinCashAddressSelector.swift in Sources */,
+				11B35076CF1D00DD9863DD0B /* BcoinApi.swift in Sources */,
 				2FA5DBF35EDF66F6977BA032 /* PeerTimer.swift in Sources */,
 				2FA5D024DF2A429D6606350F /* ProgressSyncer.swift in Sources */,
 			);

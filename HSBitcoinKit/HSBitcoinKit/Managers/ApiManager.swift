@@ -88,7 +88,7 @@ class ApiManager {
 
     private func observable(forRequest request: URLRequestConvertible) -> Observable<DataResponse<Any>> {
         let observable = Observable<DataResponse<Any>>.create { observer in
-            self.log(string: "API OUT: \(request.urlRequest?.httpMethod ?? "") \(request.urlRequest?.url?.path ?? "")")
+            self.log(string: "API OUT: \(request.urlRequest?.httpMethod ?? "") \(request.urlRequest?.url?.absoluteString ?? "")")
 
             let requestReference = Alamofire.request(request)
                     .validate()

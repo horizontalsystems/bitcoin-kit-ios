@@ -8,7 +8,7 @@ class BitcoinCashAddressSelector: IAddressSelector {
     }
 
     func getAddressVariants(publicKey: PublicKey) -> [String] {
-        let legacyAddress = addressConverter.convertToLegacy(keyHash: publicKey.keyHash, version: 0, addressType: .pubKeyHash).stringValue
+        let legacyAddress = (try? addressConverter.convert(keyHash: publicKey.keyHash, type: .p2pkh))?.stringValue
         return [legacyAddress].compactMap { $0 }
     }
 
