@@ -2,6 +2,11 @@ import Foundation
 import HSHDWalletKit
 
 class PeerConnection: NSObject, StreamDelegate {
+    enum PeerConnectionError: Error {
+        case connectionClosedWithUnknownError
+        case connectionClosedByPeer
+    }
+
     private let bufferSize = 4096
 
     let host: String
@@ -16,6 +21,7 @@ class PeerConnection: NSObject, StreamDelegate {
     private var writeStream: Unmanaged<CFWriteStream>?
     private var inputStream: InputStream?
     private var outputStream: OutputStream?
+    private var peerTimer: PeerTimer
 
     private var packets: Data = Data()
 
@@ -28,6 +34,7 @@ class PeerConnection: NSObject, StreamDelegate {
         self.host = host
         self.port = UInt32(network.port)
         self.network = network
+        self.peerTimer = PeerTimer()
     }
 
     deinit {
@@ -59,10 +66,12 @@ class PeerConnection: NSObject, StreamDelegate {
         inputStream?.open()
         outputStream?.open()
 
+        peerTimer.peerConnection = self
+        RunLoop.current.add(peerTimer.timer, forMode: .commonModes)
         RunLoop.current.run()
     }
 
-    func disconnect(eventCode: Stream.Event? = nil) {
+    func disconnect(error: Error? = nil) {
         guard readStream != nil && readStream != nil else {
             return
         }
@@ -73,11 +82,12 @@ class PeerConnection: NSObject, StreamDelegate {
         outputStream?.close()
         inputStream?.remove(from: .current, forMode: .commonModes)
         outputStream?.remove(from: .current, forMode: .commonModes)
+        peerTimer.timer.invalidate()
         readStream = nil
         writeStream = nil
         runLoop = nil
 
-        delegate?.connectionDidDisconnect(self, withError: eventCode == .errorOccurred)
+        delegate?.connectionDidDisconnect(self, withError: error)
 
         log("DISCONNECTED")
     }
@@ -95,10 +105,11 @@ class PeerConnection: NSObject, StreamDelegate {
                 break
             case .errorOccurred:
                 log("IN ERROR OCCURRED")
-                disconnect(eventCode: eventCode)
+                disconnect(error: PeerConnectionError.connectionClosedWithUnknownError)
             case .endEncountered:
                 log("IN CLOSED")
-                disconnect(eventCode: eventCode)
+                disconnect(error: PeerConnectionError.connectionClosedByPeer)
+                disconnect()
             default:
                 break
             }
@@ -112,10 +123,10 @@ class PeerConnection: NSObject, StreamDelegate {
                 delegate?.connectionReadyForWrite(self)
             case .errorOccurred:
                 log("OUT ERROR OCCURRED")
-                disconnect(eventCode: eventCode)
+                disconnect()
             case .endEncountered:
                 log("OUT CLOSED")
-                disconnect(eventCode: eventCode)
+                disconnect()
             default:
                 break
             }
@@ -125,6 +136,7 @@ class PeerConnection: NSObject, StreamDelegate {
     }
 
     private func readAvailableBytes(stream: InputStream) {
+        peerTimer.reset()
         let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
 
         defer { buffer.deallocate() }
@@ -166,6 +178,6 @@ class PeerConnection: NSObject, StreamDelegate {
 
 protocol PeerConnectionDelegate : class {
     func connectionReadyForWrite(_ connection: PeerConnection)
-    func connectionDidDisconnect(_ connection: PeerConnection, withError error: Bool)
+    func connectionDidDisconnect(_ connection: PeerConnection, withError error: Error?)
     func connection(_ connection: PeerConnection, didReceiveMessage message: IMessage)
 }

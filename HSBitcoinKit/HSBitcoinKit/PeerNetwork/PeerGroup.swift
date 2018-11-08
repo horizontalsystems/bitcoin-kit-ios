@@ -6,7 +6,7 @@ class PeerGroup {
 
     weak var blockSyncer: IBlockSyncer?
     weak var transactionSyncer: ITransactionSyncer?
-    weak var bestBlockHeightDelegate: BestBlockHeightDelegate?
+    private var bestBlockHeightListener: BestBlockHeightListener
 
     private let factory: IFactory
     private let network: INetwork
@@ -16,9 +16,9 @@ class PeerGroup {
 
     private var started: Bool = false
 
-    private var connectedPeers: [Peer] = []
-    private var connectingPeerHosts: [Peer] = []
-    private var syncPeer: Peer?
+    private var connectedPeers: [IPeer] = []
+    private var connectingPeerHosts: [IPeer] = []
+    private var syncPeer: IPeer?
 
     private var fetchedBlocks: [MerkleBlock] = []
     private var pendingTransactions: [Transaction] = []
@@ -27,12 +27,14 @@ class PeerGroup {
     private let syncPeerQueue: DispatchQueue
     private let inventoryQueue: DispatchQueue
 
-    init(factory: IFactory, network: INetwork, peerHostManager: IPeerHostManager, bloomFilterManager: IBloomFilterManager, peerCount: Int = 10,
+    init(factory: IFactory, network: INetwork, listener: BestBlockHeightListener,
+         peerHostManager: IPeerHostManager, bloomFilterManager: IBloomFilterManager, peerCount: Int = 10,
          localQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Local Queue", qos: .userInitiated),
          syncPeerQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Sync Peer Queue", qos: .userInitiated),
          inventoryQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Inventory Queue", qos: .background)) {
         self.factory = factory
         self.network = network
+        self.bestBlockHeightListener = listener
         self.peerHostManager = peerHostManager
         self.bloomFilterManager = bloomFilterManager
         self.peerCount = peerCount
@@ -51,10 +53,11 @@ class PeerGroup {
                 return
             }
 
-            for _ in (self.connectedPeers.count+self.connectingPeerHosts.count)..<self.peerCount {
+            for _ in (self.connectedPeers.count + self.connectingPeerHosts.count)..<self.peerCount {
                 if let host = self.peerHostManager.peerHost {
                     let peer = self.factory.peer(withHost: host, network: self.network)
                     self.connectingPeerHosts.append(peer)
+                    peer.localBestBlockHeight = self.blockSyncer?.localBestBlockHeight ?? 0
                     peer.delegate = self
                     peer.connect()
                 } else {
@@ -64,7 +67,7 @@ class PeerGroup {
         }
     }
 
-    private func dispatchTasks(forReadyPeer peer: Peer? = nil) {
+    private func dispatchTasks(forReadyPeer peer: IPeer? = nil) {
         if let peer = peer {
             handleReady(peer: peer)
         } else {
@@ -74,12 +77,12 @@ class PeerGroup {
         }
     }
 
-    private func handleReady(peer: Peer) {
+    private func handleReady(peer: IPeer) {
         guard peer.ready else {
             return
         }
 
-        if peer == syncPeer {
+        if peer.equalTo(syncPeer) {
             downloadBlockchain()
             return
         }
@@ -95,21 +98,21 @@ class PeerGroup {
             return
         }
 
-        if let listHashes = self.blockSyncer?.getBlockHashes() {
-            if (listHashes.isEmpty) {
+        if let blockHashes = self.blockSyncer?.getBlockHashes() {
+            if (blockHashes.isEmpty) {
                 syncPeer.synced = syncPeer.blockHashesSynced
             } else {
-                syncPeer.add(task: GetMerkleBlocksTask(hashes: listHashes))
+                syncPeer.add(task: GetMerkleBlocksTask(blockHashes: blockHashes))
             }
         }
 
-        if !syncPeer.blockHashesSynced, let blockLocatorHashes = self.blockSyncer?.getBlockLocatorHashes() {
+        if !syncPeer.blockHashesSynced, let blockLocatorHashes = self.blockSyncer?.getBlockLocatorHashes(peerLastBlockHeight: syncPeer.announcedLastBlockHeight) {
             syncPeer.add(task: GetBlockHashesTask(hashes: blockLocatorHashes))
         }
 
         if syncPeer.synced {
             blockSyncer?.downloadCompleted()
-            syncPeer.sendMemoryPoolMessage()
+            syncPeer.sendMempoolMessage()
             self.syncPeer = nil
             assignNextSyncPeer()
         }
@@ -133,7 +136,7 @@ class PeerGroup {
         return false
     }
 
-    private func handle(peer: Peer, task: GetBlockHashesTask) {
+    private func handle(peer: IPeer, task: GetBlockHashesTask) {
         guard !task.blockHashes.isEmpty else {
             peer.blockHashesSynced = true
             return
@@ -142,7 +145,7 @@ class PeerGroup {
         blockSyncer?.add(blockHashes: task.blockHashes)
     }
 
-    private func handle(peer: Peer, task: GetMerkleBlocksTask) {
+    private func handle(peer: IPeer, task: GetMerkleBlocksTask) {
         self.blockSyncer?.downloadIterationCompleted()
     }
 
@@ -173,6 +176,7 @@ class PeerGroup {
                 Logger.shared.log(self, "Setting sync peer to \(nonSyncedPeer.logName)")
                 self.syncPeer = nonSyncedPeer
                 self.blockSyncer?.downloadStarted()
+                self.bestBlockHeightListener.bestBlockHeightReceived(height: nonSyncedPeer.announcedLastBlockHeight)
                 self.downloadBlockchain()
             }
         }
@@ -198,7 +202,7 @@ extension PeerGroup: IPeerGroup {
         started = false
 
         for peer in connectedPeers {
-            peer.disconnect()
+            peer.disconnect(error: nil)
         }
     }
 
@@ -217,15 +221,14 @@ extension PeerGroup: IPeerGroup {
 
 extension PeerGroup: PeerDelegate {
 
-    func peerReady(_ peer: Peer) {
+    func peerReady(_ peer: IPeer) {
         Logger.shared.log(self, "Handling peerReady: \(peer.logName)")
         localQueue.async {
             self.dispatchTasks(forReadyPeer: peer)
         }
     }
 
-    func peerDidConnect(_ peer: Peer) {
-        Logger.shared.log(self, "Peer \(peer.logName) didConnect")
+    func peerDidConnect(_ peer: IPeer) {
         if let bloomFilter = bloomFilterManager.bloomFilter {
             peer.filterLoad(bloomFilter: bloomFilter)
         }
@@ -239,23 +242,23 @@ extension PeerGroup: PeerDelegate {
         self.assignNextSyncPeer()
     }
 
-    func peerDidDisconnect(_ peer: Peer, withError error: Bool) {
-        if error {
-            Logger.shared.log(self, "Peer with IP \(peer.host) disconnected with error")
+    func peerDidDisconnect(_ peer: IPeer, withError error: Error?) {
+        if let error = error {
+            Logger.shared.log(self, "Peer \(peer.logName)(\(peer.host)) disconnected with error: \(error)")
         }
 
-        peerHostManager.hostDisconnected(host: peer.host, withError: error)
+        peerHostManager.hostDisconnected(host: peer.host, withError: error != nil)
 
         localQueue.async {
             self.syncPeerQueue.async {
-                if peer === self.syncPeer {
+                if peer.equalTo(self.syncPeer) {
                     self.blockSyncer?.downloadFailed()
                     self.syncPeer = nil
                     self.assignNextSyncPeer()
                 }
             }
 
-            if let index = self.connectedPeers.index(where: { $0 === peer }) {
+            if let index = self.connectedPeers.index(where: { $0.equalTo(peer) }) {
                 self.connectedPeers.remove(at: index)
             }
         }
@@ -263,11 +266,7 @@ extension PeerGroup: PeerDelegate {
         connectPeersIfRequired()
     }
 
-    func peer(_ peer: Peer, didReceiveBestBlockHeight bestBlockHeight: Int32) {
-        bestBlockHeightDelegate?.bestBlockHeightReceived(height: bestBlockHeight)
-    }
-
-    func peer(_ peer: Peer, didCompleteTask task: PeerTask) {
+    func peer(_ peer: IPeer, didCompleteTask task: PeerTask) {
         switch task {
 
         case let task as GetBlockHashesTask:
@@ -287,21 +286,21 @@ extension PeerGroup: PeerDelegate {
         }
     }
 
-    func handle(_ peer: Peer, merkleBlock: MerkleBlock) {
+    func handle(_ peer: IPeer, merkleBlock: MerkleBlock) {
         do {
             try blockSyncer?.handle(merkleBlock: merkleBlock)
         } catch {
-            peer.disconnect()
+            peer.disconnect(error: error)
         }
     }
 
-    func peer(_ peer: Peer, didReceiveAddresses addresses: [NetworkAddress]) {
+    func peer(_ peer: IPeer, didReceiveAddresses addresses: [NetworkAddress]) {
         self.peerHostManager.addHosts(hosts: addresses.map {
             $0.address
         })
     }
 
-    func peer(_ peer: Peer, didReceiveInventoryItems items: [InventoryItem]) {
+    func peer(_ peer: IPeer, didReceiveInventoryItems items: [InventoryItem]) {
         inventoryQueue.async {
             var blockHashes = [Data]()
             var transactionHashes = [Data]()
@@ -348,9 +347,11 @@ extension PeerGroup: PeerHostManagerDelegate {
 }
 
 extension PeerGroup: BloomFilterManagerDelegate {
+
     func bloomFilterUpdated(bloomFilter: BloomFilter) {
         for peer in self.connectedPeers {
             peer.filterLoad(bloomFilter: bloomFilter)
         }
     }
+
 }

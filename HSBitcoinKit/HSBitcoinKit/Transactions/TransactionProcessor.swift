@@ -26,7 +26,7 @@ class TransactionProcessor {
 
 extension TransactionProcessor: ITransactionProcessor {
 
-    func process(transactions: [Transaction], inBlock block: Block?, checkBloomFilter: Bool, realm: Realm) throws {
+    func process(transactions: [Transaction], inBlock block: Block?, skipCheckBloomFilter: Bool, realm: Realm) throws {
         var needToUpdateBloomFilter = false
 
         for transaction in transactions {
@@ -43,7 +43,7 @@ extension TransactionProcessor: ITransactionProcessor {
                 transaction.status = .relayed
                 realm.add(transaction)
 
-                if checkBloomFilter {
+                if !skipCheckBloomFilter {
                     needToUpdateBloomFilter = needToUpdateBloomFilter || self.addressManager.gapShifts() || self.hasUnspentOutputs(transaction: transaction)
                 }
             }

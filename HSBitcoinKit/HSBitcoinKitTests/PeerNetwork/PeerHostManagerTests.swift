@@ -9,7 +9,9 @@ class PeerHostManagerTests:XCTestCase {
     private var mockNetwork: MockINetwork!
     private var mockRealmFactory: MockIRealmFactory!
     private var mockHostDiscovery: MockIHostDiscovery!
-    private var queue: DispatchQueue!
+    private var dnsLookupQueue: DispatchQueue!
+    private var localQueue: DispatchQueue!
+    private var hostsUsageQueue: DispatchQueue!
     private var dnsSeeds: [String]!
     private var manager: PeerHostManager!
 
@@ -18,18 +20,19 @@ class PeerHostManagerTests:XCTestCase {
     override func setUp() {
         super.setUp()
 
-        realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
+        // We need to use real RealmFactory that creates realm instances each time when requested
+        // Because, we're using different DispatchQueues for localQueue and hostsUsageQueue
+        let realmFactory = RealmFactory(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
+        realm = realmFactory.realm
         try! realm.write { realm.deleteAll() }
-
-        let mockRealmFactory = MockIRealmFactory()
-        stub(mockRealmFactory) { mock in
-            when(mock.realm.get).thenReturn(realm)
-        }
 
         mockPeerHostManagerDelegate = MockPeerHostManagerDelegate()
         mockNetwork = MockINetwork()
         mockHostDiscovery = MockIHostDiscovery()
-        queue = DispatchQueue.main
+        dnsLookupQueue = DispatchQueue.main
+        // We cannot use DispatchQueue.main because this queue has .sync calls which main thread cannot perform.
+        localQueue = DispatchQueue(label: "PeerHostManager LocalQueue", qos: .background)
+        hostsUsageQueue = DispatchQueue.main
         dnsSeeds = ["some.seed"]
 
         stub(mockHostDiscovery) { mock in
@@ -39,7 +42,7 @@ class PeerHostManagerTests:XCTestCase {
             when(mock.dnsSeeds.get).thenReturn(dnsSeeds)
         }
 
-        manager = PeerHostManager(network: mockNetwork, realmFactory: mockRealmFactory, hostDiscovery: mockHostDiscovery, dnsLookupQueue: queue, localQueue: queue)
+        manager = PeerHostManager(network: mockNetwork, realmFactory: realmFactory, hostDiscovery: mockHostDiscovery, dnsLookupQueue: localQueue, localQueue: localQueue, hostsUsageQueue: localQueue)
     }
 
     override func tearDown() {
@@ -47,7 +50,9 @@ class PeerHostManagerTests:XCTestCase {
         mockNetwork = nil
         mockRealmFactory = nil
         mockHostDiscovery = nil
-        queue = nil
+        dnsLookupQueue = nil
+        localQueue = nil
+        hostsUsageQueue = nil
         manager = nil
         realm = nil
 
@@ -63,6 +68,7 @@ class PeerHostManagerTests:XCTestCase {
 
         let host = manager.peerHost
         XCTAssertEqual(host, peerAddress.ip)
+        waitForMainQueue(queue: localQueue)
         waitForMainQueue()
         verify(mockHostDiscovery, never()).lookup(dnsSeed: any())
     }
@@ -77,6 +83,7 @@ class PeerHostManagerTests:XCTestCase {
         let _ = manager.peerHost
         let host2 = manager.peerHost
         XCTAssertEqual(host2, nil)
+        waitForMainQueue(queue: localQueue)
         waitForMainQueue()
         verify(mockHostDiscovery).lookup(dnsSeed: equal(to: dnsSeeds[0]))
     }
@@ -84,6 +91,7 @@ class PeerHostManagerTests:XCTestCase {
     func testPeerHost_HasNoPeerAddress() {
         let host = manager.peerHost
         XCTAssertEqual(host, nil)
+        waitForMainQueue(queue: localQueue)
         waitForMainQueue()
         verify(mockHostDiscovery).lookup(dnsSeed: equal(to: dnsSeeds[0]))
     }
@@ -98,6 +106,7 @@ class PeerHostManagerTests:XCTestCase {
         }
 
         let host = manager.peerHost
+        waitForMainQueue(queue: localQueue)
         waitForMainQueue()
         XCTAssertEqual(host, peerAddress2.ip)
     }
@@ -110,6 +119,7 @@ class PeerHostManagerTests:XCTestCase {
         }
 
         manager.hostDisconnected(host: peerAddress.ip, withError: false)
+        waitForMainQueue(queue: localQueue)
         waitForMainQueue()
         XCTAssertEqual(peerAddress.score, 1)
     }
@@ -122,6 +132,7 @@ class PeerHostManagerTests:XCTestCase {
         }
 
         manager.hostDisconnected(host: peerAddress.ip, withError: true)
+        waitForMainQueue(queue: localQueue)
         waitForMainQueue()
         XCTAssertEqual(realm.objects(PeerAddress.self).count, 0)
     }
@@ -133,10 +144,13 @@ class PeerHostManagerTests:XCTestCase {
         }
 
         let host = manager.peerHost
+        waitForMainQueue(queue: localQueue)
         waitForMainQueue()
         manager.hostDisconnected(host: host!, withError: false)
+        waitForMainQueue(queue: localQueue)
         waitForMainQueue()
         let host2 = manager.peerHost
+        waitForMainQueue(queue: localQueue)
         waitForMainQueue()
         XCTAssertEqual(host, host2)
     }
@@ -144,12 +158,14 @@ class PeerHostManagerTests:XCTestCase {
     func testHostDisconnected_HostNotFound() {
         manager.hostDisconnected(host: "192.168.0.1", withError: false)
         let host = manager.peerHost
+        waitForMainQueue(queue: localQueue)
         waitForMainQueue()
         XCTAssertEqual(host, nil)
     }
 
     func testAddHosts() {
         manager.addHosts(hosts: ["192.168.0.1", "192.168.0.2"])
+        waitForMainQueue(queue: localQueue)
         waitForMainQueue()
 
         XCTAssertEqual(realm.objects(PeerAddress.self).count, 2)
@@ -168,6 +184,7 @@ class PeerHostManagerTests:XCTestCase {
         }
 
         manager.addHosts(hosts: ["192.168.0.1", "192.168.0.2"])
+        waitForMainQueue(queue: localQueue)
         waitForMainQueue()
 
         XCTAssertEqual(realm.objects(PeerAddress.self).count, 2)
@@ -181,6 +198,7 @@ class PeerHostManagerTests:XCTestCase {
 
     func testAddHosts_ShouldHandleDuplicates() {
         manager.addHosts(hosts: ["192.168.0.1", "192.168.0.1"])
+        waitForMainQueue(queue: localQueue)
         waitForMainQueue()
 
         XCTAssertEqual(realm.objects(PeerAddress.self).count, 1)
@@ -196,6 +214,7 @@ class PeerHostManagerTests:XCTestCase {
         }
 
         manager.addHosts(hosts: ["192.168.0.1"])
+        waitForMainQueue(queue: localQueue)
         waitForMainQueue()
 
         verify(mockPeerHostManagerDelegate).newHostsAdded()
@@ -208,6 +227,7 @@ class PeerHostManagerTests:XCTestCase {
         }
 
         manager.addHosts(hosts: [])
+        waitForMainQueue(queue: localQueue)
         waitForMainQueue()
 
         verify(mockPeerHostManagerDelegate, never()).newHostsAdded()

@@ -2,6 +2,12 @@ import Foundation
 import HSCryptoKit
 
 class Peer {
+    enum PeerError: Error {
+        case peerBestBlockIsLessThanOne
+        case peerHasExpiredBlockChain(localHeight: Int32, peerHeight: Int32)
+        case peerNotFullNode
+        case peerDoesNotSupportBloomFilter
+    }
 
     private let protocolVersion: Int32 = 70015
     private var sentVersion: Bool = false
@@ -15,6 +21,8 @@ class Peer {
     private let queue: DispatchQueue
     private let network: INetwork
 
+    var announcedLastBlockHeight: Int32 = 0
+    var localBestBlockHeight: Int32 = 0
     var connected: Bool = false
     var blockHashesSynced: Bool = false
     var synced: Bool = false
@@ -40,57 +48,7 @@ class Peer {
         connection.delegate = self
     }
 
-    func connect() {
-        connection.connect()
-    }
-
-    func disconnect() {
-        connection.disconnect()
-    }
-
-    func add(task: PeerTask) {
-        tasks.append(task)
-
-        task.delegate = self
-        task.requester = self
-
-        task.start()
-    }
-
-    func isRequestingInventory(hash: Data) -> Bool {
-        for task in tasks {
-            if task.isRequestingInventory(hash: hash) {
-                return true
-            }
-        }
-        return false
-    }
-
-    func handleRelayedTransaction(hash: Data) -> Bool {
-        for task in tasks {
-            if task.handleRelayedTransaction(hash: hash) {
-                return true
-            }
-        }
-        return false
-    }
-
-    func filterLoad(bloomFilter: BloomFilter) {
-        let filterLoadMessage = FilterLoadMessage(bloomFilter: bloomFilter)
-
-        log("--> FILTERLOAD: \(bloomFilter.elementsCount) item(s)")
-        connection.send(message: filterLoadMessage)
-    }
-
-    func sendMemoryPoolMessage() {
-        if !mempoolSent {
-            log("--> MEMPOOL")
-            connection.send(message: MemPoolMessage())
-            mempoolSent = true
-        }
-    }
-
-    private func sendVersionMessage() {
+    private func sendVersion() {
         let versionMessage = VersionMessage(
                 version: protocolVersion,
                 services: 0x00,
@@ -99,7 +57,7 @@ class Peer {
                 myAddress: NetworkAddress(services: 0x00, address: "::ffff:127.0.0.1", port: UInt16(connection.port)),
                 nonce: 0,
                 userAgent: "/WalletKit:0.1.0/",
-                startHeight: -1,
+                startHeight: localBestBlockHeight,
                 relay: false
         )
 
@@ -107,7 +65,7 @@ class Peer {
         connection.send(message: versionMessage)
     }
 
-    private func sendVerackMessage() {
+    private func sendVerack() {
         log("--> VERACK")
         connection.send(message: VerackMessage())
     }
@@ -131,14 +89,35 @@ class Peer {
 
     private func handle(message: VersionMessage) {
         log("<-- VERSION: \(message.version) --- \(message.userAgent?.value ?? "") --- \(ServiceFlags(rawValue: message.services)) -- \(String(describing: message.startHeight ?? 0))")
-
-        if !sentVerack {
-            sendVerackMessage()
-            sentVerack = true
+        do {
+            try validatePeerVersion(message: message)
+        } catch {
+            disconnect(error: error)
         }
 
-        if let startHeight = message.startHeight {
-            delegate?.peer(self, didReceiveBestBlockHeight: startHeight)
+        self.announcedLastBlockHeight = message.startHeight ?? 0
+
+        if !sentVerack {
+            sendVerack()
+            sentVerack = true
+        }
+    }
+
+    private func validatePeerVersion(message: VersionMessage) throws {
+        guard let startHeight = message.startHeight, startHeight > 0 else {
+            throw PeerError.peerBestBlockIsLessThanOne
+        }
+
+        guard startHeight >= localBestBlockHeight else {
+            throw PeerError.peerHasExpiredBlockChain(localHeight: localBestBlockHeight, peerHeight: startHeight)
+        }
+
+        guard message.hasBlockChain(network: network) else {
+            throw PeerError.peerNotFullNode
+        }
+
+        guard message.supportsBloomFilter(network: network) else {
+            throw PeerError.peerDoesNotSupportBloomFilter
         }
     }
 
@@ -238,16 +217,74 @@ class Peer {
 
 }
 
+extension Peer: IPeer {
+
+    func connect() {
+        connection.connect()
+    }
+
+    func disconnect(error: Error? = nil) {
+        connection.disconnect(error: error)
+    }
+
+    func add(task: PeerTask) {
+        tasks.append(task)
+
+        task.delegate = self
+        task.requester = self
+
+        task.start()
+    }
+
+    func isRequestingInventory(hash: Data) -> Bool {
+        for task in tasks {
+            if task.isRequestingInventory(hash: hash) {
+                return true
+            }
+        }
+        return false
+    }
+
+    func handleRelayedTransaction(hash: Data) -> Bool {
+        for task in tasks {
+            if task.handleRelayedTransaction(hash: hash) {
+                return true
+            }
+        }
+        return false
+    }
+
+    func filterLoad(bloomFilter: BloomFilter) {
+        let filterLoadMessage = FilterLoadMessage(bloomFilter: bloomFilter)
+
+        log("--> FILTERLOAD: \(bloomFilter.elementsCount) item(s)")
+        connection.send(message: filterLoadMessage)
+    }
+
+    func sendMempoolMessage() {
+        if !mempoolSent {
+            log("--> MEMPOOL")
+            connection.send(message: MemPoolMessage())
+            mempoolSent = true
+        }
+    }
+
+    func equalTo(_ other: IPeer?) -> Bool {
+        return self.host == other?.host
+    }
+
+}
+
 extension Peer: PeerConnectionDelegate {
 
     func connectionReadyForWrite(_ connection: PeerConnection) {
         if !sentVersion {
-            sendVersionMessage()
+            sendVersion()
             sentVersion = true
         }
     }
 
-    func connectionDidDisconnect(_ connection: PeerConnection, withError error: Bool) {
+    func connectionDidDisconnect(_ connection: PeerConnection, withError error: Error?) {
         connected = false
         delegate?.peerDidDisconnect(self, withError: error)
     }
@@ -272,6 +309,11 @@ extension Peer: IPeerTaskDelegate {
         if tasks.isEmpty {
             delegate?.peerReady(self)
         }
+    }
+
+    func handle(failedTask task: PeerTask, error: Error) {
+        log("Handling failed task: \(type(of: task))")
+        connection.disconnect(error: error)
     }
 
     func handle(merkleBlock: MerkleBlock) {
@@ -319,22 +361,4 @@ extension Peer: IPeerTaskRequester {
         connection.send(message: message)
     }
 
-}
-
-extension Peer: Equatable {
-    static func ==(lhs: Peer, rhs: Peer) -> Bool {
-        return lhs.host == rhs.host
-    }
-}
-
-protocol PeerDelegate: class {
-    func handle(_ peer: Peer, merkleBlock: MerkleBlock)
-    func peerReady(_ peer: Peer)
-    func peerDidConnect(_ peer: Peer)
-    func peerDidDisconnect(_ peer: Peer, withError error: Bool)
-
-    func peer(_ peer: Peer, didReceiveBestBlockHeight bestBlockHeight: Int32)
-    func peer(_ peer: Peer, didCompleteTask task: PeerTask)
-    func peer(_ peer: Peer, didReceiveAddresses addresses: [NetworkAddress])
-    func peer(_ peer: Peer, didReceiveInventoryItems items: [InventoryItem])
 }

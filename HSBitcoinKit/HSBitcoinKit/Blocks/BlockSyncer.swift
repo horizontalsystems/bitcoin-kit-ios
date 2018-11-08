@@ -3,6 +3,7 @@ import RealmSwift
 
 class BlockSyncer {
 
+    private let listener: BlockSyncerListener
     private let realmFactory: IRealmFactory
     private let network: INetwork
     private let transactionProcessor: ITransactionProcessor
@@ -13,7 +14,12 @@ class BlockSyncer {
     private let hashCheckpointThreshold: Int
     private var needToReDownload = false
 
-    init(realmFactory: IRealmFactory, network: INetwork,
+    var localBestBlockHeight: Int32 {
+        let height = realmFactory.realm.objects(Block.self).sorted(byKeyPath: "height").last?.height
+        return Int32(height ?? 0)
+    }
+
+    init(realmFactory: IRealmFactory, network: INetwork, listener: BlockSyncerListener,
          transactionProcessor: ITransactionProcessor, blockchain: IBlockchain, addressManager: IAddressManager, bloomFilterManager: IBloomFilterManager,
          hashCheckpointThreshold: Int = 100) {
         self.realmFactory = realmFactory
@@ -23,6 +29,7 @@ class BlockSyncer {
         self.addressManager = addressManager
         self.bloomFilterManager = bloomFilterManager
         self.hashCheckpointThreshold = hashCheckpointThreshold
+        self.listener = listener
 
         let realm = realmFactory.realm
         if realm.objects(Block.self).count == 0, let checkpointBlockHeader = network.checkpointBlock.header {
@@ -31,6 +38,8 @@ class BlockSyncer {
                 realm.add(checkpointBlock)
             }
         }
+
+        listener.initialBestBlockHeightUpdated(height: localBestBlockHeight)
     }
 
     // We need to clear block hashes when sync peer is disconnected
@@ -52,19 +61,7 @@ class BlockSyncer {
         let blocksToDelete = realm.objects(Block.self).filter(NSPredicate(format: "reversedHeaderHashHex IN %@", Array(blockReversedHashes)))
 
         try realm.write {
-            for block in blocksToDelete {
-                for transaction in block.transactions {
-                    for output in transaction.outputs {
-                        realm.delete(output)
-                    }
-                    for input in transaction.inputs {
-                        realm.delete(input)
-                    }
-                    realm.delete(transaction)
-                }
-            }
-
-            realm.delete(blocksToDelete)
+            blockchain.deleteBlocks(blocks: blocksToDelete, realm: realm)
         }
     }
 
@@ -83,7 +80,7 @@ extension BlockSyncer: IBlockSyncer {
 
             blockchain.handleFork(realm: realmFactory.realm)
         } catch {
-            print(error)
+            Logger.shared.log(self, "\(error)")
         }
     }
 
@@ -106,14 +103,14 @@ extension BlockSyncer: IBlockSyncer {
         prepareForDownload()
     }
 
-    func getBlockHashes() -> [Data] {
+    func getBlockHashes() -> [BlockHash] {
         let realm = realmFactory.realm
         let blockHashes = realm.objects(BlockHash.self).sorted(byKeyPath: "order")
 
-        return blockHashes.prefix(500).map { blockHash in blockHash.headerHash }
+        return blockHashes.prefix(500).map { BlockHash(value: $0) }
     }
 
-    func getBlockLocatorHashes() -> [Data] {
+    func getBlockLocatorHashes(peerLastBlockHeight: Int32) -> [Data] {
         let realm = realmFactory.realm
         var blockLocatorHashes = [Data]()
 
@@ -127,7 +124,9 @@ extension BlockSyncer: IBlockSyncer {
             }
         }
 
-        blockLocatorHashes.append(network.checkpointBlock.headerHash)
+
+        let checkPointBlock = realm.objects(Block.self).filter("height = %@", peerLastBlockHeight).first ?? network.checkpointBlock
+        blockLocatorHashes.append(checkPointBlock.headerHash)
 
         return blockLocatorHashes
     }
@@ -154,25 +153,17 @@ extension BlockSyncer: IBlockSyncer {
     func handle(merkleBlock: MerkleBlock) throws {
         let realm = realmFactory.realm
 
+        var block: Block!
         try realm.write {
-            var block: Block!
-            do {
-                block = try blockchain.connect(merkleBlock: merkleBlock, realm: realm)
-            } catch let error as BlockValidatorError {
-                if error != BlockValidatorError.noPreviousBlock {
-                    throw error
-                }
 
-                let height = realm.objects(BlockHash.self).filter("headerHash = %@", merkleBlock.headerHash).first?.height ?? 0
-                if height > 0 {
-                    block = blockchain.forceAdd(merkleBlock: merkleBlock, height: height, realm: realm)
-                } else {
-                    throw error
-                }
+            if let height = merkleBlock.height {
+                block = blockchain.forceAdd(merkleBlock: merkleBlock, height: height, realm: realm)
+            } else {
+                block = try blockchain.connect(merkleBlock: merkleBlock, realm: realm)
             }
 
             do {
-                try transactionProcessor.process(transactions: merkleBlock.transactions, inBlock: block, checkBloomFilter: !self.needToReDownload, realm: realm)
+                try transactionProcessor.process(transactions: merkleBlock.transactions, inBlock: block, skipCheckBloomFilter: self.needToReDownload, realm: realm)
             } catch _ as BloomFilterManager.BloomFilterExpired {
                 self.needToReDownload = true
             }
@@ -181,6 +172,8 @@ extension BlockSyncer: IBlockSyncer {
                 realm.delete(blockHash)
             }
         }
+
+        listener.currentBestBlockHeightUpdated(height: Int32(block.height))
     }
 
     func shouldRequestBlock(withHash hash: Data) -> Bool {

@@ -2,7 +2,6 @@ import XCTest
 import Cuckoo
 import HSHDWalletKit
 import RealmSwift
-import HSHDWalletKit
 @testable import HSBitcoinKit
 
 class AddressManagerTests: XCTestCase {

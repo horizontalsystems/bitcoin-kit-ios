@@ -65,6 +65,7 @@
 		11B35F02260D5A21CF0EA3B8 /* Factory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B3529A1731702724B0342D /* Factory.swift */; };
 		11B35F79192D8E7F80BEEC1C /* BlockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B3527FFC458AEFC035AC35 /* BlockTests.swift */; };
 		11B35FC6819CD5A9B94A85BF /* BitcoinMainNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35D44C0F5847D5B6EDEBC /* BitcoinMainNet.swift */; };
+		2FA5D024DF2A429D6606350F /* ProgressSyncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D859C070F9718CACF08F /* ProgressSyncer.swift */; };
 		2FA5D166F7AD6D1E7A81CB4D /* Blockchain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D05597A1DC332C67BDF7 /* Blockchain.swift */; };
 		2FA5D19E18DC7528778D26F0 /* PeerAddress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DDED90E11DEC3647B164 /* PeerAddress.swift */; };
 		2FA5D1EE5C8EF298CD8A6733 /* TransactionSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D880471F191DBCDAE574 /* TransactionSerializer.swift */; };
@@ -72,6 +73,7 @@
 		2FA5D26905936BB701998750 /* GetBlockHashesTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D65667DA8BFD91E91C8B /* GetBlockHashesTask.swift */; };
 		2FA5D2E6BA34E1A932C9C16B /* AddressManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D5A9656117A6FD41E814 /* AddressManager.swift */; };
 		2FA5D39FBC802B5EF03AD53A /* TransactionBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D11405173CD80A6B9904 /* TransactionBuilder.swift */; };
+		2FA5D443E5A428D1A60CD031 /* ProgressSyncerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D82EFF381CE6233790A9 /* ProgressSyncerTests.swift */; };
 		2FA5D4F27E10A609FF81950E /* UnknownMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D3F63860A15B55DC196E /* UnknownMessage.swift */; };
 		2FA5D56E3AE0E2E9817FC370 /* TransactionInputSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DCD21585D41C520DF764 /* TransactionInputSerializer.swift */; };
 		2FA5D599E444F6847B6E9A4C /* Peer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D5A744085AD28EFBB868 /* Peer.swift */; };
@@ -85,6 +87,7 @@
 		2FA5D89F0797F7444BF7B7E8 /* PeerManagementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D83F468DB29920CF7A99 /* PeerManagementTests.swift */; };
 		2FA5D9ED521660FA5EEF360E /* MerkleBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D5C9BB0E185AF72B9174 /* MerkleBlock.swift */; };
 		2FA5DB7F5BD8E25DCAF9AC83 /* PeerHostManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DF9ADB516A45C797889D /* PeerHostManagerTests.swift */; };
+		2FA5DBF35EDF66F6977BA032 /* PeerTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DEC11B1DA4DA336DBB28 /* PeerTimer.swift */; };
 		2FA5DC1C403D74796F4131EC /* InputSignerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DA9D7F78A26107F7209C /* InputSignerTests.swift */; };
 		2FA5DC27C4032E13E157A0D7 /* AddressConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D23A8EC7BB3569F51ABD /* AddressConverterTests.swift */; };
 		2FA5DC3D8DAD2FF85FB26C91 /* TransactionSyncerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D316DD8A722A5300002B /* TransactionSyncerTests.swift */; };
@@ -278,7 +281,9 @@
 		2FA5D5A9656117A6FD41E814 /* AddressManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddressManager.swift; sourceTree = "<group>"; };
 		2FA5D5C9BB0E185AF72B9174 /* MerkleBlock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MerkleBlock.swift; sourceTree = "<group>"; };
 		2FA5D65667DA8BFD91E91C8B /* GetBlockHashesTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetBlockHashesTask.swift; sourceTree = "<group>"; };
+		2FA5D82EFF381CE6233790A9 /* ProgressSyncerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressSyncerTests.swift; sourceTree = "<group>"; };
 		2FA5D83F468DB29920CF7A99 /* PeerManagementTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerManagementTests.swift; sourceTree = "<group>"; };
+		2FA5D859C070F9718CACF08F /* ProgressSyncer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressSyncer.swift; sourceTree = "<group>"; };
 		2FA5D880471F191DBCDAE574 /* TransactionSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionSerializer.swift; sourceTree = "<group>"; };
 		2FA5DA9D7F78A26107F7209C /* InputSignerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputSignerTests.swift; sourceTree = "<group>"; };
 		2FA5DADEB0FD09138FD308A1 /* HDPrivateKeyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HDPrivateKeyTests.swift; sourceTree = "<group>"; };
@@ -289,6 +294,7 @@
 		2FA5DDED90E11DEC3647B164 /* PeerAddress.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerAddress.swift; sourceTree = "<group>"; };
 		2FA5DE7E06652FCED7B288E7 /* BloomFilterManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BloomFilterManager.swift; sourceTree = "<group>"; };
 		2FA5DE9CAB1F15B04E2C54C9 /* HostDiscovery.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.swfit; path = HostDiscovery.swift; sourceTree = "<group>"; };
+		2FA5DEC11B1DA4DA336DBB28 /* PeerTimer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerTimer.swift; sourceTree = "<group>"; };
 		2FA5DEC34722F594F85688C0 /* TransactionOutputSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionOutputSerializer.swift; sourceTree = "<group>"; };
 		2FA5DEC678BF41F0D38095DD /* BlockchainTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockchainTests.swift; sourceTree = "<group>"; };
 		2FA5DF1470723462D2CF707B /* TransactionProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionProcessor.swift; sourceTree = "<group>"; };
@@ -473,6 +479,7 @@
 				2FA5D05597A1DC332C67BDF7 /* Blockchain.swift */,
 				11B35C07292793FCE3096D03 /* BlockSyncer.swift */,
 				58AAAC9FD7A9AD220E52F974 /* MerkleBlockValidator.swift */,
+				2FA5D859C070F9718CACF08F /* ProgressSyncer.swift */,
 			);
 			path = Blocks;
 			sourceTree = "<group>";
@@ -520,6 +527,7 @@
 				11B356D308DCF4BB33D9F488 /* ServiceFlags.swift */,
 				11B355C0072CA13ADBAC1351 /* VarInt.swift */,
 				11B35C47D552B7AC5EA8C463 /* VarString.swift */,
+				2FA5DEC11B1DA4DA336DBB28 /* PeerTimer.swift */,
 			);
 			path = PeerNetwork;
 			sourceTree = "<group>";
@@ -669,6 +677,7 @@
 				2FA5DEC678BF41F0D38095DD /* BlockchainTests.swift */,
 				11B352A955F667DC0C23CE1C /* BlockSyncerTests.swift */,
 				58AAA5EE018C74544938121F /* MerkleBlockValidatorTests.swift */,
+				2FA5D82EFF381CE6233790A9 /* ProgressSyncerTests.swift */,
 			);
 			path = Blocks;
 			sourceTree = "<group>";
@@ -1160,6 +1169,7 @@
 				58AAAE00FA79BB744B0EEA9C /* MerkleBlockValidatorTests.swift in Sources */,
 				2FA5DF1A340A352EEDBF41E6 /* BlockchainTests.swift in Sources */,
 				58AAA83A724E87945B3B2358 /* BTCApiSyncerTests.swift in Sources */,
+				2FA5D443E5A428D1A60CD031 /* ProgressSyncerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1294,6 +1304,8 @@
 				58AAA80E3D7A474D0BFA96E9 /* BtcComApi.swift in Sources */,
 				58AAA7912B48C0C21F50DBF2 /* BitcoinAddressSelector.swift in Sources */,
 				58AAAC2B5D2BA0B33514E44F /* BitcoinCashAddressSelector.swift in Sources */,
+				2FA5DBF35EDF66F6977BA032 /* PeerTimer.swift in Sources */,
+				2FA5D024DF2A429D6606350F /* ProgressSyncer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

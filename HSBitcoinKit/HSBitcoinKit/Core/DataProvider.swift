@@ -7,7 +7,6 @@ import HSCryptoKit
 
 class DataProvider {
     private let disposeBag = DisposeBag()
-    private var knownBestBlockHeight: Int = 0
 
     private let realmFactory: IRealmFactory
     private let addressManager: IAddressManager
@@ -62,7 +61,6 @@ class DataProvider {
     private func handleBlocks(changeset: RealmCollectionChange<Results<Block>>) {
         if case let .update(collection, deletions, insertions, _) = changeset, let block = collection.last, (!deletions.isEmpty || !insertions.isEmpty) {
             delegate?.lastBlockInfoUpdated(lastBlockInfo: blockInfo(fromBlock: block))
-            handleProgressUpdate(block: block)
         }
     }
 
@@ -70,24 +68,6 @@ class DataProvider {
         if case .update = changeset {
             delegate?.balanceUpdated(balance: balance)
         }
-    }
-
-    private func handleProgressUpdate(block: Block) {
-        let progress: Double!
-
-        if knownBestBlockHeight == 0 {
-            progress = 0
-        } else {
-            if knownBestBlockHeight < block.height {
-                knownBestBlockHeight = block.height
-            }
-
-            progress = knownBestBlockHeight == network.checkpointBlock.height
-                    ? 1
-                    : Double(block.height - network.checkpointBlock.height) / Double(knownBestBlockHeight - network.checkpointBlock.height)
-        }
-
-        delegate?.progressUpdated(progress: progress)
     }
 
     private var unspentOutputRealmResults: Results<TransactionOutput> {
@@ -226,15 +206,10 @@ extension DataProvider: IDataProvider {
 
 }
 
-extension DataProvider: BestBlockHeightDelegate {
+extension DataProvider: ProgressSyncerDelegate {
 
-    func bestBlockHeightReceived(height: Int32) {
-        if height > knownBestBlockHeight {
-            knownBestBlockHeight = Int(height)
-            if let lastBlock = blockRealmResults.last {
-                handleProgressUpdate(block: lastBlock)
-            }
-        }
+    func handleProgressUpdate(progress: Double) {
+        delegate?.progressUpdated(progress: progress)
     }
 
 }

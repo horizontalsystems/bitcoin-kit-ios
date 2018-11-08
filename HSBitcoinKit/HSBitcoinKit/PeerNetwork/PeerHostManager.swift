@@ -56,8 +56,8 @@ extension PeerHostManager: IPeerHostManager {
     }
 
     func hostDisconnected(host: String, withError error: Bool) {
-        localQueue.async {
-            self.hostsUsageQueue.sync {
+        localQueue.sync {
+            self.hostsUsageQueue.async {
                 self.usedHosts.removeAll(where: { connectedHost in connectedHost == host })
             }
 

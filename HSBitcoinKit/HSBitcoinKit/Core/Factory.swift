@@ -24,7 +24,7 @@ class Factory: IFactory {
         return TransactionOutput(withValue: value, index: index, lockingScript: script, type: type, address: address, keyHash: keyHash, publicKey: publicKey)
     }
 
-    func peer(withHost host: String, network: INetwork) -> Peer {
+    func peer(withHost host: String, network: INetwork) -> IPeer {
         return Peer(host: host, network: network)
     }
 

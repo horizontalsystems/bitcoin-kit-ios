@@ -31,7 +31,7 @@ class TransactionSyncerTests: XCTestCase {
         mockBloomFilterManager = MockIBloomFilterManager()
 
         stub(mockTransactionProcessor) { mock in
-            when(mock.process(transactions: any(), inBlock: any(), checkBloomFilter: any(), realm: any())).thenDoNothing()
+            when(mock.process(transactions: any(), inBlock: any(), skipCheckBloomFilter: any(), realm: any())).thenDoNothing()
         }
         stub(mockAddressManager) { mock in
             when(mock.fillGap()).thenDoNothing()
@@ -74,7 +74,7 @@ class TransactionSyncerTests: XCTestCase {
     func testHandle_emptyTransactions() {
         syncer.handle(transactions: [])
 
-        verify(mockTransactionProcessor, never()).process(transactions: any(), inBlock: any(), checkBloomFilter: any(), realm: any())
+        verify(mockTransactionProcessor, never()).process(transactions: any(), inBlock: any(), skipCheckBloomFilter: any(), realm: any())
         verify(mockAddressManager, never()).fillGap()
         verify(mockBloomFilterManager, never()).regenerateBloomFilter()
     }
@@ -83,11 +83,11 @@ class TransactionSyncerTests: XCTestCase {
         let transactions = [TestData.p2pkhTransaction]
 
         stub(mockTransactionProcessor) { mock in
-            when(mock.process(transactions: equal(to: transactions), inBlock: any(), checkBloomFilter: any(), realm: any())).thenThrow(BloomFilterManager.BloomFilterExpired())
+            when(mock.process(transactions: equal(to: transactions), inBlock: any(), skipCheckBloomFilter: any(), realm: any())).thenThrow(BloomFilterManager.BloomFilterExpired())
         }
 
         syncer.handle(transactions: transactions)
-        verify(mockTransactionProcessor).process(transactions: equal(to: transactions), inBlock: equal(to: nil), checkBloomFilter: equal(to: true), realm: any())
+        verify(mockTransactionProcessor).process(transactions: equal(to: transactions), inBlock: equal(to: nil), skipCheckBloomFilter: equal(to: false), realm: any())
         verify(mockAddressManager).fillGap()
         verify(mockBloomFilterManager).regenerateBloomFilter()
     }
@@ -96,11 +96,11 @@ class TransactionSyncerTests: XCTestCase {
         let transactions = [TestData.p2pkhTransaction]
 
         stub(mockTransactionProcessor) { mock in
-            when(mock.process(transactions: equal(to: transactions), inBlock: any(), checkBloomFilter: equal(to: true), realm: any())).thenDoNothing()
+            when(mock.process(transactions: equal(to: transactions), inBlock: any(), skipCheckBloomFilter: equal(to: false), realm: any())).thenDoNothing()
         }
 
         syncer.handle(transactions: transactions)
-        verify(mockTransactionProcessor).process(transactions: equal(to: transactions), inBlock: equal(to: nil), checkBloomFilter: equal(to: true), realm: any())
+        verify(mockTransactionProcessor).process(transactions: equal(to: transactions), inBlock: equal(to: nil), skipCheckBloomFilter: equal(to: false), realm: any())
         verify(mockAddressManager, never()).fillGap()
         verify(mockBloomFilterManager, never()).regenerateBloomFilter()
     }

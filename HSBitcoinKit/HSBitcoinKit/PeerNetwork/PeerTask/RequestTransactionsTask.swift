@@ -37,3 +37,11 @@ class RequestTransactionsTask: PeerTask {
     }
 
 }
+
+extension RequestTransactionsTask: Equatable {
+
+    static func ==(lhs: RequestTransactionsTask, rhs: RequestTransactionsTask) -> Bool {
+        return lhs.hashes == rhs.hashes
+    }
+
+}

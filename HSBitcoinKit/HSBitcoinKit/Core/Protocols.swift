@@ -66,16 +66,53 @@ protocol IBloomFilterManager {
     func regenerateBloomFilter()
 }
 
-protocol IPeerGroup {
+protocol IPeerGroup: class {
     var blockSyncer: IBlockSyncer? { get set }
     var transactionSyncer: ITransactionSyncer? { get set }
-    var bestBlockHeightDelegate: BestBlockHeightDelegate? { get set }
     func start()
     func stop()
     func send(transaction: Transaction)
 }
 
-protocol BestBlockHeightDelegate: class {
+protocol IPeer: class {
+    var delegate: PeerDelegate? { get set }
+    var localBestBlockHeight: Int32 { get set }
+    var announcedLastBlockHeight: Int32 { get }
+    var host: String { get }
+    var logName: String { get }
+    var ready: Bool { get }
+    var synced: Bool { get set }
+    var blockHashesSynced: Bool { get set }
+    func connect()
+    func disconnect(error: Error?)
+    func add(task: PeerTask)
+    func isRequestingInventory(hash: Data) -> Bool
+    func handleRelayedTransaction(hash: Data) -> Bool
+    func filterLoad(bloomFilter: BloomFilter)
+    func sendMempoolMessage()
+    func equalTo(_ peer: IPeer?) -> Bool
+}
+
+protocol PeerDelegate: class {
+    func handle(_ peer: IPeer, merkleBlock: MerkleBlock)
+    func peerReady(_ peer: IPeer)
+    func peerDidConnect(_ peer: IPeer)
+    func peerDidDisconnect(_ peer: IPeer, withError error: Error?)
+
+    func peer(_ peer: IPeer, didCompleteTask task: PeerTask)
+    func peer(_ peer: IPeer, didReceiveAddresses addresses: [NetworkAddress])
+    func peer(_ peer: IPeer, didReceiveInventoryItems items: [InventoryItem])
+}
+
+protocol IPeerTaskRequester: class {
+    func getBlocks(hashes: [Data])
+    func getData(items: [InventoryItem])
+    func sendTransactionInventory(hash: Data)
+    func send(transaction: Transaction)
+    func ping(nonce: UInt64)
+}
+
+protocol BestBlockHeightListener: class {
     func bestBlockHeightReceived(height: Int32)
 }
 
@@ -91,7 +128,7 @@ protocol IFactory {
     func block(withHeader header: BlockHeader, previousBlock: Block) -> Block
     func block(withHeader header: BlockHeader, height: Int) -> Block
     func blockHash(withHeaderHash headerHash: Data, height: Int) -> BlockHash
-    func peer(withHost host: String, network: INetwork) -> Peer
+    func peer(withHost host: String, network: INetwork) -> IPeer
     func transaction(version: Int, inputs: [TransactionInput], outputs: [TransactionOutput], lockTime: Int) -> Transaction
     func transactionInput(withPreviousOutputTxReversedHex previousOutputTxReversedHex: String, previousOutputIndex: Int, script: Data, sequence: Int) -> TransactionInput
     func transactionOutput(withValue value: Int, index: Int, lockingScript script: Data, type: ScriptType, address: String?, keyHash: Data?, publicKey: PublicKey?) throws -> TransactionOutput
@@ -122,7 +159,7 @@ protocol IScriptExtractor: class {
 }
 
 protocol ITransactionProcessor {
-    func process(transactions: [Transaction], inBlock block: Block?, checkBloomFilter: Bool, realm: Realm) throws
+    func process(transactions: [Transaction], inBlock block: Block?, skipCheckBloomFilter: Bool, realm: Realm) throws
     func process(transaction: Transaction, realm: Realm)
 }
 
@@ -154,6 +191,7 @@ protocol IBlockchain {
     func connect(merkleBlock: MerkleBlock, realm: Realm) throws -> Block
     func forceAdd(merkleBlock: MerkleBlock, height: Int, realm: Realm) -> Block
     func handleFork(realm: Realm)
+    func deleteBlocks(blocks: Results<Block>, realm: Realm)
 }
 
 protocol IInputSigner {
@@ -181,16 +219,30 @@ protocol IUnspentOutputProvider {
 }
 
 protocol IBlockSyncer: class {
+    var localBestBlockHeight: Int32 { get }
     func prepareForDownload()
     func downloadStarted()
     func downloadIterationCompleted()
     func downloadCompleted()
     func downloadFailed()
-    func getBlockHashes() -> [Data]
-    func getBlockLocatorHashes() -> [Data]
+    func getBlockHashes() -> [BlockHash]
+    func getBlockLocatorHashes(peerLastBlockHeight: Int32) -> [Data]
     func add(blockHashes: [Data])
     func handle(merkleBlock: MerkleBlock) throws
     func shouldRequestBlock(withHash hash: Data) -> Bool
+}
+
+protocol BlockSyncerListener: class {
+    func initialBestBlockHeightUpdated(height: Int32)
+    func currentBestBlockHeightUpdated(height: Int32)
+}
+
+protocol IProgressSyncer: class {
+    var delegate: ProgressSyncerDelegate? { get set }
+}
+
+protocol ProgressSyncerDelegate: class {
+    func handleProgressUpdate(progress: Double)
 }
 
 protocol IDataProvider {
@@ -238,6 +290,8 @@ protocol INetwork: class {
 }
 
 extension INetwork {
+    var serviceFullNode: UInt64 { return 1 }
+    var bloomFilter: Int32 { return 70000 }
     var maxTargetBits: Int { return 0x1d00ffff }
 
     var targetTimeSpan: Int { return 14 * 24 * 60 * 60 }                // Seconds in Bitcoin cycle

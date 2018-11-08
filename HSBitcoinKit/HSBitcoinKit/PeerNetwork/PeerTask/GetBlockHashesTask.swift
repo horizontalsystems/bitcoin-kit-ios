@@ -45,3 +45,11 @@ class GetBlockHashesTask: PeerTask {
         return false
     }
 }
+
+extension GetBlockHashesTask: Equatable {
+
+    static func ==(lhs: GetBlockHashesTask, rhs: GetBlockHashesTask) -> Bool {
+        return lhs.blockLocatorHashes == rhs.blockLocatorHashes
+    }
+
+}

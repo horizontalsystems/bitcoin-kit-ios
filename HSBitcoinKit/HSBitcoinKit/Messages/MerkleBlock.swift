@@ -4,6 +4,7 @@ import HSCryptoKit
 class MerkleBlock {
     let header: BlockHeader
     let transactionHashes: [Data]
+    var height: Int? = nil
     var transactions: [Transaction]
 
     lazy var headerHash: Data = {
