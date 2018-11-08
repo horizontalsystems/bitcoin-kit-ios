@@ -1,6 +1,7 @@
 import BigInt
 import RxSwift
 import RealmSwift
+import Alamofire
 
 enum BlockValidatorType { case header, bits, legacy, testNet, EDA, DAA }
 
@@ -33,10 +34,15 @@ protocol IHDWallet {
     func privateKeyData(index: Int, external: Bool) throws -> Data
 }
 
+protocol IReachabilityManager {
+    var subject: PublishSubject<NetworkReachabilityManager.NetworkReachabilityStatus> { get set }
+    func reachable() -> Bool
+}
+
 protocol IPeerHostManager {
     var delegate: PeerHostManagerDelegate? { get set }
     var peerHost: String? { get }
-    func hostDisconnected(host: String, withError error: Bool)
+    func hostDisconnected(host: String, withError error: Error?, networkReachable: Bool)
     func addHosts(hosts: [String])
 }
 

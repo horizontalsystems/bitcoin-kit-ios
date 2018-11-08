@@ -71,9 +71,17 @@ class Peer {
     }
 
     private func handle(message: IMessage) {
+        if let versionMessage = message as? VersionMessage {
+            handle(message: versionMessage)
+        } else if let _ = message as? VerackMessage {
+            handleVerackMessage()
+        }
+
+        guard self.connected else {
+            return
+        }
+
         switch message {
-        case let versionMessage as VersionMessage: handle(message: versionMessage)
-        case _ as VerackMessage: handleVerackMessage()
         case let addressMessage as AddressMessage: handle(message: addressMessage)
         case let inventoryMessage as InventoryMessage: handle(message: inventoryMessage)
         case let getDataMessage as GetDataMessage: handle(message: getDataMessage)
@@ -224,7 +232,7 @@ extension Peer: IPeer {
     }
 
     func disconnect(error: Error? = nil) {
-        connection.disconnect(error: error)
+        self.connection.disconnect(error: error)
     }
 
     func add(task: PeerTask) {

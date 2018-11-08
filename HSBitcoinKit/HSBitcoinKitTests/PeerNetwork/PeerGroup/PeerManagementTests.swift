@@ -2,6 +2,8 @@ import XCTest
 import Cuckoo
 import RealmSwift
 import HSHDWalletKit
+import RxSwift
+import Alamofire
 @testable import HSBitcoinKit
 
 class PeerManagementTests: XCTestCase {
@@ -9,12 +11,14 @@ class PeerManagementTests: XCTestCase {
     private var mockFactory: MockIFactory!
     private var mockNetwork: MockINetwork!
     private var mockBestBlockHeightListener: MockBestBlockHeightListener!
+    private var mockReachabilityManager: MockIReachabilityManager!
     private var mockPeerHostManager: MockIPeerHostManager!
     private var mockBloomFilterManager: MockIBloomFilterManager!
 
     private var peerGroup: PeerGroup!
 
     private var peers: [String: MockIPeer]!
+    private var subject: PublishSubject<NetworkReachabilityManager.NetworkReachabilityStatus>!
     private var publicKey: PublicKey!
 
     override func setUp() {
@@ -23,9 +27,11 @@ class PeerManagementTests: XCTestCase {
         mockFactory = MockIFactory()
         mockNetwork = MockINetwork()
         mockBestBlockHeightListener = MockBestBlockHeightListener()
+        mockReachabilityManager = MockIReachabilityManager()
         mockPeerHostManager = MockIPeerHostManager()
         mockBloomFilterManager = MockIBloomFilterManager()
         peers = [String: MockIPeer]()
+        subject = PublishSubject<NetworkReachabilityManager.NetworkReachabilityStatus>()
 
         for host in 0..<4 {
             let hostString = String(host)
@@ -64,10 +70,14 @@ class PeerManagementTests: XCTestCase {
         stub(mockBestBlockHeightListener) { mock in
             when(mock.bestBlockHeightReceived(height: any())).thenDoNothing()
         }
+        stub(mockReachabilityManager) { mock in
+            when(mock.subject.get).thenReturn(subject)
+            when(mock.reachable()).thenReturn(true)
+        }
         stub(mockPeerHostManager) { mock in
             when(mock.delegate.set(any())).thenDoNothing()
             when(mock.peerHost.get).thenReturn("0").thenReturn("1").thenReturn("2").thenReturn("3")
-            when(mock.hostDisconnected(host: any(), withError: any())).thenDoNothing()
+            when(mock.hostDisconnected(host: any(), withError: any(), networkReachable: any())).thenDoNothing()
         }
         stub(mockBloomFilterManager) { mock in
             when(mock.delegate.set(any())).thenDoNothing()
@@ -75,7 +85,7 @@ class PeerManagementTests: XCTestCase {
         }
 
         peerGroup = PeerGroup(
-                factory: mockFactory, network: mockNetwork, listener: mockBestBlockHeightListener, peerHostManager: mockPeerHostManager, bloomFilterManager: mockBloomFilterManager, peerCount: 3,
+                factory: mockFactory, network: mockNetwork, listener: mockBestBlockHeightListener, reachabilityManager: mockReachabilityManager, peerHostManager: mockPeerHostManager, bloomFilterManager: mockBloomFilterManager, peerCount: 3,
                 localQueue: DispatchQueue.main, syncPeerQueue: DispatchQueue.main, inventoryQueue: DispatchQueue.main
         )
     }
@@ -83,10 +93,14 @@ class PeerManagementTests: XCTestCase {
     override func tearDown() {
         mockFactory = nil
         mockNetwork = nil
+        mockBestBlockHeightListener = nil
+        mockReachabilityManager = nil
         mockPeerHostManager = nil
         mockBloomFilterManager = nil
         peerGroup = nil
+
         peers = nil
+        subject = nil
         publicKey = nil
 
         super.tearDown()
