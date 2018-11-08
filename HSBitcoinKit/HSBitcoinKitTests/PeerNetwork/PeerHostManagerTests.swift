@@ -118,7 +118,7 @@ class PeerHostManagerTests:XCTestCase {
             realm.add(peerAddress)
         }
 
-        manager.hostDisconnected(host: peerAddress.ip, withError: false)
+        manager.hostDisconnected(host: peerAddress.ip, withError: nil, networkReachable: true)
         waitForMainQueue(queue: localQueue)
         waitForMainQueue()
         XCTAssertEqual(peerAddress.score, 1)
@@ -131,10 +131,23 @@ class PeerHostManagerTests:XCTestCase {
             realm.add(peerAddress)
         }
 
-        manager.hostDisconnected(host: peerAddress.ip, withError: true)
+        manager.hostDisconnected(host: peerAddress.ip, withError: PeerConnection.PeerConnectionError.connectionClosedByPeer, networkReachable: true)
         waitForMainQueue(queue: localQueue)
         waitForMainQueue()
         XCTAssertEqual(realm.objects(PeerAddress.self).count, 0)
+    }
+
+    func testHostDisconnected_WithError_networkNotReachable() {
+        let peerAddress = PeerAddress(ip: "192.168.0.1", score: 0)
+
+        try! realm.write {
+            realm.add(peerAddress)
+        }
+
+        manager.hostDisconnected(host: peerAddress.ip, withError: PeerConnection.PeerConnectionError.connectionClosedByPeer, networkReachable: false)
+        waitForMainQueue(queue: localQueue)
+        waitForMainQueue()
+        XCTAssertEqual(peerAddress.score, 1)
     }
 
     func testHostDisconnected_ShouldFreeHost() {
@@ -146,7 +159,7 @@ class PeerHostManagerTests:XCTestCase {
         let host = manager.peerHost
         waitForMainQueue(queue: localQueue)
         waitForMainQueue()
-        manager.hostDisconnected(host: host!, withError: false)
+        manager.hostDisconnected(host: host!, withError: nil, networkReachable: true)
         waitForMainQueue(queue: localQueue)
         waitForMainQueue()
         let host2 = manager.peerHost
@@ -156,7 +169,7 @@ class PeerHostManagerTests:XCTestCase {
     }
 
     func testHostDisconnected_HostNotFound() {
-        manager.hostDisconnected(host: "192.168.0.1", withError: false)
+        manager.hostDisconnected(host: "192.168.0.1", withError: nil, networkReachable: true)
         let host = manager.peerHost
         waitForMainQueue(queue: localQueue)
         waitForMainQueue()

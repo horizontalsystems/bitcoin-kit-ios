@@ -24,6 +24,7 @@ class PeerConnection: NSObject, StreamDelegate {
     private var peerTimer: PeerTimer
 
     private var packets: Data = Data()
+    var connected: Bool = false
 
     var logName: String {
         let index = abs(host.hash) % WordList.english.count
@@ -86,6 +87,7 @@ class PeerConnection: NSObject, StreamDelegate {
         readStream = nil
         writeStream = nil
         runLoop = nil
+        connected = false
 
         delegate?.connectionDidDisconnect(self, withError: error)
 
@@ -98,6 +100,7 @@ class PeerConnection: NSObject, StreamDelegate {
             switch eventCode {
             case .openCompleted:
                 log("CONNECTION ESTABLISHED")
+                connected = true
                 break
             case .hasBytesAvailable:
                 readAvailableBytes(stream: stream)
@@ -105,11 +108,15 @@ class PeerConnection: NSObject, StreamDelegate {
                 break
             case .errorOccurred:
                 log("IN ERROR OCCURRED")
-                disconnect(error: PeerConnectionError.connectionClosedWithUnknownError)
+                if connected {
+                    // If connected, then error is related not to peer, but to network
+                    disconnect()
+                } else {
+                    disconnect(error: PeerConnectionError.connectionClosedWithUnknownError)
+                }
             case .endEncountered:
                 log("IN CLOSED")
                 disconnect(error: PeerConnectionError.connectionClosedByPeer)
-                disconnect()
             default:
                 break
             }

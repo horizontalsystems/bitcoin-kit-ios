@@ -55,7 +55,7 @@ extension PeerHostManager: IPeerHostManager {
         return peerAddress?.ip
     }
 
-    func hostDisconnected(host: String, withError error: Bool) {
+    func hostDisconnected(host: String, withError error: Error?, networkReachable: Bool) {
         localQueue.sync {
             self.hostsUsageQueue.async {
                 self.usedHosts.removeAll(where: { connectedHost in connectedHost == host })
@@ -65,7 +65,7 @@ extension PeerHostManager: IPeerHostManager {
             if let peerAddress = realm.objects(PeerAddress.self).filter("ip = %@", host).first {
                 do {
                     try realm.write {
-                        if error {
+                        if networkReachable && error != nil {
                             realm.delete(peerAddress)
                         } else {
                             peerAddress.score += 1

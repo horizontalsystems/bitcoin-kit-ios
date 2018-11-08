@@ -22,6 +22,7 @@ public class BitcoinKit {
 
     private let hdWallet: IHDWallet
 
+    private let reachabilityManager: ReachabilityManager
     private let peerHostManager: IPeerHostManager
     private let stateManager: IStateManager
     private let initialSyncApi: IInitialSyncApi
@@ -108,13 +109,15 @@ public class BitcoinKit {
 //        initialSyncApi = BtcComApi(network: network)
         initialSyncApi = BcoinApi(network: network)
 
+        reachabilityManager = ReachabilityManager()
+
         peerHostManager = PeerHostManager(network: network, realmFactory: realmFactory)
 
         factory = Factory()
         progressSyncer = ProgressSyncer()
 
         bloomFilterManager = BloomFilterManager(realmFactory: realmFactory)
-        peerGroup = PeerGroup(factory: factory, network: network, listener: progressSyncer, peerHostManager: peerHostManager, bloomFilterManager: bloomFilterManager)
+        peerGroup = PeerGroup(factory: factory, network: network, listener: progressSyncer, reachabilityManager: reachabilityManager, peerHostManager: peerHostManager, bloomFilterManager: bloomFilterManager)
 
         addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, addressConverter: addressConverter)
         initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, api: initialSyncApi, addressManager: addressManager, addressSelector: addressSelector, factory: factory, peerGroup: peerGroup, network: network)
@@ -155,6 +158,8 @@ extension BitcoinKit {
     }
 
     public func clear() throws {
+        peerGroup.stop()
+
         let realm = realmFactory.realm
 
         try realm.write {
