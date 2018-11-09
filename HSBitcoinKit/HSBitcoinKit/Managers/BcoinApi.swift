@@ -9,11 +9,11 @@ class BcoinApi {
         let url: String
 
         switch network {
-        case is BitcoinMainNet: url = "https://bcoin.grouvi.im"
-        case is BitcoinTestNet: url = "http://bcoin.grouvi.org"
-        case is BitcoinCashMainNet: url = "https://bcash.grouvi.im"
-        case is BitcoinCashTestNet: url = "http://bcash.grouvi.org"
-        default: url = "http://bcoin.grouvi.org"
+        case is BitcoinMainNet: url = "https://btc.horizontalsystems.xyz"
+        case is BitcoinTestNet: url = "http://btc-testnet.horizontalsystems.xyz"
+        case is BitcoinCashMainNet: url = "https://bch.horizontalsystems.xyz"
+        case is BitcoinCashTestNet: url = "http://bch-testnet.horizontalsystems.xyz"
+        default: url = "http://btc-testnet.horizontalsystems.xyz"
         }
 
         apiManager = ApiManager(apiUrl: url)
