@@ -1,10 +1,14 @@
 import Foundation
 
-class RelayTransactionTask: PeerTask {
+class SendTransactionTask: PeerTask {
 
     var transaction: Transaction
 
     init(transaction: Transaction) {
+        // Transaction is managed by Realm. We need to serialize and deserialize it in order to make it non-managed.
+        let data = TransactionSerializer.serialize(transaction: transaction)
+        let transaction = TransactionSerializer.deserialize(data: data)
+
         self.transaction = transaction
     }
 
@@ -18,15 +22,6 @@ class RelayTransactionTask: PeerTask {
         }
 
         requester?.send(transaction: transaction)
-
-        return true
-    }
-
-    override func handleRelayedTransaction(hash: Data) -> Bool {
-        guard hash == transaction.dataHash else {
-            return false
-        }
-
         delegate?.handle(completedTask: self)
 
         return true
@@ -34,9 +29,9 @@ class RelayTransactionTask: PeerTask {
 
 }
 
-extension RelayTransactionTask: Equatable {
+extension SendTransactionTask: Equatable {
 
-    static func ==(lhs: RelayTransactionTask, rhs: RelayTransactionTask) -> Bool {
+    static func ==(lhs: SendTransactionTask, rhs: SendTransactionTask) -> Bool {
         return lhs.transaction.reversedHashHex == rhs.transaction.reversedHashHex
     }
 

@@ -77,7 +77,20 @@ protocol IPeerGroup: class {
     var transactionSyncer: ITransactionSyncer? { get set }
     func start()
     func stop()
-    func send(transaction: Transaction)
+    func sendPendingTransactions()
+}
+
+protocol IPeers: class {
+    var syncPeer: IPeer? { get set }
+    func add(peer: IPeer)
+    func peerConnected(peer: IPeer)
+    func peerDisconnected(peer: IPeer)
+    func disconnectAll()
+    func totalPeersCount() -> Int
+    func someReadyPeers() -> [IPeer]
+    func connected() -> [IPeer]
+    func nonSyncedPeer() -> IPeer?
+    func syncPeerIs(peer: IPeer) -> Bool
 }
 
 protocol IPeer: class {
@@ -93,7 +106,6 @@ protocol IPeer: class {
     func disconnect(error: Error?)
     func add(task: PeerTask)
     func isRequestingInventory(hash: Data) -> Bool
-    func handleRelayedTransaction(hash: Data) -> Bool
     func filterLoad(bloomFilter: BloomFilter)
     func sendMempoolMessage()
     func equalTo(_ peer: IPeer?) -> Bool
@@ -178,8 +190,9 @@ protocol ITransactionLinker {
 }
 
 protocol ITransactionSyncer: class {
-    func getNonSentTransactions() -> [Transaction]
+    func pendingTransactions() -> [Transaction]
     func handle(transactions: [Transaction])
+    func handle(sentTransaction transaction: Transaction)
     func shouldRequestTransaction(hash: Data) -> Bool
 }
 

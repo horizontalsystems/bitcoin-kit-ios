@@ -20,21 +20,15 @@ class PeerGroup {
     private var started: Bool = false
     private var _started: Bool = false
 
-    private var connectedPeers: [IPeer] = []
-    private var connectingPeerHosts: [IPeer] = []
-    private var syncPeer: IPeer?
+    private var peers: IPeers
 
-    private var fetchedBlocks: [MerkleBlock] = []
-    private var pendingTransactions: [Transaction] = []
-
-    private let localQueue: DispatchQueue
-    private let syncPeerQueue: DispatchQueue
+    private let peersQueue: DispatchQueue
     private let inventoryQueue: DispatchQueue
 
     init(factory: IFactory, network: INetwork, listener: BestBlockHeightListener, reachabilityManager: IReachabilityManager,
-         peerHostManager: IPeerHostManager, bloomFilterManager: IBloomFilterManager, peerCount: Int = 10,
-         localQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Local Queue", qos: .userInitiated),
-         syncPeerQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Sync Peer Queue", qos: .userInitiated),
+         peerHostManager: IPeerHostManager, bloomFilterManager: IBloomFilterManager,
+         peerCount: Int = 10, peers: IPeers = Peers(),
+         peersQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Local Queue", qos: .userInitiated),
          inventoryQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Inventory Queue", qos: .background)) {
         self.factory = factory
         self.network = network
@@ -43,9 +37,9 @@ class PeerGroup {
         self.peerHostManager = peerHostManager
         self.bloomFilterManager = bloomFilterManager
         self.peerCount = peerCount
+        self.peers = peers
 
-        self.localQueue = localQueue
-        self.syncPeerQueue = syncPeerQueue
+        self.peersQueue = peersQueue
         self.inventoryQueue = inventoryQueue
 
         self.peerHostManager.delegate = self
@@ -57,17 +51,17 @@ class PeerGroup {
     }
 
     private func connectPeersIfRequired() {
-        localQueue.async {
+        peersQueue.async {
             guard self.started, self.reachabilityManager.reachable() else {
                 return
             }
 
-            for _ in (self.connectedPeers.count + self.connectingPeerHosts.count)..<self.peerCount {
+            for _ in self.peers.totalPeersCount()..<self.peerCount {
                 if let host = self.peerHostManager.peerHost {
                     let peer = self.factory.peer(withHost: host, network: self.network)
-                    self.connectingPeerHosts.append(peer)
-                    peer.localBestBlockHeight = self.blockSyncer?.localBestBlockHeight ?? 0
                     peer.delegate = self
+                    peer.localBestBlockHeight = self.blockSyncer?.localBestBlockHeight ?? 0
+                    self.peers.add(peer: peer)
                     peer.connect()
                 } else {
                     break
@@ -76,40 +70,24 @@ class PeerGroup {
         }
     }
 
-    private func dispatchTasks(forReadyPeer peer: IPeer? = nil) {
-        localQueue.async {
-            if let peer = peer {
-                self.handleReady(peer: peer)
-            } else {
-                for peer in self.connectedPeers.filter({ $0.ready }) {
-                    self.handleReady(peer: peer)
+    private func handlePendingTransactions(forReadyPeer peer: IPeer? = nil) {
+        peersQueue.async {
+            guard self.peers.connected().count > 0, self.peers.nonSyncedPeer() == nil else {
+                return
+            }
+
+            for peer in self.peers.someReadyPeers() {
+                let pendingTransactions = self.transactionSyncer?.pendingTransactions() ?? []
+                for transaction in pendingTransactions {
+                    peer.add(task: SendTransactionTask(transaction: transaction))
                 }
             }
         }
     }
 
-    // Must be called only from DispatchTasks or localQueue thread
-    private func handleReady(peer: IPeer) {
-        guard peer.ready else {
-            return
-        }
-
-        syncPeerQueue.async {
-            if peer.equalTo(self.syncPeer) {
-                self.downloadBlockchain()
-                return
-            }
-        }
-
-        for transaction in pendingTransactions {
-            peer.add(task: RelayTransactionTask(transaction: transaction))
-        }
-        pendingTransactions = []
-    }
-
     private func downloadBlockchain() {
-        syncPeerQueue.async {
-            guard let syncPeer = self.syncPeer, syncPeer.ready else {
+        peersQueue.async {
+            guard let syncPeer = self.peers.syncPeer, syncPeer.ready else {
                 return
             }
 
@@ -128,42 +106,33 @@ class PeerGroup {
             if syncPeer.synced {
                 self.blockSyncer?.downloadCompleted()
                 syncPeer.sendMempoolMessage()
-                self.syncPeer = nil
+                self.peers.syncPeer = nil
                 self.assignNextSyncPeer()
             }
         }
     }
 
     private func assignNextSyncPeer() {
-        syncPeerQueue.async {
-            guard self.syncPeer == nil else {
+        peersQueue.async {
+            guard self.peers.syncPeer == nil else {
                 return
             }
 
-            self.localQueue.async {
-                if let nonSyncedPeer = self.connectedPeers.first(where: { !$0.synced }) {
-                    Logger.shared.log(self, "Setting sync peer to \(nonSyncedPeer.logName)")
-                    self.syncPeer = nonSyncedPeer
-                    self.blockSyncer?.downloadStarted()
-                    self.bestBlockHeightListener.bestBlockHeightReceived(height: nonSyncedPeer.announcedLastBlockHeight)
-                    self.downloadBlockchain()
-                }
+            if let nonSyncedPeer = self.peers.nonSyncedPeer() {
+                Logger.shared.log(self, "Setting sync peer to \(nonSyncedPeer.logName)")
+                self.peers.syncPeer = nonSyncedPeer
+                self.blockSyncer?.downloadStarted()
+                self.bestBlockHeightListener.bestBlockHeightReceived(height: nonSyncedPeer.announcedLastBlockHeight)
+                self.downloadBlockchain()
+            } else {
+                self.handlePendingTransactions()
             }
         }
     }
 
     private func isRequestingInventory(hash: Data) -> Bool {
-        for peer in connectedPeers {
+        for peer in self.peers.connected() {
             if peer.isRequestingInventory(hash: hash) {
-                return true
-            }
-        }
-        return false
-    }
-
-    private func handleRelayedTransaction(hash: Data) -> Bool {
-        for peer in connectedPeers {
-            if peer.handleRelayedTransaction(hash: hash) {
                 return true
             }
         }
@@ -187,17 +156,8 @@ class PeerGroup {
         transactionSyncer?.handle(transactions: transactions)
     }
 
-    private func handle(relayedTransaction transaction: Transaction) {
-        // todo: temp solution for setting tx status. It should be handled in more efficient way
-        transactionSyncer?.handle(transactions: [transaction])
-    }
-
-    private func addNonSentTransactions() {
-        if let transactions = transactionSyncer?.getNonSentTransactions() {
-            for transaction in transactions {
-                send(transaction: transaction)
-            }
-        }
+    private func handle(sentTransaction transaction: Transaction) {
+        transactionSyncer?.handle(sentTransaction: transaction)
     }
 
     private func _start() {
@@ -207,7 +167,6 @@ class PeerGroup {
 
         _started = true
 
-        addNonSentTransactions()
         blockSyncer?.prepareForDownload()
         connectPeersIfRequired()
     }
@@ -215,13 +174,7 @@ class PeerGroup {
     private func _stop() {
         _started = false
 
-        for peer in connectedPeers {
-            peer.disconnect(error: nil)
-        }
-
-        for peer in connectingPeerHosts {
-            peer.disconnect(error: nil)
-        }
+        self.peers.disconnectAll()
     }
 
 }
@@ -258,15 +211,8 @@ extension PeerGroup: IPeerGroup {
         _stop()
     }
 
-    func send(transaction: Transaction) {
-        // Transaction is managed by Realm. We need to serialize and deserialize it in order to make it non-managed.
-        let data = TransactionSerializer.serialize(transaction: transaction)
-        let transaction = TransactionSerializer.deserialize(data: data)
-
-        localQueue.async {
-            self.pendingTransactions.append(transaction)
-            self.dispatchTasks()
-        }
+    func sendPendingTransactions() {
+        self.handlePendingTransactions()
     }
 
 }
@@ -275,7 +221,7 @@ extension PeerGroup: PeerDelegate {
 
     func peerReady(_ peer: IPeer) {
         Logger.shared.log(self, "Handling peerReady: \(peer.logName)")
-        self.dispatchTasks(forReadyPeer: peer)
+        self.downloadBlockchain()
     }
 
     func peerDidConnect(_ peer: IPeer) {
@@ -283,11 +229,8 @@ extension PeerGroup: PeerDelegate {
             peer.filterLoad(bloomFilter: bloomFilter)
         }
 
-        localQueue.async {
-            if let index = self.connectingPeerHosts.index(where: { $0 === peer }) {
-                self.connectingPeerHosts.remove(at: index)
-            }
-            self.connectedPeers.append(peer)
+        peersQueue.async {
+            self.peers.peerConnected(peer: peer)
         }
 
         self.assignNextSyncPeer()
@@ -300,18 +243,14 @@ extension PeerGroup: PeerDelegate {
 
         peerHostManager.hostDisconnected(host: peer.host, withError: error, networkReachable: reachabilityManager.reachable())
 
-        syncPeerQueue.async {
-            if peer.equalTo(self.syncPeer) {
+        peersQueue.async {
+            if self.peers.syncPeerIs(peer: peer) {
                 self.blockSyncer?.downloadFailed()
-                self.syncPeer = nil
+                self.peers.syncPeer = nil
                 self.assignNextSyncPeer()
             }
-        }
 
-        localQueue.async {
-            if let index = self.connectedPeers.index(where: { $0.equalTo(peer) }) {
-                self.connectedPeers.remove(at: index)
-            }
+            self.peers.peerDisconnected(peer: peer)
         }
 
         connectPeersIfRequired()
@@ -329,8 +268,8 @@ extension PeerGroup: PeerDelegate {
         case let task as RequestTransactionsTask:
             handle(transactions: task.transactions)
 
-        case let task as RelayTransactionTask:
-            handle(relayedTransaction: task.transaction)
+        case let task as SendTransactionTask:
+            handle(sentTransaction: task.transaction)
 
         default: ()
 
@@ -364,11 +303,7 @@ extension PeerGroup: PeerDelegate {
                     }
                 case .transaction:
                     if !self.isRequestingInventory(hash: item.hash) {
-                        if self.handleRelayedTransaction(hash: item.hash) {
-                            continue
-                        }
-
-                        if let transactionSyncer = self.transactionSyncer, transactionSyncer.shouldRequestTransaction(hash: item.hash) {
+                        if self.transactionSyncer?.shouldRequestTransaction(hash: item.hash) ?? false {
                             transactionHashes.append(item.hash)
                         }
                     }
@@ -400,7 +335,7 @@ extension PeerGroup: PeerHostManagerDelegate {
 extension PeerGroup: BloomFilterManagerDelegate {
 
     func bloomFilterUpdated(bloomFilter: BloomFilter) {
-        for peer in self.connectedPeers {
+        for peer in self.peers.connected() {
             peer.filterLoad(bloomFilter: bloomFilter)
         }
     }

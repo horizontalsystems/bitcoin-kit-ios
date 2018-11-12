@@ -66,7 +66,7 @@ class TransactionSyncerTests: XCTestCase {
             realm.add(newTransaction)
         }
 
-        let transactions = syncer.getNonSentTransactions()
+        let transactions = syncer.pendingTransactions()
         XCTAssertEqual(transactions.count, 1)
         XCTAssertEqual(transactions.first!.dataHash, newTransaction.dataHash)
     }

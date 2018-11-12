@@ -253,15 +253,6 @@ extension Peer: IPeer {
         return false
     }
 
-    func handleRelayedTransaction(hash: Data) -> Bool {
-        for task in tasks {
-            if task.handleRelayedTransaction(hash: hash) {
-                return true
-            }
-        }
-        return false
-    }
-
     func filterLoad(bloomFilter: BloomFilter) {
         let filterLoadMessage = FilterLoadMessage(bloomFilter: bloomFilter)
 

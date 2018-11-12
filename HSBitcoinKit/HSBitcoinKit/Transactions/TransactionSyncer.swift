@@ -6,6 +6,9 @@ class TransactionSyncer {
     private let transactionProcessor: ITransactionProcessor
     private let addressManager: IAddressManager
     private let bloomFilterManager: IBloomFilterManager
+    private let maxRetriesCount: Int = 3
+    private let retriesPeriod: Double = 60 // seconds
+    private let totalRetriesPeriod: Double = 60 * 60 * 24 // seconds
 
     init(realmFactory: IRealmFactory, processor: ITransactionProcessor, addressManager: IAddressManager, bloomFilterManager: IBloomFilterManager) {
         self.realmFactory = realmFactory
@@ -18,10 +21,33 @@ class TransactionSyncer {
 
 extension TransactionSyncer: ITransactionSyncer {
 
-    func getNonSentTransactions() -> [Transaction] {
+    func pendingTransactions() -> [Transaction] {
         let realm = realmFactory.realm
-        let nonSentTransactions = realm.objects(Transaction.self).filter("status = %@", TransactionStatus.new.rawValue)
-        return Array(nonSentTransactions)
+
+        let pendingTransactions = realm.objects(Transaction.self).filter("status = %@", TransactionStatus.new.rawValue).filter { transaction in
+            if let sentTransaction = realm.objects(SentTransaction.self).filter("reversedHashHex = %@", transaction.reversedHashHex).first {
+                return sentTransaction.retriesCount < self.maxRetriesCount &&
+                        sentTransaction.lastSendTime < CACurrentMediaTime() + self.retriesPeriod &&
+                        sentTransaction.firstSendTime < CACurrentMediaTime() + self.totalRetriesPeriod
+            } else {
+                return true
+            }
+        }
+
+        return Array(pendingTransactions)
+    }
+
+    func handle(sentTransaction transaction: Transaction) {
+        let realm = realmFactory.realm
+
+        try? realm.write {
+            if let sentTransaction = realm.objects(SentTransaction.self).filter("reversedHashHex = %@", transaction.reversedHashHex).first {
+                sentTransaction.lastSendTime = CACurrentMediaTime()
+                sentTransaction.retriesCount = sentTransaction.retriesCount + 1
+            } else {
+                realm.add(SentTransaction(reversedHashHex: transaction.reversedHashHex))
+            }
+        }
     }
 
     func handle(transactions: [Transaction]) {
@@ -48,7 +74,7 @@ extension TransactionSyncer: ITransactionSyncer {
 
     func shouldRequestTransaction(hash: Data) -> Bool {
         let realm = realmFactory.realm
-        return realm.objects(Transaction.self).filter("reversedHashHex = %@", hash.reversedHex).isEmpty
+        return realm.objects(Transaction.self).filter("reversedHashHex = %@ AND status = %@", hash.reversedHex, TransactionStatus.relayed.rawValue).isEmpty
     }
 
 }

@@ -36,7 +36,7 @@ class TransactionCreatorTests: XCTestCase {
             when(mock.process(transaction: any(), realm: any())).thenDoNothing()
         }
         stub(mockPeerGroup) { mock in
-            when(mock.send(transaction: any())).thenDoNothing()
+            when(mock.sendPendingTransactions()).thenDoNothing()
         }
         stub(mockAddressManager) { mock in
             when(mock.changePublicKey()).thenReturn(TestData.pubKey())
@@ -64,7 +64,7 @@ class TransactionCreatorTests: XCTestCase {
             return
         }
 
-        verify(mockPeerGroup).send(transaction: equal(to: transaction))
+        verify(mockPeerGroup).sendPendingTransactions()
         verify(mockTransactionProcessor).process(transaction: equal(to: transaction), realm: any())
     }
 
@@ -82,7 +82,7 @@ class TransactionCreatorTests: XCTestCase {
             XCTFail("Unexpected exception!")
         }
 
-        verify(mockPeerGroup, never()).send(transaction: any())
+        verify(mockPeerGroup, never()).sendPendingTransactions()
         verify(mockTransactionProcessor, never()).process(transaction: any(), realm: any())
     }
 
