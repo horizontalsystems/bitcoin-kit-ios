@@ -21,7 +21,7 @@ class PeerHostManagerDelegateTests: PeerGroupTests {
     func testNewHostsAdded() {
         peerGroup.start()
 
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.totalPeersCount()).thenReturn(1)
         }
 

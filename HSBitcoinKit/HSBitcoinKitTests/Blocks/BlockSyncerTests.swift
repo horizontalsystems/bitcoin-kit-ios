@@ -70,6 +70,8 @@ class BlockSyncerTests: XCTestCase {
                 hashCheckpointThreshold: 100
         )
 
+        verify(mockBlockSyncerListener).initialBestBlockHeightUpdated(height: equal(to: Int32(TestData.checkpointBlock.height)))
+
         checkpointBlock = realm.objects(Block.self).filter("reversedHeaderHashHex = %@", TestData.checkpointBlock.reversedHeaderHashHex).first!
         newBlock2 = TestData.secondBlock
         newBlock1 = newBlock2.previousBlock!
@@ -127,6 +129,18 @@ class BlockSyncerTests: XCTestCase {
         verify(mockBlockchain).deleteBlocks(blocks: equal(to: realm.objects(Block.self), equalWhen: equalFunction), realm: any())
 
         XCTAssertEqual(realm.objects(BlockHash.self).count, 0)
+    }
+
+    func testLocalBestBlockHeight() {
+        let secondBlock = TestData.secondBlock
+        secondBlock.previousBlock!.previousBlock = realm.objects(Block.self).first
+
+        try! realm.write {
+            realm.add(secondBlock)
+        }
+
+        XCTAssertEqual(realm.objects(Block.self).count, 3)
+        XCTAssertEqual(syncer.localBestBlockHeight, Int32(secondBlock.height))
     }
 
     func testPrepareForDownload_PreValidatedBlocks() {
@@ -297,6 +311,7 @@ class BlockSyncerTests: XCTestCase {
         try! syncer.handle(merkleBlock: merkleBlock)
         verify(mockBlockchain).connect(merkleBlock: equal(to: merkleBlock), realm: any())
         verify(mockTransactionProcessor).process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: equal(to: false), realm: any())
+        verify(mockBlockSyncerListener).currentBestBlockHeightUpdated(height: Int32(block.height))
         XCTAssertEqual(realm.objects(BlockHash.self).count, 0)
         verifyNeedToReDownloadSet(to: false)
     }

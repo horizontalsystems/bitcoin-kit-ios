@@ -29,7 +29,7 @@ class PeerDelegateTests: PeerGroupTests {
             when(mock.getBlockHashes()).thenReturn(blockHashes)
             when(mock.getBlockLocatorHashes(peerLastBlockHeight: equal(to: 0))).thenReturn(hashes)
         }
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.syncPeer.get).thenReturn(peer)
         }
         stub(peer) { mock in
@@ -50,7 +50,7 @@ class PeerDelegateTests: PeerGroupTests {
     func testPeerReady_PeerIsSyncNotPeer() {
         let peer = peers["0"]!
 
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.syncPeer.get).thenReturn(nil)
         }
 
@@ -64,7 +64,7 @@ class PeerDelegateTests: PeerGroupTests {
     func testPeerReady_PeerNotReady() {
         let peer = peers["0"]!
 
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.syncPeer.get).thenReturn(peer)
         }
         stub(peer) { mock in
@@ -87,7 +87,7 @@ class PeerDelegateTests: PeerGroupTests {
             when(mock.getBlockHashes()).thenReturn(blockHashes)
             when(mock.getBlockLocatorHashes(peerLastBlockHeight: equal(to: 0))).thenReturn([])
         }
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.syncPeer.get).thenReturn(peer)
         }
         stub(peer) { mock in
@@ -113,7 +113,7 @@ class PeerDelegateTests: PeerGroupTests {
             when(mock.getBlockHashes()).thenReturn([])
             when(mock.getBlockLocatorHashes(peerLastBlockHeight: equal(to: 0))).thenReturn(hashes)
         }
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.syncPeer.get).thenReturn(peer)
         }
         stub(peer) { mock in
@@ -139,7 +139,7 @@ class PeerDelegateTests: PeerGroupTests {
             when(mock.getBlockHashes()).thenReturn([])
             when(mock.getBlockLocatorHashes(peerLastBlockHeight: equal(to: 0))).thenReturn([])
         }
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.syncPeer.get).thenReturn(peer)
             when(mock.syncPeer.set(any())).thenDoNothing()
         }
@@ -158,7 +158,7 @@ class PeerDelegateTests: PeerGroupTests {
 
         verify(mockBlockSyncer).downloadCompleted()
         verify(peer).sendMempoolMessage()
-        verify(mockPeers).syncPeer.set(isNil())
+        verify(mockPeerManager).syncPeer.set(isNil())
     }
 
     func testPeerReady_Synced_AnotherPeerIsNotSynced() {
@@ -168,7 +168,7 @@ class PeerDelegateTests: PeerGroupTests {
             when(mock.getBlockHashes()).thenReturn([])
             when(mock.getBlockLocatorHashes(peerLastBlockHeight: equal(to: 0))).thenReturn([])
         }
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.syncPeer.get).thenReturn(peer)
             when(mock.syncPeer.set(any())).thenDoNothing()
         }
@@ -186,12 +186,12 @@ class PeerDelegateTests: PeerGroupTests {
 
         verify(mockBlockSyncer).downloadCompleted()
         verify(peer).sendMempoolMessage()
-        verify(mockPeers).syncPeer.set(isNil())
+        verify(mockPeerManager).syncPeer.set(isNil())
 
         // Here a block which sets another syncPeer is left enqueued
         let peer2 = peers["1"]!
-        reset(mockPeers)
-        stub(mockPeers) { mock in
+        reset(mockPeerManager)
+        stub(mockPeerManager) { mock in
             when(mock.syncPeer.get).thenReturn(nil)
             when(mock.syncPeer.set(any())).thenDoNothing()
             when(mock.nonSyncedPeer()).thenReturn(peer2)
@@ -199,7 +199,7 @@ class PeerDelegateTests: PeerGroupTests {
 
         waitForMainQueue()
 
-        verify(mockPeers).syncPeer.set(equal(to: peer2, equalWhen: { $0!.host == $1!.host }))
+        verify(mockPeerManager).syncPeer.set(equal(to: peer2, equalWhen: { $0!.host == $1!.host }))
 
         // Here a block which starts synchronization of newly set syncPeer is left enqueued
         waitForMainQueue()
@@ -212,7 +212,7 @@ class PeerDelegateTests: PeerGroupTests {
         stub(mockBloomFilterManager) { mock in
             when(mock.bloomFilter.get).thenReturn(bloomFilter)
         }
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.syncPeer.get).thenReturn(nil)
             when(mock.syncPeer.set(any())).thenDoNothing()
             when(mock.nonSyncedPeer()).thenReturn(peer)
@@ -228,8 +228,7 @@ class PeerDelegateTests: PeerGroupTests {
         waitForMainQueue()
 
         verify(peer).filterLoad(bloomFilter: equal(to: bloomFilter, equalWhen: { $0.filter == $1.filter }))
-        verify(mockPeers).peerConnected(peer: equal(to: peer, equalWhen: { $0.host == $1.host }))
-        verify(mockPeers).syncPeer.set(equal(to: peer, equalWhen: { $0!.host == $1!.host }))
+        verify(mockPeerManager).syncPeer.set(equal(to: peer, equalWhen: { $0!.host == $1!.host }))
         verify(mockBlockSyncer).downloadStarted()
         verify(mockBestBlockHeightListener).bestBlockHeightReceived(height: equal(to: 0))
 
@@ -237,7 +236,7 @@ class PeerDelegateTests: PeerGroupTests {
         stub(mockBlockSyncer) { mock in
             when(mock.getBlockHashes()).thenReturn([])
         }
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.syncPeer.get).thenReturn(peer)
         }
         stub(peer) { mock in
@@ -272,7 +271,7 @@ class PeerDelegateTests: PeerGroupTests {
         stub(mockBloomFilterManager) { mock in
             when(mock.bloomFilter.get).thenReturn(nil)
         }
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.syncPeer.get).thenReturn(peer)
             when(mock.connected()).thenReturn([peer])
             when(mock.someReadyPeers()).thenReturn([peer])
@@ -283,8 +282,7 @@ class PeerDelegateTests: PeerGroupTests {
         waitForMainQueue()
         waitForMainQueue()
 
-        verify(mockPeers).peerConnected(peer: equal(to: peer, equalWhen: { $0.host == $1.host }))
-        verify(mockPeers, never()).syncPeer.set(any())
+        verify(mockPeerManager, never()).syncPeer.set(any())
         verify(mockBlockSyncer, never()).downloadStarted()
         verify(mockBestBlockHeightListener, never()).bestBlockHeightReceived(height: equal(to: 0))
         verify(mockTransactionSyncer, never()).pendingTransactions()
@@ -296,7 +294,7 @@ class PeerDelegateTests: PeerGroupTests {
         stub(mockBloomFilterManager) { mock in
             when(mock.bloomFilter.get).thenReturn(nil)
         }
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.syncPeer.get).thenReturn(nil)
             when(mock.connected()).thenReturn([peer])
             when(mock.someReadyPeers()).thenReturn([peer])
@@ -306,8 +304,7 @@ class PeerDelegateTests: PeerGroupTests {
         delegate.peerDidConnect(peer)
         waitForMainQueue()
 
-        verify(mockPeers).peerConnected(peer: equal(to: peer, equalWhen: { $0.host == $1.host }))
-        verify(mockPeers, never()).syncPeer.set(any())
+        verify(mockPeerManager, never()).syncPeer.set(any())
         verify(mockBlockSyncer, never()).downloadStarted()
         verify(mockBestBlockHeightListener, never()).bestBlockHeightReceived(height: equal(to: 0))
 
@@ -328,10 +325,9 @@ class PeerDelegateTests: PeerGroupTests {
         stub(mockReachabilityManager) { mock in
             when(mock.reachable()).thenReturn(true)
         }
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.syncPeer.set(any())).thenDoNothing()
             when(mock.syncPeerIs(peer: any())).thenReturn(true)
-            when(mock.peerDisconnected(peer: any())).thenDoNothing()
         }
         stub(mockPeerHostManager) { mock in
             when(mock.hostDisconnected(host: any(), withError: any(), networkReachable: any())).thenDoNothing()
@@ -347,15 +343,14 @@ class PeerDelegateTests: PeerGroupTests {
 
         verify(mockPeerHostManager).hostDisconnected(host: equal(to: peer.host), withError: isNil(), networkReachable: equal(to: true))
         verify(mockBlockSyncer).downloadFailed()
-        verify(mockPeers).syncPeer.set(isNil())
-        verify(mockPeers).peerDisconnected(peer: equal(to: peer, equalWhen: { $0.host == $1.host }))
+        verify(mockPeerManager).syncPeer.set(isNil())
 
         // Here two blocks are left enqueued:
         // - which sets a syncPeer
         // - which connects missing peers if exist
         let peer2 = peers["1"]!
-        reset(mockPeers)
-        stub(mockPeers) { mock in
+        reset(mockPeerManager)
+        stub(mockPeerManager) { mock in
             when(mock.syncPeer.get).thenReturn(nil)
             when(mock.syncPeer.set(any())).thenDoNothing()
             when(mock.nonSyncedPeer()).thenReturn(peer2)
@@ -365,7 +360,7 @@ class PeerDelegateTests: PeerGroupTests {
 
         waitForMainQueue()
 
-        verify(mockPeers).syncPeer.set(equal(to: peer2, equalWhen: { $0!.host == $1!.host }))
+        verify(mockPeerManager).syncPeer.set(equal(to: peer2, equalWhen: { $0!.host == $1!.host }))
         verify(mockPeerHostManager).peerHost.get
 
         // Here a block which starts synchronization of newly set syncPeer is left enqueued
@@ -379,9 +374,8 @@ class PeerDelegateTests: PeerGroupTests {
         stub(mockReachabilityManager) { mock in
             when(mock.reachable()).thenReturn(true)
         }
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.syncPeerIs(peer: any())).thenReturn(false)
-            when(mock.peerDisconnected(peer: any())).thenDoNothing()
         }
         stub(mockPeerHostManager) { mock in
             when(mock.hostDisconnected(host: any(), withError: any(), networkReachable: any())).thenDoNothing()
@@ -394,18 +388,17 @@ class PeerDelegateTests: PeerGroupTests {
 
         verify(mockPeerHostManager).hostDisconnected(host: equal(to: peer.host), withError: isNil(), networkReachable: equal(to: true))
         verify(mockBlockSyncer, never()).downloadFailed()
-        verify(mockPeers, never()).syncPeer.set(any())
-        verify(mockPeers).peerDisconnected(peer: equal(to: peer, equalWhen: { $0.host == $1.host }))
+        verify(mockPeerManager, never()).syncPeer.set(any())
 
         // Here only one block is left enqueued:
         // - which connects missing peers if exist
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.totalPeersCount()).thenReturn(1)
         }
 
         waitForMainQueue()
 
-        verify(mockPeers, never()).syncPeer.set(any())
+        verify(mockPeerManager, never()).syncPeer.set(any())
         verify(mockPeerHostManager).peerHost.get
 
         // Here a block which starts synchronization of newly set syncPeer is left enqueued
@@ -419,9 +412,8 @@ class PeerDelegateTests: PeerGroupTests {
         stub(mockReachabilityManager) { mock in
             when(mock.reachable()).thenReturn(false)
         }
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.syncPeerIs(peer: any())).thenReturn(false)
-            when(mock.peerDisconnected(peer: any())).thenDoNothing()
         }
         stub(mockPeerHostManager) { mock in
             when(mock.hostDisconnected(host: any(), withError: any(), networkReachable: any())).thenDoNothing()
@@ -443,9 +435,8 @@ class PeerDelegateTests: PeerGroupTests {
         stub(mockReachabilityManager) { mock in
             when(mock.reachable()).thenReturn(false)
         }
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.syncPeerIs(peer: any())).thenReturn(false)
-            when(mock.peerDisconnected(peer: any())).thenDoNothing()
         }
         stub(mockPeerHostManager) { mock in
             when(mock.hostDisconnected(host: any(), withError: any(), networkReachable: any())).thenDoNothing()
@@ -585,7 +576,7 @@ class PeerDelegateTests: PeerGroupTests {
         stub(mockTransactionSyncer) { mock in
             when(mock.shouldRequestTransaction(hash: any())).thenReturn(true)
         }
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.connected()).thenReturn([peer])
         }
         stub(peer) { mock in
@@ -605,8 +596,8 @@ class PeerDelegateTests: PeerGroupTests {
 
         // Here a block which sets another syncPeer is left enqueued
         let peer2 = peers["1"]!
-        reset(mockPeers)
-        stub(mockPeers) { mock in
+        reset(mockPeerManager)
+        stub(mockPeerManager) { mock in
             when(mock.syncPeer.get).thenReturn(nil)
             when(mock.syncPeer.set(any())).thenDoNothing()
             when(mock.nonSyncedPeer()).thenReturn(peer2)
@@ -614,7 +605,7 @@ class PeerDelegateTests: PeerGroupTests {
 
         waitForMainQueue()
 
-        verify(mockPeers).syncPeer.set(equal(to: peer2, equalWhen: { $0!.host == $1!.host }))
+        verify(mockPeerManager).syncPeer.set(equal(to: peer2, equalWhen: { $0!.host == $1!.host }))
 
         // Here a block which starts synchronization of newly set syncPeer is left enqueued
         waitForMainQueue()
@@ -636,7 +627,7 @@ class PeerDelegateTests: PeerGroupTests {
 
         verify(peer, never()).synced.set(equal(to: false))
         verify(peer, never()).blockHashesSynced.set(equal(to: false))
-        verify(mockPeers, never()).syncPeer.set(any())
+        verify(mockPeerManager, never()).syncPeer.set(any())
     }
 
     func testPeerDidReceiveInventoryItem_TransactionExists() {
@@ -649,7 +640,7 @@ class PeerDelegateTests: PeerGroupTests {
         stub(mockTransactionSyncer) { mock in
             when(mock.shouldRequestTransaction(hash: any())).thenReturn(false)
         }
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.connected()).thenReturn([peer])
         }
         stub(peer) { mock in
@@ -672,7 +663,7 @@ class PeerDelegateTests: PeerGroupTests {
         stub(mockTransactionSyncer) { mock in
             when(mock.shouldRequestTransaction(hash: any())).thenReturn(true)
         }
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.connected()).thenReturn([peer])
         }
         stub(peer) { mock in

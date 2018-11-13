@@ -116,7 +116,7 @@ public class BitcoinKit {
         factory = Factory()
         progressSyncer = ProgressSyncer()
 
-        bloomFilterManager = BloomFilterManager(realmFactory: realmFactory)
+        bloomFilterManager = BloomFilterManager(realmFactory: realmFactory, factory: factory)
         peerGroup = PeerGroup(factory: factory, network: network, listener: progressSyncer, reachabilityManager: reachabilityManager, peerHostManager: peerHostManager, bloomFilterManager: bloomFilterManager)
 
         addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, addressConverter: addressConverter)

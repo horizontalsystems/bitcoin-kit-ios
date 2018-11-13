@@ -80,11 +80,9 @@ protocol IPeerGroup: class {
     func sendPendingTransactions()
 }
 
-protocol IPeers: class {
+protocol IPeerManager: class {
     var syncPeer: IPeer? { get set }
     func add(peer: IPeer)
-    func peerConnected(peer: IPeer)
-    func peerDisconnected(peer: IPeer)
     func disconnectAll()
     func totalPeersCount() -> Int
     func someReadyPeers() -> [IPeer]
@@ -100,6 +98,7 @@ protocol IPeer: class {
     var host: String { get }
     var logName: String { get }
     var ready: Bool { get }
+    var connected: Bool { get }
     var synced: Bool { get set }
     var blockHashesSynced: Bool { get set }
     func connect()
@@ -150,6 +149,7 @@ protocol IFactory {
     func transaction(version: Int, inputs: [TransactionInput], outputs: [TransactionOutput], lockTime: Int) -> Transaction
     func transactionInput(withPreviousOutputTxReversedHex previousOutputTxReversedHex: String, previousOutputIndex: Int, script: Data, sequence: Int) -> TransactionInput
     func transactionOutput(withValue value: Int, index: Int, lockingScript script: Data, type: ScriptType, address: String?, keyHash: Data?, publicKey: PublicKey?) throws -> TransactionOutput
+    func bloomFilter(withElements: [Data]) -> BloomFilter
 }
 
 protocol IInitialSyncer {

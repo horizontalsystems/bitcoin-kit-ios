@@ -22,7 +22,7 @@ class BloomFilterManagerDelegateTests: PeerGroupTests {
         let peer = peers["0"]!
         let bloomFilter = BloomFilter(elements: [Data(from: 10000)])
 
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.connected()).thenReturn([peer])
         }
         stub(peer) { mock in

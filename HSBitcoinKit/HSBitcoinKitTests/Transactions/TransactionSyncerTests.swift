@@ -10,6 +10,10 @@ class TransactionSyncerTests: XCTestCase {
     private var mockAddressManager: MockIAddressManager!
     private var mockBloomFilterManager: MockIBloomFilterManager!
 
+    private var maxRetriesCount: Int!
+    private var retriesPeriod: Double!
+    private var totalRetriesPeriod: Double!
+
     private var realm: Realm!
     private var syncer: TransactionSyncer!
 
@@ -40,7 +44,13 @@ class TransactionSyncerTests: XCTestCase {
             when(mock.regenerateBloomFilter()).thenDoNothing()
         }
 
-        syncer = TransactionSyncer(realmFactory: mockRealmFactory, processor: mockTransactionProcessor, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager)
+        maxRetriesCount = 3
+        retriesPeriod = 60
+        totalRetriesPeriod = 60 * 60 * 24
+
+        syncer = TransactionSyncer(
+                realmFactory: mockRealmFactory, processor: mockTransactionProcessor, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager,
+                maxRetriesCount: maxRetriesCount, retriesPeriod: retriesPeriod, totalRetriesPeriod: totalRetriesPeriod)
     }
 
     override func tearDown() {
@@ -49,26 +59,119 @@ class TransactionSyncerTests: XCTestCase {
         mockAddressManager = nil
         mockBloomFilterManager = nil
 
+        maxRetriesCount = nil
+        retriesPeriod = nil
+        totalRetriesPeriod = nil
+
         realm = nil
         syncer = nil
 
         super.tearDown()
     }
 
-    func testNonSentTransactions() {
+    func testPendingTransactions() {
         let relayedTransaction = TestData.p2pkhTransaction
         let newTransaction = TestData.p2wpkhTransaction
+        let newSentTransaction = TestData.p2pkTransaction
+        let sentTransaction = SentTransaction(reversedHashHex: newSentTransaction.reversedHashHex)
         relayedTransaction.status = .relayed
         newTransaction.status = .new
+        newSentTransaction.status = .new
+        sentTransaction.lastSendTime = CACurrentMediaTime() - retriesPeriod - 1
 
         try! realm.write {
             realm.add(relayedTransaction)
             realm.add(newTransaction)
+            realm.add(newSentTransaction)
+            realm.add(sentTransaction)
         }
 
-        let transactions = syncer.pendingTransactions()
-        XCTAssertEqual(transactions.count, 1)
+        var transactions = syncer.pendingTransactions()
+        XCTAssertEqual(transactions.count, 2)
         XCTAssertEqual(transactions.first!.dataHash, newTransaction.dataHash)
+        XCTAssertEqual(transactions.last!.dataHash, newSentTransaction.dataHash)
+
+        try! realm.write {
+            realm.delete(newTransaction)
+            // sentTransaction retriesCount has exceeded
+            sentTransaction.retriesCount = maxRetriesCount
+        }
+
+        transactions = syncer.pendingTransactions()
+        XCTAssertEqual(transactions.count, 0)
+
+        try! realm.write {
+            sentTransaction.retriesCount = 0
+            // sentTransaction retriesPeriod has not elapsed
+            sentTransaction.lastSendTime = CACurrentMediaTime()
+        }
+
+        transactions = syncer.pendingTransactions()
+        XCTAssertEqual(transactions.count, 0)
+
+        try! realm.write {
+            sentTransaction.lastSendTime = CACurrentMediaTime() - retriesPeriod - 1
+            // sentTransaction totalRetriesPeriod has elapsed
+            sentTransaction.firstSendTime = CACurrentMediaTime() - totalRetriesPeriod - 1
+        }
+
+        transactions = syncer.pendingTransactions()
+        XCTAssertEqual(transactions.count, 0)
+    }
+
+    func testHandleSentTransaction() {
+        let transaction = TestData.p2pkhTransaction
+        transaction.status = .new
+
+        try! realm.write {
+            realm.add(transaction)
+        }
+
+        syncer.handle(sentTransaction: transaction)
+
+        let sentTransaction = realm.objects(SentTransaction.self).last!
+        XCTAssertEqual(sentTransaction.reversedHashHex, transaction.reversedHashHex)
+        XCTAssertEqual(sentTransaction.retriesCount, 0)
+        XCTAssertLessThanOrEqual(abs(CACurrentMediaTime() - sentTransaction.firstSendTime), 0.1)
+        XCTAssertLessThanOrEqual(abs(CACurrentMediaTime() - sentTransaction.lastSendTime), 0.1)
+    }
+
+    func testHandleSentTransaction_SentTransactionExists() {
+        let transaction = TestData.p2pkhTransaction
+        transaction.status = .new
+        let sentTransaction = SentTransaction(reversedHashHex: transaction.reversedHashHex)
+        sentTransaction.firstSendTime = sentTransaction.firstSendTime - 100
+        sentTransaction.lastSendTime = sentTransaction.lastSendTime - 100
+
+        try! realm.write {
+            realm.add(transaction)
+            realm.add(sentTransaction)
+        }
+
+        syncer.handle(sentTransaction: transaction)
+
+        XCTAssertEqual(sentTransaction.reversedHashHex, transaction.reversedHashHex)
+        XCTAssertEqual(sentTransaction.retriesCount, 1)
+        XCTAssertLessThanOrEqual(abs(CACurrentMediaTime() - sentTransaction.firstSendTime - 100), 0.1)
+        XCTAssertLessThanOrEqual(abs(CACurrentMediaTime() - sentTransaction.lastSendTime), 0.1)
+    }
+
+    func testHandleSentTransaction_transactionNotExists() {
+        let transaction = TestData.p2pkhTransaction
+        transaction.status = .new
+
+        syncer.handle(sentTransaction: transaction)
+
+        XCTAssertEqual(realm.objects(SentTransaction.self).count, 0)
+    }
+
+    func testHandleSentTransaction_transactionIsNotNew() {
+        let transaction = TestData.p2pkhTransaction
+        transaction.status = .relayed
+
+        syncer.handle(sentTransaction: transaction)
+
+        XCTAssertEqual(realm.objects(SentTransaction.self).count, 0)
     }
 
     func testHandle_emptyTransactions() {

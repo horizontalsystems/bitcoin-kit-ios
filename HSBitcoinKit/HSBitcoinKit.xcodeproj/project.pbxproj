@@ -75,8 +75,9 @@
 		2FA5D26905936BB701998750 /* GetBlockHashesTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D65667DA8BFD91E91C8B /* GetBlockHashesTask.swift */; };
 		2FA5D2E6BA34E1A932C9C16B /* AddressManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D5A9656117A6FD41E814 /* AddressManager.swift */; };
 		2FA5D39FBC802B5EF03AD53A /* TransactionBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D11405173CD80A6B9904 /* TransactionBuilder.swift */; };
+		2FA5D421B7EE9B499EEA6908 /* BloomFilterManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D4E64129FF62BED7ADE7 /* BloomFilterManagerTests.swift */; };
 		2FA5D443E5A428D1A60CD031 /* ProgressSyncerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D82EFF381CE6233790A9 /* ProgressSyncerTests.swift */; };
-		2FA5D448B43D6BFB15208436 /* Peers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D3968E6E11AF76368CA5 /* Peers.swift */; };
+		2FA5D448B43D6BFB15208436 /* PeerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D3968E6E11AF76368CA5 /* PeerManager.swift */; };
 		2FA5D4F27E10A609FF81950E /* UnknownMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D3F63860A15B55DC196E /* UnknownMessage.swift */; };
 		2FA5D56E3AE0E2E9817FC370 /* TransactionInputSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DCD21585D41C520DF764 /* TransactionInputSerializer.swift */; };
 		2FA5D571931CA46B417C18BA /* PeerGroupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D602DBCFC5121F7C245F /* PeerGroupTests.swift */; };
@@ -286,8 +287,9 @@
 		2FA5D307095385625960B0A0 /* TransactionMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionMessage.swift; sourceTree = "<group>"; };
 		2FA5D316DD8A722A5300002B /* TransactionSyncerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionSyncerTests.swift; sourceTree = "<group>"; };
 		2FA5D349EBA047CDDBE94057 /* FilterAddMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FilterAddMessage.swift; sourceTree = "<group>"; };
-		2FA5D3968E6E11AF76368CA5 /* Peers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Peers.swift; sourceTree = "<group>"; };
+		2FA5D3968E6E11AF76368CA5 /* PeerManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerManager.swift; sourceTree = "<group>"; };
 		2FA5D3F63860A15B55DC196E /* UnknownMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnknownMessage.swift; sourceTree = "<group>"; };
+		2FA5D4E64129FF62BED7ADE7 /* BloomFilterManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BloomFilterManagerTests.swift; sourceTree = "<group>"; };
 		2FA5D5A744085AD28EFBB868 /* Peer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Peer.swift; sourceTree = "<group>"; };
 		2FA5D5A9656117A6FD41E814 /* AddressManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddressManager.swift; sourceTree = "<group>"; };
 		2FA5D5C9BB0E185AF72B9174 /* MerkleBlock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MerkleBlock.swift; sourceTree = "<group>"; };
@@ -485,6 +487,7 @@
 				2FA5DAE996A847B90E5D033A /* UnspentOutputSelectorTests.swift */,
 				58AAAECE6429C4CBD7FD2394 /* UnspentOutputProviderTests.swift */,
 				58AAABE00BDEB41C68669800 /* BTCApiSyncerTests.swift */,
+				2FA5D4E64129FF62BED7ADE7 /* BloomFilterManagerTests.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -540,11 +543,11 @@
 				D31711E920F7192300AEF61B /* PeerConnection.swift */,
 				11B359E44D75610DF2841327 /* PeerGroup.swift */,
 				D093F45D21414CC000C5D8CD /* PeerHostManager.swift */,
+				2FA5D3968E6E11AF76368CA5 /* PeerManager.swift */,
+				2FA5DEC11B1DA4DA336DBB28 /* PeerTimer.swift */,
 				11B356D308DCF4BB33D9F488 /* ServiceFlags.swift */,
 				11B355C0072CA13ADBAC1351 /* VarInt.swift */,
 				11B35C47D552B7AC5EA8C463 /* VarString.swift */,
-				2FA5DEC11B1DA4DA336DBB28 /* PeerTimer.swift */,
-				2FA5D3968E6E11AF76368CA5 /* Peers.swift */,
 			);
 			path = PeerNetwork;
 			sourceTree = "<group>";
@@ -1198,6 +1201,7 @@
 				2FA5DB74D510BA9F6D9525A4 /* BloomFilterManagerDelegateTests.swift in Sources */,
 				2FA5D571931CA46B417C18BA /* PeerGroupTests.swift in Sources */,
 				2FA5DEDC4F93EAB928423720 /* IPeerGroupTests.swift in Sources */,
+				2FA5D421B7EE9B499EEA6908 /* BloomFilterManagerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1336,7 +1340,7 @@
 				2FA5DBF35EDF66F6977BA032 /* PeerTimer.swift in Sources */,
 				2FA5D024DF2A429D6606350F /* ProgressSyncer.swift in Sources */,
 				2FA5D91DCF7F320369162C5A /* ReachabilityManager.swift in Sources */,
-				2FA5D448B43D6BFB15208436 /* Peers.swift in Sources */,
+				2FA5D448B43D6BFB15208436 /* PeerManager.swift in Sources */,
 				2FA5D9D3DA2DF9BD402CE5DD /* SentTransaction.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -14,7 +14,7 @@ class PeerGroupTests: XCTestCase {
     internal var mockReachabilityManager: MockIReachabilityManager!
     internal var mockPeerHostManager: MockIPeerHostManager!
     internal var mockBloomFilterManager: MockIBloomFilterManager!
-    internal var mockPeers: MockIPeers!
+    internal var mockPeerManager: MockIPeerManager!
     internal var mockBlockSyncer: MockIBlockSyncer!
     internal var mockTransactionSyncer: MockITransactionSyncer!
 
@@ -33,7 +33,7 @@ class PeerGroupTests: XCTestCase {
         mockReachabilityManager = MockIReachabilityManager()
         mockPeerHostManager = MockIPeerHostManager()
         mockBloomFilterManager = MockIBloomFilterManager()
-        mockPeers = MockIPeers()
+        mockPeerManager = MockIPeerManager()
         mockBlockSyncer = MockIBlockSyncer()
         mockTransactionSyncer = MockITransactionSyncer()
         peers = [String: MockIPeer]()
@@ -66,11 +66,9 @@ class PeerGroupTests: XCTestCase {
             when(mock.delegate.set(any())).thenDoNothing()
             when(mock.bloomFilter.get).thenReturn(nil)
         }
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.syncPeer.get).thenReturn(nil)
             when(mock.add(peer: any())).thenDoNothing()
-            when(mock.peerConnected(peer: any())).thenDoNothing()
-            when(mock.peerDisconnected(peer: any())).thenDoNothing()
             when(mock.disconnectAll()).thenDoNothing()
             when(mock.totalPeersCount()).thenReturn(0)
             when(mock.someReadyPeers()).thenReturn([IPeer]())
@@ -93,7 +91,7 @@ class PeerGroupTests: XCTestCase {
 
         peerGroup = PeerGroup(
                 factory: mockFactory, network: mockNetwork, listener: mockBestBlockHeightListener, reachabilityManager: mockReachabilityManager, peerHostManager: mockPeerHostManager, bloomFilterManager: mockBloomFilterManager,
-                peerCount: peersCount, peers: mockPeers,
+                peerCount: peersCount, peerManager: mockPeerManager,
                 peersQueue: DispatchQueue.main, inventoryQueue: DispatchQueue.main
         )
         peerGroup.blockSyncer = mockBlockSyncer

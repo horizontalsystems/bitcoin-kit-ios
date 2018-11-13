@@ -22,7 +22,7 @@ class IPeerGroupTests: PeerGroupTests {
             let peerMock = peers[host]!
             verify(peerMock).delegate.set(any())
             verify(peerMock).localBestBlockHeight.set(equal(to: 0))
-            verify(mockPeers).add(peer: equal(to: peerMock, equalWhen: { $0!.host == $1.host }))
+            verify(mockPeerManager).add(peer: equal(to: peerMock, equalWhen: { $0!.host == $1.host }))
         }
     }
 
@@ -62,7 +62,7 @@ class IPeerGroupTests: PeerGroupTests {
     }
 
     func testStart_ConnectedAndConnectingPeersIsEqualToPeersCount() {
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.totalPeersCount()).thenReturn(peersCount)
         }
         peerGroup.start()
@@ -93,7 +93,7 @@ class IPeerGroupTests: PeerGroupTests {
 
     func testStop() {
         peerGroup.stop()
-        verify(mockPeers).disconnectAll()
+        verify(mockPeerManager).disconnectAll()
     }
 
     func testSendPendingTransactions() {
@@ -103,7 +103,7 @@ class IPeerGroupTests: PeerGroupTests {
         stub(mockTransactionSyncer) { mock in
             when(mock.pendingTransactions()).thenReturn([transaction])
         }
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.connected()).thenReturn([peer])
             when(mock.nonSyncedPeer()).thenReturn(nil)
             when(mock.someReadyPeers()).thenReturn([peer])
@@ -123,7 +123,7 @@ class IPeerGroupTests: PeerGroupTests {
         stub(mockTransactionSyncer) { mock in
             when(mock.pendingTransactions()).thenReturn([transaction])
         }
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.connected()).thenReturn([peer])
             when(mock.nonSyncedPeer()).thenReturn(peer)
             when(mock.someReadyPeers()).thenReturn([peer])
@@ -142,7 +142,7 @@ class IPeerGroupTests: PeerGroupTests {
         stub(mockTransactionSyncer) { mock in
             when(mock.pendingTransactions()).thenReturn([transaction])
         }
-        stub(mockPeers) { mock in
+        stub(mockPeerManager) { mock in
             when(mock.connected()).thenReturn([peer])
             when(mock.nonSyncedPeer()).thenReturn(nil)
             when(mock.someReadyPeers()).thenReturn([])
