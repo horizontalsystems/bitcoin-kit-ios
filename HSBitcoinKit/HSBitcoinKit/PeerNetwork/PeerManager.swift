@@ -11,6 +11,12 @@ class PeerManager: IPeerManager {
         self.peers.append(peer)
     }
 
+    func peerDisconnected(peer: IPeer) {
+        if let index = self.peers.index(where: { $0.equalTo(peer) }) {
+            self.peers.remove(at: index)
+        }
+    }
+
     func disconnectAll() {
         for peer in peers {
             peer.disconnect(error: nil)

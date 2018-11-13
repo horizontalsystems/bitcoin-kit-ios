@@ -82,7 +82,3 @@ extension BloomFilterManager: IBloomFilterManager {
     }
 
 }
-
-protocol BloomFilterManagerDelegate: class {
-    func bloomFilterUpdated(bloomFilter: BloomFilter)
-}

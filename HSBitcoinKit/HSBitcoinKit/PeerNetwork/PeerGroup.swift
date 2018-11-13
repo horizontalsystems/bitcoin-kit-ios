@@ -70,7 +70,7 @@ class PeerGroup {
         }
     }
 
-    private func handlePendingTransactions(forReadyPeer peer: IPeer? = nil) {
+    private func handlePendingTransactions() {
         peersQueue.async {
             guard self.peerManager.connected().count > 0, self.peerManager.nonSyncedPeer() == nil else {
                 return
@@ -245,6 +245,8 @@ extension PeerGroup: PeerDelegate {
                 self.peerManager.syncPeer = nil
                 self.assignNextSyncPeer()
             }
+
+            self.peerManager.peerDisconnected(peer: peer)
         }
 
         connectPeersIfRequired()

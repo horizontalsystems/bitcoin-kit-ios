@@ -328,6 +328,7 @@ class PeerDelegateTests: PeerGroupTests {
         stub(mockPeerManager) { mock in
             when(mock.syncPeer.set(any())).thenDoNothing()
             when(mock.syncPeerIs(peer: any())).thenReturn(true)
+            when(mock.peerDisconnected(peer: any())).thenDoNothing()
         }
         stub(mockPeerHostManager) { mock in
             when(mock.hostDisconnected(host: any(), withError: any(), networkReachable: any())).thenDoNothing()
@@ -344,6 +345,7 @@ class PeerDelegateTests: PeerGroupTests {
         verify(mockPeerHostManager).hostDisconnected(host: equal(to: peer.host), withError: isNil(), networkReachable: equal(to: true))
         verify(mockBlockSyncer).downloadFailed()
         verify(mockPeerManager).syncPeer.set(isNil())
+        verify(mockPeerManager).peerDisconnected(peer: equal(to: peer, equalWhen: { $0.host == $1.host }))
 
         // Here two blocks are left enqueued:
         // - which sets a syncPeer
@@ -376,6 +378,7 @@ class PeerDelegateTests: PeerGroupTests {
         }
         stub(mockPeerManager) { mock in
             when(mock.syncPeerIs(peer: any())).thenReturn(false)
+            when(mock.peerDisconnected(peer: any())).thenDoNothing()
         }
         stub(mockPeerHostManager) { mock in
             when(mock.hostDisconnected(host: any(), withError: any(), networkReachable: any())).thenDoNothing()
@@ -389,6 +392,7 @@ class PeerDelegateTests: PeerGroupTests {
         verify(mockPeerHostManager).hostDisconnected(host: equal(to: peer.host), withError: isNil(), networkReachable: equal(to: true))
         verify(mockBlockSyncer, never()).downloadFailed()
         verify(mockPeerManager, never()).syncPeer.set(any())
+        verify(mockPeerManager).peerDisconnected(peer: equal(to: peer, equalWhen: { $0.host == $1.host }))
 
         // Here only one block is left enqueued:
         // - which connects missing peers if exist
@@ -414,6 +418,7 @@ class PeerDelegateTests: PeerGroupTests {
         }
         stub(mockPeerManager) { mock in
             when(mock.syncPeerIs(peer: any())).thenReturn(false)
+            when(mock.peerDisconnected(peer: any())).thenDoNothing()
         }
         stub(mockPeerHostManager) { mock in
             when(mock.hostDisconnected(host: any(), withError: any(), networkReachable: any())).thenDoNothing()
@@ -437,6 +442,7 @@ class PeerDelegateTests: PeerGroupTests {
         }
         stub(mockPeerManager) { mock in
             when(mock.syncPeerIs(peer: any())).thenReturn(false)
+            when(mock.peerDisconnected(peer: any())).thenDoNothing()
         }
         stub(mockPeerHostManager) { mock in
             when(mock.hostDisconnected(host: any(), withError: any(), networkReachable: any())).thenDoNothing()

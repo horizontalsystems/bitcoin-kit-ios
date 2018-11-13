@@ -72,6 +72,10 @@ protocol IBloomFilterManager {
     func regenerateBloomFilter()
 }
 
+protocol BloomFilterManagerDelegate: class {
+    func bloomFilterUpdated(bloomFilter: BloomFilter)
+}
+
 protocol IPeerGroup: class {
     var blockSyncer: IBlockSyncer? { get set }
     var transactionSyncer: ITransactionSyncer? { get set }
@@ -83,6 +87,7 @@ protocol IPeerGroup: class {
 protocol IPeerManager: class {
     var syncPeer: IPeer? { get set }
     func add(peer: IPeer)
+    func peerDisconnected(peer: IPeer)
     func disconnectAll()
     func totalPeersCount() -> Int
     func someReadyPeers() -> [IPeer]
