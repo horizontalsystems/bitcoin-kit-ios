@@ -96,7 +96,7 @@ public class BitcoinKit {
 
         realmFactory = RealmFactory(configuration: realmConfiguration)
 
-        hdWallet = HDWallet(seed: Mnemonic.seed(mnemonic: words), coinType: network.coinType, xPrivKey: network.xPrivKey, xPubKey: network.xPubKey)
+        hdWallet = HDWallet(seed: Mnemonic.seed(mnemonic: words), coinType: network.coinType, xPrivKey: network.xPrivKey, xPubKey: network.xPubKey, gapLimit: 20)
 
         stateManager = StateManager(realmFactory: realmFactory)
 

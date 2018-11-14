@@ -698,7 +698,7 @@ class PeerDelegateTests: PeerGroupTests {
             inventoryItems.append(InventoryItem(type: InventoryItem.ObjectType.blockMessage.rawValue, hash: hash))
         }
 
-        task.handle(items: inventoryItems)
+        let _ = task.handle(items: inventoryItems)
 
         return task
     }
@@ -707,7 +707,7 @@ class PeerDelegateTests: PeerGroupTests {
         let task = RequestTransactionsTask(hashes: [Data(from: 10000)])
 
         for transaction in transactions {
-            task.handle(transaction: transaction)
+            let _ = task.handle(transaction: transaction)
         }
 
         return task

@@ -178,12 +178,6 @@ class BloomFilterManagerTests: XCTestCase {
     }
 
     func testRegenerateBloomFilter_NoNewElements() {
-        let keys = [
-            getPublicKey(withIndex: 0, chain: .external),
-            getPublicKey(withIndex: 0, chain: .internal),
-            getPublicKey(withIndex: 1, chain: .external),
-        ]
-
         stub(mockFactory) { mock in
             when(mock).bloomFilter(withElements: any()).thenReturn(bloomFilter)
         }

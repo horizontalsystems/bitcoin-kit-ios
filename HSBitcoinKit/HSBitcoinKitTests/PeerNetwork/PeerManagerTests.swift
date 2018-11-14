@@ -35,8 +35,8 @@ class PeerManagerTests:XCTestCase {
 
     func testSomeReadyPeers() {
         let peer = addPeer(host: "0", ready: true)
-        addPeer(host: "1", ready: true)
-        addPeer(host: "3", ready: false)
+        let _ = addPeer(host: "1", ready: true)
+        let _ = addPeer(host: "3", ready: false)
 
         let peers = manager.someReadyPeers()
         XCTAssertEqual(peers.count, 1)
@@ -57,7 +57,7 @@ class PeerManagerTests:XCTestCase {
 
     func testConnected() {
         let peer = addPeer(host: "0", connected: true)
-        addPeer(host: "1", connected: false)
+        let _ = addPeer(host: "1", connected: false)
 
         let peers = manager.connected()
         XCTAssertEqual(peers.count, 1)
@@ -66,9 +66,9 @@ class PeerManagerTests:XCTestCase {
 
     func testNonSyncedPeer() {
         let peer = addPeer(host: "0", connected: true, synced: false)
-        addPeer(host: "1", connected: true, synced: true)
-        addPeer(host: "2", connected: false, synced: false)
-        addPeer(host: "3", connected: false, synced: true)
+        let _ = addPeer(host: "1", connected: true, synced: true)
+        let _ = addPeer(host: "2", connected: false, synced: false)
+        let _ = addPeer(host: "3", connected: false, synced: true)
 
         let resultPeer = manager.nonSyncedPeer()
         XCTAssertEqual(resultPeer!.host, peer.host)

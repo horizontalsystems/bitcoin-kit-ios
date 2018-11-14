@@ -179,7 +179,6 @@ class InitialSyncerTests: XCTestCase {
         let secondBlock = TestData.secondBlock
         let firstBlock = secondBlock.previousBlock!
         let firstBlockHash = BlockHash(withHeaderHash: firstBlock.headerHash, height: 10)
-        let secondBlockHash = BlockHash(withHeaderHash: secondBlock.headerHash, height: 12)
 
         let externalResponse0 = BlockResponse(hash: firstBlock.reversedHeaderHashHex, height: 10)
         let externalResponse1 = BlockResponse(hash: secondBlock.reversedHeaderHashHex, height: 112)
