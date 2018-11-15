@@ -72,12 +72,28 @@ protocol IBloomFilterManager {
     func regenerateBloomFilter()
 }
 
+protocol BloomFilterManagerDelegate: class {
+    func bloomFilterUpdated(bloomFilter: BloomFilter)
+}
+
 protocol IPeerGroup: class {
     var blockSyncer: IBlockSyncer? { get set }
     var transactionSyncer: ITransactionSyncer? { get set }
     func start()
     func stop()
-    func send(transaction: Transaction)
+    func sendPendingTransactions()
+}
+
+protocol IPeerManager: class {
+    var syncPeer: IPeer? { get set }
+    func add(peer: IPeer)
+    func peerDisconnected(peer: IPeer)
+    func disconnectAll()
+    func totalPeersCount() -> Int
+    func someReadyPeers() -> [IPeer]
+    func connected() -> [IPeer]
+    func nonSyncedPeer() -> IPeer?
+    func syncPeerIs(peer: IPeer) -> Bool
 }
 
 protocol IPeer: class {
@@ -87,13 +103,13 @@ protocol IPeer: class {
     var host: String { get }
     var logName: String { get }
     var ready: Bool { get }
+    var connected: Bool { get }
     var synced: Bool { get set }
     var blockHashesSynced: Bool { get set }
     func connect()
     func disconnect(error: Error?)
     func add(task: PeerTask)
     func isRequestingInventory(hash: Data) -> Bool
-    func handleRelayedTransaction(hash: Data) -> Bool
     func filterLoad(bloomFilter: BloomFilter)
     func sendMempoolMessage()
     func equalTo(_ peer: IPeer?) -> Bool
@@ -118,6 +134,22 @@ protocol IPeerTaskRequester: class {
     func ping(nonce: UInt64)
 }
 
+protocol IPeerTaskDelegate: class {
+    func handle(completedTask task: PeerTask)
+    func handle(failedTask task: PeerTask, error: Error)
+    func handle(merkleBlock: MerkleBlock)
+}
+
+protocol IPeerConnection: class {
+    var delegate: PeerConnectionDelegate? { get set }
+    var host: String { get }
+    var port: UInt32 { get }
+    var logName: String { get }
+    func connect()
+    func disconnect(error: Error?)
+    func send(message: IMessage)
+}
+
 protocol BestBlockHeightListener: class {
     func bestBlockHeightReceived(height: Int32)
 }
@@ -138,6 +170,7 @@ protocol IFactory {
     func transaction(version: Int, inputs: [TransactionInput], outputs: [TransactionOutput], lockTime: Int) -> Transaction
     func transactionInput(withPreviousOutputTxReversedHex previousOutputTxReversedHex: String, previousOutputIndex: Int, script: Data, sequence: Int) -> TransactionInput
     func transactionOutput(withValue value: Int, index: Int, lockingScript script: Data, type: ScriptType, address: String?, keyHash: Data?, publicKey: PublicKey?) throws -> TransactionOutput
+    func bloomFilter(withElements: [Data]) -> BloomFilter
 }
 
 protocol IInitialSyncer {
@@ -178,8 +211,9 @@ protocol ITransactionLinker {
 }
 
 protocol ITransactionSyncer: class {
-    func getNonSentTransactions() -> [Transaction]
+    func pendingTransactions() -> [Transaction]
     func handle(transactions: [Transaction])
+    func handle(sentTransaction transaction: Transaction)
     func shouldRequestTransaction(hash: Data) -> Bool
 }
 
@@ -266,7 +300,7 @@ protocol IDataProvider {
 }
 
 protocol INetwork: class {
-    var merkleBlockValidator: MerkleBlockValidator { get }
+    var merkleBlockValidator: IMerkleBlockValidator { get }
 
     var name: String { get }
     var pubKeyHash: UInt8 { get }
@@ -293,6 +327,10 @@ protocol INetwork: class {
     var heightInterval: Int { get }                                     // Blocks in cycle
 
     func validate(block: Block, previousBlock: Block) throws
+}
+
+protocol IMerkleBlockValidator: class {
+    func merkleBlock(from message: MerkleBlockMessage) throws -> MerkleBlock
 }
 
 extension INetwork {

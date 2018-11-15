@@ -5,7 +5,7 @@ class BitcoinMainNet: INetwork {
     private let bitsValidator: IBlockValidator
     private let difficultyValidator: IBlockValidator
 
-    let merkleBlockValidator: MerkleBlockValidator
+    let merkleBlockValidator: IMerkleBlockValidator
 
     let name = "bitcoin-main-net"
     let pubKeyHash: UInt8 = 0x00

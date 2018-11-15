@@ -8,10 +8,6 @@ class Factory: IFactory {
         return Block(withHeader: header, height: height)
     }
 
-    func block(withHeaderHash headerHash: Data, height: Int) -> Block {
-        return Block(withHeaderHash: headerHash, height: height)
-    }
-
     func transaction(version: Int, inputs: [TransactionInput], outputs: [TransactionOutput], lockTime: Int) -> Transaction {
         return Transaction(version: version, inputs: inputs, outputs: outputs, lockTime: lockTime)
     }
@@ -25,11 +21,15 @@ class Factory: IFactory {
     }
 
     func peer(withHost host: String, network: INetwork) -> IPeer {
-        return Peer(host: host, network: network)
+        return Peer(host: host, network: network, connection: PeerConnection(host: host, network: network))
     }
 
     func blockHash(withHeaderHash headerHash: Data, height: Int) -> BlockHash {
         return BlockHash(withHeaderHash: headerHash, height: height)
+    }
+
+    func bloomFilter(withElements elements: [Data]) -> BloomFilter {
+        return BloomFilter(elements: elements)
     }
 
 }

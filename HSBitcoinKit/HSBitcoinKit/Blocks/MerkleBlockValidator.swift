@@ -1,7 +1,7 @@
 import Foundation
 import HSCryptoKit
 
-class MerkleBlockValidator {
+class MerkleBlockValidator: IMerkleBlockValidator {
 
     enum ValidationError: Error {
         case wrongMerkleRoot

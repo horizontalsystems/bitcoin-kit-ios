@@ -7,9 +7,9 @@ class GetMerkleBlocksTask: PeerTask {
     private var pendingMerkleBlocks = [MerkleBlock]()
     private var pingNonce: UInt64
 
-    init(blockHashes: [BlockHash]) {
+    init(blockHashes: [BlockHash], pingNonce: UInt64 = UInt64.random(in: 0..<UINT64_MAX)) {
         self.blockHashes = blockHashes
-        self.pingNonce = UInt64.random(in: 0..<UINT64_MAX)
+        self.pingNonce = pingNonce
     }
 
     override func start() {

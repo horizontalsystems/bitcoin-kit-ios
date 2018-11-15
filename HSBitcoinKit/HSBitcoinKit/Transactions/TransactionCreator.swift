@@ -42,7 +42,7 @@ extension TransactionCreator: ITransactionCreator {
             transactionProcessor.process(transaction: transaction, realm: realm)
         }
 
-        peerGroup.send(transaction: transaction)
+        peerGroup.sendPendingTransactions()
     }
 
 }

@@ -4,12 +4,14 @@ class BloomFilterManager {
     class BloomFilterExpired: Error {}
 
     private let realmFactory: IRealmFactory
+    private let factory: IFactory
     weak var delegate: BloomFilterManagerDelegate?
 
     var bloomFilter: BloomFilter?
 
-    init(realmFactory: IRealmFactory) {
+    init(realmFactory: IRealmFactory, factory: IFactory) {
         self.realmFactory = realmFactory
+        self.factory = factory
     }
 
     // This method is a workaround
@@ -71,7 +73,7 @@ extension BloomFilterManager: IBloomFilterManager {
         }
 
         if !elements.isEmpty {
-            let bloomFilter = BloomFilter(elements: elements)
+            let bloomFilter = factory.bloomFilter(withElements: elements)
             if self.bloomFilter?.filter != bloomFilter.filter {
                 self.bloomFilter = bloomFilter
                 delegate?.bloomFilterUpdated(bloomFilter: bloomFilter)
@@ -79,8 +81,4 @@ extension BloomFilterManager: IBloomFilterManager {
         }
     }
 
-}
-
-protocol BloomFilterManagerDelegate: class {
-    func bloomFilterUpdated(bloomFilter: BloomFilter)
 }

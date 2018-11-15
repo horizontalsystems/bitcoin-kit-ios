@@ -6,7 +6,7 @@ class BitcoinCashMainNet: INetwork {
     private let dAAValidator: IBlockValidator
     private let eDAValidator: IBlockValidator
 
-    let merkleBlockValidator: MerkleBlockValidator
+    let merkleBlockValidator: IMerkleBlockValidator
 
     private let blockHelper: IBlockHelper
 

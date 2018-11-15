@@ -6,9 +6,9 @@ class GetBlockHashesTask: PeerTask {
     private var blockLocatorHashes: [Data]
     private var pingNonce: UInt64
 
-    init(hashes: [Data]) {
+    init(hashes: [Data], pingNonce: UInt64 = UInt64.random(in: 0..<UINT64_MAX)) {
         self.blockLocatorHashes = hashes
-        self.pingNonce = UInt64.random(in: 0..<UINT64_MAX)
+        self.pingNonce = pingNonce
     }
 
     override func start() {
@@ -33,7 +33,7 @@ class GetBlockHashesTask: PeerTask {
             blockHashes = newHashes
         }
 
-        return newHashes.isEmpty
+        return !newHashes.isEmpty
     }
 
     override func handle(pongNonce: UInt64) -> Bool {

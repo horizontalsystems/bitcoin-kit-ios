@@ -28,10 +28,6 @@ class PeerTask {
         return false
     }
 
-    func handleRelayedTransaction(hash: Data) -> Bool {
-        return false
-    }
-
     func isRequestingInventory(hash: Data) -> Bool {
         return false
     }
@@ -39,10 +35,4 @@ class PeerTask {
     func handle(pongNonce: UInt64) -> Bool {
         return false
     }
-}
-
-protocol IPeerTaskDelegate: class {
-    func handle(completedTask task: PeerTask)
-    func handle(failedTask task: PeerTask, error: Error)
-    func handle(merkleBlock: MerkleBlock)
 }
