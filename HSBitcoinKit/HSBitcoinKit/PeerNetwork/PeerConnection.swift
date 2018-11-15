@@ -1,7 +1,7 @@
 import Foundation
 import HSHDWalletKit
 
-class PeerConnection: NSObject, StreamDelegate {
+class PeerConnection: NSObject {
     enum PeerConnectionError: Error {
         case connectionClosedWithUnknownError
         case connectionClosedByPeer
@@ -42,17 +42,6 @@ class PeerConnection: NSObject, StreamDelegate {
         disconnect()
     }
 
-    func connect() {
-        if runLoop == nil {
-            DispatchQueue.global(qos: .userInitiated).async {
-                self.runLoop = .current
-                self.connectAsync()
-            }
-        } else {
-            log("ALREADY CONNECTED")
-        }
-    }
-
     private func connectAsync() {
         CFStreamCreatePairWithSocketToHost(kCFAllocatorDefault, host as CFString, port, &readStream, &writeStream)
         inputStream = readStream!.takeRetainedValue()
@@ -70,6 +59,53 @@ class PeerConnection: NSObject, StreamDelegate {
         peerTimer.peerConnection = self
         RunLoop.current.add(peerTimer.timer, forMode: .commonModes)
         RunLoop.current.run()
+    }
+
+    private func readAvailableBytes(stream: InputStream) {
+        peerTimer.reset()
+        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
+
+        defer {
+            buffer.deallocate()
+        }
+
+        while stream.hasBytesAvailable {
+            let numberOfBytesRead = stream.read(buffer, maxLength: bufferSize)
+            if numberOfBytesRead <= 0 {
+                if let _ = stream.streamError {
+                    break
+                }
+            } else {
+                packets += Data(bytesNoCopy: buffer, count: numberOfBytesRead, deallocator: .none)
+            }
+        }
+
+        while packets.count >= NetworkMessage.minimumLength {
+            guard let networkMessage = NetworkMessage.deserialize(data: packets, network: network) else {
+                return
+            }
+
+            packets = Data(packets.dropFirst(NetworkMessage.minimumLength + Int(networkMessage.length)))
+            delegate?.connection(self, didReceiveMessage: networkMessage.message)
+        }
+    }
+
+    private func log(_ message: String) {
+        Logger.shared.log(self, "\(logName) \(message)")
+    }
+}
+
+extension PeerConnection: IPeerConnection {
+
+    func connect() {
+        if runLoop == nil {
+            DispatchQueue.global(qos: .userInitiated).async {
+                self.runLoop = .current
+                self.connectAsync()
+            }
+        } else {
+            log("ALREADY CONNECTED")
+        }
     }
 
     func disconnect(error: Error? = nil) {
@@ -93,6 +129,19 @@ class PeerConnection: NSObject, StreamDelegate {
 
         log("DISCONNECTED")
     }
+
+    func send(message: IMessage) {
+        let message = NetworkMessage(network: network, message: message)
+
+        let data = message.serialized()
+        _ = data.withUnsafeBytes {
+            outputStream?.write($0, maxLength: data.count)
+        }
+    }
+
+}
+
+extension PeerConnection: StreamDelegate {
 
     func stream(_ stream: Stream, handle eventCode: Stream.Event) {
         switch stream {
@@ -142,49 +191,10 @@ class PeerConnection: NSObject, StreamDelegate {
         }
     }
 
-    private func readAvailableBytes(stream: InputStream) {
-        peerTimer.reset()
-        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
-
-        defer { buffer.deallocate() }
-
-        while stream.hasBytesAvailable {
-            let numberOfBytesRead = stream.read(buffer, maxLength: bufferSize)
-            if numberOfBytesRead <= 0 {
-                if let _ = stream.streamError {
-                    break
-                }
-            } else {
-                packets += Data(bytesNoCopy: buffer, count: numberOfBytesRead, deallocator: .none)
-            }
-        }
-
-        while packets.count >= NetworkMessage.minimumLength {
-            guard let networkMessage = NetworkMessage.deserialize(data: packets, network: network) else {
-                return
-            }
-
-            packets = Data(packets.dropFirst(NetworkMessage.minimumLength + Int(networkMessage.length)))
-            delegate?.connection(self, didReceiveMessage: networkMessage.message)
-        }
-    }
-
-    func send(message: IMessage) {
-        let message = NetworkMessage(network: network, message: message)
-
-        let data = message.serialized()
-        _ = data.withUnsafeBytes {
-            outputStream?.write($0, maxLength: data.count)
-        }
-    }
-
-    private func log(_ message: String) {
-        Logger.shared.log(self, "\(logName) \(message)")
-    }
 }
 
-protocol PeerConnectionDelegate : class {
-    func connectionReadyForWrite(_ connection: PeerConnection)
-    func connectionDidDisconnect(_ connection: PeerConnection, withError error: Error?)
-    func connection(_ connection: PeerConnection, didReceiveMessage message: IMessage)
+protocol PeerConnectionDelegate: class {
+    func connectionReadyForWrite(_ connection: IPeerConnection)
+    func connectionDidDisconnect(_ connection: IPeerConnection, withError error: Error?)
+    func connection(_ connection: IPeerConnection, didReceiveMessage message: IMessage)
 }

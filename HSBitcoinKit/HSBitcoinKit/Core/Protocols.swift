@@ -140,6 +140,16 @@ protocol IPeerTaskDelegate: class {
     func handle(merkleBlock: MerkleBlock)
 }
 
+protocol IPeerConnection: class {
+    var delegate: PeerConnectionDelegate? { get set }
+    var host: String { get }
+    var port: UInt32 { get }
+    var logName: String { get }
+    func connect()
+    func disconnect(error: Error?)
+    func send(message: IMessage)
+}
+
 protocol BestBlockHeightListener: class {
     func bestBlockHeightReceived(height: Int32)
 }
@@ -290,7 +300,7 @@ protocol IDataProvider {
 }
 
 protocol INetwork: class {
-    var merkleBlockValidator: MerkleBlockValidator { get }
+    var merkleBlockValidator: IMerkleBlockValidator { get }
 
     var name: String { get }
     var pubKeyHash: UInt8 { get }
@@ -317,6 +327,10 @@ protocol INetwork: class {
     var heightInterval: Int { get }                                     // Blocks in cycle
 
     func validate(block: Block, previousBlock: Block) throws
+}
+
+protocol IMerkleBlockValidator: class {
+    func merkleBlock(from message: MerkleBlockMessage) throws -> MerkleBlock
 }
 
 extension INetwork {

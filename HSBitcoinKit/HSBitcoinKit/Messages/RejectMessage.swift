@@ -21,6 +21,13 @@ struct RejectMessage: IMessage {
     /// block header hash of the object being rejected, so the field is 32 bytes.
     let data: Data
 
+    init(message: VarString, ccode: UInt8, reason: VarString, data: Data) {
+        self.message = message
+        self.ccode = ccode
+        self.reason = reason
+        self.data = data
+    }
+
     init(data: Data) {
         let byteStream = ByteStream(data)
 

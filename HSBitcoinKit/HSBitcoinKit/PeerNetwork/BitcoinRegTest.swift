@@ -3,7 +3,7 @@ import Foundation
 class BitcoinRegTest: INetwork {
     private let headerValidator: IBlockValidator
 
-    let merkleBlockValidator: MerkleBlockValidator
+    let merkleBlockValidator: IMerkleBlockValidator
 
     let name = "bitcoin-reg-test"
     let pubKeyHash: UInt8 = 0x6f

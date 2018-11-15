@@ -12,10 +12,11 @@ class Peer {
     private let protocolVersion: Int32 = 70015
     private var sentVersion: Bool = false
     private var sentVerack: Bool = false
+    private var mempoolSent: Bool = false
 
     weak var delegate: PeerDelegate?
 
-    private let connection: PeerConnection
+    private let connection: IPeerConnection
     private var tasks: [PeerTask] = []
 
     private let queue: DispatchQueue
@@ -26,7 +27,6 @@ class Peer {
     var connected: Bool = false
     var blockHashesSynced: Bool = false
     var synced: Bool = false
-    var mempoolSent: Bool = false
 
     var ready: Bool {
         return connected && tasks.isEmpty
@@ -40,10 +40,15 @@ class Peer {
         return connection.logName
     }
 
-    init(host: String, network: INetwork) {
-        connection = PeerConnection(host: host, network: network)
-        queue = DispatchQueue(label: "Peer: \(host)", qos: .userInitiated)
+    init(host: String, network: INetwork, connection: IPeerConnection, queue: DispatchQueue? = nil) {
+        self.connection = connection
         self.network = network
+
+        if let queue = queue {
+            self.queue = queue
+        } else {
+            self.queue = DispatchQueue(label: "Peer: \(host)", qos: .userInitiated)
+        }
 
         connection.delegate = self
     }
@@ -70,11 +75,13 @@ class Peer {
         connection.send(message: VerackMessage())
     }
 
-    private func handle(message: IMessage) {
+    private func handle(message: IMessage) throws {
         if let versionMessage = message as? VersionMessage {
             handle(message: versionMessage)
+            return
         } else if let _ = message as? VerackMessage {
             handleVerackMessage()
+            return
         }
 
         guard self.connected else {
@@ -86,7 +93,7 @@ class Peer {
         case let inventoryMessage as InventoryMessage: handle(message: inventoryMessage)
         case let getDataMessage as GetDataMessage: handle(message: getDataMessage)
         case let blockMessage as BlockMessage: handle(message: blockMessage)
-        case let merkleBlockMessage as MerkleBlockMessage: handle(message: merkleBlockMessage)
+        case let merkleBlockMessage as MerkleBlockMessage: try handle(message: merkleBlockMessage)
         case let transactionMessage as TransactionMessage: handle(message: transactionMessage)
         case let pingMessage as PingMessage: handle(message: pingMessage)
         case let pongMessage as PongMessage: handle(message: pongMessage)
@@ -101,6 +108,7 @@ class Peer {
             try validatePeerVersion(message: message)
         } catch {
             disconnect(error: error)
+            return
         }
 
         self.announcedLastBlockHeight = message.startHeight ?? 0
@@ -169,19 +177,15 @@ class Peer {
         log("<-- BLOCK: \(CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: message.blockHeaderItem)).reversedHex)")
     }
 
-    private func handle(message: MerkleBlockMessage) {
+    private func handle(message: MerkleBlockMessage) throws {
         log("<-- MERKLEBLOCK: \(CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: message.blockHeader)).reversedHex)")
 
-        do {
-            let merkleBlock = try network.merkleBlockValidator.merkleBlock(from: message)
+        let merkleBlock = try network.merkleBlockValidator.merkleBlock(from: message)
 
-            for task in tasks {
-                if task.handle(merkleBlock: merkleBlock) {
-                    break
-                }
+        for task in tasks {
+            if task.handle(merkleBlock: merkleBlock) {
+                break
             }
-        } catch {
-            log("MERKLE BLOCK MESSAGE ERROR: \(error)")
         }
     }
 
@@ -276,21 +280,26 @@ extension Peer: IPeer {
 
 extension Peer: PeerConnectionDelegate {
 
-    func connectionReadyForWrite(_ connection: PeerConnection) {
+    func connectionReadyForWrite(_ connection: IPeerConnection) {
         if !sentVersion {
             sendVersion()
             sentVersion = true
         }
     }
 
-    func connectionDidDisconnect(_ connection: PeerConnection, withError error: Error?) {
+    func connectionDidDisconnect(_ connection: IPeerConnection, withError error: Error?) {
         connected = false
         delegate?.peerDidDisconnect(self, withError: error)
     }
 
-    func connection(_ connection: PeerConnection, didReceiveMessage message: IMessage) {
+    func connection(_ connection: IPeerConnection, didReceiveMessage message: IMessage) {
         queue.async {
-            self.handle(message: message)
+            do {
+                try self.handle(message: message)
+            } catch {
+                self.log("Message handling failed with error: \(error)")
+                self.disconnect(error: error)
+            }
         }
     }
 
@@ -312,7 +321,7 @@ extension Peer: IPeerTaskDelegate {
 
     func handle(failedTask task: PeerTask, error: Error) {
         log("Handling failed task: \(type(of: task))")
-        connection.disconnect(error: error)
+        disconnect(error: error)
     }
 
     func handle(merkleBlock: MerkleBlock) {

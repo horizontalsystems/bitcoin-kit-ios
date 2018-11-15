@@ -8,7 +8,7 @@ class BitcoinTestNet: INetwork {
     private let legacyDifficultyValidator: IBlockValidator
     private let testNetDifficultyValidator: IBlockValidator
 
-    let merkleBlockValidator: MerkleBlockValidator
+    let merkleBlockValidator: IMerkleBlockValidator
 
     let name = "bitcoin-test-net"
     let pubKeyHash: UInt8 = 0x6f

@@ -67,6 +67,7 @@
 		11B35F79192D8E7F80BEEC1C /* BlockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B3527FFC458AEFC035AC35 /* BlockTests.swift */; };
 		11B35FC6819CD5A9B94A85BF /* BitcoinMainNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35D44C0F5847D5B6EDEBC /* BitcoinMainNet.swift */; };
 		2FA5D024DF2A429D6606350F /* ProgressSyncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D859C070F9718CACF08F /* ProgressSyncer.swift */; };
+		2FA5D13C7285E79B75FAE2BE /* PeerConnectionDelegateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DF96100D81EACBBC87F6 /* PeerConnectionDelegateTests.swift */; };
 		2FA5D166F7AD6D1E7A81CB4D /* Blockchain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D05597A1DC332C67BDF7 /* Blockchain.swift */; };
 		2FA5D19E18DC7528778D26F0 /* PeerAddress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DDED90E11DEC3647B164 /* PeerAddress.swift */; };
 		2FA5D1EE5C8EF298CD8A6733 /* TransactionSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D880471F191DBCDAE574 /* TransactionSerializer.swift */; };
@@ -74,6 +75,7 @@
 		2FA5D2239DF0C24C4CC6366B /* PeerHostManagerDelegateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D632A9EFB1F0CF2523DF /* PeerHostManagerDelegateTests.swift */; };
 		2FA5D26905936BB701998750 /* GetBlockHashesTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D65667DA8BFD91E91C8B /* GetBlockHashesTask.swift */; };
 		2FA5D2E6BA34E1A932C9C16B /* AddressManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D5A9656117A6FD41E814 /* AddressManager.swift */; };
+		2FA5D371584B554068CCAD8E /* IPeerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D99586B15F4477D695F7 /* IPeerTests.swift */; };
 		2FA5D37E8B4A6D9B89410173 /* SendTransactionTaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D2DAB8485F5F9E2E23B6 /* SendTransactionTaskTests.swift */; };
 		2FA5D39FBC802B5EF03AD53A /* TransactionBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D11405173CD80A6B9904 /* TransactionBuilder.swift */; };
 		2FA5D421B7EE9B499EEA6908 /* BloomFilterManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D4E64129FF62BED7ADE7 /* BloomFilterManagerTests.swift */; };
@@ -88,6 +90,7 @@
 		2FA5D5FB8B7F7B1E65A156BF /* GetMerkleBlocksTaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D2907674257196C4F586 /* GetMerkleBlocksTaskTests.swift */; };
 		2FA5D5FE71A528D363227585 /* AddressManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D05FCBFFE93D46F8C292 /* AddressManagerTests.swift */; };
 		2FA5D60486BE522A9A7B80F8 /* AddressConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D1DAFDFD31F055B6ED11 /* AddressConverter.swift */; };
+		2FA5D6129186D79E7C7DD57F /* IPeerTaskDelegateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DFB5B9A13478ACBB61EB /* IPeerTaskDelegateTests.swift */; };
 		2FA5D65869320A18AFB8CE98 /* BlockHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DB1F056B264F829BFDDD /* BlockHash.swift */; };
 		2FA5D67384D58067F71CD6B2 /* InputSigner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DF9995FA7DD7556893F7 /* InputSigner.swift */; };
 		2FA5D6EC6F4A32E3489F89B0 /* TransactionMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D307095385625960B0A0 /* TransactionMessage.swift */; };
@@ -114,6 +117,7 @@
 		2FA5DF1A340A352EEDBF41E6 /* BlockchainTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DEC678BF41F0D38095DD /* BlockchainTests.swift */; };
 		2FA5DF66AD595EAC2723B0B3 /* UnspentOutputSelectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DAE996A847B90E5D033A /* UnspentOutputSelectorTests.swift */; };
 		2FA5DF914AC51B522EDDCD24 /* BlockHeaderSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DFCE859758F42448A02B /* BlockHeaderSerializer.swift */; };
+		2FA5DFD4DDEA0B2F36600346 /* IPeerTaskRequesterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DAAAC2F759FD42948DDE /* IPeerTaskRequesterTests.swift */; };
 		58AAA0853E5A328B3190C9F0 /* IpfsApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA5EE98F68D3D473C9A88 /* IpfsApi.swift */; };
 		58AAA0AEFEBBBA597001B1EC /* MockValidatorHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA9A9A73DE22FB87CD1B1 /* MockValidatorHelper.swift */; };
 		58AAA15CFA130C0752775CF1 /* PFromPKHExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA3EBDA17F35EA4C16C81 /* PFromPKHExtractor.swift */; };
@@ -309,7 +313,9 @@
 		2FA5D82EFF381CE6233790A9 /* ProgressSyncerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressSyncerTests.swift; sourceTree = "<group>"; };
 		2FA5D859C070F9718CACF08F /* ProgressSyncer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressSyncer.swift; sourceTree = "<group>"; };
 		2FA5D880471F191DBCDAE574 /* TransactionSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionSerializer.swift; sourceTree = "<group>"; };
+		2FA5D99586B15F4477D695F7 /* IPeerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IPeerTests.swift; sourceTree = "<group>"; };
 		2FA5DA9D7F78A26107F7209C /* InputSignerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputSignerTests.swift; sourceTree = "<group>"; };
+		2FA5DAAAC2F759FD42948DDE /* IPeerTaskRequesterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IPeerTaskRequesterTests.swift; sourceTree = "<group>"; };
 		2FA5DADEB0FD09138FD308A1 /* HDPrivateKeyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HDPrivateKeyTests.swift; sourceTree = "<group>"; };
 		2FA5DAE996A847B90E5D033A /* UnspentOutputSelectorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnspentOutputSelectorTests.swift; sourceTree = "<group>"; };
 		2FA5DB1F056B264F829BFDDD /* BlockHash.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockHash.swift; sourceTree = "<group>"; };
@@ -325,8 +331,10 @@
 		2FA5DF037E951950A0F7FF03 /* SentTransaction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SentTransaction.swift; sourceTree = "<group>"; };
 		2FA5DF1470723462D2CF707B /* TransactionProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionProcessor.swift; sourceTree = "<group>"; };
 		2FA5DF41CAF034B375E58E7A /* IPeerGroupTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IPeerGroupTests.swift; sourceTree = "<group>"; };
+		2FA5DF96100D81EACBBC87F6 /* PeerConnectionDelegateTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerConnectionDelegateTests.swift; sourceTree = "<group>"; };
 		2FA5DF9995FA7DD7556893F7 /* InputSigner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputSigner.swift; sourceTree = "<group>"; };
 		2FA5DF9ADB516A45C797889D /* PeerHostManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerHostManagerTests.swift; sourceTree = "<group>"; };
+		2FA5DFB5B9A13478ACBB61EB /* IPeerTaskDelegateTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IPeerTaskDelegateTests.swift; sourceTree = "<group>"; };
 		2FA5DFC7FA0A5363BFFB8E28 /* GetBlockHashesTaskTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetBlockHashesTaskTests.swift; sourceTree = "<group>"; };
 		2FA5DFCE859758F42448A02B /* BlockHeaderSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockHeaderSerializer.swift; sourceTree = "<group>"; };
 		2FA5DFDD75C8D896B99C2ED6 /* IMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IMessage.swift; sourceTree = "<group>"; };
@@ -757,6 +765,7 @@
 		58AAA80C18459F9822D75EC3 /* PeerNetwork */ = {
 			isa = PBXGroup;
 			children = (
+				D0232B37219C4740006803E1 /* Peer */,
 				D064ED8821622CA500310C99 /* PeerGroup */,
 				D05D5DEF219BF5AB006D0394 /* PeerTask */,
 				58AAA3744E23993E6BA283AC /* BitcoinCashMainNetTests.swift */,
@@ -835,6 +844,17 @@
 				58AAA3D78F9ADAF9CE4E41FC /* SegWitBech32AddressConverterTests.swift */,
 			);
 			path = Helpers;
+			sourceTree = "<group>";
+		};
+		D0232B37219C4740006803E1 /* Peer */ = {
+			isa = PBXGroup;
+			children = (
+				2FA5D99586B15F4477D695F7 /* IPeerTests.swift */,
+				2FA5DF96100D81EACBBC87F6 /* PeerConnectionDelegateTests.swift */,
+				2FA5DFB5B9A13478ACBB61EB /* IPeerTaskDelegateTests.swift */,
+				2FA5DAAAC2F759FD42948DDE /* IPeerTaskRequesterTests.swift */,
+			);
+			path = Peer;
 			sourceTree = "<group>";
 		};
 		D05D5DEF219BF5AB006D0394 /* PeerTask */ = {
@@ -1135,6 +1155,7 @@
 			inputPaths = (
 				"$(SRCROOT)/${PROJECT_NAME}/Core/Protocols.swift",
 				"$(SRCROOT)/${PROJECT_NAME}/Scripts/Script.swift",
+				"$(SRCROOT)/${PROJECT_NAME}/PeerNetwork/PeerTask/PeerTask.swift",
 			);
 			name = Cuckoo;
 			outputPaths = (
@@ -1230,6 +1251,10 @@
 				2FA5D5FB8B7F7B1E65A156BF /* GetMerkleBlocksTaskTests.swift in Sources */,
 				2FA5D37E8B4A6D9B89410173 /* SendTransactionTaskTests.swift in Sources */,
 				2FA5DD904B10D404DF9C6E04 /* RequestTransactionTaskTests.swift in Sources */,
+				2FA5D371584B554068CCAD8E /* IPeerTests.swift in Sources */,
+				2FA5D13C7285E79B75FAE2BE /* PeerConnectionDelegateTests.swift in Sources */,
+				2FA5D6129186D79E7C7DD57F /* IPeerTaskDelegateTests.swift in Sources */,
+				2FA5DFD4DDEA0B2F36600346 /* IPeerTaskRequesterTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -116,7 +116,7 @@ class GetMerkleBlockTaskTests:XCTestCase {
         let merkleBlock = MerkleBlock(header: blockHeaders[0], transactionHashes: [], transactions: [])
         let merkleBlock2 = MerkleBlock(header: blockHeaders[1], transactionHashes: [], transactions: [])
 
-        let handled = task.handle(merkleBlock: merkleBlock)
+        let _ = task.handle(merkleBlock: merkleBlock)
         resetMockDelegate()
 
         let handled2 = task.handle(merkleBlock: merkleBlock2)

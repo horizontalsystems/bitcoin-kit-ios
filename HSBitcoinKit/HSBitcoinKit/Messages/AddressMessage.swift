@@ -8,6 +8,11 @@ struct AddressMessage: IMessage {
     /// The uint32_t is a timestamp (see note below).
     let addressList: [NetworkAddress]
 
+    init(addresses: [NetworkAddress]) {
+        count = VarInt(addresses.count)
+        addressList = addresses
+    }
+
     init(data: Data) {
         let byteStream = ByteStream(data)
 

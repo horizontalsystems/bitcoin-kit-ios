@@ -17,7 +17,7 @@ class BitcoinCashTestNet: INetwork {
     let coinType: UInt32 = 1
     let sigHash: SigHashType = .bitcoinCashAll
 
-    let merkleBlockValidator: MerkleBlockValidator
+    let merkleBlockValidator: IMerkleBlockValidator
 
     let dnsSeeds = [
         "testnet-seed.bitcoinabc.org",
