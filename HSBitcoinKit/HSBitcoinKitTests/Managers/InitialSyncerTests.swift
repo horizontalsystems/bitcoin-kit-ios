@@ -41,6 +41,9 @@ class InitialSyncerTests: XCTestCase {
         stub(mockRealmFactory) {mock in
             when(mock.realm.get).thenReturn(realm)
         }
+        stub(mockNetwork) { mock in
+            when(mock.syncableFromApi.get).thenReturn(true)
+        }
 
 
         internalKeys = []
@@ -77,6 +80,7 @@ class InitialSyncerTests: XCTestCase {
         }
         stub(mockAddressManager) { mock in
             when(mock.addKeys(keys: any())).thenDoNothing()
+            when(mock.fillGap()).thenDoNothing()
         }
         stub(mockStateManager) { mock in
             when(mock.apiSynced.get).thenReturn(false)
@@ -134,6 +138,20 @@ class InitialSyncerTests: XCTestCase {
         verify(mockPeerGroup).start()
     }
 
+    func testSetApiSyncedIfNetworkNotSyncableFromApi() {
+        stub(mockNetwork) { mock in
+            when(mock.syncableFromApi.get).thenReturn(false)
+        }
+        stub(mockStateManager) { mock in
+            when(mock.apiSynced.set(any())).thenDoNothing()
+            when(mock.apiSynced.get).thenReturn(true)
+        }
+
+        try! syncer.sync()
+
+        verify(mockStateManager).apiSynced.set(true)
+    }
+
     func testSuccessSync() {
         let thirdBlock = TestData.thirdBlock
         let secondBlock = thirdBlock.previousBlock!
@@ -168,6 +186,7 @@ class InitialSyncerTests: XCTestCase {
         XCTAssertEqual(realm.objects(BlockHash.self).filter("reversedHeaderHashHex = %@", externalResponse01.hash).count, 1)
         XCTAssertEqual(realm.objects(BlockHash.self).filter("reversedHeaderHashHex = %@", internalResponse0.hash).count, 1)
 
+        verify(mockAddressManager).fillGap()
         verify(mockAddressManager).addKeys(keys: equal(to: [externalKeys[0], externalKeys[1], externalKeys[2], internalKeys[0], internalKeys[1], internalKeys[2]]))
         verify(mockHDWallet, never()).publicKey(index: equal(to: 3), external: any())
 

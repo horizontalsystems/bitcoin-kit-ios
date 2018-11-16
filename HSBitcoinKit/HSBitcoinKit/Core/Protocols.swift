@@ -81,7 +81,7 @@ protocol IPeerGroup: class {
     var transactionSyncer: ITransactionSyncer? { get set }
     func start()
     func stop()
-    func sendPendingTransactions()
+    func sendPendingTransactions() throws
 }
 
 protocol IPeerManager: class {
@@ -318,6 +318,7 @@ protocol INetwork: class {
     var checkpointBlock: Block { get }
     var coinType: UInt32 { get }
     var sigHash: SigHashType { get }
+    var syncableFromApi: Bool { get }
 
     // difficulty adjustment params
     var maxTargetBits: Int { get }                                      // Maximum difficulty.

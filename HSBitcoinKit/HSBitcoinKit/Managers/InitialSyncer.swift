@@ -92,6 +92,12 @@ class InitialSyncer {
 extension InitialSyncer: IInitialSyncer {
 
     func sync() throws {
+        try addressManager.fillGap()
+
+        if !network.syncableFromApi {
+            stateManager.apiSynced = true
+        }
+
         if !stateManager.apiSynced {
             let maxHeight = network.checkpointBlock.height
 

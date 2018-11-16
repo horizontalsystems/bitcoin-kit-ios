@@ -18,6 +18,7 @@ class BitcoinRegTest: INetwork {
     let port: UInt32 = 18444
     let coinType: UInt32 = 1
     let sigHash: SigHashType = .bitcoinAll
+    var syncableFromApi: Bool = false
 
     let dnsSeeds = [
          "btc-regtest.horizontalsystems.xyz",

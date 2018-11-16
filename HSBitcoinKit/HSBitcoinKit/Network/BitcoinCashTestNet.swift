@@ -16,6 +16,7 @@ class BitcoinCashTestNet: INetwork {
     let port: UInt32 = 18333
     let coinType: UInt32 = 1
     let sigHash: SigHashType = .bitcoinCashAll
+    var syncableFromApi: Bool = true
 
     let merkleBlockValidator: IMerkleBlockValidator
 

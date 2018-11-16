@@ -23,6 +23,7 @@ class BitcoinCashMainNet: INetwork {
     let port: UInt32 = 8333
     let coinType: UInt32 = 0
     let sigHash: SigHashType = .bitcoinCashAll
+    var syncableFromApi: Bool = true
 
     let dnsSeeds = [
         "seed.bitcoinabc.org",

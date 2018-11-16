@@ -23,6 +23,7 @@ class BitcoinTestNet: INetwork {
     let port: UInt32 = 18333
     let coinType: UInt32 = 1
     let sigHash: SigHashType = .bitcoinAll
+    var syncableFromApi: Bool = true
 
     let dnsSeeds = [
         "testnet-seed.bitcoin.petertodd.org",    // Peter Todd
