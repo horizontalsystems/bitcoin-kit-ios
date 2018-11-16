@@ -324,7 +324,7 @@
 		2FA5DDAE64200E386070668C /* TransactionBuilderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionBuilderTests.swift; sourceTree = "<group>"; };
 		2FA5DDED90E11DEC3647B164 /* PeerAddress.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerAddress.swift; sourceTree = "<group>"; };
 		2FA5DE7E06652FCED7B288E7 /* BloomFilterManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BloomFilterManager.swift; sourceTree = "<group>"; };
-		2FA5DE9CAB1F15B04E2C54C9 /* HostDiscovery.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.swfit; path = HostDiscovery.swift; sourceTree = "<group>"; };
+		2FA5DE9CAB1F15B04E2C54C9 /* HostDiscovery.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HostDiscovery.swift; sourceTree = "<group>"; };
 		2FA5DEC11B1DA4DA336DBB28 /* PeerTimer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerTimer.swift; sourceTree = "<group>"; };
 		2FA5DEC34722F594F85688C0 /* TransactionOutputSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionOutputSerializer.swift; sourceTree = "<group>"; };
 		2FA5DEC678BF41F0D38095DD /* BlockchainTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockchainTests.swift; sourceTree = "<group>"; };
@@ -546,28 +546,19 @@
 			path = Helpers;
 			sourceTree = "<group>";
 		};
-		11B357B9FF089EC58748DA4C /* PeerNetwork */ = {
+		11B357B9FF089EC58748DA4C /* Network */ = {
 			isa = PBXGroup;
 			children = (
-				11B35D7D1D8F72DFA208F497 /* PeerTask */,
+				D096D108219E93F300E8103F /* Helpers */,
+				11B358F2406C382875DA91A2 /* Messages */,
+				D096D109219E95B800E8103F /* Peer */,
 				11B3538AE4523B395063F66D /* BitcoinCashMainNet.swift */,
 				11B35F5A8D3919A80AD2DBF3 /* BitcoinCashTestNet.swift */,
 				11B35D44C0F5847D5B6EDEBC /* BitcoinMainNet.swift */,
 				11B35E92D4F8CF1524F98F7A /* BitcoinTestNet.swift */,
 				11B35A0FD8DBCF14EC9AA8ED /* BitcoinRegTest.swift */,
-				11B35AEA9C74CB8AFFFE9D8E /* ByteStream.swift */,
-				2FA5DE9CAB1F15B04E2C54C9 /* HostDiscovery.swift */,
-				2FA5D5A744085AD28EFBB868 /* Peer.swift */,
-				D31711E920F7192300AEF61B /* PeerConnection.swift */,
-				11B359E44D75610DF2841327 /* PeerGroup.swift */,
-				D093F45D21414CC000C5D8CD /* PeerHostManager.swift */,
-				2FA5D3968E6E11AF76368CA5 /* PeerManager.swift */,
-				2FA5DEC11B1DA4DA336DBB28 /* PeerTimer.swift */,
-				11B356D308DCF4BB33D9F488 /* ServiceFlags.swift */,
-				11B355C0072CA13ADBAC1351 /* VarInt.swift */,
-				11B35C47D552B7AC5EA8C463 /* VarString.swift */,
 			);
-			path = PeerNetwork;
+			path = Network;
 			sourceTree = "<group>";
 		};
 		11B3582B0517A9873E63381B /* Transactions */ = {
@@ -575,6 +566,7 @@
 			children = (
 				58AAAB58B5883EDAE754E34F /* Builder */,
 				11B3505456C3C7F73F2722AB /* Extractors */,
+				58AAAE8C826DAC0CB77E8521 /* Scripts */,
 				11B357AFD2F27913B7451ACA /* TransactionExtractorTests.swift */,
 				11B35DB7140D86176157F8CA /* TransactionLinkerTests.swift */,
 				58AAA21C2FD6764CD385663E /* TransactionCreatorTests.swift */,
@@ -668,6 +660,7 @@
 			children = (
 				58AAA98E5C50F2723D500F9F /* Builder */,
 				11B35ABE009449CF02027197 /* Extractors */,
+				58AAA11F421202A1ADFF0CE2 /* Scripts */,
 				11B356EF3A4749163293CCA3 /* BlockSyncer.swift */,
 				11B3556BD9C3E52C992D1E92 /* TransactionExtractor.swift */,
 				11B3526235310556644773A2 /* TransactionLinker.swift */,
@@ -762,20 +755,16 @@
 			path = Scripts;
 			sourceTree = "<group>";
 		};
-		58AAA80C18459F9822D75EC3 /* PeerNetwork */ = {
+		58AAA80C18459F9822D75EC3 /* Network */ = {
 			isa = PBXGroup;
 			children = (
-				D0232B37219C4740006803E1 /* Peer */,
-				D064ED8821622CA500310C99 /* PeerGroup */,
-				D05D5DEF219BF5AB006D0394 /* PeerTask */,
+				D096D10A219E97E100E8103F /* Peer */,
 				58AAA3744E23993E6BA283AC /* BitcoinCashMainNetTests.swift */,
 				58AAAAFCA9E73AD5A7AB4CA6 /* BitcoinMainNetTests.swift */,
 				58AAAEDC9D0D7BAE56C71DE0 /* BitcoinTestNetTests.swift */,
 				58AAA285EFA8FD5B4236D8CC /* BitcoinRegTestNetTests.swift */,
-				2FA5DF9ADB516A45C797889D /* PeerHostManagerTests.swift */,
-				2FA5D27387B0CF46C2B0A22A /* PeerManagerTests.swift */,
 			);
-			path = PeerNetwork;
+			path = Network;
 			sourceTree = "<group>";
 		};
 		58AAA98E5C50F2723D500F9F /* Builder */ = {
@@ -846,7 +835,7 @@
 			path = Helpers;
 			sourceTree = "<group>";
 		};
-		D0232B37219C4740006803E1 /* Peer */ = {
+		D0232B37219C4740006803E1 /* PeerTests */ = {
 			isa = PBXGroup;
 			children = (
 				2FA5D99586B15F4477D695F7 /* IPeerTests.swift */,
@@ -854,7 +843,7 @@
 				2FA5DFB5B9A13478ACBB61EB /* IPeerTaskDelegateTests.swift */,
 				2FA5DAAAC2F759FD42948DDE /* IPeerTaskRequesterTests.swift */,
 			);
-			path = Peer;
+			path = PeerTests;
 			sourceTree = "<group>";
 		};
 		D05D5DEF219BF5AB006D0394 /* PeerTask */ = {
@@ -868,7 +857,7 @@
 			path = PeerTask;
 			sourceTree = "<group>";
 		};
-		D064ED8821622CA500310C99 /* PeerGroup */ = {
+		D064ED8821622CA500310C99 /* PeerGroupTests */ = {
 			isa = PBXGroup;
 			children = (
 				2FA5D0A6A8C6C5A4E2AAFB74 /* BloomFilterManagerDelegateTests.swift */,
@@ -877,7 +866,46 @@
 				2FA5D602DBCFC5121F7C245F /* PeerGroupTests.swift */,
 				2FA5D632A9EFB1F0CF2523DF /* PeerHostManagerDelegateTests.swift */,
 			);
-			path = PeerGroup;
+			path = PeerGroupTests;
+			sourceTree = "<group>";
+		};
+		D096D108219E93F300E8103F /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				11B35AEA9C74CB8AFFFE9D8E /* ByteStream.swift */,
+				2FA5DE9CAB1F15B04E2C54C9 /* HostDiscovery.swift */,
+				11B356D308DCF4BB33D9F488 /* ServiceFlags.swift */,
+				11B355C0072CA13ADBAC1351 /* VarInt.swift */,
+				11B35C47D552B7AC5EA8C463 /* VarString.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
+		D096D109219E95B800E8103F /* Peer */ = {
+			isa = PBXGroup;
+			children = (
+				11B35D7D1D8F72DFA208F497 /* PeerTask */,
+				2FA5D5A744085AD28EFBB868 /* Peer.swift */,
+				D31711E920F7192300AEF61B /* PeerConnection.swift */,
+				11B359E44D75610DF2841327 /* PeerGroup.swift */,
+				D093F45D21414CC000C5D8CD /* PeerHostManager.swift */,
+				2FA5D3968E6E11AF76368CA5 /* PeerManager.swift */,
+				2FA5DEC11B1DA4DA336DBB28 /* PeerTimer.swift */,
+			);
+			path = Peer;
+			sourceTree = "<group>";
+		};
+		D096D10A219E97E100E8103F /* Peer */ = {
+			isa = PBXGroup;
+			children = (
+				D0232B37219C4740006803E1 /* PeerTests */,
+				D064ED8821622CA500310C99 /* PeerGroupTests */,
+				D05D5DEF219BF5AB006D0394 /* PeerTask */,
+				2FA5DF9ADB516A45C797889D /* PeerHostManagerTests.swift */,
+				2FA5D27387B0CF46C2B0A22A /* PeerManagerTests.swift */,
+			);
+			name = Peer;
+			path = "New Group";
 			sourceTree = "<group>";
 		};
 		D0CF87C9211D9E36003C950F /* Recovered References */ = {
@@ -927,8 +955,7 @@
 				D01B6FAA21230AE80085010F /* Helpers */,
 				11B352462C0F682238607E64 /* Managers */,
 				11B358FC5E5FE51671115A95 /* Models */,
-				58AAA80C18459F9822D75EC3 /* PeerNetwork */,
-				58AAAE8C826DAC0CB77E8521 /* Scripts */,
+				58AAA80C18459F9822D75EC3 /* Network */,
 				11B3582B0517A9873E63381B /* Transactions */,
 				D380FD6720FCC22800276993 /* GeneratedMocks.swift */,
 				11B3590614D2772B1436542A /* Extensions.swift */,
@@ -970,11 +997,9 @@
 				11B355C61361B7F77322E618 /* Extensions */,
 				11B35649863DB92E43F8D567 /* Helpers */,
 				11B35F900746A8190305C20E /* Managers */,
-				11B358F2406C382875DA91A2 /* Messages */,
 				11B35B5B2F111C31B1D972EB /* Models */,
-				11B357B9FF089EC58748DA4C /* PeerNetwork */,
+				11B357B9FF089EC58748DA4C /* Network */,
 				D0F02417213CF40F002629EF /* Serializers */,
-				58AAA11F421202A1ADFF0CE2 /* Scripts */,
 				11B35BC0CDFD3512DD636A78 /* Transactions */,
 				D3FD450820F354EF00F472B9 /* HSBitcoinKit.h */,
 				D3FD450920F354EF00F472B9 /* Info.plist */,
@@ -1154,8 +1179,8 @@
 			);
 			inputPaths = (
 				"$(SRCROOT)/${PROJECT_NAME}/Core/Protocols.swift",
-				"$(SRCROOT)/${PROJECT_NAME}/Scripts/Script.swift",
-				"$(SRCROOT)/${PROJECT_NAME}/PeerNetwork/PeerTask/PeerTask.swift",
+				"$(SRCROOT)/${PROJECT_NAME}/Transactions/Scripts/Script.swift",
+				"$(SRCROOT)/${PROJECT_NAME}/Network/Peer/PeerTask/PeerTask.swift",
 			);
 			name = Cuckoo;
 			outputPaths = (
