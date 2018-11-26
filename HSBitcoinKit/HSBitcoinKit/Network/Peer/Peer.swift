@@ -1,6 +1,5 @@
 import Foundation
 import HSCryptoKit
-import SwiftyBeaver
 
 class Peer {
     enum PeerError: Error {

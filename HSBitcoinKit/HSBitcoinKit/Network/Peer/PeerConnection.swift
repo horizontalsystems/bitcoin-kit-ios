@@ -1,6 +1,5 @@
 import Foundation
 import HSHDWalletKit
-import SwiftyBeaver
 
 class PeerConnection: NSObject {
     enum PeerConnectionError: Error {

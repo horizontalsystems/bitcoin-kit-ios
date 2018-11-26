@@ -1,5 +1,4 @@
 import Foundation
-import SwiftyBeaver
 
 class PeerTimer {
 

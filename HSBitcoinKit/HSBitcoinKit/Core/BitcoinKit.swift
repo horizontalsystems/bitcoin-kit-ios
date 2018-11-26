@@ -3,7 +3,6 @@ import HSHDWalletKit
 import RealmSwift
 import BigInt
 import HSCryptoKit
-import SwiftyBeaver
 
 public class BitcoinKit {
 
