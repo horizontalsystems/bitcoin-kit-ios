@@ -128,7 +128,7 @@ class PeerGroup {
             }
 
             if let nonSyncedPeer = self.peerManager.nonSyncedPeer() {
-                btcKitLog.debug("Setting sync peer to \(nonSyncedPeer.logName)")
+                logger.debug("Setting sync peer to \(nonSyncedPeer.logName)")
                 self.peerManager.syncPeer = nonSyncedPeer
                 self.blockSyncer?.downloadStarted()
                 self.bestBlockHeightListener.bestBlockHeightReceived(height: nonSyncedPeer.announcedLastBlockHeight)
@@ -242,7 +242,7 @@ extension PeerGroup: PeerDelegate {
 
     func peerDidDisconnect(_ peer: IPeer, withError error: Error?) {
         if let error = error {
-            btcKitLog.warning("Peer \(peer.logName)(\(peer.host)) disconnected. Network reachable: \(reachabilityManager.reachable()). Error: \(error)")
+            logger.warning("Peer \(peer.logName)(\(peer.host)) disconnected. Network reachable: \(reachabilityManager.reachable()). Error: \(error)")
         }
 
         peerHostManager.hostDisconnected(host: peer.host, withError: error, networkReachable: reachabilityManager.reachable())
@@ -284,7 +284,7 @@ extension PeerGroup: PeerDelegate {
         do {
             try blockSyncer?.handle(merkleBlock: merkleBlock)
         } catch {
-            btcKitLog.error(error, context: peer.logName)
+            logger.error(error, context: peer.logName)
             peer.disconnect(error: error)
         }
     }

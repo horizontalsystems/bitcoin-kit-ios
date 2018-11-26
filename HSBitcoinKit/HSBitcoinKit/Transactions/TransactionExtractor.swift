@@ -36,7 +36,7 @@ extension TransactionExtractor: ITransactionExtractor {
                     validScriptType = extractor.type
                     break
                 } catch {
-                    btcKitLog.error("\(error) Can't parse output by this extractor")
+                    logger.error("\(error) Can't parse output by this extractor")
                 }
             }
             guard let addressKeyHash = payload else { continue }
@@ -76,7 +76,7 @@ extension TransactionExtractor: ITransactionExtractor {
                         break
                     }
                 } catch {
-                    btcKitLog.error("\(error) Can't parse output by this extractor")
+                    logger.error("\(error) Can't parse output by this extractor")
                 }
             }
         }

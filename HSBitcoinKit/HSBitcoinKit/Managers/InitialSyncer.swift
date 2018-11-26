@@ -39,7 +39,7 @@ class InitialSyncer {
             return nil
         }
 
-        btcKitLog.debug("SAVING: \(keys.count) keys, \(blocks.count) blocks")
+        logger.debug("SAVING: \(keys.count) keys, \(blocks.count) blocks")
 
         let realm = realmFactory.realm
         try realm.write {
@@ -121,7 +121,7 @@ extension InitialSyncer: IInitialSyncer {
                         try? self?.handle(keys: keys, responses: responses)
                     }, onError: { [weak self] error in
                         // TODO: make handle error
-                        btcKitLog.error(error)
+                        logger.error(error)
 //                        self?.peerGroup.start()
                     })
                     .disposed(by: disposeBag)

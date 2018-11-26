@@ -5,7 +5,7 @@ import BigInt
 import HSCryptoKit
 import SwiftyBeaver
 
-let btcKitLog = SwiftyBeaver.self
+let logger = SwiftyBeaver.self
 
 public class BitcoinKit {
 
@@ -153,7 +153,7 @@ public class BitcoinKit {
         let console = ConsoleDestination()
         console.minLevel = minLogLevel
         console.format = "$DHH:mm:ss.SSS$d $C$c[$T]$X $N.$F:$l - $M"
-        btcKitLog.addDestination(console)
+        logger.addDestination(console)
     }
 
 }

@@ -80,7 +80,7 @@ extension BlockSyncer: IBlockSyncer {
 
             blockchain.handleFork(realm: realmFactory.realm)
         } catch {
-            btcKitLog.error(error)
+            logger.error(error)
         }
     }
 

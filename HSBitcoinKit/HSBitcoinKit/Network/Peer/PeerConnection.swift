@@ -92,7 +92,7 @@ class PeerConnection: NSObject {
     }
 
     private func log(_ message: String, level: SwiftyBeaver.Level = .debug) {
-        btcKitLog.custom(level: level, message: message, file: #file, function: #function, line: #line, context: logName)
+        logger.custom(level: level, message: message, file: #file, function: #function, line: #line, context: logName)
     }
 }
 

@@ -72,7 +72,7 @@ extension PeerHostManager: IPeerHostManager {
                         }
                     }
                 } catch {
-                    btcKitLog.error("Could not process IP due to error: \(error)")
+                    logger.error("Could not process IP due to error: \(error)")
                 }
             }
         }
@@ -99,12 +99,12 @@ extension PeerHostManager: IPeerHostManager {
             }
 
             do {
-                btcKitLog.debug("Adding new hosts: \(newPeerAddresses.count)")
+                logger.debug("Adding new hosts: \(newPeerAddresses.count)")
                 try realm.write {
                     realm.add(newPeerAddresses)
                 }
             } catch {
-                btcKitLog.error("Could not add PeerAddresses due to error: \(error)")
+                logger.error("Could not add PeerAddresses due to error: \(error)")
             }
 
             self.delegate?.newHostsAdded()

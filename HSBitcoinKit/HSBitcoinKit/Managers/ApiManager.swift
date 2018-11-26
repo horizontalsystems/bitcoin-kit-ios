@@ -42,7 +42,7 @@ class ApiManager {
 
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
-        btcKitLog.debug("API OUT: \(method.rawValue) \(path) \(parameters.map { String(describing: $0) } ?? "")")
+        logger.debug("API OUT: \(method.rawValue) \(path) \(parameters.map { String(describing: $0) } ?? "")")
 
         return RequestRouter(request: request, encoding: method == .get ? URLEncoding.default : JSONEncoding.default, parameters: parameters)
     }
@@ -88,7 +88,7 @@ class ApiManager {
 
     private func observable(forRequest request: URLRequestConvertible) -> Observable<DataResponse<Any>> {
         let observable = Observable<DataResponse<Any>>.create { observer in
-            btcKitLog.debug("API OUT: \(request.urlRequest?.httpMethod ?? "") \(request.urlRequest?.url?.absoluteString ?? "")")
+            logger.debug("API OUT: \(request.urlRequest?.httpMethod ?? "") \(request.urlRequest?.url?.absoluteString ?? "")")
 
             let requestReference = Alamofire.request(request)
                     .validate()
@@ -105,14 +105,14 @@ class ApiManager {
         return observable.do(onNext: { dataResponse in
             switch dataResponse.result {
             case .success(let result):
-                btcKitLog.debug("API IN: SUCCESS: \(dataResponse.request?.url?.path ?? ""): response = \(result)")
+                logger.debug("API IN: SUCCESS: \(dataResponse.request?.url?.path ?? ""): response = \(result)")
                 ()
             case .failure:
                 let data = dataResponse.data.flatMap {
                     try? JSONSerialization.jsonObject(with: $0, options: .allowFragments)
                 }
 
-                btcKitLog.debug("API IN: ERROR: \(dataResponse.request?.url?.path ?? ""): status = \(dataResponse.response?.statusCode ?? 0), response: \(data.map { "\($0)" } ?? "nil")")
+                logger.debug("API IN: ERROR: \(dataResponse.request?.url?.path ?? ""): status = \(dataResponse.response?.statusCode ?? 0), response: \(data.map { "\($0)" } ?? "nil")")
                 ()
             }
         })
