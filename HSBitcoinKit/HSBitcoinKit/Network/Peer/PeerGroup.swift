@@ -4,6 +4,11 @@ import RxSwift
 
 class PeerGroup {
 
+    enum PeerGroupError: Error {
+        case noConnectedPeers
+        case peersNotSynced
+    }
+
     private let reachabilityManager: IReachabilityManager
     private var disposable: Disposable?
 
@@ -70,12 +75,16 @@ class PeerGroup {
         }
     }
 
-    private func handlePendingTransactions() {
-        peersQueue.async {
-            guard self.peerManager.connected().count > 0, self.peerManager.nonSyncedPeer() == nil else {
-                return
-            }
+    private func handlePendingTransactions() throws {
+        guard self.peerManager.connected().count > 0 else {
+            throw PeerGroupError.noConnectedPeers
+        }
 
+        guard self.peerManager.nonSyncedPeer() == nil else {
+            throw PeerGroupError.peersNotSynced
+        }
+
+        peersQueue.async {
             for peer in self.peerManager.someReadyPeers() {
                 let pendingTransactions = self.transactionSyncer?.pendingTransactions() ?? []
                 for transaction in pendingTransactions {
@@ -125,7 +134,7 @@ class PeerGroup {
                 self.bestBlockHeightListener.bestBlockHeightReceived(height: nonSyncedPeer.announcedLastBlockHeight)
                 self.downloadBlockchain()
             } else {
-                self.handlePendingTransactions()
+                try? self.handlePendingTransactions()
             }
         }
     }
@@ -211,8 +220,8 @@ extension PeerGroup: IPeerGroup {
         _stop()
     }
 
-    func sendPendingTransactions() {
-        self.handlePendingTransactions()
+    func sendPendingTransactions() throws {
+        try self.handlePendingTransactions()
     }
 
 }

@@ -20,6 +20,7 @@ class BitcoinMainNet: INetwork {
     let port: UInt32 = 8333
     let coinType: UInt32 = 0
     let sigHash: SigHashType = .bitcoinAll
+    var syncableFromApi: Bool = true
 
     let dnsSeeds = [
         "seed.bitcoin.sipa.be",         // Pieter Wuille
