@@ -31,8 +31,13 @@ class RequestRouter: URLRequestConvertible {
 class ApiManager {
     private let apiUrl: String
 
-    required init(apiUrl: String) {
+    private let logger: Logger?
+
+
+    required init(apiUrl: String, logger: Logger? = nil) {
         self.apiUrl = apiUrl
+
+        self.logger = logger
     }
 
     func request(withMethod method: HTTPMethod, path: String, parameters: [String: Any]? = nil) -> URLRequestConvertible {
@@ -42,7 +47,7 @@ class ApiManager {
 
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
-        logger.debug("API OUT: \(method.rawValue) \(path) \(parameters.map { String(describing: $0) } ?? "")")
+        logger?.debug("API OUT: \(method.rawValue) \(path) \(parameters.map { String(describing: $0) } ?? "")")
 
         return RequestRouter(request: request, encoding: method == .get ? URLEncoding.default : JSONEncoding.default, parameters: parameters)
     }
@@ -88,7 +93,7 @@ class ApiManager {
 
     private func observable(forRequest request: URLRequestConvertible) -> Observable<DataResponse<Any>> {
         let observable = Observable<DataResponse<Any>>.create { observer in
-            logger.debug("API OUT: \(request.urlRequest?.httpMethod ?? "") \(request.urlRequest?.url?.absoluteString ?? "")")
+            self.logger?.debug("API OUT: \(request.urlRequest?.httpMethod ?? "") \(request.urlRequest?.url?.absoluteString ?? "")")
 
             let requestReference = Alamofire.request(request)
                     .validate()
@@ -105,14 +110,14 @@ class ApiManager {
         return observable.do(onNext: { dataResponse in
             switch dataResponse.result {
             case .success(let result):
-                logger.debug("API IN: SUCCESS: \(dataResponse.request?.url?.path ?? ""): response = \(result)")
+                self.logger?.debug("API IN: SUCCESS: \(dataResponse.request?.url?.path ?? ""): response = \(result)")
                 ()
             case .failure:
                 let data = dataResponse.data.flatMap {
                     try? JSONSerialization.jsonObject(with: $0, options: .allowFragments)
                 }
 
-                logger.debug("API IN: ERROR: \(dataResponse.request?.url?.path ?? ""): status = \(dataResponse.response?.statusCode ?? 0), response: \(data.map { "\($0)" } ?? "nil")")
+                self.logger?.debug("API IN: ERROR: \(dataResponse.request?.url?.path ?? ""): status = \(dataResponse.response?.statusCode ?? 0), response: \(data.map { "\($0)" } ?? "nil")")
                 ()
             }
         })

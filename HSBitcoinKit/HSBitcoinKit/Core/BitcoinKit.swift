@@ -5,8 +5,6 @@ import BigInt
 import HSCryptoKit
 import SwiftyBeaver
 
-let logger = SwiftyBeaver.self
-
 public class BitcoinKit {
 
     public weak var delegate: BitcoinKitDelegate?
@@ -20,6 +18,7 @@ public class BitcoinKit {
     private let validatorFactory: IBlockValidatorFactory
 
     private let network: INetwork
+    private let logger: Logger
 
     private let realmFactory: IRealmFactory
 
@@ -59,7 +58,7 @@ public class BitcoinKit {
     private let progressSyncer: IProgressSyncer & BestBlockHeightListener & BlockSyncerListener
     private var dataProvider: IDataProvider & ProgressSyncerDelegate
 
-    public init(withWords words: [String], coin: Coin, minLogLevel: SwiftyBeaver.Level = .verbose) {
+    public init(withWords words: [String], coin: Coin, minLogLevel: Logger.Level = .verbose) {
         let wordsHash = words.joined().data(using: .utf8).map { CryptoKit.sha256($0).hex } ?? words[0]
 
         let realmFileName = "\(wordsHash)-\(coin.rawValue).realm"
@@ -96,6 +95,7 @@ public class BitcoinKit {
             }
         }
         addressConverter = AddressConverter(network: network, bech32AddressConverter: bech32AddressConverter)
+        logger = Logger(network: network)
 
         realmFactory = RealmFactory(configuration: realmConfiguration)
 
@@ -109,8 +109,8 @@ public class BitcoinKit {
         case .bitcoinCash: addressSelector = BitcoinCashAddressSelector(addressConverter: addressConverter)
         }
 
-//        initialSyncApi = BtcComApi(network: network)
-        initialSyncApi = BcoinApi(network: network)
+//        initialSyncApi = BtcComApi(network: network, logger: logger)
+        initialSyncApi = BcoinApi(network: network, logger: logger)
 
         reachabilityManager = ReachabilityManager()
 
@@ -120,7 +120,7 @@ public class BitcoinKit {
         progressSyncer = ProgressSyncer()
 
         bloomFilterManager = BloomFilterManager(realmFactory: realmFactory, factory: factory)
-        peerGroup = PeerGroup(factory: factory, network: network, listener: progressSyncer, reachabilityManager: reachabilityManager, peerHostManager: peerHostManager, bloomFilterManager: bloomFilterManager)
+        peerGroup = PeerGroup(factory: factory, network: network, listener: progressSyncer, reachabilityManager: reachabilityManager, peerHostManager: peerHostManager, bloomFilterManager: bloomFilterManager, logger: logger)
 
         addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, addressConverter: addressConverter)
         initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, api: initialSyncApi, addressManager: addressManager, addressSelector: addressSelector, factory: factory, peerGroup: peerGroup, network: network)
@@ -141,7 +141,7 @@ public class BitcoinKit {
         blockchain = Blockchain(network: network, factory: factory)
 
         dataProvider = DataProvider(realmFactory: realmFactory, addressManager: addressManager, addressConverter: addressConverter, transactionCreator: transactionCreator, transactionBuilder: transactionBuilder, network: network)
-        blockSyncer = BlockSyncer(realmFactory: realmFactory, network: network, listener: progressSyncer, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager)
+        blockSyncer = BlockSyncer(realmFactory: realmFactory, network: network, listener: progressSyncer, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager, logger: logger)
 
         peerGroup.blockSyncer = blockSyncer
         peerGroup.transactionSyncer = transactionSyncer
@@ -149,11 +149,6 @@ public class BitcoinKit {
         progressSyncer.delegate = dataProvider
 
         dataProvider.delegate = self
-
-        let console = ConsoleDestination()
-        console.minLevel = minLogLevel
-        console.format = "$DHH:mm:ss.SSS$d $C$c[$T]$X $N.$F:$l - $M"
-        logger.addDestination(console)
     }
 
 }

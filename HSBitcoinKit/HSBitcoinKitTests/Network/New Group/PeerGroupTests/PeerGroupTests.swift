@@ -45,7 +45,7 @@ class PeerGroupTests: XCTestCase {
             peers[hostString] = mockPeer
 
             stub(mockFactory) { mock in
-                when(mock.peer(withHost: equal(to: hostString), network: any())).thenReturn(mockPeer)
+                when(mock.peer(withHost: equal(to: hostString), network: any(), logger: any())).thenReturn(mockPeer)
             }
         }
         resetStubsAndInvocationsOfPeers()

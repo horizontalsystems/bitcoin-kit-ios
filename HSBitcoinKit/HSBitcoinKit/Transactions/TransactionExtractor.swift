@@ -12,12 +12,16 @@ class TransactionExtractor {
     let scriptConverter: IScriptConverter
     let addressConverter: IAddressConverter
 
+    let logger: Logger?
+    
     init(scriptInputExtractors: [IScriptExtractor] = TransactionExtractor.defaultInputExtractors, scriptOutputExtractors: [IScriptExtractor] = TransactionExtractor.defaultOutputExtractors,
-         scriptConverter: IScriptConverter, addressConverter: IAddressConverter) {
+         scriptConverter: IScriptConverter, addressConverter: IAddressConverter, logger: Logger? = nil) {
         self.scriptInputExtractors = scriptInputExtractors
         self.scriptOutputExtractors = scriptOutputExtractors
         self.scriptConverter = scriptConverter
         self.addressConverter = addressConverter
+        
+        self.logger = logger
     }
 
 }
@@ -36,7 +40,7 @@ extension TransactionExtractor: ITransactionExtractor {
                     validScriptType = extractor.type
                     break
                 } catch {
-                    logger.error("\(error) Can't parse output by this extractor")
+                    logger?.error("\(error) Can't parse output by this extractor")
                 }
             }
             guard let addressKeyHash = payload else { continue }
@@ -76,7 +80,7 @@ extension TransactionExtractor: ITransactionExtractor {
                         break
                     }
                 } catch {
-                    logger.error("\(error) Can't parse output by this extractor")
+                    logger?.error("\(error) Can't parse output by this extractor")
                 }
             }
         }

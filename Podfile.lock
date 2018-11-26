@@ -17,7 +17,6 @@ PODS:
     - RxSwift (~> 4.0)
   - RxSwift (4.3.1)
   - SipHash (1.2.2)
-  - SwiftyBeaver (1.6.1)
 
 DEPENDENCIES:
   - Alamofire
@@ -29,7 +28,6 @@ DEPENDENCIES:
   - RealmSwift
   - RxRealm
   - RxSwift
-  - SwiftyBeaver
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
@@ -44,7 +42,6 @@ SPEC REPOS:
     - RxRealm
     - RxSwift
     - SipHash
-    - SwiftyBeaver
 
 SPEC CHECKSUMS:
   Alamofire: c7287b6e5d7da964a70935e5db17046b7fde6568
@@ -58,8 +55,7 @@ SPEC CHECKSUMS:
   RxRealm: a6c6c0a07cb61f34209969ca6657734edfdfff30
   RxSwift: fe0fd770a43acdb7d0a53da411c9b892e69bb6e4
   SipHash: fad90a4683e420c52ef28063063dbbce248ea6d4
-  SwiftyBeaver: ccfcdf85a04d429f1633f668650b0ce8020bda3a
 
-PODFILE CHECKSUM: 2fbdc51b9bca0cc8a05c66c4b5b345fc246e7be5
+PODFILE CHECKSUM: 1a2effba4d0a10b310a52a7a7d8e5338a2dcc811
 
 COCOAPODS: 1.5.3

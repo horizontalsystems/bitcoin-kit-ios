@@ -5,7 +5,7 @@ import ObjectMapper
 class BcoinApi {
     private let apiManager: ApiManager
 
-    init(network: INetwork) {
+    init(network: INetwork, logger: Logger? = nil) {
         let url: String
 
         switch network {
@@ -16,7 +16,7 @@ class BcoinApi {
         default: url = "http://btc-testnet.horizontalsystems.xyz"
         }
 
-        apiManager = ApiManager(apiUrl: url)
+        apiManager = ApiManager(apiUrl: url, logger: logger)
     }
 
 }

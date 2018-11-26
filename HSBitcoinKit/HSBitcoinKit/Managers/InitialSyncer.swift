@@ -15,9 +15,11 @@ class InitialSyncer {
     private let peerGroup: IPeerGroup
     private let network: INetwork
 
+    private let logger: Logger?
+
     private let async: Bool
 
-    init(realmFactory: IRealmFactory, hdWallet: IHDWallet, stateManager: IStateManager, api: IInitialSyncApi, addressManager: IAddressManager, addressSelector: IAddressSelector, factory: IFactory, peerGroup: IPeerGroup, network: INetwork, async: Bool = true) {
+    init(realmFactory: IRealmFactory, hdWallet: IHDWallet, stateManager: IStateManager, api: IInitialSyncApi, addressManager: IAddressManager, addressSelector: IAddressSelector, factory: IFactory, peerGroup: IPeerGroup, network: INetwork, async: Bool = true, logger: Logger? = nil) {
         self.realmFactory = realmFactory
         self.hdWallet = hdWallet
         self.stateManager = stateManager
@@ -27,6 +29,8 @@ class InitialSyncer {
         self.factory = factory
         self.peerGroup = peerGroup
         self.network = network
+
+        self.logger = logger
 
         self.async = async
     }
@@ -39,7 +43,7 @@ class InitialSyncer {
             return nil
         }
 
-        logger.debug("SAVING: \(keys.count) keys, \(blocks.count) blocks")
+        logger?.debug("SAVING: \(keys.count) keys, \(blocks.count) blocks")
 
         let realm = realmFactory.realm
         try realm.write {
@@ -121,7 +125,7 @@ extension InitialSyncer: IInitialSyncer {
                         try? self?.handle(keys: keys, responses: responses)
                     }, onError: { [weak self] error in
                         // TODO: make handle error
-                        logger.error(error)
+                        self?.logger?.error(error)
 //                        self?.peerGroup.start()
                     })
                     .disposed(by: disposeBag)

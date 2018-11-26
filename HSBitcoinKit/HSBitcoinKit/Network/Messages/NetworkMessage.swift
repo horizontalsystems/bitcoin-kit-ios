@@ -74,7 +74,7 @@ struct NetworkMessage {
 
         let magic = byteStream.read(UInt32.self).bigEndian
         guard network.magic == magic else {
-            logger.warning("Wrong magic number!")
+            Logger.shared.warning("Wrong magic number!", network: network)
             return nil
         }
         let command = byteStream.read(Data.self, count: 12).to(type: String.self)

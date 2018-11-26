@@ -25,6 +25,9 @@ class PeerConnection: NSObject {
     private var peerTimer: PeerTimer
 
     private var packets: Data = Data()
+
+    private let logger: Logger?
+
     var connected: Bool = false
 
     var logName: String {
@@ -32,11 +35,13 @@ class PeerConnection: NSObject {
         return "[\(WordList.english[index])]".uppercased()
     }
 
-    init(host: String, network: INetwork) {
+    init(host: String, network: INetwork, logger: Logger? = nil) {
         self.host = host
         self.port = UInt32(network.port)
         self.network = network
         self.peerTimer = PeerTimer()
+
+        self.logger = logger
     }
 
     deinit {
@@ -91,8 +96,8 @@ class PeerConnection: NSObject {
         }
     }
 
-    private func log(_ message: String, level: SwiftyBeaver.Level = .debug) {
-        logger.custom(level: level, message: message, file: #file, function: #function, line: #line, context: logName)
+    private func log(_ message: String, level: Logger.Level = .debug, file: String = #file, function: String = #function, line: Int = #line) {
+        logger?.log(level: level, message: message, file: file, function: function, line: line, context: logName)
     }
 }
 

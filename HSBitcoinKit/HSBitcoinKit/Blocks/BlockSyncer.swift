@@ -14,6 +14,8 @@ class BlockSyncer {
     private let hashCheckpointThreshold: Int
     private var needToReDownload = false
 
+    private let logger: Logger?
+
     var localBestBlockHeight: Int32 {
         let height = realmFactory.realm.objects(Block.self).sorted(byKeyPath: "height").last?.height
         return Int32(height ?? 0)
@@ -21,7 +23,7 @@ class BlockSyncer {
 
     init(realmFactory: IRealmFactory, network: INetwork, listener: BlockSyncerListener,
          transactionProcessor: ITransactionProcessor, blockchain: IBlockchain, addressManager: IAddressManager, bloomFilterManager: IBloomFilterManager,
-         hashCheckpointThreshold: Int = 100) {
+         hashCheckpointThreshold: Int = 100, logger: Logger? = nil) {
         self.realmFactory = realmFactory
         self.network = network
         self.transactionProcessor = transactionProcessor
@@ -30,6 +32,8 @@ class BlockSyncer {
         self.bloomFilterManager = bloomFilterManager
         self.hashCheckpointThreshold = hashCheckpointThreshold
         self.listener = listener
+
+        self.logger = logger
 
         let realm = realmFactory.realm
         if realm.objects(Block.self).count == 0, let checkpointBlockHeader = network.checkpointBlock.header {
@@ -80,7 +84,7 @@ extension BlockSyncer: IBlockSyncer {
 
             blockchain.handleFork(realm: realmFactory.realm)
         } catch {
-            logger.error(error)
+            logger?.error(error)
         }
     }
 

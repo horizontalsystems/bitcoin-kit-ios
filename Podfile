@@ -25,7 +25,6 @@ def kit_pods
   pod 'BigInt'
   pod 'RealmSwift'
   pod 'RxRealm'
-  pod 'SwiftyBeaver'
 end
 
 target :HSBitcoinKitDemo do
