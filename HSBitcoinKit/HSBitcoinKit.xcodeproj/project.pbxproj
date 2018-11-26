@@ -37,7 +37,6 @@
 		11B3575E152A018865047D4D /* HeadersMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B353B145524AAE2A1B76A6 /* HeadersMessage.swift */; };
 		11B3577DC09E75C39C5F7D2A /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B3510658CE89D9DB6772E5 /* String.swift */; };
 		11B35785C5E654AB52A81E8A /* BloomFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B350F93CE46013514830A3 /* BloomFilter.swift */; };
-		11B357FBDA015B9B9DBDA229 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B354D856797A77A814998A /* Logger.swift */; };
 		11B3580E3ED73322D657644F /* StateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B358481D7E7EB156912F52 /* StateManager.swift */; };
 		11B35823EEDAE4C578F2EA02 /* RequestTransactionsTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35413F7A859F19D27BA39 /* RequestTransactionsTask.swift */; };
 		11B358A4D0D687298E84A6C8 /* RealmFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35DE14DB8DA22E71A1E35 /* RealmFactory.swift */; };
@@ -241,7 +240,6 @@
 		11B3538AE4523B395063F66D /* BitcoinCashMainNet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinCashMainNet.swift; sourceTree = "<group>"; };
 		11B353B145524AAE2A1B76A6 /* HeadersMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeadersMessage.swift; sourceTree = "<group>"; };
 		11B35413F7A859F19D27BA39 /* RequestTransactionsTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestTransactionsTask.swift; sourceTree = "<group>"; };
-		11B354D856797A77A814998A /* Logger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		11B354DDB46C9DE37375424D /* OpCode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpCode.swift; sourceTree = "<group>"; };
 		11B354EF0F404DF96E765CA1 /* DifficultyEncoder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DifficultyEncoder.swift; sourceTree = "<group>"; };
 		11B3556BD9C3E52C992D1E92 /* TransactionExtractor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionExtractor.swift; sourceTree = "<group>"; };
@@ -487,7 +485,6 @@
 			isa = PBXGroup;
 			children = (
 				11B3529A1731702724B0342D /* Factory.swift */,
-				11B354D856797A77A814998A /* Logger.swift */,
 				11B35DE14DB8DA22E71A1E35 /* RealmFactory.swift */,
 				11B35CDB306DF2676A56216B /* BitcoinKit.swift */,
 				11B3501384C4274027587EB4 /* Protocols.swift */,
@@ -1134,6 +1131,7 @@
 				"${BUILT_PRODUCTS_DIR}/RxRealm/RxRealm.framework",
 				"${BUILT_PRODUCTS_DIR}/RxSwift/RxSwift.framework",
 				"${BUILT_PRODUCTS_DIR}/SipHash/SipHash.framework",
+				"${BUILT_PRODUCTS_DIR}/SwiftyBeaver/SwiftyBeaver.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
@@ -1148,6 +1146,7 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxRealm.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxSwift.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SipHash.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftyBeaver.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -1345,7 +1344,6 @@
 				2FA5D67384D58067F71CD6B2 /* InputSigner.swift in Sources */,
 				11B35F02260D5A21CF0EA3B8 /* Factory.swift in Sources */,
 				58AAA8CCA46340450D2912C5 /* UnspentOutputProvider.swift in Sources */,
-				11B357FBDA015B9B9DBDA229 /* Logger.swift in Sources */,
 				2FA5D60486BE522A9A7B80F8 /* AddressConverter.swift in Sources */,
 				58AAA36E48DB45B72112973B /* TransactionCreator.swift in Sources */,
 				2FA5DC980A0E135863848CB0 /* TransactionProcessor.swift in Sources */,

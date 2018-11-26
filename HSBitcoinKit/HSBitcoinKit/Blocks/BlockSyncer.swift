@@ -80,7 +80,7 @@ extension BlockSyncer: IBlockSyncer {
 
             blockchain.handleFork(realm: realmFactory.realm)
         } catch {
-            Logger.shared.log(self, "\(error)")
+            btcKitLog.error(error)
         }
     }
 
@@ -155,7 +155,6 @@ extension BlockSyncer: IBlockSyncer {
 
         var block: Block!
         try realm.write {
-
             if let height = merkleBlock.height {
                 block = blockchain.forceAdd(merkleBlock: merkleBlock, height: height, realm: realm)
             } else {

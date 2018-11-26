@@ -1,5 +1,6 @@
 import Foundation
 import HSCryptoKit
+import SwiftyBeaver
 
 class Peer {
     enum PeerError: Error {
@@ -223,8 +224,8 @@ class Peer {
         log("<-- REJECT: \(message.message) code: 0x\(String(message.ccode, radix: 16)) reason: \(message.reason)")
     }
 
-    private func log(_ message: String) {
-        Logger.shared.log(self, "\(logName): \(message)")
+    private func log(_ message: String, level: SwiftyBeaver.Level = .debug) {
+        btcKitLog.custom(level: level, message: message, file: #file, function: #function, line: #line, context: logName)
     }
 
 }
@@ -297,7 +298,7 @@ extension Peer: PeerConnectionDelegate {
             do {
                 try self.handle(message: message)
             } catch {
-                self.log("Message handling failed with error: \(error)")
+                self.log("Message handling failed with error: \(error)", level: .error)
                 self.disconnect(error: error)
             }
         }

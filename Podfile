@@ -10,8 +10,8 @@ project 'HSBitcoinKit/HSBitcoinKit'
 
 
 def internal_pods
-  pod "HSCryptoKit"
-  pod "HSHDWalletKit"
+  pod 'HSCryptoKit'
+  pod 'HSHDWalletKit'
 end
 
 def kit_pods
@@ -24,7 +24,8 @@ def kit_pods
 
   pod 'BigInt'
   pod 'RealmSwift'
-  pod "RxRealm"
+  pod 'RxRealm'
+  pod 'SwiftyBeaver'
 end
 
 target :HSBitcoinKitDemo do
@@ -41,5 +42,5 @@ target :HSBitcoinKitTests do
   project 'HSBitcoinKit/HSBitcoinKit'
 
   internal_pods
-  pod "Cuckoo"
+  pod 'Cuckoo'
 end

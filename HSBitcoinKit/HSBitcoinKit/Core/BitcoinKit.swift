@@ -3,6 +3,9 @@ import HSHDWalletKit
 import RealmSwift
 import BigInt
 import HSCryptoKit
+import SwiftyBeaver
+
+let btcKitLog = SwiftyBeaver.self
 
 public class BitcoinKit {
 
@@ -56,7 +59,7 @@ public class BitcoinKit {
     private let progressSyncer: IProgressSyncer & BestBlockHeightListener & BlockSyncerListener
     private var dataProvider: IDataProvider & ProgressSyncerDelegate
 
-    public init(withWords words: [String], coin: Coin) {
+    public init(withWords words: [String], coin: Coin, minLogLevel: SwiftyBeaver.Level = .verbose) {
         let wordsHash = words.joined().data(using: .utf8).map { CryptoKit.sha256($0).hex } ?? words[0]
 
         let realmFileName = "\(wordsHash)-\(coin.rawValue).realm"
@@ -146,6 +149,11 @@ public class BitcoinKit {
         progressSyncer.delegate = dataProvider
 
         dataProvider.delegate = self
+
+        let console = ConsoleDestination()
+        console.minLevel = minLogLevel
+        console.format = "$DHH:mm:ss.SSS$d $C$c[$T]$X $N.$F:$l - $M"
+        btcKitLog.addDestination(console)
     }
 
 }

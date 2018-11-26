@@ -1,4 +1,5 @@
 import Foundation
+import SwiftyBeaver
 
 class PeerTimer {
 
@@ -26,7 +27,7 @@ class PeerTimer {
     private func timePeriodPassed(_ timer: Timer) {
         if let lastPingTime = lastPingTime {
             if (CACurrentMediaTime() - lastPingTime > pingTimeout) {
-                log("Timed out. Closing connection")
+                log("Timed out. Closing connection", level: .error)
                 peerConnection?.disconnect(error: PeerTimerError.pingTimedOut)
             }
         }
@@ -47,8 +48,8 @@ class PeerTimer {
         peerConnection?.send(message: message)
     }
 
-    private func log(_ message: String) {
-        Logger.shared.log(self, "\(peerConnection?.logName ?? ""): \(message)")
+    private func log(_ message: String, level: SwiftyBeaver.Level = .debug) {
+        btcKitLog.custom(level: level, message: message, file: #file, function: #function, line: #line, context: peerConnection?.logName ?? "")
     }
 
 }

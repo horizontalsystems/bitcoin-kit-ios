@@ -1,5 +1,6 @@
 import Foundation
 import HSHDWalletKit
+import SwiftyBeaver
 
 class PeerConnection: NSObject {
     enum PeerConnectionError: Error {
@@ -90,8 +91,8 @@ class PeerConnection: NSObject {
         }
     }
 
-    private func log(_ message: String) {
-        Logger.shared.log(self, "\(logName) \(message)")
+    private func log(_ message: String, level: SwiftyBeaver.Level = .debug) {
+        btcKitLog.custom(level: level, message: message, file: #file, function: #function, line: #line, context: logName)
     }
 }
 
@@ -156,7 +157,7 @@ extension PeerConnection: StreamDelegate {
             case .hasSpaceAvailable:
                 break
             case .errorOccurred:
-                log("IN ERROR OCCURRED")
+                log("IN ERROR OCCURRED", level: .warning)
                 if connected {
                     // If connected, then error is related not to peer, but to network
                     disconnect()
@@ -178,7 +179,7 @@ extension PeerConnection: StreamDelegate {
             case .hasSpaceAvailable:
                 delegate?.connectionReadyForWrite(self)
             case .errorOccurred:
-                log("OUT ERROR OCCURRED")
+                log("OUT ERROR OCCURRED", level: .warning)
                 disconnect()
             case .endEncountered:
                 log("OUT CLOSED")
