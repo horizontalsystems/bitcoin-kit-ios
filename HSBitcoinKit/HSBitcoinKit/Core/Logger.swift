@@ -1,53 +1,150 @@
 import Foundation
 
-class Logger {
-    static let shared = Logger()
+public class Logger {
 
-    private init() {
+    public static let shared = Logger()
+
+    public enum Level: Int {
+        case verbose = 0
+        case debug = 1
+        case info = 2
+        case warning = 3
+        case error = 4
     }
 
-    private let allowedLogs = [
-//        String(describing: ApiManager.self),
-//        String(describing: BlockSyncer.self),
-//        String(describing: TransactionProcessor.self),
-//        String(describing: PeerConnection.self),
-//        String(describing: PeerTimer.self),
-//        String(describing: Peer.self),
-//        String(describing: PeerGroup.self),
-//        String(describing: PeerHostManager.self),
-//        String(describing: InitialSyncer.self),
-//        String(describing: BlockSyncer.self),
-//        String(describing: TransactionSyncer.self),
-//        String(describing: NetworkMessage.self),
-        ""
+    private let colors: [Level: String] = [
+        Level.verbose: "💜 VERBOSE ",     // silver
+        Level.debug:   "💚 DEBUG ",       // green
+        Level.info:    "💙 INFO ",        // blue
+        Level.warning: "💛 WARNING ",     // yellow
+        Level.error:   "❤️ ERROR "        // red
+
     ]
 
     private lazy var dateFormatter: DateFormatter = {
         var formatter = DateFormatter()
         formatter.timeZone = TimeZone.autoupdatingCurrent
         formatter.locale = Locale.current
-//        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
         formatter.dateFormat = "HH:mm:ss.SSS"
         return formatter
     }()
 
-    func log<T>(_ namespace: T?, _ logString: String) {
-        log(String(describing: T.self), logString)
+    private let network: INetwork?
+
+    init(network: INetwork? = nil) {
+        self.network = network
     }
 
-    func log(_ logTag: String, _ logString: String) {
-        if allowedLogs.contains(logTag) {
-            let timestamp = dateFormatter.string(from: Date())
-            print("\(timestamp): \(logString)")
+    private let includeFiles: [String] = [
+        // "PeerConnection",
+        // "Peer",
+    ]
+    private let excludeFiles: [String] = []
+
+    /// log something generally unimportant (lowest priority)
+    func verbose(_ message: @autoclosure () -> Any, _
+    file: String = #file, _ function: String = #function, line: Int = #line, context: Any? = nil, network: INetwork? = nil) {
+        log(level: .verbose, message: message, file: file, function: function, line: line, context: context, network: network)
+    }
+
+    /// log something which help during debugging (low priority)
+    func debug(_ message: @autoclosure () -> Any, _
+    file: String = #file, _ function: String = #function, line: Int = #line, context: Any? = nil, network: INetwork? = nil) {
+        log(level: .debug, message: message, file: file, function: function, line: line, context: context, network: network)
+    }
+
+    /// log something which you are really interested but which is not an issue or error (normal priority)
+    func info(_ message: @autoclosure () -> Any, _
+    file: String = #file, _ function: String = #function, line: Int = #line, context: Any? = nil, network: INetwork? = nil) {
+        log(level: .info, message: message, file: file, function: function, line: line, context: context, network: network)
+    }
+
+    /// log something which may cause big trouble soon (high priority)
+    func warning(_ message: @autoclosure () -> Any, _
+    file: String = #file, _ function: String = #function, line: Int = #line, context: Any? = nil, network: INetwork? = nil) {
+        log(level: .warning, message: message, file: file, function: function, line: line, context: context, network: network)
+    }
+
+    /// log something which will keep you awake at night (highest priority)
+    func error(_ message: @autoclosure () -> Any, _
+    file: String = #file, _ function: String = #function, line: Int = #line, context: Any? = nil, network: INetwork? = nil) {
+        log(level: .error, message: message, file: file, function: function, line: line, context: context, network: network)
+    }
+
+    /// custom logging to manually adjust values, should just be used by other frameworks
+    func log(level: Logger.Level, message: @autoclosure () -> Any,
+                    file: String = #file, function: String = #function, line: Int = #line, context: Any? = nil, network: INetwork? = nil) {
+
+        let file = fileNameWithoutSuffix(file)
+
+        guard includeFiles.isEmpty || includeFiles.contains(file) else {
+            return
+        }
+
+        guard excludeFiles.isEmpty || !excludeFiles.contains(file) else {
+            return
+        }
+
+        var str = ""
+        if let network = network {
+            str = "\(network.name) "
+        } else if let network = self.network {
+            str = "\(network.name) "
+        }
+
+        str = str + "\(dateFormatter.string(from: Date())) \(colors[level]!)[\(threadName())]"
+
+        if let context = context {
+            str = str + " \(context)"
+        }
+
+        str = str + " \(file).\(functionName(function)):\(line) - \(message())"
+
+        print(str)
+    }
+
+    private func functionName(_ function: String) -> String {
+        if let index = function.firstIndex(of: "(") {
+            return String(function.prefix(index.encodedOffset))
+        } else {
+            return function
         }
     }
 
-    static func log(_ log: String) {
-        let name = __dispatch_queue_get_label(nil)
-        if let label = String(cString: name, encoding: .utf8) {
-            let timestamp = Logger.shared.dateFormatter.string(from: Date())
-            print("\(timestamp): \(log) \(Thread.current) \(label)")
+    // returns the current thread name
+    private func threadName() -> String {
+        if Thread.isMainThread {
+            return ""
+        } else {
+            let threadName = Thread.current.name
+            if let threadName = threadName, !threadName.isEmpty {
+                return threadName
+            } else {
+                return String(format: "%p", Thread.current)
+            }
         }
+    }
+
+    // returns the filename without suffix (= file ending) of a path
+    private func fileNameWithoutSuffix(_ file: String) -> String {
+        let fileName = fileNameOfFile(file)
+
+        if !fileName.isEmpty {
+            let fileNameParts = fileName.components(separatedBy: ".")
+            if let firstPart = fileNameParts.first {
+                return firstPart
+            }
+        }
+        return ""
+    }
+
+    // returns the filename of a path
+    private func fileNameOfFile(_ file: String) -> String {
+        let fileParts = file.components(separatedBy: "/")
+        if let lastPart = fileParts.last {
+            return lastPart
+        }
+        return ""
     }
 
 }

@@ -1,26 +1,31 @@
 import RealmSwift
 
 class PeerHostManager {
-    let network: INetwork
-    let realmFactory: IRealmFactory
-    let hostDiscovery: IHostDiscovery
+    private let network: INetwork
+    private let realmFactory: IRealmFactory
+    private let hostDiscovery: IHostDiscovery
     private let dnsLookupQueue: DispatchQueue
     private let hostsUsageQueue: DispatchQueue
     private let localQueue: DispatchQueue
     private var collected: Bool = false
     private var usedHosts: [String] = []
+
+    private let logger: Logger?
+
     weak var delegate: PeerHostManagerDelegate?
 
     init(network: INetwork, realmFactory: IRealmFactory, hostDiscovery: IHostDiscovery = HostDiscovery(),
          dnsLookupQueue: DispatchQueue = DispatchQueue(label: "PeerHostManager DNSLookupQueue", qos: .background, attributes: .concurrent),
          localQueue: DispatchQueue = DispatchQueue(label: "PeerHostManager LocalQueue", qos: .utility),
-         hostsUsageQueue: DispatchQueue = DispatchQueue(label: "PeerHostManager HostsUsageQueue", qos: .utility)) {
+         hostsUsageQueue: DispatchQueue = DispatchQueue(label: "PeerHostManager HostsUsageQueue", qos: .utility), logger: Logger? = nil) {
         self.network = network
         self.realmFactory = realmFactory
         self.hostDiscovery = hostDiscovery
         self.dnsLookupQueue = dnsLookupQueue
         self.hostsUsageQueue = hostsUsageQueue
         self.localQueue = localQueue
+
+        self.logger = logger
     }
 
     private func collectPeerHosts() {
@@ -72,7 +77,7 @@ extension PeerHostManager: IPeerHostManager {
                         }
                     }
                 } catch {
-                    Logger.shared.log(self, "could not process IP due to error: \(error)")
+                    logger?.error("Could not process IP due to error: \(error)")
                 }
             }
         }
@@ -99,12 +104,12 @@ extension PeerHostManager: IPeerHostManager {
             }
 
             do {
-                Logger.shared.log(self, "Adding new hosts: \(newPeerAddresses.count)")
+                self.logger?.debug("Adding new hosts: \(newPeerAddresses.count)")
                 try realm.write {
                     realm.add(newPeerAddresses)
                 }
             } catch {
-                Logger.shared.log(self, "could not add PeerAddresses due to error: \(error)")
+                self.logger?.error("Could not add PeerAddresses due to error: \(error)")
             }
 
             self.delegate?.newHostsAdded()

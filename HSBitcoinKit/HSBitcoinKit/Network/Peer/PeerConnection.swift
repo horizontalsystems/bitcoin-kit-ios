@@ -24,6 +24,9 @@ class PeerConnection: NSObject {
     private var peerTimer: PeerTimer
 
     private var packets: Data = Data()
+
+    private let logger: Logger?
+
     var connected: Bool = false
 
     var logName: String {
@@ -31,11 +34,13 @@ class PeerConnection: NSObject {
         return "[\(WordList.english[index])]".uppercased()
     }
 
-    init(host: String, network: INetwork) {
+    init(host: String, network: INetwork, logger: Logger? = nil) {
         self.host = host
         self.port = UInt32(network.port)
         self.network = network
         self.peerTimer = PeerTimer()
+
+        self.logger = logger
     }
 
     deinit {
@@ -90,8 +95,8 @@ class PeerConnection: NSObject {
         }
     }
 
-    private func log(_ message: String) {
-        Logger.shared.log(self, "\(logName) \(message)")
+    private func log(_ message: String, level: Logger.Level = .debug, file: String = #file, function: String = #function, line: Int = #line) {
+        logger?.log(level: level, message: message, file: file, function: function, line: line, context: logName)
     }
 }
 
@@ -156,7 +161,7 @@ extension PeerConnection: StreamDelegate {
             case .hasSpaceAvailable:
                 break
             case .errorOccurred:
-                log("IN ERROR OCCURRED")
+                log("IN ERROR OCCURRED", level: .warning)
                 if connected {
                     // If connected, then error is related not to peer, but to network
                     disconnect()
@@ -178,7 +183,7 @@ extension PeerConnection: StreamDelegate {
             case .hasSpaceAvailable:
                 delegate?.connectionReadyForWrite(self)
             case .errorOccurred:
-                log("OUT ERROR OCCURRED")
+                log("OUT ERROR OCCURRED", level: .warning)
                 disconnect()
             case .endEncountered:
                 log("OUT CLOSED")

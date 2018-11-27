@@ -22,6 +22,8 @@ class Peer {
     private let queue: DispatchQueue
     private let network: INetwork
 
+    private let logger: Logger?
+
     var announcedLastBlockHeight: Int32 = 0
     var localBestBlockHeight: Int32 = 0
     var connected: Bool = false
@@ -40,9 +42,11 @@ class Peer {
         return connection.logName
     }
 
-    init(host: String, network: INetwork, connection: IPeerConnection, queue: DispatchQueue? = nil) {
+    init(host: String, network: INetwork, connection: IPeerConnection, queue: DispatchQueue? = nil, logger: Logger? = nil) {
         self.connection = connection
         self.network = network
+
+        self.logger = logger
 
         if let queue = queue {
             self.queue = queue
@@ -223,8 +227,8 @@ class Peer {
         log("<-- REJECT: \(message.message) code: 0x\(String(message.ccode, radix: 16)) reason: \(message.reason)")
     }
 
-    private func log(_ message: String) {
-        Logger.shared.log(self, "\(logName): \(message)")
+    private func log(_ message: String, level: Logger.Level = .debug, file: String = #file, function: String = #function, line: Int = #line) {
+        logger?.log(level: level, message: message, file: file, function: function, line: line, context: logName)
     }
 
 }
@@ -297,7 +301,7 @@ extension Peer: PeerConnectionDelegate {
             do {
                 try self.handle(message: message)
             } catch {
-                self.log("Message handling failed with error: \(error)")
+                self.log("Message handling failed with error: \(error)", level: .error)
                 self.disconnect(error: error)
             }
         }

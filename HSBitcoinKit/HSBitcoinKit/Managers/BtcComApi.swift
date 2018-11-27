@@ -4,7 +4,7 @@ import RxSwift
 class BtcComApi {
     private let apiManager: ApiManager
 
-    init(network: INetwork) {
+    init(network: INetwork, logger: Logger? = nil) {
         let url: String
 
         switch network {
@@ -15,7 +15,7 @@ class BtcComApi {
         default: url = "https://tchain.api.btc.com/v3"
         }
 
-        apiManager = ApiManager(apiUrl: url)
+        apiManager = ApiManager(apiUrl: url, logger: logger)
     }
 
     private func handleRequest(address: String, page: Int = 1, result: Set<BlockResponse> = []) -> Observable<Set<BlockResponse>> {

@@ -30,11 +30,14 @@ class PeerGroup {
     private let peersQueue: DispatchQueue
     private let inventoryQueue: DispatchQueue
 
+    private let logger: Logger?
+
     init(factory: IFactory, network: INetwork, listener: BestBlockHeightListener, reachabilityManager: IReachabilityManager,
          peerHostManager: IPeerHostManager, bloomFilterManager: IBloomFilterManager,
          peerCount: Int = 10, peerManager: IPeerManager = PeerManager(),
          peersQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Local Queue", qos: .userInitiated),
-         inventoryQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Inventory Queue", qos: .background)) {
+         inventoryQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Inventory Queue", qos: .background),
+         logger: Logger? = nil) {
         self.factory = factory
         self.network = network
         self.bestBlockHeightListener = listener
@@ -46,6 +49,8 @@ class PeerGroup {
 
         self.peersQueue = peersQueue
         self.inventoryQueue = inventoryQueue
+
+        self.logger = logger
 
         self.peerHostManager.delegate = self
         self.bloomFilterManager.delegate = self
@@ -63,7 +68,7 @@ class PeerGroup {
 
             for _ in self.peerManager.totalPeersCount()..<self.peerCount {
                 if let host = self.peerHostManager.peerHost {
-                    let peer = self.factory.peer(withHost: host, network: self.network)
+                    let peer = self.factory.peer(withHost: host, network: self.network, logger: self.logger)
                     peer.delegate = self
                     peer.localBestBlockHeight = self.blockSyncer?.localBestBlockHeight ?? 0
                     self.peerManager.add(peer: peer)
@@ -128,7 +133,7 @@ class PeerGroup {
             }
 
             if let nonSyncedPeer = self.peerManager.nonSyncedPeer() {
-                Logger.shared.log(self, "Setting sync peer to \(nonSyncedPeer.logName)")
+                self.logger?.debug("Setting sync peer to \(nonSyncedPeer.logName)")
                 self.peerManager.syncPeer = nonSyncedPeer
                 self.blockSyncer?.downloadStarted()
                 self.bestBlockHeightListener.bestBlockHeightReceived(height: nonSyncedPeer.announcedLastBlockHeight)
@@ -229,7 +234,6 @@ extension PeerGroup: IPeerGroup {
 extension PeerGroup: PeerDelegate {
 
     func peerReady(_ peer: IPeer) {
-        Logger.shared.log(self, "Handling peerReady: \(peer.logName)")
         self.downloadBlockchain()
     }
 
@@ -243,7 +247,7 @@ extension PeerGroup: PeerDelegate {
 
     func peerDidDisconnect(_ peer: IPeer, withError error: Error?) {
         if let error = error {
-            Logger.shared.log(self, "Peer \(peer.logName)(\(peer.host)) disconnected. Network reachable: \(reachabilityManager.reachable()). Error: \(error)")
+            logger?.warning("Peer \(peer.logName)(\(peer.host)) disconnected. Network reachable: \(reachabilityManager.reachable()). Error: \(error)")
         }
 
         peerHostManager.hostDisconnected(host: peer.host, withError: error, networkReachable: reachabilityManager.reachable())
@@ -285,6 +289,7 @@ extension PeerGroup: PeerDelegate {
         do {
             try blockSyncer?.handle(merkleBlock: merkleBlock)
         } catch {
+            logger?.error(error, context: peer.logName)
             peer.disconnect(error: error)
         }
     }
