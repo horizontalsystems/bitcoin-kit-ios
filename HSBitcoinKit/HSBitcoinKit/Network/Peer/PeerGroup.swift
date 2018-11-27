@@ -205,9 +205,9 @@ extension PeerGroup: IPeerGroup {
         // Subscribe to ReachabilityManager
         disposable = reachabilityManager.subject.subscribe(onNext: { [weak self] status in
             if status {
-                self?.start()
+                self?._start()
             } else {
-                self?.stop()
+                self?._stop()
             }
         })
 
