@@ -64,10 +64,15 @@ extension AddressConverter: IAddressConverter {
         if unknownPrefix {
             throw ConversionError.wrongAddressPrefix
         }
+        let suffixLength = 4
+
         let hex = Base58.decode(address)
-        let givenChecksum = hex.suffix(4)
-        let doubleSHA256 = CryptoKit.sha256sha256(hex.prefix(hex.count - 4))
-        let actualChecksum = doubleSHA256.prefix(4)
+        if hex.count < suffixLength {
+            throw ConversionError.invalidAddressLength
+        }
+        let givenChecksum = hex.suffix(suffixLength)
+        let doubleSHA256 = CryptoKit.sha256sha256(hex.prefix(hex.count - suffixLength))
+        let actualChecksum = doubleSHA256.prefix(suffixLength)
         guard givenChecksum == actualChecksum else {
             throw ConversionError.invalidChecksum
         }
