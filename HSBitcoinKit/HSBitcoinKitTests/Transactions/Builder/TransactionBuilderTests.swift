@@ -8,7 +8,7 @@ class TransactionBuilderTests: XCTestCase {
     private var realm: Realm!
     private var mockUnspentOutputSelector: MockIUnspentOutputSelector!
     private var mockUnspentOutputProvider: MockIUnspentOutputProvider!
-    private var mockTransactionSizeCalculator: MockITransactionSizeCalculator!
+    private var mockAddressManager: MockIAddressManager!
     private var mockAddressConverter: MockIAddressConverter!
     private var mockInputSigner: MockIInputSigner!
     private var mockScriptBuilder: MockIScriptBuilder!
@@ -44,13 +44,13 @@ class TransactionBuilderTests: XCTestCase {
 
         mockUnspentOutputSelector = MockIUnspentOutputSelector()
         mockUnspentOutputProvider = MockIUnspentOutputProvider()
-        mockTransactionSizeCalculator = MockITransactionSizeCalculator()
+        mockAddressManager = MockIAddressManager()
         mockAddressConverter = MockIAddressConverter()
         mockInputSigner = MockIInputSigner()
         mockScriptBuilder = MockIScriptBuilder()
         mockFactory = MockIFactory()
 
-        transactionBuilder = TransactionBuilder(unspentOutputSelector: mockUnspentOutputSelector, unspentOutputProvider: mockUnspentOutputProvider, transactionSizeCalculator: mockTransactionSizeCalculator, addressConverter: mockAddressConverter, inputSigner: mockInputSigner, scriptBuilder: mockScriptBuilder, factory: mockFactory)
+        transactionBuilder = TransactionBuilder(unspentOutputSelector: mockUnspentOutputSelector, unspentOutputProvider: mockUnspentOutputProvider, addressManager: mockAddressManager, addressConverter: mockAddressConverter, inputSigner: mockInputSigner, scriptBuilder: mockScriptBuilder, factory: mockFactory)
 
         changePubKey = TestData.pubKey()
         changePubKeyAddress = "Rsfz3aRmCwTe2J8pSWSYRNYmweJ"
@@ -78,15 +78,15 @@ class TransactionBuilderTests: XCTestCase {
         changeOutput = TransactionOutput(withValue: totalInputValue - value, index: 1, lockingScript: Data(), type: .p2pkh, keyHash: changePubKey.keyHash)
 
         stub(mockUnspentOutputSelector) { mock in
-            when(mock.select(value: any(), feeRate: any(), outputType: any(), changeType: any(), senderPay: any(), outputs: any())).thenReturn(unspentOutputs)
+            when(mock.select(value: any(), feeRate: any(), outputScriptType: any(), changeType: any(), senderPay: any(), outputs: any())).thenReturn(unspentOutputs)
         }
 
         stub(mockUnspentOutputProvider) { mock in
             when(mock.allUnspentOutputs()).thenReturn(unspentOutputs.outputs)
         }
 
-        stub(mockTransactionSizeCalculator) { mock in
-            when(mock.outputSize(type: any())).thenReturn(34)
+        stub(mockAddressManager) { mock in
+            when(mock.changePublicKey()).thenReturn(changePubKey)
         }
 
         stub(mockInputSigner) { mock in
@@ -142,12 +142,12 @@ class TransactionBuilderTests: XCTestCase {
         super.tearDown()
     }
 
-    func testFee() {
+    func testFee_AddressGiven() {
         let resultFee = try! transactionBuilder.fee(for: value, feeRate: feeRate, senderPay: false, address: toAdressPKH)
-        XCTAssertEqual(resultFee, fee)
+        XCTAssertEqual(resultFee, 570)
     }
 
-    func testFee_Error() {
+    func testFee_AddressGiven_Error() {
         stub(mockAddressConverter) { mock in
             when(mock.convert(address: toAdressPKH)).thenThrow(AddressConverter.ConversionError.invalidAddressLength)
         }
@@ -161,8 +161,13 @@ class TransactionBuilderTests: XCTestCase {
         }
     }
 
+    func testFee_AddressNotGiven_Error() {
+        let resultFee = try! transactionBuilder.fee(for: value, feeRate: feeRate, senderPay: false)
+        XCTAssertEqual(resultFee, fee)
+    }
+
     func testBuildTransaction_P2PKH() {
-        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, changePubKey: changePubKey, toAddress: toAdressPKH)
+        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAdressPKH)
 
         XCTAssertNotEqual(resultTx.reversedHashHex, "")
         XCTAssertEqual(resultTx.status, .new)
@@ -192,14 +197,14 @@ class TransactionBuilderTests: XCTestCase {
         fee = 1008
 
         stub(mockUnspentOutputSelector) { mock in
-            when(mock.select(value: any(), feeRate: any(), outputType: any(), changeType: any(), senderPay: any(), outputs: any())).thenReturn(unspentOutputs)
+            when(mock.select(value: any(), feeRate: any(), outputScriptType: any(), changeType: any(), senderPay: any(), outputs: any())).thenReturn(unspentOutputs)
         }
 
         stub(mockUnspentOutputProvider) { mock in
             when(mock.allUnspentOutputs()).thenReturn(unspentOutputs.outputs)
         }
 
-        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, changePubKey: changePubKey, toAddress: toAddressWPKH)
+        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressWPKH)
 
         XCTAssertNotEqual(resultTx.reversedHashHex, "")
         XCTAssertEqual(resultTx.status, .new)
@@ -218,7 +223,7 @@ class TransactionBuilderTests: XCTestCase {
     }
 
     func testBuildTransaction_P2SH() {
-        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, changePubKey: changePubKey, toAddress: toAddressSH)
+        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressSH)
 
         XCTAssertNotEqual(resultTx.reversedHashHex, "")
         XCTAssertEqual(resultTx.status, .new)
@@ -233,7 +238,7 @@ class TransactionBuilderTests: XCTestCase {
     }
 
     func testBuildTransactionSenderPay() {
-        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: true, changePubKey: changePubKey, toAddress: toAdressPKH)
+        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: true, toAddress: toAdressPKH)
 
         XCTAssertEqual(resultTx.outputs[0].value, value)  // value - fee
         verify(mockFactory).transactionOutput(withValue: unspentOutputs.outputs[0].value - value - fee, index: 1, lockingScript: any(), type: equal(to: ScriptType.p2pkh), address: equal(to: changePubKeyAddress), keyHash: any(), publicKey: any())
@@ -243,10 +248,10 @@ class TransactionBuilderTests: XCTestCase {
         value = totalInputValue
         unspentOutputs = SelectedUnspentOutputInfo(outputs: unspentOutputs.outputs, totalValue: unspentOutputs.totalValue, fee: unspentOutputs.fee, addChangeOutput: false)
         stub(mockUnspentOutputSelector) { mock in
-            when(mock.select(value: any(), feeRate: any(), outputType: any(), changeType: any(), senderPay: any(), outputs: any())).thenReturn(unspentOutputs)
+            when(mock.select(value: any(), feeRate: any(), outputScriptType: any(), changeType: any(), senderPay: any(), outputs: any())).thenReturn(unspentOutputs)
         }
 
-        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, changePubKey: changePubKey, toAddress: toAdressPKH)
+        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAdressPKH)
 
         XCTAssertEqual(resultTx.inputs.count, 1)
         XCTAssertEqual(resultTx.inputs[0].previousOutput!, unspentOutputs.outputs[0])
@@ -256,13 +261,13 @@ class TransactionBuilderTests: XCTestCase {
     }
 
     func testBuildTransaction_ChangeNotAddedForDust() {
-        value = totalInputValue - mockTransactionSizeCalculator.outputSize(type: .p2pkh) * feeRate
+        value = totalInputValue - TransactionSizeCalculator().outputSize(type: .p2pkh) * feeRate
         unspentOutputs = SelectedUnspentOutputInfo(outputs: unspentOutputs.outputs, totalValue: unspentOutputs.totalValue, fee: unspentOutputs.fee, addChangeOutput: false)
         stub(mockUnspentOutputSelector) { mock in
-            when(mock.select(value: any(), feeRate: any(), outputType: any(), changeType: any(), senderPay: any(), outputs: any())).thenReturn(unspentOutputs)
+            when(mock.select(value: any(), feeRate: any(), outputScriptType: any(), changeType: any(), senderPay: any(), outputs: any())).thenReturn(unspentOutputs)
         }
 
-        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, changePubKey: changePubKey, toAddress: toAdressPKH)
+        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAdressPKH)
 
         XCTAssertEqual(resultTx.inputs.count, 1)
         XCTAssertEqual(resultTx.inputs[0].previousOutput!, unspentOutputs.outputs[0])
@@ -283,7 +288,7 @@ class TransactionBuilderTests: XCTestCase {
             when(mock.unlockingScript(params: any())).thenReturn(sigScript)
         }
 
-        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, changePubKey: changePubKey, toAddress: toAdressPKH)
+        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAdressPKH)
         XCTAssertEqual(resultTx.inputs[0].signatureScript, sigScript)
     }
 
@@ -291,7 +296,7 @@ class TransactionBuilderTests: XCTestCase {
         unspentOutputs = SelectedUnspentOutputInfo(outputs: [previousTransaction.outputs[0]], totalValue: previousTransaction.outputs[0].value, fee: value, addChangeOutput: true)
 
         do {
-            let _ = try transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, changePubKey: changePubKey, toAddress: toAdressPKH)
+            let _ = try transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAdressPKH)
         } catch let error as TransactionBuilder.BuildError {
             XCTAssertEqual(error, TransactionBuilder.BuildError.feeMoreThanValue)
         } catch let error {
@@ -306,11 +311,27 @@ class TransactionBuilderTests: XCTestCase {
         }
 
         do {
-            let _ = try transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, changePubKey: changePubKey, toAddress: toAdressPKH)
+            let _ = try transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAdressPKH)
         } catch let error as TransactionBuilder.BuildError {
             XCTAssertEqual(error, TransactionBuilder.BuildError.noPreviousTransaction)
         } catch let error {
             XCTFail(error.localizedDescription)
         }
     }
+
+    func testBuildTransaction_noChangeAddress() {
+        stub(mockAddressManager) { mock in
+            when(mock.changePublicKey()).thenThrow(AddressManager.AddressManagerError.noUnusedPublicKey)
+        }
+
+        do {
+            let _ = try transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAdressPKH)
+            XCTFail("No exception!")
+        } catch let error as TransactionBuilder.BuildError {
+            XCTAssertEqual(error, TransactionBuilder.BuildError.noChangeAddress)
+        } catch {
+            XCTFail("Unexpected exception!")
+        }
+    }
+
 }

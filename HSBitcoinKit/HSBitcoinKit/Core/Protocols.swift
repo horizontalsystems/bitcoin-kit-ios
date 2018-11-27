@@ -224,7 +224,7 @@ protocol ITransactionCreator {
 
 protocol ITransactionBuilder {
     func fee(for value: Int, feeRate: Int, senderPay: Bool, address: String?) throws -> Int
-    func buildTransaction(value: Int, feeRate: Int, senderPay: Bool, changeScriptType: ScriptType, changePubKey: PublicKey, toAddress: String) throws -> Transaction
+    func buildTransaction(value: Int, feeRate: Int, senderPay: Bool, toAddress: String) throws -> Transaction
 }
 
 protocol IBlockchain {
@@ -244,14 +244,14 @@ protocol IScriptBuilder {
 }
 
 protocol ITransactionSizeCalculator {
-    func transactionSize(inputs: [ScriptType], outputs: [ScriptType]) -> Int
+    func transactionSize(inputs: [ScriptType], outputScriptTypes: [ScriptType]) -> Int
     func outputSize(type: ScriptType) -> Int
     func inputSize(type: ScriptType) -> Int
     func toBytes(fee: Int) -> Int
 }
 
 protocol IUnspentOutputSelector {
-    func select(value: Int, feeRate: Int, outputType: ScriptType, changeType: ScriptType, senderPay: Bool, outputs: [TransactionOutput]) throws -> SelectedUnspentOutputInfo
+    func select(value: Int, feeRate: Int, outputScriptType: ScriptType, changeType: ScriptType, senderPay: Bool, outputs: [TransactionOutput]) throws -> SelectedUnspentOutputInfo
 }
 
 protocol IUnspentOutputProvider {
@@ -293,6 +293,7 @@ protocol IDataProvider {
     var balance: Int { get }
     var receiveAddress: String { get }
     func send(to address: String, value: Int) throws
+    func validate(address: String) throws
     func fee(for value: Int, toAddress: String?, senderPay: Bool) throws -> Int
 
     var debugInfo: String { get }

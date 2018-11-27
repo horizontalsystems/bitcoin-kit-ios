@@ -135,8 +135,8 @@ public class BitcoinKit {
         transactionLinker = TransactionLinker()
         transactionProcessor = TransactionProcessor(extractor: transactionExtractor, linker: transactionLinker, addressManager: addressManager)
         transactionSyncer = TransactionSyncer(realmFactory: realmFactory, processor: transactionProcessor, addressManager: addressManager, bloomFilterManager: bloomFilterManager)
-        transactionBuilder = TransactionBuilder(unspentOutputSelector: unspentOutputSelector, unspentOutputProvider: unspentOutputProvider, transactionSizeCalculator: transactionSizeCalculator, addressConverter: addressConverter, inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory)
-        transactionCreator = TransactionCreator(realmFactory: realmFactory, transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, peerGroup: peerGroup, addressManager: addressManager)
+        transactionBuilder = TransactionBuilder(unspentOutputSelector: unspentOutputSelector, unspentOutputProvider: unspentOutputProvider, addressManager: addressManager, addressConverter: addressConverter, inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory)
+        transactionCreator = TransactionCreator(realmFactory: realmFactory, transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, peerGroup: peerGroup)
         blockchain = Blockchain(network: network, factory: factory)
 
         dataProvider = DataProvider(realmFactory: realmFactory, addressManager: addressManager, addressConverter: addressConverter, transactionCreator: transactionCreator, transactionBuilder: transactionBuilder, network: network)
@@ -187,6 +187,10 @@ extension BitcoinKit {
 
     public func send(to address: String, value: Int) throws {
         try dataProvider.send(to: address, value: value)
+    }
+
+    public func validate(address: String) throws {
+       try dataProvider.validate(address: address)
     }
 
     public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool) throws -> Int {
