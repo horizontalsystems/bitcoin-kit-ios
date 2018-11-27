@@ -138,6 +138,10 @@ class DataProvider {
         )
     }
 
+    private func latestFeeRate() -> FeeRate {
+        return realmFactory.realm.objects(FeeRate.self).last ?? FeeRate.defaultFeeRate
+    }
+
 }
 
 extension DataProvider: IDataProvider {

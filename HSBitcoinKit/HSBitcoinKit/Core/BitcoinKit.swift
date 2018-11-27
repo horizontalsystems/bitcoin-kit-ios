@@ -23,10 +23,12 @@ public class BitcoinKit {
 
     private let hdWallet: IHDWallet
 
+    private let bcoinReachabilityManager: ReachabilityManager
+
     private let reachabilityManager: ReachabilityManager
     private let peerHostManager: IPeerHostManager
     private let stateManager: IStateManager
-    private let initialSyncApi: IInitialSyncApi
+    private let syncApi: IInitialSyncApi & IFeeRateApi
     private let addressManager: IAddressManager
     private let bloomFilterManager: IBloomFilterManager
 
@@ -34,6 +36,13 @@ public class BitcoinKit {
     private let factory: IFactory
 
     private let initialSyncer: IInitialSyncer
+
+    private let realmStorage: RealmStorage
+
+    private let feeRateTimer: IPeriodicTimer
+    private let feeRateApiProvider: IApiConfigProvider
+    private let feeRateSyncer: FeeRateSyncer
+    private let feeRateManager: FeeRateManager
 
     private let bech32AddressConverter: IBech32AddressConverter
     private let addressConverter: IAddressConverter
@@ -109,7 +118,8 @@ public class BitcoinKit {
         }
 
 //        initialSyncApi = BtcComApi(network: network, logger: logger)
-        initialSyncApi = BcoinApi(network: network, logger: logger)
+        feeRateApiProvider = FeeRateApiProvider()
+        syncApi = BcoinApi(network: network, apiProvider: feeRateApiProvider, logger: logger)
 
         reachabilityManager = ReachabilityManager()
 
@@ -122,7 +132,16 @@ public class BitcoinKit {
         peerGroup = PeerGroup(factory: factory, network: network, listener: progressSyncer, reachabilityManager: reachabilityManager, peerHostManager: peerHostManager, bloomFilterManager: bloomFilterManager, logger: logger)
 
         addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, addressConverter: addressConverter)
-        initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, api: initialSyncApi, addressManager: addressManager, addressSelector: addressSelector, factory: factory, peerGroup: peerGroup, network: network)
+        initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, api: syncApi, addressManager: addressManager, addressSelector: addressSelector, factory: factory, peerGroup: peerGroup, network: network)
+
+        realmStorage = RealmStorage(realmFactory: realmFactory)
+
+        bcoinReachabilityManager = ReachabilityManager(configProvider: feeRateApiProvider)
+
+        feeRateTimer = PeriodicTimer(interval: 3 * 60)
+        feeRateSyncer = FeeRateSyncer(networkManager: syncApi, timer: feeRateTimer)
+        feeRateManager = FeeRateManager(storage: realmStorage, syncer: feeRateSyncer, reachabilityManager: bcoinReachabilityManager, timer: feeRateTimer)
+        feeRateSyncer.delegate = feeRateManager
 
         inputSigner = InputSigner(hdWallet: hdWallet, network: network)
         scriptBuilder = ScriptBuilder()

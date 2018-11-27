@@ -204,9 +204,9 @@ extension PeerGroup: IPeerGroup {
 
         // Subscribe to ReachabilityManager
         disposable = reachabilityManager.subject.subscribe(onNext: { [weak self] status in
-            if status == .reachable(.ethernetOrWiFi) || status == .reachable(.wwan) {
+            if status {
                 self?._start()
-            } else if status == .notReachable {
+            } else {
                 self?._stop()
             }
         })
