@@ -169,7 +169,7 @@ protocol IFactory {
     func peer(withHost host: String, network: INetwork, logger: Logger?) -> IPeer
     func transaction(version: Int, inputs: [TransactionInput], outputs: [TransactionOutput], lockTime: Int) -> Transaction
     func transactionInput(withPreviousOutputTxReversedHex previousOutputTxReversedHex: String, previousOutputIndex: Int, script: Data, sequence: Int) -> TransactionInput
-    func transactionOutput(withValue value: Int, index: Int, lockingScript script: Data, type: ScriptType, address: String?, keyHash: Data?, publicKey: PublicKey?) throws -> TransactionOutput
+    func transactionOutput(withValue value: Int, index: Int, lockingScript script: Data, type: ScriptType, address: String?, keyHash: Data?, publicKey: PublicKey?) -> TransactionOutput
     func bloomFilter(withElements: [Data]) -> BloomFilter
 }
 
@@ -293,7 +293,6 @@ protocol IDataProvider {
     var balance: Int { get }
     var receiveAddress: String { get }
     func send(to address: String, value: Int) throws
-    func validate(address: String) throws
     func fee(for value: Int, toAddress: String?, senderPay: Bool) throws -> Int
 
     var debugInfo: String { get }

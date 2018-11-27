@@ -3,7 +3,6 @@ import HSCryptoKit
 class TransactionBuilder {
     enum BuildError: Error {
         case noPreviousTransaction
-        case noOutputKeyHash
         case feeMoreThanValue
     }
 
@@ -37,7 +36,7 @@ class TransactionBuilder {
 
     private func addOutputToTransaction(transaction: Transaction, address: Address, pubKey: PublicKey? = nil, value: Int) throws {
         let script = try scriptBuilder.lockingScript(for: address)
-        let output = try factory.transactionOutput(withValue: value, index: transaction.outputs.count, lockingScript: script, type: address.scriptType, address: address.stringValue, keyHash: address.keyHash, publicKey: pubKey)
+        let output = factory.transactionOutput(withValue: value, index: transaction.outputs.count, lockingScript: script, type: address.scriptType, address: address.stringValue, keyHash: address.keyHash, publicKey: pubKey)
         transaction.outputs.append(output)
     }
 
@@ -47,7 +46,8 @@ extension TransactionBuilder: ITransactionBuilder {
 
     func fee(for value: Int, feeRate: Int, senderPay: Bool, address: String? = nil) throws -> Int {
         var outputType: ScriptType = .p2pkh
-        if let string = address, let address = try? addressConverter.convert(address: string) {
+        if let string = address {
+            let address = try addressConverter.convert(address: string)
             outputType = address.scriptType
         }
         let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputType: outputType, changeType: .p2pkh, senderPay: senderPay, outputs: unspentOutputProvider.allUnspentOutputs())
@@ -56,7 +56,6 @@ extension TransactionBuilder: ITransactionBuilder {
 
     func buildTransaction(value: Int, feeRate: Int, senderPay: Bool, changeScriptType: ScriptType = .p2pkh, changePubKey: PublicKey, toAddress: String) throws -> Transaction {
         let address = try addressConverter.convert(address: toAddress)
-
         let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputType: address.scriptType, changeType: changeScriptType, senderPay: senderPay, outputs: unspentOutputProvider.allUnspentOutputs())
 
         // Build transaction

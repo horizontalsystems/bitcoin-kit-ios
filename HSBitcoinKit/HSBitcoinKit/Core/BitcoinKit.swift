@@ -189,10 +189,6 @@ extension BitcoinKit {
         try dataProvider.send(to: address, value: value)
     }
 
-    public func validate(address: String) throws {
-       try dataProvider.validate(address: address)
-    }
-
     public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool) throws -> Int {
         return try dataProvider.fee(for: value, toAddress: toAddress, senderPay: senderPay)
     }

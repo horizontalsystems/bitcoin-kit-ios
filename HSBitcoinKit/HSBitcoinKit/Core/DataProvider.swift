@@ -164,10 +164,6 @@ extension DataProvider: IDataProvider {
         try transactionCreator.create(to: address, value: value, feeRate: transactionCreator.feeRate, senderPay: true)
     }
 
-    func validate(address: String) throws {
-        _ = try addressConverter.convert(address: address)
-    }
-
     func fee(for value: Int, toAddress: String? = nil, senderPay: Bool) throws -> Int {
         return try transactionBuilder.fee(for: value, feeRate: transactionCreator.feeRate, senderPay: senderPay, address: toAddress)
     }
