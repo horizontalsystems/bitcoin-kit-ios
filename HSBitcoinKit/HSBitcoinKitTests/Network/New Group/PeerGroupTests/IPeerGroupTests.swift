@@ -79,6 +79,23 @@ class IPeerGroupTests: PeerGroupTests {
         XCTAssertEqual(subject.hasObservers, true)
     }
 
+    func testReachabilityChanged_Connected() {
+        peerGroup.start()
+        waitForMainQueue()
+
+        subject.onNext(true)
+        verify(mockBlockSyncer).prepareForDownload()
+    }
+
+    func testReachabilityChanged_Disconnected() {
+        peerGroup.start()
+        waitForMainQueue()
+
+        subject.onNext(false)
+        verify(mockPeerManager).disconnectAll()
+    }
+
+
     func testStart_NetworkIsNotReachable() {
         stub(mockReachabilityManager) { mock in
             when(mock.reachable()).thenReturn(false)
