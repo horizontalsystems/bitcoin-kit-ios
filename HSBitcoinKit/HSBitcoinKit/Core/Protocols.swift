@@ -34,9 +34,23 @@ protocol IHDWallet {
     func privateKeyData(index: Int, external: Bool) throws -> Data
 }
 
+protocol IApiConfigProvider {
+    var reachabilityHost: String { get }
+    var apiUrl: String { get }
+}
+
 protocol IReachabilityManager {
-    var subject: PublishSubject<NetworkReachabilityManager.NetworkReachabilityStatus> { get set }
+    var subject: PublishSubject<Bool> { get set }
     func reachable() -> Bool
+}
+
+protocol IPeriodicTimer {
+    var delegate: IPeriodicTimerDelegate? { get set }
+    func schedule()
+}
+
+protocol IPeriodicTimerDelegate: class {
+    func onFire()
 }
 
 protocol IPeerHostManager {
@@ -52,6 +66,30 @@ protocol IStateManager {
 
 protocol IInitialSyncApi {
     func getBlockHashes(address: String) -> Observable<Set<BlockResponse>>
+}
+
+protocol IFeeRateApi {
+    func getFeeRate() -> Observable<FeeRate>
+}
+
+protocol IFeeRateStorage {
+    var feeRate: FeeRate? { get }
+    func save(feeRate: FeeRate)
+    func clear()
+}
+
+protocol IFeeRateSyncer {
+    var delegate: IFeeRateSyncerDelegate? { get set }
+    func sync()
+}
+
+protocol IFeeRateSyncerDelegate: class {
+    func didSync(feeRate: FeeRate)
+}
+
+protocol IFeeRateManager {
+    var subject: PublishSubject<Void> { get }
+    var feeRate: FeeRate { get }
 }
 
 protocol IAddressSelector {

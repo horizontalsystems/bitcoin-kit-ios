@@ -22,7 +22,7 @@ class PeerGroupTests: XCTestCase {
 
     internal var peersCount = 3
     internal var peers: [String: MockIPeer]!
-    internal var subject: PublishSubject<NetworkReachabilityManager.NetworkReachabilityStatus>!
+    internal var subject: PublishSubject<Bool>!
 
     override func setUp() {
         super.setUp()
@@ -37,7 +37,7 @@ class PeerGroupTests: XCTestCase {
         mockBlockSyncer = MockIBlockSyncer()
         mockTransactionSyncer = MockITransactionSyncer()
         peers = [String: MockIPeer]()
-        subject = PublishSubject<NetworkReachabilityManager.NetworkReachabilityStatus>()
+        subject = PublishSubject<Bool>()
 
         for host in 0..<4 {
             let hostString = String(host)

@@ -4,21 +4,30 @@ import RxSwift
 
 class ReachabilityManager: IReachabilityManager {
 
-    var subject = PublishSubject<NetworkReachabilityManager.NetworkReachabilityStatus>()
-    private let net: NetworkReachabilityManager?
+    var subject = PublishSubject<Bool>()
+    private let manager: NetworkReachabilityManager?
 
-    init() {
-        net = NetworkReachabilityManager()
-
-        net?.listener = { status in
-            self.subject.onNext(status)
+    init(configProvider: IApiConfigProvider? = nil) {
+        if let configProvider = configProvider {
+            manager = NetworkReachabilityManager(host: configProvider.reachabilityHost)
+        } else {
+            manager = NetworkReachabilityManager()
         }
 
-        net?.startListening()
+        manager?.listener = { [weak self] status in
+            switch status {
+            case .reachable:
+                self?.subject.onNext(true)
+            default:
+                self?.subject.onNext(false)
+            }
+        }
+
+        manager?.startListening()
     }
 
     func reachable() -> Bool {
-        return net?.isReachable ?? false
+        return manager?.isReachable ?? false
     }
 
 }
