@@ -158,7 +158,7 @@ public class BitcoinKit {
         transactionCreator = TransactionCreator(realmFactory: realmFactory, transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, peerGroup: peerGroup)
         blockchain = Blockchain(network: network, factory: factory)
 
-        dataProvider = DataProvider(realmFactory: realmFactory, addressManager: addressManager, addressConverter: addressConverter, transactionCreator: transactionCreator, transactionBuilder: transactionBuilder, network: network)
+        dataProvider = DataProvider(realmFactory: realmFactory, addressManager: addressManager, addressConverter: addressConverter, feeRateManager: feeRateManager, transactionCreator: transactionCreator, transactionBuilder: transactionBuilder, network: network)
         blockSyncer = BlockSyncer(realmFactory: realmFactory, network: network, listener: progressSyncer, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager, logger: logger)
 
         peerGroup.blockSyncer = blockSyncer

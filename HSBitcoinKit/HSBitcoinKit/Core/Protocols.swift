@@ -90,6 +90,9 @@ protocol IFeeRateSyncerDelegate: class {
 protocol IFeeRateManager {
     var subject: PublishSubject<Void> { get }
     var feeRate: FeeRate { get }
+    var lowValue: Int { get }
+    var mediumValue: Int { get }
+    var highValue: Int { get }
 }
 
 protocol IAddressSelector {

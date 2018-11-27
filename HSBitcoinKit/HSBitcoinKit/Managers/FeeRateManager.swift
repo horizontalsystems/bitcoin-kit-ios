@@ -36,6 +36,21 @@ extension FeeRateManager: IFeeRateManager {
     var feeRate: FeeRate {
         return storage.feeRate ?? FeeRate.defaultFeeRate
     }
+
+    var lowValue: Int {
+        return valueInSatoshi(value: feeRate.lowPriority)
+    }
+    var mediumValue: Int {
+        return valueInSatoshi(value: feeRate.mediumPriority)
+    }
+    var highValue: Int {
+        return valueInSatoshi(value: feeRate.highPriority)
+    }
+
+    private func valueInSatoshi(value: Double) -> Int {
+        return Int(value * 100_000_000 / 1024)
+    }
+
 }
 
 extension FeeRateManager: IPeriodicTimerDelegate {
