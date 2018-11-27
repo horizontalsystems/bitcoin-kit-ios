@@ -9,7 +9,6 @@ class TransactionCreatorTests: XCTestCase {
     private var mockTransactionBuilder: MockITransactionBuilder!
     private var mockTransactionProcessor: MockITransactionProcessor!
     private var mockPeerGroup: MockIPeerGroup!
-    private var mockAddressManager: MockIAddressManager!
 
     private var transactionCreator: TransactionCreator!
 
@@ -27,10 +26,9 @@ class TransactionCreatorTests: XCTestCase {
         mockTransactionBuilder = MockITransactionBuilder()
         mockTransactionProcessor = MockITransactionProcessor()
         mockPeerGroup = MockIPeerGroup()
-        mockAddressManager = MockIAddressManager()
 
         stub(mockTransactionBuilder) { mock in
-            when(mock.buildTransaction(value: any(), feeRate: any(), senderPay: any(), changeScriptType: any(), changePubKey: any(), toAddress: any())).thenReturn(TestData.p2pkhTransaction)
+            when(mock.buildTransaction(value: any(), feeRate: any(), senderPay: any(), toAddress: any())).thenReturn(TestData.p2pkhTransaction)
         }
         stub(mockTransactionProcessor) { mock in
             when(mock.process(transaction: any(), realm: any())).thenDoNothing()
@@ -38,11 +36,8 @@ class TransactionCreatorTests: XCTestCase {
         stub(mockPeerGroup) { mock in
             when(mock.sendPendingTransactions()).thenDoNothing()
         }
-        stub(mockAddressManager) { mock in
-            when(mock.changePublicKey()).thenReturn(TestData.pubKey())
-        }
 
-        transactionCreator = TransactionCreator(realmFactory: mockRealmFactory, transactionBuilder: mockTransactionBuilder, transactionProcessor: mockTransactionProcessor, peerGroup: mockPeerGroup, addressManager: mockAddressManager)
+        transactionCreator = TransactionCreator(realmFactory: mockRealmFactory, transactionBuilder: mockTransactionBuilder, transactionProcessor: mockTransactionProcessor, peerGroup: mockPeerGroup)
     }
 
     override func tearDown() {
@@ -50,7 +45,6 @@ class TransactionCreatorTests: XCTestCase {
         mockTransactionBuilder = nil
         mockTransactionProcessor = nil
         mockPeerGroup = nil
-        mockAddressManager = nil
         transactionCreator = nil
 
         super.tearDown()
@@ -68,18 +62,18 @@ class TransactionCreatorTests: XCTestCase {
         verify(mockTransactionProcessor).process(transaction: equal(to: transaction), realm: any())
     }
 
-    func testNoChangeAddress() {
-        stub(mockAddressManager) { mock in
-            when(mock.changePublicKey()).thenThrow(TransactionBuilder.BuildError.feeMoreThanValue)
+    func testCreateTransaction_transactionAlreadyExists() {
+        try! realm.write {
+            realm.add(TestData.p2pkhTransaction)
         }
 
         do {
             try transactionCreator.create(to: "Address", value: 1, feeRate: 1, senderPay: true)
-            XCTFail("No exception!")
+            XCTFail("No exception")
         } catch let error as TransactionCreator.CreationError {
-            XCTAssertEqual(error, TransactionCreator.CreationError.noChangeAddress)
+            XCTAssertEqual(error, TransactionCreator.CreationError.transactionAlreadyExists)
         } catch {
-            XCTFail("Unexpected exception!")
+            XCTFail("Unexpected exception")
         }
 
         verify(mockPeerGroup, never()).sendPendingTransactions()

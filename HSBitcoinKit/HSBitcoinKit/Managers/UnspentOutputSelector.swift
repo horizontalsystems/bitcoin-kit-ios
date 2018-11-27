@@ -24,7 +24,7 @@ class UnspentOutputSelector {
 
 extension UnspentOutputSelector: IUnspentOutputSelector {
 
-    func select(value: Int, feeRate: Int, outputType: ScriptType = .p2pkh, changeType: ScriptType = .p2pkh, senderPay: Bool, outputs: [TransactionOutput]) throws -> SelectedUnspentOutputInfo {
+    func select(value: Int, feeRate: Int, outputScriptType: ScriptType = .p2pkh, changeType: ScriptType = .p2pkh, senderPay: Bool, outputs: [TransactionOutput]) throws -> SelectedUnspentOutputInfo {
         guard value > 0 else {
             throw SelectorError.wrongValue
         }
@@ -35,7 +35,7 @@ extension UnspentOutputSelector: IUnspentOutputSelector {
 
         // try to find 1 unspent output with exactly matching value
         for output in outputs {
-            let fee = calculator.transactionSize(inputs: [output.scriptType], outputs: [outputType]) * feeRate
+            let fee = calculator.transactionSize(inputs: [output.scriptType], outputScriptTypes: [outputScriptType]) * feeRate
             let totalFee = senderPay ? fee : 0
             if (value + totalFee <= output.value) && (value + totalFee + dust > output.value) {
                 return SelectedUnspentOutputInfo(outputs: [output], totalValue: output.value, fee: senderPay ? (output.value - value) : fee, addChangeOutput: false)
@@ -46,34 +46,34 @@ extension UnspentOutputSelector: IUnspentOutputSelector {
 
         // select outputs with least value until we get needed value
         var selectedOutputs = [TransactionOutput]()
-        var selectedOutputTypes = [ScriptType]()
+        var selectedOutputScriptTypes = [ScriptType]()
         var totalValue = 0
 
         var fee = 0
         var lastCalculatedFee = 0
 
         for output in sortedOutputs {
-            lastCalculatedFee = calculator.transactionSize(inputs: selectedOutputTypes, outputs: [outputType]) * feeRate
+            lastCalculatedFee = calculator.transactionSize(inputs: selectedOutputScriptTypes, outputScriptTypes: [outputScriptType]) * feeRate
             if senderPay {
                 fee = lastCalculatedFee
             }
-            if totalValue >= value + fee {
+            if totalValue >= lastCalculatedFee && totalValue >= value + fee {
                 break
             }
             selectedOutputs.append(output)
-            selectedOutputTypes.append(output.scriptType)
+            selectedOutputScriptTypes.append(output.scriptType)
             totalValue += output.value
         }
 
         // if all outputs are selected and total value less than needed throw error
         if totalValue < value + fee {
-            throw UnspentOutputSelector.SelectorError.notEnough
+            throw SelectorError.notEnough
         }
 
         // if total selected outputs value more than value and fee for transaction with change output + change input -> add fee for change output and mark as need change address
         var addChangeOutput = false
         if totalValue > value + lastCalculatedFee + (senderPay ? dust : 0) {
-            lastCalculatedFee = calculator.transactionSize(inputs: selectedOutputTypes, outputs: [outputType, changeType]) * feeRate
+            lastCalculatedFee = calculator.transactionSize(inputs: selectedOutputScriptTypes, outputScriptTypes: [outputScriptType, changeType]) * feeRate
             addChangeOutput = true
         } else if senderPay {
             lastCalculatedFee = totalValue - value
