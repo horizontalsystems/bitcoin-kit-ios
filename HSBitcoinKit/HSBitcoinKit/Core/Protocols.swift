@@ -259,7 +259,6 @@ protocol ITransactionSyncer: class {
 }
 
 protocol ITransactionCreator {
-    var feeRate: Int { get }
     func create(to address: String, value: Int, feeRate: Int, senderPay: Bool) throws
 }
 

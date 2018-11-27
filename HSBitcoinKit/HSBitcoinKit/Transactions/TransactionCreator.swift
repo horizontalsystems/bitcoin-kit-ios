@@ -3,8 +3,6 @@ class TransactionCreator {
         case transactionAlreadyExists
     }
 
-    let feeRate: Int = 8
-
     private let realmFactory: IRealmFactory
     private let transactionBuilder: ITransactionBuilder
     private let transactionProcessor: ITransactionProcessor
