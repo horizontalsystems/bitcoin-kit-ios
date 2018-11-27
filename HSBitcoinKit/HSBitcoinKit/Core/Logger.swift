@@ -2,8 +2,6 @@ import Foundation
 
 public class Logger {
 
-    public static let shared = Logger()
-
     public enum Level: Int {
         case verbose = 0
         case debug = 1
@@ -18,7 +16,6 @@ public class Logger {
         Level.info:    "💙 INFO ",        // blue
         Level.warning: "💛 WARNING ",     // yellow
         Level.error:   "❤️ ERROR "        // red
-
     ]
 
     private lazy var dateFormatter: DateFormatter = {
@@ -30,9 +27,11 @@ public class Logger {
     }()
 
     private let network: INetwork?
+    private let minLogLevel: Level
 
-    init(network: INetwork? = nil) {
+    init(network: INetwork? = nil, minLogLevel: Level) {
         self.network = network
+        self.minLogLevel = minLogLevel
     }
 
     private let includeFiles: [String] = [
@@ -74,6 +73,10 @@ public class Logger {
     /// custom logging to manually adjust values, should just be used by other frameworks
     func log(level: Logger.Level, message: @autoclosure () -> Any,
                     file: String = #file, function: String = #function, line: Int = #line, context: Any? = nil, network: INetwork? = nil) {
+
+        guard level.rawValue >= minLogLevel.rawValue else {
+            return
+        }
 
         let file = fileNameWithoutSuffix(file)
 

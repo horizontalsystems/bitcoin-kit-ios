@@ -94,7 +94,7 @@ public class BitcoinKit {
             }
         }
         addressConverter = AddressConverter(network: network, bech32AddressConverter: bech32AddressConverter)
-        logger = Logger(network: network)
+        logger = Logger(network: network, minLogLevel: minLogLevel)
 
         realmFactory = RealmFactory(configuration: realmConfiguration)
 
