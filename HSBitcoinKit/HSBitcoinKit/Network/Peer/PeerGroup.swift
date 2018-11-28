@@ -253,13 +253,13 @@ extension PeerGroup: PeerDelegate {
         peerHostManager.hostDisconnected(host: peer.host, withError: error, networkReachable: reachabilityManager.reachable())
 
         peersQueue.async {
+            self.peerManager.peerDisconnected(peer: peer)
+
             if self.peerManager.syncPeerIs(peer: peer) {
                 self.blockSyncer?.downloadFailed()
                 self.peerManager.syncPeer = nil
                 self.assignNextSyncPeer()
             }
-
-            self.peerManager.peerDisconnected(peer: peer)
         }
 
         connectPeersIfRequired()
