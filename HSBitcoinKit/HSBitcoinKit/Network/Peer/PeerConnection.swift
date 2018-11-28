@@ -38,7 +38,7 @@ class PeerConnection: NSObject {
         self.host = host
         self.port = UInt32(network.port)
         self.network = network
-        self.peerTimer = PeerTimer()
+        self.peerTimer = PeerTimer(logger: logger)
 
         self.logger = logger
     }
