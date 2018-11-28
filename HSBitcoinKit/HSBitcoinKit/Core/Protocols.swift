@@ -90,6 +90,9 @@ protocol IFeeRateSyncerDelegate: class {
 protocol IFeeRateManager {
     var subject: PublishSubject<Void> { get }
     var feeRate: FeeRate { get }
+    var lowValue: Int { get }
+    var mediumValue: Int { get }
+    var highValue: Int { get }
 }
 
 protocol IAddressSelector {
@@ -256,7 +259,6 @@ protocol ITransactionSyncer: class {
 }
 
 protocol ITransactionCreator {
-    var feeRate: Int { get }
     func create(to address: String, value: Int, feeRate: Int, senderPay: Bool) throws
 }
 

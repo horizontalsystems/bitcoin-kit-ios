@@ -82,8 +82,8 @@ struct FeeRateResponse: ImmutableMappable {
 
     init(map: Map) throws {
         lowPriority = try map.value("low_priority")
-        mediumPriority = try map.value("low_priority")
-        highPriority = try map.value("low_priority")
+        mediumPriority = try map.value("medium_priority")
+        highPriority = try map.value("high_priority")
 
         date = try map.value("date_str")
         dateInterval = try map.value("date")

@@ -8,6 +8,7 @@ import HSCryptoKit
 class DataProvider {
     private let disposeBag = DisposeBag()
 
+    private let feeRateManager: IFeeRateManager
     private let realmFactory: IRealmFactory
     private let addressManager: IAddressManager
     private let addressConverter: IAddressConverter
@@ -21,10 +22,11 @@ class DataProvider {
 
     weak var delegate: DataProviderDelegate?
 
-    init(realmFactory: IRealmFactory, addressManager: IAddressManager, addressConverter: IAddressConverter, transactionCreator: ITransactionCreator, transactionBuilder: ITransactionBuilder, network: INetwork) {
+    init(realmFactory: IRealmFactory, addressManager: IAddressManager, addressConverter: IAddressConverter, feeRateManager: IFeeRateManager, transactionCreator: ITransactionCreator, transactionBuilder: ITransactionBuilder, network: INetwork) {
         self.realmFactory = realmFactory
         self.addressManager = addressManager
         self.addressConverter = addressConverter
+        self.feeRateManager = feeRateManager
         self.transactionCreator = transactionCreator
         self.transactionBuilder = transactionBuilder
         self.network = network
@@ -165,7 +167,7 @@ extension DataProvider: IDataProvider {
     }
 
     func send(to address: String, value: Int) throws {
-        try transactionCreator.create(to: address, value: value, feeRate: transactionCreator.feeRate, senderPay: true)
+        try transactionCreator.create(to: address, value: value, feeRate: feeRateManager.mediumValue, senderPay: true)
     }
 
     func validate(address: String) throws {
@@ -173,7 +175,7 @@ extension DataProvider: IDataProvider {
     }
 
     func fee(for value: Int, toAddress: String? = nil, senderPay: Bool) throws -> Int {
-        return try transactionBuilder.fee(for: value, feeRate: transactionCreator.feeRate, senderPay: senderPay, address: toAddress)
+        return try transactionBuilder.fee(for: value, feeRate: feeRateManager.mediumValue, senderPay: senderPay, address: toAddress)
     }
 
     var receiveAddress: String {
