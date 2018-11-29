@@ -48,7 +48,7 @@ extension FeeRateManager: IFeeRateManager {
     }
 
     private func valueInSatoshi(value: Double) -> Int {
-        return Int(value * 100_000_000 / 1000)
+        return max(Int(round(value * 100_000_000 / 1000)), 1)
     }
 
 }
