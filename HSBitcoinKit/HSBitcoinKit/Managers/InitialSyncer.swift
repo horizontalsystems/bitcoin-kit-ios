@@ -15,6 +15,8 @@ class InitialSyncer {
     private let peerGroup: IPeerGroup
     private let network: INetwork
 
+    private var syncDisposable: Disposable?
+
     private let logger: Logger?
 
     private let async: Bool
@@ -121,19 +123,25 @@ extension InitialSyncer: IInitialSyncer {
                 observable = observable.subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
             }
 
-            observable.subscribe(onNext: { [weak self] keys, responses in
+            syncDisposable = observable.subscribe(onNext: { [weak self] keys, responses in
                         try? self?.handle(keys: keys, responses: responses)
                     }, onError: { [weak self] error in
                         // TODO: make handle error
                         self?.logger?.error(error)
 //                        self?.peerGroup.start()
                     })
-                    .disposed(by: disposeBag)
+            if let syncDisposable = syncDisposable {
+                disposeBag.insert(syncDisposable)
+            }
         } else {
             peerGroup.start()
         }
     }
 
+    func stop() {
+        syncDisposable?.dispose()
+        syncDisposable = nil
+    }
 }
 
 struct BlockResponse: Hashable {

@@ -216,6 +216,7 @@ protocol IFactory {
 
 protocol IInitialSyncer {
     func sync() throws
+    func stop()
 }
 
 protocol IBech32AddressConverter {

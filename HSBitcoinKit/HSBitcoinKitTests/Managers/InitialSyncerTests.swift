@@ -194,6 +194,58 @@ class InitialSyncerTests: XCTestCase {
         verify(mockPeerGroup).start()
     }
 
+    func testStopSync() {
+        let thirdBlock = TestData.thirdBlock
+        let secondBlock = thirdBlock.previousBlock!
+        let firstBlock = secondBlock.previousBlock!
+        let firstBlockHash = BlockHash(withHeaderHash: firstBlock.headerHash, height: 10)
+        let secondBlockHash = BlockHash(withHeaderHash: secondBlock.headerHash, height: 12)
+        let thirdBlockHash = BlockHash(withHeaderHash: thirdBlock.headerHash, height: 15)
+
+        let externalResponse00 = BlockResponse(hash: firstBlock.reversedHeaderHashHex, height: 10)
+        let externalResponse01 = BlockResponse(hash: secondBlock.reversedHeaderHashHex, height: 12)
+        let internalResponse0 = BlockResponse(hash: thirdBlock.reversedHeaderHashHex, height: 15)
+
+        let subject = PublishSubject<()>()
+        let disposeBag = DisposeBag()
+
+        let delayObserver = Observable<Set<BlockResponse>>.create { observer in
+            subject.subscribe(onNext: {
+                observer.onNext([])
+                observer.onCompleted()
+            }).disposed(by: disposeBag)
+
+            return Disposables.create()
+        }
+        stub(mockInitialSyncApi) { mock in
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[0]))).thenReturn(Observable.just([externalResponse00, externalResponse01]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[1]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[0]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[0]))).thenReturn(Observable.just([internalResponse0]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[1]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[0]))).thenReturn(delayObserver)
+        }
+
+        stub(mockFactory) { mock in
+            when(mock).blockHash(withHeaderHash: equal(to: firstBlock.headerHash), height: equal(to: externalResponse00.height)).thenReturn(firstBlockHash)
+            when(mock).blockHash(withHeaderHash: equal(to: secondBlock.headerHash), height: equal(to: externalResponse01.height)).thenReturn(secondBlockHash)
+            when(mock).blockHash(withHeaderHash: equal(to: thirdBlock.headerHash), height: equal(to: internalResponse0.height)).thenReturn(thirdBlockHash)
+        }
+
+        try! syncer.sync()
+        syncer.stop()
+
+        subject.onNext(())
+
+        XCTAssertEqual(realm.objects(BlockHash.self).count, 0)
+
+        verify(mockAddressManager, never()).addKeys(keys: any())
+        verify(mockHDWallet, never()).publicKey(index: equal(to: 3), external: any())
+
+        verify(mockStateManager, never()).apiSynced.set(false)
+        verify(mockPeerGroup, never()).start()
+    }
+
     func testSuccessSync_IgnoreBlocksAfterCheckpoint() {
         let secondBlock = TestData.secondBlock
         let firstBlock = secondBlock.previousBlock!

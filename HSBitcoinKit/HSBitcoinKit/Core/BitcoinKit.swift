@@ -182,6 +182,7 @@ extension BitcoinKit {
 
     public func clear() throws {
         peerGroup.stop()
+        initialSyncer.stop()
 
         let realm = realmFactory.realm
 
