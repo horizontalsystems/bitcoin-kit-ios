@@ -153,6 +153,7 @@ protocol IPeer: class {
     func isRequestingInventory(hash: Data) -> Bool
     func filterLoad(bloomFilter: BloomFilter)
     func sendMempoolMessage()
+    func sendPing(nonce: UInt64)
     func equalTo(_ peer: IPeer?) -> Bool
 }
 
@@ -189,6 +190,11 @@ protocol IPeerConnection: class {
     func connect()
     func disconnect(error: Error?)
     func send(message: IMessage)
+}
+
+protocol IConnectionTimeoutManager: class {
+    func reset()
+    func timePeriodPassed(peer: IPeer)
 }
 
 protocol BestBlockHeightListener: class {

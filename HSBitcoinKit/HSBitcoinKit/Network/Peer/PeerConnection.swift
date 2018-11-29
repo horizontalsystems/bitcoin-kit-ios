@@ -8,6 +8,7 @@ class PeerConnection: NSObject {
     }
 
     private let bufferSize = 4096
+    private let interval = 1.0
 
     let host: String
     let port: UInt32
@@ -21,7 +22,7 @@ class PeerConnection: NSObject {
     private var writeStream: Unmanaged<CFWriteStream>?
     private var inputStream: InputStream?
     private var outputStream: OutputStream?
-    private var peerTimer: PeerTimer
+    private var timer: Timer?
 
     private var packets: Data = Data()
 
@@ -38,8 +39,7 @@ class PeerConnection: NSObject {
         self.host = host
         self.port = UInt32(network.port)
         self.network = network
-        self.peerTimer = PeerTimer(logger: logger)
-
+        self.timer = nil
         self.logger = logger
     }
 
@@ -61,15 +61,17 @@ class PeerConnection: NSObject {
         inputStream?.open()
         outputStream?.open()
 
-        peerTimer.peerConnection = self
-        RunLoop.current.add(peerTimer.timer, forMode: .commonModes)
+        let timer = Timer(timeInterval: interval, repeats: true, block: { _ in self.delegate?.connectionTimePeriodPassed() })
+        self.timer = timer
+
+        RunLoop.current.add(timer, forMode: .commonModes)
         RunLoop.current.run()
     }
 
     private func readAvailableBytes(stream: InputStream) {
-        peerTimer.reset()
-        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
+        delegate?.connectionAlive()
 
+        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
         defer {
             buffer.deallocate()
         }
@@ -91,7 +93,7 @@ class PeerConnection: NSObject {
             }
 
             packets = Data(packets.dropFirst(NetworkMessage.minimumLength + Int(networkMessage.length)))
-            delegate?.connection(self, didReceiveMessage: networkMessage.message)
+            delegate?.connection(didReceiveMessage: networkMessage.message)
         }
     }
 
@@ -124,13 +126,13 @@ extension PeerConnection: IPeerConnection {
         outputStream?.close()
         inputStream?.remove(from: .current, forMode: .commonModes)
         outputStream?.remove(from: .current, forMode: .commonModes)
-        peerTimer.timer.invalidate()
+        timer?.invalidate()
         readStream = nil
         writeStream = nil
         runLoop = nil
         connected = false
 
-        delegate?.connectionDidDisconnect(self, withError: error)
+        delegate?.connectionDidDisconnect(withError: error)
 
         log("DISCONNECTED")
     }
@@ -181,7 +183,7 @@ extension PeerConnection: StreamDelegate {
             case .hasBytesAvailable:
                 break
             case .hasSpaceAvailable:
-                delegate?.connectionReadyForWrite(self)
+                delegate?.connectionReadyForWrite()
             case .errorOccurred:
                 log("OUT ERROR OCCURRED", level: .warning)
                 disconnect()
@@ -199,7 +201,9 @@ extension PeerConnection: StreamDelegate {
 }
 
 protocol PeerConnectionDelegate: class {
-    func connectionReadyForWrite(_ connection: IPeerConnection)
-    func connectionDidDisconnect(_ connection: IPeerConnection, withError error: Error?)
-    func connection(_ connection: IPeerConnection, didReceiveMessage message: IMessage)
+    func connectionAlive()
+    func connectionTimePeriodPassed()
+    func connectionReadyForWrite()
+    func connectionDidDisconnect(withError error: Error?)
+    func connection(didReceiveMessage message: IMessage)
 }

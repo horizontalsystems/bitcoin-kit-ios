@@ -17,6 +17,7 @@ class Peer {
     weak var delegate: PeerDelegate?
 
     private let connection: IPeerConnection
+    private let connectionTimeoutManager: IConnectionTimeoutManager
     private var tasks: [PeerTask] = []
 
     private let queue: DispatchQueue
@@ -42,8 +43,9 @@ class Peer {
         return connection.logName
     }
 
-    init(host: String, network: INetwork, connection: IPeerConnection, queue: DispatchQueue? = nil, logger: Logger? = nil) {
+    init(host: String, network: INetwork, connection: IPeerConnection, connectionTimeoutManager: IConnectionTimeoutManager, queue: DispatchQueue? = nil, logger: Logger? = nil) {
         self.connection = connection
+        self.connectionTimeoutManager = connectionTimeoutManager
         self.network = network
 
         self.logger = logger
@@ -276,6 +278,13 @@ extension Peer: IPeer {
         }
     }
 
+    func sendPing(nonce: UInt64) {
+        let message = PingMessage(nonce: nonce)
+
+        log("--> Ping: \(message.nonce)")
+        connection.send(message: message)
+    }
+
     func equalTo(_ other: IPeer?) -> Bool {
         return self.host == other?.host
     }
@@ -284,19 +293,27 @@ extension Peer: IPeer {
 
 extension Peer: PeerConnectionDelegate {
 
-    func connectionReadyForWrite(_ connection: IPeerConnection) {
+    func connectionAlive() {
+        connectionTimeoutManager.reset()
+    }
+
+    func connectionTimePeriodPassed() {
+        connectionTimeoutManager.timePeriodPassed(peer: self)
+    }
+
+    func connectionReadyForWrite() {
         if !sentVersion {
             sendVersion()
             sentVersion = true
         }
     }
 
-    func connectionDidDisconnect(_ connection: IPeerConnection, withError error: Error?) {
+    func connectionDidDisconnect(withError error: Error?) {
         connected = false
         delegate?.peerDidDisconnect(self, withError: error)
     }
 
-    func connection(_ connection: IPeerConnection, didReceiveMessage message: IMessage) {
+    func connection(didReceiveMessage message: IMessage) {
         queue.async {
             do {
                 try self.handle(message: message)
@@ -367,10 +384,7 @@ extension Peer: IPeerTaskRequester {
     }
 
     func ping(nonce: UInt64) {
-        let message = PingMessage(nonce: nonce)
-
-        log("--> Ping: \(message.nonce)")
-        connection.send(message: message)
+        sendPing(nonce: nonce)
     }
 
 }
