@@ -83,7 +83,7 @@ pod 'HSBitcoinKit'
 
 All features of the library are used in example project. It can be referred as a starting point for usage of the library.
 
-* [Example Project](https://github.com/horizontalsystems/bitcoin-kit-ios/tree/master/Example)
+* [Example Project](https://github.com/horizontalsystems/bitcoin-kit-ios/tree/master/HSBitcoinKitDemo)
 
 ## Dependencies
 
