@@ -87,5 +87,5 @@ All features of the library are used in example project. It can be referred as a
 
 ## Dependencies
 
-* [HSHDWalletKit] (https://github.com/horizontalsystems/hd-wallet-kit-ios) - HD Wallet related features, mnemonic phrase geneartion.
-* [HSCryptoKit] (https://github.com/horizontalsystems/crypto-kit-ios) - Crypto functions required for working with blockchain.
+* [HSHDWalletKit](https://github.com/horizontalsystems/hd-wallet-kit-ios) - HD Wallet related features, mnemonic phrase geneartion.
+* [HSCryptoKit](https://github.com/horizontalsystems/crypto-kit-ios) - Crypto functions required for working with blockchain.
