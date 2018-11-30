@@ -47,8 +47,6 @@ class CashBech32AddressConverterTests: XCTestCase {
         checkError(prefix: "bitcoincash", address: " ")
         // invalid upper and lower case at the same time "Q" "zdvr2hn0xrz99fcp6hkjxzk848rjvvhgytv4fket8"
         checkError(prefix: "bitcoincash", address: "bitcoincash:Qzdvr2hn0xrz99fcp6hkjxzk848rjvvhgytv4fket8")
-        // no prefix
-        checkError(prefix: "bitcoincash", address: "qr6m7j9njldwwzlg9v7v53unlr4jkmx6eylep8ekg2")
         // invalid prefix "bitcoincash012345"
         checkError(prefix: "bitcoincash", address: "bitcoincash012345:qzdvr2hn0xrz99fcp6hkjxzk848rjvvhgytv4fket8")
         // invalid character "1"
@@ -98,11 +96,13 @@ class CashBech32AddressConverterTests: XCTestCase {
     func checkError(prefix: String, address: String) {
         do {
             let _ = try cashBech32Converter.convert(prefix: prefix, address: address)
+            XCTFail("No error found!")
         } catch let error as AddressConverter.ConversionError {
             XCTAssertEqual(error, AddressConverter.ConversionError.unknownAddressType)
         } catch {
             XCTFail("Wrong \(error) exception")
         }
+
     }
 
     func HexEncodesToBech32(hex: String, prefix: String, cashBech32: String, version: UInt8, scriptType: ScriptType) {

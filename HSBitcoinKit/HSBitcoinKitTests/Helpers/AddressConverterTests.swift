@@ -34,6 +34,47 @@ class AddressConverterTests: XCTestCase {
         super.tearDown()
     }
 
+    func testParsePaymentAddress() {
+        var paymentData = BitcoinPaymentData(address: "address_data")
+        checkPaymentData(paymentAddress: "address_data", paymentData: paymentData)
+
+        paymentData = BitcoinPaymentData(address: "address_data", scheme: "prefix")
+        checkPaymentData(paymentAddress: "prefix:address_data", paymentData: paymentData)
+
+        paymentData = BitcoinPaymentData(address: "address_data", scheme: "prefix", version: "1.0")
+        checkPaymentData(paymentAddress: "prefix:address_data;version=1.0", paymentData: paymentData)
+
+        paymentData = BitcoinPaymentData(address: "address_data", scheme: "prefix", version: "1.0", label: "test")
+        checkPaymentData(paymentAddress: "prefix:address_data;version=1.0?label=test", paymentData: paymentData)
+
+        paymentData = BitcoinPaymentData(address: "address_data", scheme: "prefix", amount: 0.01)
+        checkPaymentData(paymentAddress: "prefix:address_data?amount=0.01", paymentData: paymentData)
+
+        paymentData = BitcoinPaymentData(address: "address_data", scheme: "prefix", amount: 0.01, label: "test_sender")
+        checkPaymentData(paymentAddress: "prefix:address_data?amount=0.01?label=test_sender", paymentData: paymentData)
+
+        paymentData = BitcoinPaymentData(address: "address_data", scheme: "prefix", parameters: ["custom":"any"])
+        checkPaymentData(paymentAddress: "prefix:address_data?custom=any", paymentData: paymentData)
+    }
+
+    private func checkPaymentData(paymentAddress: String, paymentData: BitcoinPaymentData) {
+        let bitcoinPaymentData = addressConverter.parse(paymentAddress: paymentAddress)
+        XCTAssertEqual(bitcoinPaymentData, paymentData)
+    }
+
+    func testParsePaymentAddressWithParts() {
+        let scheme = "bitcoin"
+        let paymentAddress = "address_data"
+        let amount = "amount=0.1"
+
+        let bitcoinPaymentData = addressConverter.parse(paymentAddress: "\(scheme):\(paymentAddress)?\(amount)")
+        XCTAssertEqual(bitcoinPaymentData.address, paymentAddress)
+        XCTAssertEqual(bitcoinPaymentData.amount, nil)
+        XCTAssertEqual(bitcoinPaymentData.label, nil)
+        XCTAssertEqual(bitcoinPaymentData.message, nil)
+        XCTAssertEqual(bitcoinPaymentData.parameters, nil)
+    }
+
     func testValidAddressConvert() {
         let address = "msGCb97sW9s9Mt7gN5m7TGmwLqhqGaFqYz"
         let keyHash = "80d733d7a4c02aba01da9370afc954c73a32dba5"
