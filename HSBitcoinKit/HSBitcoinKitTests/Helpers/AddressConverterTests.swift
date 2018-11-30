@@ -62,19 +62,6 @@ class AddressConverterTests: XCTestCase {
         XCTAssertEqual(bitcoinPaymentData, paymentData)
     }
 
-    func testParsePaymentAddressWithParts() {
-        let scheme = "bitcoin"
-        let paymentAddress = "address_data"
-        let amount = "amount=0.1"
-
-        let bitcoinPaymentData = addressConverter.parse(paymentAddress: "\(scheme):\(paymentAddress)?\(amount)")
-        XCTAssertEqual(bitcoinPaymentData.address, paymentAddress)
-        XCTAssertEqual(bitcoinPaymentData.amount, nil)
-        XCTAssertEqual(bitcoinPaymentData.label, nil)
-        XCTAssertEqual(bitcoinPaymentData.message, nil)
-        XCTAssertEqual(bitcoinPaymentData.parameters, nil)
-    }
-
     func testValidAddressConvert() {
         let address = "msGCb97sW9s9Mt7gN5m7TGmwLqhqGaFqYz"
         let keyHash = "80d733d7a4c02aba01da9370afc954c73a32dba5"

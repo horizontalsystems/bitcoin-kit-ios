@@ -20,11 +20,17 @@ class PeerHostManagerTests:XCTestCase {
     override func setUp() {
         super.setUp()
 
-        // We need to use real RealmFactory that creates realm instances each time when requested
-        // Because, we're using different DispatchQueues for localQueue and hostsUsageQueue
-        let realmFactory = RealmFactory(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
-        realm = realmFactory.realm
+        let configuration = Realm.Configuration(inMemoryIdentifier: "TestRealm")
+
+        realm = try! Realm(configuration: configuration)
         try! realm.write { realm.deleteAll() }
+
+        let mockRealmFactory = MockIRealmFactory()
+        stub(mockRealmFactory) { mock in
+            // We need to create new realm instances each time when requested
+            // Because, we're using different DispatchQueues for localQueue and hostsUsageQueue
+            when(mock.realm.get).then { return try! Realm(configuration: configuration) }
+        }
 
         mockPeerHostManagerDelegate = MockPeerHostManagerDelegate()
         mockNetwork = MockINetwork()
@@ -42,7 +48,7 @@ class PeerHostManagerTests:XCTestCase {
             when(mock.dnsSeeds.get).thenReturn(dnsSeeds)
         }
 
-        manager = PeerHostManager(network: mockNetwork, realmFactory: realmFactory, hostDiscovery: mockHostDiscovery, dnsLookupQueue: localQueue, localQueue: localQueue, hostsUsageQueue: localQueue)
+        manager = PeerHostManager(network: mockNetwork, realmFactory: mockRealmFactory, hostDiscovery: mockHostDiscovery, dnsLookupQueue: localQueue, localQueue: localQueue, hostsUsageQueue: localQueue)
     }
 
     override func tearDown() {
