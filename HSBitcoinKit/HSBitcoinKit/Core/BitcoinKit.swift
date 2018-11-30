@@ -72,9 +72,6 @@ public class BitcoinKit {
 
         let realmFileName = "\(wordsHash)-\(coin.rawValue).realm"
 
-        let documentsUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
-        let realmConfiguration = Realm.Configuration(fileURL: documentsUrl?.appendingPathComponent(realmFileName))
-
         difficultyEncoder = DifficultyEncoder()
         blockHelper = BlockHelper()
         validatorFactory = BlockValidatorFactory(difficultyEncoder: difficultyEncoder, blockHelper: blockHelper)
@@ -106,7 +103,7 @@ public class BitcoinKit {
         addressConverter = AddressConverter(network: network, bech32AddressConverter: bech32AddressConverter)
         logger = Logger(network: network, minLogLevel: minLogLevel)
 
-        realmFactory = RealmFactory(configuration: realmConfiguration)
+        realmFactory = RealmFactory(realmFileName: realmFileName)
 
         hdWallet = HDWallet(seed: Mnemonic.seed(mnemonic: words), coinType: network.coinType, xPrivKey: network.xPrivKey, xPubKey: network.xPubKey, gapLimit: 20)
 
