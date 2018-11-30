@@ -225,6 +225,7 @@ protocol IBech32AddressConverter {
 }
 
 protocol IAddressConverter {
+    func parse(paymentAddress: String) -> BitcoinPaymentData
     func convert(address: String) throws -> Address
     func convert(keyHash: Data, type: ScriptType) throws -> Address
     func convertToLegacy(keyHash: Data, version: UInt8, addressType: AddressType) -> LegacyAddress
@@ -334,6 +335,7 @@ protocol IDataProvider {
     var balance: Int { get }
     var receiveAddress: String { get }
     func send(to address: String, value: Int) throws
+    func parse(paymentAddress: String) -> BitcoinPaymentData
     func validate(address: String) throws
     func fee(for value: Int, toAddress: String?, senderPay: Bool) throws -> Int
 

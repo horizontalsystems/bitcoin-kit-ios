@@ -1,6 +1,11 @@
 import HSCryptoKit
 
 class AddressConverter {
+    fileprivate static let parameterVersion = "version"
+    fileprivate static let parameterAmount = "amount"
+    fileprivate static let parameterLabel = "label"
+    fileprivate static let parameterMessage = "message"
+
     enum ConversionError: Error {
         case invalidChecksum
         case invalidAddressLength
@@ -19,6 +24,49 @@ class AddressConverter {
 }
 
 extension AddressConverter: IAddressConverter {
+
+    func parse(paymentAddress: String) -> BitcoinPaymentData {
+        var parsedString = paymentAddress
+        var address: String
+
+        var scheme: String?
+        var version: String?
+        var amount: Double?
+        var label: String?
+        var message: String?
+
+        var parameters = [String: String]()
+
+        let schemeSeparatedParts = paymentAddress.components(separatedBy: ":")
+        // check exist scheme
+        if schemeSeparatedParts.count >= 2 {
+            scheme = schemeSeparatedParts[0]
+            parsedString = schemeSeparatedParts[1]
+        }
+
+        // check exist params
+        var versionSeparatedParts = parsedString.components(separatedBy: CharacterSet(charactersIn: ";?"))
+        guard versionSeparatedParts.count >= 2 else {
+            address = parsedString
+
+            return BitcoinPaymentData(address: address, scheme: scheme)
+        }
+        address = versionSeparatedParts.removeFirst()
+        versionSeparatedParts.forEach { parameter in
+            let parts = parameter.components(separatedBy: "=")
+            if parts.count == 2 {
+                switch parts[0] {
+                case AddressConverter.parameterVersion: version = parts[1]
+                case AddressConverter.parameterAmount: amount = Double(parts[1]) ?? nil
+                case AddressConverter.parameterLabel: label = parts[1]
+                case AddressConverter.parameterMessage: message = parts[1]
+                default: parameters[parts[0]] = parts[1]
+                }
+            }
+        }
+
+        return BitcoinPaymentData(address: address, scheme: scheme, version: version, amount: amount, label: label, message: message, parameters: parameters.isEmpty ? nil : parameters)
+    }
 
     func convert(keyHash: Data, type: ScriptType) throws -> Address {
         if let address = try? bech32AddressConverter.convert(prefix: network.bech32PrefixPattern, keyData: keyHash, scriptType: type) {

@@ -212,6 +212,10 @@ extension BitcoinKit {
        try dataProvider.validate(address: address)
     }
 
+    public func parse(paymentAddress: String) -> BitcoinPaymentData {
+        return dataProvider.parse(paymentAddress: paymentAddress)
+    }
+
     public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool) throws -> Int {
         return try dataProvider.fee(for: value, toAddress: toAddress, senderPay: senderPay)
     }

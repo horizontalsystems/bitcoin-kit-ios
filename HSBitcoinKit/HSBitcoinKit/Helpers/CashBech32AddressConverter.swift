@@ -3,7 +3,11 @@ import Foundation
 class CashBech32AddressConverter: IBech32AddressConverter {
 
     func convert(prefix: String, address: String) throws -> Address {
-        if let cashAddrData = CashAddrBech32.decode(address) {
+        var correctedAddress = address
+        if address.firstIndex(of: ":") == nil {
+            correctedAddress = "\(prefix):\(address)"
+        }
+        if let cashAddrData = CashAddrBech32.decode(correctedAddress) {
             guard prefix == cashAddrData.prefix else {
                 throw AddressConverter.ConversionError.wrongAddressPrefix
             }
@@ -21,7 +25,7 @@ class CashBech32AddressConverter: IBech32AddressConverter {
                 throw AddressConverter.ConversionError.invalidAddressLength
             }
             let type: AddressType = AddressType(rawValue: typeBits) ?? .pubKeyHash
-            return CashAddress(type: type, keyHash: hex, cashAddrBech32: address, version: versionByte)
+            return CashAddress(type: type, keyHash: hex, cashAddrBech32: correctedAddress, version: versionByte)
         }
         throw AddressConverter.ConversionError.unknownAddressType
     }
