@@ -170,6 +170,10 @@ extension DataProvider: IDataProvider {
         try transactionCreator.create(to: address, value: value, feeRate: feeRateManager.mediumValue, senderPay: true)
     }
 
+    func parse(paymentAddress: String) -> BitcoinPaymentData {
+        return addressConverter.parse(paymentAddress: paymentAddress)
+    }
+
     func validate(address: String) throws {
         _ = try addressConverter.convert(address: address)
     }

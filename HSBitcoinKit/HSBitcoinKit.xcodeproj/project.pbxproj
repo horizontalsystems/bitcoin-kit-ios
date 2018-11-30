@@ -177,6 +177,7 @@
 		58AAAC2B5D2BA0B33514E44F /* BitcoinCashAddressSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAF2DEF2097D0BAE1487B /* BitcoinCashAddressSelector.swift */; };
 		58AAAC458EE82D6C1874467F /* InitialSyncApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAA5925D186DB6263A84E /* InitialSyncApi.swift */; };
 		58AAAC48ECA38644E789E9C3 /* FeeRateSyncerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA0845DD6505153E767DC /* FeeRateSyncerTests.swift */; };
+		58AAAC5B6B652220A1A707EF /* BitcoinPaymentData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA0125762CC01D08AB167 /* BitcoinPaymentData.swift */; };
 		58AAAC71975D71CEA47A9C33 /* PFromWitnessExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAEC2E6230CEC68A13533 /* PFromWitnessExtractor.swift */; };
 		58AAAD03F1F32EB8AEE1C934 /* HeaderValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA902722CF6B773724894 /* HeaderValidator.swift */; };
 		58AAAD1C062938F07E90EA9D /* Address.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAB4FF63F2AA59C24E9C0 /* Address.swift */; };
@@ -347,6 +348,7 @@
 		2FA5DFDD75C8D896B99C2ED6 /* IMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IMessage.swift; sourceTree = "<group>"; };
 		30C70D5B1A6435BFE9B244ED /* Pods_HSBitcoinKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_HSBitcoinKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5718FF6FEB058540D331F8AA /* Pods-HSBitcoinKit.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HSBitcoinKit.release.xcconfig"; path = "../Pods/Target Support Files/Pods-HSBitcoinKit/Pods-HSBitcoinKit.release.xcconfig"; sourceTree = "<group>"; };
+		58AAA0125762CC01D08AB167 /* BitcoinPaymentData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinPaymentData.swift; sourceTree = "<group>"; };
 		58AAA0541FE999FB87D999C5 /* WitnessExtractorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WitnessExtractorTests.swift; sourceTree = "<group>"; };
 		58AAA0616D186C35DC0F3367 /* BlockHelperTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockHelperTests.swift; sourceTree = "<group>"; };
 		58AAA0845DD6505153E767DC /* FeeRateSyncerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FeeRateSyncerTests.swift; sourceTree = "<group>"; };
@@ -669,6 +671,7 @@
 				11B35352F3DA4C26A552C62B /* TransactionInput.swift */,
 				11B3559B75AD75C20287ECC7 /* TransactionOutput.swift */,
 				11B357C9E6B02801B0422881 /* TransactionInfo.swift */,
+				58AAA0125762CC01D08AB167 /* BitcoinPaymentData.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1460,6 +1463,7 @@
 				58AAAA5042AAE1661ECE5CB5 /* BcoinProvider.swift in Sources */,
 				58AAA98383D6E9642327F1C0 /* FeeRateManager.swift in Sources */,
 				58AAAC458EE82D6C1874467F /* InitialSyncApi.swift in Sources */,
+				58AAAC5B6B652220A1A707EF /* BitcoinPaymentData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
