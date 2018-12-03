@@ -45,6 +45,7 @@ public class BitcoinKit {
     private let feeRateSyncer: FeeRateSyncer
     private let feeRateManager: FeeRateManager
 
+    private let paymentAddressParser: IPaymentAddressParser
     private let bech32AddressConverter: IBech32AddressConverter
     private let addressConverter: IAddressConverter
     private let scriptConverter: IScriptConverter
@@ -83,21 +84,26 @@ public class BitcoinKit {
             case .mainNet:
                 network = BitcoinMainNet(validatorFactory: validatorFactory)
                 bech32AddressConverter = SegWitBech32AddressConverter(scriptConverter: scriptConverter)
+                paymentAddressParser = PaymentAddressParser(validScheme: "bitcoin", removeScheme: true)
             case .testNet:
                 network = BitcoinTestNet(validatorFactory: validatorFactory)
                 bech32AddressConverter = SegWitBech32AddressConverter(scriptConverter: scriptConverter)
+                paymentAddressParser = PaymentAddressParser(validScheme: "bitcoin", removeScheme: true)
             case .regTest:
                 network = BitcoinRegTest(validatorFactory: validatorFactory)
                 bech32AddressConverter = SegWitBech32AddressConverter(scriptConverter: scriptConverter)
+                paymentAddressParser = PaymentAddressParser(validScheme: "bitcoin", removeScheme: true)
             }
         case .bitcoinCash(let networkType):
             switch networkType {
             case .mainNet:
                 network = BitcoinCashMainNet(validatorFactory: validatorFactory, blockHelper: blockHelper)
                 bech32AddressConverter = CashBech32AddressConverter()
+                paymentAddressParser = PaymentAddressParser(validScheme: "bitcoincash", removeScheme: false)
             case .testNet, .regTest:
                 network = BitcoinCashTestNet(validatorFactory: validatorFactory)
                 bech32AddressConverter = CashBech32AddressConverter()
+                paymentAddressParser = PaymentAddressParser(validScheme: "bitcoincash", removeScheme: false)
             }
         }
         addressConverter = AddressConverter(network: network, bech32AddressConverter: bech32AddressConverter)
@@ -157,7 +163,7 @@ public class BitcoinKit {
         transactionCreator = TransactionCreator(realmFactory: realmFactory, transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, peerGroup: peerGroup)
         blockchain = Blockchain(network: network, factory: factory)
 
-        dataProvider = DataProvider(realmFactory: realmFactory, addressManager: addressManager, addressConverter: addressConverter, feeRateManager: feeRateManager, transactionCreator: transactionCreator, transactionBuilder: transactionBuilder, network: network)
+        dataProvider = DataProvider(realmFactory: realmFactory, addressManager: addressManager, addressConverter: addressConverter, paymentAddressParser: paymentAddressParser, feeRateManager: feeRateManager, transactionCreator: transactionCreator, transactionBuilder: transactionBuilder, network: network)
         blockSyncer = BlockSyncer(realmFactory: realmFactory, network: network, listener: progressSyncer, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager, logger: logger)
 
         peerGroup.blockSyncer = blockSyncer

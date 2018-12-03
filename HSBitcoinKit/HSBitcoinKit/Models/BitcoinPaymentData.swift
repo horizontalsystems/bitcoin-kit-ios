@@ -3,7 +3,6 @@ import Foundation
 public struct BitcoinPaymentData: Equatable {
     public let address: String
 
-    public let scheme: String?
     public let version: String?
     public let amount: Double?
     public let label: String?
@@ -11,9 +10,8 @@ public struct BitcoinPaymentData: Equatable {
 
     public let parameters: [String: String]?
 
-    init(address: String, scheme: String? = nil, version: String? = nil, amount: Double? = nil, label: String? = nil, message: String? = nil, parameters: [String: String]? = nil) {
+    init(address: String, version: String? = nil, amount: Double? = nil, label: String? = nil, message: String? = nil, parameters: [String: String]? = nil) {
         self.address = address
-        self.scheme = scheme
         self.version = version
         self.amount = amount
         self.label = label
@@ -22,11 +20,7 @@ public struct BitcoinPaymentData: Equatable {
     }
 
     var uriPaymentAddress: String {
-        var uriAddress = ""
-        if let scheme = scheme {
-            uriAddress = scheme + ":"
-        }
-        uriAddress.append(address)
+        var uriAddress = address
         if let version = version {
             uriAddress.append(";version=" + version)
         }
@@ -50,7 +44,6 @@ public struct BitcoinPaymentData: Equatable {
 
     public static func ==(lhs: BitcoinPaymentData, rhs: BitcoinPaymentData) -> Bool {
         return lhs.address == rhs.address &&
-                lhs.scheme == rhs.scheme &&
                 lhs.version == rhs.version &&
                 lhs.amount == rhs.amount &&
                 lhs.label == rhs.label &&

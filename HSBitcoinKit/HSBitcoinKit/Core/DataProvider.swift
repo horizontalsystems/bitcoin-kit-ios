@@ -12,6 +12,7 @@ class DataProvider {
     private let realmFactory: IRealmFactory
     private let addressManager: IAddressManager
     private let addressConverter: IAddressConverter
+    private let paymentAddressParser: IPaymentAddressParser
     private let transactionCreator: ITransactionCreator
     private let transactionBuilder: ITransactionBuilder
     private let network: INetwork
@@ -22,10 +23,11 @@ class DataProvider {
 
     weak var delegate: DataProviderDelegate?
 
-    init(realmFactory: IRealmFactory, addressManager: IAddressManager, addressConverter: IAddressConverter, feeRateManager: IFeeRateManager, transactionCreator: ITransactionCreator, transactionBuilder: ITransactionBuilder, network: INetwork) {
+    init(realmFactory: IRealmFactory, addressManager: IAddressManager, addressConverter: IAddressConverter, paymentAddressParser: IPaymentAddressParser, feeRateManager: IFeeRateManager, transactionCreator: ITransactionCreator, transactionBuilder: ITransactionBuilder, network: INetwork) {
         self.realmFactory = realmFactory
         self.addressManager = addressManager
         self.addressConverter = addressConverter
+        self.paymentAddressParser = paymentAddressParser
         self.feeRateManager = feeRateManager
         self.transactionCreator = transactionCreator
         self.transactionBuilder = transactionBuilder
@@ -171,7 +173,7 @@ extension DataProvider: IDataProvider {
     }
 
     func parse(paymentAddress: String) -> BitcoinPaymentData {
-        return addressConverter.parse(paymentAddress: paymentAddress)
+        return paymentAddressParser.parse(paymentAddress: paymentAddress)
     }
 
     func validate(address: String) throws {
