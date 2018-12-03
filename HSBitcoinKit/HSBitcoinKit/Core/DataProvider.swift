@@ -169,7 +169,7 @@ extension DataProvider: IDataProvider {
     }
 
     func send(to address: String, value: Int) throws {
-        try transactionCreator.create(to: address, value: value, feeRate: 2, senderPay: true)
+        try transactionCreator.create(to: address, value: value, feeRate: feeRateManager.mediumValue, senderPay: true)
     }
 
     func parse(paymentAddress: String) -> BitcoinPaymentData {
@@ -181,7 +181,7 @@ extension DataProvider: IDataProvider {
     }
 
     func fee(for value: Int, toAddress: String? = nil, senderPay: Bool) throws -> Int {
-        return try transactionBuilder.fee(for: value, feeRate: 2, senderPay: senderPay, address: toAddress)
+        return try transactionBuilder.fee(for: value, feeRate: feeRateManager.mediumValue, senderPay: senderPay, address: toAddress)
     }
 
     var receiveAddress: String {
