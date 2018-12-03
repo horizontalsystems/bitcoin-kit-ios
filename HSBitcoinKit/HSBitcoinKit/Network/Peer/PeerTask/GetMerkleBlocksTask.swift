@@ -1,15 +1,14 @@
 import Foundation
 
 class GetMerkleBlocksTask: PeerTask {
-    class MerkleBlocksNotReceived: Error {}
 
+    private let allowedIdleTime = 5.0
     private var blockHashes: [BlockHash]
     private var pendingMerkleBlocks = [MerkleBlock]()
-    private var pingNonce: UInt64
 
-    init(blockHashes: [BlockHash], pingNonce: UInt64 = UInt64.random(in: 0..<UINT64_MAX)) {
+    init(blockHashes: [BlockHash], dateGenerator: @escaping () -> Date = Date.init) {
         self.blockHashes = blockHashes
-        self.pingNonce = pingNonce
+        super.init(dateGenerator: dateGenerator)
     }
 
     override func start() {
@@ -18,13 +17,14 @@ class GetMerkleBlocksTask: PeerTask {
         }
 
         requester?.getData(items: items)
-        requester?.ping(nonce: pingNonce)
+        resetTimer()
     }
 
     override func handle(merkleBlock: MerkleBlock) -> Bool {
         guard let blockHash = blockHashes.first(where: { blockHash in blockHash.headerHash == merkleBlock.headerHash }) else {
             return false
         }
+        resetTimer()
 
         merkleBlock.height = blockHash.height > 0 ? blockHash.height : nil
 
@@ -39,8 +39,9 @@ class GetMerkleBlocksTask: PeerTask {
 
     override func handle(transaction: Transaction) -> Bool {
         if let index = pendingMerkleBlocks.index(where: { $0.transactionHashes.contains(transaction.dataHash) }) {
-            let block = pendingMerkleBlocks[index]
+            resetTimer()
 
+            let block = pendingMerkleBlocks[index]
             block.transactions.append(transaction)
 
             if block.complete {
@@ -54,18 +55,16 @@ class GetMerkleBlocksTask: PeerTask {
         return false
     }
 
-    override func handle(pongNonce: UInt64) -> Bool {
-        if pongNonce == pingNonce {
-            if blockHashes.isEmpty {
-                delegate?.handle(completedTask: self)
-            } else {
-                delegate?.handle(failedTask: self, error: MerkleBlocksNotReceived())
+    override func checkTimeout() {
+        if let lastActiveTime = lastActiveTime {
+            if dateGenerator().timeIntervalSince1970 - lastActiveTime > allowedIdleTime {
+                if blockHashes.isEmpty {
+                    delegate?.handle(completedTask: self)
+                } else {
+                    delegate?.handle(failedTask: self, error: TimeoutError())
+                }
             }
-
-            return true
         }
-
-        return false
     }
 
     private func handle(completeMerkleBlock merkleBlock: MerkleBlock) {
@@ -80,12 +79,12 @@ class GetMerkleBlocksTask: PeerTask {
         }
     }
 
-}
+    func equalTo(_ task: GetMerkleBlocksTask?) -> Bool {
+        guard let task = task else {
+            return false
+        }
 
-extension GetMerkleBlocksTask: Equatable {
-
-    static func ==(lhs: GetMerkleBlocksTask, rhs: GetMerkleBlocksTask) -> Bool {
-        return lhs.blockHashes == rhs.blockHashes
+        return blockHashes == task.blockHashes
     }
 
 }

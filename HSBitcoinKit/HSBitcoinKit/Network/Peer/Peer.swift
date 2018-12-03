@@ -217,12 +217,6 @@ class Peer {
 
     private func handle(message: PongMessage) {
         log("<-- PONG: \(message.nonce)")
-
-        for task in tasks {
-            if task.handle(pongNonce: message.nonce) {
-                break
-            }
-        }
     }
 
     private func handle(message: RejectMessage) {
@@ -299,6 +293,10 @@ extension Peer: PeerConnectionDelegate {
 
     func connectionTimePeriodPassed() {
         connectionTimeoutManager.timePeriodPassed(peer: self)
+
+        if let task = tasks.first {
+            task.checkTimeout()
+        }
     }
 
     func connectionReadyForWrite() {
@@ -333,6 +331,11 @@ extension Peer: IPeerTaskDelegate {
         if let index = tasks.index(where: { $0 === task }) {
             let task = tasks.remove(at: index)
             delegate?.peer(self, didCompleteTask: task)
+        }
+
+        if let task = tasks.first {
+            // Reset timer for the next task in list
+            task.resetTimer()
         }
 
         if tasks.isEmpty {

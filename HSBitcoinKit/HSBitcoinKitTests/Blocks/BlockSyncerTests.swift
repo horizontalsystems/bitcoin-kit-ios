@@ -131,7 +131,7 @@ class BlockSyncerTests: XCTestCase {
         XCTAssertEqual(realm.objects(BlockHash.self).count, 0)
     }
 
-    func testLocalBestBlockHeight() {
+    func testLocalDownloadedBestBlockHeight() {
         let secondBlock = TestData.secondBlock
         secondBlock.previousBlock!.previousBlock = realm.objects(Block.self).first
 
@@ -140,7 +140,45 @@ class BlockSyncerTests: XCTestCase {
         }
 
         XCTAssertEqual(realm.objects(Block.self).count, 3)
-        XCTAssertEqual(syncer.localBestBlockHeight, Int32(secondBlock.height))
+        XCTAssertEqual(syncer.localDownloadedBestBlockHeight, Int32(secondBlock.height))
+    }
+
+    func testLocalKnownBestBlockHeight_NoBlockHashes() {
+        let secondBlock = TestData.secondBlock
+        secondBlock.previousBlock!.previousBlock = realm.objects(Block.self).first
+
+        try! realm.write {
+            realm.add(secondBlock)
+        }
+
+        XCTAssertEqual(realm.objects(Block.self).count, 3)
+        XCTAssertEqual(syncer.localKnownBestBlockHeight, Int32(secondBlock.height))
+    }
+
+    func testLocalKnownBestBlockHeight_BlockHashesWithExistingBlocks() {
+        let secondBlock = TestData.secondBlock
+        secondBlock.previousBlock!.previousBlock = realm.objects(Block.self).first
+
+        try! realm.write {
+            realm.add(secondBlock)
+            realm.add(BlockHash(withHeaderHash: secondBlock.headerHash, height: 0))
+        }
+
+        XCTAssertEqual(realm.objects(Block.self).count, 3)
+        XCTAssertEqual(syncer.localKnownBestBlockHeight, Int32(secondBlock.height))
+    }
+
+    func testLocalKnownBestBlockHeight_BlockHashesWithoutExistingBlocks() {
+        let secondBlock = TestData.secondBlock
+        secondBlock.previousBlock!.previousBlock = realm.objects(Block.self).first
+
+        try! realm.write {
+            realm.add(secondBlock)
+            realm.add(BlockHash(withHeaderHash: Data(from: 10000000), height: 0))
+        }
+
+        XCTAssertEqual(realm.objects(Block.self).count, 3)
+        XCTAssertEqual(syncer.localKnownBestBlockHeight, Int32(secondBlock.height + 1))
     }
 
     func testPrepareForDownload_PreValidatedBlocks() {

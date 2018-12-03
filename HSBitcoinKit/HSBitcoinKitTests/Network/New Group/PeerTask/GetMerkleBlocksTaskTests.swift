@@ -5,17 +5,28 @@ import HSCryptoKit
 
 class GetMerkleBlockTaskTests:XCTestCase {
 
+    private var generatedDate: Date!
+    private var dateIsGenerated: Bool!
+    private var dateGenerator: (() -> Date)!
+
     private var mockRequester: MockIPeerTaskRequester!
     private var mockDelegate: MockIPeerTaskDelegate!
 
     private var blockHashes: [BlockHash]!
     private var blockHeaders: [BlockHeader]!
-    private var pingNonce: UInt64!
     private var task: GetMerkleBlocksTask!
+
+    private let allowedIdleTime = 5.0
 
     override func setUp() {
         super.setUp()
 
+        dateIsGenerated = false
+        generatedDate = Date()
+        dateGenerator = {
+            self.dateIsGenerated = true
+            return self.generatedDate
+        }
         mockRequester = MockIPeerTaskRequester()
         mockDelegate = MockIPeerTaskDelegate()
 
@@ -37,16 +48,14 @@ class GetMerkleBlockTaskTests:XCTestCase {
             BlockHash(withHeaderHash: CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: blockHeaders[0])), height: 10),
             BlockHash(withHeaderHash: CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: blockHeaders[1])), height: 15)
         ]
-        pingNonce = UInt64.random(in: 0..<UINT64_MAX)
 
-        task = GetMerkleBlocksTask(blockHashes: blockHashes, pingNonce: pingNonce)
+        task = GetMerkleBlocksTask(blockHashes: blockHashes, dateGenerator: dateGenerator)
         task.requester = mockRequester
         task.delegate = mockDelegate
     }
 
     override func tearDown() {
         blockHashes = nil
-        pingNonce = nil
         task = nil
 
         super.tearDown()
@@ -62,7 +71,7 @@ class GetMerkleBlockTaskTests:XCTestCase {
                 }
             }.count == given.count
         }))
-        verify(mockRequester).ping(nonce: equal(to: pingNonce))
+        XCTAssertTrue(dateIsGenerated)
     }
 
     func testHandleMerkleBlock_BlockWasNotRequested() {
@@ -70,7 +79,8 @@ class GetMerkleBlockTaskTests:XCTestCase {
         let merkleBlock = MerkleBlock(header: blockHeader, transactionHashes: [], transactions: [])
 
         let handled = task.handle(merkleBlock: merkleBlock)
-        XCTAssertEqual(handled, false)
+        XCTAssertFalse(handled)
+        XCTAssertFalse(dateIsGenerated)
         verifyNoMoreInteractions(mockDelegate)
     }
 
@@ -79,7 +89,8 @@ class GetMerkleBlockTaskTests:XCTestCase {
 
         let handled = task.handle(merkleBlock: merkleBlock)
 
-        XCTAssertEqual(handled, true)
+        XCTAssertTrue(handled)
+        XCTAssertTrue(dateIsGenerated)
         XCTAssertEqual(merkleBlock.height, blockHashes[0].height)
         verify(mockDelegate).handle(merkleBlock: equal(to: merkleBlock))
         verifyNoMoreInteractions(mockDelegate)
@@ -91,7 +102,8 @@ class GetMerkleBlockTaskTests:XCTestCase {
 
         let handled = task.handle(merkleBlock: merkleBlock)
 
-        XCTAssertEqual(handled, true)
+        XCTAssertTrue(handled)
+        XCTAssertTrue(dateIsGenerated)
         XCTAssertEqual(merkleBlock.height, nil)
         verify(mockDelegate).handle(merkleBlock: equal(to: merkleBlock))
         verifyNoMoreInteractions(mockDelegate)
@@ -102,7 +114,8 @@ class GetMerkleBlockTaskTests:XCTestCase {
 
         let handled = task.handle(merkleBlock: merkleBlock)
 
-        XCTAssertEqual(handled, true)
+        XCTAssertTrue(handled)
+        XCTAssertTrue(dateIsGenerated)
         verify(mockDelegate).handle(merkleBlock: equal(to: merkleBlock))
         verifyNoMoreInteractions(mockDelegate)
 
@@ -118,10 +131,12 @@ class GetMerkleBlockTaskTests:XCTestCase {
 
         let _ = task.handle(merkleBlock: merkleBlock)
         resetMockDelegate()
+        dateIsGenerated = false
 
         let handled2 = task.handle(merkleBlock: merkleBlock2)
 
-        XCTAssertEqual(handled2, true)
+        XCTAssertTrue(handled2)
+        XCTAssertTrue(dateIsGenerated)
         verify(mockDelegate).handle(merkleBlock: equal(to: merkleBlock2))
         verify(mockDelegate).handle(completedTask: equal(to: task))
         verifyNoMoreInteractions(mockDelegate)
@@ -133,7 +148,8 @@ class GetMerkleBlockTaskTests:XCTestCase {
 
         let handled = task.handle(merkleBlock: merkleBlock)
 
-        XCTAssertEqual(handled, true)
+        XCTAssertTrue(handled)
+        XCTAssertTrue(dateIsGenerated)
         verifyNoMoreInteractions(mockDelegate)
     }
 
@@ -143,9 +159,11 @@ class GetMerkleBlockTaskTests:XCTestCase {
         let merkleBlock = MerkleBlock(header: blockHeaders[0], transactionHashes: [transaction.dataHash], transactions: [])
 
         let _ = task.handle(merkleBlock: merkleBlock)
+        dateIsGenerated = false
         let handled = task.handle(transaction: transaction2)
 
-        XCTAssertEqual(handled, false)
+        XCTAssertFalse(handled)
+        XCTAssertFalse(dateIsGenerated)
         verifyNoMoreInteractions(mockDelegate)
     }
 
@@ -156,7 +174,8 @@ class GetMerkleBlockTaskTests:XCTestCase {
         let _ = task.handle(merkleBlock: merkleBlock)
         let handled = task.handle(transaction: transaction)
 
-        XCTAssertEqual(handled, true)
+        XCTAssertTrue(handled)
+        XCTAssertTrue(dateIsGenerated)
         verify(mockDelegate).handle(merkleBlock: equal(to: merkleBlock))
         verifyNoMoreInteractions(mockDelegate)
     }
@@ -169,10 +188,12 @@ class GetMerkleBlockTaskTests:XCTestCase {
         let _ = task.handle(merkleBlock: merkleBlock)
         let _ = task.handle(merkleBlock: merkleBlock2)
         resetMockDelegate()
+        dateIsGenerated = false
 
         let handled = task.handle(transaction: transaction)
 
-        XCTAssertEqual(handled, true)
+        XCTAssertTrue(handled)
+        XCTAssertTrue(dateIsGenerated)
         verify(mockDelegate).handle(merkleBlock: equal(to: merkleBlock))
         verify(mockDelegate).handle(completedTask: equal(to: task))
         verifyNoMoreInteractions(mockDelegate)
@@ -186,11 +207,12 @@ class GetMerkleBlockTaskTests:XCTestCase {
         let _ = task.handle(merkleBlock: merkleBlock)
         let handled = task.handle(transaction: transaction)
 
-        XCTAssertEqual(handled, true)
+        XCTAssertTrue(handled)
+        XCTAssertTrue(dateIsGenerated)
         verifyNoMoreInteractions(mockDelegate)
     }
 
-    func testPingNonce_NoPendingBlocks() {
+    func testCheckTimeout_NoPendingBlocks_allowedIdleTime_HasPassed() {
         let merkleBlock = MerkleBlock(header: blockHeaders[0], transactionHashes: [], transactions: [])
         let merkleBlock2 = MerkleBlock(header: blockHeaders[1], transactionHashes: [], transactions: [])
 
@@ -198,18 +220,51 @@ class GetMerkleBlockTaskTests:XCTestCase {
         let _ = task.handle(merkleBlock: merkleBlock2)
         resetMockDelegate()
 
-        let handled = task.handle(pongNonce: pingNonce)
+        generatedDate = Date(timeIntervalSince1970: 1000000)
+        task.resetTimer()
 
-        XCTAssertEqual(handled, true)
+        generatedDate = Date(timeIntervalSince1970: 1000000 + allowedIdleTime + 1)
+        task.checkTimeout()
+
         verify(mockDelegate).handle(completedTask: equal(to: task))
         verifyNoMoreInteractions(mockDelegate)
     }
 
-    func testPingNonce_PendingBlocksExist() {
-        let handled = task.handle(pongNonce: pingNonce)
+    func testCheckTimeout_NoPendingBlocks_allowedIdleTime_HasNotPassed() {
+        let merkleBlock = MerkleBlock(header: blockHeaders[0], transactionHashes: [], transactions: [])
+        let merkleBlock2 = MerkleBlock(header: blockHeaders[1], transactionHashes: [], transactions: [])
 
-        XCTAssertEqual(handled, true)
-        verify(mockDelegate).handle(failedTask: equal(to: task), error: equal(to: GetMerkleBlocksTask.MerkleBlocksNotReceived(), equalWhen: { type(of: $0) == type(of: $1) }))
+        let _ = task.handle(merkleBlock: merkleBlock)
+        let _ = task.handle(merkleBlock: merkleBlock2)
+        resetMockDelegate()
+
+        generatedDate = Date(timeIntervalSince1970: 1000000)
+        task.resetTimer()
+
+        generatedDate = Date(timeIntervalSince1970: 1000000 + allowedIdleTime - 1)
+        task.checkTimeout()
+
+        verifyNoMoreInteractions(mockDelegate)
+    }
+
+    func testCheckTimeout_PendingBlocksExist_allowedIdleTime_HasPassed() {
+        generatedDate = Date(timeIntervalSince1970: 1000000)
+        task.resetTimer()
+
+        generatedDate = Date(timeIntervalSince1970: 1000000 + allowedIdleTime + 1)
+        task.checkTimeout()
+
+        verify(mockDelegate).handle(failedTask: equal(to: task), error: equal(to: PeerTask.TimeoutError(), equalWhen: { type(of: $0) == type(of: $1) }))
+        verifyNoMoreInteractions(mockDelegate)
+    }
+
+    func testCheckTimeout_PendingBlocksExist_allowedIdleTime_HasNotPassed() {
+        generatedDate = Date(timeIntervalSince1970: 1000000)
+        task.resetTimer()
+
+        generatedDate = Date(timeIntervalSince1970: 1000000 + allowedIdleTime - 1)
+        task.checkTimeout()
+
         verifyNoMoreInteractions(mockDelegate)
     }
 

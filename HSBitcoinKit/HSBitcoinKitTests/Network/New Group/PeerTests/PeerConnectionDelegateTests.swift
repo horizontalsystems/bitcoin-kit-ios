@@ -56,8 +56,19 @@ class PeerConnectionDelegateTests: XCTestCase {
     }
 
     func testConnectionTimePeriodPassed() {
+        let mockTask = MockPeerTask()
+        stub(mockTask) { mock in
+            when(mock).delegate.set(any()).thenDoNothing()
+            when(mock).requester.set(any()).thenDoNothing()
+            when(mock).start().thenDoNothing()
+            when(mock).resetTimer().thenDoNothing()
+            when(mock).checkTimeout().thenDoNothing()
+        }
+
+        peer.add(task: mockTask)
         peer.connectionTimePeriodPassed()
         verify(mockConnectionTimeoutManager).timePeriodPassed(peer: equal(to: peer, equalWhen: { $0.host == $1.host }))
+        verify(mockTask).checkTimeout()
     }
 
     func testConnectionReadyForWrite() {
@@ -465,38 +476,6 @@ class PeerConnectionDelegateTests: XCTestCase {
         waitForMainQueue()
 
         verify(mockConnection, never()).send(message: any())
-        verifyNoMoreInteractions(mockPeerGroup)
-    }
-
-    func testConnectionDidReceiveMessage_PongMessage() {
-        let message = PongMessage(nonce: 100)
-        let task = newTask(extraMocks: { when($0).handle(pongNonce: any()).thenReturn(true) })
-        let task2 = newTask(extraMocks: { when($0).handle(pongNonce: any()).thenReturn(false) })
-
-        peer.connected = true
-        peer.add(task: task)
-        peer.add(task: task2)
-        peer.connection(didReceiveMessage: message)
-        waitForMainQueue()
-
-        verify(task).handle(pongNonce: equal(to: 100))
-        verify(task2, never()).handle(pongNonce: any())
-        verifyNoMoreInteractions(mockPeerGroup)
-    }
-
-    func testConnectionDidReceiveMessage_PongMessage_WhenNoInternet() {
-        let message = PongMessage(nonce: 100)
-        let task = newTask(extraMocks: { when($0).handle(pongNonce: any()).thenReturn(true) })
-        let task2 = newTask(extraMocks: { when($0).handle(pongNonce: any()).thenReturn(false) })
-
-        peer.connected = false
-        peer.add(task: task)
-        peer.add(task: task2)
-        peer.connection(didReceiveMessage: message)
-        waitForMainQueue()
-
-        verify(task, never()).handle(pongNonce: any())
-        verify(task2, never()).handle(pongNonce: any())
         verifyNoMoreInteractions(mockPeerGroup)
     }
 

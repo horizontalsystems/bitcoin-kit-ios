@@ -306,7 +306,8 @@ protocol IUnspentOutputProvider {
 }
 
 protocol IBlockSyncer: class {
-    var localBestBlockHeight: Int32 { get }
+    var localDownloadedBestBlockHeight: Int32 { get }
+    var localKnownBestBlockHeight: Int32 { get }
     func prepareForDownload()
     func downloadStarted()
     func downloadIterationCompleted()

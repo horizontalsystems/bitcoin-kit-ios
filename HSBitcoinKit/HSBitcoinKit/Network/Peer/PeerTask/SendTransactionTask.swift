@@ -27,12 +27,12 @@ class SendTransactionTask: PeerTask {
         return true
     }
 
-}
+    func equalTo(_ task: SendTransactionTask?) -> Bool {
+        guard let task = task else {
+            return false
+        }
 
-extension SendTransactionTask: Equatable {
-
-    static func ==(lhs: SendTransactionTask, rhs: SendTransactionTask) -> Bool {
-        return lhs.transaction.reversedHashHex == rhs.transaction.reversedHashHex
+        return transaction.reversedHashHex == task.transaction.reversedHashHex
     }
 
 }

@@ -63,6 +63,7 @@ class IPeerTaskDelegateTests: XCTestCase {
         peer.handle(completedTask: task)
 
         verify(mockPeerGroup).peer(equal(to: peer, equalWhen: { $0 === $1 }), didCompleteTask: equal(to: task, equalWhen: { $0 === $1 }))
+        verify(task2).resetTimer()
         verify(mockPeerGroup, never()).peer(equal(to: peer, equalWhen: { $0 === $1 }), didCompleteTask: equal(to: task2, equalWhen: { $0 === $1 }))
         verify(mockPeerGroup, never()).peerReady(any())
     }
@@ -88,7 +89,7 @@ class IPeerTaskDelegateTests: XCTestCase {
 
     func testHandleFailedTask() {
         let task = newTask()
-        let error = GetMerkleBlocksTask.MerkleBlocksNotReceived()
+        let error = PeerTask.TimeoutError()
 
         peer.handle(failedTask: task, error: error)
 
@@ -112,6 +113,8 @@ class IPeerTaskDelegateTests: XCTestCase {
             when(mock).delegate.set(any()).thenDoNothing()
             when(mock).requester.set(any()).thenDoNothing()
             when(mock).start().thenDoNothing()
+            when(mock).resetTimer().thenDoNothing()
+            when(mock).checkTimeout().thenDoNothing()
         }
 
         return mockTask

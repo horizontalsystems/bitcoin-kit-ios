@@ -8,7 +8,7 @@ class ConnectionTimeoutManagerTests:XCTestCase {
     private var dateIsGenerated: Bool!
     private var dateGenerator: (() -> Date)!
 
-    private var maxIdleTime = 10.0
+    private var maxIdleTime = 60.0
     private var pingTimeout = 5.0
     private var mockPeer: MockIPeer!
 

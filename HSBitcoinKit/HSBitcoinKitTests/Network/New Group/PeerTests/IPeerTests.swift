@@ -35,7 +35,6 @@ class IPeerTests: XCTestCase {
             when(mock.handle(getDataInventoryItem: any())).thenReturn(false)
             when(mock.handle(items: any())).thenReturn(false)
             when(mock.isRequestingInventory(hash: any())).thenReturn(false)
-            when(mock.handle(pongNonce: any())).thenReturn(false)
         }
         stub(mockConnection) { mock in
             when(mock.delegate.set(any())).thenDoNothing()
