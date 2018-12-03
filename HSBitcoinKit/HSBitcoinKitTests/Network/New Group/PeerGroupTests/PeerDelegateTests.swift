@@ -22,12 +22,13 @@ class PeerDelegateTests: PeerGroupTests {
         let peer = peers["0"]!
         let blockHashes = [BlockHash(withHeaderHash: Data(from: 10000), height: 1)]
         let hashes = [Data(from: 111111)]
-        let getMerkleBlocksTask = GetMerkleBlocksTask(blockHashes: blockHashes)
-        let getBlockHashesTask = GetBlockHashesTask(hashes: hashes)
+        let localKnownBestBlockHeight: Int32 = 50
+        let syncPeerAnnouncedLastBlockHeight: Int32 = 100
 
         stub(mockBlockSyncer) { mock in
             when(mock.getBlockHashes()).thenReturn(blockHashes)
-            when(mock.getBlockLocatorHashes(peerLastBlockHeight: equal(to: 0))).thenReturn(hashes)
+            when(mock.getBlockLocatorHashes(peerLastBlockHeight: equal(to: syncPeerAnnouncedLastBlockHeight))).thenReturn(hashes)
+            when(mock.localKnownBestBlockHeight.get).thenReturn(localKnownBestBlockHeight)
         }
         stub(mockPeerManager) { mock in
             when(mock.syncPeer.get).thenReturn(peer)
@@ -36,14 +37,44 @@ class PeerDelegateTests: PeerGroupTests {
             when(mock.ready.get).thenReturn(true)
             when(mock.blockHashesSynced.get).thenReturn(false)
             when(mock.synced.get).thenReturn(false)
-            when(mock.announcedLastBlockHeight.get).thenReturn(0)
+            when(mock.announcedLastBlockHeight.get).thenReturn(syncPeerAnnouncedLastBlockHeight)
         }
 
         delegate.peerReady(peer)
         waitForMainQueue()
 
-        verify(peer).add(task: equal(to: getMerkleBlocksTask, equalWhen: { ($0 as? GetMerkleBlocksTask) == ($1 as? GetMerkleBlocksTask) }))
-        verify(peer).add(task: equal(to: getBlockHashesTask, equalWhen: { ($0 as? GetBlockHashesTask) == ($1 as? GetBlockHashesTask) }))
+        verify(peer).add(task: equal(to: GetMerkleBlocksTask(blockHashes: blockHashes)))
+        verify(peer).add(task: equal(to: GetBlockHashesTask(hashes: hashes, expectedHashesMinCount: syncPeerAnnouncedLastBlockHeight - localKnownBestBlockHeight )))
+        verify(mockBlockSyncer, never()).downloadCompleted()
+    }
+
+    func testPeerReady_PeerAnnouncedLastBlockHeightEqualTolocalKnownBestBlockHeight() {
+        let peer = peers["0"]!
+        let blockHashes = [BlockHash(withHeaderHash: Data(from: 10000), height: 1)]
+        let hashes = [Data(from: 111111)]
+        let localKnownBestBlockHeight: Int32 = 100
+        let syncPeerAnnouncedLastBlockHeight: Int32 = 100
+
+        stub(mockBlockSyncer) { mock in
+            when(mock.getBlockHashes()).thenReturn(blockHashes)
+            when(mock.getBlockLocatorHashes(peerLastBlockHeight: equal(to: syncPeerAnnouncedLastBlockHeight))).thenReturn(hashes)
+            when(mock.localKnownBestBlockHeight.get).thenReturn(localKnownBestBlockHeight)
+        }
+        stub(mockPeerManager) { mock in
+            when(mock.syncPeer.get).thenReturn(peer)
+        }
+        stub(peer) { mock in
+            when(mock.ready.get).thenReturn(true)
+            when(mock.blockHashesSynced.get).thenReturn(false)
+            when(mock.synced.get).thenReturn(false)
+            when(mock.announcedLastBlockHeight.get).thenReturn(syncPeerAnnouncedLastBlockHeight)
+        }
+
+        delegate.peerReady(peer)
+        waitForMainQueue()
+
+        verify(peer).add(task: equal(to: GetMerkleBlocksTask(blockHashes: blockHashes)))
+        verify(peer).add(task: equal(to: GetBlockHashesTask(hashes: hashes, expectedHashesMinCount: 6 )))
         verify(mockBlockSyncer, never()).downloadCompleted()
     }
 
@@ -81,7 +112,6 @@ class PeerDelegateTests: PeerGroupTests {
     func testPeerReady_BlockHashesAlreadySynced() {
         let peer = peers["0"]!
         let blockHashes = [BlockHash(withHeaderHash: Data(from: 10000), height: 1)]
-        let getMerkleBlocksTask = GetMerkleBlocksTask(blockHashes: blockHashes)
 
         stub(mockBlockSyncer) { mock in
             when(mock.getBlockHashes()).thenReturn(blockHashes)
@@ -101,13 +131,12 @@ class PeerDelegateTests: PeerGroupTests {
         waitForMainQueue()
 
         verify(peer, times(1)).add(task: any())
-        verify(peer).add(task: equal(to: getMerkleBlocksTask, equalWhen: { ($0 as? GetMerkleBlocksTask) == ($1 as? GetMerkleBlocksTask) }))
+        verify(peer).add(task: equal(to: GetMerkleBlocksTask(blockHashes: blockHashes)))
     }
 
     func testPeerReady_NoBlockToDownload() {
         let peer = peers["0"]!
         let hashes = [Data(from: 111111)]
-        let getBlockHashesTask = GetBlockHashesTask(hashes: hashes)
 
         stub(mockBlockSyncer) { mock in
             when(mock.getBlockHashes()).thenReturn([])
@@ -129,7 +158,7 @@ class PeerDelegateTests: PeerGroupTests {
 
         verify(peer).synced.set(equal(to: false))
         verify(peer, times(1)).add(task: any())
-        verify(peer).add(task: equal(to: getBlockHashesTask, equalWhen: { ($0 as? GetBlockHashesTask) == ($1 as? GetBlockHashesTask) }))
+        verify(peer).add(task: equal(to: GetBlockHashesTask(hashes: hashes, expectedHashesMinCount: 0)))
     }
 
     func testPeerReady_Synced() {
@@ -598,7 +627,7 @@ class PeerDelegateTests: PeerGroupTests {
         verify(peer).synced.set(equal(to: false))
         verify(peer).blockHashesSynced.set(equal(to: false))
         let task = RequestTransactionsTask(hashes: [transactionHash])
-        verify(peer).add(task: equal(to: task, equalWhen: { ($0 as! RequestTransactionsTask) == ($1 as! RequestTransactionsTask) }))
+        verify(peer).add(task: equal(to: task))
 
         // Here a block which sets another syncPeer is left enqueued
         let peer2 = peers["1"]!
@@ -691,7 +720,7 @@ class PeerDelegateTests: PeerGroupTests {
 
 
     private func getCompleted_GetBlockHashesTask(hashes: [Data]) -> GetBlockHashesTask {
-        let task = GetBlockHashesTask(hashes: [])
+        let task = GetBlockHashesTask(hashes: [], expectedHashesMinCount: 0)
         var inventoryItems = [InventoryItem]()
 
         for hash in hashes {

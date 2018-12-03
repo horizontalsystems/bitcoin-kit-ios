@@ -10,6 +10,7 @@ class PeerConnectionDelegateTests: XCTestCase {
 
     internal var mockNetwork: MockINetwork!
     internal var mockConnection: MockIPeerConnection!
+    internal var mockConnectionTimeoutManager: MockIConnectionTimeoutManager!
     internal var mockPeerGroup: MockPeerDelegate!
 
     internal var peer: Peer!
@@ -19,6 +20,7 @@ class PeerConnectionDelegateTests: XCTestCase {
 
         mockNetwork = MockINetwork()
         mockConnection = MockIPeerConnection()
+        mockConnectionTimeoutManager = MockIConnectionTimeoutManager()
         mockPeerGroup = MockPeerDelegate()
 
         resetMockConnection()
@@ -28,19 +30,45 @@ class PeerConnectionDelegateTests: XCTestCase {
             when(mock.peer(any(), didReceiveAddresses: any())).thenDoNothing()
             when(mock.peer(any(), didReceiveInventoryItems: any())).thenDoNothing()
         }
+        stub(mockConnectionTimeoutManager) { mock in
+            when(mock.reset()).thenDoNothing()
+            when(mock.timePeriodPassed(peer: any())).thenDoNothing()
+        }
 
-        peer = Peer(host: "", network: mockNetwork, connection: mockConnection, queue: DispatchQueue.main)
+        peer = Peer(host: "", network: mockNetwork, connection: mockConnection, connectionTimeoutManager: mockConnectionTimeoutManager, queue: DispatchQueue.main)
         peer.delegate = mockPeerGroup
     }
 
     override func tearDown() {
         mockNetwork = nil
         mockConnection = nil
+        mockConnectionTimeoutManager = nil
         mockPeerGroup = nil
 
         peer = nil
 
         super.tearDown()
+    }
+
+    func testConnectionAlive() {
+        peer.connectionAlive()
+        verify(mockConnectionTimeoutManager).reset()
+    }
+
+    func testConnectionTimePeriodPassed() {
+        let mockTask = MockPeerTask()
+        stub(mockTask) { mock in
+            when(mock).delegate.set(any()).thenDoNothing()
+            when(mock).requester.set(any()).thenDoNothing()
+            when(mock).start().thenDoNothing()
+            when(mock).resetTimer().thenDoNothing()
+            when(mock).checkTimeout().thenDoNothing()
+        }
+
+        peer.add(task: mockTask)
+        peer.connectionTimePeriodPassed()
+        verify(mockConnectionTimeoutManager).timePeriodPassed(peer: equal(to: peer, equalWhen: { $0.host == $1.host }))
+        verify(mockTask).checkTimeout()
     }
 
     func testConnectionReadyForWrite() {
@@ -52,25 +80,25 @@ class PeerConnectionDelegateTests: XCTestCase {
         )
 
         peer.localBestBlockHeight = localBestBlockHeight
-        peer.connectionReadyForWrite(mockConnection)
+        peer.connectionReadyForWrite()
 
         verify(mockConnection).send(message: equal(to: message, equalWhen: { ($0 as! VersionMessage).startHeight == ($1 as! VersionMessage).startHeight }))
     }
 
     func testConnectionReadyForWrite_SecondTime() {
-        peer.connectionReadyForWrite(mockConnection)
+        peer.connectionReadyForWrite()
         reset(mockConnection)
         stub(mockConnection) { mock in
             when(mock.send(message: any())).thenDoNothing()
         }
 
-        peer.connectionReadyForWrite(mockConnection)
+        peer.connectionReadyForWrite()
 
         verifyNoMoreInteractions(mockConnection)
     }
 
     func testConnectionDidDisconnect() {
-        peer.connectionDidDisconnect(mockConnection, withError: nil)
+        peer.connectionDidDisconnect(withError: nil)
 
         XCTAssertEqual(peer.connected, false)
         verify(mockPeerGroup).peerDidDisconnect(equal(to: peer, equalWhen: { $0 === $1 }), withError: isNil())
@@ -86,7 +114,7 @@ class PeerConnectionDelegateTests: XCTestCase {
 
         peer.connected = true
         peer.localBestBlockHeight = 10
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         XCTAssertEqual(peer.announcedLastBlockHeight, startHeight)
@@ -103,7 +131,7 @@ class PeerConnectionDelegateTests: XCTestCase {
 
         peer.connected = false
         peer.localBestBlockHeight = 10
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         XCTAssertEqual(peer.announcedLastBlockHeight, startHeight)
@@ -118,7 +146,7 @@ class PeerConnectionDelegateTests: XCTestCase {
                 nonce: 0, userAgent: "0000", startHeight: startHeight, relay: false
         )
 
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         XCTAssertEqual(peer.announcedLastBlockHeight, 0)
@@ -135,7 +163,7 @@ class PeerConnectionDelegateTests: XCTestCase {
         )
 
         peer.localBestBlockHeight = 10
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         XCTAssertEqual(peer.announcedLastBlockHeight, 0)
@@ -152,7 +180,7 @@ class PeerConnectionDelegateTests: XCTestCase {
         )
 
         peer.localBestBlockHeight = 10
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         XCTAssertEqual(peer.announcedLastBlockHeight, 0)
@@ -169,7 +197,7 @@ class PeerConnectionDelegateTests: XCTestCase {
         )
 
         peer.localBestBlockHeight = 10
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         XCTAssertEqual(peer.announcedLastBlockHeight, 0)
@@ -186,12 +214,12 @@ class PeerConnectionDelegateTests: XCTestCase {
         )
 
         peer.localBestBlockHeight = 10
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         resetMockConnection()
 
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         XCTAssertEqual(peer.announcedLastBlockHeight, startHeight)
@@ -203,7 +231,7 @@ class PeerConnectionDelegateTests: XCTestCase {
         let message = VerackMessage()
 
         peer.connected = true
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         XCTAssertEqual(peer.connected, true)
@@ -214,7 +242,7 @@ class PeerConnectionDelegateTests: XCTestCase {
         let message = VerackMessage()
 
         peer.connected = false
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         XCTAssertEqual(peer.connected, true)
@@ -226,7 +254,7 @@ class PeerConnectionDelegateTests: XCTestCase {
         let message = AddressMessage(addresses: [networkAddress])
 
         peer.connected = true
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         let networkAddressesCompareFunction: ([NetworkAddress], [NetworkAddress]) -> Bool = listCompareFunction(compareItemFunction: { $0.address == $1.address })
@@ -238,7 +266,7 @@ class PeerConnectionDelegateTests: XCTestCase {
         let message = AddressMessage(addresses: [networkAddress])
 
         peer.connected = false
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         verify(mockPeerGroup, never()).peer(any(), didReceiveAddresses: any())
@@ -249,7 +277,7 @@ class PeerConnectionDelegateTests: XCTestCase {
         let message = InventoryMessage(inventoryItems: [inv])
 
         peer.connected = true
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         let networkAddressesCompareFunction: ([InventoryItem], [InventoryItem]) -> Bool = listCompareFunction(compareItemFunction: { $0.hash == $1.hash })
@@ -261,7 +289,7 @@ class PeerConnectionDelegateTests: XCTestCase {
         let message = InventoryMessage(inventoryItems: [inv])
 
         peer.connected = false
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         verify(mockPeerGroup, never()).peer(any(), didReceiveInventoryItems: any())
@@ -273,7 +301,7 @@ class PeerConnectionDelegateTests: XCTestCase {
 
         peer.connected = true
         peer.add(task: newTask(extraMocks: { when($0).handle(items: any()).thenReturn(true) }))
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         verify(mockPeerGroup, never()).peer(any(), didReceiveInventoryItems: any())
@@ -288,7 +316,7 @@ class PeerConnectionDelegateTests: XCTestCase {
         peer.connected = true
         peer.add(task: task)
         peer.add(task: task2)
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         verify(task).handle(getDataInventoryItem: equal(to: inv, equalWhen: { $0.hash == $1.hash }))
@@ -304,7 +332,7 @@ class PeerConnectionDelegateTests: XCTestCase {
         peer.connected = false
         peer.add(task: task)
         peer.add(task: task2)
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         verify(task, never()).handle(getDataInventoryItem: any())
@@ -315,7 +343,7 @@ class PeerConnectionDelegateTests: XCTestCase {
         let message = BlockMessage(data: BlockHeaderSerializer.serialize(header: TestData.firstBlock.header!) + VarInt(0).serialized())
 
         peer.connected = true
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         verifyNoMoreInteractions(mockPeerGroup)
@@ -338,7 +366,7 @@ class PeerConnectionDelegateTests: XCTestCase {
         peer.connected = true
         peer.add(task: task)
         peer.add(task: task2)
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         verify(mockValidator).merkleBlock(from: equal(to: message))
@@ -362,7 +390,7 @@ class PeerConnectionDelegateTests: XCTestCase {
 
         peer.connected = false
         peer.add(task: task)
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         verify(mockValidator, never()).merkleBlock(from: any())
@@ -385,7 +413,7 @@ class PeerConnectionDelegateTests: XCTestCase {
 
         peer.connected = true
         peer.add(task: task)
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         verify(mockValidator).merkleBlock(from: equal(to: message))
@@ -403,7 +431,7 @@ class PeerConnectionDelegateTests: XCTestCase {
         peer.connected = true
         peer.add(task: task)
         peer.add(task: task2)
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         verify(task).handle(transaction: equal(to: transaction, equalWhen: { $0.dataHash == $1.dataHash }))
@@ -420,7 +448,7 @@ class PeerConnectionDelegateTests: XCTestCase {
         peer.connected = false
         peer.add(task: task)
         peer.add(task: task2)
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         verify(task, never()).handle(transaction: any())
@@ -433,7 +461,7 @@ class PeerConnectionDelegateTests: XCTestCase {
         let pongMessage = PongMessage(nonce: 100)
 
         peer.connected = true
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         verify(mockConnection).send(message: equal(to: pongMessage, equalWhen: { ($0 as! PongMessage).nonce == ($1 as! PongMessage).nonce }))
@@ -444,42 +472,10 @@ class PeerConnectionDelegateTests: XCTestCase {
         let message = PingMessage(nonce: 100)
 
         peer.connected = false
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         verify(mockConnection, never()).send(message: any())
-        verifyNoMoreInteractions(mockPeerGroup)
-    }
-
-    func testConnectionDidReceiveMessage_PongMessage() {
-        let message = PongMessage(nonce: 100)
-        let task = newTask(extraMocks: { when($0).handle(pongNonce: any()).thenReturn(true) })
-        let task2 = newTask(extraMocks: { when($0).handle(pongNonce: any()).thenReturn(false) })
-
-        peer.connected = true
-        peer.add(task: task)
-        peer.add(task: task2)
-        peer.connection(mockConnection, didReceiveMessage: message)
-        waitForMainQueue()
-
-        verify(task).handle(pongNonce: equal(to: 100))
-        verify(task2, never()).handle(pongNonce: any())
-        verifyNoMoreInteractions(mockPeerGroup)
-    }
-
-    func testConnectionDidReceiveMessage_PongMessage_WhenNoInternet() {
-        let message = PongMessage(nonce: 100)
-        let task = newTask(extraMocks: { when($0).handle(pongNonce: any()).thenReturn(true) })
-        let task2 = newTask(extraMocks: { when($0).handle(pongNonce: any()).thenReturn(false) })
-
-        peer.connected = false
-        peer.add(task: task)
-        peer.add(task: task2)
-        peer.connection(mockConnection, didReceiveMessage: message)
-        waitForMainQueue()
-
-        verify(task, never()).handle(pongNonce: any())
-        verify(task2, never()).handle(pongNonce: any())
         verifyNoMoreInteractions(mockPeerGroup)
     }
 
@@ -487,7 +483,7 @@ class PeerConnectionDelegateTests: XCTestCase {
         let message = RejectMessage(message: "", ccode: 0, reason: "", data: Data())
 
         peer.connected = true
-        peer.connection(mockConnection, didReceiveMessage: message)
+        peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
         verifyNoMoreInteractions(mockPeerGroup)

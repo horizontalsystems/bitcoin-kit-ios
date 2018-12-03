@@ -16,9 +16,24 @@ class BlockSyncer {
 
     private let logger: Logger?
 
-    var localBestBlockHeight: Int32 {
+    var localDownloadedBestBlockHeight: Int32 {
         let height = realmFactory.realm.objects(Block.self).sorted(byKeyPath: "height").last?.height
         return Int32(height ?? 0)
+    }
+
+    var localKnownBestBlockHeight: Int32 {
+        let realm = realmFactory.realm
+
+        let blocks = realm.objects(Block.self).sorted(byKeyPath: "height")
+        let newBlockHashesCount = realm.objects(BlockHash.self).filter("height = 0").filter { blockHash in
+            return blocks.filter("reversedHeaderHashHex = %@", blockHash.reversedHeaderHashHex).first == nil
+        }.count
+
+        if let lastBlockHeight = blocks.last?.height {
+            return Int32(lastBlockHeight + newBlockHashesCount)
+        } else {
+            return Int32(newBlockHashesCount)
+        }
     }
 
     init(realmFactory: IRealmFactory, network: INetwork, listener: BlockSyncerListener,
@@ -43,7 +58,7 @@ class BlockSyncer {
             }
         }
 
-        listener.initialBestBlockHeightUpdated(height: localBestBlockHeight)
+        listener.initialBestBlockHeightUpdated(height: localKnownBestBlockHeight)
     }
 
     // We need to clear block hashes when sync peer is disconnected

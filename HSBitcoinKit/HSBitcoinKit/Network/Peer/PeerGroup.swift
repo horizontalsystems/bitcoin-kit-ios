@@ -70,7 +70,7 @@ class PeerGroup {
                 if let host = self.peerHostManager.peerHost {
                     let peer = self.factory.peer(withHost: host, network: self.network, logger: self.logger)
                     peer.delegate = self
-                    peer.localBestBlockHeight = self.blockSyncer?.localBestBlockHeight ?? 0
+                    peer.localBestBlockHeight = self.blockSyncer?.localDownloadedBestBlockHeight ?? 0
                     self.peerManager.add(peer: peer)
                     peer.connect()
                 } else {
@@ -114,7 +114,15 @@ class PeerGroup {
             }
 
             if !syncPeer.blockHashesSynced, let blockLocatorHashes = self.blockSyncer?.getBlockLocatorHashes(peerLastBlockHeight: syncPeer.announcedLastBlockHeight) {
-                syncPeer.add(task: GetBlockHashesTask(hashes: blockLocatorHashes))
+                let expectedHashesMinCount: Int32!
+
+                if let localKnownBestBlockHeight = self.blockSyncer?.localKnownBestBlockHeight, syncPeer.announcedLastBlockHeight > localKnownBestBlockHeight {
+                    expectedHashesMinCount = syncPeer.announcedLastBlockHeight - localKnownBestBlockHeight
+                } else {
+                    expectedHashesMinCount = 0
+                }
+
+                syncPeer.add(task: GetBlockHashesTask(hashes: blockLocatorHashes, expectedHashesMinCount: expectedHashesMinCount))
             }
 
             if syncPeer.synced {

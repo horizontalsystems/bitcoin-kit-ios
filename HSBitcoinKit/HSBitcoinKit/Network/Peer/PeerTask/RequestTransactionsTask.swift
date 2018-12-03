@@ -36,12 +36,11 @@ class RequestTransactionsTask: PeerTask {
         return hashes.contains(hash)
     }
 
-}
+    func equalTo(_ task: RequestTransactionsTask?) -> Bool {
+        guard let task = task else {
+            return false
+        }
 
-extension RequestTransactionsTask: Equatable {
-
-    static func ==(lhs: RequestTransactionsTask, rhs: RequestTransactionsTask) -> Bool {
-        return lhs.hashes == rhs.hashes
+        return hashes == task.hashes
     }
-
 }

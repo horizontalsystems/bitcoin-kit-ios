@@ -7,6 +7,7 @@ class IPeerTaskRequesterTests: XCTestCase {
 
     internal var mockNetwork: MockINetwork!
     internal var mockConnection: MockIPeerConnection!
+    internal var mockConnectionTimeoutManager: MockIConnectionTimeoutManager!
     internal var mockPeerGroup: MockPeerDelegate!
 
     internal var peer: Peer!
@@ -16,6 +17,7 @@ class IPeerTaskRequesterTests: XCTestCase {
 
         mockNetwork = MockINetwork()
         mockConnection = MockIPeerConnection()
+        mockConnectionTimeoutManager = MockIConnectionTimeoutManager()
         mockPeerGroup = MockPeerDelegate()
 
         stub(mockConnection) { mock in
@@ -27,14 +29,19 @@ class IPeerTaskRequesterTests: XCTestCase {
             when(mock).disconnect(error: any()).thenDoNothing()
             when(mock).send(message: any()).thenDoNothing()
         }
+        stub(mockConnectionTimeoutManager) { mock in
+            when(mock.reset()).thenDoNothing()
+            when(mock.timePeriodPassed(peer: any())).thenDoNothing()
+        }
 
-        peer = Peer(host: "", network: mockNetwork, connection: mockConnection, queue: DispatchQueue.main)
+        peer = Peer(host: "", network: mockNetwork, connection: mockConnection, connectionTimeoutManager: mockConnectionTimeoutManager, queue: DispatchQueue.main)
         peer.delegate = mockPeerGroup
     }
 
     override func tearDown() {
         mockNetwork = nil
         mockConnection = nil
+        mockConnectionTimeoutManager = nil
         mockPeerGroup = nil
 
         peer = nil

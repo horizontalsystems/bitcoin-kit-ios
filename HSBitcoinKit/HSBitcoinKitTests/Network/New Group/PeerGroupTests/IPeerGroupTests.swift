@@ -129,8 +129,7 @@ class IPeerGroupTests: PeerGroupTests {
         try! peerGroup.sendPendingTransactions()
         waitForMainQueue()
 
-        let task = SendTransactionTask(transaction: transaction)
-        verify(peer).add(task: equal(to: task, equalWhen: { ($0 as! SendTransactionTask) == ($1 as! SendTransactionTask) }))
+        verify(peer).add(task: equal(to: SendTransactionTask(transaction: transaction)))
     }
 
     func testSendPendingTransactions_NoConnectedPeers() {

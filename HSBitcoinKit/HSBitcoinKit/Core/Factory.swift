@@ -21,7 +21,7 @@ class Factory: IFactory {
     }
 
     func peer(withHost host: String, network: INetwork, logger: Logger? = nil) -> IPeer {
-        return Peer(host: host, network: network, connection: PeerConnection(host: host, network: network, logger: logger), logger: logger)
+        return Peer(host: host, network: network, connection: PeerConnection(host: host, network: network, logger: logger), connectionTimeoutManager: ConnectionTimeoutManager(), logger: logger)
     }
 
     func blockHash(withHeaderHash headerHash: Data, height: Int) -> BlockHash {

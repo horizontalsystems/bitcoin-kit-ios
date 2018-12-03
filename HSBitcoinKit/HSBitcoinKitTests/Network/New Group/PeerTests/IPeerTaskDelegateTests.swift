@@ -7,6 +7,7 @@ class IPeerTaskDelegateTests: XCTestCase {
 
     internal var mockNetwork: MockINetwork!
     internal var mockConnection: MockIPeerConnection!
+    internal var mockConnectionTimeoutManager: MockIConnectionTimeoutManager!
     internal var mockPeerGroup: MockPeerDelegate!
 
     internal var peer: Peer!
@@ -16,6 +17,7 @@ class IPeerTaskDelegateTests: XCTestCase {
 
         mockNetwork = MockINetwork()
         mockConnection = MockIPeerConnection()
+        mockConnectionTimeoutManager = MockIConnectionTimeoutManager()
         mockPeerGroup = MockPeerDelegate()
 
         stub(mockConnection) { mock in
@@ -32,14 +34,19 @@ class IPeerTaskDelegateTests: XCTestCase {
             when(mock.peerReady(any())).thenDoNothing()
             when(mock.handle(any(), merkleBlock: any())).thenDoNothing()
         }
+        stub(mockConnectionTimeoutManager) { mock in
+            when(mock.reset()).thenDoNothing()
+            when(mock.timePeriodPassed(peer: any())).thenDoNothing()
+        }
 
-        peer = Peer(host: "", network: mockNetwork, connection: mockConnection, queue: DispatchQueue.main)
+        peer = Peer(host: "", network: mockNetwork, connection: mockConnection, connectionTimeoutManager: mockConnectionTimeoutManager, queue: DispatchQueue.main)
         peer.delegate = mockPeerGroup
     }
 
     override func tearDown() {
         mockNetwork = nil
         mockConnection = nil
+        mockConnectionTimeoutManager = nil
         mockPeerGroup = nil
 
         peer = nil
@@ -56,6 +63,7 @@ class IPeerTaskDelegateTests: XCTestCase {
         peer.handle(completedTask: task)
 
         verify(mockPeerGroup).peer(equal(to: peer, equalWhen: { $0 === $1 }), didCompleteTask: equal(to: task, equalWhen: { $0 === $1 }))
+        verify(task2).resetTimer()
         verify(mockPeerGroup, never()).peer(equal(to: peer, equalWhen: { $0 === $1 }), didCompleteTask: equal(to: task2, equalWhen: { $0 === $1 }))
         verify(mockPeerGroup, never()).peerReady(any())
     }
@@ -81,7 +89,7 @@ class IPeerTaskDelegateTests: XCTestCase {
 
     func testHandleFailedTask() {
         let task = newTask()
-        let error = GetMerkleBlocksTask.MerkleBlocksNotReceived()
+        let error = PeerTask.TimeoutError()
 
         peer.handle(failedTask: task, error: error)
 
@@ -105,6 +113,8 @@ class IPeerTaskDelegateTests: XCTestCase {
             when(mock).delegate.set(any()).thenDoNothing()
             when(mock).requester.set(any()).thenDoNothing()
             when(mock).start().thenDoNothing()
+            when(mock).resetTimer().thenDoNothing()
+            when(mock).checkTimeout().thenDoNothing()
         }
 
         return mockTask

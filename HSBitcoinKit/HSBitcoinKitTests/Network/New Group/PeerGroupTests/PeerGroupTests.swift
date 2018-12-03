@@ -77,7 +77,8 @@ class PeerGroupTests: XCTestCase {
             when(mock.syncPeerIs(peer: any())).thenReturn(false)
         }
         stub(mockBlockSyncer) { mock in
-            when(mock.localBestBlockHeight.get).thenReturn(0)
+            when(mock.localDownloadedBestBlockHeight.get).thenReturn(0)
+            when(mock.localKnownBestBlockHeight.get).thenReturn(0)
             when(mock.prepareForDownload()).thenDoNothing()
             when(mock.downloadStarted()).thenDoNothing()
             when(mock.downloadCompleted()).thenDoNothing()
