@@ -5,6 +5,7 @@ import RealmSwift
 
 class AddressConverterTests: XCTestCase {
     private var addressConverter: AddressConverter!
+    private var mockPaymentAddressParser: MockIPaymentAddressParser!
     private var mockBech32: MockIBech32AddressConverter!
 
     override func setUp() {
@@ -24,6 +25,7 @@ class AddressConverterTests: XCTestCase {
             when(mock.convert(prefix: any(), address: any())).thenThrow(AddressConverter.ConversionError.unknownAddressType)
             when(mock.convert(prefix: any(), keyData: any(), scriptType: any())).thenThrow(AddressConverter.ConversionError.unknownAddressType)
         }
+        mockPaymentAddressParser = MockIPaymentAddressParser()
         addressConverter = AddressConverter(network: mockNetwork, bech32AddressConverter: mockBech32)
     }
 
@@ -32,34 +34,6 @@ class AddressConverterTests: XCTestCase {
         mockBech32 = nil
 
         super.tearDown()
-    }
-
-    func testParsePaymentAddress() {
-        var paymentData = BitcoinPaymentData(address: "address_data")
-        checkPaymentData(paymentAddress: "address_data", paymentData: paymentData)
-
-        paymentData = BitcoinPaymentData(address: "address_data", scheme: "prefix")
-        checkPaymentData(paymentAddress: "prefix:address_data", paymentData: paymentData)
-
-        paymentData = BitcoinPaymentData(address: "address_data", scheme: "prefix", version: "1.0")
-        checkPaymentData(paymentAddress: "prefix:address_data;version=1.0", paymentData: paymentData)
-
-        paymentData = BitcoinPaymentData(address: "address_data", scheme: "prefix", version: "1.0", label: "test")
-        checkPaymentData(paymentAddress: "prefix:address_data;version=1.0?label=test", paymentData: paymentData)
-
-        paymentData = BitcoinPaymentData(address: "address_data", scheme: "prefix", amount: 0.01)
-        checkPaymentData(paymentAddress: "prefix:address_data?amount=0.01", paymentData: paymentData)
-
-        paymentData = BitcoinPaymentData(address: "address_data", scheme: "prefix", amount: 0.01, label: "test_sender")
-        checkPaymentData(paymentAddress: "prefix:address_data?amount=0.01?label=test_sender", paymentData: paymentData)
-
-        paymentData = BitcoinPaymentData(address: "address_data", scheme: "prefix", parameters: ["custom":"any"])
-        checkPaymentData(paymentAddress: "prefix:address_data?custom=any", paymentData: paymentData)
-    }
-
-    private func checkPaymentData(paymentAddress: String, paymentData: BitcoinPaymentData) {
-        let bitcoinPaymentData = addressConverter.parse(paymentAddress: paymentAddress)
-        XCTAssertEqual(bitcoinPaymentData, paymentData)
     }
 
     func testValidAddressConvert() {

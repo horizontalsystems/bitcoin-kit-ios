@@ -218,13 +218,15 @@ protocol IInitialSyncer {
     func sync() throws
 }
 
+protocol IPaymentAddressParser {
+    func parse(paymentAddress: String) -> BitcoinPaymentData
+}
 protocol IBech32AddressConverter {
     func convert(prefix: String, address: String) throws -> Address
     func convert(prefix: String, keyData: Data, scriptType: ScriptType) throws -> Address
 }
 
 protocol IAddressConverter {
-    func parse(paymentAddress: String) -> BitcoinPaymentData
     func convert(address: String) throws -> Address
     func convert(keyHash: Data, type: ScriptType) throws -> Address
     func convertToLegacy(keyHash: Data, version: UInt8, addressType: AddressType) -> LegacyAddress
