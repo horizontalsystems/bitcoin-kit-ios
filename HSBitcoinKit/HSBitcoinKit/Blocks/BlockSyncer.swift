@@ -160,8 +160,10 @@ extension BlockSyncer: IBlockSyncer {
 
         var hashes = [BlockHash]()
         for hash in blockHashes {
-            lastOrder = lastOrder + 1
-            hashes.append(BlockHash(withHeaderHash: hash, height: 0, order: lastOrder))
+            if realm.objects(BlockHash.self).filter("reversedHeaderHashHex = %@", hash.reversedHex).count == 0 {
+                lastOrder = lastOrder + 1
+                hashes.append(BlockHash(withHeaderHash: hash, height: 0, order: lastOrder))
+            }
         }
 
         try? realm.write {
