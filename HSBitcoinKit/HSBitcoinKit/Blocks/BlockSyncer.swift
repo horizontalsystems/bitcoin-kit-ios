@@ -124,7 +124,7 @@ extension BlockSyncer: IBlockSyncer {
 
     func getBlockHashes() -> [BlockHash] {
         let realm = realmFactory.realm
-        let blockHashes = realm.objects(BlockHash.self).sorted(byKeyPath: "order")
+        let blockHashes = realm.objects(BlockHash.self).sorted(by: [SortDescriptor(keyPath: "order"), SortDescriptor(keyPath: "height")])
 
         return blockHashes.prefix(500).map { BlockHash(value: $0) }
     }

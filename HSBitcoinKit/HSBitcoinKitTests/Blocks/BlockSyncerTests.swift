@@ -258,8 +258,9 @@ class BlockSyncerTests: XCTestCase {
     func testGetBlockHashes() {
         var blockHashes = [BlockHash]()
         for i in 0..<1000 {
-            blockHashes.append(BlockHash(withHeaderHash: Data(from: i), height: [i-900, 0].max()!, order: i))
+            blockHashes.append(BlockHash(withHeaderHash: Data(from: i), height: 0, order: i + 1))
         }
+        blockHashes.append(BlockHash(withHeaderHash: Data(from: 10000), height: 1, order: 0))
 
         try! realm.write {
             realm.add(blockHashes)
@@ -267,8 +268,10 @@ class BlockSyncerTests: XCTestCase {
 
         let results = syncer.getBlockHashes()
         XCTAssertEqual(results.count, 500)
-        XCTAssertEqual(results.first!.headerHash, blockHashes.first!.headerHash)
-        XCTAssertEqual(results.last!.headerHash, blockHashes[499].headerHash)
+
+        XCTAssertEqual(results[0].headerHash, blockHashes[1000].headerHash)
+        XCTAssertEqual(results[1].headerHash, blockHashes[0].headerHash)
+        XCTAssertEqual(results.last!.headerHash, blockHashes[498].headerHash)
     }
 
     func testGetBlockLocatorHashes_BlockHashesExist() {
