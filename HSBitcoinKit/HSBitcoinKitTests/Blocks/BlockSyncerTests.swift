@@ -330,6 +330,25 @@ class BlockSyncerTests: XCTestCase {
         }
     }
 
+    func testAdd_BlockHashesExistWithTheSameHeaderHash() {
+        var blockHashDatas = [Data]()
+        for i in 0..<10 {
+            blockHashDatas.append(Data(from: i))
+        }
+
+        try! realm.write {
+            realm.add(BlockHash(withHeaderHash: blockHashDatas[0], height: 0, order: 10))
+        }
+        syncer.add(blockHashes: blockHashDatas)
+
+        XCTAssertEqual(realm.objects(BlockHash.self).count, 10)
+        for i in 0..<10 {
+            let blockHash = realm.objects(BlockHash.self).filter("headerHash = %@", Data(from: i)).first!
+            XCTAssertEqual(blockHash.order, 10 + i)
+            XCTAssertEqual(blockHash.height, 0)
+        }
+    }
+
     func testHandleMerkleBlock() {
         let merkleBlock = MerkleBlock(header: TestData.secondBlock.header!, transactionHashes: [], transactions: [])
         let block = TestData.secondBlock
