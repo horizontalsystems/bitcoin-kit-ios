@@ -13,7 +13,7 @@ class RealmFactory {
                     BlockHash.self,
                     BlockHeader.self,
                     FeeRate.self,
-                    KitState.self,
+                    RestoreState.self,
                     PeerAddress.self,
                     PublicKey.self,
                     SentTransaction.self,

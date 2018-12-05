@@ -54,7 +54,7 @@ class InitialSyncer {
 
         try addressManager.addKeys(keys: keys)
 
-        stateManager.apiSynced = true
+        stateManager.restored = true
         peerGroup.start()
     }
 
@@ -101,10 +101,10 @@ extension InitialSyncer: IInitialSyncer {
         try addressManager.fillGap()
 
         if !network.syncableFromApi {
-            stateManager.apiSynced = true
+            stateManager.restored = true
         }
 
-        if !stateManager.apiSynced {
+        if !stateManager.restored {
             let maxHeight = network.checkpointBlock.height
 
             let externalObservable = try fetchFromApi(external: true, maxHeight: maxHeight)

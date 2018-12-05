@@ -61,7 +61,7 @@ protocol IPeerHostManager {
 }
 
 protocol IStateManager {
-    var apiSynced: Bool { get set }
+    var restored: Bool { get set }
 }
 
 protocol IInitialSyncApi {
