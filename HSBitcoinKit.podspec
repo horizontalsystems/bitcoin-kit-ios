@@ -12,7 +12,7 @@ Pod::Spec.new do |spec|
   spec.social_media_url = 'http://horizontalsystems.io/'
 
   spec.requires_arc = true
-  spec.source = { git: 'https://github.com/horizontalsystems/bitcoin-kit-ios.git', tag: "v#{spec.version}" }
+  spec.source = { git: 'https://github.com/horizontalsystems/bitcoin-kit-ios.git', tag: "#{spec.version}" }
   spec.source_files = 'HSBitcoinKit/HSBitcoinKit/**/*.{h,m,swift}'
   spec.ios.deployment_target = '11.0'
   spec.swift_version = '4.1'
