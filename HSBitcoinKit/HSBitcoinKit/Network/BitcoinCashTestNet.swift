@@ -38,13 +38,13 @@ class BitcoinCashTestNet: INetwork {
     let checkpointBlock = Block(
             withHeader: BlockHeader(
                     version: 536870912,
-                    previousBlockHeaderReversedHex: "00000000000002724a16527c4b048a811ee7821c54bf8daf9e7eb8c07df7f982",
-                    merkleRootReversedHex: "027db423d24edcd6238234e0ddfe988ee6847abb3e64173b928799071ae32676",
-                    timestamp: 1537393033,
-                    bits: 436481402,
-                    nonce: 408109711
+                    previousBlockHeaderReversedHex: "000000000000043c25d4b23dee40208a9df99ef5717d236379120b01af2077e2",
+                    merkleRootReversedHex: "fb7ca6fbd9e1dd307cdafa7f7bf66317a49bfae4fc8e4d841f4faaf1acae5844",
+                    timestamp: 1543989687,
+                    bits: 486604799,
+                    nonce: 890299933
             ),
-            height: 1257984)
+            height: 1272398)
 
     required init(validatorFactory: IBlockValidatorFactory) {
         headerValidator = validatorFactory.validator(for: .header)
