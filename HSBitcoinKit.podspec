@@ -8,7 +8,7 @@ Pod::Spec.new do |spec|
                     DESC
   spec.homepage = 'https://github.com/horizontalsystems/bitcoin-kit-ios'
   spec.license = { :type => 'Apache 2.0', :file => 'LICENSE' }
-  spec.author = { 'Horizontal Systems' => 'horizontalsystems@protonmail.ch' }
+  spec.author = { 'Horizontal Systems' => 'hsdao@protonmail.ch' }
   spec.social_media_url = 'http://horizontalsystems.io/'
 
   spec.requires_arc = true
