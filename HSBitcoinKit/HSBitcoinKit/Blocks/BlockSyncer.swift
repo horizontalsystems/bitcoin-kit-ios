@@ -58,7 +58,7 @@ class BlockSyncer {
             }
         }
 
-        listener.initialBestBlockHeightUpdated(height: localKnownBestBlockHeight)
+        listener.initialBestBlockHeightUpdated(height: localDownloadedBestBlockHeight)
     }
 
     // We need to clear block hashes when sync peer is disconnected

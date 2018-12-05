@@ -40,28 +40,16 @@ class BitcoinCashMainNet: INetwork {
             ),
             height: 0)
 
-//    One of the checkpoint blocks before hard fork. Must be tested
-//    let checkpointBlock = Block(
-//            withHeader: BlockHeader(
-//                    version: 536870912,
-//                    previousBlockHeaderReversedHex: "000000000000000000b3ff31d54e9e83515ee18360c7dc59e30697d083c745ff",
-//                    merkleRootReversedHex: "33d4a902daa28d09f9f6a319f538153e4b747938e20e113a2935c8dc0b971584",
-//                    timestamp: 1481765313,
-//                    bits: 0x18038b85,
-//                    nonce: 251583942
-//            ),
-//            height: 443520)
-
     let checkpointBlock = Block(
             withHeader: BlockHeader(
-                    version: 536870912,
-                    previousBlockHeaderReversedHex: "000000000000000000640772774c4c5c923397129370c8edf05c3792de1dcb4e",
-                    merkleRootReversedHex: "bf78c4852c6fb6a80f47b254dd076e780872958dcaac629e48ba297b7cb5782a",
-                    timestamp: 1535106119,
-                    bits: 0x180215b2,
-                    nonce: 2725498692
+                    version: 549453824,
+                    previousBlockHeaderReversedHex: "0000000000000000013211b6077a69de24f4c5b2706171abfdcaf328121086e4",
+                    merkleRootReversedHex: "d175c8837f8ef6f6a43fbd4e54c4344ae5998be1e5734ee820288dc9d1622256",
+                    timestamp: 1543350262,
+                    bits: 402927509,
+                    nonce: 3929695337
             ),
-            height: 544800)
+            height: 558432)
 
 //    var targetTimeSpan: Int { return 24 * 60 * 60 }                     // Seconds in Bitcoin cycle
 
