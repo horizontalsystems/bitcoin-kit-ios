@@ -45,6 +45,14 @@ class BalanceController: UIViewController {
         Manager.shared.lastBlockInfoSubject.observeOn(MainScheduler.instance).subscribe(onNext: { [weak self] info in
             self?.update(lastBlockInfo: info)
         }).disposed(by: disposeBag)
+
+        Manager.shared.initialSyncErrorSubject.observeOn(MainScheduler.instance).subscribe(onNext: { [weak self] error in
+            let alert = UIAlertController(title: "Initial Sync Error", message: "\(error)", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: { _ in
+                self?.start()
+            }))
+            self?.present(alert, animated: true)
+        }).disposed(by: disposeBag)
     }
 
     @objc func logout() {

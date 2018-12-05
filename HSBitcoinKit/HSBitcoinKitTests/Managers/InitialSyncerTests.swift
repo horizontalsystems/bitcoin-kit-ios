@@ -15,6 +15,7 @@ class InitialSyncerTests: XCTestCase {
     private var mockFactory: MockIFactory!
     private var mockPeerGroup: MockIPeerGroup!
     private var mockNetwork: MockINetwork!
+    private var mockDelegate: MockIInitialSyncerDelegate!
     private var syncer: InitialSyncer!
 
     private var realm: Realm!
@@ -35,6 +36,7 @@ class InitialSyncerTests: XCTestCase {
         mockFactory = MockIFactory()
         mockPeerGroup = MockIPeerGroup()
         mockNetwork = MockINetwork()
+        mockDelegate = MockIInitialSyncerDelegate()
 
         realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
         try! realm.write { realm.deleteAll() }
@@ -89,6 +91,9 @@ class InitialSyncerTests: XCTestCase {
         stub(mockPeerGroup) { mock in
             when(mock.start()).thenDoNothing()
         }
+        stub(mockDelegate) { mock in
+            when(mock.syncFailed(error: any())).thenDoNothing()
+        }
 
         let checkpointBlock = Block()
         checkpointBlock.height = 100
@@ -109,6 +114,7 @@ class InitialSyncerTests: XCTestCase {
                 network: mockNetwork,
                 async: false
         )
+        syncer.delegate = mockDelegate
     }
 
     override func tearDown() {
@@ -249,6 +255,7 @@ class InitialSyncerTests: XCTestCase {
 
         XCTAssertEqual(realm.objects(BlockHash.self).count, 0)
 
+        verify(mockDelegate).syncFailed(error: equal(to: ApiError.noConnection, equalWhen: { type(of: $0) == type(of: $1) }))
         verify(mockStateManager, never()).apiSynced.set(true)
         verify(mockPeerGroup, never()).start()
     }

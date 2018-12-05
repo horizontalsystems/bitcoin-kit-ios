@@ -19,6 +19,8 @@ class InitialSyncer {
 
     private let async: Bool
 
+    weak var delegate: IInitialSyncerDelegate?
+
     init(realmFactory: IRealmFactory, hdWallet: IHDWallet, stateManager: IStateManager, api: IInitialSyncApi, addressManager: IAddressManager, addressSelector: IAddressSelector, factory: IFactory, peerGroup: IPeerGroup, network: INetwork, async: Bool = true, logger: Logger? = nil) {
         self.realmFactory = realmFactory
         self.hdWallet = hdWallet
@@ -124,9 +126,8 @@ extension InitialSyncer: IInitialSyncer {
             observable.subscribe(onNext: { [weak self] keys, responses in
                         try? self?.handle(keys: keys, responses: responses)
                     }, onError: { [weak self] error in
-                        // TODO: make handle error
                         self?.logger?.error(error)
-//                        self?.peerGroup.start()
+                        self?.delegate?.syncFailed(error: error)
                     })
                     .disposed(by: disposeBag)
         } else {

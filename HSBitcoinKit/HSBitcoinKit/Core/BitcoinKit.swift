@@ -36,7 +36,7 @@ public class BitcoinKit {
     private var peerGroup: IPeerGroup
     private let factory: IFactory
 
-    private let initialSyncer: IInitialSyncer
+    private var initialSyncer: IInitialSyncer
 
     private let realmStorage: RealmStorage
 
@@ -171,6 +171,7 @@ public class BitcoinKit {
 
         progressSyncer.delegate = dataProvider
 
+        initialSyncer.delegate = self
         dataProvider.delegate = self
     }
 
@@ -255,11 +256,18 @@ extension BitcoinKit: DataProviderDelegate {
 
 }
 
+extension BitcoinKit: IInitialSyncerDelegate {
+    func syncFailed(error: Error) {
+        delegate?.initialSyncFailed(bitcoinKit: self, error: error)
+    }
+}
+
 public protocol BitcoinKitDelegate: class {
     func transactionsUpdated(bitcoinKit: BitcoinKit, inserted: [TransactionInfo], updated: [TransactionInfo], deleted: [Int])
     func balanceUpdated(bitcoinKit: BitcoinKit, balance: Int)
     func lastBlockInfoUpdated(bitcoinKit: BitcoinKit, lastBlockInfo: BlockInfo)
     func progressUpdated(bitcoinKit: BitcoinKit, progress: Double)
+    func initialSyncFailed(bitcoinKit: BitcoinKit, error: Error)
 }
 
 extension BitcoinKit {

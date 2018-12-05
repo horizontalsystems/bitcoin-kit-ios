@@ -221,7 +221,12 @@ protocol IFactory {
 }
 
 protocol IInitialSyncer {
+    var delegate: IInitialSyncerDelegate? { get set }
     func sync() throws
+}
+
+protocol IInitialSyncerDelegate: class {
+    func syncFailed(error: Error)
 }
 
 protocol IPaymentAddressParser {
