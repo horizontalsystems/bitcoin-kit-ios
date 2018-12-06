@@ -38,6 +38,12 @@ class KitStateProviderTest: XCTestCase  {
         verify(mockDelegate).handleKitStateUpdate(state: equal(to: BitcoinKit.KitState.notSynced))
     }
 
+    func testSyncFinished() {
+        syncer.syncFinished()
+
+        verify(mockDelegate).handleKitStateUpdate(state: equal(to: BitcoinKit.KitState.synced))
+    }
+
     func testInitialBestBlockHeightUpdated() {
         syncer.initialBestBlockHeightUpdated(height: 100)
 

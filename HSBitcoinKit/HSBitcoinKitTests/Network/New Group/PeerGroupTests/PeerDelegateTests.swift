@@ -186,6 +186,7 @@ class PeerDelegateTests: PeerGroupTests {
         waitForMainQueue()
 
         verify(mockBlockSyncer).downloadCompleted()
+        verify(mockListener).syncFinished()
         verify(peer).sendMempoolMessage()
         verify(mockPeerManager).syncPeer.set(isNil())
     }
@@ -214,6 +215,7 @@ class PeerDelegateTests: PeerGroupTests {
         waitForMainQueue()
 
         verify(mockBlockSyncer).downloadCompleted()
+        verify(mockListener).syncFinished()
         verify(peer).sendMempoolMessage()
         verify(mockPeerManager).syncPeer.set(isNil())
 

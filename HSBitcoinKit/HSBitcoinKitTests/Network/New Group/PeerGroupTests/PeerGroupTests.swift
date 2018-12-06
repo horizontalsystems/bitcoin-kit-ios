@@ -53,6 +53,7 @@ class PeerGroupTests: XCTestCase {
         stub(mockListener) { mock in
             when(mock.syncStarted()).thenDoNothing()
             when(mock.syncStopped()).thenDoNothing()
+            when(mock.syncFinished()).thenDoNothing()
         }
         stub(mockReachabilityManager) { mock in
             when(mock.subject.get).thenReturn(subject)
