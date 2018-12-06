@@ -127,6 +127,7 @@ class PeerGroup {
 
             if syncPeer.synced {
                 self.blockSyncer?.downloadCompleted()
+                self.syncStateListener.syncFinished()
                 syncPeer.sendMempoolMessage()
                 self.peerManager.syncPeer = nil
                 self.assignNextSyncPeer()

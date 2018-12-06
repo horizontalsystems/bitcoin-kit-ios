@@ -19,6 +19,10 @@ extension KitStateProvider: ISyncStateListener {
         delegate?.handleKitStateUpdate(state: BitcoinKit.KitState.notSynced)
     }
 
+    func syncFinished() {
+        delegate?.handleKitStateUpdate(state: BitcoinKit.KitState.synced)
+    }
+
     func initialBestBlockHeightUpdated(height: Int32) {
         initialBestBlockHeight = height
         currentBestBlockHeight = height
