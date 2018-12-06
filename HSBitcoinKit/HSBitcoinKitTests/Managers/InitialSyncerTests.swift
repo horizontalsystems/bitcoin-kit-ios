@@ -15,6 +15,7 @@ class InitialSyncerTests: XCTestCase {
     private var mockFactory: MockIFactory!
     private var mockPeerGroup: MockIPeerGroup!
     private var mockNetwork: MockINetwork!
+    private var mockListener: MockISyncStateListener!
     private var syncer: InitialSyncer!
 
     private var realm: Realm!
@@ -35,6 +36,7 @@ class InitialSyncerTests: XCTestCase {
         mockFactory = MockIFactory()
         mockPeerGroup = MockIPeerGroup()
         mockNetwork = MockINetwork()
+        mockListener = MockISyncStateListener()
 
         realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
         try! realm.write { realm.deleteAll() }
@@ -83,11 +85,15 @@ class InitialSyncerTests: XCTestCase {
             when(mock.fillGap()).thenDoNothing()
         }
         stub(mockStateManager) { mock in
-            when(mock.apiSynced.get).thenReturn(false)
-            when(mock.apiSynced.set(any())).thenDoNothing()
+            when(mock.restored.get).thenReturn(false)
+            when(mock.restored.set(any())).thenDoNothing()
         }
         stub(mockPeerGroup) { mock in
             when(mock.start()).thenDoNothing()
+        }
+        stub(mockListener) { mock in
+            when(mock.syncStarted()).thenDoNothing()
+            when(mock.syncStopped()).thenDoNothing()
         }
 
         let checkpointBlock = Block()
@@ -99,6 +105,7 @@ class InitialSyncerTests: XCTestCase {
 
         syncer = InitialSyncer(
                 realmFactory: mockRealmFactory,
+                listener: mockListener,
                 hdWallet: mockHDWallet,
                 stateManager: mockStateManager,
                 api: mockInitialSyncApi,
@@ -113,6 +120,7 @@ class InitialSyncerTests: XCTestCase {
 
     override func tearDown() {
         mockRealmFactory = nil
+        mockListener = nil
         mockHDWallet = nil
         mockStateManager = nil
         mockInitialSyncApi = nil
@@ -130,7 +138,7 @@ class InitialSyncerTests: XCTestCase {
 
     func testConnectPeerGroupIfAlreadySynced() {
         stub(mockStateManager) { mock in
-            when(mock.apiSynced.get).thenReturn(true)
+            when(mock.restored.get).thenReturn(true)
         }
 
         try! syncer.sync()
@@ -143,13 +151,13 @@ class InitialSyncerTests: XCTestCase {
             when(mock.syncableFromApi.get).thenReturn(false)
         }
         stub(mockStateManager) { mock in
-            when(mock.apiSynced.set(any())).thenDoNothing()
-            when(mock.apiSynced.get).thenReturn(true)
+            when(mock.restored.set(any())).thenDoNothing()
+            when(mock.restored.get).thenReturn(true)
         }
 
         try! syncer.sync()
 
-        verify(mockStateManager).apiSynced.set(true)
+        verify(mockStateManager).restored.set(true)
     }
 
     func testSuccessSync() {
@@ -190,7 +198,9 @@ class InitialSyncerTests: XCTestCase {
         verify(mockAddressManager).addKeys(keys: equal(to: [externalKeys[0], externalKeys[1], externalKeys[2], internalKeys[0], internalKeys[1], internalKeys[2]]))
         verify(mockHDWallet, never()).publicKey(index: equal(to: 3), external: any())
 
-        verify(mockStateManager).apiSynced.set(true)
+        verify(mockListener).syncStarted()
+        verifyNoMoreInteractions(mockListener)
+        verify(mockStateManager).restored.set(true)
         verify(mockPeerGroup).start()
     }
 
@@ -224,7 +234,7 @@ class InitialSyncerTests: XCTestCase {
         verify(mockHDWallet, never()).publicKey(index: equal(to: 4), external: equal(to: true))
         verify(mockHDWallet, never()).publicKey(index: equal(to: 2), external: equal(to: false))
 
-        verify(mockStateManager).apiSynced.set(true)
+        verify(mockStateManager).restored.set(true)
         verify(mockPeerGroup).start()
     }
 
@@ -249,7 +259,8 @@ class InitialSyncerTests: XCTestCase {
 
         XCTAssertEqual(realm.objects(BlockHash.self).count, 0)
 
-        verify(mockStateManager, never()).apiSynced.set(true)
+        verify(mockListener).syncStopped()
+        verify(mockStateManager, never()).restored.set(true)
         verify(mockPeerGroup, never()).start()
     }
 
@@ -292,7 +303,7 @@ class InitialSyncerTests: XCTestCase {
         verify(mockHDWallet, never()).publicKey(index: equal(to: 5), external: equal(to: true))
         verify(mockHDWallet, never()).publicKey(index: equal(to: 2), external: equal(to: false))
 
-        verify(mockStateManager).apiSynced.set(true)
+        verify(mockStateManager).restored.set(true)
         verify(mockPeerGroup).start()
     }
 

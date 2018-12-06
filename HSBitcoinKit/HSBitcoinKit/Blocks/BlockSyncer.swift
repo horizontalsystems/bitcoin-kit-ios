@@ -3,7 +3,7 @@ import RealmSwift
 
 class BlockSyncer {
 
-    private let listener: BlockSyncerListener
+    private let listener: ISyncStateListener
     private let realmFactory: IRealmFactory
     private let network: INetwork
     private let transactionProcessor: ITransactionProcessor
@@ -36,7 +36,7 @@ class BlockSyncer {
         }
     }
 
-    init(realmFactory: IRealmFactory, network: INetwork, listener: BlockSyncerListener,
+    init(realmFactory: IRealmFactory, network: INetwork, listener: ISyncStateListener,
          transactionProcessor: ITransactionProcessor, blockchain: IBlockchain, addressManager: IAddressManager, bloomFilterManager: IBloomFilterManager,
          hashCheckpointThreshold: Int = 100, logger: Logger? = nil) {
         self.realmFactory = realmFactory
@@ -171,7 +171,7 @@ extension BlockSyncer: IBlockSyncer {
         }
     }
 
-    func handle(merkleBlock: MerkleBlock) throws {
+    func handle(merkleBlock: MerkleBlock, maxBlockHeight: Int32) throws {
         let realm = realmFactory.realm
 
         var block: Block!
@@ -193,7 +193,7 @@ extension BlockSyncer: IBlockSyncer {
             }
         }
 
-        listener.currentBestBlockHeightUpdated(height: Int32(block.height))
+        listener.currentBestBlockHeightUpdated(height: Int32(block.height), maxBlockHeight: maxBlockHeight)
     }
 
     func shouldRequestBlock(withHash hash: Data) -> Bool {

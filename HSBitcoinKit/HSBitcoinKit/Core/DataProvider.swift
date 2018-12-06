@@ -218,17 +218,8 @@ extension DataProvider: IDataProvider {
 
 }
 
-extension DataProvider: ProgressSyncerDelegate {
-
-    func handleProgressUpdate(progress: Double) {
-        delegate?.progressUpdated(progress: progress)
-    }
-
-}
-
 protocol DataProviderDelegate: class {
     func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo], deleted: [Int])
     func balanceUpdated(balance: Int)
     func lastBlockInfoUpdated(lastBlockInfo: BlockInfo)
-    func progressUpdated(progress: Double)
 }

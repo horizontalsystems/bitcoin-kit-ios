@@ -1,10 +1,10 @@
 import Foundation
 import RealmSwift
 
-class KitState: Object {
+class RestoreState: Object {
 
     @objc dynamic var uniqueStubField = ""
-    @objc dynamic var apiSynced = false
+    @objc dynamic var restored = false
 
     override class func primaryKey() -> String? {
         return "uniqueStubField"

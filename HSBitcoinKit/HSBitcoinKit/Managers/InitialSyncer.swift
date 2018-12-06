@@ -6,6 +6,7 @@ class InitialSyncer {
     private let disposeBag = DisposeBag()
 
     private let realmFactory: IRealmFactory
+    private let listener: ISyncStateListener
     private let hdWallet: IHDWallet
     private var stateManager: IStateManager
     private let api: IInitialSyncApi
@@ -19,8 +20,9 @@ class InitialSyncer {
 
     private let async: Bool
 
-    init(realmFactory: IRealmFactory, hdWallet: IHDWallet, stateManager: IStateManager, api: IInitialSyncApi, addressManager: IAddressManager, addressSelector: IAddressSelector, factory: IFactory, peerGroup: IPeerGroup, network: INetwork, async: Bool = true, logger: Logger? = nil) {
+    init(realmFactory: IRealmFactory, listener: ISyncStateListener, hdWallet: IHDWallet, stateManager: IStateManager, api: IInitialSyncApi, addressManager: IAddressManager, addressSelector: IAddressSelector, factory: IFactory, peerGroup: IPeerGroup, network: INetwork, async: Bool = true, logger: Logger? = nil) {
         self.realmFactory = realmFactory
+        self.listener = listener
         self.hdWallet = hdWallet
         self.stateManager = stateManager
         self.api = api
@@ -52,7 +54,7 @@ class InitialSyncer {
 
         try addressManager.addKeys(keys: keys)
 
-        stateManager.apiSynced = true
+        stateManager.restored = true
         peerGroup.start()
     }
 
@@ -99,10 +101,12 @@ extension InitialSyncer: IInitialSyncer {
         try addressManager.fillGap()
 
         if !network.syncableFromApi {
-            stateManager.apiSynced = true
+            stateManager.restored = true
         }
 
-        if !stateManager.apiSynced {
+        if !stateManager.restored {
+            self.listener.syncStarted()
+
             let maxHeight = network.checkpointBlock.height
 
             let externalObservable = try fetchFromApi(external: true, maxHeight: maxHeight)
@@ -124,9 +128,9 @@ extension InitialSyncer: IInitialSyncer {
             observable.subscribe(onNext: { [weak self] keys, responses in
                         try? self?.handle(keys: keys, responses: responses)
                     }, onError: { [weak self] error in
-                        // TODO: make handle error
                         self?.logger?.error(error)
-//                        self?.peerGroup.start()
+                        self?.listener.syncStopped()
+
                     })
                     .disposed(by: disposeBag)
         } else {
