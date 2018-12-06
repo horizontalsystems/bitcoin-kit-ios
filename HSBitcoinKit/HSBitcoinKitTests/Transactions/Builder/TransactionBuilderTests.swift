@@ -82,7 +82,7 @@ class TransactionBuilderTests: XCTestCase {
         }
 
         stub(mockUnspentOutputProvider) { mock in
-            when(mock.allUnspentOutputs()).thenReturn(unspentOutputs.outputs)
+            when(mock.allUnspentOutputs.get).thenReturn(unspentOutputs.outputs)
         }
 
         stub(mockAddressManager) { mock in
@@ -201,7 +201,7 @@ class TransactionBuilderTests: XCTestCase {
         }
 
         stub(mockUnspentOutputProvider) { mock in
-            when(mock.allUnspentOutputs()).thenReturn(unspentOutputs.outputs)
+            when(mock.allUnspentOutputs.get).thenReturn(unspentOutputs.outputs)
         }
 
         let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressWPKH)

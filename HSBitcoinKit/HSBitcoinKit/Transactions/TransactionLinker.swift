@@ -18,6 +18,7 @@ class TransactionLinker: ITransactionLinker {
                 input.address = previousOutput.address
                 input.keyHash = previousOutput.keyHash
                 transaction.isMine = true
+                transaction.isOutgoing = true
             }
         }
     }

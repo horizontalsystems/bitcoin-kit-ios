@@ -12,6 +12,7 @@ class Transaction: Object {
     @objc dynamic var block: Block?
 
     @objc dynamic var isMine: Bool = false
+    @objc dynamic var isOutgoing: Bool = false
     @objc dynamic var status: TransactionStatus = .relayed
 
     @objc dynamic var segWit: Bool = false
