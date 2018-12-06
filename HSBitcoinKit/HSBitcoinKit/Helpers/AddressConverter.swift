@@ -51,7 +51,7 @@ extension AddressConverter: IAddressConverter {
         if let address = try? bech32AddressConverter.convert(prefix: network.bech32PrefixPattern, address: address) {
             return address
         }
-        guard address.count >= 34 && address.count <= 55 else {
+        guard address.count >= 26 && address.count <= 35 else {
             throw ConversionError.invalidAddressLength
         }
         let pattern = ["^\(network.scriptPrefixPattern)", "^\(network.pubKeyPrefixPattern)"]
