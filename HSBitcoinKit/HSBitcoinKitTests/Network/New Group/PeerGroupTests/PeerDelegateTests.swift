@@ -259,7 +259,6 @@ class PeerDelegateTests: PeerGroupTests {
         verify(peer).filterLoad(bloomFilter: equal(to: bloomFilter, equalWhen: { $0.filter == $1.filter }))
         verify(mockPeerManager).syncPeer.set(equal(to: peer, equalWhen: { $0!.host == $1!.host }))
         verify(mockBlockSyncer).downloadStarted()
-        verify(mockBestBlockHeightListener).bestBlockHeightReceived(height: equal(to: 0))
 
         // Here a block which starts synchronization of newly set syncPeer is left enqueued
         stub(mockBlockSyncer) { mock in
@@ -313,7 +312,6 @@ class PeerDelegateTests: PeerGroupTests {
 
         verify(mockPeerManager, never()).syncPeer.set(any())
         verify(mockBlockSyncer, never()).downloadStarted()
-        verify(mockBestBlockHeightListener, never()).bestBlockHeightReceived(height: equal(to: 0))
         verify(mockTransactionSyncer, never()).pendingTransactions()
     }
 
@@ -335,7 +333,6 @@ class PeerDelegateTests: PeerGroupTests {
 
         verify(mockPeerManager, never()).syncPeer.set(any())
         verify(mockBlockSyncer, never()).downloadStarted()
-        verify(mockBestBlockHeightListener, never()).bestBlockHeightReceived(height: equal(to: 0))
 
         // Here a block which sends pending transactions is left enqueued
         stub(mockTransactionSyncer) { mock in
@@ -558,13 +555,16 @@ class PeerDelegateTests: PeerGroupTests {
         let peer = peers["0"]!
         let merkleBlock = MerkleBlock(header: TestData.firstBlock.header!, transactionHashes: [], transactions: [])
 
+        stub(peer) { mock in
+            when(mock.announcedLastBlockHeight.get).thenReturn(100)
+        }
         stub(mockBlockSyncer) { mock in
-            when(mock.handle(merkleBlock: any())).thenDoNothing()
+            when(mock.handle(merkleBlock: any(), maxBlockHeight: any())).thenDoNothing()
         }
 
         peerGroup.handle(peer, merkleBlock: merkleBlock)
 
-        verify(mockBlockSyncer).handle(merkleBlock: equal(to: merkleBlock))
+        verify(mockBlockSyncer).handle(merkleBlock: equal(to: merkleBlock), maxBlockHeight: equal(to: 100))
         verify(peer, never()).disconnect(error: any())
     }
 
@@ -573,12 +573,12 @@ class PeerDelegateTests: PeerGroupTests {
         let merkleBlock = MerkleBlock(header: TestData.firstBlock.header!, transactionHashes: [], transactions: [])
 
         stub(mockBlockSyncer) { mock in
-            when(mock.handle(merkleBlock: any())).thenThrow(MerkleBlockValidator.ValidationError.notEnoughBits)
+            when(mock.handle(merkleBlock: any(), maxBlockHeight: any())).thenThrow(MerkleBlockValidator.ValidationError.notEnoughBits)
         }
 
         peerGroup.handle(peer, merkleBlock: merkleBlock)
 
-        verify(mockBlockSyncer).handle(merkleBlock: equal(to: merkleBlock))
+        verify(mockBlockSyncer).handle(merkleBlock: equal(to: merkleBlock), maxBlockHeight: any())
         verify(peer).disconnect(error: equal(to: MerkleBlockValidator.ValidationError.notEnoughBits, equalWhen: { $0! == $1! }))
     }
 

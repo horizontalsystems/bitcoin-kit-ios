@@ -36,7 +36,7 @@ public class BitcoinKit {
     private var peerGroup: IPeerGroup
     private let factory: IFactory
 
-    private let initialSyncer: IInitialSyncer
+    private var initialSyncer: IInitialSyncer
 
     private let realmStorage: RealmStorage
 
@@ -65,8 +65,8 @@ public class BitcoinKit {
 
     private let blockSyncer: IBlockSyncer
 
-    private let progressSyncer: IProgressSyncer & BestBlockHeightListener & BlockSyncerListener
-    private var dataProvider: IDataProvider & ProgressSyncerDelegate
+    private let kitStateProvider: IKitStateProvider & ISyncStateListener
+    private var dataProvider: IDataProvider
 
     public init(withWords words: [String], coin: Coin, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) {
         let wordsHash = words.joined().data(using: .utf8).map { CryptoKit.sha256($0).hex } ?? words[0]
@@ -131,13 +131,13 @@ public class BitcoinKit {
         peerHostManager = PeerHostManager(network: network, realmFactory: realmFactory)
 
         factory = Factory()
-        progressSyncer = ProgressSyncer()
+        kitStateProvider = KitStateProvider()
 
         bloomFilterManager = BloomFilterManager(realmFactory: realmFactory, factory: factory)
-        peerGroup = PeerGroup(factory: factory, network: network, listener: progressSyncer, reachabilityManager: reachabilityManager, peerHostManager: peerHostManager, bloomFilterManager: bloomFilterManager, logger: logger)
+        peerGroup = PeerGroup(factory: factory, network: network, listener: kitStateProvider, reachabilityManager: reachabilityManager, peerHostManager: peerHostManager, bloomFilterManager: bloomFilterManager, logger: logger)
 
         addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, addressConverter: addressConverter)
-        initialSyncer = InitialSyncer(realmFactory: realmFactory, hdWallet: hdWallet, stateManager: stateManager, api: initialSyncApi, addressManager: addressManager, addressSelector: addressSelector, factory: factory, peerGroup: peerGroup, network: network)
+        initialSyncer = InitialSyncer(realmFactory: realmFactory, listener: kitStateProvider, hdWallet: hdWallet, stateManager: stateManager, api: initialSyncApi, addressManager: addressManager, addressSelector: addressSelector, factory: factory, peerGroup: peerGroup, network: network)
 
         realmStorage = RealmStorage(realmFactory: realmFactory)
 
@@ -164,13 +164,12 @@ public class BitcoinKit {
         blockchain = Blockchain(network: network, factory: factory)
 
         dataProvider = DataProvider(realmFactory: realmFactory, addressManager: addressManager, addressConverter: addressConverter, paymentAddressParser: paymentAddressParser, unspentOutputProvider: unspentOutputProvider, feeRateManager: feeRateManager, transactionCreator: transactionCreator, transactionBuilder: transactionBuilder, network: network)
-        blockSyncer = BlockSyncer(realmFactory: realmFactory, network: network, listener: progressSyncer, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager, logger: logger)
+        blockSyncer = BlockSyncer(realmFactory: realmFactory, network: network, listener: kitStateProvider, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager, logger: logger)
 
         peerGroup.blockSyncer = blockSyncer
         peerGroup.transactionSyncer = transactionSyncer
 
-        progressSyncer.delegate = dataProvider
-
+        kitStateProvider.delegate = self
         dataProvider.delegate = self
     }
 
@@ -249,17 +248,19 @@ extension BitcoinKit: DataProviderDelegate {
         delegate?.lastBlockInfoUpdated(bitcoinKit: self, lastBlockInfo: lastBlockInfo)
     }
 
-    func progressUpdated(progress: Double) {
-        delegate?.progressUpdated(bitcoinKit: self, progress: progress)
-    }
+}
 
+extension BitcoinKit: IKitStateProviderDelegate {
+    func handleKitStateUpdate(state: KitState) {
+        delegate?.kitStateUpdated(state: state)
+    }
 }
 
 public protocol BitcoinKitDelegate: class {
     func transactionsUpdated(bitcoinKit: BitcoinKit, inserted: [TransactionInfo], updated: [TransactionInfo], deleted: [Int])
     func balanceUpdated(bitcoinKit: BitcoinKit, balance: Int)
     func lastBlockInfoUpdated(bitcoinKit: BitcoinKit, lastBlockInfo: BlockInfo)
-    func progressUpdated(bitcoinKit: BitcoinKit, progress: Double)
+    func kitStateUpdated(state: BitcoinKit.KitState)
 }
 
 extension BitcoinKit {
@@ -282,6 +283,12 @@ extension BitcoinKit {
         case mainNet
         case testNet
         case regTest
+    }
+
+    public enum KitState {
+        case synced
+        case syncing(progress: Double)
+        case notSynced
     }
 
 }

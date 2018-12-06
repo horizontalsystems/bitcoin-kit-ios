@@ -7,18 +7,18 @@ class StateManager {
         self.realmFactory = realmFactory
     }
 
-    private func getKitState() -> KitState {
-        return realmFactory.realm.objects(KitState.self).first ?? KitState()
+    private func getRestoreState() -> RestoreState {
+        return realmFactory.realm.objects(RestoreState.self).first ?? RestoreState()
     }
 
-    private func setKitState(_ block: (KitState) -> ()) {
+    private func setRestoreState(_ block: (RestoreState) -> ()) {
         let realm = realmFactory.realm
 
-        let kitState = realm.objects(KitState.self).first ?? KitState()
+        let restoreState = realm.objects(RestoreState.self).first ?? RestoreState()
 
         try? realm.write {
-            block(kitState)
-            realm.add(kitState, update: true)
+            block(restoreState)
+            realm.add(restoreState, update: true)
         }
     }
 
@@ -26,13 +26,13 @@ class StateManager {
 
 extension StateManager: IStateManager {
 
-    var apiSynced: Bool {
+    var restored: Bool {
         get {
-            return getKitState().apiSynced
+            return getRestoreState().restored
         }
         set {
-            setKitState { kitState in
-                kitState.apiSynced = newValue
+            setRestoreState { kitState in
+                kitState.restored = newValue
             }
         }
     }

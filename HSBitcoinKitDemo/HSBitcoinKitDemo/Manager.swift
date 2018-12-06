@@ -14,7 +14,7 @@ class Manager {
 
     let balanceSubject = PublishSubject<Int>()
     let lastBlockInfoSubject = PublishSubject<BlockInfo>()
-    let progressSubject = PublishSubject<Double>()
+    let progressSubject = PublishSubject<BitcoinKit.KitState>()
     let transactionsSubject = PublishSubject<Void>()
 
     init() {
@@ -77,8 +77,8 @@ extension Manager: BitcoinKitDelegate {
         lastBlockInfoSubject.onNext(lastBlockInfo)
     }
 
-    public func progressUpdated(bitcoinKit: BitcoinKit, progress: Double) {
-        progressSubject.onNext(progress)
+    public func kitStateUpdated(state: BitcoinKit.KitState) {
+        progressSubject.onNext(state)
     }
 
 }

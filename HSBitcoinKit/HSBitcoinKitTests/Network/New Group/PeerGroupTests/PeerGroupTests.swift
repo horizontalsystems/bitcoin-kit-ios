@@ -10,7 +10,7 @@ class PeerGroupTests: XCTestCase {
 
     internal var mockFactory: MockIFactory!
     internal var mockNetwork: MockINetwork!
-    internal var mockBestBlockHeightListener: MockBestBlockHeightListener!
+    internal var mockListener: MockISyncStateListener!
     internal var mockReachabilityManager: MockIReachabilityManager!
     internal var mockPeerHostManager: MockIPeerHostManager!
     internal var mockBloomFilterManager: MockIBloomFilterManager!
@@ -29,7 +29,7 @@ class PeerGroupTests: XCTestCase {
 
         mockFactory = MockIFactory()
         mockNetwork = MockINetwork()
-        mockBestBlockHeightListener = MockBestBlockHeightListener()
+        mockListener = MockISyncStateListener()
         mockReachabilityManager = MockIReachabilityManager()
         mockPeerHostManager = MockIPeerHostManager()
         mockBloomFilterManager = MockIBloomFilterManager()
@@ -50,8 +50,9 @@ class PeerGroupTests: XCTestCase {
         }
         resetStubsAndInvocationsOfPeers()
 
-        stub(mockBestBlockHeightListener) { mock in
-            when(mock.bestBlockHeightReceived(height: any())).thenDoNothing()
+        stub(mockListener) { mock in
+            when(mock.syncStarted()).thenDoNothing()
+            when(mock.syncStopped()).thenDoNothing()
         }
         stub(mockReachabilityManager) { mock in
             when(mock.subject.get).thenReturn(subject)
@@ -91,7 +92,7 @@ class PeerGroupTests: XCTestCase {
         }
 
         peerGroup = PeerGroup(
-                factory: mockFactory, network: mockNetwork, listener: mockBestBlockHeightListener, reachabilityManager: mockReachabilityManager, peerHostManager: mockPeerHostManager, bloomFilterManager: mockBloomFilterManager,
+                factory: mockFactory, network: mockNetwork, listener: mockListener, reachabilityManager: mockReachabilityManager, peerHostManager: mockPeerHostManager, bloomFilterManager: mockBloomFilterManager,
                 peerCount: peersCount, peerManager: mockPeerManager,
                 peersQueue: DispatchQueue.main, inventoryQueue: DispatchQueue.main
         )
@@ -102,7 +103,7 @@ class PeerGroupTests: XCTestCase {
     override func tearDown() {
         mockFactory = nil
         mockNetwork = nil
-        mockBestBlockHeightListener = nil
+        mockListener = nil
         mockReachabilityManager = nil
         mockPeerHostManager = nil
         mockBloomFilterManager = nil

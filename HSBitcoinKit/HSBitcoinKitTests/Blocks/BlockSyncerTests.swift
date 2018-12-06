@@ -6,7 +6,7 @@ import RealmSwift
 
 class BlockSyncerTests: XCTestCase {
     private var mockNetwork: MockINetwork!
-    private var mockBlockSyncerListener: MockBlockSyncerListener!
+    private var mockListener: MockISyncStateListener!
     private var mockTransactionProcessor: MockITransactionProcessor!
     private var mockBlockchain: MockIBlockchain!
     private var mockAddressManager: MockIAddressManager!
@@ -36,7 +36,7 @@ class BlockSyncerTests: XCTestCase {
         }
 
         mockNetwork = MockINetwork()
-        mockBlockSyncerListener = MockBlockSyncerListener()
+        mockListener = MockISyncStateListener()
         mockTransactionProcessor = MockITransactionProcessor()
         mockBlockchain = MockIBlockchain()
         mockAddressManager = MockIAddressManager()
@@ -45,9 +45,9 @@ class BlockSyncerTests: XCTestCase {
         stub(mockNetwork) { mock in
             when(mock.checkpointBlock.get).thenReturn(TestData.checkpointBlock)
         }
-        stub(mockBlockSyncerListener) { mock in
+        stub(mockListener) { mock in
             when(mock.initialBestBlockHeightUpdated(height: any())).thenDoNothing()
-            when(mock.currentBestBlockHeightUpdated(height: any())).thenDoNothing()
+            when(mock.currentBestBlockHeightUpdated(height: any(), maxBlockHeight: any())).thenDoNothing()
         }
 
         stub(mockTransactionProcessor) { mock in
@@ -65,12 +65,12 @@ class BlockSyncerTests: XCTestCase {
         }
 
         syncer = BlockSyncer(
-                realmFactory: mockRealmFactory, network: mockNetwork, listener: mockBlockSyncerListener,
+                realmFactory: mockRealmFactory, network: mockNetwork, listener: mockListener,
                 transactionProcessor: mockTransactionProcessor, blockchain: mockBlockchain, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager,
                 hashCheckpointThreshold: 100
         )
 
-        verify(mockBlockSyncerListener).initialBestBlockHeightUpdated(height: equal(to: Int32(TestData.checkpointBlock.height)))
+        verify(mockListener).initialBestBlockHeightUpdated(height: equal(to: Int32(TestData.checkpointBlock.height)))
 
         checkpointBlock = realm.objects(Block.self).filter("reversedHeaderHashHex = %@", TestData.checkpointBlock.reversedHeaderHashHex).first!
         newBlock2 = TestData.secondBlock
@@ -356,6 +356,7 @@ class BlockSyncerTests: XCTestCase {
         let merkleBlock = MerkleBlock(header: TestData.secondBlock.header!, transactionHashes: [], transactions: [])
         let block = TestData.secondBlock
         let blockHash = BlockHash(withHeaderHash: block.headerHash, height: block.height)
+        let maxBlockHeight: Int32 = 1000
 
         try! realm.write {
             realm.add(blockHash)
@@ -368,10 +369,10 @@ class BlockSyncerTests: XCTestCase {
             when(mock.process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: any(), realm: any())).thenDoNothing()
         }
 
-        try! syncer.handle(merkleBlock: merkleBlock)
+        try! syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: maxBlockHeight)
         verify(mockBlockchain).connect(merkleBlock: equal(to: merkleBlock), realm: any())
         verify(mockTransactionProcessor).process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: equal(to: false), realm: any())
-        verify(mockBlockSyncerListener).currentBestBlockHeightUpdated(height: Int32(block.height))
+        verify(mockListener).currentBestBlockHeightUpdated(height: Int32(block.height), maxBlockHeight: equal(to: maxBlockHeight))
         XCTAssertEqual(realm.objects(BlockHash.self).count, 0)
         verifyNeedToReDownloadSet(to: false)
     }
@@ -395,7 +396,7 @@ class BlockSyncerTests: XCTestCase {
             when(mock.process(transactions: equal(to: []), inBlock: equal(to: forceAddedBlock), skipCheckBloomFilter: any(), realm: any())).thenDoNothing()
         }
 
-        try! syncer.handle(merkleBlock: merkleBlock)
+        try! syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: 0)
         verify(mockBlockchain, never()).connect(merkleBlock: any(), realm: any())
         verify(mockBlockchain).forceAdd(merkleBlock: equal(to: merkleBlock), height: equal(to: merkleBlock.height!), realm: any())
         verify(mockTransactionProcessor).process(transactions: equal(to: []), inBlock: equal(to: forceAddedBlock), skipCheckBloomFilter: equal(to: false), realm: any())
@@ -409,7 +410,7 @@ class BlockSyncerTests: XCTestCase {
         }
 
         do {
-            try syncer.handle(merkleBlock: merkleBlock)
+            try syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: 0)
             XCTFail("Should throw an error")
         } catch let error as BlockValidatorError {
             XCTAssertEqual(error, BlockValidatorError.noPreviousBlock)
@@ -440,7 +441,7 @@ class BlockSyncerTests: XCTestCase {
             when(mock.process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: any(), realm: any())).thenDoNothing()
         }
 
-        try! syncer.handle(merkleBlock: merkleBlock)
+        try! syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: 0)
         verify(mockBlockchain).connect(merkleBlock: equal(to: merkleBlock), realm: any())
         verify(mockTransactionProcessor).process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: equal(to: true), realm: any())
         XCTAssertEqual(realm.objects(BlockHash.self).count, 1)
@@ -463,7 +464,7 @@ class BlockSyncerTests: XCTestCase {
             when(mock.process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: any(), realm: any())).thenThrow(BloomFilterManager.BloomFilterExpired())
         }
 
-        try! syncer.handle(merkleBlock: merkleBlock)
+        try! syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: 0)
         verify(mockBlockchain).connect(merkleBlock: equal(to: merkleBlock), realm: any())
         verify(mockTransactionProcessor).process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: equal(to: false), realm: any())
         XCTAssertEqual(realm.objects(BlockHash.self).count, 1)
@@ -492,7 +493,7 @@ class BlockSyncerTests: XCTestCase {
             when(mock.process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: any(), realm: any())).thenDoNothing()
         }
 
-        try? syncer.handle(merkleBlock: merkleBlock)
+        try? syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: 0)
 
         verify(mockTransactionProcessor).process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: value, realm: any())
     }
@@ -507,12 +508,12 @@ class BlockSyncerTests: XCTestCase {
         stub(mockTransactionProcessor) { mock in
             when(mock.process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: false, realm: any())).thenThrow(BloomFilterManager.BloomFilterExpired())
         }
-        try? syncer.handle(merkleBlock: merkleBlock)
+        try? syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: 0)
 
         stub(mockTransactionProcessor) { mock in
             when(mock.process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: true, realm: any())).thenThrow(BloomFilterManager.BloomFilterExpired())
         }
-        try? syncer.handle(merkleBlock: merkleBlock)
+        try? syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: 0)
 
         verify(mockTransactionProcessor).process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: true, realm: any())
     }
