@@ -14,9 +14,8 @@ class Manager {
 
     let balanceSubject = PublishSubject<Int>()
     let lastBlockInfoSubject = PublishSubject<BlockInfo>()
-    let progressSubject = PublishSubject<Double>()
+    let progressSubject = PublishSubject<BitcoinKit.KitState>()
     let transactionsSubject = PublishSubject<Void>()
-    let initialSyncErrorSubject = PublishSubject<Error>()
 
     init() {
         if let words = savedWords {
@@ -78,12 +77,8 @@ extension Manager: BitcoinKitDelegate {
         lastBlockInfoSubject.onNext(lastBlockInfo)
     }
 
-    public func progressUpdated(bitcoinKit: BitcoinKit, progress: Double) {
-        progressSubject.onNext(progress)
-    }
-
-    public func initialSyncFailed(bitcoinKit: BitcoinKit, error: Error) {
-        initialSyncErrorSubject.onNext(error)
+    public func kitStateUpdated(state: BitcoinKit.KitState) {
+        progressSubject.onNext(state)
     }
 
 }

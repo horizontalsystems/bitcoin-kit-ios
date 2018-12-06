@@ -14,6 +14,7 @@ class IPeerGroupTests: PeerGroupTests {
         waitForMainQueue()
 
         verify(mockBlockSyncer).prepareForDownload()
+        verify(mockListener).syncStarted()
         let expectedConnectTriggeredHosts = Array(peers.keys.sorted().prefix(peersCount))
         verify(mockPeerHostManager, times(peersCount)).peerHost.get
         verifyConnectTriggeredOnlyForPeers(withHosts: expectedConnectTriggeredHosts)
@@ -85,6 +86,7 @@ class IPeerGroupTests: PeerGroupTests {
 
         subject.onNext(true)
         verify(mockBlockSyncer).prepareForDownload()
+        verify(mockListener).syncStarted()
     }
 
     func testReachabilityChanged_Disconnected() {
@@ -93,6 +95,7 @@ class IPeerGroupTests: PeerGroupTests {
 
         subject.onNext(false)
         verify(mockPeerManager).disconnectAll()
+        verify(mockListener).syncStopped()
     }
 
 
@@ -111,6 +114,7 @@ class IPeerGroupTests: PeerGroupTests {
     func testStop() {
         peerGroup.stop()
         verify(mockPeerManager).disconnectAll()
+        verify(mockListener).syncStopped()
     }
 
     func testSendPendingTransactions() {

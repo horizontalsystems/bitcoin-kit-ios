@@ -6,6 +6,7 @@ class InitialSyncer {
     private let disposeBag = DisposeBag()
 
     private let realmFactory: IRealmFactory
+    private let listener: ISyncStateListener
     private let hdWallet: IHDWallet
     private var stateManager: IStateManager
     private let api: IInitialSyncApi
@@ -19,10 +20,9 @@ class InitialSyncer {
 
     private let async: Bool
 
-    weak var delegate: IInitialSyncerDelegate?
-
-    init(realmFactory: IRealmFactory, hdWallet: IHDWallet, stateManager: IStateManager, api: IInitialSyncApi, addressManager: IAddressManager, addressSelector: IAddressSelector, factory: IFactory, peerGroup: IPeerGroup, network: INetwork, async: Bool = true, logger: Logger? = nil) {
+    init(realmFactory: IRealmFactory, listener: ISyncStateListener, hdWallet: IHDWallet, stateManager: IStateManager, api: IInitialSyncApi, addressManager: IAddressManager, addressSelector: IAddressSelector, factory: IFactory, peerGroup: IPeerGroup, network: INetwork, async: Bool = true, logger: Logger? = nil) {
         self.realmFactory = realmFactory
+        self.listener = listener
         self.hdWallet = hdWallet
         self.stateManager = stateManager
         self.api = api
@@ -105,6 +105,8 @@ extension InitialSyncer: IInitialSyncer {
         }
 
         if !stateManager.restored {
+            self.listener.syncStarted()
+
             let maxHeight = network.checkpointBlock.height
 
             let externalObservable = try fetchFromApi(external: true, maxHeight: maxHeight)
@@ -127,7 +129,8 @@ extension InitialSyncer: IInitialSyncer {
                         try? self?.handle(keys: keys, responses: responses)
                     }, onError: { [weak self] error in
                         self?.logger?.error(error)
-                        self?.delegate?.syncFailed(error: error)
+                        self?.listener.syncStopped()
+
                     })
                     .disposed(by: disposeBag)
         } else {

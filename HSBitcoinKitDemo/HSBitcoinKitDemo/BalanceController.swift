@@ -38,20 +38,12 @@ class BalanceController: UIViewController {
             self?.update(balance: balance)
         }).disposed(by: disposeBag)
 
-        Manager.shared.progressSubject.observeOn(MainScheduler.instance).subscribe(onNext: { [weak self] progress in
-            self?.update(progress: progress)
+        Manager.shared.progressSubject.observeOn(MainScheduler.instance).subscribe(onNext: { [weak self] state in
+            self?.update(state: state)
         }).disposed(by: disposeBag)
 
         Manager.shared.lastBlockInfoSubject.observeOn(MainScheduler.instance).subscribe(onNext: { [weak self] info in
             self?.update(lastBlockInfo: info)
-        }).disposed(by: disposeBag)
-
-        Manager.shared.initialSyncErrorSubject.observeOn(MainScheduler.instance).subscribe(onNext: { [weak self] error in
-            let alert = UIAlertController(title: "Initial Sync Error", message: "\(error)", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: { _ in
-                self?.start()
-            }))
-            self?.present(alert, animated: true)
         }).disposed(by: disposeBag)
     }
 
@@ -81,8 +73,12 @@ class BalanceController: UIViewController {
         balanceLabel?.text = "Balance: \(Double(balance) / 100_000_000)"
     }
 
-    private func update(progress: Double) {
-        progressLabel?.text = "Sync Progress: \(Int(progress * 100))%"
+    private func update(state: BitcoinKit.KitState) {
+        switch state {
+        case .synced: progressLabel?.text = "Synced"
+        case let BitcoinKit.KitState.syncing(progress): progressLabel?.text = "Sync Progress: \(Int(progress * 100))%"
+        case .notSynced: progressLabel?.text = "Not Synced"
+        }
     }
 
     private func update(lastBlockInfo info: BlockInfo) {

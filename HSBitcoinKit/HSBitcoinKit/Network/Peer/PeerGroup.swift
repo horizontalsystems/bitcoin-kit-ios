@@ -14,7 +14,7 @@ class PeerGroup {
 
     weak var blockSyncer: IBlockSyncer?
     weak var transactionSyncer: ITransactionSyncer?
-    private var bestBlockHeightListener: BestBlockHeightListener
+    private var syncStateListener: ISyncStateListener
 
     private let factory: IFactory
     private let network: INetwork
@@ -32,7 +32,7 @@ class PeerGroup {
 
     private let logger: Logger?
 
-    init(factory: IFactory, network: INetwork, listener: BestBlockHeightListener, reachabilityManager: IReachabilityManager,
+    init(factory: IFactory, network: INetwork, listener: ISyncStateListener, reachabilityManager: IReachabilityManager,
          peerHostManager: IPeerHostManager, bloomFilterManager: IBloomFilterManager,
          peerCount: Int = 10, peerManager: IPeerManager = PeerManager(),
          peersQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Local Queue", qos: .userInitiated),
@@ -40,7 +40,7 @@ class PeerGroup {
          logger: Logger? = nil) {
         self.factory = factory
         self.network = network
-        self.bestBlockHeightListener = listener
+        self.syncStateListener = listener
         self.reachabilityManager = reachabilityManager
         self.peerHostManager = peerHostManager
         self.bloomFilterManager = bloomFilterManager
@@ -144,7 +144,6 @@ class PeerGroup {
                 self.logger?.debug("Setting sync peer to \(nonSyncedPeer.logName)")
                 self.peerManager.syncPeer = nonSyncedPeer
                 self.blockSyncer?.downloadStarted()
-                self.bestBlockHeightListener.bestBlockHeightReceived(height: nonSyncedPeer.announcedLastBlockHeight)
                 self.downloadBlockchain()
             } else {
                 try? self.handlePendingTransactions()
@@ -191,12 +190,14 @@ class PeerGroup {
 
         blockSyncer?.prepareForDownload()
         connectPeersIfRequired()
+        syncStateListener.syncStarted()
     }
 
     private func _stop() {
         _started = false
 
         self.peerManager.disconnectAll()
+        syncStateListener.syncStopped()
     }
 
 }
@@ -295,7 +296,7 @@ extension PeerGroup: PeerDelegate {
 
     func handle(_ peer: IPeer, merkleBlock: MerkleBlock) {
         do {
-            try blockSyncer?.handle(merkleBlock: merkleBlock)
+            try blockSyncer?.handle(merkleBlock: merkleBlock, maxBlockHeight: peer.announcedLastBlockHeight)
         } catch {
             logger?.error(error, context: peer.logName)
             peer.disconnect(error: error)

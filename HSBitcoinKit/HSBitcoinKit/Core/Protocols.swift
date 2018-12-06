@@ -197,8 +197,11 @@ protocol IConnectionTimeoutManager: class {
     func timePeriodPassed(peer: IPeer)
 }
 
-protocol BestBlockHeightListener: class {
-    func bestBlockHeightReceived(height: Int32)
+protocol ISyncStateListener: class {
+    func syncStarted()
+    func syncStopped()
+    func initialBestBlockHeightUpdated(height: Int32)
+    func currentBestBlockHeightUpdated(height: Int32, maxBlockHeight: Int32)
 }
 
 protocol PeerHostManagerDelegate: class {
@@ -221,7 +224,6 @@ protocol IFactory {
 }
 
 protocol IInitialSyncer {
-    var delegate: IInitialSyncerDelegate? { get set }
     func sync() throws
 }
 
@@ -232,6 +234,7 @@ protocol IInitialSyncerDelegate: class {
 protocol IPaymentAddressParser {
     func parse(paymentAddress: String) -> BitcoinPaymentData
 }
+
 protocol IBech32AddressConverter {
     func convert(prefix: String, address: String) throws -> Address
     func convert(prefix: String, keyData: Data, scriptType: ScriptType) throws -> Address
@@ -323,21 +326,16 @@ protocol IBlockSyncer: class {
     func getBlockHashes() -> [BlockHash]
     func getBlockLocatorHashes(peerLastBlockHeight: Int32) -> [Data]
     func add(blockHashes: [Data])
-    func handle(merkleBlock: MerkleBlock) throws
+    func handle(merkleBlock: MerkleBlock, maxBlockHeight: Int32) throws
     func shouldRequestBlock(withHash hash: Data) -> Bool
 }
 
-protocol BlockSyncerListener: class {
-    func initialBestBlockHeightUpdated(height: Int32)
-    func currentBestBlockHeightUpdated(height: Int32)
+protocol IKitStateProvider: class {
+    var delegate: IKitStateProviderDelegate? { get set }
 }
 
-protocol IProgressSyncer: class {
-    var delegate: ProgressSyncerDelegate? { get set }
-}
-
-protocol ProgressSyncerDelegate: class {
-    func handleProgressUpdate(progress: Double)
+protocol IKitStateProviderDelegate: class {
+    func handleKitStateUpdate(state: BitcoinKit.KitState)
 }
 
 protocol IDataProvider {
