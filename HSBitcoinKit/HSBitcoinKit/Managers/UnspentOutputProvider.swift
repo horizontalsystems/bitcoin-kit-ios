@@ -1,21 +1,32 @@
+import RealmSwift
+
 class UnspentOutputProvider {
     let realmFactory: IRealmFactory
+    let confirmationsThreshold: Int
 
-    init(realmFactory: IRealmFactory) {
+    init(realmFactory: IRealmFactory, confirmationsThreshold: Int) {
         self.realmFactory = realmFactory
+        self.confirmationsThreshold = confirmationsThreshold
     }
 }
 
 extension UnspentOutputProvider: IUnspentOutputProvider {
 
-    func allUnspentOutputs() -> [TransactionOutput] {
+    var allUnspentOutputs: [TransactionOutput] {
         let realm = realmFactory.realm
-        let allUnspentOutputs = realm.objects(TransactionOutput.self)
+        let lastBlockHeight = realmFactory.realm.objects(Block.self).sorted(byKeyPath: "height").last?.height ?? 0
+
+        let results = Array(realm.objects(TransactionOutput.self)
                 .filter("publicKey != nil")
                 .filter("scriptType != %@", ScriptType.unknown.rawValue)
-                .filter("inputs.@count = %@", 0)
+                .filter("inputs.@count = %@", 0))
 
-        return Array(allUnspentOutputs)
+        return results.filter { (output: TransactionOutput) in
+                guard let transaction = output.transaction else {
+                    return false
+                }
+                return transaction.isOutgoing || ((transaction.block?.height ?? lastBlockHeight) <= lastBlockHeight - confirmationsThreshold + 1)
+        }
     }
 
 }

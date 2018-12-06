@@ -13,29 +13,32 @@ class DataProvider {
     private let addressManager: IAddressManager
     private let addressConverter: IAddressConverter
     private let paymentAddressParser: IPaymentAddressParser
+    private let unspentOutputProvider: IUnspentOutputProvider
     private let transactionCreator: ITransactionCreator
     private let transactionBuilder: ITransactionBuilder
     private let network: INetwork
 
-    private var unspentOutputsNotificationToken: NotificationToken?
+    private let balanceUpdateSubject = PublishSubject<Void>()
+
     private var transactionsNotificationToken: NotificationToken?
     private var blocksNotificationToken: NotificationToken?
 
     weak var delegate: DataProviderDelegate?
 
-    init(realmFactory: IRealmFactory, addressManager: IAddressManager, addressConverter: IAddressConverter, paymentAddressParser: IPaymentAddressParser, feeRateManager: IFeeRateManager, transactionCreator: ITransactionCreator, transactionBuilder: ITransactionBuilder, network: INetwork) {
+    init(realmFactory: IRealmFactory, addressManager: IAddressManager, addressConverter: IAddressConverter, paymentAddressParser: IPaymentAddressParser, unspentOutputProvider: IUnspentOutputProvider, feeRateManager: IFeeRateManager, transactionCreator: ITransactionCreator, transactionBuilder: ITransactionBuilder, network: INetwork) {
         self.realmFactory = realmFactory
         self.addressManager = addressManager
         self.addressConverter = addressConverter
         self.paymentAddressParser = paymentAddressParser
+        self.unspentOutputProvider = unspentOutputProvider
         self.feeRateManager = feeRateManager
         self.transactionCreator = transactionCreator
         self.transactionBuilder = transactionBuilder
         self.network = network
 
-        unspentOutputsNotificationToken = unspentOutputRealmResults.observe { [weak self] changeset in
-            self?.handleUnspentOutputs(changeset: changeset)
-        }
+        balanceUpdateSubject.debounce(0.5, scheduler: MainScheduler.instance).subscribeAsync(disposeBag: disposeBag, onNext: {
+            self.delegate?.balanceUpdated(balance: self.balance)
+        })
 
         transactionsNotificationToken = transactionRealmResults.observe { [weak self] changeset in
             self?.handleTransactions(changeset: changeset)
@@ -47,7 +50,6 @@ class DataProvider {
     }
 
     deinit {
-        unspentOutputsNotificationToken?.invalidate()
         transactionsNotificationToken?.invalidate()
         blocksNotificationToken?.invalidate()
     }
@@ -59,26 +61,15 @@ class DataProvider {
                     updated: modifications.map { collection[$0] }.map { transactionInfo(fromTransaction: $0) },
                     deleted: deletions
             )
+            balanceUpdateSubject.onNext(())
         }
     }
 
     private func handleBlocks(changeset: RealmCollectionChange<Results<Block>>) {
         if case let .update(collection, deletions, insertions, _) = changeset, let block = collection.last, (!deletions.isEmpty || !insertions.isEmpty) {
             delegate?.lastBlockInfoUpdated(lastBlockInfo: blockInfo(fromBlock: block))
+            balanceUpdateSubject.onNext(())
         }
-    }
-
-    private func handleUnspentOutputs(changeset: RealmCollectionChange<Results<TransactionOutput>>) {
-        if case .update = changeset {
-            delegate?.balanceUpdated(balance: balance)
-        }
-    }
-
-    private var unspentOutputRealmResults: Results<TransactionOutput> {
-        return realmFactory.realm.objects(TransactionOutput.self)
-                .filter("publicKey != nil")
-                .filter("scriptType != %@", ScriptType.unknown.rawValue)
-                .filter("inputs.@count = %@", 0)
     }
 
     private var transactionRealmResults: Results<Transaction> {
@@ -161,7 +152,7 @@ extension DataProvider: IDataProvider {
     var balance: Int {
         var balance = 0
 
-        for output in unspentOutputRealmResults {
+        for output in unspentOutputProvider.allUnspentOutputs {
             balance += output.value
         }
 

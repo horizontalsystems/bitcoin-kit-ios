@@ -56,7 +56,7 @@ extension TransactionBuilder: ITransactionBuilder {
         } else {
             // Estimated fee
             // Default to .p2pkh address
-            let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: .p2pkh, changeType: .p2pkh, senderPay: senderPay, outputs: unspentOutputProvider.allUnspentOutputs())
+            let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: .p2pkh, changeType: .p2pkh, senderPay: senderPay, outputs: unspentOutputProvider.allUnspentOutputs)
             return selectedOutputsInfo.fee
         }
     }
@@ -68,7 +68,7 @@ extension TransactionBuilder: ITransactionBuilder {
 
         let changeScriptType = ScriptType.p2pkh
         let address = try addressConverter.convert(address: toAddress)
-        let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: address.scriptType, changeType: changeScriptType, senderPay: senderPay, outputs: unspentOutputProvider.allUnspentOutputs())
+        let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: address.scriptType, changeType: changeScriptType, senderPay: senderPay, outputs: unspentOutputProvider.allUnspentOutputs)
 
         if !senderPay {
             guard selectedOutputsInfo.fee < value else {
@@ -120,6 +120,7 @@ extension TransactionBuilder: ITransactionBuilder {
 
         transaction.status = .new
         transaction.isMine = true
+        transaction.isOutgoing = true
         transaction.dataHash = CryptoKit.sha256sha256(TransactionSerializer.serialize(transaction: transaction, withoutWitness: true))
         transaction.reversedHashHex = transaction.dataHash.reversedHex
         return transaction

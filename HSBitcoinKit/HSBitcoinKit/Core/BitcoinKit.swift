@@ -68,7 +68,7 @@ public class BitcoinKit {
     private let kitStateProvider: IKitStateProvider & ISyncStateListener
     private var dataProvider: IDataProvider
 
-    public init(withWords words: [String], coin: Coin, minLogLevel: Logger.Level = .verbose) {
+    public init(withWords words: [String], coin: Coin, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) {
         let wordsHash = words.joined().data(using: .utf8).map { CryptoKit.sha256($0).hex } ?? words[0]
 
         let realmFileName = "\(wordsHash)-\(coin.rawValue).realm"
@@ -153,7 +153,7 @@ public class BitcoinKit {
 
         transactionSizeCalculator = TransactionSizeCalculator()
         unspentOutputSelector = UnspentOutputSelector(calculator: transactionSizeCalculator)
-        unspentOutputProvider = UnspentOutputProvider(realmFactory: realmFactory)
+        unspentOutputProvider = UnspentOutputProvider(realmFactory: realmFactory, confirmationsThreshold: confirmationsThreshold)
 
         transactionExtractor = TransactionExtractor(scriptConverter: scriptConverter, addressConverter: addressConverter)
         transactionLinker = TransactionLinker()
@@ -163,7 +163,7 @@ public class BitcoinKit {
         transactionCreator = TransactionCreator(realmFactory: realmFactory, transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, peerGroup: peerGroup)
         blockchain = Blockchain(network: network, factory: factory)
 
-        dataProvider = DataProvider(realmFactory: realmFactory, addressManager: addressManager, addressConverter: addressConverter, paymentAddressParser: paymentAddressParser, feeRateManager: feeRateManager, transactionCreator: transactionCreator, transactionBuilder: transactionBuilder, network: network)
+        dataProvider = DataProvider(realmFactory: realmFactory, addressManager: addressManager, addressConverter: addressConverter, paymentAddressParser: paymentAddressParser, unspentOutputProvider: unspentOutputProvider, feeRateManager: feeRateManager, transactionCreator: transactionCreator, transactionBuilder: transactionBuilder, network: network)
         blockSyncer = BlockSyncer(realmFactory: realmFactory, network: network, listener: kitStateProvider, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager, logger: logger)
 
         peerGroup.blockSyncer = blockSyncer

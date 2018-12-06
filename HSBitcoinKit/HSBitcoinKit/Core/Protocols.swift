@@ -312,7 +312,7 @@ protocol IUnspentOutputSelector {
 }
 
 protocol IUnspentOutputProvider {
-    func allUnspentOutputs() -> [TransactionOutput]
+    var allUnspentOutputs: [TransactionOutput] { get }
 }
 
 protocol IBlockSyncer: class {
