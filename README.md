@@ -1,11 +1,11 @@
 # BitcoinKit-iOS
 
-Bitcoin and BitcoinCash(ABC) SPV wallet toolkit for Swift. This is a full implementation of SPV node inluding wallet creation/restore, syncronzation with network, send/receive transactions, and more.
+Bitcoin and BitcoinCash(ABC) SPV wallet toolkit for Swift. This is a full implementation of SPV node including wallet creation/restore, syncronzation with network, send/receive transactions, and more.
 
 
 ## Features
 
-- Full SVP implementation for fast mobile performance
+- Full SPV implementation for fast mobile performance
 - Send/Receive Legacy transactions (*P2PKH*, *P2PK*, *P2SH*)
 - Send/Receive Segwit transactions (*P2WPKH*)
 - Send/Receive Segwit transactions compatible with legacy wallets (*P2WPKH-SH*)
@@ -262,3 +262,8 @@ All features of the library are used in example project. It can be referred as a
 
 * [HSHDWalletKit](https://github.com/horizontalsystems/hd-wallet-kit-ios) - HD Wallet related features, mnemonic phrase geneartion.
 * [HSCryptoKit](https://github.com/horizontalsystems/crypto-kit-ios) - Crypto functions required for working with blockchain.
+
+## License
+
+The `HSBitcoinKit` toolkit is open source and available under the terms of the [MIT License](https://github.com/horizontalsystems/bitcoin-kit-ios/blob/master/LICENSE).
+
