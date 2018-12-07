@@ -299,7 +299,7 @@ extension PeerGroup: PeerDelegate {
         do {
             try blockSyncer?.handle(merkleBlock: merkleBlock, maxBlockHeight: peer.announcedLastBlockHeight)
         } catch {
-            logger?.error(error, context: peer.logName)
+            logger?.warning(error, context: peer.logName)
             peer.disconnect(error: error)
         }
     }
