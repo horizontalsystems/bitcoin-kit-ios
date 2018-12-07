@@ -41,10 +41,13 @@ class PaymentAddressParserTests: XCTestCase {
         checkPaymentData(addressParser: addressParser, paymentAddress: "bitcoin:address_data?amount=0.01", paymentData: paymentData)
 
         paymentData = BitcoinPaymentData(address: "address_data", amount: 0.01, label: "test_sender")
-        checkPaymentData(addressParser: addressParser, paymentAddress: "bitcoin:address_data?amount=0.01?label=test_sender", paymentData: paymentData)
+        checkPaymentData(addressParser: addressParser, paymentAddress: "bitcoin:address_data?amount=0.01&label=test_sender", paymentData: paymentData)
 
         paymentData = BitcoinPaymentData(address: "address_data", parameters: ["custom":"any"])
         checkPaymentData(addressParser: addressParser, paymentAddress: "bitcoin:address_data?custom=any", paymentData: paymentData)
+
+        paymentData = BitcoinPaymentData(address: "175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W", amount: 50, label: "Luke-Jr", message: "Donation for project xyz")
+        checkPaymentData(addressParser: addressParser, paymentAddress: "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?amount=50&label=Luke-Jr&message=Donation%20for%20project%20xyz", paymentData: paymentData)
     }
 
     func testParseBitcoinCashPaymentAddress() {
@@ -72,7 +75,7 @@ class PaymentAddressParserTests: XCTestCase {
         checkPaymentData(addressParser: addressParser, paymentAddress: "bitcoincash:address_data?amount=0.01", paymentData: paymentData)
 
         paymentData = BitcoinPaymentData(address: "bitcoincash:address_data", amount: 0.01, label: "test_sender")
-        checkPaymentData(addressParser: addressParser, paymentAddress: "bitcoincash:address_data?amount=0.01?label=test_sender", paymentData: paymentData)
+        checkPaymentData(addressParser: addressParser, paymentAddress: "bitcoincash:address_data?amount=0.01&label=test_sender", paymentData: paymentData)
 
         paymentData = BitcoinPaymentData(address: "bitcoincash:address_data", parameters: ["custom":"any"])
         checkPaymentData(addressParser: addressParser, paymentAddress: "bitcoincash:address_data?custom=any", paymentData: paymentData)
