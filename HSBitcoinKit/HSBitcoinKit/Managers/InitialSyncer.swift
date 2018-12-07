@@ -17,8 +17,9 @@ class InitialSyncer {
     private let network: INetwork
 
     private let logger: Logger?
-
     private let async: Bool
+
+    private var syncing = false
 
     init(realmFactory: IRealmFactory, listener: ISyncStateListener, hdWallet: IHDWallet, stateManager: IStateManager, api: IInitialSyncApi, addressManager: IAddressManager, addressSelector: IAddressSelector, factory: IFactory, peerGroup: IPeerGroup, network: INetwork, async: Bool = true, logger: Logger? = nil) {
         self.realmFactory = realmFactory
@@ -105,6 +106,12 @@ extension InitialSyncer: IInitialSyncer {
         }
 
         if !stateManager.restored {
+            guard !syncing else {
+                return
+            }
+
+            syncing = true
+
             self.listener.syncStarted()
 
             let maxHeight = network.checkpointBlock.height
@@ -126,11 +133,12 @@ extension InitialSyncer: IInitialSyncer {
             }
 
             observable.subscribe(onNext: { [weak self] keys, responses in
+                        self?.syncing = false
                         try? self?.handle(keys: keys, responses: responses)
                     }, onError: { [weak self] error in
+                        self?.syncing = false
                         self?.logger?.error(error)
                         self?.listener.syncStopped()
-
                     })
                     .disposed(by: disposeBag)
         } else {

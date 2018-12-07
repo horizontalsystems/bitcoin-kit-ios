@@ -316,7 +316,7 @@ extension Peer: PeerConnectionDelegate {
             do {
                 try self.handle(message: message)
             } catch {
-                self.log("Message handling failed with error: \(error)", level: .error)
+                self.log("Message handling failed with error: \(error)", level: .warning)
                 self.disconnect(error: error)
             }
         }

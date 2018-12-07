@@ -136,7 +136,7 @@ class InitialSyncerTests: XCTestCase {
         super.tearDown()
     }
 
-    func testConnectPeerGroupIfAlreadySynced() {
+    func testStartPeerGroupIfAlreadySynced() {
         stub(mockStateManager) { mock in
             when(mock.restored.get).thenReturn(true)
         }
@@ -158,6 +158,105 @@ class InitialSyncerTests: XCTestCase {
         try! syncer.sync()
 
         verify(mockStateManager).restored.set(true)
+    }
+
+    func testDontStartSyncSecondTimeBeforeFinished() {
+        let firstBlock = TestData.firstBlock
+        let firstBlockHash = BlockHash(withHeaderHash: firstBlock.headerHash, height: 10)
+        let externalResponse = BlockResponse(hash: firstBlock.reversedHeaderHashHex, height: 10)
+
+        stub(mockInitialSyncApi) { mock in
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[0]))).thenReturn(Observable.just([externalResponse]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[1]))).thenReturn(Observable.just([]).delay(0.001, scheduler: MainScheduler.instance))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[2]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[0]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[1]))).thenReturn(Observable.just([]))
+        }
+
+        stub(mockFactory) { mock in
+            when(mock).blockHash(withHeaderHash: equal(to: firstBlock.headerHash), height: equal(to: externalResponse.height)).thenReturn(firstBlockHash)
+        }
+
+        try! syncer.sync()
+        verify(mockInitialSyncApi).getBlockHashes(address: equal(to: externalAddresses[0]))
+
+        reset(mockInitialSyncApi)
+        stub(mockInitialSyncApi) { mock in
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[0]))).thenReturn(Observable.just([externalResponse]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[1]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[2]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[0]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[1]))).thenReturn(Observable.just([]))
+        }
+
+        try! syncer.sync()
+        verify(mockInitialSyncApi, never()).getBlockHashes(address: any())
+        waitForMainQueue()
+    }
+
+    func testStartSyncSecondTimeAfterFinished() {
+        let firstBlock = TestData.firstBlock
+        let firstBlockHash = BlockHash(withHeaderHash: firstBlock.headerHash, height: 10)
+        let externalResponse = BlockResponse(hash: firstBlock.reversedHeaderHashHex, height: 10)
+
+        stub(mockInitialSyncApi) { mock in
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[0]))).thenReturn(Observable.just([externalResponse]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[1]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[2]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[0]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[1]))).thenReturn(Observable.just([]))
+        }
+
+        stub(mockFactory) { mock in
+            when(mock).blockHash(withHeaderHash: equal(to: firstBlock.headerHash), height: equal(to: externalResponse.height)).thenReturn(firstBlockHash)
+        }
+
+        try! syncer.sync()
+        verify(mockInitialSyncApi).getBlockHashes(address: equal(to: externalAddresses[0]))
+
+        reset(mockInitialSyncApi)
+        stub(mockInitialSyncApi) { mock in
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[0]))).thenReturn(Observable.just([externalResponse]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[1]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[2]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[0]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[1]))).thenReturn(Observable.just([]))
+        }
+
+        try! syncer.sync()
+        verify(mockInitialSyncApi).getBlockHashes(address: equal(to: externalAddresses[0]))
+    }
+
+    func testStartSyncSecondTimeAfterStopped() {
+        let firstBlock = TestData.firstBlock
+        let firstBlockHash = BlockHash(withHeaderHash: firstBlock.headerHash, height: 10)
+        let externalResponse = BlockResponse(hash: firstBlock.reversedHeaderHashHex, height: 10)
+
+        stub(mockInitialSyncApi) { mock in
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[0]))).thenReturn(Observable.just([externalResponse]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[1]))).thenReturn(Observable.error(ApiError.noConnection))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[0]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[1]))).thenReturn(Observable.just([]))
+        }
+
+        stub(mockFactory) { mock in
+            when(mock).blockHash(withHeaderHash: equal(to: firstBlock.headerHash), height: equal(to: externalResponse.height)).thenReturn(firstBlockHash)
+        }
+
+        try! syncer.sync()
+        verify(mockInitialSyncApi).getBlockHashes(address: equal(to: externalAddresses[0]))
+
+        reset(mockInitialSyncApi)
+        stub(mockInitialSyncApi) { mock in
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[0]))).thenReturn(Observable.just([externalResponse]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[1]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[2]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[0]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[1]))).thenReturn(Observable.just([]))
+        }
+
+        try! syncer.sync()
+        verify(mockInitialSyncApi).getBlockHashes(address: equal(to: externalAddresses[0]))
     }
 
     func testSuccessSync() {
