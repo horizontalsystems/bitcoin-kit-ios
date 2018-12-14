@@ -42,14 +42,14 @@ class BitcoinCashMainNet: INetwork {
 
     let checkpointBlock = Block(
             withHeader: BlockHeader(
-                    version: 549453824,
-                    previousBlockHeaderReversedHex: "0000000000000000013211b6077a69de24f4c5b2706171abfdcaf328121086e4",
-                    merkleRootReversedHex: "d175c8837f8ef6f6a43fbd4e54c4344ae5998be1e5734ee820288dc9d1622256",
-                    timestamp: 1543350262,
-                    bits: 402927509,
-                    nonce: 3929695337
+                    version: 536870912,
+                    previousBlockHeaderReversedHex: "000000000000000000e59b1e08600cb1f1056a4431e0efffb6cb34be79e47468",
+                    merkleRootReversedHex: "215f71f1312013a9997b5a2f0e28f0de9b1ded94c8a980295668640547d362b8",
+                    timestamp: 1544791060,
+                    bits: 0x18079eb7,
+                    nonce: 3574431690
             ),
-            height: 558432)
+            height: 560792)
 
 //    var targetTimeSpan: Int { return 24 * 60 * 60 }                     // Seconds in Bitcoin cycle
 
