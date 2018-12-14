@@ -3,9 +3,9 @@ PODS:
   - BigInt (3.1.0):
     - SipHash (~> 1.2)
   - Cuckoo (0.11.3)
-  - HSCryptoKit (1.0.0)
-  - HSHDWalletKit (1.0.1):
-    - HSCryptoKit
+  - HSCryptoKit (1.0.1)
+  - HSHDWalletKit (1.0.2):
+    - HSCryptoKit (~> 1.0.1)
   - ObjectMapper (3.3.0)
   - Realm (3.11.0):
     - Realm/Headers (= 3.11.0)
@@ -19,15 +19,15 @@ PODS:
   - SipHash (1.2.2)
 
 DEPENDENCIES:
-  - Alamofire
-  - BigInt
+  - Alamofire (~> 4.7.3)
+  - BigInt (~> 3.1.0)
   - Cuckoo
-  - HSCryptoKit
-  - HSHDWalletKit (~> 1.0.1)
-  - ObjectMapper
-  - RealmSwift
-  - RxRealm
-  - RxSwift
+  - HSCryptoKit (~> 1.0.1)
+  - HSHDWalletKit (~> 1.0.2)
+  - ObjectMapper (~> 3.3.0)
+  - RealmSwift (~> 3.11.0)
+  - RxRealm (~> 0.7.5)
+  - RxSwift (~> 4.3.1)
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
@@ -47,8 +47,8 @@ SPEC CHECKSUMS:
   Alamofire: c7287b6e5d7da964a70935e5db17046b7fde6568
   BigInt: 76b5dfdfa3e2e478d4ffdf161aeede5502e2742f
   Cuckoo: 97522dd7ac6f18adba6022bdc74aa69e82ca691a
-  HSCryptoKit: 03c84aca081a6bcc999021d0acbf0cf7cf785d34
-  HSHDWalletKit: b3207ba91c73e32905964b36a0faf5c1da287cdd
+  HSCryptoKit: b5b7080a6571df88e25e68ec7dcc1c02a56f02ee
+  HSHDWalletKit: a37ff1172876560ded7d5ddedfe7e53959825658
   ObjectMapper: b612bf8c8e99c4dc0bb6013a51f7c27966ed5da9
   Realm: 92f09a102692b96a9a10e9617f214f15c5ab85fc
   RealmSwift: 5f0481cd658bb751c509314b964a35eaa264d2cf
@@ -56,6 +56,6 @@ SPEC CHECKSUMS:
   RxSwift: fe0fd770a43acdb7d0a53da411c9b892e69bb6e4
   SipHash: fad90a4683e420c52ef28063063dbbce248ea6d4
 
-PODFILE CHECKSUM: 80f4ef001bd51248b6aad22c6bea2e8e94911d81
+PODFILE CHECKSUM: 4dfd6262a08f389382d5333fe927a2d78324dcdc
 
 COCOAPODS: 1.5.3
