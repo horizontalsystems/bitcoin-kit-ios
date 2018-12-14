@@ -16,7 +16,7 @@ class GetMerkleBlockTaskTests:XCTestCase {
     private var blockHeaders: [BlockHeader]!
     private var task: GetMerkleBlocksTask!
 
-    private let allowedIdleTime = 5.0
+    private let allowedIdleTime = 60.0
 
     override func setUp() {
         super.setUp()

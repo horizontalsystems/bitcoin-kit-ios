@@ -2,7 +2,7 @@ import Foundation
 
 class GetMerkleBlocksTask: PeerTask {
 
-    private let allowedIdleTime = 5.0
+    private let allowedIdleTime = 60.0
     private var blockHashes: [BlockHash]
     private var pendingMerkleBlocks = [MerkleBlock]()
 

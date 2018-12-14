@@ -294,8 +294,10 @@ extension Peer: PeerConnectionDelegate {
     func connectionTimePeriodPassed() {
         connectionTimeoutManager.timePeriodPassed(peer: self)
 
-        if let task = tasks.first {
-            task.checkTimeout()
+        queue.async {
+            if let task = self.tasks.first {
+                task.checkTimeout()
+            }
         }
     }
 
