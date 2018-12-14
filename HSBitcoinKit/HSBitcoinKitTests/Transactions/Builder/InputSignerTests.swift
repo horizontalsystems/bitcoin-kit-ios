@@ -44,7 +44,7 @@ class InputSignerTests: XCTestCase {
         mockNetwork = MockINetwork()
 
         stub(mockHDWallet) { mock in
-            when(mock.privateKeyData(index: any(), external: any())).thenReturn(privateKey)
+            when(mock.privateKeyData(account: any(), index: any(), external: any())).thenReturn(privateKey)
         }
         stub(mockNetwork) { mock in
             when(mock.sigHash.get).thenReturn(SigHashType.bitcoinAll)
@@ -174,7 +174,7 @@ class InputSignerTests: XCTestCase {
 
     func testNoPrivateKey() {
         stub(mockHDWallet) { mock in
-            when(mock.privateKeyData(index: any(), external: any())).thenThrow(InputSigner.SignError.noPreviousOutputAddress)
+            when(mock.privateKeyData(account: any(), index: any(), external: any())).thenThrow(InputSigner.SignError.noPreviousOutputAddress)
         }
 
         var caught = false

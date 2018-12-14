@@ -18,7 +18,7 @@ Pod::Spec.new do |spec|
   spec.swift_version = '4.1'
 
   spec.dependency 'HSCryptoKit'
-  spec.dependency 'HSHDWalletKit'
+  spec.dependency 'HSHDWalletKit', '~> 1.0.1'
   spec.dependency 'Alamofire'
   spec.dependency 'ObjectMapper'
   spec.dependency 'RxSwift'

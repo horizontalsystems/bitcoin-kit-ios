@@ -195,8 +195,8 @@ class BloomFilterManagerTests: XCTestCase {
 
 
     private func getPublicKey(withIndex index: Int, chain: HDWallet.Chain) -> PublicKey {
-        let hdPrivKeyData = try! hdWallet.privateKeyData(index: index, external: chain == .external)
-        return PublicKey(withIndex: index, external: chain == .external, hdPublicKeyData: hdPrivKeyData)
+        let hdPrivKeyData = try! hdWallet.privateKeyData(account: 0, index: index, external: chain == .external)
+        return PublicKey(withAccount: 0, index: index, external: chain == .external, hdPublicKeyData: hdPrivKeyData)
     }
 
     private func byteArrayLittleEndian(int: Int) -> [UInt8] {

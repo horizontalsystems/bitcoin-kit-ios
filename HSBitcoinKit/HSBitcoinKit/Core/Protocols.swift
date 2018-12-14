@@ -30,8 +30,8 @@ protocol IRealmFactory {
 
 protocol IHDWallet {
     var gapLimit: Int { get }
-    func publicKey(index: Int, external: Bool) throws -> PublicKey
-    func privateKeyData(index: Int, external: Bool) throws -> Data
+    func publicKey(account: Int, index: Int, external: Bool) throws -> PublicKey
+    func privateKeyData(account: Int, index: Int, external: Bool) throws -> Data
 }
 
 protocol IApiConfigProvider {

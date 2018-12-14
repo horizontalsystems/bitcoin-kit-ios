@@ -52,30 +52,36 @@ class InitialSyncerTests: XCTestCase {
         externalKeys = []
         internalAddresses = []
         externalAddresses = []
-        for i in 0..<5 {
-            let internalKey = PublicKey()
-            let internalAddress = LegacyAddress(type: .pubKeyHash, keyHash: Data(bytes: [UInt8(1), UInt8(i)]), base58: "internal\(i)")
-            internalKey.keyHash = internalAddress.keyHash
-            internalKey.external = false
-            internalKeys.append(internalKey)
-            internalAddresses.append(internalAddress.stringValue)
+        for account in 0..<2 {
+            for i in 0..<5 {
+                let internalKey = PublicKey()
+                let internalAddress = LegacyAddress(type: .pubKeyHash, keyHash: Data(bytes: [UInt8(1), UInt8(i)]), base58: "internal\(i + (account*5))")
+                internalKey.account = account
+                internalKey.keyHash = internalAddress.keyHash
+                internalKey.external = false
+                internalKeys.append(internalKey)
+                internalAddresses.append(internalAddress.stringValue)
 
-            let externalKey = PublicKey()
-            let externalAddress = LegacyAddress(type: .pubKeyHash, keyHash: Data(bytes: [UInt8(0), UInt8(i)]), base58: "external\(i)")
-            externalKey.keyHash = externalAddress.keyHash
-            externalKeys.append(externalKey)
-            externalAddresses.append(externalAddress.stringValue)
+                let externalKey = PublicKey()
+                let externalAddress = LegacyAddress(type: .pubKeyHash, keyHash: Data(bytes: [UInt8(0), UInt8(i)]), base58: "external\(i + (account*5))")
+                externalKey.account = account
+                externalKey.keyHash = externalAddress.keyHash
+                externalKeys.append(externalKey)
+                externalAddresses.append(externalAddress.stringValue)
+            }
         }
 
         stub(mockHDWallet) { mock in
             when(mock.gapLimit.get).thenReturn(2)
-            for i in 0..<5 {
-                when(mock.publicKey(index: equal(to: i), external: equal(to: false))).thenReturn(internalKeys[i])
-                when(mock.publicKey(index: equal(to: i), external: equal(to: true))).thenReturn(externalKeys[i])
+            for account in 0..<2 {
+                for i in 0..<5 {
+                    when(mock.publicKey(account: equal(to: account), index: equal(to: i), external: equal(to: false))).thenReturn(internalKeys[i + (account*5)])
+                    when(mock.publicKey(account: equal(to: account), index: equal(to: i), external: equal(to: true))).thenReturn(externalKeys[i + (account*5)])
+                }
             }
         }
         stub(mockAddressSelector) { mock in
-            for i in 0..<5 {
+            for i in 0..<(5*2) {
                 when(mock.getAddressVariants(publicKey: equal(to: internalKeys[i]))).thenReturn([internalAddresses[i]])
                 when(mock.getAddressVariants(publicKey: equal(to: externalKeys[i]))).thenReturn([externalAddresses[i]])
             }
@@ -195,20 +201,11 @@ class InitialSyncerTests: XCTestCase {
     }
 
     func testStartSyncSecondTimeAfterFinished() {
-        let firstBlock = TestData.firstBlock
-        let firstBlockHash = BlockHash(withHeaderHash: firstBlock.headerHash, height: 10)
-        let externalResponse = BlockResponse(hash: firstBlock.reversedHeaderHashHex, height: 10)
-
         stub(mockInitialSyncApi) { mock in
-            when(mock.getBlockHashes(address: equal(to: externalAddresses[0]))).thenReturn(Observable.just([externalResponse]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[0]))).thenReturn(Observable.just([]))
             when(mock.getBlockHashes(address: equal(to: externalAddresses[1]))).thenReturn(Observable.just([]))
-            when(mock.getBlockHashes(address: equal(to: externalAddresses[2]))).thenReturn(Observable.just([]))
             when(mock.getBlockHashes(address: equal(to: internalAddresses[0]))).thenReturn(Observable.just([]))
             when(mock.getBlockHashes(address: equal(to: internalAddresses[1]))).thenReturn(Observable.just([]))
-        }
-
-        stub(mockFactory) { mock in
-            when(mock).blockHash(withHeaderHash: equal(to: firstBlock.headerHash), height: equal(to: externalResponse.height)).thenReturn(firstBlockHash)
         }
 
         try! syncer.sync()
@@ -216,9 +213,8 @@ class InitialSyncerTests: XCTestCase {
 
         reset(mockInitialSyncApi)
         stub(mockInitialSyncApi) { mock in
-            when(mock.getBlockHashes(address: equal(to: externalAddresses[0]))).thenReturn(Observable.just([externalResponse]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[0]))).thenReturn(Observable.just([]))
             when(mock.getBlockHashes(address: equal(to: externalAddresses[1]))).thenReturn(Observable.just([]))
-            when(mock.getBlockHashes(address: equal(to: externalAddresses[2]))).thenReturn(Observable.just([]))
             when(mock.getBlockHashes(address: equal(to: internalAddresses[0]))).thenReturn(Observable.just([]))
             when(mock.getBlockHashes(address: equal(to: internalAddresses[1]))).thenReturn(Observable.just([]))
         }
@@ -228,19 +224,11 @@ class InitialSyncerTests: XCTestCase {
     }
 
     func testStartSyncSecondTimeAfterStopped() {
-        let firstBlock = TestData.firstBlock
-        let firstBlockHash = BlockHash(withHeaderHash: firstBlock.headerHash, height: 10)
-        let externalResponse = BlockResponse(hash: firstBlock.reversedHeaderHashHex, height: 10)
-
         stub(mockInitialSyncApi) { mock in
-            when(mock.getBlockHashes(address: equal(to: externalAddresses[0]))).thenReturn(Observable.just([externalResponse]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[0]))).thenReturn(Observable.just([]))
             when(mock.getBlockHashes(address: equal(to: externalAddresses[1]))).thenReturn(Observable.error(ApiError.noConnection))
             when(mock.getBlockHashes(address: equal(to: internalAddresses[0]))).thenReturn(Observable.just([]))
             when(mock.getBlockHashes(address: equal(to: internalAddresses[1]))).thenReturn(Observable.just([]))
-        }
-
-        stub(mockFactory) { mock in
-            when(mock).blockHash(withHeaderHash: equal(to: firstBlock.headerHash), height: equal(to: externalResponse.height)).thenReturn(firstBlockHash)
         }
 
         try! syncer.sync()
@@ -248,9 +236,8 @@ class InitialSyncerTests: XCTestCase {
 
         reset(mockInitialSyncApi)
         stub(mockInitialSyncApi) { mock in
-            when(mock.getBlockHashes(address: equal(to: externalAddresses[0]))).thenReturn(Observable.just([externalResponse]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[0]))).thenReturn(Observable.just([]))
             when(mock.getBlockHashes(address: equal(to: externalAddresses[1]))).thenReturn(Observable.just([]))
-            when(mock.getBlockHashes(address: equal(to: externalAddresses[2]))).thenReturn(Observable.just([]))
             when(mock.getBlockHashes(address: equal(to: internalAddresses[0]))).thenReturn(Observable.just([]))
             when(mock.getBlockHashes(address: equal(to: internalAddresses[1]))).thenReturn(Observable.just([]))
         }
@@ -278,6 +265,10 @@ class InitialSyncerTests: XCTestCase {
             when(mock.getBlockHashes(address: equal(to: internalAddresses[0]))).thenReturn(Observable.just([internalResponse0]))
             when(mock.getBlockHashes(address: equal(to: internalAddresses[1]))).thenReturn(Observable.just([]))
             when(mock.getBlockHashes(address: equal(to: internalAddresses[2]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[5 + 0]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[5 + 1]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[5 + 0]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[5 + 1]))).thenReturn(Observable.just([]))
         }
 
         stub(mockFactory) { mock in
@@ -295,7 +286,9 @@ class InitialSyncerTests: XCTestCase {
 
         verify(mockAddressManager).fillGap()
         verify(mockAddressManager).addKeys(keys: equal(to: [externalKeys[0], externalKeys[1], externalKeys[2], internalKeys[0], internalKeys[1], internalKeys[2]]))
-        verify(mockHDWallet, never()).publicKey(index: equal(to: 3), external: any())
+        verify(mockAddressManager).addKeys(keys: equal(to: [externalKeys[5 + 0], externalKeys[5 + 1], internalKeys[5 + 0], internalKeys[5 + 1]]))
+        verify(mockHDWallet, never()).publicKey(account: equal(to: 0), index: equal(to: 3), external: any())
+        verify(mockHDWallet, never()).publicKey(account: equal(to: 1), index: equal(to: 2), external: any())
 
         verify(mockListener).syncStarted()
         verifyNoMoreInteractions(mockListener)
@@ -318,6 +311,10 @@ class InitialSyncerTests: XCTestCase {
             when(mock.getBlockHashes(address: equal(to: externalAddresses[3]))).thenReturn(Observable.just([]))
             when(mock.getBlockHashes(address: equal(to: internalAddresses[0]))).thenReturn(Observable.just([]))
             when(mock.getBlockHashes(address: equal(to: internalAddresses[1]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[5 + 0]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[5 + 1]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[5 + 0]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[5 + 1]))).thenReturn(Observable.just([]))
         }
 
         stub(mockFactory) { mock in
@@ -330,8 +327,8 @@ class InitialSyncerTests: XCTestCase {
         XCTAssertEqual(realm.objects(BlockHash.self).filter("reversedHeaderHashHex = %@", externalResponse0.hash).count, 1)
 
         verify(mockAddressManager).addKeys(keys: equal(to: [externalKeys[0], externalKeys[1], externalKeys[2], externalKeys[3], internalKeys[0], internalKeys[1]]))
-        verify(mockHDWallet, never()).publicKey(index: equal(to: 4), external: equal(to: true))
-        verify(mockHDWallet, never()).publicKey(index: equal(to: 2), external: equal(to: false))
+        verify(mockHDWallet, never()).publicKey(account: equal(to: 0), index: equal(to: 4), external: equal(to: true))
+        verify(mockHDWallet, never()).publicKey(account: equal(to: 0), index: equal(to: 2), external: equal(to: false))
 
         verify(mockStateManager).restored.set(true)
         verify(mockPeerGroup).start()
@@ -383,6 +380,10 @@ class InitialSyncerTests: XCTestCase {
             when(mock.getBlockHashes(address: equal(to: externalAddresses[4]))).thenReturn(Observable.just([]))
             when(mock.getBlockHashes(address: equal(to: internalAddresses[0]))).thenReturn(Observable.just([]))
             when(mock.getBlockHashes(address: equal(to: internalAddresses[1]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[5 + 0]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: externalAddresses[5 + 1]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[5 + 0]))).thenReturn(Observable.just([]))
+            when(mock.getBlockHashes(address: equal(to: internalAddresses[5 + 1]))).thenReturn(Observable.just([]))
         }
 
         stub(mockFactory) { mock in
@@ -399,8 +400,8 @@ class InitialSyncerTests: XCTestCase {
         XCTAssertEqual(realm.objects(BlockHash.self).filter("reversedHeaderHashHex = %@", response3.hash).count, 1)
 
         verify(mockAddressManager).addKeys(keys: equal(to: [externalKeys[0], externalKeys[1], externalKeys[2], externalKeys[3], externalKeys[4], internalKeys[0], internalKeys[1]]))
-        verify(mockHDWallet, never()).publicKey(index: equal(to: 5), external: equal(to: true))
-        verify(mockHDWallet, never()).publicKey(index: equal(to: 2), external: equal(to: false))
+        verify(mockHDWallet, never()).publicKey(account: equal(to: 0), index: equal(to: 5), external: equal(to: true))
+        verify(mockHDWallet, never()).publicKey(account: equal(to: 0), index: equal(to: 2), external: equal(to: false))
 
         verify(mockStateManager).restored.set(true)
         verify(mockPeerGroup).start()

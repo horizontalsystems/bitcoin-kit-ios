@@ -185,23 +185,22 @@ extension DataProvider: IDataProvider {
         let realm = realmFactory.realm
 
         let blocks = realm.objects(Block.self).sorted(byKeyPath: "height")
-        let syncedBlocks = blocks
         let pubKeys = realm.objects(PublicKey.self)
 
         for pubKey in pubKeys {
             let scriptType: ScriptType = (network is BitcoinCashMainNet || network is BitcoinCashTestNet) ? .p2pkh : .p2wpkh
             let bechAddress = (try? addressConverter.convert(keyHash: OpCode.scriptWPKH(pubKey.keyHash), type: scriptType).stringValue) ?? "none"
-            lines.append("\(pubKey.index) --- \(pubKey.external) --- hash: \(pubKey.keyHash.hex) --- p2wkph(SH) hash: \(pubKey.scriptHashForP2WPKH.hex)")
+            lines.append("\(pubKey.account) --- \(pubKey.index) --- \(pubKey.external) --- hash: \(pubKey.keyHash.hex) --- p2wkph(SH) hash: \(pubKey.scriptHashForP2WPKH.hex)")
             lines.append("legacy: \(addressConverter.convertToLegacy(keyHash: pubKey.keyHash, version: network.pubKeyHash, addressType: .pubKeyHash).stringValue) --- bech32: \(bechAddress) --- SH(WPKH): \(addressConverter.convertToLegacy(keyHash: pubKey.scriptHashForP2WPKH, version: network.scriptHash, addressType: .scriptHash).stringValue) \n")
         }
         lines.append("PUBLIC KEYS COUNT: \(pubKeys.count)")
 
-        lines.append("BLOCK COUNT: \(blocks.count) --- \(syncedBlocks.count) synced")
-        if let block = syncedBlocks.first {
-            lines.append("First Synced Block: \(block.height) --- \(block.reversedHeaderHashHex)")
+        lines.append("BLOCK COUNT: \(blocks.count)")
+        if let block = blocks.first {
+            lines.append("First Block: \(block.height) --- \(block.reversedHeaderHashHex)")
         }
-        if let block = syncedBlocks.last {
-            lines.append("Last Synced Block: \(block.height) --- \(block.reversedHeaderHashHex)")
+        if let block = blocks.last {
+            lines.append("Last Block: \(block.height) --- \(block.reversedHeaderHashHex)")
         }
 
         return lines.joined(separator: "\n")

@@ -33,7 +33,7 @@ extension InputSigner: IInputSigner {
 
         let publicKey = pubKey.raw
 
-        guard let privateKeyData = try? hdWallet.privateKeyData(index: pubKey.index, external: pubKey.external) else {
+        guard let privateKeyData = try? hdWallet.privateKeyData(account: pubKey.account, index: pubKey.index, external: pubKey.external) else {
             throw SignError.noPrivateKey
         }
         let witness = prevOutput.scriptType == .p2wpkh || prevOutput.scriptType == .p2wpkhSh
