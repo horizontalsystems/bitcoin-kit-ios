@@ -1,33 +1,35 @@
 PODS:
-  - Alamofire (4.7.3)
+  - Alamofire (4.8.0)
   - BigInt (3.1.0):
     - SipHash (~> 1.2)
-  - Cuckoo (0.11.3)
+  - Cuckoo (0.12.0)
   - HSCryptoKit (1.0.1)
   - HSHDWalletKit (1.0.2):
     - HSCryptoKit (~> 1.0.1)
   - ObjectMapper (3.3.0)
-  - Realm (3.11.0):
-    - Realm/Headers (= 3.11.0)
-  - Realm/Headers (3.11.0)
-  - RealmSwift (3.11.0):
-    - Realm (= 3.11.0)
-  - RxRealm (0.7.5):
+  - Realm (3.11.2):
+    - Realm/Headers (= 3.11.2)
+  - Realm/Headers (3.11.2)
+  - RealmSwift (3.11.2):
+    - Realm (= 3.11.2)
+  - RxAtomic (4.4.0)
+  - RxRealm (0.7.6):
     - RealmSwift (~> 3.0)
     - RxSwift (~> 4.0)
-  - RxSwift (4.3.1)
+  - RxSwift (4.4.0):
+    - RxAtomic (~> 4.4)
   - SipHash (1.2.2)
 
 DEPENDENCIES:
-  - Alamofire (~> 4.7.3)
+  - Alamofire (~> 4.8.0)
   - BigInt (~> 3.1.0)
   - Cuckoo
   - HSCryptoKit (~> 1.0.1)
   - HSHDWalletKit (~> 1.0.2)
   - ObjectMapper (~> 3.3.0)
   - RealmSwift (~> 3.11.0)
-  - RxRealm (~> 0.7.5)
-  - RxSwift (~> 4.3.1)
+  - RxRealm (~> 0.7.0)
+  - RxSwift (~> 4.0)
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
@@ -39,23 +41,25 @@ SPEC REPOS:
     - ObjectMapper
     - Realm
     - RealmSwift
+    - RxAtomic
     - RxRealm
     - RxSwift
     - SipHash
 
 SPEC CHECKSUMS:
-  Alamofire: c7287b6e5d7da964a70935e5db17046b7fde6568
+  Alamofire: 3ec537f71edc9804815215393ae2b1a8ea33a844
   BigInt: 76b5dfdfa3e2e478d4ffdf161aeede5502e2742f
-  Cuckoo: 97522dd7ac6f18adba6022bdc74aa69e82ca691a
+  Cuckoo: d30b6c149e52ffbcfe6b4a9543e4627d08947274
   HSCryptoKit: b5b7080a6571df88e25e68ec7dcc1c02a56f02ee
   HSHDWalletKit: a37ff1172876560ded7d5ddedfe7e53959825658
   ObjectMapper: b612bf8c8e99c4dc0bb6013a51f7c27966ed5da9
-  Realm: 92f09a102692b96a9a10e9617f214f15c5ab85fc
-  RealmSwift: 5f0481cd658bb751c509314b964a35eaa264d2cf
-  RxRealm: a6c6c0a07cb61f34209969ca6657734edfdfff30
-  RxSwift: fe0fd770a43acdb7d0a53da411c9b892e69bb6e4
+  Realm: 864477d028db77f7c5a0cba64a4892ad53db128a
+  RealmSwift: 12b8262fc08020b47de4fd88eb3d5c9425b34ec7
+  RxAtomic: eacf60db868c96bfd63320e28619fe29c179656f
+  RxRealm: 5379eddd74f8d617ca7681d1f8d144af25b432b0
+  RxSwift: 5976ecd04fc2fefd648827c23de5e11157faa973
   SipHash: fad90a4683e420c52ef28063063dbbce248ea6d4
 
-PODFILE CHECKSUM: 4dfd6262a08f389382d5333fe927a2d78324dcdc
+PODFILE CHECKSUM: ea0f851b7dbfbf9e9d56c9712a0c4acb355d277d
 
 COCOAPODS: 1.5.3
