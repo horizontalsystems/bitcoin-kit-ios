@@ -67,6 +67,7 @@ class PeerConnectionDelegateTests: XCTestCase {
 
         peer.add(task: mockTask)
         peer.connectionTimePeriodPassed()
+        waitForMainQueue()
         verify(mockConnectionTimeoutManager).timePeriodPassed(peer: equal(to: peer, equalWhen: { $0.host == $1.host }))
         verify(mockTask).checkTimeout()
     }

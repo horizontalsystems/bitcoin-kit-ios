@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name = 'HSBitcoinKit'
-  spec.version = '0.1.3'
+  spec.version = '0.1.4'
   spec.summary = 'Bitcoin wallet library for Swift'
   spec.description = <<-DESC
                        HSBitcoinKit implements Bitcoin protocol in Swift. It is an implementation of the Bitcoin SPV protocol written (almost) entirely in swift.
@@ -17,12 +17,12 @@ Pod::Spec.new do |spec|
   spec.ios.deployment_target = '11.0'
   spec.swift_version = '4.1'
 
-  spec.dependency 'HSCryptoKit'
-  spec.dependency 'HSHDWalletKit', '~> 1.0.1'
-  spec.dependency 'Alamofire'
-  spec.dependency 'ObjectMapper'
-  spec.dependency 'RxSwift'
-  spec.dependency 'BigInt'
-  spec.dependency 'RealmSwift'
-  spec.dependency 'RxRealm'
+  spec.dependency 'HSCryptoKit', '~> 1.0.1'
+  spec.dependency 'HSHDWalletKit', '~> 1.0.2'
+  spec.dependency 'Alamofire', '~> 4.7.3'
+  spec.dependency 'ObjectMapper', '~> 3.3.0'
+  spec.dependency 'RxSwift', '~> 4.3.1'
+  spec.dependency 'BigInt', '~> 3.1.0'
+  spec.dependency 'RealmSwift', '~> 3.11.0'
+  spec.dependency 'RxRealm', '~> 0.7.5'
 end

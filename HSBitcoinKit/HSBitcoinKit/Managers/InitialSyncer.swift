@@ -77,7 +77,8 @@ class InitialSyncer {
             logger?.debug("Account \(account) has \(keys.count) keys and \(blocks.count) blocks")
             try addressManager.addKeys(keys: keys)
 
-            if blocks.isEmpty {
+            // If gap shift is found
+            if keys.count <= hdWallet.gapLimit * 2 {
                 syncing = false
                 stateManager.restored = true
                 peerGroup.start()

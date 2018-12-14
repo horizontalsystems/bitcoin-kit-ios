@@ -10,21 +10,21 @@ project 'HSBitcoinKit/HSBitcoinKit'
 
 
 def internal_pods
-  pod 'HSCryptoKit'
-  pod 'HSHDWalletKit', '~> 1.0.1'
+  pod 'HSCryptoKit', '~> 1.0.1'
+  pod 'HSHDWalletKit', '~> 1.0.2'
 end
 
 def kit_pods
   internal_pods
 
-  pod 'Alamofire'
-  pod 'ObjectMapper'
+  pod 'Alamofire', '~> 4.7.3'
+  pod 'ObjectMapper', '~> 3.3.0'
 
-  pod 'RxSwift'
+  pod 'RxSwift', '~> 4.3.1'
 
-  pod 'BigInt'
-  pod 'RealmSwift'
-  pod 'RxRealm'
+  pod 'BigInt', '~> 3.1.0'
+  pod 'RealmSwift', '~> 3.11.0'
+  pod 'RxRealm', '~> 0.7.5'
 end
 
 target :HSBitcoinKitDemo do
