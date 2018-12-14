@@ -44,12 +44,12 @@ class AddressManagerTests: XCTestCase {
 
     func testChangePublicKey() {
         let publicKeys = [
-            getPublicKey(withIndex: 0, chain: .internal),
-            getPublicKey(withIndex: 0, chain: .external),
-            getPublicKey(withIndex: 3, chain: .internal),
-            getPublicKey(withIndex: 1, chain: .internal),
-            getPublicKey(withIndex: 2, chain: .internal),
-            getPublicKey(withIndex: 1, chain: .external)
+            getPublicKey(withAccount: 0, index: 0, chain: .internal),
+            getPublicKey(withAccount: 0, index: 0, chain: .external),
+            getPublicKey(withAccount: 0, index: 3, chain: .internal),
+            getPublicKey(withAccount: 0, index: 1, chain: .internal),
+            getPublicKey(withAccount: 0, index: 2, chain: .internal),
+            getPublicKey(withAccount: 0, index: 1, chain: .external)
         ]
         let txOutput = TestData.p2pkhTransaction.outputs[0]
 
@@ -64,7 +64,7 @@ class AddressManagerTests: XCTestCase {
     }
 
     func testChangePublicKey_NoUnusedPublicKey() {
-        let publicKey =  getPublicKey(withIndex: 0, chain: .internal)
+        let publicKey =  getPublicKey(withAccount: 0, index: 0, chain: .internal)
         let txOutput = TestData.p2pkhTransaction.outputs[0]
 
         try! realm.write {
@@ -85,12 +85,12 @@ class AddressManagerTests: XCTestCase {
 
     func testReceiveAddress() {
         let publicKeys = [
-            getPublicKey(withIndex: 0, chain: .external),
-            getPublicKey(withIndex: 0, chain: .internal),
-            getPublicKey(withIndex: 3, chain: .external),
-            getPublicKey(withIndex: 1, chain: .external),
-            getPublicKey(withIndex: 1, chain: .internal),
-            getPublicKey(withIndex: 2, chain: .external)
+            getPublicKey(withAccount: 0, index: 0, chain: .external),
+            getPublicKey(withAccount: 0, index: 0, chain: .internal),
+            getPublicKey(withAccount: 0, index: 3, chain: .external),
+            getPublicKey(withAccount: 0, index: 1, chain: .external),
+            getPublicKey(withAccount: 0, index: 1, chain: .internal),
+            getPublicKey(withAccount: 0, index: 2, chain: .external)
         ]
         let txOutput = TestData.p2pkhTransaction.outputs[0]
 
@@ -110,7 +110,7 @@ class AddressManagerTests: XCTestCase {
     }
 
     func testReceiveAddress_NoUnusedPublicKey() {
-        let publicKey =  getPublicKey(withIndex: 0, chain: .external)
+        let publicKey =  getPublicKey(withAccount: 0, index: 0, chain: .external)
         let txOutput = TestData.p2pkhTransaction.outputs[0]
 
         try! realm.write {
@@ -131,11 +131,15 @@ class AddressManagerTests: XCTestCase {
 
     func testFillGap() {
         let keys = [
-            getPublicKey(withIndex: 0, chain: .internal),
-            getPublicKey(withIndex: 1, chain: .internal),
-            getPublicKey(withIndex: 2, chain: .internal),
-            getPublicKey(withIndex: 0, chain: .external),
-            getPublicKey(withIndex: 1, chain: .external),
+            getPublicKey(withAccount: 0, index: 0, chain: .internal),
+            getPublicKey(withAccount: 0, index: 1, chain: .internal),
+            getPublicKey(withAccount: 0, index: 2, chain: .internal),
+            getPublicKey(withAccount: 0, index: 0, chain: .external),
+            getPublicKey(withAccount: 0, index: 1, chain: .external),
+            getPublicKey(withAccount: 1, index: 0, chain: .internal),
+            getPublicKey(withAccount: 1, index: 1, chain: .internal),
+            getPublicKey(withAccount: 1, index: 0, chain: .external),
+            getPublicKey(withAccount: 1, index: 1, chain: .external),
         ]
         let txOutput = TestData.p2pkhTransaction.outputs[0]
 
@@ -147,32 +151,81 @@ class AddressManagerTests: XCTestCase {
 
         stub(mockHDWallet) { mock in
             when(mock.gapLimit.get).thenReturn(2)
-            when(mock.publicKey(index: equal(to: 2), external: equal(to: false))).thenReturn(keys[2])
-            when(mock.publicKey(index: equal(to: 0), external: equal(to: true))).thenReturn(keys[3])
-            when(mock.publicKey(index: equal(to: 1), external: equal(to: true))).thenReturn(keys[4])
+            when(mock.publicKey(account: equal(to: 0), index: equal(to: 2), external: equal(to: false))).thenReturn(keys[2])
+            when(mock.publicKey(account: equal(to: 0), index: equal(to: 0), external: equal(to: true))).thenReturn(keys[3])
+            when(mock.publicKey(account: equal(to: 0), index: equal(to: 1), external: equal(to: true))).thenReturn(keys[4])
+            when(mock.publicKey(account: equal(to: 1), index: equal(to: 0), external: equal(to: false))).thenReturn(keys[5])
+            when(mock.publicKey(account: equal(to: 1), index: equal(to: 1), external: equal(to: false))).thenReturn(keys[6])
+            when(mock.publicKey(account: equal(to: 1), index: equal(to: 0), external: equal(to: true))).thenReturn(keys[7])
+            when(mock.publicKey(account: equal(to: 1), index: equal(to: 1), external: equal(to: true))).thenReturn(keys[8])
         }
 
         try! manager.fillGap()
-        verify(mockHDWallet, times(1)).publicKey(index: any(), external: equal(to: false))
-        verify(mockHDWallet, times(2)).publicKey(index: any(), external: equal(to: true))
+        verify(mockHDWallet, times(1)).publicKey(account: equal(to: 0), index: any(), external: equal(to: false))
+        verify(mockHDWallet, times(2)).publicKey(account: equal(to: 1), index: any(), external: equal(to: false))
+        verify(mockHDWallet, times(2)).publicKey(account: equal(to: 0), index: any(), external: equal(to: true))
+        verify(mockHDWallet, times(2)).publicKey(account: equal(to: 1), index: any(), external: equal(to: true))
 
-        let internalKeys = realm.objects(PublicKey.self).filter("external = false").sorted(byKeyPath: "index")
-        let externalKeys = realm.objects(PublicKey.self).filter("external = true").sorted(byKeyPath: "index")
+        var internalKeys = realm.objects(PublicKey.self).filter("external = false AND account = 0").sorted(byKeyPath: "index")
+        var externalKeys = realm.objects(PublicKey.self).filter("external = true AND account = 0").sorted(byKeyPath: "index")
 
         XCTAssertEqual(internalKeys.count, 3)
         XCTAssertEqual(externalKeys.count, 2)
         XCTAssertEqual(internalKeys[2].keyHash, keys[2].keyHash)
         XCTAssertEqual(externalKeys[0].keyHash, keys[3].keyHash)
         XCTAssertEqual(externalKeys[1].keyHash, keys[4].keyHash)
+
+        internalKeys = realm.objects(PublicKey.self).filter("external = false AND account = 1").sorted(byKeyPath: "index")
+        externalKeys = realm.objects(PublicKey.self).filter("external = true AND account = 1").sorted(byKeyPath: "index")
+
+        XCTAssertEqual(internalKeys.count, 2)
+        XCTAssertEqual(externalKeys.count, 2)
+        XCTAssertEqual(internalKeys[0].keyHash, keys[5].keyHash)
+        XCTAssertEqual(internalKeys[1].keyHash, keys[6].keyHash)
+        XCTAssertEqual(externalKeys[0].keyHash, keys[7].keyHash)
+        XCTAssertEqual(externalKeys[1].keyHash, keys[8].keyHash)
+    }
+
+    func testFillGap_NoUsedKey() {
+        let keys = [
+            getPublicKey(withAccount: 0, index: 0, chain: .internal),
+            getPublicKey(withAccount: 0, index: 1, chain: .internal),
+            getPublicKey(withAccount: 0, index: 0, chain: .external),
+            getPublicKey(withAccount: 0, index: 1, chain: .external),
+        ]
+
+        stub(mockHDWallet) { mock in
+            when(mock.gapLimit.get).thenReturn(2)
+            when(mock.publicKey(account: equal(to: 0), index: equal(to: 0), external: equal(to: false))).thenReturn(keys[0])
+            when(mock.publicKey(account: equal(to: 0), index: equal(to: 1), external: equal(to: false))).thenReturn(keys[1])
+            when(mock.publicKey(account: equal(to: 0), index: equal(to: 0), external: equal(to: true))).thenReturn(keys[2])
+            when(mock.publicKey(account: equal(to: 0), index: equal(to: 1), external: equal(to: true))).thenReturn(keys[3])
+        }
+
+        try! manager.fillGap()
+        verify(mockHDWallet, times(2)).publicKey(account: equal(to: 0), index: any(), external: equal(to: false))
+        verify(mockHDWallet, times(2)).publicKey(account: equal(to: 0), index: any(), external: equal(to: true))
+        verify(mockHDWallet, never()).publicKey(account: equal(to: 1), index: any(), external: any())
+
+        let internalKeys = realm.objects(PublicKey.self).filter("external = false").sorted(byKeyPath: "index")
+        let externalKeys = realm.objects(PublicKey.self).filter("external = true").sorted(byKeyPath: "index")
+
+        XCTAssertEqual(internalKeys.count, 2)
+        XCTAssertEqual(externalKeys.count, 2)
+        XCTAssertEqual(realm.objects(PublicKey.self).filter("account != 0").count, 0)
     }
 
     func testFillGap_NoUnusedKeys() {
         let keys = [
-            getPublicKey(withIndex: 0, chain: .internal),
-            getPublicKey(withIndex: 1, chain: .internal),
-            getPublicKey(withIndex: 2, chain: .internal),
-            getPublicKey(withIndex: 0, chain: .external),
-            getPublicKey(withIndex: 1, chain: .external),
+            getPublicKey(withAccount: 0, index: 0, chain: .internal),
+            getPublicKey(withAccount: 0, index: 1, chain: .internal),
+            getPublicKey(withAccount: 0, index: 2, chain: .internal),
+            getPublicKey(withAccount: 0, index: 0, chain: .external),
+            getPublicKey(withAccount: 0, index: 1, chain: .external),
+            getPublicKey(withAccount: 1, index: 0, chain: .internal),
+            getPublicKey(withAccount: 1, index: 1, chain: .internal),
+            getPublicKey(withAccount: 1, index: 0, chain: .external),
+            getPublicKey(withAccount: 1, index: 1, chain: .external),
         ]
         let txOutput = TestData.p2pkhTransaction.outputs[0]
 
@@ -184,18 +237,22 @@ class AddressManagerTests: XCTestCase {
 
         stub(mockHDWallet) { mock in
             when(mock.gapLimit.get).thenReturn(2)
-            when(mock.publicKey(index: equal(to: 1), external: equal(to: false))).thenReturn(keys[1])
-            when(mock.publicKey(index: equal(to: 2), external: equal(to: false))).thenReturn(keys[2])
-            when(mock.publicKey(index: equal(to: 0), external: equal(to: true))).thenReturn(keys[3])
-            when(mock.publicKey(index: equal(to: 1), external: equal(to: true))).thenReturn(keys[4])
+            when(mock.publicKey(account: equal(to: 0), index: equal(to: 1), external: equal(to: false))).thenReturn(keys[1])
+            when(mock.publicKey(account: equal(to: 0), index: equal(to: 2), external: equal(to: false))).thenReturn(keys[2])
+            when(mock.publicKey(account: equal(to: 0), index: equal(to: 0), external: equal(to: true))).thenReturn(keys[3])
+            when(mock.publicKey(account: equal(to: 0), index: equal(to: 1), external: equal(to: true))).thenReturn(keys[4])
+            when(mock.publicKey(account: equal(to: 1), index: equal(to: 0), external: equal(to: false))).thenReturn(keys[5])
+            when(mock.publicKey(account: equal(to: 1), index: equal(to: 1), external: equal(to: false))).thenReturn(keys[6])
+            when(mock.publicKey(account: equal(to: 1), index: equal(to: 0), external: equal(to: true))).thenReturn(keys[7])
+            when(mock.publicKey(account: equal(to: 1), index: equal(to: 1), external: equal(to: true))).thenReturn(keys[8])
         }
 
         try! manager.fillGap()
-        verify(mockHDWallet, times(2)).publicKey(index: any(), external: equal(to: false))
-        verify(mockHDWallet, times(2)).publicKey(index: any(), external: equal(to: true))
+        verify(mockHDWallet, times(2)).publicKey(account: equal(to: 0), index: any(), external: equal(to: false))
+        verify(mockHDWallet, times(2)).publicKey(account: equal(to: 0), index: any(), external: equal(to: true))
 
-        let internalKeys = realm.objects(PublicKey.self).filter("external = false").sorted(byKeyPath: "index")
-        let externalKeys = realm.objects(PublicKey.self).filter("external = true").sorted(byKeyPath: "index")
+        let internalKeys = realm.objects(PublicKey.self).filter("external = false AND account = 0").sorted(byKeyPath: "index")
+        let externalKeys = realm.objects(PublicKey.self).filter("external = true AND account = 0").sorted(byKeyPath: "index")
 
         XCTAssertEqual(internalKeys.count, 3)
         XCTAssertEqual(externalKeys.count, 2)
@@ -207,13 +264,17 @@ class AddressManagerTests: XCTestCase {
 
     func testFillGap_NonSequentiallyUsedKeys() {
         let keys = [
-            getPublicKey(withIndex: 0, chain: .internal),
-            getPublicKey(withIndex: 1, chain: .internal),
-            getPublicKey(withIndex: 2, chain: .internal),
-            getPublicKey(withIndex: 0, chain: .external),
-            getPublicKey(withIndex: 1, chain: .external),
-            getPublicKey(withIndex: 3, chain: .internal),
-            getPublicKey(withIndex: 2, chain: .external),
+            getPublicKey(withAccount: 0, index: 0, chain: .internal),
+            getPublicKey(withAccount: 0, index: 1, chain: .internal),
+            getPublicKey(withAccount: 0, index: 2, chain: .internal),
+            getPublicKey(withAccount: 0, index: 0, chain: .external),
+            getPublicKey(withAccount: 0, index: 1, chain: .external),
+            getPublicKey(withAccount: 0, index: 3, chain: .internal),
+            getPublicKey(withAccount: 0, index: 2, chain: .external),
+            getPublicKey(withAccount: 1, index: 0, chain: .internal),
+            getPublicKey(withAccount: 1, index: 1, chain: .internal),
+            getPublicKey(withAccount: 1, index: 0, chain: .external),
+            getPublicKey(withAccount: 1, index: 1, chain: .external),
         ]
         let txOutput = TestData.p2pkhTransaction.outputs[0]
         let txOutput2 = TestData.p2pkTransaction.outputs[0]
@@ -229,16 +290,20 @@ class AddressManagerTests: XCTestCase {
 
         stub(mockHDWallet) { mock in
             when(mock.gapLimit.get).thenReturn(1)
-            when(mock.publicKey(index: equal(to: 3), external: equal(to: false))).thenReturn(keys[5])
-            when(mock.publicKey(index: equal(to: 2), external: equal(to: true))).thenReturn(keys[6])
+            when(mock.publicKey(account: equal(to: 0), index: equal(to: 3), external: equal(to: false))).thenReturn(keys[5])
+            when(mock.publicKey(account: equal(to: 0), index: equal(to: 2), external: equal(to: true))).thenReturn(keys[6])
+            when(mock.publicKey(account: equal(to: 1), index: equal(to: 0), external: equal(to: false))).thenReturn(keys[7])
+            when(mock.publicKey(account: equal(to: 1), index: equal(to: 1), external: equal(to: false))).thenReturn(keys[8])
+            when(mock.publicKey(account: equal(to: 1), index: equal(to: 0), external: equal(to: true))).thenReturn(keys[9])
+            when(mock.publicKey(account: equal(to: 1), index: equal(to: 1), external: equal(to: true))).thenReturn(keys[10])
         }
 
         try! manager.fillGap()
-        verify(mockHDWallet, times(1)).publicKey(index: any(), external: equal(to: false))
-        verify(mockHDWallet, times(1)).publicKey(index: any(), external: equal(to: true))
+        verify(mockHDWallet, times(1)).publicKey(account: equal(to: 0), index: any(), external: equal(to: false))
+        verify(mockHDWallet, times(1)).publicKey(account: equal(to: 0), index: any(), external: equal(to: true))
 
-        let internalKeys = realm.objects(PublicKey.self).filter("external = false").sorted(byKeyPath: "index")
-        let externalKeys = realm.objects(PublicKey.self).filter("external = true").sorted(byKeyPath: "index")
+        let internalKeys = realm.objects(PublicKey.self).filter("external = false AND account = 0").sorted(byKeyPath: "index")
+        let externalKeys = realm.objects(PublicKey.self).filter("external = true AND account = 0").sorted(byKeyPath: "index")
 
         XCTAssertEqual(internalKeys.count, 4)
         XCTAssertEqual(externalKeys.count, 3)
@@ -253,9 +318,9 @@ class AddressManagerTests: XCTestCase {
 
     func testAddKeys() {
         let keys = [
-            getPublicKey(withIndex: 0, chain: .internal),
-            getPublicKey(withIndex: 1, chain: .internal),
-            getPublicKey(withIndex: 0, chain: .external),
+            getPublicKey(withAccount: 0, index: 0, chain: .internal),
+            getPublicKey(withAccount: 0, index: 1, chain: .internal),
+            getPublicKey(withAccount: 0, index: 0, chain: .external),
         ]
 
         try! manager.addKeys(keys: keys)
@@ -272,11 +337,11 @@ class AddressManagerTests: XCTestCase {
 
     func testGapShifts() {
         let keys = [
-            getPublicKey(withIndex: 0, chain: .internal),
-            getPublicKey(withIndex: 1, chain: .internal),
-            getPublicKey(withIndex: 2, chain: .internal),
-            getPublicKey(withIndex: 0, chain: .external),
-            getPublicKey(withIndex: 1, chain: .external),
+            getPublicKey(withAccount: 0, index: 0, chain: .internal),
+            getPublicKey(withAccount: 0, index: 1, chain: .internal),
+            getPublicKey(withAccount: 0, index: 2, chain: .internal),
+            getPublicKey(withAccount: 0, index: 0, chain: .external),
+            getPublicKey(withAccount: 0, index: 1, chain: .external),
         ]
         let txOutput = TestData.p2pkhTransaction.outputs[0]
 
@@ -291,16 +356,16 @@ class AddressManagerTests: XCTestCase {
         }
 
         XCTAssertEqual(manager.gapShifts(), true)
-        verify(mockHDWallet, never()).publicKey(index: any(), external: any())
+        verify(mockHDWallet, never()).publicKey(account: any(), index: any(), external: any())
     }
 
     func testGapShifts_NoUnusedKeys() {
         let keys = [
-            getPublicKey(withIndex: 0, chain: .internal),
-            getPublicKey(withIndex: 1, chain: .internal),
-            getPublicKey(withIndex: 2, chain: .internal),
-            getPublicKey(withIndex: 0, chain: .external),
-            getPublicKey(withIndex: 1, chain: .external),
+            getPublicKey(withAccount: 0, index: 0, chain: .internal),
+            getPublicKey(withAccount: 0, index: 1, chain: .internal),
+            getPublicKey(withAccount: 0, index: 2, chain: .internal),
+            getPublicKey(withAccount: 0, index: 0, chain: .external),
+            getPublicKey(withAccount: 0, index: 1, chain: .external),
         ]
         let txOutput = TestData.p2pkhTransaction.outputs[0]
 
@@ -315,18 +380,18 @@ class AddressManagerTests: XCTestCase {
         }
 
         XCTAssertEqual(manager.gapShifts(), true)
-        verify(mockHDWallet, never()).publicKey(index: any(), external: any())
+        verify(mockHDWallet, never()).publicKey(account: any(), index: any(), external: any())
     }
 
     func testGapShifts_NonSequentiallyUsedKeys() {
         let keys = [
-            getPublicKey(withIndex: 0, chain: .internal),
-            getPublicKey(withIndex: 1, chain: .internal),
-            getPublicKey(withIndex: 2, chain: .internal),
-            getPublicKey(withIndex: 0, chain: .external),
-            getPublicKey(withIndex: 1, chain: .external),
-            getPublicKey(withIndex: 3, chain: .internal),
-            getPublicKey(withIndex: 2, chain: .external),
+            getPublicKey(withAccount: 0, index: 0, chain: .internal),
+            getPublicKey(withAccount: 0, index: 1, chain: .internal),
+            getPublicKey(withAccount: 0, index: 2, chain: .internal),
+            getPublicKey(withAccount: 0, index: 0, chain: .external),
+            getPublicKey(withAccount: 0, index: 1, chain: .external),
+            getPublicKey(withAccount: 0, index: 3, chain: .internal),
+            getPublicKey(withAccount: 0, index: 2, chain: .external),
         ]
         let txOutput = TestData.p2pkhTransaction.outputs[0]
         let txOutput2 = TestData.p2pkTransaction.outputs[0]
@@ -346,16 +411,16 @@ class AddressManagerTests: XCTestCase {
         }
 
         XCTAssertEqual(manager.gapShifts(), true)
-        verify(mockHDWallet, never()).publicKey(index: any(), external: any())
+        verify(mockHDWallet, never()).publicKey(account: any(), index: any(), external: any())
     }
 
     func testGapShifts_NoShift() {
         let keys = [
-            getPublicKey(withIndex: 0, chain: .internal),
-            getPublicKey(withIndex: 1, chain: .internal),
-            getPublicKey(withIndex: 0, chain: .external),
-            getPublicKey(withIndex: 1, chain: .external),
-            getPublicKey(withIndex: 2, chain: .external),
+            getPublicKey(withAccount: 0, index: 0, chain: .internal),
+            getPublicKey(withAccount: 0, index: 1, chain: .internal),
+            getPublicKey(withAccount: 0, index: 0, chain: .external),
+            getPublicKey(withAccount: 0, index: 1, chain: .external),
+            getPublicKey(withAccount: 0, index: 2, chain: .external),
         ]
         let txOutput = TestData.p2pkhTransaction.outputs[0]
 
@@ -373,8 +438,8 @@ class AddressManagerTests: XCTestCase {
     }
 
 
-    private func getPublicKey(withIndex index: Int, chain: HDWallet.Chain) -> PublicKey {
-        let hdPrivKeyData = try! hdWallet.privateKeyData(index: index, external: chain == .external)
-        return PublicKey(withIndex: index, external: chain == .external, hdPublicKeyData: hdPrivKeyData)
+    private func getPublicKey(withAccount account: Int, index: Int, chain: HDWallet.Chain) -> PublicKey {
+        let hdPrivKeyData = try! hdWallet.privateKeyData(account: account, index: index, external: chain == .external)
+        return PublicKey(withAccount: account, index: index, external: chain == .external, hdPublicKeyData: hdPrivKeyData)
     }
 }

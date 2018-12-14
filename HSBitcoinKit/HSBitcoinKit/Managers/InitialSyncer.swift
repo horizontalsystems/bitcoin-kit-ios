@@ -38,7 +38,34 @@ class InitialSyncer {
         self.async = async
     }
 
-    private func handle(keys: [PublicKey], responses: [BlockResponse]) throws {
+    private func sync(forAccount account: Int) {
+        let maxHeight = network.checkpointBlock.height
+
+        let externalObservable = fetchFromApi(forAccount: account, external: true, maxHeight: maxHeight)
+        let internalObservable = fetchFromApi(forAccount: account, external: false, maxHeight: maxHeight)
+
+        var observable = Observable.concat(externalObservable, internalObservable).toArray().map { array -> ([PublicKey], [BlockResponse]) in
+            let (externalKeys, externalResponses) = array[0]
+            let (internalKeys, internalResponses) = array[1]
+
+            let set: Set<BlockResponse> = Set(externalResponses + internalResponses)
+
+            return (externalKeys + internalKeys, Array(set))
+        }
+
+        if async {
+            observable = observable.subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
+        }
+
+        observable.subscribe(onNext: { [weak self] keys, responses in
+                    self?.handle(forAccount: account, keys: keys, responses: responses)
+                }, onError: { [weak self] error in
+                    self?.handle(error: error)
+                })
+                .disposed(by: disposeBag)
+    }
+
+    private func handle(forAccount account: Int, keys: [PublicKey], responses: [BlockResponse]) {
         let blocks = responses.compactMap { response -> BlockHash? in
             if let hash = Data(hex: response.hash) {
                 return self.factory.blockHash(withHeaderHash: Data(hash.reversed()), height: response.height)
@@ -46,24 +73,44 @@ class InitialSyncer {
             return nil
         }
 
-        logger?.debug("SAVING: \(keys.count) keys, \(blocks.count) blocks")
+        do {
+            logger?.debug("Account \(account) has \(keys.count) keys and \(blocks.count) blocks")
+            try addressManager.addKeys(keys: keys)
 
-        let realm = realmFactory.realm
-        try realm.write {
-            realm.add(blocks, update: true)
+            if blocks.isEmpty {
+                syncing = false
+                stateManager.restored = true
+                peerGroup.start()
+                return
+            }
+
+            let realm = realmFactory.realm
+            try realm.write {
+                realm.add(blocks, update: true)
+            }
+
+            sync(forAccount: account + 1)
+        } catch {
+            handle(error: error)
         }
-
-        try addressManager.addKeys(keys: keys)
-
-        stateManager.restored = true
-        peerGroup.start()
     }
 
-    private func fetchFromApi(external: Bool, maxHeight: Int, lastUsedKeyIndex: Int = -1, keys: [PublicKey] = [], responses: [BlockResponse] = []) throws -> Observable<([PublicKey], [BlockResponse])> {
+    private func handle(error: Error) {
+        syncing = false
+        logger?.error(error)
+        listener.syncStopped()
+    }
+
+    private func fetchFromApi(forAccount account: Int, external: Bool, maxHeight: Int, lastUsedKeyIndex: Int = -1, keys: [PublicKey] = [], responses: [BlockResponse] = []) -> Observable<([PublicKey], [BlockResponse])> {
         let count = keys.count
         let gapLimit = hdWallet.gapLimit
+        let newKey: PublicKey!
 
-        let newKey = try hdWallet.publicKey(index: count, external: external)
+        do {
+            newKey = try hdWallet.publicKey(account: account, index: count, external: external)
+        } catch {
+            return Observable.error(error)
+        }
 
         return getBlockHashes(publicKey: newKey)
                 .flatMap { [unowned self] blockResponses -> Observable<([PublicKey], [BlockResponse])> in
@@ -79,7 +126,7 @@ class InitialSyncer {
                         return Observable.just((keys, responses))
                     } else {
                         let validResponses = blockResponses.filter { $0.height <= maxHeight }
-                        return try self.fetchFromApi(external: external, maxHeight: maxHeight, lastUsedKeyIndex: lastUsedKeyIndex, keys: keys, responses: responses + validResponses)
+                        return self.fetchFromApi(forAccount: account, external: external, maxHeight: maxHeight, lastUsedKeyIndex: lastUsedKeyIndex, keys: keys, responses: responses + validResponses)
                     }
                 }
     }
@@ -111,36 +158,9 @@ extension InitialSyncer: IInitialSyncer {
             }
 
             syncing = true
+            listener.syncStarted()
 
-            self.listener.syncStarted()
-
-            let maxHeight = network.checkpointBlock.height
-
-            let externalObservable = try fetchFromApi(external: true, maxHeight: maxHeight)
-            let internalObservable = try fetchFromApi(external: false, maxHeight: maxHeight)
-
-            var observable = Observable.concat(externalObservable, internalObservable).toArray().map { array -> ([PublicKey], [BlockResponse]) in
-                let (externalKeys, externalResponses) = array[0]
-                let (internalKeys, internalResponses) = array[1]
-
-                let set: Set<BlockResponse> = Set(externalResponses + internalResponses)
-
-                return (externalKeys + internalKeys, Array(set))
-            }
-
-            if async {
-                observable = observable.subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
-            }
-
-            observable.subscribe(onNext: { [weak self] keys, responses in
-                        self?.syncing = false
-                        try? self?.handle(keys: keys, responses: responses)
-                    }, onError: { [weak self] error in
-                        self?.syncing = false
-                        self?.logger?.error(error)
-                        self?.listener.syncStopped()
-                    })
-                    .disposed(by: disposeBag)
+            sync(forAccount: 0)
         } else {
             peerGroup.start()
         }

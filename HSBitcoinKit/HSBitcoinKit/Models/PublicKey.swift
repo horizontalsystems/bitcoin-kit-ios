@@ -11,6 +11,7 @@ class PublicKey: Object {
 
     let outputs = LinkingObjects(fromType: TransactionOutput.self, property: "publicKey")
 
+    @objc dynamic var account = 0
     @objc dynamic var index = 0
     @objc dynamic var external = true
     @objc dynamic var raw = Data()
@@ -22,8 +23,9 @@ class PublicKey: Object {
         return "keyHashHex"
     }
 
-    convenience init(withIndex index: Int, external: Bool, hdPublicKeyData data: Data) {
+    convenience init(withAccount account: Int, index: Int, external: Bool, hdPublicKeyData data: Data) {
         self.init()
+        self.account = account
         self.index = index
         self.external = external
         raw = data
