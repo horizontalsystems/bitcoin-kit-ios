@@ -15,11 +15,10 @@ class TransactionLinker: ITransactionLinker {
                 }
 
                 input.previousOutput = previousOutput
-                input.address = previousOutput.address
-                input.keyHash = previousOutput.keyHash
                 transaction.isMine = true
                 transaction.isOutgoing = true
             }
         }
     }
+
 }

@@ -30,7 +30,7 @@ extension AddressConverter: IAddressConverter {
         case .p2pkh, .p2pk:
             version = network.pubKeyHash
             addressType = .pubKeyHash
-        case .p2sh:
+        case .p2sh, .p2wpkhSh:
             version = network.scriptHash
             addressType = .scriptHash
         default: throw ConversionError.unknownAddressType
