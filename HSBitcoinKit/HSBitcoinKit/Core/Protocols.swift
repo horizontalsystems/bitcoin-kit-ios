@@ -253,7 +253,7 @@ protocol IScriptConverter {
 
 protocol IScriptExtractor: class {
     var type: ScriptType { get }
-    func extract(from script: Script, converter: IScriptConverter) throws -> Data?
+    func extract(from data: Data, converter: IScriptConverter) throws -> Data?
 }
 
 protocol ITransactionProcessor {
@@ -262,11 +262,19 @@ protocol ITransactionProcessor {
 }
 
 protocol ITransactionExtractor {
-    func extract(transaction: Transaction, realm: Realm)
+    func extract(transaction: Transaction)
+}
+
+protocol ITransactionOutputAddressExtractor {
+    func extractOutputAddresses(transaction: Transaction)
 }
 
 protocol ITransactionLinker {
     func handle(transaction: Transaction, realm: Realm)
+}
+
+protocol ITransactionPublicKeySetter {
+    func set(transaction: Transaction, realm: Realm)
 }
 
 protocol ITransactionSyncer: class {

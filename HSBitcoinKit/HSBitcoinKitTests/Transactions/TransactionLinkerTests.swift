@@ -62,8 +62,6 @@ class TransactionLinkerTests: XCTestCase {
         }
         XCTAssertEqual(transaction.isMine, true)
         assertOutputEqual(out1: transaction.inputs.first!.previousOutput!, out2: previousTransaction.outputs.first!)
-        XCTAssertEqual(transaction.inputs.first!.address, previousTransaction.outputs.first!.address)
-        XCTAssertEqual(transaction.inputs.first!.keyHash, previousTransaction.outputs.first!.keyHash)
     }
 
     func testHandle_HasPreviousOutputWhichIsNotMine() {
@@ -90,8 +88,6 @@ class TransactionLinkerTests: XCTestCase {
         }
         XCTAssertEqual(transaction.isMine, false)
         XCTAssertEqual(transaction.inputs.first!.previousOutput, nil)
-        XCTAssertEqual(transaction.inputs.first!.address, nil)
-        XCTAssertEqual(transaction.inputs.first!.keyHash, nil)
     }
 
     func testHandle_HasNotPreviousOutput() {

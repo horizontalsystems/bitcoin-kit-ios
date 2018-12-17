@@ -4,7 +4,10 @@ import RealmSwift
 @testable import HSBitcoinKit
 
 class TransactionProcessorTests: XCTestCase {
-    private var mockExtractor: MockITransactionExtractor!
+    private var mockOutputExtractor: MockITransactionExtractor!
+    private var mockOutputAddressExtractor: MockITransactionOutputAddressExtractor!
+    private var mockPublicKeySetter: MockITransactionPublicKeySetter!
+    private var mockInputExtractor: MockITransactionExtractor!
     private var mockLinker: MockITransactionLinker!
     private var mockAddressManager: MockIAddressManager!
 
@@ -23,25 +26,38 @@ class TransactionProcessorTests: XCTestCase {
             when(mock.realm.get).thenReturn(realm)
         }
 
-        mockExtractor = MockITransactionExtractor()
+        mockOutputExtractor = MockITransactionExtractor()
+        mockOutputAddressExtractor = MockITransactionOutputAddressExtractor()
+        mockPublicKeySetter = MockITransactionPublicKeySetter()
+        mockInputExtractor = MockITransactionExtractor()
         mockLinker = MockITransactionLinker()
         mockAddressManager = MockIAddressManager()
 
         stub(mockLinker) { mock in
             when(mock.handle(transaction: any(), realm: any())).thenDoNothing()
         }
-        stub(mockExtractor) { mock in
-            when(mock.extract(transaction: any(), realm: any())).thenDoNothing()
+        stub(mockOutputExtractor) { mock in
+            when(mock.extract(transaction: any())).thenDoNothing()
+        }
+        stub(mockOutputAddressExtractor) { mock in
+            when(mock.extractOutputAddresses(transaction: any())).thenDoNothing()
+        }
+        stub(mockInputExtractor) { mock in
+            when(mock.extract(transaction: any())).thenDoNothing()
         }
         stub(mockAddressManager) { mock in
             when(mock.gapShifts()).thenReturn(false)
         }
+        stub(mockPublicKeySetter) { mock in
+            when(mock.set(transaction: any(), realm: any())).thenDoNothing()
+        }
 
-        transactionProcessor = TransactionProcessor(extractor: mockExtractor, linker: mockLinker, addressManager: mockAddressManager)
+        transactionProcessor = TransactionProcessor(outputExtractor: mockOutputExtractor, inputExtractor: mockInputExtractor, linker: mockLinker, outputAddressExtractor: mockOutputAddressExtractor, transactionPublicKeySetter: mockPublicKeySetter, addressManager: mockAddressManager)
     }
 
     override func tearDown() {
-        mockExtractor = nil
+        mockOutputExtractor = nil
+        mockInputExtractor = nil
         mockLinker = nil
         transactionProcessor = nil
 
@@ -59,8 +75,30 @@ class TransactionProcessorTests: XCTestCase {
 
         transactionProcessor.process(transaction: transaction, realm: realm)
 
-        verify(mockExtractor).extract(transaction: equal(to: transaction), realm: equal(to: realm))
+        verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
         verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
+        verify(mockPublicKeySetter).set(transaction: equal(to: transaction), realm: equal(to: realm))
+
+        verifyNoMoreInteractions(mockOutputAddressExtractor)
+        verifyNoMoreInteractions(mockInputExtractor)
+    }
+
+    func testProcessSingleTransaction_isMine() {
+        let transaction = TestData.p2pkhTransaction
+        transaction.isMine = true
+
+        try! realm.write {
+            realm.add(transaction)
+        }
+
+        transactionProcessor.process(transaction: transaction, realm: realm)
+
+        verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
+        verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
+        verify(mockPublicKeySetter).set(transaction: equal(to: transaction), realm: equal(to: realm))
+
+        verify(mockOutputAddressExtractor).extractOutputAddresses(transaction: equal(to: transaction))
+        verify(mockInputExtractor).extract(transaction: equal(to: transaction))
     }
 
     func testProcessTransactions_TransactionExists() {
@@ -75,7 +113,7 @@ class TransactionProcessorTests: XCTestCase {
             try! transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
         }
 
-        verify(mockExtractor, never()).extract(transaction: equal(to: transaction), realm: equal(to: realm))
+        verify(mockOutputExtractor, never()).extract(transaction: equal(to: transaction))
         verify(mockLinker, never()).handle(transaction: equal(to: transaction), realm: equal(to: realm))
 
         let realmTransactions = realm.objects(Transaction.self)
@@ -93,7 +131,7 @@ class TransactionProcessorTests: XCTestCase {
             try! transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
         }
 
-        verify(mockExtractor).extract(transaction: equal(to: transaction), realm: equal(to: realm))
+        verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
         verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
 
         let realmTransactions = realm.objects(Transaction.self)
@@ -111,7 +149,7 @@ class TransactionProcessorTests: XCTestCase {
             try! transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
         }
 
-        verify(mockExtractor).extract(transaction: equal(to: transaction), realm: equal(to: realm))
+        verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
         verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
 
         let realmTransactions = realm.objects(Transaction.self)
@@ -136,7 +174,7 @@ class TransactionProcessorTests: XCTestCase {
             }
         }
 
-        verify(mockExtractor).extract(transaction: equal(to: transaction), realm: equal(to: realm))
+        verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
         verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
 
         let realmTransactions = realm.objects(Transaction.self)
@@ -166,7 +204,7 @@ class TransactionProcessorTests: XCTestCase {
             }
         }
 
-        verify(mockExtractor).extract(transaction: equal(to: transaction), realm: equal(to: realm))
+        verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
         verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
 
         let realmTransactions = realm.objects(Transaction.self)
@@ -192,7 +230,7 @@ class TransactionProcessorTests: XCTestCase {
             }
         }
 
-        verify(mockExtractor).extract(transaction: equal(to: transaction), realm: equal(to: realm))
+        verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
         verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
 
         let realmTransactions = realm.objects(Transaction.self)
@@ -218,7 +256,7 @@ class TransactionProcessorTests: XCTestCase {
             }
         }
 
-        verify(mockExtractor).extract(transaction: equal(to: transaction), realm: equal(to: realm))
+        verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
         verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
 
         let realmTransactions = realm.objects(Transaction.self)

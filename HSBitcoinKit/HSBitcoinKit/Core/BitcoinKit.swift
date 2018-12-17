@@ -50,7 +50,10 @@ public class BitcoinKit {
     private let addressConverter: IAddressConverter
     private let scriptConverter: IScriptConverter
     private let transactionProcessor: ITransactionProcessor
-    private let transactionExtractor: ITransactionExtractor
+    private let transactionOutputExtractor: ITransactionExtractor
+    private let transactionInputExtractor: ITransactionExtractor
+    private let transactionOutputAddressExtractor: ITransactionOutputAddressExtractor
+    private let transactionPublicKeySetter: ITransactionPublicKeySetter
     private let transactionLinker: ITransactionLinker
     private let transactionSyncer: ITransactionSyncer
     private let transactionCreator: ITransactionCreator
@@ -155,9 +158,13 @@ public class BitcoinKit {
         unspentOutputSelector = UnspentOutputSelector(calculator: transactionSizeCalculator)
         unspentOutputProvider = UnspentOutputProvider(realmFactory: realmFactory, confirmationsThreshold: confirmationsThreshold)
 
-        transactionExtractor = TransactionExtractor(scriptConverter: scriptConverter, addressConverter: addressConverter)
+        transactionOutputExtractor = TransactionOutputExtractor()
+        transactionOutputAddressExtractor = TransactionOutputAddressExtractor(addressConverter: addressConverter)
+        transactionInputExtractor = TransactionInputExtractor(scriptConverter: scriptConverter, addressConverter: addressConverter)
         transactionLinker = TransactionLinker()
-        transactionProcessor = TransactionProcessor(extractor: transactionExtractor, linker: transactionLinker, addressManager: addressManager)
+        transactionPublicKeySetter = TransactionPublicKeySetter()
+        transactionProcessor = TransactionProcessor(outputExtractor: transactionOutputExtractor, inputExtractor: transactionInputExtractor, linker: transactionLinker, outputAddressExtractor: transactionOutputAddressExtractor, transactionPublicKeySetter: transactionPublicKeySetter, addressManager: addressManager)
+
         transactionSyncer = TransactionSyncer(realmFactory: realmFactory, processor: transactionProcessor, addressManager: addressManager, bloomFilterManager: bloomFilterManager)
         transactionBuilder = TransactionBuilder(unspentOutputSelector: unspentOutputSelector, unspentOutputProvider: unspentOutputProvider, addressManager: addressManager, addressConverter: addressConverter, inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory)
         transactionCreator = TransactionCreator(realmFactory: realmFactory, transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, peerGroup: peerGroup)
