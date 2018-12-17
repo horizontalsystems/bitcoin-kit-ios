@@ -46,18 +46,22 @@ class PeerHostManager {
 extension PeerHostManager: IPeerHostManager {
 
     var peerHost: String? {
-        let realm = realmFactory.realm
-        let peerAddress = realm.objects(PeerAddress.self).sorted(byKeyPath: "score").first(where: { !usedHosts.contains($0.ip) })
+        var host: String?
+        
+        hostsUsageQueue.sync {
+            let realm = self.realmFactory.realm
+            let peerAddress = realm.objects(PeerAddress.self).sorted(byKeyPath: "score").first(where: { !self.usedHosts.contains($0.ip) })
 
-        if let peerAddress = peerAddress {
-            hostsUsageQueue.sync {
+            if let peerAddress = peerAddress {
                 self.usedHosts.append(peerAddress.ip)
+            } else {
+                self.collectPeerHosts()
             }
-        } else {
-            collectPeerHosts()
-        }
 
-        return peerAddress?.ip
+            host = peerAddress?.ip
+        }
+        
+        return host
     }
 
     func hostDisconnected(host: String, withError error: Error?, networkReachable: Bool) {
