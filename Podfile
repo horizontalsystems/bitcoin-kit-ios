@@ -10,8 +10,8 @@ project 'HSBitcoinKit/HSBitcoinKit'
 
 
 def internal_pods
-  pod 'HSCryptoKit', '~> 1.0.1'
-  pod 'HSHDWalletKit', '~> 1.0.2'
+  pod 'HSCryptoKit', '~> 1.1.0'
+  pod 'HSHDWalletKit', '~> 1.0.3'
 end
 
 def kit_pods

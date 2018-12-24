@@ -123,6 +123,7 @@ protocol IPeerGroup: class {
     func start()
     func stop()
     func sendPendingTransactions() throws
+    func checkPeersSynced() throws
 }
 
 protocol IPeerManager: class {

@@ -207,4 +207,68 @@ class IPeerGroupTests: PeerGroupTests {
         verify(peer, never()).add(task: any())
     }
 
+    func testCheckPeersSynced() {
+        let transaction = TestData.p2pkTransaction
+        let peer = peers["0"]!
+
+        stub(mockTransactionSyncer) { mock in
+            when(mock.pendingTransactions()).thenReturn([transaction])
+        }
+        stub(mockPeerManager) { mock in
+            when(mock.connected()).thenReturn([peer])
+            when(mock.nonSyncedPeer()).thenReturn(nil)
+            when(mock.someReadyPeers()).thenReturn([peer])
+        }
+
+        try! peerGroup.checkPeersSynced()
+    }
+
+    func testCheckPeersSynced_NoConnectedPeers() {
+        let transaction = TestData.p2pkTransaction
+        let peer = peers["0"]!
+
+        stub(mockTransactionSyncer) { mock in
+            when(mock.pendingTransactions()).thenReturn([transaction])
+        }
+        stub(mockPeerManager) { mock in
+            when(mock.connected()).thenReturn([])
+            when(mock.nonSyncedPeer()).thenReturn(nil)
+            when(mock.someReadyPeers()).thenReturn([peer])
+        }
+
+        do {
+            try peerGroup.checkPeersSynced()
+            waitForMainQueue()
+            XCTFail("Should throw exception")
+        } catch let error as PeerGroup.PeerGroupError {
+            XCTAssertEqual(error, PeerGroup.PeerGroupError.noConnectedPeers)
+        } catch {
+            XCTFail("Unexpected exception thrown")
+        }
+    }
+
+    func testCheckPeersSynced_PeersAreNotSynced() {
+        let transaction = TestData.p2pkTransaction
+        let peer = peers["0"]!
+
+        stub(mockTransactionSyncer) { mock in
+            when(mock.pendingTransactions()).thenReturn([transaction])
+        }
+        stub(mockPeerManager) { mock in
+            when(mock.connected()).thenReturn([peer])
+            when(mock.nonSyncedPeer()).thenReturn(peer)
+            when(mock.someReadyPeers()).thenReturn([peer])
+        }
+
+        do {
+            try peerGroup.checkPeersSynced()
+            waitForMainQueue()
+            XCTFail("Should throw exception")
+        } catch let error as PeerGroup.PeerGroupError {
+            XCTAssertEqual(error, PeerGroup.PeerGroupError.peersNotSynced)
+        } catch {
+            XCTFail("Unexpected exception thrown")
+        }
+    }
+
 }
