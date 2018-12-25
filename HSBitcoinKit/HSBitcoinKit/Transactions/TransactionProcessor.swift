@@ -5,16 +5,14 @@ class TransactionProcessor {
     private let outputExtractor: ITransactionExtractor
     private let inputExtractor: ITransactionExtractor
     private let outputAddressExtractor: ITransactionOutputAddressExtractor
-    private let transactionPublicKeySetter: ITransactionPublicKeySetter
     private let linker: ITransactionLinker
     private let addressManager: IAddressManager
 
-    init(outputExtractor: ITransactionExtractor, inputExtractor: ITransactionExtractor, linker: ITransactionLinker, outputAddressExtractor: ITransactionOutputAddressExtractor, transactionPublicKeySetter: ITransactionPublicKeySetter, addressManager: IAddressManager) {
+    init(outputExtractor: ITransactionExtractor, inputExtractor: ITransactionExtractor, linker: ITransactionLinker, outputAddressExtractor: ITransactionOutputAddressExtractor, addressManager: IAddressManager) {
         self.outputExtractor = outputExtractor
         self.inputExtractor = inputExtractor
         self.outputAddressExtractor = outputAddressExtractor
         self.linker = linker
-        self.transactionPublicKeySetter = transactionPublicKeySetter
         self.addressManager = addressManager
     }
 
@@ -62,7 +60,6 @@ extension TransactionProcessor: ITransactionProcessor {
 
     func process(transaction: Transaction, realm: Realm) {
         outputExtractor.extract(transaction: transaction)
-        transactionPublicKeySetter.set(transaction: transaction, realm: realm)
         linker.handle(transaction: transaction, realm: realm)
 
         guard transaction.isMine else {

@@ -19,13 +19,13 @@ class TransactionPublicKeySetterTests: XCTestCase {
             when(mock.realm.get).thenReturn(realm)
         }
 
-        publicKey = PublicKey(withIndex: 0, external: true, hdPublicKeyData: Data(hex: "0011223344")!)
+        publicKey = PublicKey(withAccount: 0, index: 0, external: true, hdPublicKeyData: Data(hex: "0011223344")!)
         try! realm.write {
             realm.deleteAll()
             realm.add(publicKey)
         }
 
-        transactionKeySetter = TransactionPublicKeySetter()
+        transactionKeySetter = TransactionPublicKeySetter(realmFactory: mockRealmFactory)
     }
 
     override func tearDown() {
@@ -37,18 +37,21 @@ class TransactionPublicKeySetterTests: XCTestCase {
     func testSetP2PKHKeys() {
         let tx = TestData.p2pkhTransaction
         tx.outputs[0].keyHash = publicKey.keyHash
-        transactionKeySetter.set(transaction: tx, realm: realm)
+        let mine = transactionKeySetter.set(output: tx.outputs[0])
 
-        XCTAssertEqual(tx.isMine, true)
+        XCTAssertEqual(mine, true)
         XCTAssertEqual(tx.outputs[0].publicKey, publicKey)
+
+        let notMine = transactionKeySetter.set(output: tx.outputs[1])
+        XCTAssertEqual(notMine, false)
     }
 
     func testSetP2PKKeys() {
         let tx = TestData.p2pkhTransaction
         tx.outputs[0].keyHash = publicKey.raw
-        transactionKeySetter.set(transaction: tx, realm: realm)
+        let mine = transactionKeySetter.set(output: tx.outputs[0])
 
-        XCTAssertEqual(tx.isMine, true)
+        XCTAssertEqual(mine, true)
         XCTAssertEqual(tx.outputs[0].publicKey, publicKey)
     }
 
@@ -56,9 +59,9 @@ class TransactionPublicKeySetterTests: XCTestCase {
         let tx = TestData.p2pkhTransaction
         tx.outputs[0].scriptType = .p2wpkh
         tx.outputs[0].keyHash = Data(hex: "0014")! + publicKey.scriptHashForP2WPKH
-        transactionKeySetter.set(transaction: tx, realm: realm)
+        let mine = transactionKeySetter.set(output: tx.outputs[0])
 
-        XCTAssertEqual(tx.isMine, true)
+        XCTAssertEqual(mine, true)
         XCTAssertEqual(tx.outputs[0].publicKey, publicKey)
         XCTAssertEqual(tx.outputs[0].scriptType, .p2wpkhSh)
     }

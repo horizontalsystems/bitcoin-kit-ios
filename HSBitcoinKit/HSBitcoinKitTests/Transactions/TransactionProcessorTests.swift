@@ -6,7 +6,6 @@ import RealmSwift
 class TransactionProcessorTests: XCTestCase {
     private var mockOutputExtractor: MockITransactionExtractor!
     private var mockOutputAddressExtractor: MockITransactionOutputAddressExtractor!
-    private var mockPublicKeySetter: MockITransactionPublicKeySetter!
     private var mockInputExtractor: MockITransactionExtractor!
     private var mockLinker: MockITransactionLinker!
     private var mockAddressManager: MockIAddressManager!
@@ -28,7 +27,6 @@ class TransactionProcessorTests: XCTestCase {
 
         mockOutputExtractor = MockITransactionExtractor()
         mockOutputAddressExtractor = MockITransactionOutputAddressExtractor()
-        mockPublicKeySetter = MockITransactionPublicKeySetter()
         mockInputExtractor = MockITransactionExtractor()
         mockLinker = MockITransactionLinker()
         mockAddressManager = MockIAddressManager()
@@ -48,11 +46,8 @@ class TransactionProcessorTests: XCTestCase {
         stub(mockAddressManager) { mock in
             when(mock.gapShifts()).thenReturn(false)
         }
-        stub(mockPublicKeySetter) { mock in
-            when(mock.set(transaction: any(), realm: any())).thenDoNothing()
-        }
 
-        transactionProcessor = TransactionProcessor(outputExtractor: mockOutputExtractor, inputExtractor: mockInputExtractor, linker: mockLinker, outputAddressExtractor: mockOutputAddressExtractor, transactionPublicKeySetter: mockPublicKeySetter, addressManager: mockAddressManager)
+        transactionProcessor = TransactionProcessor(outputExtractor: mockOutputExtractor, inputExtractor: mockInputExtractor, linker: mockLinker, outputAddressExtractor: mockOutputAddressExtractor, addressManager: mockAddressManager)
     }
 
     override func tearDown() {
@@ -77,7 +72,6 @@ class TransactionProcessorTests: XCTestCase {
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
         verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
-        verify(mockPublicKeySetter).set(transaction: equal(to: transaction), realm: equal(to: realm))
 
         verifyNoMoreInteractions(mockOutputAddressExtractor)
         verifyNoMoreInteractions(mockInputExtractor)
@@ -95,7 +89,6 @@ class TransactionProcessorTests: XCTestCase {
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
         verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
-        verify(mockPublicKeySetter).set(transaction: equal(to: transaction), realm: equal(to: realm))
 
         verify(mockOutputAddressExtractor).extractOutputAddresses(transaction: equal(to: transaction))
         verify(mockInputExtractor).extract(transaction: equal(to: transaction))

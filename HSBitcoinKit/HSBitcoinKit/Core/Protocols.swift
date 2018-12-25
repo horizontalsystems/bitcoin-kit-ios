@@ -274,7 +274,7 @@ protocol ITransactionLinker {
 }
 
 protocol ITransactionPublicKeySetter {
-    func set(transaction: Transaction, realm: Realm)
+    func set(output: TransactionOutput) -> Bool
 }
 
 protocol ITransactionSyncer: class {

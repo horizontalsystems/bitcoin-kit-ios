@@ -2,9 +2,11 @@ import RealmSwift
 import HSCryptoKit
 
 class TransactionOutputExtractor {
+    let transactionKeySetter: ITransactionPublicKeySetter
     let logger: Logger?
 
-    init(logger: Logger? = nil) {
+    init(transactionKeySetter: ITransactionPublicKeySetter, logger: Logger? = nil) {
+        self.transactionKeySetter = transactionKeySetter
         self.logger = logger
     }
 
@@ -52,6 +54,11 @@ extension TransactionOutputExtractor: ITransactionExtractor {
 
             output.scriptType = validScriptType
             output.keyHash = payload
+
+            if transactionKeySetter.set(output: output) {
+                transaction.isMine = true
+            }
+
         }
     }
 
