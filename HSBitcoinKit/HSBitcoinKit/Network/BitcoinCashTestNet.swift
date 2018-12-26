@@ -38,11 +38,11 @@ class BitcoinCashTestNet: INetwork {
     let checkpointBlock = Block(
             withHeader: BlockHeader(
                     version: 536870912,
-                    previousBlockHeaderReversedHex: "000000000000043c25d4b23dee40208a9df99ef5717d236379120b01af2077e2",
-                    merkleRootReversedHex: "fb7ca6fbd9e1dd307cdafa7f7bf66317a49bfae4fc8e4d841f4faaf1acae5844",
-                    timestamp: 1543989687,
+                    previousBlockHeaderReversedHex: "00000000213b5213663c4a91139f5a400c01b3eb8dd368c3c8b3c86fa6f7809e",
+                    merkleRootReversedHex: "bbc68e26bf975f667bdd7fea497546244792a1bd3c3ff4aee87d7ff8ab10f423",
+                    timestamp: 1545802380,
                     bits: 486604799,
-                    nonce: 890299933
+                    nonce: 2980594562
             ),
             height: 1272398)
 
