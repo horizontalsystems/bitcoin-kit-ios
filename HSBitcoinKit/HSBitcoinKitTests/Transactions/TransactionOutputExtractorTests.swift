@@ -1,20 +1,30 @@
 import XCTest
 import Cuckoo
+import RealmSwift
 @testable import HSBitcoinKit
 
 class TransactionOutputExtractorTests: XCTestCase {
     private var extractor: TransactionOutputExtractor!
+
+    private var mockPublicKeySetter: MockITransactionPublicKeySetter!
 
     private var transaction: Transaction!
 
     override func setUp() {
         super.setUp()
 
-        extractor = TransactionOutputExtractor()
+        mockPublicKeySetter = MockITransactionPublicKeySetter()
+        stub(mockPublicKeySetter) { mock in
+            when(mock.set(output: any())).thenReturn(false)
+        }
+
+        extractor = TransactionOutputExtractor(transactionKeySetter: mockPublicKeySetter)
         transaction = TestData.p2pkhTransaction
     }
 
     override func tearDown() {
+        mockPublicKeySetter = nil
+
         extractor = nil
         transaction = nil
 
@@ -26,6 +36,20 @@ class TransactionOutputExtractorTests: XCTestCase {
         transaction.outputs[0].lockingScript = Data(hex: "76a9141ec865abcb88cec71c484d4dadec3d7dc0271a7b88ac")!
 
         extractor.extract(transaction: transaction)
+        XCTAssertEqual(transaction.isMine, false)
+        XCTAssertEqual(transaction.outputs[0].keyHash, keyHash)
+        XCTAssertEqual(transaction.outputs[0].scriptType, ScriptType.p2pkh)
+    }
+
+    func testExtractP2PKH_isMine() {
+        stub(mockPublicKeySetter) { mock in
+            when(mock.set(output: any())).thenReturn(true)
+        }
+        let keyHash = Data(hex: "1ec865abcb88cec71c484d4dadec3d7dc0271a7b")!
+        transaction.outputs[0].lockingScript = Data(hex: "76a9141ec865abcb88cec71c484d4dadec3d7dc0271a7b88ac")!
+
+        extractor.extract(transaction: transaction)
+        XCTAssertEqual(transaction.isMine, true)
         XCTAssertEqual(transaction.outputs[0].keyHash, keyHash)
         XCTAssertEqual(transaction.outputs[0].scriptType, ScriptType.p2pkh)
     }

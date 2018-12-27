@@ -158,12 +158,12 @@ public class BitcoinKit {
         unspentOutputSelector = UnspentOutputSelector(calculator: transactionSizeCalculator)
         unspentOutputProvider = UnspentOutputProvider(realmFactory: realmFactory, confirmationsThreshold: confirmationsThreshold)
 
-        transactionOutputExtractor = TransactionOutputExtractor()
+        transactionPublicKeySetter = TransactionPublicKeySetter(realmFactory: realmFactory)
+        transactionOutputExtractor = TransactionOutputExtractor(transactionKeySetter: transactionPublicKeySetter)
         transactionOutputAddressExtractor = TransactionOutputAddressExtractor(addressConverter: addressConverter)
         transactionInputExtractor = TransactionInputExtractor(scriptConverter: scriptConverter, addressConverter: addressConverter)
         transactionLinker = TransactionLinker()
-        transactionPublicKeySetter = TransactionPublicKeySetter()
-        transactionProcessor = TransactionProcessor(outputExtractor: transactionOutputExtractor, inputExtractor: transactionInputExtractor, linker: transactionLinker, outputAddressExtractor: transactionOutputAddressExtractor, transactionPublicKeySetter: transactionPublicKeySetter, addressManager: addressManager)
+        transactionProcessor = TransactionProcessor(outputExtractor: transactionOutputExtractor, inputExtractor: transactionInputExtractor, linker: transactionLinker, outputAddressExtractor: transactionOutputAddressExtractor, addressManager: addressManager)
 
         transactionSyncer = TransactionSyncer(realmFactory: realmFactory, processor: transactionProcessor, addressManager: addressManager, bloomFilterManager: bloomFilterManager)
         transactionBuilder = TransactionBuilder(unspentOutputSelector: unspentOutputSelector, unspentOutputProvider: unspentOutputProvider, addressManager: addressManager, addressConverter: addressConverter, inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory)

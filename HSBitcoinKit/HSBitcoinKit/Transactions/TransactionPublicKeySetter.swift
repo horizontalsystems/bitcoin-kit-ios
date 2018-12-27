@@ -2,34 +2,34 @@ import Foundation
 import RealmSwift
 
 class TransactionPublicKeySetter {
+    let realmFactory: IRealmFactory
+
+    init(realmFactory: IRealmFactory) {
+        self.realmFactory = realmFactory
+    }
 }
 
 extension TransactionPublicKeySetter: ITransactionPublicKeySetter {
 
-    public func set(transaction: Transaction, realm: Realm) {
-        let results = realm.objects(PublicKey.self)
+    public func set(output: TransactionOutput) -> Bool {
+        let realm = realmFactory.realm
 
-        for output in transaction.outputs {
-            if let key = output.keyHash {
-                var correctKey = key
-                if output.scriptType == .p2wpkh, key.count > 2 {
-                    correctKey = key.dropFirst(2)
-                }
-                for result in results {
-                    if result.raw == correctKey || result.keyHash == correctKey {
-                        output.publicKey = result
-                        transaction.isMine = true
-                        break
-                    }
-                    if result.scriptHashForP2WPKH == correctKey {
-                        output.publicKey = result
-                        output.scriptType = .p2wpkhSh
-                        transaction.isMine = true
-                        break
-                    }
+        if let key = output.keyHash {
+            var correctKey = key
+            if output.scriptType == .p2wpkh, key.count > 2 {
+                correctKey = key.dropFirst(2)
+                if let result = realm.objects(PublicKey.self).filter("scriptHashForP2WPKH = %@", correctKey).first {
+                    output.publicKey = result
+                    output.scriptType = .p2wpkhSh
+                    return true
                 }
             }
+            if let result = realm.objects(PublicKey.self).filter("raw = %@ OR keyHash = %@", correctKey, correctKey).first {
+                output.publicKey = result
+                return true
+            }
         }
+        return false
     }
 
 }
