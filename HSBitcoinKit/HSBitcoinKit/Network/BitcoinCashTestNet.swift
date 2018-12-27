@@ -44,7 +44,7 @@ class BitcoinCashTestNet: INetwork {
                     bits: 486604799,
                     nonce: 2980594562
             ),
-            height: 1272398)
+            height: 1276019)
 
     required init(validatorFactory: IBlockValidatorFactory) {
         headerValidator = validatorFactory.validator(for: .header)
