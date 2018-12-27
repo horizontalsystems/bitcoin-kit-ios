@@ -188,10 +188,15 @@ extension DataProvider: IDataProvider {
         let pubKeys = realm.objects(PublicKey.self)
 
         for pubKey in pubKeys {
-            let scriptType: ScriptType = (network is BitcoinCashMainNet || network is BitcoinCashTestNet) ? .p2pkh : .p2wpkh
-            let bechAddress = (try? addressConverter.convert(keyHash: OpCode.scriptWPKH(pubKey.keyHash), type: scriptType).stringValue) ?? "none"
+            var bechAddress: String?
+            if network is BitcoinCashMainNet || network is BitcoinCashTestNet {
+                bechAddress = try? addressConverter.convert(keyHash: pubKey.keyHash, type: .p2pkh).stringValue
+            } else {
+                bechAddress = try? addressConverter.convert(keyHash: OpCode.scriptWPKH(pubKey.keyHash), type: .p2wpkh).stringValue
+            }
+
             lines.append("\(pubKey.account) --- \(pubKey.index) --- \(pubKey.external) --- hash: \(pubKey.keyHash.hex) --- p2wkph(SH) hash: \(pubKey.scriptHashForP2WPKH.hex)")
-            lines.append("legacy: \(addressConverter.convertToLegacy(keyHash: pubKey.keyHash, version: network.pubKeyHash, addressType: .pubKeyHash).stringValue) --- bech32: \(bechAddress) --- SH(WPKH): \(addressConverter.convertToLegacy(keyHash: pubKey.scriptHashForP2WPKH, version: network.scriptHash, addressType: .scriptHash).stringValue) \n")
+            lines.append("legacy: \(addressConverter.convertToLegacy(keyHash: pubKey.keyHash, version: network.pubKeyHash, addressType: .pubKeyHash).stringValue) --- bech32: \(bechAddress ?? "none") --- SH(WPKH): \(addressConverter.convertToLegacy(keyHash: pubKey.scriptHashForP2WPKH, version: network.scriptHash, addressType: .scriptHash).stringValue) \n")
         }
         lines.append("PUBLIC KEYS COUNT: \(pubKeys.count)")
 

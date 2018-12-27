@@ -19,7 +19,7 @@ class TransactionPublicKeySetterTests: XCTestCase {
             when(mock.realm.get).thenReturn(realm)
         }
 
-        publicKey = PublicKey(withIndex: 0, external: true, hdPublicKeyData: Data(hex: "0011223344")!)
+        publicKey = PublicKey(withAccount: 0, index: 0, external: true, hdPublicKeyData: Data(hex: "0011223344")!)
         try! realm.write {
             realm.deleteAll()
             realm.add(publicKey)
