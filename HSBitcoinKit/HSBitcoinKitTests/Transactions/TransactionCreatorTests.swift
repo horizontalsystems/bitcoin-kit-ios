@@ -35,6 +35,7 @@ class TransactionCreatorTests: XCTestCase {
         }
         stub(mockPeerGroup) { mock in
             when(mock.sendPendingTransactions()).thenDoNothing()
+            when(mock.checkPeersSynced()).thenDoNothing()
         }
 
         transactionCreator = TransactionCreator(realmFactory: mockRealmFactory, transactionBuilder: mockTransactionBuilder, transactionProcessor: mockTransactionProcessor, peerGroup: mockPeerGroup)
@@ -76,6 +77,25 @@ class TransactionCreatorTests: XCTestCase {
             XCTFail("Unexpected exception")
         }
 
+        verify(mockPeerGroup, never()).sendPendingTransactions()
+        verify(mockTransactionProcessor, never()).process(transaction: any(), realm: any())
+    }
+
+    func testCreateTransaction_peersNotSynced() {
+        stub(mockPeerGroup) { mock in
+            when(mock.checkPeersSynced()).thenThrow(PeerGroup.PeerGroupError.noConnectedPeers)
+        }
+
+        do {
+            try transactionCreator.create(to: "Address", value: 1, feeRate: 1, senderPay: true)
+            XCTFail("No exception")
+        } catch let error as PeerGroup.PeerGroupError {
+            XCTAssertEqual(error, PeerGroup.PeerGroupError.noConnectedPeers)
+        } catch {
+            XCTFail("Unexpected exception")
+        }
+
+        verify(mockTransactionBuilder, never()).buildTransaction(value: any(), feeRate: any(), senderPay: any(), toAddress: any())
         verify(mockPeerGroup, never()).sendPendingTransactions()
         verify(mockTransactionProcessor, never()).process(transaction: any(), realm: any())
     }

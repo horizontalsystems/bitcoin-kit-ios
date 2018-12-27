@@ -81,13 +81,7 @@ class PeerGroup {
     }
 
     private func handlePendingTransactions() throws {
-        guard self.peerManager.connected().count > 0 else {
-            throw PeerGroupError.noConnectedPeers
-        }
-
-        guard self.peerManager.nonSyncedPeer() == nil else {
-            throw PeerGroupError.peersNotSynced
-        }
+        try checkPeersSynced()
 
         peersQueue.async {
             for peer in self.peerManager.someReadyPeers() {
@@ -233,6 +227,16 @@ extension PeerGroup: IPeerGroup {
         disposable?.dispose()
 
         _stop()
+    }
+
+    func checkPeersSynced() throws {
+        guard peerManager.connected().count > 0 else {
+            throw PeerGroupError.noConnectedPeers
+        }
+
+        guard peerManager.nonSyncedPeer() == nil else {
+            throw PeerGroupError.peersNotSynced
+        }
     }
 
     func sendPendingTransactions() throws {
