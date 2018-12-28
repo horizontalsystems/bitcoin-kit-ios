@@ -71,6 +71,7 @@
 		2FA5D443E5A428D1A60CD031 /* KitStateProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D82EFF381CE6233790A9 /* KitStateProviderTests.swift */; };
 		2FA5D448B43D6BFB15208436 /* PeerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D3968E6E11AF76368CA5 /* PeerManager.swift */; };
 		2FA5D4912ABA5CEE7C00ECD0 /* PeerManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D27387B0CF46C2B0A22A /* PeerManagerTests.swift */; };
+		2FA5D4AB6E84748075FA6294 /* Array.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DBBF82E71BB3E056B753 /* Array.swift */; };
 		2FA5D4F27E10A609FF81950E /* UnknownMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D3F63860A15B55DC196E /* UnknownMessage.swift */; };
 		2FA5D56E3AE0E2E9817FC370 /* TransactionInputSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DCD21585D41C520DF764 /* TransactionInputSerializer.swift */; };
 		2FA5D571931CA46B417C18BA /* PeerGroupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D602DBCFC5121F7C245F /* PeerGroupTests.swift */; };
@@ -307,6 +308,7 @@
 		2FA5DADEB0FD09138FD308A1 /* HDPrivateKeyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HDPrivateKeyTests.swift; sourceTree = "<group>"; };
 		2FA5DAE996A847B90E5D033A /* UnspentOutputSelectorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnspentOutputSelectorTests.swift; sourceTree = "<group>"; };
 		2FA5DB1F056B264F829BFDDD /* BlockHash.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockHash.swift; sourceTree = "<group>"; };
+		2FA5DBBF82E71BB3E056B753 /* Array.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Array.swift; sourceTree = "<group>"; };
 		2FA5DCB87581859B2E083377 /* PeerDelegateTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerDelegateTests.swift; sourceTree = "<group>"; };
 		2FA5DCD21585D41C520DF764 /* TransactionInputSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionInputSerializer.swift; sourceTree = "<group>"; };
 		2FA5DDAE64200E386070668C /* TransactionBuilderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionBuilderTests.swift; sourceTree = "<group>"; };
@@ -506,6 +508,7 @@
 		11B355C61361B7F77322E618 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				2FA5DBBF82E71BB3E056B753 /* Array.swift */,
 				11B35F3FD9CCB938B62D07EA /* Observable.swift */,
 				11B3510658CE89D9DB6772E5 /* String.swift */,
 			);
@@ -1414,6 +1417,7 @@
 				58AAA9ABB0AAAF9A11B98261 /* TransactionOutputExtractor.swift in Sources */,
 				58AAA120B3EEA225FFFBE2BC /* TransactionOutputAddressExtractor.swift in Sources */,
 				3C7B9B6F34A3C30648B65661 /* TransactionPublicKeySetter.swift in Sources */,
+				2FA5D4AB6E84748075FA6294 /* Array.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
