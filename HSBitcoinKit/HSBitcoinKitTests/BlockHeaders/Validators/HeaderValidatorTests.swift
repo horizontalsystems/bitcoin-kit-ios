@@ -1,6 +1,7 @@
 import XCTest
 import Cuckoo
 @testable import HSBitcoinKit
+import BigInt
 
 class HeaderValidatorTests: XCTestCase {
 
@@ -13,7 +14,7 @@ class HeaderValidatorTests: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        validator = HeaderValidator()
+        validator = HeaderValidator(encoder: DifficultyEncoder())
         network = MockINetwork()
 
         block = TestData.firstBlock
@@ -38,7 +39,7 @@ class HeaderValidatorTests: XCTestCase {
         }
     }
 
-    func testNotEqualBits() {
+    func testWrongPreviousHeaderHash() {
         candidate.header!.previousBlockHeaderHash = Data(hex: "da1a")!
         do {
             try validator.validate(candidate: candidate, block: block, network: network)
@@ -49,6 +50,18 @@ class HeaderValidatorTests: XCTestCase {
             XCTFail("Unknown exception thrown")
         }
     }
+
+    func testWrongProofOfWork_nBitsLessThanHeaderHash() {
+        candidate.header!.bits = DifficultyEncoder().encodeCompact(from: BigInt(candidate.reversedHeaderHashHex, radix: 16)! - 1)
+        do {
+            try validator.validate(candidate: candidate, block: block, network: network)
+            XCTFail("invalidProveOfWork exception not thrown")
+        } catch let error as BlockValidatorError {
+            XCTAssertEqual(error, BlockValidatorError.invalidProveOfWork)
+        } catch {
+            XCTFail("Unknown exception thrown")
+        }
+    }K
 
     func testNoCandidateHeader() {
         candidate.header = nil
