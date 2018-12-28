@@ -256,4 +256,111 @@ class TransactionProcessorTests: XCTestCase {
         XCTAssertEqual(realmTransactions.count, 0)
     }
 
+    func testProcessTransactions_TransactionNotInTopologicalOrder() {
+        let transactions = self.transactions()
+        var calledTransactions = [Transaction]()
+
+        stub(mockOutputExtractor) { mock in
+            when(mock.extract(transaction: any())).then { transaction in
+                calledTransactions.append(transaction)
+            }
+        }
+
+        for i in 0..<4 {
+            for j in 0..<4 {
+                for k in 0..<4 {
+                    for l in 0..<4 {
+                        if [0, 1, 2, 3].contains(where: { $0 != i && $0 != j && $0 != k && $0 != l }) {
+                            continue
+                        }
+
+                        calledTransactions = []
+
+                        try! transactionProcessor.process(transactions: [transactions[i], transactions[j], transactions[k], transactions[l]], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
+
+                        for (m, transaction) in calledTransactions.enumerated() {
+                            XCTAssertEqual(transaction.reversedHashHex, transactions[m].reversedHashHex)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    private func transactions() -> [Transaction] {
+        let transaction = Transaction(
+                version: 0,
+                inputs: [
+                    TransactionInput(
+                            withPreviousOutputTxReversedHex: Data(from: 1).hex,
+                            previousOutputIndex: 0,
+                            script: Data(from: 999999999999),
+                            sequence: 0
+                    )
+                ],
+                outputs: [
+                    TransactionOutput(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data())
+                ],
+                lockTime: 0
+        )
+
+        let transaction2 = Transaction(
+                version: 0,
+                inputs: [
+                    TransactionInput(
+                            withPreviousOutputTxReversedHex: transaction.reversedHashHex,
+                            previousOutputIndex: 0,
+                            script: Data(from: 999999999999),
+                            sequence: 0
+                    )
+                ],
+                outputs: [
+                    TransactionOutput(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data()),
+                    TransactionOutput(withValue: 0, index: 1, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data())
+                ],
+                lockTime: 0
+        )
+
+        let transaction3 = Transaction(
+                version: 0,
+                inputs: [
+                    TransactionInput(
+                            withPreviousOutputTxReversedHex: transaction2.reversedHashHex,
+                            previousOutputIndex: 0,
+                            script: Data(from: 999999999999),
+                            sequence: 0
+                    )
+                ],
+                outputs: [
+                    TransactionOutput(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data()),
+                ],
+                lockTime: 0
+        )
+
+        let transaction4 = Transaction(
+                version: 0,
+                inputs: [
+                    TransactionInput(
+                            withPreviousOutputTxReversedHex: transaction2.reversedHashHex,
+                            previousOutputIndex: 1,
+                            script: Data(from: 999999999999),
+                            sequence: 0
+                    ),
+                    TransactionInput(
+                            withPreviousOutputTxReversedHex: transaction3.reversedHashHex,
+                            previousOutputIndex: 0,
+                            script: Data(from: 999999999999),
+                            sequence: 0
+                    )
+                ],
+                outputs: [
+                    TransactionOutput(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data())
+                ],
+                lockTime: 0
+        )
+
+        return [transaction, transaction2, transaction3, transaction4]
+    }
+
 }

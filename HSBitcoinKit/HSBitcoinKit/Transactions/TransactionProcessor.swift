@@ -33,7 +33,7 @@ extension TransactionProcessor: ITransactionProcessor {
     func process(transactions: [Transaction], inBlock block: Block?, skipCheckBloomFilter: Bool, realm: Realm) throws {
         var needToUpdateBloomFilter = false
 
-        for transaction in transactions {
+        for transaction in transactions.inTopologicalOrder() {
             if let existingTransaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", transaction.reversedHashHex).first {
                 existingTransaction.block = block
                 existingTransaction.status = .relayed
