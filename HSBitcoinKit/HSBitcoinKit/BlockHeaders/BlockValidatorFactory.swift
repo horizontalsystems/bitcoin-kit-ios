@@ -12,7 +12,7 @@ extension BlockValidatorFactory: IBlockValidatorFactory {
 
     func validator(for validatorType: BlockValidatorType) -> IBlockValidator {
         switch validatorType {
-        case .header: return HeaderValidator()
+        case .header: return HeaderValidator(encoder: difficultyEncoder)
         case .bits: return BitsValidator()
         case .testNet: return LegacyTestNetDifficultyValidator()
         case .legacy: return LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockHelper: blockHelper)
