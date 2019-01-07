@@ -71,10 +71,8 @@ public class BitcoinKit {
     private let kitStateProvider: IKitStateProvider & ISyncStateListener
     private var dataProvider: IDataProvider
 
-    public init(withWords words: [String], coin: Coin, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) {
-        let wordsHash = words.joined().data(using: .utf8).map { CryptoKit.sha256($0).hex } ?? words[0]
-
-        let realmFileName = "\(wordsHash)-\(coin.rawValue).realm"
+    public init(withWords words: [String], coin: Coin, walletId: String, newWallet: Bool = false, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) {
+        let realmFileName = "\(walletId)-\(coin.rawValue).realm"
 
         difficultyEncoder = DifficultyEncoder()
         blockHelper = BlockHelper()
@@ -116,7 +114,7 @@ public class BitcoinKit {
 
         hdWallet = HDWallet(seed: Mnemonic.seed(mnemonic: words), coinType: network.coinType, xPrivKey: network.xPrivKey, xPubKey: network.xPubKey, gapLimit: 20)
 
-        stateManager = StateManager(realmFactory: realmFactory)
+        stateManager = StateManager(realmFactory: realmFactory, syncableFromApi: network.syncableFromApi, newWallet: newWallet)
 
         let addressSelector: IAddressSelector
         switch coin {

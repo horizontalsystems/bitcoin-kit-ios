@@ -152,20 +152,6 @@ class InitialSyncerTests: XCTestCase {
         verify(mockPeerGroup).start()
     }
 
-    func testSetApiSyncedIfNetworkNotSyncableFromApi() {
-        stub(mockNetwork) { mock in
-            when(mock.syncableFromApi.get).thenReturn(false)
-        }
-        stub(mockStateManager) { mock in
-            when(mock.restored.set(any())).thenDoNothing()
-            when(mock.restored.get).thenReturn(true)
-        }
-
-        try! syncer.sync()
-
-        verify(mockStateManager).restored.set(true)
-    }
-
     func testDontStartSyncSecondTimeBeforeFinished() {
         let firstBlock = TestData.firstBlock
         let firstBlockHash = BlockHash(withHeaderHash: firstBlock.headerHash, height: 10)

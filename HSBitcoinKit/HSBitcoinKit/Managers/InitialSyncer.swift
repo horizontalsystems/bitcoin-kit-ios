@@ -149,10 +149,6 @@ extension InitialSyncer: IInitialSyncer {
     func sync() throws {
         try addressManager.fillGap()
 
-        if !network.syncableFromApi {
-            stateManager.restored = true
-        }
-
         if !stateManager.restored {
             guard !syncing else {
                 return

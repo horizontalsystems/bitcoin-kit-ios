@@ -3,8 +3,12 @@ import RealmSwift
 class StateManager {
     private let realmFactory: IRealmFactory
 
-    init(realmFactory: IRealmFactory) {
+    init(realmFactory: IRealmFactory, syncableFromApi: Bool, newWallet: Bool) {
         self.realmFactory = realmFactory
+
+        if !syncableFromApi || newWallet {
+            self.restored = true
+        }
     }
 
     private func getRestoreState() -> RestoreState {
