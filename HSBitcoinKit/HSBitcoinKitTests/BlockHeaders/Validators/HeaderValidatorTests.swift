@@ -61,7 +61,7 @@ class HeaderValidatorTests: XCTestCase {
         } catch {
             XCTFail("Unknown exception thrown")
         }
-    }K
+    }
 
     func testNoCandidateHeader() {
         candidate.header = nil
