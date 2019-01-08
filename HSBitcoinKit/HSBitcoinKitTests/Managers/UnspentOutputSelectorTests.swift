@@ -95,8 +95,8 @@ class UnspentOutputSelectorTests: XCTestCase {
         do {
             _ = try unspentOutputSelector.select(value: 31001, feeRate: 1, senderPay: false, outputs: outputs)
             XCTFail("Wrong value summary!")
-        } catch let error as UnspentOutputSelector.SelectorError {
-            XCTAssertEqual(error, UnspentOutputSelector.SelectorError.notEnough)
+        } catch let error as SelectorError {
+            XCTAssertEqual(error, SelectorError.notEnough(maxFee: 0))
         } catch {
             XCTFail("Unexpected \(error) error!")
         }
@@ -106,8 +106,8 @@ class UnspentOutputSelectorTests: XCTestCase {
         do {
             _ = try unspentOutputSelector.select(value: 30901, feeRate: 1, senderPay: true, outputs: outputs)
             XCTFail("Wrong value summary!")
-        } catch let error as UnspentOutputSelector.SelectorError {
-            XCTAssertEqual(error, UnspentOutputSelector.SelectorError.notEnough)
+        } catch let error as SelectorError {
+            XCTAssertEqual(error, SelectorError.notEnough(maxFee: 100))
         } catch {
             XCTFail("Unexpected \(error) error!")
         }
@@ -117,8 +117,8 @@ class UnspentOutputSelectorTests: XCTestCase {
         do {
             _ = try unspentOutputSelector.select(value: 100, feeRate: 1, senderPay: false, outputs: [])
             XCTFail("Wrong value summary!")
-        } catch let error as UnspentOutputSelector.SelectorError {
-            XCTAssertEqual(error, UnspentOutputSelector.SelectorError.emptyOutputs)
+        } catch let error as SelectorError {
+            XCTAssertEqual(error, SelectorError.emptyOutputs)
         } catch {
             XCTFail("Unexpected \(error) error!")
         }
