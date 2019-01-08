@@ -24,3 +24,17 @@ extension BitcoinKit.KitState: Equatable {
     }
 
 }
+
+extension SelectorError: Equatable {
+
+    public static func ==(lhs: SelectorError, rhs: SelectorError) -> Bool {
+        switch (lhs, rhs) {
+        case (.wrongValue, .wrongValue): return true
+        case (.emptyOutputs, .emptyOutputs): return true
+        case let (.notEnough(lMaxFee),   .notEnough(rMaxFee)): return lMaxFee == rMaxFee
+        default:
+            return false
+        }
+    }
+
+}
