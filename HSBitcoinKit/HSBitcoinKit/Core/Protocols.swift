@@ -351,10 +351,10 @@ protocol IKitStateProviderDelegate: class {
 protocol IDataProvider {
     var delegate: DataProviderDelegate? { get set }
 
-    var transactions: [TransactionInfo] { get }
     var lastBlockInfo: BlockInfo? { get }
     var balance: Int { get }
     var receiveAddress: String { get }
+    func transactions(fromHash: String?, limit: Int?) -> Observable<[TransactionInfo]>
     func send(to address: String, value: Int) throws
     func parse(paymentAddress: String) -> BitcoinPaymentData
     func validate(address: String) throws

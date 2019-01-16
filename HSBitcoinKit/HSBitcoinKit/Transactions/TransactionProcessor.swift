@@ -7,13 +7,16 @@ class TransactionProcessor {
     private let outputAddressExtractor: ITransactionOutputAddressExtractor
     private let linker: ITransactionLinker
     private let addressManager: IAddressManager
+    private let dateGenerator: () -> Date
 
-    init(outputExtractor: ITransactionExtractor, inputExtractor: ITransactionExtractor, linker: ITransactionLinker, outputAddressExtractor: ITransactionOutputAddressExtractor, addressManager: IAddressManager) {
+    init(outputExtractor: ITransactionExtractor, inputExtractor: ITransactionExtractor, linker: ITransactionLinker, outputAddressExtractor: ITransactionOutputAddressExtractor, addressManager: IAddressManager,
+         dateGenerator: @escaping () -> Date = Date.init) {
         self.outputExtractor = outputExtractor
         self.inputExtractor = inputExtractor
         self.outputAddressExtractor = outputAddressExtractor
         self.linker = linker
         self.addressManager = addressManager
+        self.dateGenerator = dateGenerator
     }
 
     private func hasUnspentOutputs(transaction: Transaction) -> Bool {
@@ -26,6 +29,13 @@ class TransactionProcessor {
         return false
     }
 
+    func relay(transaction: Transaction, withOrder order: Int, inBlock block: Block?) {
+        transaction.block = block
+        transaction.status = .relayed
+        transaction.timestamp = block?.header?.timestamp ?? Int(dateGenerator().timeIntervalSince1970)
+        transaction.order = order
+    }
+
 }
 
 extension TransactionProcessor: ITransactionProcessor {
@@ -33,18 +43,16 @@ extension TransactionProcessor: ITransactionProcessor {
     func process(transactions: [Transaction], inBlock block: Block?, skipCheckBloomFilter: Bool, realm: Realm) throws {
         var needToUpdateBloomFilter = false
 
-        for transaction in transactions.inTopologicalOrder() {
+        for (index, transaction) in transactions.inTopologicalOrder().enumerated() {
             if let existingTransaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", transaction.reversedHashHex).first {
-                existingTransaction.block = block
-                existingTransaction.status = .relayed
+                relay(transaction: existingTransaction, withOrder: index, inBlock: block)
                 continue
             }
 
             process(transaction: transaction, realm: realm)
 
             if transaction.isMine {
-                transaction.block = block
-                transaction.status = .relayed
+                relay(transaction: transaction, withOrder: index, inBlock: block)
                 realm.add(transaction)
 
                 if !skipCheckBloomFilter {

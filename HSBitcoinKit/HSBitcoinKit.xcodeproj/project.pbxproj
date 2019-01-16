@@ -187,6 +187,7 @@
 		D00DA94E213E86BC007F82D6 /* MemPoolMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00DA94D213E86BC007F82D6 /* MemPoolMessage.swift */; };
 		D026EFF021AFD1FB00B6640D /* ConnectionTimeoutManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D026EFEF21AFD1FB00B6640D /* ConnectionTimeoutManagerTests.swift */; };
 		D093F45E21414CC000C5D8CD /* PeerHostManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D093F45D21414CC000C5D8CD /* PeerHostManager.swift */; };
+		D0F63BE421EF349D000CAB79 /* DataProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0F63BE321EF349D000CAB79 /* DataProviderTests.swift */; };
 		D31711EA20F7192400AEF61B /* PeerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31711E920F7192300AEF61B /* PeerConnection.swift */; };
 		D31711FF20F7193000AEF61B /* PingMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31711EB20F7192F00AEF61B /* PingMessage.swift */; };
 		D317120020F7193000AEF61B /* AddressMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31711EC20F7192F00AEF61B /* AddressMessage.swift */; };
@@ -409,6 +410,7 @@
 		D00DA94D213E86BC007F82D6 /* MemPoolMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemPoolMessage.swift; sourceTree = "<group>"; };
 		D026EFEF21AFD1FB00B6640D /* ConnectionTimeoutManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionTimeoutManagerTests.swift; sourceTree = "<group>"; };
 		D093F45D21414CC000C5D8CD /* PeerHostManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerHostManager.swift; sourceTree = "<group>"; };
+		D0F63BE321EF349D000CAB79 /* DataProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataProviderTests.swift; sourceTree = "<group>"; };
 		D31711E920F7192300AEF61B /* PeerConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerConnection.swift; sourceTree = "<group>"; };
 		D31711EB20F7192F00AEF61B /* PingMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PingMessage.swift; sourceTree = "<group>"; };
 		D31711EC20F7192F00AEF61B /* AddressMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddressMessage.swift; sourceTree = "<group>"; };
@@ -927,6 +929,14 @@
 			path = Serializers;
 			sourceTree = "<group>";
 		};
+		D0F63BE221EF3469000CAB79 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				D0F63BE321EF349D000CAB79 /* DataProviderTests.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
 		D0FCA7092133D250008169E1 /* HDWallet */ = {
 			isa = PBXGroup;
 			children = (
@@ -950,6 +960,7 @@
 			children = (
 				11B35F875BE86EBC5D97DECC /* Blocks */,
 				11B3507A75FAF11E3C461160 /* BlockHeaders */,
+				D0F63BE221EF3469000CAB79 /* Core */,
 				D0FCA7092133D250008169E1 /* HDWallet */,
 				D01B6FAA21230AE80085010F /* Helpers */,
 				11B352462C0F682238607E64 /* Managers */,
@@ -1275,6 +1286,7 @@
 				2FA5D6129186D79E7C7DD57F /* IPeerTaskDelegateTests.swift in Sources */,
 				2FA5DFD4DDEA0B2F36600346 /* IPeerTaskRequesterTests.swift in Sources */,
 				58AAAC48ECA38644E789E9C3 /* FeeRateSyncerTests.swift in Sources */,
+				D0F63BE421EF349D000CAB79 /* DataProviderTests.swift in Sources */,
 				58AAA5E1FEBF06E6187588FD /* FeeRateManagerTests.swift in Sources */,
 				58AAA3A0474719B721A0E877 /* PaymentAddressParserTests.swift in Sources */,
 				58AAA321A8780859892D0C73 /* TransactionOutputExtractorTests.swift in Sources */,

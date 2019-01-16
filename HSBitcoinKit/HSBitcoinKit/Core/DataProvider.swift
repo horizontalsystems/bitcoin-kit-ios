@@ -121,7 +121,7 @@ class DataProvider {
                 to: toAddresses,
                 amount: amount,
                 blockHeight: transaction.block?.height,
-                timestamp: transaction.block?.header?.timestamp
+                timestamp: transaction.timestamp
         )
     }
 
@@ -141,10 +141,6 @@ class DataProvider {
 
 extension DataProvider: IDataProvider {
 
-    var transactions: [TransactionInfo] {
-        return transactionRealmResults.map { transactionInfo(fromTransaction: $0) }
-    }
-
     var lastBlockInfo: BlockInfo? {
         return blockRealmResults.last.map { blockInfo(fromBlock: $0) }
     }
@@ -157,6 +153,32 @@ extension DataProvider: IDataProvider {
         }
 
         return balance
+    }
+
+    func transactions(fromHash: String?, limit: Int?) -> Observable<[TransactionInfo]> {
+        return Observable.create { observer in
+            let realm = self.realmFactory.realm
+            var transactions = realm.objects(Transaction.self)
+                    .sorted(by: [SortDescriptor(keyPath: "timestamp", ascending: false), SortDescriptor(keyPath: "order", ascending: false)])
+
+            if let fromHash = fromHash, let fromTransaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", fromHash).first {
+                transactions = transactions.filter(
+                        "timestamp < %@ OR (timestamp = %@ AND order < %@)",
+                        fromTransaction.timestamp,
+                        fromTransaction.timestamp,
+                        fromTransaction.order
+                )
+            }
+
+            var results = Array(transactions)
+            if let limit = limit {
+                results = Array(transactions.prefix(limit))
+            }
+
+            observer.onNext(results.map() { self.transactionInfo(fromTransaction: $0) } )
+            observer.onCompleted()
+            return Disposables.create()
+        }
     }
 
     func send(to address: String, value: Int) throws {
