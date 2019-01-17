@@ -13,10 +13,11 @@ class DataProviderTests: XCTestCase {
     private var mockTransactionCreator: MockITransactionCreator!
     private var mockTransactionBuilder: MockITransactionBuilder!
     private var mockNetwork: MockINetwork!
+    private var mockDataProviderDelegate: MockIDataProviderDelegate!
 
     private var dataProvider: DataProvider!
-
     private var realm: Realm!
+    private var unspentOutputs = [TransactionOutput]()
 
     override func setUp() {
         super.setUp()
@@ -39,12 +40,24 @@ class DataProviderTests: XCTestCase {
         mockTransactionCreator = MockITransactionCreator()
         mockTransactionBuilder = MockITransactionBuilder()
         mockNetwork = MockINetwork()
+        mockDataProviderDelegate = MockIDataProviderDelegate()
+
+        stub(mockUnspentOutputProvider) { mock in
+            when(mock.allUnspentOutputs.get).thenReturn(unspentOutputs)
+        }
+
+        stub(mockDataProviderDelegate) { mock in
+            when(mock.transactionsUpdated(inserted: any(), updated: any(), deleted: any())).thenDoNothing()
+            when(mock.balanceUpdated(balance: any())).thenDoNothing()
+            when(mock.lastBlockInfoUpdated(lastBlockInfo: any())).thenDoNothing()
+        }
 
         dataProvider = DataProvider(
                 realmFactory: mockRealmFactory, addressManager: mockAddressManager, addressConverter: mockAddressConverter,
                 paymentAddressParser: mockPaymentAddressParser, unspentOutputProvider: mockUnspentOutputProvider, feeRateManager: mockFeeRateManager,
-                transactionCreator: mockTransactionCreator, transactionBuilder: mockTransactionBuilder, network: mockNetwork
+                transactionCreator: mockTransactionCreator, transactionBuilder: mockTransactionBuilder, network: mockNetwork, debounceTime: 0
         )
+        dataProvider.delegate = mockDataProviderDelegate
     }
 
     override func tearDown() {
@@ -56,6 +69,7 @@ class DataProviderTests: XCTestCase {
         mockTransactionCreator = nil
         mockTransactionBuilder = nil
         mockNetwork = nil
+        mockDataProviderDelegate = nil
 
         dataProvider = nil
 
@@ -199,6 +213,67 @@ class DataProviderTests: XCTestCase {
         XCTAssertEqual(results[3].transactionHash, transactions[1].reversedHashHex)
     }
 
+    func testBlockAdded() {
+        let block = TestData.firstBlock
+        let blockInfo = BlockInfo(
+                headerHash: block.reversedHeaderHashHex,
+                height: block.height,
+                timestamp: block.header?.timestamp
+        )
+
+        try! realm.write {
+            realm.add(block)
+        }
+        waitForMainQueue()
+        waitForMainQueue()
+
+        verify(mockDataProviderDelegate).lastBlockInfoUpdated(lastBlockInfo: equal(to: blockInfo))
+        verify(mockDataProviderDelegate).balanceUpdated(balance: equal(to: 0))
+        XCTAssertEqual(dataProvider.balance, 0)
+        XCTAssertEqual(dataProvider.lastBlockInfo, blockInfo)
+    }
+
+    func testBlockAdded_UnspentOutputsExist() {
+        unspentOutputs.append(TransactionOutput(withValue: 1, index: 0, lockingScript: Data(from: 100), type: .p2pk, keyHash: nil))
+        unspentOutputs.append(TransactionOutput(withValue: 2, index: 0, lockingScript: Data(from: 200), type: .p2pk, keyHash: nil))
+
+        stub(mockUnspentOutputProvider) { mock in
+            when(mock.allUnspentOutputs.get).thenReturn(unspentOutputs)
+        }
+
+        try! realm.write {
+            realm.add(TestData.firstBlock)
+        }
+        waitForMainQueue()
+        waitForMainQueue()
+
+        verify(mockDataProviderDelegate).balanceUpdated(balance: equal(to: 3))
+        XCTAssertEqual(dataProvider.balance, 3)
+    }
+
+    func testTransactionsExist() {
+        let transaction = TestData.p2pkTransaction
+        transaction.isMine = true
+        let transactionInfo = TransactionInfo(transactionHash: transaction.reversedHashHex, from: [TransactionAddressInfo](), to: [TransactionAddressInfo](), amount: 0, blockHeight: nil, timestamp: nil)
+
+        unspentOutputs.append(TransactionOutput(withValue: 1, index: 0, lockingScript: Data(from: 100), type: .p2pk, keyHash: nil))
+        unspentOutputs.append(TransactionOutput(withValue: 2, index: 0, lockingScript: Data(from: 200), type: .p2pk, keyHash: nil))
+
+        stub(mockUnspentOutputProvider) { mock in
+            when(mock.allUnspentOutputs.get).thenReturn(unspentOutputs)
+        }
+
+        try! realm.write {
+            realm.add(transaction)
+        }
+
+        waitForMainQueue()
+        waitForMainQueue()
+
+        verify(mockDataProviderDelegate).transactionsUpdated(inserted: equal(to: [transactionInfo]), updated: equal(to: [TransactionInfo]()), deleted: equal(to: []))
+        verify(mockDataProviderDelegate).balanceUpdated(balance: equal(to: 3))
+        XCTAssertEqual(dataProvider.balance, 3)
+    }
 
     private func transactions() -> [Transaction] {
         let transaction = Transaction(

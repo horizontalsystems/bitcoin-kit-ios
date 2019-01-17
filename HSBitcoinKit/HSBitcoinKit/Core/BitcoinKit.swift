@@ -240,7 +240,7 @@ extension BitcoinKit {
 
 }
 
-extension BitcoinKit: DataProviderDelegate {
+extension BitcoinKit: IDataProviderDelegate {
 
     func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo], deleted: [Int]) {
         delegate?.transactionsUpdated(bitcoinKit: self, inserted: inserted, updated: updated, deleted: deleted)
