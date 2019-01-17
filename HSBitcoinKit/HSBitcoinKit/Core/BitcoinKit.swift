@@ -210,7 +210,7 @@ extension BitcoinKit {
         return dataProvider.balance
     }
 
-    public func transactions(fromHash: String? = nil, limit: Int? = nil) -> Observable<[TransactionInfo]> {
+    public func transactions(fromHash: String? = nil, limit: Int? = nil) -> Single<[TransactionInfo]> {
         return dataProvider.transactions(fromHash: fromHash, limit: limit)
     }
 

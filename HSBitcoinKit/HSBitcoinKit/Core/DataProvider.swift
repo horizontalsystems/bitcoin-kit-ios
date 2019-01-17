@@ -150,8 +150,8 @@ class DataProvider {
 
 extension DataProvider: IDataProvider {
 
-    func transactions(fromHash: String?, limit: Int?) -> Observable<[TransactionInfo]> {
-        return Observable.create { observer in
+    func transactions(fromHash: String?, limit: Int?) -> Single<[TransactionInfo]> {
+        return Single.create { observer in
             let realm = self.realmFactory.realm
             var transactions = realm.objects(Transaction.self)
                     .sorted(by: [SortDescriptor(keyPath: "timestamp", ascending: false), SortDescriptor(keyPath: "order", ascending: false)])
@@ -170,8 +170,7 @@ extension DataProvider: IDataProvider {
                 results = Array(transactions.prefix(limit))
             }
 
-            observer.onNext(results.map() { self.transactionInfo(fromTransaction: $0) } )
-            observer.onCompleted()
+            observer(.success(results.map() { self.transactionInfo(fromTransaction: $0) }))
             return Disposables.create()
         }
     }

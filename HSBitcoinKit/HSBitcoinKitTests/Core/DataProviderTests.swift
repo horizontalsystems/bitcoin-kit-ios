@@ -92,7 +92,7 @@ class DataProviderTests: XCTestCase {
 
         var results = [TransactionInfo]()
         dataProvider.transactions(fromHash: nil, limit: 3).subscribe(
-                onNext: { transactionInfos in
+                onSuccess: { transactionInfos in
                     results = transactionInfos
                 }
         ).disposed(by: disposeBag)
@@ -124,7 +124,7 @@ class DataProviderTests: XCTestCase {
 
         var results = [TransactionInfo]()
         dataProvider.transactions(fromHash: nil, limit: 3).subscribe(
-                onNext: { transactionInfos in
+                onSuccess: { transactionInfos in
                     results = transactionInfos
                 }
         ).disposed(by: disposeBag)
@@ -157,7 +157,7 @@ class DataProviderTests: XCTestCase {
         // Sort by timestamps
         var results = [TransactionInfo]()
         dataProvider.transactions(fromHash: transactions[0].reversedHashHex, limit: 3).subscribe(
-                onNext: { transactionInfos in
+                onSuccess: { transactionInfos in
                     results = transactionInfos
                 }
         ).disposed(by: disposeBag)
@@ -169,7 +169,7 @@ class DataProviderTests: XCTestCase {
 
         // Sort by timestamps and order
         dataProvider.transactions(fromHash: transactions[3].reversedHashHex, limit: 3).subscribe(
-                onNext: { transactionInfos in
+                onSuccess: { transactionInfos in
                     results = transactionInfos
                 }
         ).disposed(by: disposeBag)
@@ -200,7 +200,7 @@ class DataProviderTests: XCTestCase {
         // Sort by timestamps
         var results = [TransactionInfo]()
         dataProvider.transactions(fromHash: nil, limit: nil).subscribe(
-                onNext: { transactionInfos in
+                onSuccess: { transactionInfos in
                     results = transactionInfos
                 }
         ).disposed(by: disposeBag)
