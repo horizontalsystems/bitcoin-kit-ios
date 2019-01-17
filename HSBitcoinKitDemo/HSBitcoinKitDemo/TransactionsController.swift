@@ -30,8 +30,10 @@ class TransactionsController: UITableViewController {
     }
 
     private func update() {
-        transactions = Manager.shared.bitcoinKit.transactions
-        tableView.reloadData()
+        Manager.shared.bitcoinKit.transactions().subscribe(onSuccess: { transactions in
+            self.transactions = transactions
+            self.tableView.reloadData()
+        })
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

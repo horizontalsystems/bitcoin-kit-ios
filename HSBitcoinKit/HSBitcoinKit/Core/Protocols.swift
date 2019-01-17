@@ -349,18 +349,24 @@ protocol IKitStateProviderDelegate: class {
 }
 
 protocol IDataProvider {
-    var delegate: DataProviderDelegate? { get set }
+    var delegate: IDataProviderDelegate? { get set }
 
-    var transactions: [TransactionInfo] { get }
     var lastBlockInfo: BlockInfo? { get }
     var balance: Int { get }
     var receiveAddress: String { get }
+    func transactions(fromHash: String?, limit: Int?) -> Single<[TransactionInfo]>
     func send(to address: String, value: Int) throws
     func parse(paymentAddress: String) -> BitcoinPaymentData
     func validate(address: String) throws
     func fee(for value: Int, toAddress: String?, senderPay: Bool) throws -> Int
 
     var debugInfo: String { get }
+}
+
+protocol IDataProviderDelegate: class {
+    func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo], deleted: [Int])
+    func balanceUpdated(balance: Int)
+    func lastBlockInfoUpdated(lastBlockInfo: BlockInfo)
 }
 
 protocol INetwork: class {

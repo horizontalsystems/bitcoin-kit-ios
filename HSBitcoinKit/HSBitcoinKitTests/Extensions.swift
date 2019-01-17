@@ -38,3 +38,19 @@ extension SelectorError: Equatable {
     }
 
 }
+
+extension BlockInfo: Equatable {
+
+    public static func ==(lhs: BlockInfo, rhs: BlockInfo) -> Bool {
+        return lhs.headerHash == rhs.headerHash && lhs.height == rhs.height && lhs.timestamp == rhs.timestamp
+    }
+
+}
+
+extension TransactionInfo: Equatable {
+
+    public static func ==(lhs: TransactionInfo, rhs: TransactionInfo) -> Bool {
+        return lhs.transactionHash == rhs.transactionHash
+    }
+
+}

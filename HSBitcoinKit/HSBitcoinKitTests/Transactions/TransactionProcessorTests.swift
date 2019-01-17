@@ -10,6 +10,9 @@ class TransactionProcessorTests: XCTestCase {
     private var mockLinker: MockITransactionLinker!
     private var mockAddressManager: MockIAddressManager!
 
+    private var generatedDate: Date!
+    private var dateGenerator: (() -> Date)!
+
     private var transactionProcessor: TransactionProcessor!
 
     private var realm: Realm!
@@ -19,6 +22,11 @@ class TransactionProcessorTests: XCTestCase {
 
         realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
         try! realm.write { realm.deleteAll() }
+
+        generatedDate = Date()
+        dateGenerator = {
+            return self.generatedDate
+        }
 
         let mockRealmFactory = MockIRealmFactory()
         stub(mockRealmFactory) { mock in
@@ -47,7 +55,7 @@ class TransactionProcessorTests: XCTestCase {
             when(mock.gapShifts()).thenReturn(false)
         }
 
-        transactionProcessor = TransactionProcessor(outputExtractor: mockOutputExtractor, inputExtractor: mockInputExtractor, linker: mockLinker, outputAddressExtractor: mockOutputAddressExtractor, addressManager: mockAddressManager)
+        transactionProcessor = TransactionProcessor(outputExtractor: mockOutputExtractor, inputExtractor: mockInputExtractor, linker: mockLinker, outputAddressExtractor: mockOutputAddressExtractor, addressManager: mockAddressManager, dateGenerator: dateGenerator)
     }
 
     override func tearDown() {
@@ -55,6 +63,9 @@ class TransactionProcessorTests: XCTestCase {
         mockInputExtractor = nil
         mockLinker = nil
         transactionProcessor = nil
+
+        generatedDate = nil
+        dateGenerator = nil
 
         realm = nil
 
@@ -114,6 +125,66 @@ class TransactionProcessorTests: XCTestCase {
         XCTAssertEqual(realmTransactions.first!.dataHash, transaction.dataHash)
         XCTAssertEqual(realmTransactions.first!.status, TransactionStatus.relayed)
         XCTAssertEqual(realmTransactions.first!.block, nil)
+    }
+
+    func testProcessTransactions_SeveralMempoolTransactions() {
+        let transactions = self.transactions()
+        for transaction in transactions {
+            transaction.isMine = true
+            transaction.timestamp = 0
+            transaction.order = 0
+        }
+
+        try! realm.write {
+            realm.add([transactions[1], transactions[3]])
+            transactions[1].status = .new
+        }
+
+        try! realm.write {
+            try! transactionProcessor.process(transactions: [transactions[3], transactions[1], transactions[2], transactions[0]], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
+        }
+
+        let realmTransactions = realm.objects(Transaction.self).sorted(byKeyPath: "order")
+
+        XCTAssertEqual(realmTransactions.count, 4)
+        for (i, transaction) in transactions.enumerated() {
+            XCTAssertEqual(realmTransactions[i].dataHash, transaction.dataHash)
+            XCTAssertEqual(realmTransactions[i].status, .relayed)
+            XCTAssertEqual(realmTransactions[i].order, i)
+            XCTAssertEqual(realmTransactions[i].timestamp, Int(generatedDate.timeIntervalSince1970))
+        }
+    }
+
+    func testProcessTransactions_SeveralTransactionsInBlock() {
+        let transactions = self.transactions()
+        let block = TestData.firstBlock
+
+        for transaction in transactions {
+            transaction.isMine = true
+            transaction.timestamp = 0
+            transaction.order = 0
+        }
+
+        try! realm.write {
+            realm.add(block)
+            realm.add([transactions[1], transactions[3]])
+            transactions[1].status = .new
+        }
+
+        try! realm.write {
+            try! transactionProcessor.process(transactions: [transactions[3], transactions[1], transactions[2], transactions[0]], inBlock: block, skipCheckBloomFilter: false, realm: realm)
+        }
+
+        let realmTransactions = realm.objects(Transaction.self).sorted(byKeyPath: "order")
+
+        XCTAssertEqual(realmTransactions.count, 4)
+        for (i, transaction) in transactions.enumerated() {
+            XCTAssertEqual(realmTransactions[i].block?.reversedHeaderHashHex, block.reversedHeaderHashHex)
+            XCTAssertEqual(realmTransactions[i].dataHash, transaction.dataHash)
+            XCTAssertEqual(realmTransactions[i].status, .relayed)
+            XCTAssertEqual(realmTransactions[i].order, i)
+            XCTAssertEqual(realmTransactions[i].timestamp, block.header!.timestamp)
+        }
     }
 
     func testProcessTransactions_TransactionNotExists_Mine() {
