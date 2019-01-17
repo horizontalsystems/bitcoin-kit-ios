@@ -165,9 +165,11 @@ extension DataProvider: IDataProvider {
                 )
             }
 
-            var results = Array(transactions)
+            let results: [Transaction]
             if let limit = limit {
                 results = Array(transactions.prefix(limit))
+            } else {
+                results = Array(transactions)
             }
 
             observer(.success(results.map() { self.transactionInfo(fromTransaction: $0) }))
