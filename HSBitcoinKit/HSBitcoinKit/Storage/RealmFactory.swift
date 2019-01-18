@@ -8,7 +8,7 @@ class RealmFactory {
 
         configuration = Realm.Configuration(
                 fileURL: documentsUrl?.appendingPathComponent(realmFileName),
-                schemaVersion: 1,
+                schemaVersion: 2,
                 deleteRealmIfMigrationNeeded: true,
                 objectTypes: [
                     Block.self,

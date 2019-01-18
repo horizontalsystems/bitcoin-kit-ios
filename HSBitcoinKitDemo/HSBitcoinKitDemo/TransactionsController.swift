@@ -30,7 +30,7 @@ class TransactionsController: UITableViewController {
     }
 
     private func update() {
-        Manager.shared.bitcoinKit.transactions().subscribe(onSuccess: { transactions in
+        let _ = Manager.shared.bitcoinKit.transactions().subscribe(onSuccess: { transactions in
             self.transactions = transactions
             self.tableView.reloadData()
         })
