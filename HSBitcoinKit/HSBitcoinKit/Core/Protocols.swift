@@ -323,6 +323,7 @@ protocol IUnspentOutputSelector {
 
 protocol IUnspentOutputProvider {
     var allUnspentOutputs: [TransactionOutput] { get }
+    var balance: Int { get }
 }
 
 protocol IBlockSyncer: class {

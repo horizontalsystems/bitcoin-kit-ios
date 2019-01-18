@@ -38,16 +38,12 @@ class DataProvider {
         self.transactionCreator = transactionCreator
         self.transactionBuilder = transactionBuilder
         self.network = network
+        self.balance = unspentOutputProvider.balance
+        self.lastBlockInfo = blockRealmResults.last.map { blockInfo(fromBlock: $0) }
 
         balanceUpdateSubject.debounce(debounceTime, scheduler: MainScheduler.instance).subscribeAsync(disposeBag: disposeBag, onNext: {
-            var balance = 0
-
-            for output in self.unspentOutputProvider.allUnspentOutputs {
-                balance += output.value
-            }
-
-            self.balance = balance
-            self.delegate?.balanceUpdated(balance: balance)
+            self.balance = unspentOutputProvider.balance
+            self.delegate?.balanceUpdated(balance: self.balance)
         })
 
         transactionsNotificationToken = transactionRealmResults.observe { [weak self] changeset in

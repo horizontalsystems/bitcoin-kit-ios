@@ -17,7 +17,6 @@ class DataProviderTests: XCTestCase {
 
     private var dataProvider: DataProvider!
     private var realm: Realm!
-    private var unspentOutputs = [TransactionOutput]()
 
     override func setUp() {
         super.setUp()
@@ -43,7 +42,7 @@ class DataProviderTests: XCTestCase {
         mockDataProviderDelegate = MockIDataProviderDelegate()
 
         stub(mockUnspentOutputProvider) { mock in
-            when(mock.allUnspentOutputs.get).thenReturn(unspentOutputs)
+            when(mock.balance.get).thenReturn(0)
         }
 
         stub(mockDataProviderDelegate) { mock in
@@ -234,11 +233,8 @@ class DataProviderTests: XCTestCase {
     }
 
     func testBlockAdded_UnspentOutputsExist() {
-        unspentOutputs.append(TransactionOutput(withValue: 1, index: 0, lockingScript: Data(from: 100), type: .p2pk, keyHash: nil))
-        unspentOutputs.append(TransactionOutput(withValue: 2, index: 0, lockingScript: Data(from: 200), type: .p2pk, keyHash: nil))
-
         stub(mockUnspentOutputProvider) { mock in
-            when(mock.allUnspentOutputs.get).thenReturn(unspentOutputs)
+            when(mock.balance.get).thenReturn(3)
         }
 
         try! realm.write {
@@ -256,11 +252,8 @@ class DataProviderTests: XCTestCase {
         transaction.isMine = true
         let transactionInfo = TransactionInfo(transactionHash: transaction.reversedHashHex, from: [TransactionAddressInfo](), to: [TransactionAddressInfo](), amount: 0, blockHeight: nil, timestamp: nil)
 
-        unspentOutputs.append(TransactionOutput(withValue: 1, index: 0, lockingScript: Data(from: 100), type: .p2pk, keyHash: nil))
-        unspentOutputs.append(TransactionOutput(withValue: 2, index: 0, lockingScript: Data(from: 200), type: .p2pk, keyHash: nil))
-
         stub(mockUnspentOutputProvider) { mock in
-            when(mock.allUnspentOutputs.get).thenReturn(unspentOutputs)
+            when(mock.balance.get).thenReturn(3)
         }
 
         try! realm.write {
