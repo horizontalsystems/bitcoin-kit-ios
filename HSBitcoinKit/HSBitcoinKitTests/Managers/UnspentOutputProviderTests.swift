@@ -92,27 +92,27 @@ class UnspentOutputProviderTests: XCTestCase {
     }
 
     func testOutgoingOutputs() {
-            outputs.forEach { $0.publicKey = pubKey }
+        outputs.forEach { $0.publicKey = pubKey }
 
-            let transaction = Transaction(version: 0, inputs: [], outputs: outputs)
-            let block = Block(withHeader: BlockHeader(), height: lastBlockHeight - 1)
-            transaction.block = block
-            transaction.isOutgoing = true
+        let transaction = Transaction(version: 0, inputs: [], outputs: outputs)
+        let block = Block(withHeader: BlockHeader(), height: lastBlockHeight - 1)
+        transaction.block = block
+        transaction.isOutgoing = true
 
-            try? realm.write {
-                realm.add(transaction, update: true)
-            }
-            let inputTransaction = Transaction(version: 0, inputs: inputsWithPreviousOutputs(range: 0..<2), outputs: [])
-            try? realm.write {
-                realm.add(inputTransaction, update: true)
-            }
-
-            let unspentOutputs = unspentOutputProvider.allUnspentOutputs
-
-            XCTAssertEqual(unspentOutputs[0].keyHash, outputs[2].keyHash)
-            XCTAssertEqual(unspentOutputs[1].keyHash, outputs[3].keyHash)
-            XCTAssertEqual(unspentOutputs[2].keyHash, outputs[4].keyHash)
+        try? realm.write {
+            realm.add(transaction, update: true)
         }
+        let inputTransaction = Transaction(version: 0, inputs: inputsWithPreviousOutputs(range: 0..<2), outputs: [])
+        try? realm.write {
+            realm.add(inputTransaction, update: true)
+        }
+
+        let unspentOutputs = unspentOutputProvider.allUnspentOutputs
+
+        XCTAssertEqual(unspentOutputs[0].keyHash, outputs[2].keyHash)
+        XCTAssertEqual(unspentOutputs[1].keyHash, outputs[3].keyHash)
+        XCTAssertEqual(unspentOutputs[2].keyHash, outputs[4].keyHash)
+    }
 
     func testEmptyMineOutputs() {
         let transaction = Transaction(version: 0, inputs: [], outputs: outputs)
@@ -125,6 +125,25 @@ class UnspentOutputProviderTests: XCTestCase {
         }
         let unspentOutputs = unspentOutputProvider.allUnspentOutputs
         XCTAssertEqual(unspentOutputs.count, 0)
+    }
+
+    func testBalance() {
+        outputs.forEach { $0.publicKey = pubKey }
+
+        let transaction = Transaction(version: 0, inputs: [], outputs: outputs)
+        let block = Block(withHeader: BlockHeader(), height: lastBlockHeight - 1)
+        transaction.block = block
+        transaction.isOutgoing = true
+
+        try? realm.write {
+            realm.add(transaction, update: true)
+        }
+        let inputTransaction = Transaction(version: 0, inputs: inputsWithPreviousOutputs(range: 0..<2), outputs: [])
+        try? realm.write {
+            realm.add(inputTransaction, update: true)
+        }
+
+        XCTAssertEqual(unspentOutputProvider.balance, outputs[2].value + outputs[3].value + outputs[4].value)
     }
 
     private func inputsWithPreviousOutputs(range: Range<Int>) -> [TransactionInput] {
