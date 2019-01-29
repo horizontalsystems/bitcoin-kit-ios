@@ -26,7 +26,7 @@ class TransactionCell: UITableViewCell {
 
         infoLabel?.text =
                 "Amount: \(amount)\n" +
-                "Date: \(transaction.timestamp.map { String(describing: $0) } ?? "n/a")\n" +
+                "Date: \(Date(timeIntervalSince1970: Double(transaction.timestamp)))\n" +
                 "Tx Hash: \(transaction.transactionHash.prefix(10))...\n" +
                 "From: \(fromAddress)\n" +
                 "To: \(toAddress)\n" +

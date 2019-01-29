@@ -6,7 +6,7 @@ public struct TransactionInfo {
     public let to: [TransactionAddressInfo]
     public let amount: Int
     public let blockHeight: Int?
-    public let timestamp: Int?
+    public let timestamp: Int
 }
 
 public struct TransactionAddressInfo {
