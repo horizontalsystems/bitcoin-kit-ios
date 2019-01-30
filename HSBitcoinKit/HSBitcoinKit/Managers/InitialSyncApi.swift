@@ -9,11 +9,11 @@ class InitialSyncApi {
         let url: String
 
         switch network {
-        case is BitcoinMainNet: url = "https://btc.horizontalsystems.xyz"
-        case is BitcoinTestNet: url = "http://btc-testnet.horizontalsystems.xyz"
-        case is BitcoinCashMainNet: url = "https://bch.horizontalsystems.xyz"
-        case is BitcoinCashTestNet: url = "http://bch-testnet.horizontalsystems.xyz"
-        default: url = "http://btc-testnet.horizontalsystems.xyz"
+        case is BitcoinMainNet: url = "https://btc.horizontalsystems.xyz/apg"
+        case is BitcoinTestNet: url = "http://btc-testnet.horizontalsystems.xyz/apg"
+        case is BitcoinCashMainNet: url = "https://bch.horizontalsystems.xyz/apg"
+        case is BitcoinCashTestNet: url = "http://bch-testnet.horizontalsystems.xyz/apg"
+        default: url = "http://btc-testnet.horizontalsystems.xyz/apg"
         }
 
         apiManager = ApiManager(apiUrl: url, logger: logger)
