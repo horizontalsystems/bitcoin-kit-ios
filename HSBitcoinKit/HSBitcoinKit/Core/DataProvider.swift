@@ -23,9 +23,12 @@ class DataProvider {
     private var transactionsNotificationToken: NotificationToken?
     private var blocksNotificationToken: NotificationToken?
 
-    weak var delegate: DataProviderDelegate?
+    public var balance: Int = 0
+    public var lastBlockInfo: BlockInfo? = nil
 
-    init(realmFactory: IRealmFactory, addressManager: IAddressManager, addressConverter: IAddressConverter, paymentAddressParser: IPaymentAddressParser, unspentOutputProvider: IUnspentOutputProvider, feeRateManager: IFeeRateManager, transactionCreator: ITransactionCreator, transactionBuilder: ITransactionBuilder, network: INetwork) {
+    weak var delegate: IDataProviderDelegate?
+
+    init(realmFactory: IRealmFactory, addressManager: IAddressManager, addressConverter: IAddressConverter, paymentAddressParser: IPaymentAddressParser, unspentOutputProvider: IUnspentOutputProvider, feeRateManager: IFeeRateManager, transactionCreator: ITransactionCreator, transactionBuilder: ITransactionBuilder, network: INetwork, debounceTime: Double = 0.5) {
         self.realmFactory = realmFactory
         self.addressManager = addressManager
         self.addressConverter = addressConverter
@@ -35,8 +38,11 @@ class DataProvider {
         self.transactionCreator = transactionCreator
         self.transactionBuilder = transactionBuilder
         self.network = network
+        self.balance = unspentOutputProvider.balance
+        self.lastBlockInfo = blockRealmResults.last.map { blockInfo(fromBlock: $0) }
 
-        balanceUpdateSubject.debounce(0.5, scheduler: MainScheduler.instance).subscribeAsync(disposeBag: disposeBag, onNext: {
+        balanceUpdateSubject.debounce(debounceTime, scheduler: MainScheduler.instance).subscribeAsync(disposeBag: disposeBag, onNext: {
+            self.balance = unspentOutputProvider.balance
             self.delegate?.balanceUpdated(balance: self.balance)
         })
 
@@ -67,7 +73,10 @@ class DataProvider {
 
     private func handleBlocks(changeset: RealmCollectionChange<Results<Block>>) {
         if case let .update(collection, deletions, insertions, _) = changeset, let block = collection.last, (!deletions.isEmpty || !insertions.isEmpty) {
-            delegate?.lastBlockInfoUpdated(lastBlockInfo: blockInfo(fromBlock: block))
+            let blockInfo = self.blockInfo(fromBlock: block)
+            lastBlockInfo = blockInfo
+
+            delegate?.lastBlockInfoUpdated(lastBlockInfo: blockInfo)
             balanceUpdateSubject.onNext(())
         }
     }
@@ -121,7 +130,7 @@ class DataProvider {
                 to: toAddresses,
                 amount: amount,
                 blockHeight: transaction.block?.height,
-                timestamp: transaction.block?.header?.timestamp
+                timestamp: transaction.timestamp
         )
     }
 
@@ -133,30 +142,35 @@ class DataProvider {
         )
     }
 
-    private func latestFeeRate() -> FeeRate {
-        return realmFactory.realm.objects(FeeRate.self).last ?? FeeRate.defaultFeeRate
-    }
-
 }
 
 extension DataProvider: IDataProvider {
 
-    var transactions: [TransactionInfo] {
-        return transactionRealmResults.map { transactionInfo(fromTransaction: $0) }
-    }
+    func transactions(fromHash: String?, limit: Int?) -> Single<[TransactionInfo]> {
+        return Single.create { observer in
+            let realm = self.realmFactory.realm
+            var transactions = realm.objects(Transaction.self)
+                    .sorted(by: [SortDescriptor(keyPath: "timestamp", ascending: false), SortDescriptor(keyPath: "order", ascending: false)])
 
-    var lastBlockInfo: BlockInfo? {
-        return blockRealmResults.last.map { blockInfo(fromBlock: $0) }
-    }
+            if let fromHash = fromHash, let fromTransaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", fromHash).first {
+                transactions = transactions.filter(
+                        "timestamp < %@ OR (timestamp = %@ AND order < %@)",
+                        fromTransaction.timestamp,
+                        fromTransaction.timestamp,
+                        fromTransaction.order
+                )
+            }
 
-    var balance: Int {
-        var balance = 0
+            let results: [Transaction]
+            if let limit = limit {
+                results = Array(transactions.prefix(limit))
+            } else {
+                results = Array(transactions)
+            }
 
-        for output in unspentOutputProvider.allUnspentOutputs {
-            balance += output.value
+            observer(.success(results.map() { self.transactionInfo(fromTransaction: $0) }))
+            return Disposables.create()
         }
-
-        return balance
     }
 
     func send(to address: String, value: Int) throws {
@@ -211,10 +225,4 @@ extension DataProvider: IDataProvider {
         return lines.joined(separator: "\n")
     }
 
-}
-
-protocol DataProviderDelegate: class {
-    func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo], deleted: [Int])
-    func balanceUpdated(balance: Int)
-    func lastBlockInfoUpdated(lastBlockInfo: BlockInfo)
 }

@@ -7,12 +7,13 @@ struct SelectedUnspentOutputInfo {
     let addChangeOutput: Bool           // need to add changeOutput. Fee was calculated with change output
 }
 
+public enum SelectorError: Error {
+    case wrongValue
+    case emptyOutputs
+    case notEnough(maxFee: Int)
+}
+
 class UnspentOutputSelector {
-    enum SelectorError: Error {
-        case wrongValue
-        case emptyOutputs
-        case notEnough
-    }
 
     let calculator: ITransactionSizeCalculator
 
@@ -53,6 +54,10 @@ extension UnspentOutputSelector: IUnspentOutputSelector {
         var lastCalculatedFee = 0
 
         for output in sortedOutputs {
+            selectedOutputs.append(output)
+            selectedOutputScriptTypes.append(output.scriptType)
+            totalValue += output.value
+
             lastCalculatedFee = calculator.transactionSize(inputs: selectedOutputScriptTypes, outputScriptTypes: [outputScriptType]) * feeRate
             if senderPay {
                 fee = lastCalculatedFee
@@ -60,14 +65,11 @@ extension UnspentOutputSelector: IUnspentOutputSelector {
             if totalValue >= lastCalculatedFee && totalValue >= value + fee {
                 break
             }
-            selectedOutputs.append(output)
-            selectedOutputScriptTypes.append(output.scriptType)
-            totalValue += output.value
         }
 
         // if all outputs are selected and total value less than needed throw error
         if totalValue < value + fee {
-            throw SelectorError.notEnough
+            throw SelectorError.notEnough(maxFee: fee)
         }
 
         // if total selected outputs value more than value and fee for transaction with change output + change input -> add fee for change output and mark as need change address

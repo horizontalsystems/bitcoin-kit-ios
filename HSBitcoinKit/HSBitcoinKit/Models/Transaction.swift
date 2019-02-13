@@ -9,6 +9,8 @@ class Transaction: Object {
     @objc dynamic var dataHash = Data()
     @objc dynamic var version: Int = 0
     @objc dynamic var lockTime: Int = 0
+    @objc dynamic var timestamp: Int = 0
+    @objc dynamic var order: Int = 0
     @objc dynamic var block: Block?
 
     @objc dynamic var isMine: Bool = false
@@ -33,6 +35,8 @@ class Transaction: Object {
         outputs.forEach { self.outputs.append($0) }
 
         self.lockTime = lockTime
+        self.timestamp = Int(Date().timeIntervalSince1970)
+
         dataHash = CryptoKit.sha256sha256(TransactionSerializer.serialize(transaction: self, withoutWitness: true))
         reversedHashHex = dataHash.reversedHex
     }

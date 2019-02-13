@@ -3,6 +3,7 @@ import HSHDWalletKit
 import RealmSwift
 import BigInt
 import HSCryptoKit
+import RxSwift
 
 public class BitcoinKit {
 
@@ -201,16 +202,16 @@ extension BitcoinKit {
 
 extension BitcoinKit {
 
-    public var transactions: [TransactionInfo] {
-        return dataProvider.transactions
-    }
-
     public var lastBlockInfo: BlockInfo? {
         return dataProvider.lastBlockInfo
     }
 
     public var balance: Int {
         return dataProvider.balance
+    }
+
+    public func transactions(fromHash: String? = nil, limit: Int? = nil) -> Single<[TransactionInfo]> {
+        return dataProvider.transactions(fromHash: fromHash, limit: limit)
     }
 
     public func send(to address: String, value: Int) throws {
@@ -239,7 +240,7 @@ extension BitcoinKit {
 
 }
 
-extension BitcoinKit: DataProviderDelegate {
+extension BitcoinKit: IDataProviderDelegate {
 
     func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo], deleted: [Int]) {
         delegate?.transactionsUpdated(bitcoinKit: self, inserted: inserted, updated: updated, deleted: deleted)

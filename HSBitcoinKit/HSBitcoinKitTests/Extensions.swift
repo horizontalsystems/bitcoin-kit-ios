@@ -24,3 +24,33 @@ extension BitcoinKit.KitState: Equatable {
     }
 
 }
+
+extension SelectorError: Equatable {
+
+    public static func ==(lhs: SelectorError, rhs: SelectorError) -> Bool {
+        switch (lhs, rhs) {
+        case (.wrongValue, .wrongValue): return true
+        case (.emptyOutputs, .emptyOutputs): return true
+        case let (.notEnough(lMaxFee),   .notEnough(rMaxFee)): return lMaxFee == rMaxFee
+        default:
+            return false
+        }
+    }
+
+}
+
+extension BlockInfo: Equatable {
+
+    public static func ==(lhs: BlockInfo, rhs: BlockInfo) -> Bool {
+        return lhs.headerHash == rhs.headerHash && lhs.height == rhs.height && lhs.timestamp == rhs.timestamp
+    }
+
+}
+
+extension TransactionInfo: Equatable {
+
+    public static func ==(lhs: TransactionInfo, rhs: TransactionInfo) -> Bool {
+        return lhs.transactionHash == rhs.transactionHash
+    }
+
+}

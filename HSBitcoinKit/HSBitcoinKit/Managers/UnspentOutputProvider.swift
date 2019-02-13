@@ -29,4 +29,14 @@ extension UnspentOutputProvider: IUnspentOutputProvider {
         }
     }
 
+    var balance: Int {
+        var balance = 0
+
+        for output in self.allUnspentOutputs {
+            balance += output.value
+        }
+
+        return balance
+    }
+
 }
