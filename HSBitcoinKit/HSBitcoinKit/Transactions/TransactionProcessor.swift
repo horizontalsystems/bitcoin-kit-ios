@@ -7,15 +7,19 @@ class TransactionProcessor {
     private let outputAddressExtractor: ITransactionOutputAddressExtractor
     private let linker: ITransactionLinker
     private let addressManager: IAddressManager
+
+    weak var listener: IBlockchainDataListener?
+
     private let dateGenerator: () -> Date
 
-    init(outputExtractor: ITransactionExtractor, inputExtractor: ITransactionExtractor, linker: ITransactionLinker, outputAddressExtractor: ITransactionOutputAddressExtractor, addressManager: IAddressManager,
+    init(outputExtractor: ITransactionExtractor, inputExtractor: ITransactionExtractor, linker: ITransactionLinker, outputAddressExtractor: ITransactionOutputAddressExtractor, addressManager: IAddressManager, listener: IBlockchainDataListener? = nil,
          dateGenerator: @escaping () -> Date = Date.init) {
         self.outputExtractor = outputExtractor
         self.inputExtractor = inputExtractor
         self.outputAddressExtractor = outputAddressExtractor
         self.linker = linker
         self.addressManager = addressManager
+        self.listener = listener
         self.dateGenerator = dateGenerator
     }
 
@@ -43,9 +47,12 @@ extension TransactionProcessor: ITransactionProcessor {
     func process(transactions: [Transaction], inBlock block: Block?, skipCheckBloomFilter: Bool, realm: Realm) throws {
         var needToUpdateBloomFilter = false
 
+        var updated = [Transaction]()
+        var inserted = [Transaction]()
         for (index, transaction) in transactions.inTopologicalOrder().enumerated() {
             if let existingTransaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", transaction.reversedHashHex).first {
                 relay(transaction: existingTransaction, withOrder: index, inBlock: block)
+                updated.append(transaction)
                 continue
             }
 
@@ -54,6 +61,7 @@ extension TransactionProcessor: ITransactionProcessor {
             if transaction.isMine {
                 relay(transaction: transaction, withOrder: index, inBlock: block)
                 realm.add(transaction)
+                inserted.append(transaction)
 
                 if !skipCheckBloomFilter {
                     needToUpdateBloomFilter = needToUpdateBloomFilter || self.addressManager.gapShifts() || self.hasUnspentOutputs(transaction: transaction)
@@ -61,12 +69,25 @@ extension TransactionProcessor: ITransactionProcessor {
             }
         }
 
+        if !updated.isEmpty || !inserted.isEmpty {
+            listener?.onUpdate(updated: updated, inserted: inserted)
+        }
+
         if needToUpdateBloomFilter {
             throw BloomFilterManager.BloomFilterExpired()
         }
     }
 
-    func process(transaction: Transaction, realm: Realm) {
+    func processOutgoing(transaction: Transaction, realm: Realm) throws {
+        try realm.write {
+            realm.add(transaction)
+            process(transaction: transaction, realm: realm)
+
+            listener?.onUpdate(updated: [], inserted: [transaction])
+        }
+    }
+
+    private func process(transaction: Transaction, realm: Realm) {
         outputExtractor.extract(transaction: transaction)
         linker.handle(transaction: transaction, realm: realm)
 

@@ -65,8 +65,12 @@ class Manager {
 
 extension Manager: BitcoinKitDelegate {
 
-    public func transactionsUpdated(bitcoinKit: BitcoinKit, inserted: [TransactionInfo], updated: [TransactionInfo], deleted: [Int]) {
+    public func transactionsUpdated(bitcoinKit: BitcoinKit, inserted: [TransactionInfo], updated: [TransactionInfo]) {
         transactionsSubject.onNext(())
+    }
+
+    public func transactionsDeleted(hashes: [String]) {
+        // transactionsSubject.onNext(())
     }
 
     public func balanceUpdated(bitcoinKit: BitcoinKit, balance: Int) {

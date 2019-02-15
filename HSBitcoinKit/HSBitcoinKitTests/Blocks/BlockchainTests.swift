@@ -8,6 +8,7 @@ class BlockchainTest: XCTestCase {
 
     private var mockNetwork: MockINetwork!
     private var mockFactory: MockIFactory!
+    private var mockBlockchainDataListener: MockIBlockchainDataListener!
 
     private var realm: Realm!
     private var blockchain: Blockchain!
@@ -22,17 +23,25 @@ class BlockchainTest: XCTestCase {
 
         mockNetwork = MockINetwork()
         mockFactory = MockIFactory()
+        mockBlockchainDataListener = MockIBlockchainDataListener()
 
         stub(mockNetwork) { mock in
             when(mock.validate(block: any(), previousBlock: any())).thenDoNothing()
         }
 
-        blockchain = Blockchain(network: mockNetwork, factory: mockFactory)
+        stub(mockBlockchainDataListener) { mock in
+            when(mock.onUpdate(updated: any(), inserted: any())).thenDoNothing()
+            when(mock.onDelete(transactionHashes: any())).thenDoNothing()
+            when(mock.onInsert(block: any())).thenDoNothing()
+        }
+
+        blockchain = Blockchain(network: mockNetwork, factory: mockFactory, listener: mockBlockchainDataListener)
     }
 
     override func tearDown() {
         mockNetwork = nil
         mockFactory = nil
+        mockBlockchainDataListener = nil
 
         realm = nil
         blockchain = nil
@@ -49,6 +58,8 @@ class BlockchainTest: XCTestCase {
         }
 
         let connectedBlock = try! blockchain.connect(merkleBlock: merkleBlock, realm: realm)
+
+        verifyNoMoreInteractions(mockBlockchainDataListener)
 
         XCTAssertEqual(connectedBlock, block)
         XCTAssertEqual(realm.objects(Block.self).count, 1)
@@ -75,6 +86,8 @@ class BlockchainTest: XCTestCase {
         }
 
         verify(mockFactory).block(withHeader: equal(to: merkleBlock.header), previousBlock: equal(to: block))
+        verify(mockBlockchainDataListener).onInsert(block: equal(to: newBlock))
+
         XCTAssertEqual(connectedBlock!.headerHash, newBlock.headerHash)
         XCTAssertEqual(connectedBlock!.previousBlock, block)
         XCTAssertEqual(connectedBlock.stale, true)
@@ -94,6 +107,7 @@ class BlockchainTest: XCTestCase {
         } catch {
             XCTFail("Unexpected exception thrown")
         }
+        verifyNoMoreInteractions(mockBlockchainDataListener)
 
         XCTAssertEqual(realm.objects(Block.self).count, 0)
     }
@@ -124,6 +138,8 @@ class BlockchainTest: XCTestCase {
         } catch {
             XCTFail("Unexpected exception thrown")
         }
+
+        verifyNoMoreInteractions(mockBlockchainDataListener)
     }
 
     func testForceAdd() {
@@ -139,6 +155,7 @@ class BlockchainTest: XCTestCase {
         }
 
         verify(mockNetwork, never()).validate(block: any(), previousBlock: any())
+        verify(mockBlockchainDataListener).onInsert(block: equal(to: newBlock))
 
         let realmBlocks = realm.objects(Block.self)
         XCTAssertEqual(realmBlocks.count, 1)
@@ -222,10 +239,13 @@ class BlockchainTest: XCTestCase {
 
         prefillBlocks(blocksInChain: [Int: String](), newBlocks: newBlocks)
 
+        let hashes = Array(realm.objects(Block.self)).compactMap { $0.reversedHeaderHashHex }
+
         try! realm.write {
             blockchain.deleteBlocks(blocks: realm.objects(Block.self), realm: realm)
         }
 
+        verify(mockBlockchainDataListener).onDelete(transactionHashes: equal(to: hashes))
         assertBlocksNotPresent(blocks: newBlocks, realm: realm)
     }
 
