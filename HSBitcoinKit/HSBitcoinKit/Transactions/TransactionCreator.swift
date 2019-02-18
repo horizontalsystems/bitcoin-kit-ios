@@ -30,11 +30,7 @@ extension TransactionCreator: ITransactionCreator {
             throw CreationError.transactionAlreadyExists
         }
 
-        try realm.write {
-            realm.add(transaction)
-            transactionProcessor.process(transaction: transaction, realm: realm)
-        }
-
+        try transactionProcessor.processOutgoing(transaction: transaction, realm: realm)
         try peerGroup.sendPendingTransactions()
     }
 

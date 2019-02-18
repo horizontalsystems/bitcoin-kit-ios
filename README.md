@@ -192,9 +192,14 @@ class Manager {
 
 extension Manager: BitcoinKitDelegate {
 
-    public func transactionsUpdated(bitcoinKit: BitcoinKit, inserted: [TransactionInfo], updated: [TransactionInfo], deleted: [Int]) {
+    public func transactionsUpdated(bitcoinKit: BitcoinKit, inserted: [TransactionInfo], updated: [TransactionInfo]) {
 		// do something with transactions
     }
+
+public func transactionsDeleted(hashes: [String]) {
+    // do something with transactions
+    }
+
 
     public func balanceUpdated(bitcoinKit: BitcoinKit, balance: Int) {
 		// do something with balance
@@ -214,6 +219,11 @@ extension Manager: BitcoinKitDelegate {
     }
 
 }
+```
+Listener events are run in a dedicated background thread. It can be switched to main thread by setting the  ```delegateQueue``` property to ```DispatchQueue.main```
+
+```swift
+bitcoinKit.delegateQueue = DispatchQueue.main
 ```
 
 ## Prerequisites

@@ -3,10 +3,12 @@ import RealmSwift
 class Blockchain {
     private let network: INetwork
     private let factory: IFactory
+    weak var listener: IBlockchainDataListener?
 
-    init(network: INetwork, factory: IFactory) {
+    init(network: INetwork, factory: IFactory, listener: IBlockchainDataListener? = nil) {
         self.network = network
         self.factory = factory
+        self.listener = listener
     }
 
 }
@@ -28,12 +30,16 @@ extension Blockchain: IBlockchain {
         block.stale = true
         realm.add(block)
 
+        listener?.onInsert(block: block)
+
         return block
     }
 
     func forceAdd(merkleBlock: MerkleBlock, height: Int, realm: Realm) -> Block {
         let block = factory.block(withHeader: merkleBlock.header, height: height)
         realm.add(block)
+
+        listener?.onInsert(block: block)
 
         return block
     }
@@ -65,15 +71,20 @@ extension Blockchain: IBlockchain {
     }
 
     func deleteBlocks(blocks: Results<Block>, realm: Realm) {
+        var hashes = [String]()
         for block in blocks {
             for transaction in block.transactions {
                 realm.delete(transaction.outputs)
                 realm.delete(transaction.inputs)
             }
+            hashes.append(contentsOf: block.transactions.map { $0.reversedHashHex })
+
             realm.delete(block.transactions)
         }
 
         realm.delete(blocks)
+
+        listener?.onDelete(transactionHashes: hashes)
     }
 
 }

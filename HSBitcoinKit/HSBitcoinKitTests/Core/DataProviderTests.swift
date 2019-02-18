@@ -46,7 +46,7 @@ class DataProviderTests: XCTestCase {
         }
 
         stub(mockDataProviderDelegate) { mock in
-            when(mock.transactionsUpdated(inserted: any(), updated: any(), deleted: any())).thenDoNothing()
+            when(mock.transactionsUpdated(inserted: any(), updated: any())).thenDoNothing()
             when(mock.balanceUpdated(balance: any())).thenDoNothing()
             when(mock.lastBlockInfoUpdated(lastBlockInfo: any())).thenDoNothing()
         }
@@ -212,18 +212,15 @@ class DataProviderTests: XCTestCase {
         XCTAssertEqual(results[3].transactionHash, transactions[1].reversedHashHex)
     }
 
-    func testBlockAdded() {
+    func testOnInsertBlock() {
         let block = TestData.firstBlock
         let blockInfo = BlockInfo(
                 headerHash: block.reversedHeaderHashHex,
                 height: block.height,
                 timestamp: block.header?.timestamp
         )
+        dataProvider.onInsert(block: block)
 
-        try! realm.write {
-            realm.add(block)
-        }
-        waitForMainQueue()
         waitForMainQueue()
 
         verify(mockDataProviderDelegate).lastBlockInfoUpdated(lastBlockInfo: equal(to: blockInfo))
@@ -240,6 +237,8 @@ class DataProviderTests: XCTestCase {
         try! realm.write {
             realm.add(TestData.firstBlock)
         }
+        dataProvider.onInsert(block: TestData.firstBlock)
+
         waitForMainQueue()
         waitForMainQueue()
 
@@ -250,7 +249,7 @@ class DataProviderTests: XCTestCase {
     func testTransactionsExist() {
         let transaction = TestData.p2pkTransaction
         transaction.isMine = true
-        let transactionInfo = TransactionInfo(transactionHash: transaction.reversedHashHex, from: [TransactionAddressInfo](), to: [TransactionAddressInfo](), amount: 0, blockHeight: nil, timestamp: nil)
+        let transactionInfo = TransactionInfo(transactionHash: transaction.reversedHashHex, from: [TransactionAddressInfo](), to: [TransactionAddressInfo](), amount: 0, blockHeight: nil, timestamp: 0)
 
         stub(mockUnspentOutputProvider) { mock in
             when(mock.balance.get).thenReturn(3)
@@ -259,11 +258,12 @@ class DataProviderTests: XCTestCase {
         try! realm.write {
             realm.add(transaction)
         }
+        dataProvider.onUpdate(updated: [], inserted: [transaction])
 
         waitForMainQueue()
         waitForMainQueue()
 
-        verify(mockDataProviderDelegate).transactionsUpdated(inserted: equal(to: [transactionInfo]), updated: equal(to: [TransactionInfo]()), deleted: equal(to: []))
+        verify(mockDataProviderDelegate).transactionsUpdated(inserted: equal(to: [transactionInfo]), updated: equal(to: [TransactionInfo]()))
         verify(mockDataProviderDelegate).balanceUpdated(balance: equal(to: 3))
         XCTAssertEqual(dataProvider.balance, 3)
     }

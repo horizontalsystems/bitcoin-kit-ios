@@ -8,6 +8,7 @@ import RxSwift
 public class BitcoinKit {
 
     public weak var delegate: BitcoinKitDelegate?
+    public var delegateQueue = DispatchQueue(label: "bitcoin_delegate_queue")
 
     private var unspentOutputsNotificationToken: NotificationToken?
     private var transactionsNotificationToken: NotificationToken?
@@ -70,7 +71,7 @@ public class BitcoinKit {
     private let blockSyncer: IBlockSyncer
 
     private let kitStateProvider: IKitStateProvider & ISyncStateListener
-    private var dataProvider: IDataProvider
+    private var dataProvider: IDataProvider & IBlockchainDataListener
 
     public init(withWords words: [String], coin: Coin, walletId: String, newWallet: Bool = false, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) {
         let realmFileName = "\(walletId)-\(coin.rawValue).realm"
@@ -167,15 +168,18 @@ public class BitcoinKit {
         transactionSyncer = TransactionSyncer(realmFactory: realmFactory, processor: transactionProcessor, addressManager: addressManager, bloomFilterManager: bloomFilterManager)
         transactionBuilder = TransactionBuilder(unspentOutputSelector: unspentOutputSelector, unspentOutputProvider: unspentOutputProvider, addressManager: addressManager, addressConverter: addressConverter, inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory)
         transactionCreator = TransactionCreator(realmFactory: realmFactory, transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, peerGroup: peerGroup)
-        blockchain = Blockchain(network: network, factory: factory)
 
         dataProvider = DataProvider(realmFactory: realmFactory, addressManager: addressManager, addressConverter: addressConverter, paymentAddressParser: paymentAddressParser, unspentOutputProvider: unspentOutputProvider, feeRateManager: feeRateManager, transactionCreator: transactionCreator, transactionBuilder: transactionBuilder, network: network)
+
+        blockchain = Blockchain(network: network, factory: factory, listener: dataProvider)
         blockSyncer = BlockSyncer(realmFactory: realmFactory, network: network, listener: kitStateProvider, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager, logger: logger)
 
         peerGroup.blockSyncer = blockSyncer
         peerGroup.transactionSyncer = transactionSyncer
 
         kitStateProvider.delegate = self
+        transactionProcessor.listener = dataProvider
+
         dataProvider.delegate = self
     }
 
@@ -242,28 +246,49 @@ extension BitcoinKit {
 
 extension BitcoinKit: IDataProviderDelegate {
 
-    func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo], deleted: [Int]) {
-        delegate?.transactionsUpdated(bitcoinKit: self, inserted: inserted, updated: updated, deleted: deleted)
+    func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo]) {
+        delegateQueue.async { [weak self] in
+            if let kit = self {
+                kit.delegate?.transactionsUpdated(bitcoinKit: kit, inserted: inserted, updated: updated)
+            }
+        }
+    }
+
+    func transactionsDeleted(hashes: [String]) {
+        delegateQueue.async { [weak self] in
+            self?.delegate?.transactionsDeleted(hashes: hashes)
+        }
     }
 
     func balanceUpdated(balance: Int) {
-        delegate?.balanceUpdated(bitcoinKit: self, balance: balance)
+        delegateQueue.async { [weak self] in
+            if let kit = self {
+                kit.delegate?.balanceUpdated(bitcoinKit: kit, balance: balance)
+            }
+        }
     }
 
     func lastBlockInfoUpdated(lastBlockInfo: BlockInfo) {
-        delegate?.lastBlockInfoUpdated(bitcoinKit: self, lastBlockInfo: lastBlockInfo)
+        delegateQueue.async { [weak self] in
+            if let kit = self {
+                kit.delegate?.lastBlockInfoUpdated(bitcoinKit: kit, lastBlockInfo: lastBlockInfo)
+            }
+        }
     }
 
 }
 
 extension BitcoinKit: IKitStateProviderDelegate {
     func handleKitStateUpdate(state: KitState) {
-        delegate?.kitStateUpdated(state: state)
+        delegateQueue.async { [weak self] in
+            self?.delegate?.kitStateUpdated(state: state)
+        }
     }
 }
 
 public protocol BitcoinKitDelegate: class {
-    func transactionsUpdated(bitcoinKit: BitcoinKit, inserted: [TransactionInfo], updated: [TransactionInfo], deleted: [Int])
+    func transactionsUpdated(bitcoinKit: BitcoinKit, inserted: [TransactionInfo], updated: [TransactionInfo])
+    func transactionsDeleted(hashes: [String])
     func balanceUpdated(bitcoinKit: BitcoinKit, balance: Int)
     func lastBlockInfoUpdated(bitcoinKit: BitcoinKit, lastBlockInfo: BlockInfo)
     func kitStateUpdated(state: BitcoinKit.KitState)

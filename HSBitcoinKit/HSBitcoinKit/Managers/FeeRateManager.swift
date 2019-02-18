@@ -17,7 +17,7 @@ class FeeRateManager {
 
         self.timer.delegate = self
 
-        reachabilityManager.subject
+        reachabilityManager.subject.observeOn(ConcurrentDispatchQueueScheduler(qos: .background))
                 .subscribe(onNext: { [weak self] connected in
                     if connected {
                         self?.updateFeeRate()
