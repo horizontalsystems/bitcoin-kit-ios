@@ -12,6 +12,8 @@ class Manager {
 
     var bitcoinKit: BitcoinKit!
 
+    let kitInitializationCompleted = BehaviorSubject<Bool>(value: false)
+
     let balanceSubject = PublishSubject<Int>()
     let lastBlockInfoSubject = PublishSubject<BlockInfo>()
     let progressSubject = PublishSubject<BitcoinKit.KitState>()
@@ -36,12 +38,18 @@ class Manager {
         }
 
         clearWords()
+
+        kitInitializationCompleted.onNext(false)
         bitcoinKit = nil
     }
 
     private func initWalletKit(words: [String]) {
-        bitcoinKit = BitcoinKit(withWords: words, coin: coin, walletId: "SomeId", confirmationsThreshold: 1)
-        bitcoinKit.delegate = self
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.bitcoinKit = BitcoinKit(withWords: words, coin: self.coin, walletId: "SomeId", confirmationsThreshold: 1)
+            self.bitcoinKit.delegate = self
+
+            self.kitInitializationCompleted.onNext(true)
+        }
     }
 
     private var savedWords: [String]? {

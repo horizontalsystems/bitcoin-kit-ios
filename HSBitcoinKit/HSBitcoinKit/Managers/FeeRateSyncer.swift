@@ -24,9 +24,8 @@ extension FeeRateSyncer: IFeeRateSyncer {
         var observable = networkManager.getFeeRate()
 
         if async {
-            observable = observable.subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background)).observeOn(MainScheduler.instance)
+            observable = observable.subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
         }
-
         observable
                 .subscribe(onNext: { [weak self] feeRate in
                     self?.timer.schedule()

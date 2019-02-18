@@ -8,6 +8,7 @@ import RxSwift
 public class BitcoinKit {
 
     public weak var delegate: BitcoinKitDelegate?
+    public var delegateQueue = DispatchQueue(label: "bitcoin_delegate_queue")
 
     private var unspentOutputsNotificationToken: NotificationToken?
     private var transactionsNotificationToken: NotificationToken?
@@ -246,26 +247,42 @@ extension BitcoinKit {
 extension BitcoinKit: IDataProviderDelegate {
 
     func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo]) {
-        delegate?.transactionsUpdated(bitcoinKit: self, inserted: inserted, updated: updated)
+        delegateQueue.async { [weak self] in
+            if let kit = self {
+                kit.delegate?.transactionsUpdated(bitcoinKit: kit, inserted: inserted, updated: updated)
+            }
+        }
     }
 
     func transactionsDeleted(hashes: [String]) {
-        delegate?.transactionsDeleted(hashes: hashes)
+        delegateQueue.async { [weak self] in
+            self?.delegate?.transactionsDeleted(hashes: hashes)
+        }
     }
 
     func balanceUpdated(balance: Int) {
-        delegate?.balanceUpdated(bitcoinKit: self, balance: balance)
+        delegateQueue.async { [weak self] in
+            if let kit = self {
+                kit.delegate?.balanceUpdated(bitcoinKit: kit, balance: balance)
+            }
+        }
     }
 
     func lastBlockInfoUpdated(lastBlockInfo: BlockInfo) {
-        delegate?.lastBlockInfoUpdated(bitcoinKit: self, lastBlockInfo: lastBlockInfo)
+        delegateQueue.async { [weak self] in
+            if let kit = self {
+                kit.delegate?.lastBlockInfoUpdated(bitcoinKit: kit, lastBlockInfo: lastBlockInfo)
+            }
+        }
     }
 
 }
 
 extension BitcoinKit: IKitStateProviderDelegate {
     func handleKitStateUpdate(state: KitState) {
-        delegate?.kitStateUpdated(state: state)
+        delegateQueue.async { [weak self] in
+            self?.delegate?.kitStateUpdated(state: state)
+        }
     }
 }
 

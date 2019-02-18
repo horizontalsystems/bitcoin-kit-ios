@@ -38,10 +38,10 @@ class DataProvider {
         self.balance = unspentOutputProvider.balance
         self.lastBlockInfo = realmFactory.realm.objects(Block.self).sorted(byKeyPath: "height").last.map { blockInfo(fromBlock: $0) }
 
-        balanceUpdateSubject.debounce(debounceTime, scheduler: MainScheduler.instance).subscribeAsync(disposeBag: disposeBag, onNext: {
+        balanceUpdateSubject.debounce(debounceTime, scheduler: ConcurrentDispatchQueueScheduler(qos: .background)).subscribe(onNext: {
             self.balance = unspentOutputProvider.balance
             self.delegate?.balanceUpdated(balance: self.balance)
-        })
+        }).disposed(by: disposeBag)
     }
 
     private func transactionInfo(fromTransaction transaction: Transaction) -> TransactionInfo {

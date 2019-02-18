@@ -25,7 +25,16 @@ class BalanceController: UIViewController {
 
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(logout))
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Start", style: .plain, target: self, action: #selector(start))
+        navigationItem.rightBarButtonItem?.isEnabled = false
 
+        Manager.shared.kitInitializationCompleted.subscribe(onNext: { [weak self] status in
+            if status {
+                self?.initializeBitcoinKit()
+            }
+        }).disposed(by: disposeBag)
+    }
+
+    func initializeBitcoinKit() {
         let bitcoinKit = Manager.shared.bitcoinKit!
 
         update(balance: bitcoinKit.balance)
@@ -45,6 +54,8 @@ class BalanceController: UIViewController {
         Manager.shared.lastBlockInfoSubject.observeOn(MainScheduler.instance).subscribe(onNext: { [weak self] info in
             self?.update(lastBlockInfo: info)
         }).disposed(by: disposeBag)
+
+        navigationItem.rightBarButtonItem?.isEnabled = true
     }
 
     @objc func logout() {
@@ -58,10 +69,12 @@ class BalanceController: UIViewController {
     }
 
     @objc func start() {
-        do {
-            try Manager.shared.bitcoinKit.start()
-        } catch {
-            print("Start Error: \(error)")
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                try Manager.shared.bitcoinKit.start()
+            } catch {
+                print("Start Error: \(error)")
+            }
         }
     }
 
