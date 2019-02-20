@@ -18,8 +18,16 @@ struct InventoryMessage: IMessage {
         count = byteStream.read(VarInt.self)
 
         var inventoryItems = [InventoryItem]()
+        var seen = Set<String>()
+
         for _ in 0..<Int(count.underlyingValue) {
-            inventoryItems.append(InventoryItem(byteStream: byteStream))
+            let item = InventoryItem(byteStream: byteStream)
+
+            guard !seen.contains(item.hash.reversedHex) else {
+                continue
+            }
+            seen.insert(item.hash.reversedHex)
+            inventoryItems.append(item)
         }
 
         self.inventoryItems = inventoryItems

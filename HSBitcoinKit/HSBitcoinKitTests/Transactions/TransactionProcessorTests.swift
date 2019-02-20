@@ -109,6 +109,9 @@ class TransactionProcessorTests: XCTestCase {
 
     func testProcessTransactions_TransactionExists() {
         let transaction = TestData.p2pkhTransaction
+        let incomingTransaction = TestData.p2pkhTransaction
+        incomingTransaction.status = .new
+
         transaction.status = .new
 
         try! realm.write {
@@ -116,7 +119,7 @@ class TransactionProcessorTests: XCTestCase {
         }
 
         try! realm.write {
-            try! transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
+            try! transactionProcessor.process(transactions: [incomingTransaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
         }
 
         verify(mockOutputExtractor, never()).extract(transaction: equal(to: transaction))

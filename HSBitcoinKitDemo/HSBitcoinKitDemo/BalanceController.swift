@@ -29,7 +29,9 @@ class BalanceController: UIViewController {
 
         Manager.shared.kitInitializationCompleted.subscribe(onNext: { [weak self] status in
             if status {
-                self?.initializeBitcoinKit()
+                DispatchQueue.main.async {
+                    self?.initializeBitcoinKit()
+                }
             }
         }).disposed(by: disposeBag)
     }

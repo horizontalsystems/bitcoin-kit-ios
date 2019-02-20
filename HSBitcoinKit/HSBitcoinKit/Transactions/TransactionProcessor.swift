@@ -52,7 +52,7 @@ extension TransactionProcessor: ITransactionProcessor {
         for (index, transaction) in transactions.inTopologicalOrder().enumerated() {
             if let existingTransaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", transaction.reversedHashHex).first {
                 relay(transaction: existingTransaction, withOrder: index, inBlock: block)
-                updated.append(transaction)
+                updated.append(existingTransaction)
                 continue
             }
 
