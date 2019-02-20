@@ -18,12 +18,13 @@ struct InventoryMessage: IMessage {
         count = byteStream.read(VarInt.self)
 
         var inventoryItems = [InventoryItem]()
-        var seen: [String: Bool] = [:]
+        var seen = Set<String>()
 
         for _ in 0..<Int(count.underlyingValue) {
             let item = InventoryItem(byteStream: byteStream)
 
-            if seen.updateValue(true, forKey: item.hash.reversedHex) == nil {
+            if !seen.contains(item.hash.reversedHex) {
+                seen.update(with: item.hash.reversedHex)
                 inventoryItems.append(item)
             }
         }
