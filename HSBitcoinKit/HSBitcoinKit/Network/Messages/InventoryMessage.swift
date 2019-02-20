@@ -23,10 +23,11 @@ struct InventoryMessage: IMessage {
         for _ in 0..<Int(count.underlyingValue) {
             let item = InventoryItem(byteStream: byteStream)
 
-            if !seen.contains(item.hash.reversedHex) {
-                seen.update(with: item.hash.reversedHex)
-                inventoryItems.append(item)
+            guard !seen.contains(item.hash.reversedHex) else {
+                continue
             }
+            seen.insert(item.hash.reversedHex)
+            inventoryItems.append(item)
         }
 
         self.inventoryItems = inventoryItems
