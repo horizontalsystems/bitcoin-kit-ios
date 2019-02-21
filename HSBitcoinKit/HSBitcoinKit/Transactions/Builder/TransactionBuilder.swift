@@ -30,7 +30,7 @@ class TransactionBuilder {
             throw BuildError.noPreviousTransaction
         }
 
-        let input = factory.transactionInput(withPreviousOutputTxReversedHex: previousTransaction.reversedHashHex, previousOutputIndex: output.index, script: Data(), sequence: 0)
+        let input = factory.transactionInput(withPreviousOutputTxReversedHex: previousTransaction.reversedHashHex, previousOutputIndex: output.index, script: Data(), sequence: 0xFFFFFFFF)
         input.previousOutput = output
         transaction.inputs.append(input)
     }
