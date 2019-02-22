@@ -353,6 +353,7 @@ protocol IBlockSyncer: class {
 }
 
 protocol IKitStateProvider: class {
+    var syncState: BitcoinKit.KitState { get }
     var delegate: IKitStateProviderDelegate? { get set }
 }
 

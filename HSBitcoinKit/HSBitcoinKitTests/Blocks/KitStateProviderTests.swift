@@ -26,6 +26,24 @@ class KitStateProviderTest: XCTestCase  {
         syncer = nil
     }
 
+    func testStartState() {
+        XCTAssertEqual(syncer.syncState, .notSynced)
+    }
+
+    func testSetState() {
+        syncer.syncStarted()
+
+        XCTAssertEqual(syncer.syncState, BitcoinKit.KitState.syncing(progress: 0))
+    }
+
+
+    func testIgnoreSameStateChange() {
+        syncer.syncStarted()
+        syncer.syncStarted()
+
+        verify(mockDelegate, times(1)).handleKitStateUpdate(state: equal(to: BitcoinKit.KitState.syncing(progress: 0)))
+    }
+
     func testSyncStarted() {
         syncer.syncStarted()
 
@@ -33,6 +51,7 @@ class KitStateProviderTest: XCTestCase  {
     }
 
     func testSyncStopped() {
+        syncer.syncStarted()
         syncer.syncStopped()
 
         verify(mockDelegate).handleKitStateUpdate(state: equal(to: BitcoinKit.KitState.notSynced))
@@ -83,7 +102,7 @@ class KitStateProviderTest: XCTestCase  {
         syncer.currentBestBlockHeightUpdated(height: 102, maxBlockHeight: 200)
         syncer.currentBestBlockHeightUpdated(height: 101, maxBlockHeight: 200)
 
-        verify(mockDelegate, times(2)).handleKitStateUpdate(state: equal(to: BitcoinKit.KitState.syncing(progress: 0.02)))
+        verify(mockDelegate).handleKitStateUpdate(state: equal(to: BitcoinKit.KitState.syncing(progress: 0.02)))
         verify(mockDelegate, never()).handleKitStateUpdate(state: equal(to: BitcoinKit.KitState.syncing(progress: 0.01)))
     }
 

@@ -214,6 +214,10 @@ extension BitcoinKit {
         return dataProvider.balance
     }
 
+    public var syncState: BitcoinKit.KitState {
+        return kitStateProvider.syncState
+    }
+
     public func transactions(fromHash: String? = nil, limit: Int? = nil) -> Single<[TransactionInfo]> {
         return dataProvider.transactions(fromHash: fromHash, limit: limit)
     }
@@ -320,6 +324,21 @@ extension BitcoinKit {
         case synced
         case syncing(progress: Double)
         case notSynced
+    }
+
+}
+
+extension BitcoinKit.KitState {
+
+    public static func == (lhs: BitcoinKit.KitState, rhs: BitcoinKit.KitState) -> Bool {
+        switch (lhs, rhs) {
+        case (.synced, .synced), (.notSynced, .notSynced):
+            return true
+        case (.syncing(progress: let leftProgress), .syncing(progress: let rightProgress)):
+            return leftProgress == rightProgress
+        default:
+            return false
+        }
     }
 
 }
