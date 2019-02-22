@@ -7,20 +7,28 @@ class KitStateProvider: IKitStateProvider {
     private var initialBestBlockHeight: Int32 = 0
     private var currentBestBlockHeight: Int32 = 0
 
+    private(set) var syncState: BitcoinKit.KitState = .notSynced {
+        didSet {
+            if !(oldValue == syncState) {
+                delegate?.handleKitStateUpdate(state: syncState)
+            }
+        }
+    }
+
 }
 
 extension KitStateProvider: ISyncStateListener {
 
     func syncStarted() {
-        delegate?.handleKitStateUpdate(state: BitcoinKit.KitState.syncing(progress: 0))
+        syncState = .syncing(progress: 0)
     }
 
     func syncStopped() {
-        delegate?.handleKitStateUpdate(state: BitcoinKit.KitState.notSynced)
+        syncState = .notSynced
     }
 
     func syncFinished() {
-        delegate?.handleKitStateUpdate(state: BitcoinKit.KitState.synced)
+        syncState = .synced
     }
 
     func initialBestBlockHeightUpdated(height: Int32) {
@@ -44,9 +52,9 @@ extension KitStateProvider: ISyncStateListener {
         }
 
         if progress >= 1 {
-            delegate?.handleKitStateUpdate(state: BitcoinKit.KitState.synced)
+            syncState = .synced
         } else {
-            delegate?.handleKitStateUpdate(state: BitcoinKit.KitState.syncing(progress: progress))
+            syncState = .syncing(progress: progress)
         }
     }
 
