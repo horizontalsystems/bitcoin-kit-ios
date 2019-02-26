@@ -30,7 +30,9 @@ public class BitcoinKit {
     private let reachabilityManager: ReachabilityManager
     private let peerHostManager: IPeerHostManager
     private let stateManager: IStateManager
-    private let initialSyncApi: IInitialSyncApi
+
+    private let blockDiscovery: IBlockDiscovery
+
     private let ipfsApi: IFeeRateApi
     private let addressManager: IAddressManager
     private let bloomFilterManager: IBloomFilterManager
@@ -125,7 +127,13 @@ public class BitcoinKit {
         }
 
 //        initialSyncApi = BtcComApi(network: network, logger: logger)
-        initialSyncApi = InitialSyncApi(network: network, logger: logger)
+        let bcoinApiManager = BCoinApiManager(network: network, logger: logger)
+
+        let blockHashFetcherHelper = BlockHashFetcherHelper()
+        let blockHashFetcher = BlockHashFetcher(addressSelector: addressSelector, apiManager: bcoinApiManager, helper: blockHashFetcherHelper)
+
+        blockDiscovery = BlockDiscoveryBatch(network: network, wallet: hdWallet, blockHashFetcher: blockHashFetcher, logger: logger)
+
         feeRateApiProvider = FeeRateApiProvider()
         ipfsApi = IpfsApi(network: network, apiProvider: feeRateApiProvider, logger: logger)
 
@@ -140,7 +148,7 @@ public class BitcoinKit {
         peerGroup = PeerGroup(factory: factory, network: network, listener: kitStateProvider, reachabilityManager: reachabilityManager, peerHostManager: peerHostManager, bloomFilterManager: bloomFilterManager, logger: logger)
 
         addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, addressConverter: addressConverter)
-        initialSyncer = InitialSyncer(realmFactory: realmFactory, listener: kitStateProvider, hdWallet: hdWallet, stateManager: stateManager, api: initialSyncApi, addressManager: addressManager, addressSelector: addressSelector, factory: factory, peerGroup: peerGroup, network: network, logger: logger)
+        initialSyncer = InitialSyncer(realmFactory: realmFactory, listener: kitStateProvider, hdWallet: hdWallet, stateManager: stateManager, blockDiscovery: blockDiscovery, addressManager: addressManager, factory: factory, peerGroup: peerGroup, logger: logger)
 
         realmStorage = RealmStorage(realmFactory: realmFactory)
 
