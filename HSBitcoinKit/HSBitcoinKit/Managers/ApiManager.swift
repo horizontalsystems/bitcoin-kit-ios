@@ -40,10 +40,11 @@ class ApiManager {
         self.logger = logger
     }
 
-    func request(withMethod method: HTTPMethod, path: String, parameters: [String: Any]? = nil) -> URLRequestConvertible {
+    func request(withMethod method: HTTPMethod, path: String, parameters: [String: Any]? = nil, httpBody: Data? = nil) -> URLRequestConvertible {
         let baseUrl = URL(string: apiUrl)!
         var request = URLRequest(url: baseUrl.appendingPathComponent(path))
         request.httpMethod = method.rawValue
+        request.httpBody = httpBody
 
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 

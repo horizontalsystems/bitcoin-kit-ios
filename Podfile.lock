@@ -13,6 +13,9 @@ PODS:
   - RealmSwift (3.11.2):
     - Realm (= 3.11.2)
   - RxAtomic (4.4.1)
+  - RxBlocking (4.4.1):
+    - RxAtomic (~> 4.4)
+    - RxSwift (~> 4.0)
   - RxRealm (0.7.6):
     - RealmSwift (~> 3.0)
     - RxSwift (~> 4.0)
@@ -28,6 +31,7 @@ DEPENDENCIES:
   - HSHDWalletKit (~> 1.0.3)
   - ObjectMapper (~> 3.3.0)
   - RealmSwift (~> 3.11.0)
+  - RxBlocking (~> 4.0)
   - RxRealm (~> 0.7.0)
   - RxSwift (~> 4.0)
 
@@ -42,6 +46,7 @@ SPEC REPOS:
     - Realm
     - RealmSwift
     - RxAtomic
+    - RxBlocking
     - RxRealm
     - RxSwift
     - SipHash
@@ -56,10 +61,11 @@ SPEC CHECKSUMS:
   Realm: 864477d028db77f7c5a0cba64a4892ad53db128a
   RealmSwift: 12b8262fc08020b47de4fd88eb3d5c9425b34ec7
   RxAtomic: f8d6adc1ccb87a767811269e4875887bc74dbf19
+  RxBlocking: 5508e90d36ca2304632dc9378ece4e9b5d4bf656
   RxRealm: 5379eddd74f8d617ca7681d1f8d144af25b432b0
   RxSwift: 92fcf68dfef21f3e2ab1965363d9e7b3d787597e
   SipHash: fad90a4683e420c52ef28063063dbbce248ea6d4
 
-PODFILE CHECKSUM: a41413d4ca23e8cea594d2342564cd08f3de19fb
+PODFILE CHECKSUM: d556834ed5de2de4e51de6b200ff38f327ce5bd7
 
 COCOAPODS: 1.5.3
