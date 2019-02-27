@@ -16,6 +16,9 @@ class InitialSyncerTests: XCTestCase {
     private var mockListener: MockISyncStateListener!
     private var syncer: InitialSyncer!
 
+    private var mockReachabilityManager: MockIReachabilityManager!
+    internal var reachabilitySignal: Signal!
+
     private var realm: Realm!
     private var internalKeys: [PublicKey]!
     private var externalKeys: [PublicKey]!
@@ -33,6 +36,9 @@ class InitialSyncerTests: XCTestCase {
         mockFactory = MockIFactory()
         mockPeerGroup = MockIPeerGroup()
         mockListener = MockISyncStateListener()
+
+        reachabilitySignal = Signal()
+        mockReachabilityManager = MockIReachabilityManager()
 
         realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
         try! realm.write { realm.deleteAll() }
@@ -53,10 +59,15 @@ class InitialSyncerTests: XCTestCase {
         }
         stub(mockPeerGroup) { mock in
             when(mock.start()).thenDoNothing()
+            when(mock.stop()).thenDoNothing()
         }
         stub(mockListener) { mock in
             when(mock.syncStarted()).thenDoNothing()
             when(mock.syncStopped()).thenDoNothing()
+        }
+        stub(mockReachabilityManager) { mock in
+            when(mock.reachabilitySignal.get).thenReturn(reachabilitySignal)
+            when(mock.isReachable.get).thenReturn(true)
         }
 
         syncer = InitialSyncer(
@@ -68,6 +79,7 @@ class InitialSyncerTests: XCTestCase {
                 addressManager: mockAddressManager,
                 factory: mockFactory,
                 peerGroup: mockPeerGroup,
+                reachabilityManager: mockReachabilityManager,
                 async: false
         )
     }
@@ -82,6 +94,9 @@ class InitialSyncerTests: XCTestCase {
         mockFactory = nil
         mockPeerGroup = nil
         syncer = nil
+
+        reachabilitySignal = nil
+        mockReachabilityManager = nil
 
         realm = nil
 
@@ -100,9 +115,13 @@ class InitialSyncerTests: XCTestCase {
         stub(mockFactory) { mock in
             when(mock).blockHash(withHeaderHash: any(), height: any()).thenReturn(firstBlockHash)
         }
+        stub(mockStateManager) { mock in
+            when(mock.restored.get).thenReturn(false).thenReturn(true)
+        }
 
         try! syncer.sync()
 
+        verify(mockPeerGroup).stop()
         verify(mockPeerGroup).start()
         verify(mockListener).syncStarted()
         verify(mockAddressManager, times(2)).addKeys(keys: any())
@@ -111,6 +130,9 @@ class InitialSyncerTests: XCTestCase {
     func testStartPeerGroupIfAlreadySynced() {
         stub(mockStateManager) { mock in
             when(mock.restored.get).thenReturn(true)
+        }
+        stub(mockReachabilityManager) { mock in
+            when(mock.isReachable.get).thenReturn(true)
         }
 
         try! syncer.sync()
@@ -136,18 +158,19 @@ class InitialSyncerTests: XCTestCase {
             when(mock.discoverBlockHashes(account: 1, external: false)).thenReturn(Observable.just(([], [])))
         }
 
-        let firstBlock = TestData.firstBlock
-        let firstBlockHash = BlockHash(withHeaderHash: firstBlock.headerHash, height: 10)
         stub(mockFactory) { mock in
             when(mock).blockHash(withHeaderHash: equal(to: Data(hex: "00")!), height: 110).thenReturn(BlockHash(withHeaderHash: Data(hex: "00")!, height: 110))
             when(mock).blockHash(withHeaderHash: equal(to: Data(hex: "01")!), height: 111).thenReturn(BlockHash(withHeaderHash: Data(hex: "01")!, height: 111))
             when(mock).blockHash(withHeaderHash: equal(to: Data(hex: "10")!), height: 112).thenReturn(BlockHash(withHeaderHash: Data(hex: "10")!, height: 112))
             when(mock).blockHash(withHeaderHash: equal(to: Data(hex: "11")!), height: 113).thenReturn(BlockHash(withHeaderHash: Data(hex: "11")!, height: 113))
         }
-
+        stub(mockStateManager) { mock in
+            when(mock.restored.get).thenReturn(false).thenReturn(true)
+        }
         try! syncer.sync()
 
         verify(mockStateManager).restored.set(true)
+        verify(mockPeerGroup).stop()
         verify(mockPeerGroup).start()
 
         verify(mockAddressManager).addKeys(keys: equal(to: [externalPublicKey, internalPublicKey]))

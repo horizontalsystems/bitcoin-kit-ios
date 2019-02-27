@@ -22,7 +22,7 @@ class PeerGroupTests: XCTestCase {
 
     internal var peersCount = 3
     internal var peers: [String: MockIPeer]!
-    internal var subject: PublishSubject<Bool>!
+    internal var subject: PublishSubject<()>!
 
     override func setUp() {
         super.setUp()
@@ -37,7 +37,7 @@ class PeerGroupTests: XCTestCase {
         mockBlockSyncer = MockIBlockSyncer()
         mockTransactionSyncer = MockITransactionSyncer()
         peers = [String: MockIPeer]()
-        subject = PublishSubject<Bool>()
+        subject = PublishSubject<()>()
 
         for host in 0..<4 {
             let hostString = String(host)
@@ -56,8 +56,8 @@ class PeerGroupTests: XCTestCase {
             when(mock.syncFinished()).thenDoNothing()
         }
         stub(mockReachabilityManager) { mock in
-            when(mock.subject.get).thenReturn(subject)
-            when(mock.reachable()).thenReturn(true)
+            when(mock.reachabilitySignal.get).thenReturn(subject)
+            when(mock.isReachable.get).thenReturn(true)
         }
         stub(mockPeerHostManager) { mock in
             when(mock.delegate.set(any())).thenDoNothing()

@@ -224,7 +224,6 @@ class DataProviderTests: XCTestCase {
         waitForMainQueue()
 
         verify(mockDataProviderDelegate).lastBlockInfoUpdated(lastBlockInfo: equal(to: blockInfo))
-        verify(mockDataProviderDelegate).balanceUpdated(balance: equal(to: 0))
         XCTAssertEqual(dataProvider.balance, 0)
         XCTAssertEqual(dataProvider.lastBlockInfo, blockInfo)
     }

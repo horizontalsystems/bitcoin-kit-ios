@@ -14,7 +14,7 @@ class FeeRateManagerTests: XCTestCase {
     private var manager: FeeRateManager!
 
     private let feeRate = FeeRate(dateInterval: 0, date: "", low: 0, medium: 0, high: 0)
-    private let reachabilitySubject = PublishSubject<Bool>()
+    private let reachabilitySubject = PublishSubject<()>()
 
     override func setUp() {
         super.setUp()
@@ -32,7 +32,7 @@ class FeeRateManagerTests: XCTestCase {
             when(mock.sync()).thenDoNothing()
         }
         stub(mockReachabilityManager) { mock in
-            when(mock.subject.get).thenReturn(reachabilitySubject)
+            when(mock.reachabilitySignal.get).thenReturn(reachabilitySubject)
         }
         stub(mockTimer) { mock in
             when(mock.delegate.set(any())).thenDoNothing()
@@ -40,7 +40,7 @@ class FeeRateManagerTests: XCTestCase {
         }
 
 
-        manager = FeeRateManager(storage: mockStorage, syncer: mockSyncer, reachabilityManager: mockReachabilityManager, timer: mockTimer)
+        manager = FeeRateManager(storage: mockStorage, syncer: mockSyncer, reachabilityManager: mockReachabilityManager, timer: mockTimer, async: false)
     }
 
     override func tearDown() {
@@ -67,12 +67,19 @@ class FeeRateManagerTests: XCTestCase {
     }
 
     func testSyncFeeRate_OnReachabilityChanged_Connected() {
-        reachabilitySubject.onNext(true)
+        stub(mockReachabilityManager) { mock in
+            when(mock.isReachable.get).thenReturn(true)
+        }
+        reachabilitySubject.onNext(())
+
         verify(mockSyncer).sync()
     }
 
     func testSyncFeeRate_OnReachabilityChanged_Disconnected() {
-        reachabilitySubject.onNext(false)
+        stub(mockReachabilityManager) { mock in
+            when(mock.isReachable.get).thenReturn(false)
+        }
+        reachabilitySubject.onNext(())
         verify(mockSyncer, never()).sync()
     }
 

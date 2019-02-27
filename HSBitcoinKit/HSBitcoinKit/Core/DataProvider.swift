@@ -20,7 +20,13 @@ class DataProvider {
 
     private let balanceUpdateSubject = PublishSubject<Void>()
 
-    public var balance: Int = 0
+    public var balance: Int = 0 {
+        didSet {
+            if !(oldValue == balance) {
+                delegate?.balanceUpdated(balance: balance)
+            }
+        }
+    }
     public var lastBlockInfo: BlockInfo? = nil
 
     weak var delegate: IDataProviderDelegate?
@@ -40,7 +46,6 @@ class DataProvider {
 
         balanceUpdateSubject.debounce(debounceTime, scheduler: ConcurrentDispatchQueueScheduler(qos: .background)).subscribe(onNext: {
             self.balance = unspentOutputProvider.balance
-            self.delegate?.balanceUpdated(balance: self.balance)
         }).disposed(by: disposeBag)
     }
 

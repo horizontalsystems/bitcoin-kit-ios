@@ -148,7 +148,7 @@ public class BitcoinKit {
         peerGroup = PeerGroup(factory: factory, network: network, listener: kitStateProvider, reachabilityManager: reachabilityManager, peerHostManager: peerHostManager, bloomFilterManager: bloomFilterManager, logger: logger)
 
         addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, addressConverter: addressConverter)
-        initialSyncer = InitialSyncer(realmFactory: realmFactory, listener: kitStateProvider, hdWallet: hdWallet, stateManager: stateManager, blockDiscovery: blockDiscovery, addressManager: addressManager, factory: factory, peerGroup: peerGroup, logger: logger)
+        initialSyncer = InitialSyncer(realmFactory: realmFactory, listener: kitStateProvider, hdWallet: hdWallet, stateManager: stateManager, blockDiscovery: blockDiscovery, addressManager: addressManager, factory: factory, peerGroup: peerGroup, reachabilityManager: reachabilityManager, logger: logger)
 
         realmStorage = RealmStorage(realmFactory: realmFactory)
 
@@ -201,7 +201,7 @@ extension BitcoinKit {
     }
 
     public func clear() throws {
-        peerGroup.stop()
+        initialSyncer.stop()
 
         let realm = realmFactory.realm
 
