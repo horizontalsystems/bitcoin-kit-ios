@@ -44,12 +44,10 @@ class Manager {
     }
 
     private func initWalletKit(words: [String]) {
-        DispatchQueue.global(qos: .userInitiated).async {
-            self.bitcoinKit = BitcoinKit(withWords: words, coin: self.coin, walletId: "SomeId", confirmationsThreshold: 1)
-            self.bitcoinKit.delegate = self
+        bitcoinKit = BitcoinKit(withWords: words, coin: self.coin, walletId: "SomeId", confirmationsThreshold: 1)
+        bitcoinKit.delegate = self
 
-            self.kitInitializationCompleted.onNext(true)
-        }
+        kitInitializationCompleted.onNext(true)
     }
 
     private var savedWords: [String]? {

@@ -351,7 +351,7 @@ class PeerDelegateTests: PeerGroupTests {
         let peer = peers["0"]!
 
         stub(mockReachabilityManager) { mock in
-            when(mock.reachable()).thenReturn(true)
+            when(mock.isReachable.get).thenReturn(true)
         }
         stub(mockPeerManager) { mock in
             when(mock.syncPeer.set(any())).thenDoNothing()
@@ -402,7 +402,7 @@ class PeerDelegateTests: PeerGroupTests {
         let peer = peers["0"]!
 
         stub(mockReachabilityManager) { mock in
-            when(mock.reachable()).thenReturn(true)
+            when(mock.isReachable.get).thenReturn(true)
         }
         stub(mockPeerManager) { mock in
             when(mock.syncPeerIs(peer: any())).thenReturn(false)
@@ -442,7 +442,7 @@ class PeerDelegateTests: PeerGroupTests {
         let peer = peers["0"]!
 
         stub(mockReachabilityManager) { mock in
-            when(mock.reachable()).thenReturn(false)
+            when(mock.isReachable.get).thenReturn(false)
         }
         stub(mockPeerManager) { mock in
             when(mock.syncPeerIs(peer: any())).thenReturn(false)
@@ -466,7 +466,7 @@ class PeerDelegateTests: PeerGroupTests {
         let error = PeerConnection.PeerConnectionError.connectionClosedByPeer
 
         stub(mockReachabilityManager) { mock in
-            when(mock.reachable()).thenReturn(false)
+            when(mock.isReachable.get).thenReturn(false)
         }
         stub(mockPeerManager) { mock in
             when(mock.syncPeerIs(peer: any())).thenReturn(false)

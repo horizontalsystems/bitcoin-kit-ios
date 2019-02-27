@@ -4,6 +4,7 @@ import RealmSwift
 
 class InitialSyncer {
     private let disposeBag = DisposeBag()
+    private var restoreDisposable: Disposable?
 
     private let realmFactory: IRealmFactory
     private let listener: ISyncStateListener
@@ -13,13 +14,15 @@ class InitialSyncer {
     private let addressManager: IAddressManager
     private let factory: IFactory
     private let peerGroup: IPeerGroup
+    private let reachabilityManager: IReachabilityManager
 
     private let logger: Logger?
     private let async: Bool
 
-    private var syncing = false
+    private var started = false
+    private var restoring = false
 
-    init(realmFactory: IRealmFactory, listener: ISyncStateListener, hdWallet: IHDWallet, stateManager: IStateManager, blockDiscovery: IBlockDiscovery, addressManager: IAddressManager, factory: IFactory, peerGroup: IPeerGroup, async: Bool = true, logger: Logger? = nil) {
+    init(realmFactory: IRealmFactory, listener: ISyncStateListener, hdWallet: IHDWallet, stateManager: IStateManager, blockDiscovery: IBlockDiscovery, addressManager: IAddressManager, factory: IFactory, peerGroup: IPeerGroup, reachabilityManager: IReachabilityManager, async: Bool = true, logger: Logger? = nil) {
         self.realmFactory = realmFactory
         self.listener = listener
         self.hdWallet = hdWallet
@@ -28,10 +31,17 @@ class InitialSyncer {
         self.addressManager = addressManager
         self.factory = factory
         self.peerGroup = peerGroup
+        self.reachabilityManager = reachabilityManager
 
         self.logger = logger
 
         self.async = async
+    }
+
+    private func onChangeConnection() {
+        if reachabilityManager.isReachable {
+            try? sync()
+        }
     }
 
     private func sync(forAccount account: Int) {
@@ -74,9 +84,11 @@ class InitialSyncer {
 
             // If gap shift is found
             if blocks.isEmpty {
-                syncing = false
                 stateManager.restored = true
-                peerGroup.start()
+
+                stop()
+                try sync()
+
                 return
             }
 
@@ -92,7 +104,7 @@ class InitialSyncer {
     }
 
     private func handle(error: Error) {
-        syncing = false
+        restoring = false
         logger?.error(error)
         listener.syncStopped()
     }
@@ -102,20 +114,32 @@ class InitialSyncer {
 extension InitialSyncer: IInitialSyncer {
 
     func sync() throws {
-        try addressManager.fillGap()
-
         if !stateManager.restored {
-            guard !syncing else {
+            if restoreDisposable == nil {
+                restoreDisposable = reachabilityManager.reachabilitySignal.subscribe(onNext: { [weak self] in
+                    self?.onChangeConnection()
+                })
+            }
+            guard !restoring else {
                 return
             }
 
-            syncing = true
+            restoring = true
             listener.syncStarted()
 
             sync(forAccount: 0)
         } else {
             peerGroup.start()
         }
+    }
+
+    func stop() {
+        restoring = false
+        // Unsubscribe to ReachabilityManager
+        restoreDisposable?.dispose()
+        restoreDisposable = nil
+
+        peerGroup.stop()
     }
 
 }

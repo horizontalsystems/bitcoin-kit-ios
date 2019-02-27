@@ -10,16 +10,21 @@ class FeeRateManager {
     private let syncer: IFeeRateSyncer
     private var timer: IPeriodicTimer
 
-    init(storage: IFeeRateStorage, syncer: IFeeRateSyncer, reachabilityManager: IReachabilityManager, timer: IPeriodicTimer) {
+    init(storage: IFeeRateStorage, syncer: IFeeRateSyncer, reachabilityManager: IReachabilityManager, timer: IPeriodicTimer, async: Bool = true) {
         self.storage = storage
         self.syncer = syncer
         self.timer = timer
 
         self.timer.delegate = self
 
-        reachabilityManager.subject.observeOn(ConcurrentDispatchQueueScheduler(qos: .background))
-                .subscribe(onNext: { [weak self] connected in
-                    if connected {
+        var observable = reachabilityManager.reachabilitySignal.asObservable()
+
+        if async {
+            observable = observable.observeOn(ConcurrentDispatchQueueScheduler(qos: .background))
+        }
+        observable
+                .subscribe(onNext: { [weak self] in
+                    if reachabilityManager.isReachable {
                         self?.updateFeeRate()
                     }
                 })
