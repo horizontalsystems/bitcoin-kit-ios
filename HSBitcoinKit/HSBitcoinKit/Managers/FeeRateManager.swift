@@ -7,15 +7,19 @@ class FeeRateManager {
     let subject = PublishSubject<Void>()
 
     private let storage: IFeeRateStorage
-    private let syncer: IFeeRateSyncer
-    private var timer: IPeriodicTimer
+    private var syncer: IFeeRateSyncer
+    private let reachabilityManager: IReachabilityManager
 
-    init(storage: IFeeRateStorage, syncer: IFeeRateSyncer, reachabilityManager: IReachabilityManager, timer: IPeriodicTimer, async: Bool = true) {
+    init(storage: IFeeRateStorage, syncer: IFeeRateSyncer, reachabilityManager: IReachabilityManager, async: Bool = true) {
         self.storage = storage
         self.syncer = syncer
-        self.timer = timer
+        self.reachabilityManager = reachabilityManager
 
-        self.timer.delegate = self
+        self.syncer.delegate = self
+
+        Observable<Int>.timer(0, period: 3 * 60, scheduler: ConcurrentDispatchQueueScheduler(qos: .background)).observeOn(ConcurrentDispatchQueueScheduler(qos: .background)).subscribe(onNext: { [weak self] _ in
+            self?.updateFeeRate()
+        }).disposed(by: disposeBag)
 
         var observable = reachabilityManager.reachabilitySignal.asObservable()
 
@@ -24,15 +28,15 @@ class FeeRateManager {
         }
         observable
                 .subscribe(onNext: { [weak self] in
-                    if reachabilityManager.isReachable {
-                        self?.updateFeeRate()
-                    }
+                    self?.updateFeeRate()
                 })
                 .disposed(by: disposeBag)
     }
 
     private func updateFeeRate() {
-        syncer.sync()
+        if reachabilityManager.isReachable {
+            syncer.sync()
+        }
     }
 
 }
@@ -54,14 +58,6 @@ extension FeeRateManager: IFeeRateManager {
 
     private func valueInSatoshi(value: Double) -> Int {
         return max(Int(round(value * 100_000_000 / 1000)), 1)
-    }
-
-}
-
-extension FeeRateManager: IPeriodicTimerDelegate {
-
-    func onFire() {
-        updateFeeRate()
     }
 
 }

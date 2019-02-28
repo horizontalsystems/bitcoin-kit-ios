@@ -239,7 +239,6 @@ class DataProviderTests: XCTestCase {
         dataProvider.onInsert(block: TestData.firstBlock)
 
         waitForMainQueue()
-        waitForMainQueue()
 
         verify(mockDataProviderDelegate).balanceUpdated(balance: equal(to: 3))
         XCTAssertEqual(dataProvider.balance, 3)
