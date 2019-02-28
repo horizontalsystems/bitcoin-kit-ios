@@ -11,6 +11,7 @@ class TransactionCreatorTests: XCTestCase {
     private var mockPeerGroup: MockIPeerGroup!
 
     private var transactionCreator: TransactionCreator!
+    private let transaction = TestData.p2pkhTransaction
 
     override func setUp() {
         super.setUp()
@@ -28,10 +29,10 @@ class TransactionCreatorTests: XCTestCase {
         mockPeerGroup = MockIPeerGroup()
 
         stub(mockTransactionBuilder) { mock in
-            when(mock.buildTransaction(value: any(), feeRate: any(), senderPay: any(), toAddress: any())).thenReturn(TestData.p2pkhTransaction)
+            when(mock.buildTransaction(value: any(), feeRate: any(), senderPay: any(), toAddress: any())).thenReturn(transaction)
         }
         stub(mockTransactionProcessor) { mock in
-            when(mock.process(transaction: any(), realm: any())).thenDoNothing()
+            when(mock.processOutgoing(transaction: any(), realm: any())).thenDoNothing()
         }
         stub(mockPeerGroup) { mock in
             when(mock.sendPendingTransactions()).thenDoNothing()
@@ -54,13 +55,10 @@ class TransactionCreatorTests: XCTestCase {
     func testCreateTransaction() {
         try! transactionCreator.create(to: "Address", value: 1, feeRate: 1, senderPay: true)
 
-        guard let transaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", TestData.p2pkhTransaction.reversedHashHex).first else {
-            XCTFail("No transaction record!")
-            return
-        }
+        verify(mockPeerGroup).checkPeersSynced()
 
+        verify(mockTransactionProcessor).processOutgoing(transaction: equal(to: transaction), realm: any())
         verify(mockPeerGroup).sendPendingTransactions()
-        verify(mockTransactionProcessor).process(transaction: equal(to: transaction), realm: any())
     }
 
     func testCreateTransaction_transactionAlreadyExists() {
@@ -78,7 +76,7 @@ class TransactionCreatorTests: XCTestCase {
         }
 
         verify(mockPeerGroup, never()).sendPendingTransactions()
-        verify(mockTransactionProcessor, never()).process(transaction: any(), realm: any())
+        verify(mockTransactionProcessor, never()).processOutgoing(transaction: equal(to: transaction), realm: any())
     }
 
     func testCreateTransaction_peersNotSynced() {
@@ -97,7 +95,7 @@ class TransactionCreatorTests: XCTestCase {
 
         verify(mockTransactionBuilder, never()).buildTransaction(value: any(), feeRate: any(), senderPay: any(), toAddress: any())
         verify(mockPeerGroup, never()).sendPendingTransactions()
-        verify(mockTransactionProcessor, never()).process(transaction: any(), realm: any())
+        verify(mockTransactionProcessor, never()).processOutgoing(transaction: any(), realm: any())
     }
 
 }

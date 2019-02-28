@@ -40,8 +40,8 @@ protocol IApiConfigProvider {
 }
 
 protocol IReachabilityManager {
-    var subject: PublishSubject<Bool> { get set }
-    func reachable() -> Bool
+    var isReachable: Bool { get }
+    var reachabilitySignal: Signal { get }
 }
 
 protocol IPeriodicTimer {
@@ -64,8 +64,8 @@ protocol IStateManager {
     var restored: Bool { get set }
 }
 
-protocol IInitialSyncApi {
-    func getBlockHashes(address: String) -> Observable<Set<BlockResponse>>
+protocol IBlockDiscovery {
+    func discoverBlockHashes(account: Int, external: Bool) -> Observable<([PublicKey], [BlockResponse])>
 }
 
 protocol IFeeRateApi {
@@ -225,8 +225,21 @@ protocol IFactory {
     func bloomFilter(withElements: [Data]) -> BloomFilter
 }
 
+protocol IBCoinApiManager {
+    func getTransactions(addresses: [String]) -> Observable<[BCoinTransactionResponse]>
+}
+
 protocol IInitialSyncer {
     func sync() throws
+    func stop()
+}
+
+protocol IBlockHashFetcher {
+    func getBlockHashes(publicKeys: [PublicKey]) -> Observable<(responses: [BlockResponse], lastUsedIndex: Int)>
+}
+
+protocol IBlockHashFetcherHelper {
+    func lastUsedIndex(addresses: [[String]], outputs: [BCoinTransactionOutput]) -> Int
 }
 
 protocol IInitialSyncerDelegate: class {
@@ -257,9 +270,11 @@ protocol IScriptExtractor: class {
     func extract(from data: Data, converter: IScriptConverter) throws -> Data?
 }
 
-protocol ITransactionProcessor {
+protocol ITransactionProcessor: class {
+    var listener: IBlockchainDataListener? { get set }
+
     func process(transactions: [Transaction], inBlock block: Block?, skipCheckBloomFilter: Bool, realm: Realm) throws
-    func process(transaction: Transaction, realm: Realm)
+    func processOutgoing(transaction: Transaction, realm: Realm) throws
 }
 
 protocol ITransactionExtractor {
@@ -295,11 +310,20 @@ protocol ITransactionBuilder {
 }
 
 protocol IBlockchain {
+    var listener: IBlockchainDataListener? { get set }
+
     func connect(merkleBlock: MerkleBlock, realm: Realm) throws -> Block
     func forceAdd(merkleBlock: MerkleBlock, height: Int, realm: Realm) -> Block
     func handleFork(realm: Realm)
     func deleteBlocks(blocks: Results<Block>, realm: Realm)
 }
+
+protocol IBlockchainDataListener: class {
+    func onUpdate(updated: [Transaction], inserted: [Transaction])
+    func onDelete(transactionHashes: [String])
+    func onInsert(block: Block)
+}
+
 
 protocol IInputSigner {
     func sigScriptData(transaction: Transaction, index: Int) throws -> [Data]
@@ -342,6 +366,7 @@ protocol IBlockSyncer: class {
 }
 
 protocol IKitStateProvider: class {
+    var syncState: BitcoinKit.KitState { get }
     var delegate: IKitStateProviderDelegate? { get set }
 }
 
@@ -365,7 +390,8 @@ protocol IDataProvider {
 }
 
 protocol IDataProviderDelegate: class {
-    func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo], deleted: [Int])
+    func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo])
+    func transactionsDeleted(hashes: [String])
     func balanceUpdated(balance: Int)
     func lastBlockInfoUpdated(lastBlockInfo: BlockInfo)
 }

@@ -51,7 +51,7 @@ class BlockSyncerTests: XCTestCase {
         }
 
         stub(mockTransactionProcessor) { mock in
-            when(mock.process(transaction: any(), realm: any())).thenDoNothing()
+            when(mock.processOutgoing(transaction: any(), realm: any())).thenDoNothing()
         }
         stub(mockBlockchain) { mock in
             when(mock.deleteBlocks(blocks: any(), realm: any())).thenDoNothing()

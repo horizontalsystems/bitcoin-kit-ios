@@ -42,4 +42,5 @@ target :HSBitcoinKitTests do
 
   internal_pods
   pod 'Cuckoo'
+  pod 'RxBlocking', '~> 4.0'
 end

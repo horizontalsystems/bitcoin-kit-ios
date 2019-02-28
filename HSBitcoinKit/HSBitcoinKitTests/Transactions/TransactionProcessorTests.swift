@@ -9,6 +9,7 @@ class TransactionProcessorTests: XCTestCase {
     private var mockInputExtractor: MockITransactionExtractor!
     private var mockLinker: MockITransactionLinker!
     private var mockAddressManager: MockIAddressManager!
+    private var mockBlockchainDataListener: MockIBlockchainDataListener!
 
     private var generatedDate: Date!
     private var dateGenerator: (() -> Date)!
@@ -38,6 +39,7 @@ class TransactionProcessorTests: XCTestCase {
         mockInputExtractor = MockITransactionExtractor()
         mockLinker = MockITransactionLinker()
         mockAddressManager = MockIAddressManager()
+        mockBlockchainDataListener = MockIBlockchainDataListener()
 
         stub(mockLinker) { mock in
             when(mock.handle(transaction: any(), realm: any())).thenDoNothing()
@@ -54,8 +56,13 @@ class TransactionProcessorTests: XCTestCase {
         stub(mockAddressManager) { mock in
             when(mock.gapShifts()).thenReturn(false)
         }
+        stub(mockBlockchainDataListener) { mock in
+            when(mock.onUpdate(updated: any(), inserted: any())).thenDoNothing()
+            when(mock.onDelete(transactionHashes: any())).thenDoNothing()
+            when(mock.onInsert(block: any())).thenDoNothing()
+        }
 
-        transactionProcessor = TransactionProcessor(outputExtractor: mockOutputExtractor, inputExtractor: mockInputExtractor, linker: mockLinker, outputAddressExtractor: mockOutputAddressExtractor, addressManager: mockAddressManager, dateGenerator: dateGenerator)
+        transactionProcessor = TransactionProcessor(outputExtractor: mockOutputExtractor, inputExtractor: mockInputExtractor, linker: mockLinker, outputAddressExtractor: mockOutputAddressExtractor, addressManager: mockAddressManager, listener: mockBlockchainDataListener, dateGenerator: dateGenerator)
     }
 
     override func tearDown() {
@@ -63,6 +70,7 @@ class TransactionProcessorTests: XCTestCase {
         mockInputExtractor = nil
         mockLinker = nil
         transactionProcessor = nil
+        mockBlockchainDataListener = nil
 
         generatedDate = nil
         dateGenerator = nil
@@ -75,14 +83,11 @@ class TransactionProcessorTests: XCTestCase {
     func testProcessSingleTransaction() {
         let transaction = TestData.p2pkhTransaction
 
-        try! realm.write {
-            realm.add(transaction)
-        }
-
-        transactionProcessor.process(transaction: transaction, realm: realm)
+        try! transactionProcessor.processOutgoing(transaction: transaction, realm: realm)
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
         verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
+        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: []), inserted: equal(to: [transaction]))
 
         verifyNoMoreInteractions(mockOutputAddressExtractor)
         verifyNoMoreInteractions(mockInputExtractor)
@@ -92,21 +97,21 @@ class TransactionProcessorTests: XCTestCase {
         let transaction = TestData.p2pkhTransaction
         transaction.isMine = true
 
-        try! realm.write {
-            realm.add(transaction)
-        }
-
-        transactionProcessor.process(transaction: transaction, realm: realm)
+        try! transactionProcessor.processOutgoing(transaction: transaction, realm: realm)
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
         verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
 
+        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: []), inserted: equal(to: [transaction]))
         verify(mockOutputAddressExtractor).extractOutputAddresses(transaction: equal(to: transaction))
         verify(mockInputExtractor).extract(transaction: equal(to: transaction))
     }
 
     func testProcessTransactions_TransactionExists() {
         let transaction = TestData.p2pkhTransaction
+        let incomingTransaction = TestData.p2pkhTransaction
+        incomingTransaction.status = .new
+
         transaction.status = .new
 
         try! realm.write {
@@ -114,11 +119,13 @@ class TransactionProcessorTests: XCTestCase {
         }
 
         try! realm.write {
-            try! transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
+            try! transactionProcessor.process(transactions: [incomingTransaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
         }
 
         verify(mockOutputExtractor, never()).extract(transaction: equal(to: transaction))
         verify(mockLinker, never()).handle(transaction: equal(to: transaction), realm: equal(to: realm))
+
+        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: [transaction]), inserted: equal(to: []))
 
         let realmTransactions = realm.objects(Transaction.self)
         XCTAssertEqual(realmTransactions.count, 1)
@@ -145,6 +152,8 @@ class TransactionProcessorTests: XCTestCase {
         }
 
         let realmTransactions = realm.objects(Transaction.self).sorted(byKeyPath: "order")
+
+        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: [transactions[1], transactions[3]]), inserted: equal(to: [transactions[0], transactions[2]]))
 
         XCTAssertEqual(realmTransactions.count, 4)
         for (i, transaction) in transactions.enumerated() {
@@ -177,6 +186,8 @@ class TransactionProcessorTests: XCTestCase {
 
         let realmTransactions = realm.objects(Transaction.self).sorted(byKeyPath: "order")
 
+        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: [transactions[1], transactions[3]]), inserted: equal(to: [transactions[0], transactions[2]]))
+
         XCTAssertEqual(realmTransactions.count, 4)
         for (i, transaction) in transactions.enumerated() {
             XCTAssertEqual(realmTransactions[i].block?.reversedHeaderHashHex, block.reversedHeaderHashHex)
@@ -199,6 +210,9 @@ class TransactionProcessorTests: XCTestCase {
         verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
 
         let realmTransactions = realm.objects(Transaction.self)
+
+        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: []), inserted: equal(to: [transaction]))
+
         XCTAssertEqual(realmTransactions.count, 1)
         XCTAssertEqual(realmTransactions.first!.dataHash, transaction.dataHash)
         XCTAssertEqual(realmTransactions.first!.status, TransactionStatus.relayed)
@@ -215,6 +229,8 @@ class TransactionProcessorTests: XCTestCase {
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
         verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
+
+        verifyNoMoreInteractions(mockBlockchainDataListener)
 
         let realmTransactions = realm.objects(Transaction.self)
         XCTAssertEqual(realmTransactions.count, 0)
@@ -240,6 +256,8 @@ class TransactionProcessorTests: XCTestCase {
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
         verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
+
+        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: []), inserted: equal(to: [transaction]))
 
         let realmTransactions = realm.objects(Transaction.self)
         XCTAssertEqual(realmTransactions.count, 1)
@@ -271,6 +289,8 @@ class TransactionProcessorTests: XCTestCase {
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
         verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
 
+        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: []), inserted: equal(to: [transaction]))
+
         let realmTransactions = realm.objects(Transaction.self)
         XCTAssertEqual(realmTransactions.count, 1)
         XCTAssertEqual(realmTransactions.first!.dataHash, transaction.dataHash)
@@ -297,6 +317,8 @@ class TransactionProcessorTests: XCTestCase {
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
         verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
 
+        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: []), inserted: equal(to: [transaction]))
+
         let realmTransactions = realm.objects(Transaction.self)
         XCTAssertEqual(realmTransactions.count, 1)
         XCTAssertEqual(realmTransactions.first!.dataHash, transaction.dataHash)
@@ -319,6 +341,8 @@ class TransactionProcessorTests: XCTestCase {
                 XCTFail("Shouldn't throw exception")
             }
         }
+
+        verifyNoMoreInteractions(mockBlockchainDataListener)
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
         verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
@@ -348,6 +372,8 @@ class TransactionProcessorTests: XCTestCase {
                         calledTransactions = []
 
                         try! transactionProcessor.process(transactions: [transactions[i], transactions[j], transactions[k], transactions[l]], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
+
+                        verifyNoMoreInteractions(mockBlockchainDataListener)
 
                         for (m, transaction) in calledTransactions.enumerated() {
                             XCTAssertEqual(transaction.reversedHashHex, transactions[m].reversedHashHex)

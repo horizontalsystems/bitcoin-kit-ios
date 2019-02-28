@@ -84,7 +84,10 @@ class IPeerGroupTests: PeerGroupTests {
         peerGroup.start()
         waitForMainQueue()
 
-        subject.onNext(true)
+        subject.onNext(())
+        stub(mockReachabilityManager) { mock in
+            when(mock.isReachable.get).thenReturn(true)
+        }
         verify(mockBlockSyncer).prepareForDownload()
         verify(mockListener).syncStarted()
     }
@@ -93,7 +96,11 @@ class IPeerGroupTests: PeerGroupTests {
         peerGroup.start()
         waitForMainQueue()
 
-        subject.onNext(false)
+        stub(mockReachabilityManager) { mock in
+            when(mock.isReachable.get).thenReturn(false)
+        }
+        subject.onNext(())
+
         verify(mockPeerManager).disconnectAll()
         verify(mockListener).syncStopped()
     }
@@ -101,7 +108,7 @@ class IPeerGroupTests: PeerGroupTests {
 
     func testStart_NetworkIsNotReachable() {
         stub(mockReachabilityManager) { mock in
-            when(mock.reachable()).thenReturn(false)
+            when(mock.isReachable.get).thenReturn(false)
         }
 
         peerGroup.start()

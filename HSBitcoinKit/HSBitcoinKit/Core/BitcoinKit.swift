@@ -8,6 +8,7 @@ import RxSwift
 public class BitcoinKit {
 
     public weak var delegate: BitcoinKitDelegate?
+    public var delegateQueue = DispatchQueue(label: "bitcoin_delegate_queue")
 
     private var unspentOutputsNotificationToken: NotificationToken?
     private var transactionsNotificationToken: NotificationToken?
@@ -29,7 +30,9 @@ public class BitcoinKit {
     private let reachabilityManager: ReachabilityManager
     private let peerHostManager: IPeerHostManager
     private let stateManager: IStateManager
-    private let initialSyncApi: IInitialSyncApi
+
+    private let blockDiscovery: IBlockDiscovery
+
     private let ipfsApi: IFeeRateApi
     private let addressManager: IAddressManager
     private let bloomFilterManager: IBloomFilterManager
@@ -70,7 +73,7 @@ public class BitcoinKit {
     private let blockSyncer: IBlockSyncer
 
     private let kitStateProvider: IKitStateProvider & ISyncStateListener
-    private var dataProvider: IDataProvider
+    private var dataProvider: IDataProvider & IBlockchainDataListener
 
     public init(withWords words: [String], coin: Coin, walletId: String, newWallet: Bool = false, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) {
         let realmFileName = "\(walletId)-\(coin.rawValue).realm"
@@ -124,7 +127,13 @@ public class BitcoinKit {
         }
 
 //        initialSyncApi = BtcComApi(network: network, logger: logger)
-        initialSyncApi = InitialSyncApi(network: network, logger: logger)
+        let bcoinApiManager = BCoinApiManager(network: network, logger: logger)
+
+        let blockHashFetcherHelper = BlockHashFetcherHelper()
+        let blockHashFetcher = BlockHashFetcher(addressSelector: addressSelector, apiManager: bcoinApiManager, helper: blockHashFetcherHelper)
+
+        blockDiscovery = BlockDiscoveryBatch(network: network, wallet: hdWallet, blockHashFetcher: blockHashFetcher, logger: logger)
+
         feeRateApiProvider = FeeRateApiProvider()
         ipfsApi = IpfsApi(network: network, apiProvider: feeRateApiProvider, logger: logger)
 
@@ -139,7 +148,7 @@ public class BitcoinKit {
         peerGroup = PeerGroup(factory: factory, network: network, listener: kitStateProvider, reachabilityManager: reachabilityManager, peerHostManager: peerHostManager, bloomFilterManager: bloomFilterManager, logger: logger)
 
         addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, addressConverter: addressConverter)
-        initialSyncer = InitialSyncer(realmFactory: realmFactory, listener: kitStateProvider, hdWallet: hdWallet, stateManager: stateManager, api: initialSyncApi, addressManager: addressManager, addressSelector: addressSelector, factory: factory, peerGroup: peerGroup, network: network, logger: logger)
+        initialSyncer = InitialSyncer(realmFactory: realmFactory, listener: kitStateProvider, hdWallet: hdWallet, stateManager: stateManager, blockDiscovery: blockDiscovery, addressManager: addressManager, factory: factory, peerGroup: peerGroup, reachabilityManager: reachabilityManager, logger: logger)
 
         realmStorage = RealmStorage(realmFactory: realmFactory)
 
@@ -167,15 +176,18 @@ public class BitcoinKit {
         transactionSyncer = TransactionSyncer(realmFactory: realmFactory, processor: transactionProcessor, addressManager: addressManager, bloomFilterManager: bloomFilterManager)
         transactionBuilder = TransactionBuilder(unspentOutputSelector: unspentOutputSelector, unspentOutputProvider: unspentOutputProvider, addressManager: addressManager, addressConverter: addressConverter, inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory)
         transactionCreator = TransactionCreator(realmFactory: realmFactory, transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, peerGroup: peerGroup)
-        blockchain = Blockchain(network: network, factory: factory)
 
         dataProvider = DataProvider(realmFactory: realmFactory, addressManager: addressManager, addressConverter: addressConverter, paymentAddressParser: paymentAddressParser, unspentOutputProvider: unspentOutputProvider, feeRateManager: feeRateManager, transactionCreator: transactionCreator, transactionBuilder: transactionBuilder, network: network)
+
+        blockchain = Blockchain(network: network, factory: factory, listener: dataProvider)
         blockSyncer = BlockSyncer(realmFactory: realmFactory, network: network, listener: kitStateProvider, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager, logger: logger)
 
         peerGroup.blockSyncer = blockSyncer
         peerGroup.transactionSyncer = transactionSyncer
 
         kitStateProvider.delegate = self
+        transactionProcessor.listener = dataProvider
+
         dataProvider.delegate = self
     }
 
@@ -189,7 +201,7 @@ extension BitcoinKit {
     }
 
     public func clear() throws {
-        peerGroup.stop()
+        initialSyncer.stop()
 
         let realm = realmFactory.realm
 
@@ -208,6 +220,10 @@ extension BitcoinKit {
 
     public var balance: Int {
         return dataProvider.balance
+    }
+
+    public var syncState: BitcoinKit.KitState {
+        return kitStateProvider.syncState
     }
 
     public func transactions(fromHash: String? = nil, limit: Int? = nil) -> Single<[TransactionInfo]> {
@@ -242,28 +258,49 @@ extension BitcoinKit {
 
 extension BitcoinKit: IDataProviderDelegate {
 
-    func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo], deleted: [Int]) {
-        delegate?.transactionsUpdated(bitcoinKit: self, inserted: inserted, updated: updated, deleted: deleted)
+    func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo]) {
+        delegateQueue.async { [weak self] in
+            if let kit = self {
+                kit.delegate?.transactionsUpdated(bitcoinKit: kit, inserted: inserted, updated: updated)
+            }
+        }
+    }
+
+    func transactionsDeleted(hashes: [String]) {
+        delegateQueue.async { [weak self] in
+            self?.delegate?.transactionsDeleted(hashes: hashes)
+        }
     }
 
     func balanceUpdated(balance: Int) {
-        delegate?.balanceUpdated(bitcoinKit: self, balance: balance)
+        delegateQueue.async { [weak self] in
+            if let kit = self {
+                kit.delegate?.balanceUpdated(bitcoinKit: kit, balance: balance)
+            }
+        }
     }
 
     func lastBlockInfoUpdated(lastBlockInfo: BlockInfo) {
-        delegate?.lastBlockInfoUpdated(bitcoinKit: self, lastBlockInfo: lastBlockInfo)
+        delegateQueue.async { [weak self] in
+            if let kit = self {
+                kit.delegate?.lastBlockInfoUpdated(bitcoinKit: kit, lastBlockInfo: lastBlockInfo)
+            }
+        }
     }
 
 }
 
 extension BitcoinKit: IKitStateProviderDelegate {
     func handleKitStateUpdate(state: KitState) {
-        delegate?.kitStateUpdated(state: state)
+        delegateQueue.async { [weak self] in
+            self?.delegate?.kitStateUpdated(state: state)
+        }
     }
 }
 
 public protocol BitcoinKitDelegate: class {
-    func transactionsUpdated(bitcoinKit: BitcoinKit, inserted: [TransactionInfo], updated: [TransactionInfo], deleted: [Int])
+    func transactionsUpdated(bitcoinKit: BitcoinKit, inserted: [TransactionInfo], updated: [TransactionInfo])
+    func transactionsDeleted(hashes: [String])
     func balanceUpdated(bitcoinKit: BitcoinKit, balance: Int)
     func lastBlockInfoUpdated(bitcoinKit: BitcoinKit, lastBlockInfo: BlockInfo)
     func kitStateUpdated(state: BitcoinKit.KitState)
@@ -295,6 +332,21 @@ extension BitcoinKit {
         case synced
         case syncing(progress: Double)
         case notSynced
+    }
+
+}
+
+extension BitcoinKit.KitState {
+
+    public static func == (lhs: BitcoinKit.KitState, rhs: BitcoinKit.KitState) -> Bool {
+        switch (lhs, rhs) {
+        case (.synced, .synced), (.notSynced, .notSynced):
+            return true
+        case (.syncing(progress: let leftProgress), .syncing(progress: let rightProgress)):
+            return leftProgress == rightProgress
+        default:
+            return false
+        }
     }
 
 }

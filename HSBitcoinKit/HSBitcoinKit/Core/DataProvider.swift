@@ -20,10 +20,13 @@ class DataProvider {
 
     private let balanceUpdateSubject = PublishSubject<Void>()
 
-    private var transactionsNotificationToken: NotificationToken?
-    private var blocksNotificationToken: NotificationToken?
-
-    public var balance: Int = 0
+    public var balance: Int = 0 {
+        didSet {
+            if !(oldValue == balance) {
+                delegate?.balanceUpdated(balance: balance)
+            }
+        }
+    }
     public var lastBlockInfo: BlockInfo? = nil
 
     weak var delegate: IDataProviderDelegate?
@@ -39,54 +42,11 @@ class DataProvider {
         self.transactionBuilder = transactionBuilder
         self.network = network
         self.balance = unspentOutputProvider.balance
-        self.lastBlockInfo = blockRealmResults.last.map { blockInfo(fromBlock: $0) }
+        self.lastBlockInfo = realmFactory.realm.objects(Block.self).sorted(byKeyPath: "height").last.map { blockInfo(fromBlock: $0) }
 
-        balanceUpdateSubject.debounce(debounceTime, scheduler: MainScheduler.instance).subscribeAsync(disposeBag: disposeBag, onNext: {
+        balanceUpdateSubject.debounce(debounceTime, scheduler: ConcurrentDispatchQueueScheduler(qos: .background)).subscribe(onNext: {
             self.balance = unspentOutputProvider.balance
-            self.delegate?.balanceUpdated(balance: self.balance)
-        })
-
-        transactionsNotificationToken = transactionRealmResults.observe { [weak self] changeset in
-            self?.handleTransactions(changeset: changeset)
-        }
-
-        blocksNotificationToken = blockRealmResults.observe { [weak self] changeset in
-            self?.handleBlocks(changeset: changeset)
-        }
-    }
-
-    deinit {
-        transactionsNotificationToken?.invalidate()
-        blocksNotificationToken?.invalidate()
-    }
-
-    private func handleTransactions(changeset: RealmCollectionChange<Results<Transaction>>) {
-        if case let .update(collection, deletions, insertions, modifications) = changeset {
-            delegate?.transactionsUpdated(
-                    inserted: insertions.map { collection[$0] }.map { transactionInfo(fromTransaction: $0) },
-                    updated: modifications.map { collection[$0] }.map { transactionInfo(fromTransaction: $0) },
-                    deleted: deletions
-            )
-            balanceUpdateSubject.onNext(())
-        }
-    }
-
-    private func handleBlocks(changeset: RealmCollectionChange<Results<Block>>) {
-        if case let .update(collection, deletions, insertions, _) = changeset, let block = collection.last, (!deletions.isEmpty || !insertions.isEmpty) {
-            let blockInfo = self.blockInfo(fromBlock: block)
-            lastBlockInfo = blockInfo
-
-            delegate?.lastBlockInfoUpdated(lastBlockInfo: blockInfo)
-            balanceUpdateSubject.onNext(())
-        }
-    }
-
-    private var transactionRealmResults: Results<Transaction> {
-        return realmFactory.realm.objects(Transaction.self).filter("isMine = %@", true).sorted(byKeyPath: "block.height", ascending: false)
-    }
-
-    private var blockRealmResults: Results<Block> {
-        return realmFactory.realm.objects(Block.self).sorted(byKeyPath: "height")
+        }).disposed(by: disposeBag)
     }
 
     private func transactionInfo(fromTransaction transaction: Transaction) -> TransactionInfo {
@@ -140,6 +100,33 @@ class DataProvider {
                 height: block.height,
                 timestamp: block.header?.timestamp
         )
+    }
+
+}
+
+extension DataProvider: IBlockchainDataListener {
+
+    func onUpdate(updated: [Transaction], inserted: [Transaction]) {
+        delegate?.transactionsUpdated(inserted: inserted.map { transactionInfo(fromTransaction: $0) },
+                                      updated: updated.map { transactionInfo(fromTransaction: $0) })
+
+        balanceUpdateSubject.onNext(())
+    }
+
+    func onDelete(transactionHashes: [String]) {
+        delegate?.transactionsDeleted(hashes: transactionHashes)
+
+        balanceUpdateSubject.onNext(())
+    }
+
+    func onInsert(block: Block) {
+        if block.height > (lastBlockInfo?.height ?? 0) {
+            let lastBlockInfo = blockInfo(fromBlock: block)
+            self.lastBlockInfo = lastBlockInfo
+            delegate?.lastBlockInfoUpdated(lastBlockInfo: lastBlockInfo)
+
+            balanceUpdateSubject.onNext(())
+        }
     }
 
 }

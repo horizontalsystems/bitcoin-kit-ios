@@ -62,7 +62,7 @@ class PeerGroup {
 
     private func connectPeersIfRequired() {
         peersQueue.async {
-            guard self.started, self.reachabilityManager.reachable() else {
+            guard self.started, self.reachabilityManager.isReachable else {
                 return
             }
 
@@ -207,16 +207,20 @@ extension PeerGroup: IPeerGroup {
         started = true
 
         // Subscribe to ReachabilityManager
-        disposable = reachabilityManager.subject.subscribe(onNext: { [weak self] status in
-            if status {
-                self?._start()
-            } else {
-                self?._stop()
-            }
+        disposable = reachabilityManager.reachabilitySignal.subscribe(onNext: { [weak self] in
+            self?.onChangeConnection()
         })
 
-        if reachabilityManager.reachable() {
+        if reachabilityManager.isReachable {
             _start()
+        }
+    }
+
+    private func onChangeConnection() {
+        if reachabilityManager.isReachable {
+            _start()
+        } else {
+            _stop()
         }
     }
 
@@ -261,10 +265,10 @@ extension PeerGroup: PeerDelegate {
 
     func peerDidDisconnect(_ peer: IPeer, withError error: Error?) {
         if let error = error {
-            logger?.warning("Peer \(peer.logName)(\(peer.host)) disconnected. Network reachable: \(reachabilityManager.reachable()). Error: \(error)")
+            logger?.warning("Peer \(peer.logName)(\(peer.host)) disconnected. Network reachable: \(reachabilityManager.isReachable). Error: \(error)")
         }
 
-        peerHostManager.hostDisconnected(host: peer.host, withError: error, networkReachable: reachabilityManager.reachable())
+        peerHostManager.hostDisconnected(host: peer.host, withError: error, networkReachable: reachabilityManager.isReachable)
 
         peersQueue.async {
             self.peerManager.peerDisconnected(peer: peer)
