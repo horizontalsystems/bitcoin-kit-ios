@@ -86,7 +86,10 @@ class InitialSyncer {
             if blocks.isEmpty {
                 stateManager.restored = true
 
-                stop()
+                restoring = false
+                // Unsubscribe to ReachabilityManager
+                restoreDisposable?.dispose()
+                restoreDisposable = nil
                 try sync()
 
                 return
@@ -114,6 +117,8 @@ class InitialSyncer {
 extension InitialSyncer: IInitialSyncer {
 
     func sync() throws {
+        try addressManager.fillGap()
+
         if !stateManager.restored {
             if restoreDisposable == nil {
                 restoreDisposable = reachabilityManager.reachabilitySignal.subscribe(onNext: { [weak self] in
