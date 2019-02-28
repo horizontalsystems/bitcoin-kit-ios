@@ -44,7 +44,6 @@ public class BitcoinKit {
 
     private let realmStorage: RealmStorage
 
-    private let feeRateTimer: IPeriodicTimer
     private let feeRateApiProvider: IApiConfigProvider
     private let feeRateSyncer: FeeRateSyncer
     private let feeRateManager: FeeRateManager
@@ -154,10 +153,8 @@ public class BitcoinKit {
 
         bcoinReachabilityManager = ReachabilityManager(configProvider: feeRateApiProvider)
 
-        feeRateTimer = PeriodicTimer(interval: 3 * 60)
-        feeRateSyncer = FeeRateSyncer(networkManager: ipfsApi, timer: feeRateTimer)
-        feeRateManager = FeeRateManager(storage: realmStorage, syncer: feeRateSyncer, reachabilityManager: bcoinReachabilityManager, timer: feeRateTimer)
-        feeRateSyncer.delegate = feeRateManager
+        feeRateSyncer = FeeRateSyncer(networkManager: ipfsApi)
+        feeRateManager = FeeRateManager(storage: realmStorage, syncer: feeRateSyncer, reachabilityManager: bcoinReachabilityManager)
 
         inputSigner = InputSigner(hdWallet: hdWallet, network: network)
         scriptBuilder = ScriptBuilder()

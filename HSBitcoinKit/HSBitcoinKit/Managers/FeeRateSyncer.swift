@@ -7,12 +7,10 @@ class FeeRateSyncer {
     weak var delegate: IFeeRateSyncerDelegate?
 
     private let networkManager: IFeeRateApi
-    private let timer: IPeriodicTimer
     private let async: Bool
 
-    init(networkManager: IFeeRateApi, timer: IPeriodicTimer, async: Bool = true) {
+    init(networkManager: IFeeRateApi, async: Bool = true) {
         self.networkManager = networkManager
-        self.timer = timer
         self.async = async
     }
 
@@ -28,7 +26,6 @@ extension FeeRateSyncer: IFeeRateSyncer {
         }
         observable
                 .subscribe(onNext: { [weak self] feeRate in
-                    self?.timer.schedule()
                     self?.delegate?.didSync(feeRate: feeRate)
                 }, onError: { _ in
                     //do nothing

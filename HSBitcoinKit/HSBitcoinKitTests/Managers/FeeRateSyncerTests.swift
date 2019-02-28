@@ -8,8 +8,6 @@ class FeeRateSyncerTests: XCTestCase {
 
     private var mockDelegate: MockIFeeRateSyncerDelegate!
     private var mockNetworkManager: MockIFeeRateApi!
-    private var mockTimer: MockIPeriodicTimer!
-
 
     private var syncer: FeeRateSyncer!
 
@@ -20,7 +18,6 @@ class FeeRateSyncerTests: XCTestCase {
 
         mockDelegate = MockIFeeRateSyncerDelegate()
         mockNetworkManager = MockIFeeRateApi()
-        mockTimer = MockIPeriodicTimer()
 
         stub(mockNetworkManager) { mock in
             when(mock.getFeeRate()).thenReturn(Observable.just(feeRate))
@@ -28,18 +25,14 @@ class FeeRateSyncerTests: XCTestCase {
         stub(mockDelegate) { mock in
             when(mock.didSync(feeRate: any())).thenDoNothing()
         }
-        stub(mockTimer) { mock in
-            when(mock.schedule()).thenDoNothing()
-        }
 
-        syncer = FeeRateSyncer(networkManager: mockNetworkManager, timer: mockTimer, async: false)
+        syncer = FeeRateSyncer(networkManager: mockNetworkManager, async: false)
         syncer.delegate = mockDelegate
     }
 
     override func tearDown() {
         mockDelegate = nil
         mockNetworkManager = nil
-        mockTimer = nil
 
         syncer = nil
 
@@ -52,19 +45,11 @@ class FeeRateSyncerTests: XCTestCase {
         verify(mockDelegate).didSync(feeRate: equal(to: feeRate))
     }
 
-    func testInvalidateTimerOnSync() {
-        syncer.sync()
-
-        verify(mockTimer).schedule()
-    }
-
     func testNonInvalidateTimerOnError() {
         stub(mockNetworkManager) { mock in
             when(mock.getFeeRate()).thenReturn(Observable.error(AnyError.any))
         }
         syncer.sync()
-
-        verifyNoMoreInteractions(mockTimer)
     }
 
 }

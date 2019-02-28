@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name = 'HSBitcoinKit'
-  spec.version = '0.4'
+  spec.version = '0.4.1'
   spec.summary = 'Bitcoin wallet library for Swift'
   spec.description = <<-DESC
                        HSBitcoinKit implements Bitcoin protocol in Swift. It is an implementation of the Bitcoin SPV protocol written (almost) entirely in swift.
