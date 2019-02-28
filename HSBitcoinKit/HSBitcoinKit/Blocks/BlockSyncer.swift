@@ -138,7 +138,7 @@ extension BlockSyncer: IBlockSyncer {
         }
 
         if blockLocatorHashes.isEmpty {
-            realm.objects(Block.self).sorted(byKeyPath: "height", ascending: false).prefix(10).forEach { block in
+            realm.objects(Block.self).filter("height > %@", network.checkpointBlock.height).sorted(byKeyPath: "height", ascending: false).prefix(10).forEach { block in
                 blockLocatorHashes.append(block.headerHash)
             }
         }
