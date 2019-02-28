@@ -44,15 +44,6 @@ protocol IReachabilityManager {
     var reachabilitySignal: Signal { get }
 }
 
-protocol IPeriodicTimer {
-    var delegate: IPeriodicTimerDelegate? { get set }
-    func schedule()
-}
-
-protocol IPeriodicTimerDelegate: class {
-    func onFire()
-}
-
 protocol IPeerHostManager {
     var delegate: PeerHostManagerDelegate? { get set }
     var peerHost: String? { get }
