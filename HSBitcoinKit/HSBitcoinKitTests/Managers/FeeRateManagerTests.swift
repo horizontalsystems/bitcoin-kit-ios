@@ -9,7 +9,6 @@ class FeeRateManagerTests: XCTestCase {
     private var mockStorage: MockIFeeRateStorage!
     private var mockSyncer: MockIFeeRateSyncer!
     private var mockReachabilityManager: MockIReachabilityManager!
-    private var mockTimer: MockIPeriodicTimer!
 
     private var manager: FeeRateManager!
 
@@ -22,32 +21,29 @@ class FeeRateManagerTests: XCTestCase {
         mockStorage = MockIFeeRateStorage()
         mockSyncer = MockIFeeRateSyncer()
         mockReachabilityManager = MockIReachabilityManager()
-        mockTimer = MockIPeriodicTimer()
 
         stub(mockStorage) { mock in
             when(mock.feeRate.get).thenReturn(feeRate)
             when(mock.save(feeRate: any())).thenDoNothing()
         }
         stub(mockSyncer) { mock in
-            when(mock.sync()).thenDoNothing()
+            when(mock.sync()).then {
+                print("sdfsdfdssdf")
+            }
+            when(mock.delegate.set(any())).thenDoNothing()
         }
         stub(mockReachabilityManager) { mock in
             when(mock.reachabilitySignal.get).thenReturn(reachabilitySubject)
-        }
-        stub(mockTimer) { mock in
-            when(mock.delegate.set(any())).thenDoNothing()
-            when(mock.schedule()).thenDoNothing()
+            when(mock.isReachable.get).thenReturn(false)
         }
 
-
-        manager = FeeRateManager(storage: mockStorage, syncer: mockSyncer, reachabilityManager: mockReachabilityManager, timer: mockTimer, async: false)
+        manager = FeeRateManager(storage: mockStorage, syncer: mockSyncer, reachabilityManager: mockReachabilityManager, async: false)
     }
 
     override func tearDown() {
         mockStorage = nil
         mockSyncer = nil
         mockReachabilityManager = nil
-        mockTimer = nil
 
         manager = nil
 
@@ -72,7 +68,9 @@ class FeeRateManagerTests: XCTestCase {
         }
         reachabilitySubject.onNext(())
 
-        verify(mockSyncer).sync()
+        waitForMainQueue()
+
+        verify(mockSyncer, atLeastOnce()).sync()
     }
 
     func testSyncFeeRate_OnReachabilityChanged_Disconnected() {
@@ -81,11 +79,6 @@ class FeeRateManagerTests: XCTestCase {
         }
         reachabilitySubject.onNext(())
         verify(mockSyncer, never()).sync()
-    }
-
-    func testSyncFeeRate_OnTimerTick() {
-        manager.onFire()
-        verify(mockSyncer).sync()
     }
 
     func testDidSyncRate() {
