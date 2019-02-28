@@ -10,15 +10,15 @@ project 'HSBitcoinKit/HSBitcoinKit'
 
 
 def internal_pods
-  pod 'HSCryptoKit', '~> 1.1.0'
-  pod 'HSHDWalletKit', '~> 1.0.3'
+  pod 'HSCryptoKit', '~> 1.3.0'
+  pod 'HSHDWalletKit', '~> 1.0.4'
 end
 
 def kit_pods
   internal_pods
 
   pod 'Alamofire', '~> 4.8.0'
-  pod 'ObjectMapper', '~> 3.3.0'
+  pod 'ObjectMapper', '~> 3.4.0'
 
   pod 'RxSwift', '~> 4.0'
 
