@@ -64,10 +64,11 @@ protocol IFeeRateApi {
 }
 
 protocol IStorage {
-    var feeRate: FeeRate { get }
-    func save(feeRate: FeeRate)
+    var feeRate: FeeRate? { get }
+    func set(feeRate: FeeRate)
 
-    var initialRestored: Bool { get set }
+    var initialRestored: Bool? { get }
+    func set(initialRestored: Bool)
 
     func clear()
 }

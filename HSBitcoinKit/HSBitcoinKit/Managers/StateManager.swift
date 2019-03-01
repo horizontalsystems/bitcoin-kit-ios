@@ -1,6 +1,6 @@
 class StateManager {
-    private var storage: IStorage
-    private var network: INetwork
+    private let storage: IStorage
+    private let network: INetwork
     private let newWallet: Bool
 
     init(storage: IStorage, network: INetwork, newWallet: Bool) {
@@ -23,10 +23,10 @@ extension StateManager: IStateManager {
                 return true
             }
 
-            return storage.initialRestored
+            return storage.initialRestored ?? false
         }
         set {
-            storage.initialRestored = newValue
+            storage.set(initialRestored: newValue)
         }
     }
 

@@ -34,12 +34,12 @@ class FeeRateSyncerTests: XCTestCase {
             when(mock.getFeeRate()).thenReturn(Observable.just(feeRate))
         }
         stub(mockStorage) { mock in
-            when(mock.save(feeRate: any())).thenDoNothing()
+            when(mock.set(feeRate: any())).thenDoNothing()
         }
 
         syncer.sync()
 
-        verify(mockStorage).save(feeRate: equal(to: feeRate))
+        verify(mockStorage).set(feeRate: equal(to: feeRate))
     }
 
 }

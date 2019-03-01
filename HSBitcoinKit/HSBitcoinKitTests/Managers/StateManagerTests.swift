@@ -17,7 +17,7 @@ class StateManagerTests: XCTestCase {
         mockNetwork = MockINetwork()
 
         stub(mockStorage) { mock in
-            when(mock.initialRestored.set(any())).thenDoNothing()
+            when(mock.set(initialRestored: any())).thenDoNothing()
         }
 
         manager = StateManager(storage: mockStorage, network: mockNetwork, newWallet: false)
@@ -72,16 +72,27 @@ class StateManagerTests: XCTestCase {
         XCTAssertFalse(manager.restored)
     }
 
+    func testRestored_get_nilFromStorage() {
+        stub(mockNetwork) { mock in
+            when(mock.syncableFromApi.get).thenReturn(true)
+        }
+        stub(mockStorage) { mock in
+            when(mock.initialRestored.get).thenReturn(nil)
+        }
+
+        XCTAssertFalse(manager.restored)
+    }
+
     func testRestored_set_true() {
         manager.restored = true
 
-        verify(mockStorage).initialRestored.set(true)
+        verify(mockStorage).set(initialRestored: true)
     }
 
     func testRestored_set_false() {
         manager.restored = false
 
-        verify(mockStorage).initialRestored.set(false)
+        verify(mockStorage).set(initialRestored: false)
     }
 
 }

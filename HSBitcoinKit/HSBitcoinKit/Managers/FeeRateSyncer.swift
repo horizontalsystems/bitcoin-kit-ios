@@ -19,7 +19,7 @@ extension FeeRateSyncer: IFeeRateSyncer {
     func sync() {
         api.getFeeRate()
                 .subscribe(onNext: { [weak self] feeRate in
-                    self?.storage.save(feeRate: feeRate)
+                    self?.storage.set(feeRate: feeRate)
                 }, onError: { _ in
                     //do nothing
                 })

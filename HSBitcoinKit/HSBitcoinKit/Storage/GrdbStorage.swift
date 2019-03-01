@@ -45,31 +45,29 @@ class GrdbStorage {
 
 extension GrdbStorage: IStorage {
 
-    var feeRate: FeeRate {
+    var feeRate: FeeRate? {
         return try! dbPool.read { db in
-            try FeeRate.fetchOne(db) ?? FeeRate.defaultFeeRate
+            try FeeRate.fetchOne(db)
         }
     }
 
-    func save(feeRate: FeeRate) {
+    func set(feeRate: FeeRate) {
         _ = try? dbPool.write { db in
             try feeRate.insert(db)
         }
     }
 
-    var initialRestored: Bool {
-        get {
-            return try! dbPool.read { db in
-                let state = try BlockchainState.fetchOne(db) ?? BlockchainState()
-                return state.initialRestored
-            }
+    var initialRestored: Bool? {
+        return try! dbPool.read { db in
+            try BlockchainState.fetchOne(db)?.initialRestored
         }
-        set {
-            _ = try? dbPool.write { db in
-                let state = try BlockchainState.fetchOne(db) ?? BlockchainState()
-                state.initialRestored = newValue
-                try state.insert(db)
-            }
+    }
+
+    func set(initialRestored: Bool) {
+        _ = try? dbPool.write { db in
+            let state = try BlockchainState.fetchOne(db) ?? BlockchainState()
+            state.initialRestored = initialRestored
+            try state.insert(db)
         }
     }
 

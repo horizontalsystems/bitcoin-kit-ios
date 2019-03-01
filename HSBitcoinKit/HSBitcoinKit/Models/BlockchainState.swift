@@ -5,7 +5,7 @@ class BlockchainState: Record {
 
     private let primaryKey: String = BlockchainState.primaryKey
 
-    var initialRestored: Bool = false
+    var initialRestored: Bool?
 
     override class var databaseTableName: String {
         return "blockchainStates"

@@ -102,6 +102,10 @@ class DataProvider {
         )
     }
 
+    private var feeRate: FeeRate {
+        return storage.feeRate ?? FeeRate.defaultFeeRate
+    }
+
 }
 
 extension DataProvider: IBlockchainDataListener {
@@ -161,7 +165,7 @@ extension DataProvider: IDataProvider {
     }
 
     func send(to address: String, value: Int) throws {
-        try transactionCreator.create(to: address, value: value, feeRate: storage.feeRate.medium, senderPay: true)
+        try transactionCreator.create(to: address, value: value, feeRate: feeRate.medium, senderPay: true)
     }
 
     func parse(paymentAddress: String) -> BitcoinPaymentData {
@@ -173,7 +177,7 @@ extension DataProvider: IDataProvider {
     }
 
     func fee(for value: Int, toAddress: String? = nil, senderPay: Bool) throws -> Int {
-        return try transactionBuilder.fee(for: value, feeRate: storage.feeRate.medium, senderPay: senderPay, address: toAddress)
+        return try transactionBuilder.fee(for: value, feeRate: feeRate.medium, senderPay: senderPay, address: toAddress)
     }
 
     var receiveAddress: String {
