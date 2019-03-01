@@ -63,27 +63,13 @@ protocol IFeeRateApi {
     func getFeeRate() -> Observable<FeeRate>
 }
 
-protocol IFeeRateStorage {
-    var feeRate: FeeRate? { get }
+protocol IStorage {
+    var feeRate: FeeRate { get }
     func save(feeRate: FeeRate)
-    func clear()
 }
 
 protocol IFeeRateSyncer {
-    var delegate: IFeeRateSyncerDelegate? { get set }
     func sync()
-}
-
-protocol IFeeRateSyncerDelegate: class {
-    func didSync(feeRate: FeeRate)
-}
-
-protocol IFeeRateManager {
-    var subject: PublishSubject<Void> { get }
-    var feeRate: FeeRate { get }
-    var lowValue: Int { get }
-    var mediumValue: Int { get }
-    var highValue: Int { get }
 }
 
 protocol IAddressSelector {

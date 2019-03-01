@@ -5,11 +5,11 @@ import RxSwift
 @testable import HSBitcoinKit
 
 class DataProviderTests: XCTestCase {
+    private var mockStorage: MockIStorage!
     private var mockAddressManager: MockIAddressManager!
     private var mockAddressConverter: MockIAddressConverter!
     private var mockPaymentAddressParser: MockIPaymentAddressParser!
     private var mockUnspentOutputProvider: MockIUnspentOutputProvider!
-    private var mockFeeRateManager: MockIFeeRateManager!
     private var mockTransactionCreator: MockITransactionCreator!
     private var mockTransactionBuilder: MockITransactionBuilder!
     private var mockNetwork: MockINetwork!
@@ -31,11 +31,11 @@ class DataProviderTests: XCTestCase {
             when(mock.realm.get).thenReturn(realm)
         }
 
+        mockStorage = MockIStorage()
         mockAddressManager = MockIAddressManager()
         mockAddressConverter = MockIAddressConverter()
         mockPaymentAddressParser = MockIPaymentAddressParser()
         mockUnspentOutputProvider = MockIUnspentOutputProvider()
-        mockFeeRateManager = MockIFeeRateManager()
         mockTransactionCreator = MockITransactionCreator()
         mockTransactionBuilder = MockITransactionBuilder()
         mockNetwork = MockINetwork()
@@ -52,19 +52,19 @@ class DataProviderTests: XCTestCase {
         }
 
         dataProvider = DataProvider(
-                realmFactory: mockRealmFactory, addressManager: mockAddressManager, addressConverter: mockAddressConverter,
-                paymentAddressParser: mockPaymentAddressParser, unspentOutputProvider: mockUnspentOutputProvider, feeRateManager: mockFeeRateManager,
+                realmFactory: mockRealmFactory, storage: mockStorage, addressManager: mockAddressManager, addressConverter: mockAddressConverter,
+                paymentAddressParser: mockPaymentAddressParser, unspentOutputProvider: mockUnspentOutputProvider,
                 transactionCreator: mockTransactionCreator, transactionBuilder: mockTransactionBuilder, network: mockNetwork, debounceTime: 0
         )
         dataProvider.delegate = mockDataProviderDelegate
     }
 
     override func tearDown() {
+        mockStorage = nil
         mockAddressManager = nil
         mockAddressConverter = nil
         mockPaymentAddressParser = nil
         mockUnspentOutputProvider = nil
-        mockFeeRateManager = nil
         mockTransactionCreator = nil
         mockTransactionBuilder = nil
         mockNetwork = nil
