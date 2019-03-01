@@ -29,14 +29,14 @@ class GrdbStorage {
             }
         }
 
-//        migrator.registerMigration("createBlockchainStates") { db in
-//            try db.create(table: BlockchainState.databaseTableName) { t in
-//                t.column(BlockchainState.Columns.primaryKey.name, .text).notNull()
-//                t.column(BlockchainState.Columns.initialRestored.name, .boolean)
-//
-//                t.primaryKey([BlockchainState.Columns.primaryKey.name], onConflict: .replace)
-//            }
-//        }
+        migrator.registerMigration("createBlockchainStates") { db in
+            try db.create(table: BlockchainState.databaseTableName) { t in
+                t.column(BlockchainState.Columns.primaryKey.name, .text).notNull()
+                t.column(BlockchainState.Columns.initialRestored.name, .boolean)
+
+                t.primaryKey([BlockchainState.Columns.primaryKey.name], onConflict: .replace)
+            }
+        }
 
         return migrator
     }
@@ -54,6 +54,29 @@ extension GrdbStorage: IStorage {
     func save(feeRate: FeeRate) {
         _ = try? dbPool.write { db in
             try feeRate.insert(db)
+        }
+    }
+
+    var initialRestored: Bool {
+        get {
+            return try! dbPool.read { db in
+                let state = try BlockchainState.fetchOne(db) ?? BlockchainState()
+                return state.initialRestored
+            }
+        }
+        set {
+            _ = try? dbPool.write { db in
+                let state = try BlockchainState.fetchOne(db) ?? BlockchainState()
+                state.initialRestored = newValue
+                try state.insert(db)
+            }
+        }
+    }
+
+    func clear() {
+        _ = try? dbPool.write { db in
+            try FeeRate.deleteAll(db)
+            try BlockchainState.deleteAll(db)
         }
     }
 

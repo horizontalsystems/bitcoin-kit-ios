@@ -66,6 +66,10 @@ protocol IFeeRateApi {
 protocol IStorage {
     var feeRate: FeeRate { get }
     func save(feeRate: FeeRate)
+
+    var initialRestored: Bool { get set }
+
+    func clear()
 }
 
 protocol IFeeRateSyncer {

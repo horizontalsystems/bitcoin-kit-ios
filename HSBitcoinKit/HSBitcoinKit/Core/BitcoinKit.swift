@@ -120,7 +120,7 @@ public class BitcoinKit {
 
         hdWallet = HDWallet(seed: Mnemonic.seed(mnemonic: words), coinType: network.coinType, xPrivKey: network.xPrivKey, xPubKey: network.xPubKey, gapLimit: 20)
 
-        stateManager = StateManager(realmFactory: realmFactory, syncableFromApi: network.syncableFromApi, newWallet: newWallet)
+        stateManager = StateManager(storage: storage, network: network, newWallet: newWallet)
 
         let addressSelector: IAddressSelector
         switch coin {
@@ -202,6 +202,7 @@ extension BitcoinKit {
 
     public func clear() throws {
         initialSyncer.stop()
+        storage.clear()
 
         let realm = realmFactory.realm
 
