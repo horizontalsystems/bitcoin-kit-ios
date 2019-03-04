@@ -44,11 +44,12 @@ protocol IReachabilityManager {
     var reachabilitySignal: Signal { get }
 }
 
-protocol IPeerHostManager {
-    var delegate: PeerHostManagerDelegate? { get set }
-    var peerHost: String? { get }
-    func hostDisconnected(host: String, withError error: Error?, networkReachable: Bool)
-    func addHosts(hosts: [String])
+protocol IPeerAddressManager: class {
+    var delegate: IPeerAddressManagerDelegate? { get set }
+    var ip: String? { get }
+    func markSuccess(ip: String)
+    func markFailed(ip: String)
+    func add(ips: [String])
 }
 
 protocol IStateManager {
@@ -69,6 +70,12 @@ protocol IStorage {
 
     var initialRestored: Bool? { get }
     func set(initialRestored: Bool)
+
+    func existingPeerAddresses(fromIps ips: [String]) -> [PeerAddress]
+    func leastScorePeerAddress(excludingIps: [String]) -> PeerAddress?
+    func save(peerAddresses: [PeerAddress])
+    func increasePeerAddressScore(ip: String)
+    func deletePeerAddress(byIp ip: String)
 
     func clear()
 }
@@ -188,12 +195,13 @@ protocol ISyncStateListener: class {
     func currentBestBlockHeightUpdated(height: Int32, maxBlockHeight: Int32)
 }
 
-protocol PeerHostManagerDelegate: class {
-    func newHostsAdded()
+protocol IPeerAddressManagerDelegate: class {
+    func newIpsAdded()
 }
 
-protocol IHostDiscovery {
-    func lookup(dnsSeed: String) -> [String]
+protocol IPeerDiscovery {
+    var peerAddressManager: IPeerAddressManager? { get set }
+    func lookup(dnsSeed: String)
 }
 
 protocol IFactory {

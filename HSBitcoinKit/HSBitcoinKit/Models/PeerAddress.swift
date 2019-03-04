@@ -1,19 +1,35 @@
-import Foundation
-import RealmSwift
+import GRDB
 
-class PeerAddress: Object {
-    @objc dynamic var ip: String = ""
-    @objc dynamic var score: Int = 0
+class PeerAddress: Record {
+    let ip: String
+    var score: Int
 
-    override class func primaryKey() -> String? {
-        return "ip"
-    }
-
-    convenience init(ip: String, score: Int) {
-        self.init()
-
+    init(ip: String, score: Int) {
         self.ip = ip
         self.score = score
+
+        super.init()
+    }
+
+    override class var databaseTableName: String {
+        return "peerAddresses"
+    }
+
+    enum Columns: String, ColumnExpression {
+        case ip
+        case score
+    }
+
+    required init(row: Row) {
+        ip = row[Columns.ip]
+        score = row[Columns.score]
+
+        super.init(row: row)
+    }
+
+    override func encode(to container: inout PersistenceContainer) {
+        container[Columns.ip] = ip
+        container[Columns.score] = score
     }
 
 }

@@ -14,7 +14,6 @@ class RealmFactory {
                     Block.self,
                     BlockHash.self,
                     BlockHeader.self,
-                    PeerAddress.self,
                     PublicKey.self,
                     SentTransaction.self,
                     Transaction.self,

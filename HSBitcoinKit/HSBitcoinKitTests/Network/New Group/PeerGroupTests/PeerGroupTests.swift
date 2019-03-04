@@ -12,7 +12,7 @@ class PeerGroupTests: XCTestCase {
     internal var mockNetwork: MockINetwork!
     internal var mockListener: MockISyncStateListener!
     internal var mockReachabilityManager: MockIReachabilityManager!
-    internal var mockPeerHostManager: MockIPeerHostManager!
+    internal var mockPeerAddressManager: MockIPeerAddressManager!
     internal var mockBloomFilterManager: MockIBloomFilterManager!
     internal var mockPeerManager: MockIPeerManager!
     internal var mockBlockSyncer: MockIBlockSyncer!
@@ -31,7 +31,7 @@ class PeerGroupTests: XCTestCase {
         mockNetwork = MockINetwork()
         mockListener = MockISyncStateListener()
         mockReachabilityManager = MockIReachabilityManager()
-        mockPeerHostManager = MockIPeerHostManager()
+        mockPeerAddressManager = MockIPeerAddressManager()
         mockBloomFilterManager = MockIBloomFilterManager()
         mockPeerManager = MockIPeerManager()
         mockBlockSyncer = MockIBlockSyncer()
@@ -59,10 +59,11 @@ class PeerGroupTests: XCTestCase {
             when(mock.reachabilitySignal.get).thenReturn(subject)
             when(mock.isReachable.get).thenReturn(true)
         }
-        stub(mockPeerHostManager) { mock in
+        stub(mockPeerAddressManager) { mock in
             when(mock.delegate.set(any())).thenDoNothing()
-            when(mock.peerHost.get).thenReturn("0").thenReturn("1").thenReturn("2").thenReturn("3")
-            when(mock.hostDisconnected(host: any(), withError: any(), networkReachable: any())).thenDoNothing()
+            when(mock.ip.get).thenReturn("0").thenReturn("1").thenReturn("2").thenReturn("3")
+            when(mock.markSuccess(ip: any())).thenDoNothing()
+            when(mock.markFailed(ip: any())).thenDoNothing()
         }
         stub(mockBloomFilterManager) { mock in
             when(mock.delegate.set(any())).thenDoNothing()
@@ -93,7 +94,7 @@ class PeerGroupTests: XCTestCase {
         }
 
         peerGroup = PeerGroup(
-                factory: mockFactory, network: mockNetwork, listener: mockListener, reachabilityManager: mockReachabilityManager, peerHostManager: mockPeerHostManager, bloomFilterManager: mockBloomFilterManager,
+                factory: mockFactory, network: mockNetwork, listener: mockListener, reachabilityManager: mockReachabilityManager, peerAddressManager: mockPeerAddressManager, bloomFilterManager: mockBloomFilterManager,
                 peerCount: peersCount, peerManager: mockPeerManager,
                 peersQueue: DispatchQueue.main, inventoryQueue: DispatchQueue.main
         )
@@ -106,7 +107,7 @@ class PeerGroupTests: XCTestCase {
         mockNetwork = nil
         mockListener = nil
         mockReachabilityManager = nil
-        mockPeerHostManager = nil
+        mockPeerAddressManager = nil
         mockBloomFilterManager = nil
         mockBlockSyncer = nil
         mockTransactionSyncer = nil

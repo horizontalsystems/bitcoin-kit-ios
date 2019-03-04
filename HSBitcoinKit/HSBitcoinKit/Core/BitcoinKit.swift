@@ -28,7 +28,7 @@ public class BitcoinKit {
     private let bcoinReachabilityManager: ReachabilityManager
 
     private let reachabilityManager: ReachabilityManager
-    private let peerHostManager: IPeerHostManager
+    private let peerAddressManager: IPeerAddressManager
     private let stateManager: IStateManager
 
     private let blockDiscovery: IBlockDiscovery
@@ -141,13 +141,15 @@ public class BitcoinKit {
 
         reachabilityManager = ReachabilityManager()
 
-        peerHostManager = PeerHostManager(network: network, realmFactory: realmFactory)
+        let peerDiscovery = PeerDiscovery()
+        peerAddressManager = PeerAddressManager(storage: storage, network: network, peerDiscovery: peerDiscovery, logger: logger)
+        peerDiscovery.peerAddressManager = peerAddressManager
 
         factory = Factory()
         kitStateProvider = KitStateProvider()
 
         bloomFilterManager = BloomFilterManager(realmFactory: realmFactory, factory: factory)
-        peerGroup = PeerGroup(factory: factory, network: network, listener: kitStateProvider, reachabilityManager: reachabilityManager, peerHostManager: peerHostManager, bloomFilterManager: bloomFilterManager, logger: logger)
+        peerGroup = PeerGroup(factory: factory, network: network, listener: kitStateProvider, reachabilityManager: reachabilityManager, peerAddressManager: peerAddressManager, bloomFilterManager: bloomFilterManager, logger: logger)
 
         addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, addressConverter: addressConverter)
         initialSyncer = InitialSyncer(realmFactory: realmFactory, listener: kitStateProvider, hdWallet: hdWallet, stateManager: stateManager, blockDiscovery: blockDiscovery, addressManager: addressManager, factory: factory, peerGroup: peerGroup, reachabilityManager: reachabilityManager, logger: logger)

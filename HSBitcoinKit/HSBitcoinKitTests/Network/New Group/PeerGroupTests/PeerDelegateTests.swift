@@ -358,9 +358,10 @@ class PeerDelegateTests: PeerGroupTests {
             when(mock.syncPeerIs(peer: any())).thenReturn(true)
             when(mock.peerDisconnected(peer: any())).thenDoNothing()
         }
-        stub(mockPeerHostManager) { mock in
-            when(mock.hostDisconnected(host: any(), withError: any(), networkReachable: any())).thenDoNothing()
-            when(mock.peerHost.get).thenReturn(nil)
+        stub(mockPeerAddressManager) { mock in
+            when(mock.markSuccess(ip: any())).thenDoNothing()
+            when(mock.markFailed(ip: any())).thenDoNothing()
+            when(mock.ip.get).thenReturn(nil)
         }
         stub(mockBlockSyncer) { mock in
             when(mock.downloadFailed()).thenDoNothing()
@@ -370,7 +371,7 @@ class PeerDelegateTests: PeerGroupTests {
         peerGroup.peerDidDisconnect(peer, withError: nil)
         waitForMainQueue()
 
-        verify(mockPeerHostManager).hostDisconnected(host: equal(to: peer.host), withError: isNil(), networkReachable: equal(to: true))
+        verify(mockPeerAddressManager).markSuccess(ip: equal(to: peer.host))
         verify(mockBlockSyncer).downloadFailed()
         verify(mockPeerManager).syncPeer.set(isNil())
         verify(mockPeerManager).peerDisconnected(peer: equal(to: peer, equalWhen: { $0.host == $1.host }))
@@ -391,7 +392,7 @@ class PeerDelegateTests: PeerGroupTests {
         waitForMainQueue()
 
         verify(mockPeerManager).syncPeer.set(equal(to: peer2, equalWhen: { $0!.host == $1!.host }))
-        verify(mockPeerHostManager).peerHost.get
+        verify(mockPeerAddressManager).ip.get
 
         // Here a block which starts synchronization of newly set syncPeer is left enqueued
         waitForMainQueue()
@@ -408,16 +409,16 @@ class PeerDelegateTests: PeerGroupTests {
             when(mock.syncPeerIs(peer: any())).thenReturn(false)
             when(mock.peerDisconnected(peer: any())).thenDoNothing()
         }
-        stub(mockPeerHostManager) { mock in
-            when(mock.hostDisconnected(host: any(), withError: any(), networkReachable: any())).thenDoNothing()
-            when(mock.peerHost.get).thenReturn(nil)
+        stub(mockPeerAddressManager) { mock in
+            when(mock.markSuccess(ip: any())).thenDoNothing()
+            when(mock.ip.get).thenReturn(nil)
         }
 
 
         peerGroup.peerDidDisconnect(peer, withError: nil)
         waitForMainQueue()
 
-        verify(mockPeerHostManager).hostDisconnected(host: equal(to: peer.host), withError: isNil(), networkReachable: equal(to: true))
+        verify(mockPeerAddressManager).markSuccess(ip: equal(to: peer.host))
         verify(mockBlockSyncer, never()).downloadFailed()
         verify(mockPeerManager, never()).syncPeer.set(any())
         verify(mockPeerManager).peerDisconnected(peer: equal(to: peer, equalWhen: { $0.host == $1.host }))
@@ -431,7 +432,7 @@ class PeerDelegateTests: PeerGroupTests {
         waitForMainQueue()
 
         verify(mockPeerManager, never()).syncPeer.set(any())
-        verify(mockPeerHostManager).peerHost.get
+        verify(mockPeerAddressManager).ip.get
 
         // Here a block which starts synchronization of newly set syncPeer is left enqueued
         waitForMainQueue()
@@ -448,16 +449,16 @@ class PeerDelegateTests: PeerGroupTests {
             when(mock.syncPeerIs(peer: any())).thenReturn(false)
             when(mock.peerDisconnected(peer: any())).thenDoNothing()
         }
-        stub(mockPeerHostManager) { mock in
-            when(mock.hostDisconnected(host: any(), withError: any(), networkReachable: any())).thenDoNothing()
-            when(mock.peerHost.get).thenReturn(nil)
+        stub(mockPeerAddressManager) { mock in
+            when(mock.markSuccess(ip: any())).thenDoNothing()
+            when(mock.ip.get).thenReturn(nil)
         }
 
         peerGroup.peerDidDisconnect(peer, withError: nil)
         waitForMainQueue()
         waitForMainQueue()
 
-        verify(mockPeerHostManager).hostDisconnected(host: equal(to: peer.host), withError: isNil(), networkReachable: equal(to: false))
+        verify(mockPeerAddressManager).markSuccess(ip: equal(to: peer.host))
     }
 
     func testPeerDidDisconnect_WithError() {
@@ -472,16 +473,16 @@ class PeerDelegateTests: PeerGroupTests {
             when(mock.syncPeerIs(peer: any())).thenReturn(false)
             when(mock.peerDisconnected(peer: any())).thenDoNothing()
         }
-        stub(mockPeerHostManager) { mock in
-            when(mock.hostDisconnected(host: any(), withError: any(), networkReachable: any())).thenDoNothing()
-            when(mock.peerHost.get).thenReturn(nil)
+        stub(mockPeerAddressManager) { mock in
+            when(mock.markSuccess(ip: any())).thenDoNothing()
+            when(mock.ip.get).thenReturn(nil)
         }
 
         peerGroup.peerDidDisconnect(peer, withError: error)
         waitForMainQueue()
         waitForMainQueue()
 
-        verify(mockPeerHostManager).hostDisconnected(host: equal(to: peer.host), withError: equal(to: error, equalWhen: { $0! == $1! }), networkReachable: equal(to: false))
+        verify(mockPeerAddressManager).markSuccess(ip: equal(to: peer.host))
     }
 
     func testPeerDidCompleteTask_GetBlockHashesTask() {
@@ -589,13 +590,13 @@ class PeerDelegateTests: PeerGroupTests {
         let newAddressString = "new.address.string"
         let addresses = [NetworkAddress(services: 0, address: newAddressString, port: 0)]
 
-        stub(mockPeerHostManager) { mock in
-            when(mock.addHosts(hosts: any())).thenDoNothing()
+        stub(mockPeerAddressManager) { mock in
+            when(mock.add(ips: any())).thenDoNothing()
         }
 
         peerGroup.peer(peer, didReceiveAddresses: addresses)
 
-        verify(mockPeerHostManager).addHosts(hosts: equal(to: [newAddressString]))
+        verify(mockPeerAddressManager).add(ips: equal(to: [newAddressString]))
     }
 
     func testPeerDidReceiveInventoryItem() {

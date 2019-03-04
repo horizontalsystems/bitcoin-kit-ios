@@ -16,7 +16,7 @@ class IPeerGroupTests: PeerGroupTests {
         verify(mockBlockSyncer).prepareForDownload()
         verify(mockListener).syncStarted()
         let expectedConnectTriggeredHosts = Array(peers.keys.sorted().prefix(peersCount))
-        verify(mockPeerHostManager, times(peersCount)).peerHost.get
+        verify(mockPeerAddressManager, times(peersCount)).ip.get
         verifyConnectTriggeredOnlyForPeers(withHosts: expectedConnectTriggeredHosts)
 
         for host in expectedConnectTriggeredHosts {
@@ -29,37 +29,37 @@ class IPeerGroupTests: PeerGroupTests {
 
     func testStart_OnlyOneProcessAtATime() {
         // First time
-        stub(mockPeerHostManager) { mock in
-            when(mock.peerHost.get).thenReturn(nil)
+        stub(mockPeerAddressManager) { mock in
+            when(mock.ip.get).thenReturn(nil)
         }
 
         peerGroup.start()
         waitForMainQueue()
 
-        verify(mockPeerHostManager, times(1)).peerHost.get
+        verify(mockPeerAddressManager, times(1)).ip.get
 
         // Second time
-        reset(mockPeerHostManager)
-        stub(mockPeerHostManager) { mock in
-            when(mock.peerHost.get).thenReturn(nil)
+        reset(mockPeerAddressManager)
+        stub(mockPeerAddressManager) { mock in
+            when(mock.ip.get).thenReturn(nil)
         }
 
         peerGroup.start()
         waitForMainQueue()
 
-        verify(mockPeerHostManager, never()).peerHost.get
+        verify(mockPeerAddressManager, never()).ip.get
 
         // But if you stop and start again
-        reset(mockPeerHostManager)
-        stub(mockPeerHostManager) { mock in
-            when(mock.peerHost.get).thenReturn(nil)
+        reset(mockPeerAddressManager)
+        stub(mockPeerAddressManager) { mock in
+            when(mock.ip.get).thenReturn(nil)
         }
 
         peerGroup.stop()
         peerGroup.start()
         waitForMainQueue()
 
-        verify(mockPeerHostManager, times(1)).peerHost.get
+        verify(mockPeerAddressManager, times(1)).ip.get
     }
 
     func testStart_AddedPeersIsEqualToPeersCount() {
@@ -69,7 +69,7 @@ class IPeerGroupTests: PeerGroupTests {
         peerGroup.start()
         waitForMainQueue()
 
-        verify(mockPeerHostManager, never()).peerHost.get
+        verify(mockPeerAddressManager, never()).ip.get
         verifyConnectTriggeredOnlyForPeers(withHosts: [])
     }
 
@@ -114,7 +114,7 @@ class IPeerGroupTests: PeerGroupTests {
         peerGroup.start()
         waitForMainQueue()
 
-        verify(mockPeerHostManager, never()).peerHost.get
+        verify(mockPeerAddressManager, never()).ip.get
         verifyConnectTriggeredOnlyForPeers(withHosts: [])
     }
 
