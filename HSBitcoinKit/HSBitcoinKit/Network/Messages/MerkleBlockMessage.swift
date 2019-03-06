@@ -22,10 +22,12 @@ struct MerkleBlockMessage: IMessage {
         self.flags = flags
     }
 
-    init(data: Data) {
+    init(data: Data, network: INetwork) {
         let byteStream = ByteStream(data)
 
         blockHeader = BlockHeaderSerializer.deserialize(byteStream: byteStream)
+        blockHeader.headerHash = network.generateBlockHeaderHash(from: BlockHeaderSerializer.serialize(header: blockHeader))
+
         totalTransactions = byteStream.read(UInt32.self)
         numberOfHashes = byteStream.read(VarInt.self)
 

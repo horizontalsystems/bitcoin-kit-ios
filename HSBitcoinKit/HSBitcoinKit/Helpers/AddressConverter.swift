@@ -9,9 +9,9 @@ class AddressConverter {
     }
 
     let network: INetwork
-    let bech32AddressConverter: IBech32AddressConverter
+    let bech32AddressConverter: IBech32AddressConverter?
 
-    init(network: INetwork, bech32AddressConverter: IBech32AddressConverter) {
+    init(network: INetwork, bech32AddressConverter: IBech32AddressConverter?) {
         self.bech32AddressConverter = bech32AddressConverter
         self.network = network
     }
@@ -21,7 +21,7 @@ class AddressConverter {
 extension AddressConverter: IAddressConverter {
 
     func convert(keyHash: Data, type: ScriptType) throws -> Address {
-        if let address = try? bech32AddressConverter.convert(prefix: network.bech32PrefixPattern, keyData: keyHash, scriptType: type) {
+        if let converted = try? bech32AddressConverter?.convert(prefix: network.bech32PrefixPattern, keyData: keyHash, scriptType: type), let address = converted {
             return address
         }
         let version: UInt8
@@ -48,7 +48,7 @@ extension AddressConverter: IAddressConverter {
     }
 
     func convert(address: String) throws -> Address {
-        if let address = try? bech32AddressConverter.convert(prefix: network.bech32PrefixPattern, address: address) {
+        if let converted = try? bech32AddressConverter?.convert(prefix: network.bech32PrefixPattern, address: address), let address = converted {
             return address
         }
         guard address.count >= 26 && address.count <= 35 else {

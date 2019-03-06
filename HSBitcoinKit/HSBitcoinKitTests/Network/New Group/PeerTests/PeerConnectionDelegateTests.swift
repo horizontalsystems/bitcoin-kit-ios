@@ -340,16 +340,6 @@ class PeerConnectionDelegateTests: XCTestCase {
         verify(task2, never()).handle(getDataInventoryItem: any())
     }
 
-    func testConnectionDidReceiveMessage_BlockMessage() {
-        let message = BlockMessage(data: BlockHeaderSerializer.serialize(header: TestData.firstBlock.header!) + VarInt(0).serialized())
-
-        peer.connected = true
-        peer.connection(didReceiveMessage: message)
-        waitForMainQueue()
-
-        verifyNoMoreInteractions(mockPeerGroup)
-    }
-
     func testConnectionDidReceiveMessage_MerkleBlockMessage() {
         let mockValidator = MockIMerkleBlockValidator()
         let merkleBlock = MerkleBlock(header: TestData.firstBlock.header!, transactionHashes: [], transactions: [])

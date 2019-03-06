@@ -4,6 +4,7 @@ PODS:
     - SipHash (~> 1.2)
   - Cuckoo (0.12.0)
   - HSCryptoKit (1.1.0)
+  - HSCryptoX11 (1.0.0)
   - HSHDWalletKit (1.0.3):
     - HSCryptoKit (~> 1.1.0)
   - ObjectMapper (3.3.0)
@@ -28,6 +29,7 @@ DEPENDENCIES:
   - BigInt (~> 3.1.0)
   - Cuckoo
   - HSCryptoKit (~> 1.1.0)
+  - HSCryptoX11 (from `https://github.com/horizontalsystems/crypto-x11-ios`)
   - HSHDWalletKit (~> 1.0.3)
   - ObjectMapper (~> 3.3.0)
   - RealmSwift (~> 3.11.0)
@@ -51,11 +53,21 @@ SPEC REPOS:
     - RxSwift
     - SipHash
 
+EXTERNAL SOURCES:
+  HSCryptoX11:
+    :git: https://github.com/horizontalsystems/crypto-x11-ios
+
+CHECKOUT OPTIONS:
+  HSCryptoX11:
+    :commit: e243500f525f6f97dd349638f5a80e2d004685cc
+    :git: https://github.com/horizontalsystems/crypto-x11-ios
+
 SPEC CHECKSUMS:
   Alamofire: 16ce2c353fb72865124ddae8a57c5942388f4f11
   BigInt: 76b5dfdfa3e2e478d4ffdf161aeede5502e2742f
   Cuckoo: d30b6c149e52ffbcfe6b4a9543e4627d08947274
   HSCryptoKit: 8679d53083d1136fc128bbf9b040976110ce1491
+  HSCryptoX11: 9619fbffb53e9de913d77a531c5ef35cd0402dfe
   HSHDWalletKit: f75cd8186f00bae4f6aa76548a0b1f24c13dff72
   ObjectMapper: b612bf8c8e99c4dc0bb6013a51f7c27966ed5da9
   Realm: 864477d028db77f7c5a0cba64a4892ad53db128a
@@ -66,6 +78,6 @@ SPEC CHECKSUMS:
   RxSwift: 92fcf68dfef21f3e2ab1965363d9e7b3d787597e
   SipHash: fad90a4683e420c52ef28063063dbbce248ea6d4
 
-PODFILE CHECKSUM: d556834ed5de2de4e51de6b200ff38f327ce5bd7
+PODFILE CHECKSUM: 7dc9ba5571e627d46ee1c73df59ffca832857889
 
 COCOAPODS: 1.5.3

@@ -2,6 +2,7 @@ import BigInt
 import RxSwift
 import RealmSwift
 import Alamofire
+import HSCryptoKit
 
 enum BlockValidatorType { case header, bits, legacy, testNet, EDA, DAA }
 
@@ -390,6 +391,7 @@ protocol IDataProviderDelegate: class {
 protocol INetwork: class {
     var merkleBlockValidator: IMerkleBlockValidator { get }
 
+    var protocolVersion: Int32 { get }
     var name: String { get }
     var pubKeyHash: UInt8 { get }
     var privateKey: UInt8 { get }
@@ -416,6 +418,7 @@ protocol INetwork: class {
     var heightInterval: Int { get }                                     // Blocks in cycle
 
     func validate(block: Block, previousBlock: Block) throws
+    func generateBlockHeaderHash(from data: Data) -> Data
 }
 
 protocol IMerkleBlockValidator: class {
@@ -423,6 +426,8 @@ protocol IMerkleBlockValidator: class {
 }
 
 extension INetwork {
+    var protocolVersion: Int32 { return 70015 }
+
     var serviceFullNode: UInt64 { return 1 }
     var bloomFilter: Int32 { return 70000 }
     var maxTargetBits: Int { return 0x1d00ffff }
@@ -434,6 +439,10 @@ extension INetwork {
 
     func isDifficultyTransitionPoint(height: Int) -> Bool {
         return height % heightInterval == 0
+    }
+
+    func generateBlockHeaderHash(from data: Data) -> Data {
+        return CryptoKit.sha256sha256(data)
     }
 
 }

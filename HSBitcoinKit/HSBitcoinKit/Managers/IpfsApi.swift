@@ -15,11 +15,12 @@ class IpfsApi {
     init(network: INetwork, apiProvider: IApiConfigProvider, logger: Logger? = nil) {
         switch network {
         case is BitcoinCashMainNet, is BitcoinCashTestNet: coinType = "BCH"
+        case is DashMainNet, is DashTestNet: coinType = "DASH"
         default: coinType = "BTC"
         }
 
         switch network {
-        case is BitcoinTestNet, is BitcoinCashTestNet: networkType = "testnet"
+        case is BitcoinTestNet, is BitcoinCashTestNet, is DashTestNet: networkType = "testnet"
         default: networkType = ""
         }
 

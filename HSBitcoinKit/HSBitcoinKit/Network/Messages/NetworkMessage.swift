@@ -53,7 +53,6 @@ struct NetworkMessage {
 
     private static let messagesMap: [String: IMessage.Type] = [
         "addr": AddressMessage.self,
-        "block": BlockMessage.self,
         "getblocks": GetBlocksMessage.self,
         "getdata": GetDataMessage.self,
         "getheaders": GetHeadersMessage.self,
@@ -62,7 +61,6 @@ struct NetworkMessage {
         "pong": PongMessage.self,
         "verack": VerackMessage.self,
         "version": VersionMessage.self,
-        "headers": HeadersMessage.self,
         "mempool": MemPoolMessage.self,
         "merkleblock": MerkleBlockMessage.self,
         "tx": TransactionMessage.self,
@@ -90,8 +88,23 @@ struct NetworkMessage {
             return nil
         }
 
-        let messageClass = messagesMap[command] ?? UnknownMessage.self
-        let message = messageClass.init(data: payload)
+        let message: IMessage
+        switch command {
+        case "addr": message = AddressMessage(data: payload)
+        case "getblocks": message = GetBlocksMessage(data: payload)
+        case "getdata": message = GetDataMessage(data: payload)
+        case "getheaders": message = GetHeadersMessage(data: payload)
+        case "inv": message = InventoryMessage(data: payload)
+        case "ping": message = PingMessage(data: payload)
+        case "pong": message = PongMessage(data: payload)
+        case "verack": message = VerackMessage(data: payload)
+        case "version": message = VersionMessage(data: payload)
+        case "mempool": message = MemPoolMessage(data: payload)
+        case "merkleblock": message = MerkleBlockMessage(data: payload, network: network)
+        case "tx": message = TransactionMessage(data: payload)
+        case "filterload": message = FilterLoadMessage(data: payload)
+        default: message = UnknownMessage(data: data)
+        }
 
         return NetworkMessage(network: network, command: command, length: length, checksum: checksum, message: message)
     }

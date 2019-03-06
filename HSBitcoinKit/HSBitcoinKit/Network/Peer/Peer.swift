@@ -9,7 +9,7 @@ class Peer {
         case peerDoesNotSupportBloomFilter
     }
 
-    private let protocolVersion: Int32 = 70015
+    private let protocolVersion: Int32
     private var sentVersion: Bool = false
     private var sentVerack: Bool = false
     private var mempoolSent: Bool = false
@@ -44,6 +44,7 @@ class Peer {
     }
 
     init(host: String, network: INetwork, connection: IPeerConnection, connectionTimeoutManager: IConnectionTimeoutManager, queue: DispatchQueue? = nil, logger: Logger? = nil) {
+        self.protocolVersion = network.protocolVersion
         self.connection = connection
         self.connectionTimeoutManager = connectionTimeoutManager
         self.network = network
@@ -98,7 +99,6 @@ class Peer {
         case let addressMessage as AddressMessage: handle(message: addressMessage)
         case let inventoryMessage as InventoryMessage: handle(message: inventoryMessage)
         case let getDataMessage as GetDataMessage: handle(message: getDataMessage)
-        case let blockMessage as BlockMessage: handle(message: blockMessage)
         case let merkleBlockMessage as MerkleBlockMessage: try handle(message: merkleBlockMessage)
         case let transactionMessage as TransactionMessage: handle(message: transactionMessage)
         case let pingMessage as PingMessage: handle(message: pingMessage)
@@ -177,10 +177,6 @@ class Peer {
                 }
             }
         }
-    }
-
-    private func handle(message: BlockMessage) {
-        log("<-- BLOCK: \(CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: message.blockHeaderItem)).reversedHex)")
     }
 
     private func handle(message: MerkleBlockMessage) throws {

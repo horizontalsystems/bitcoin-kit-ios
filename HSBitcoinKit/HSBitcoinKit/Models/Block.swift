@@ -18,7 +18,7 @@ class Block: Object {
         return "reversedHeaderHashHex"
     }
 
-    convenience init(withHeader header: BlockHeader?, previousBlock: Block) {
+    convenience init(withHeader header: BlockHeader, previousBlock: Block) {
         self.init(withHeader: header)
 
         height = previousBlock.height + 1
@@ -39,14 +39,12 @@ class Block: Object {
         self.height = height
     }
 
-    private convenience init(withHeader header: BlockHeader?) {
+    private convenience init(withHeader header: BlockHeader) {
         self.init()
 
-        if let header = header {
-            self.header = header
-            headerHash = CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: header))
-            reversedHeaderHashHex = headerHash.reversedHex
-        }
+        self.header = header
+        self.headerHash = header.headerHash
+        reversedHeaderHashHex = headerHash.reversedHex
     }
 
 }

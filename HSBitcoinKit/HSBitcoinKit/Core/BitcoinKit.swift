@@ -49,7 +49,7 @@ public class BitcoinKit {
     private let feeRateManager: FeeRateManager
 
     private let paymentAddressParser: IPaymentAddressParser
-    private let bech32AddressConverter: IBech32AddressConverter
+    private let bech32AddressConverter: IBech32AddressConverter?
     private let addressConverter: IAddressConverter
     private let scriptConverter: IScriptConverter
     private let transactionProcessor: ITransactionProcessor
@@ -74,7 +74,7 @@ public class BitcoinKit {
     private let kitStateProvider: IKitStateProvider & ISyncStateListener
     private var dataProvider: IDataProvider & IBlockchainDataListener
 
-    public init(withWords words: [String], coin: Coin, walletId: String, newWallet: Bool = false, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) {
+    public init(withWords words: [String], coin: Coin, walletId: String, newWallet: Bool = true, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) {
         let realmFileName = "\(walletId)-\(coin.rawValue).realm"
 
         difficultyEncoder = DifficultyEncoder()
@@ -84,30 +84,33 @@ public class BitcoinKit {
         scriptConverter = ScriptConverter()
         switch coin {
         case .bitcoin(let networkType):
+            bech32AddressConverter = SegWitBech32AddressConverter(scriptConverter: scriptConverter)
+            paymentAddressParser = PaymentAddressParser(validScheme: "bitcoin", removeScheme: true)
             switch networkType {
             case .mainNet:
                 network = BitcoinMainNet(validatorFactory: validatorFactory)
-                bech32AddressConverter = SegWitBech32AddressConverter(scriptConverter: scriptConverter)
-                paymentAddressParser = PaymentAddressParser(validScheme: "bitcoin", removeScheme: true)
             case .testNet:
                 network = BitcoinTestNet(validatorFactory: validatorFactory)
-                bech32AddressConverter = SegWitBech32AddressConverter(scriptConverter: scriptConverter)
-                paymentAddressParser = PaymentAddressParser(validScheme: "bitcoin", removeScheme: true)
             case .regTest:
                 network = BitcoinRegTest(validatorFactory: validatorFactory)
-                bech32AddressConverter = SegWitBech32AddressConverter(scriptConverter: scriptConverter)
-                paymentAddressParser = PaymentAddressParser(validScheme: "bitcoin", removeScheme: true)
             }
         case .bitcoinCash(let networkType):
+            bech32AddressConverter = CashBech32AddressConverter()
+            paymentAddressParser = PaymentAddressParser(validScheme: "bitcoincash", removeScheme: false)
             switch networkType {
             case .mainNet:
                 network = BitcoinCashMainNet(validatorFactory: validatorFactory, blockHelper: blockHelper)
-                bech32AddressConverter = CashBech32AddressConverter()
-                paymentAddressParser = PaymentAddressParser(validScheme: "bitcoincash", removeScheme: false)
             case .testNet, .regTest:
                 network = BitcoinCashTestNet(validatorFactory: validatorFactory)
-                bech32AddressConverter = CashBech32AddressConverter()
-                paymentAddressParser = PaymentAddressParser(validScheme: "bitcoincash", removeScheme: false)
+            }
+        case .dash(let networkType):
+            bech32AddressConverter = nil
+            paymentAddressParser = PaymentAddressParser(validScheme: "dash", removeScheme: true)
+            switch networkType {
+            case .mainNet:
+                network = DashMainNet(validatorFactory: validatorFactory)
+            case .testNet, .regTest:
+                network = DashTestNet(validatorFactory: validatorFactory)
             }
         }
         addressConverter = AddressConverter(network: network, bech32AddressConverter: bech32AddressConverter)
@@ -121,7 +124,7 @@ public class BitcoinKit {
 
         let addressSelector: IAddressSelector
         switch coin {
-        case .bitcoin: addressSelector = BitcoinAddressSelector(addressConverter: addressConverter)
+        case .bitcoin, .dash: addressSelector = BitcoinAddressSelector(addressConverter: addressConverter)
         case .bitcoinCash: addressSelector = BitcoinCashAddressSelector(addressConverter: addressConverter)
         }
 
@@ -308,6 +311,7 @@ extension BitcoinKit {
     public enum Coin {
         case bitcoin(network: Network)
         case bitcoinCash(network: Network)
+        case dash(network: Network)
 
         var rawValue: String {
             switch self {
@@ -315,6 +319,8 @@ extension BitcoinKit {
                 return "btc-\(network)"
             case .bitcoinCash(let network):
                 return "bch-\(network)"
+            case .dash(let network):
+                return "dash-\(network)"
             }
         }
     }
