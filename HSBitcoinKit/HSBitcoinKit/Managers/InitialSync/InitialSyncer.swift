@@ -52,11 +52,11 @@ class InitialSyncer {
         var observable = Observable
                 .concat(externalObservable, internalObservable)
                 .toArray()
-                .map { array -> ([PublicKey], [BlockResponse]) in
+                .map { array -> ([PublicKey], [BlockHash]) in
                     let (externalKeys, externalResponses) = array[0]
                     let (internalKeys, internalResponses) = array[1]
 
-                    let set: Set<BlockResponse> = Set(externalResponses + internalResponses)
+                    let set: Set<BlockHash> = Set(externalResponses + internalResponses)
 
                     return (externalKeys + internalKeys, Array(set))
                 }
@@ -66,21 +66,14 @@ class InitialSyncer {
         }
 
         observable.subscribe(onNext: { [weak self] keys, responses in
-                    self?.handle(forAccount: account, keys: keys, responses: responses)
+                    self?.handle(forAccount: account, keys: keys, blockHashes: responses)
                 }, onError: { [weak self] error in
                     self?.handle(error: error)
                 })
                 .disposed(by: disposeBag)
     }
 
-    private func handle(forAccount account: Int, keys: [PublicKey], responses: [BlockResponse]) {
-        let blockHashes = responses.compactMap { response -> BlockHash? in
-            if let hash = Data(hex: response.hash) {
-                return self.factory.blockHash(withHeaderHash: Data(hash.reversed()), height: response.height, order: 0)
-            }
-            return nil
-        }
-
+    private func handle(forAccount account: Int, keys: [PublicKey], blockHashes: [BlockHash]) {
         do {
             logger?.debug("Account \(account) has \(keys.count) keys and \(blockHashes.count) blocks")
             try addressManager.addKeys(keys: keys)
@@ -144,25 +137,6 @@ extension InitialSyncer: IInitialSyncer {
         reachabilityDisposable = nil
 
         peerGroup.stop()
-    }
-
-}
-
-struct BlockResponse: Hashable {
-    let hash: String
-    let height: Int
-
-    var hashValue: Int {
-        return hash.hashValue ^ height.hashValue
-    }
-
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(hash)
-        hasher.combine(height)
-    }
-
-    static func ==(lhs: BlockResponse, rhs: BlockResponse) -> Bool {
-        return lhs.height == rhs.height && lhs.hash == rhs.hash
     }
 
 }

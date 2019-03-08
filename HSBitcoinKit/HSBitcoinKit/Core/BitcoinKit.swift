@@ -128,7 +128,7 @@ public class BitcoinKit {
         }
 
 //        initialSyncApi = BtcComApi(network: network, logger: logger)
-        let bcoinApiManager = BCoinApiManager(network: network, logger: logger)
+        let bcoinApiManager = BCoinApi(network: network, logger: logger)
 
         let blockHashFetcherHelper = BlockHashFetcherHelper()
         let blockHashFetcher = BlockHashFetcher(addressSelector: addressSelector, apiManager: bcoinApiManager, helper: blockHashFetcherHelper)

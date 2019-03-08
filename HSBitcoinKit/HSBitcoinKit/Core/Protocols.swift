@@ -58,7 +58,7 @@ protocol IStateManager {
 }
 
 protocol IBlockDiscovery {
-    func discoverBlockHashes(account: Int, external: Bool) -> Observable<([PublicKey], [BlockResponse])>
+    func discoverBlockHashes(account: Int, external: Bool) -> Observable<([PublicKey], [BlockHash])>
 }
 
 protocol IFeeRateApi {
@@ -242,8 +242,8 @@ protocol IFactory {
     func bloomFilter(withElements: [Data]) -> BloomFilter
 }
 
-protocol IBCoinApiManager {
-    func getTransactions(addresses: [String]) -> Observable<[BCoinTransactionResponse]>
+protocol IBCoinApi {
+    func getTransactions(addresses: [String]) -> Observable<[BCoinApi.TransactionItem]>
 }
 
 protocol IInitialSyncer {
@@ -252,11 +252,11 @@ protocol IInitialSyncer {
 }
 
 protocol IBlockHashFetcher {
-    func getBlockHashes(publicKeys: [PublicKey]) -> Observable<(responses: [BlockResponse], lastUsedIndex: Int)>
+    func getBlockHashes(publicKeys: [PublicKey]) -> Observable<(responses: [BlockHash], lastUsedIndex: Int)>
 }
 
 protocol IBlockHashFetcherHelper {
-    func lastUsedIndex(addresses: [[String]], outputs: [BCoinTransactionOutput]) -> Int
+    func lastUsedIndex(addresses: [[String]], outputs: [BCoinApi.TransactionOutputItem]) -> Int
 }
 
 protocol IInitialSyncerDelegate: class {

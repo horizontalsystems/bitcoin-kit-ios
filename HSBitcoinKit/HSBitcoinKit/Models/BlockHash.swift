@@ -15,6 +15,19 @@ class BlockHash: Record {
         super.init()
     }
 
+    init?(reversedHeaderHashHex: String, height: Int, order: Int) {
+        guard let headerHash = Data(hex: reversedHeaderHashHex) else {
+            return nil
+        }
+
+        self.reversedHeaderHashHex = reversedHeaderHashHex
+        self.headerHash = headerHash
+        self.height = height
+        self.order = order
+
+        super.init()
+    }
+
     override class var databaseTableName: String {
         return "blockHashes"
     }
@@ -48,6 +61,19 @@ extension BlockHash: Equatable {
 
     public static func ==(lhs: BlockHash, rhs: BlockHash) -> Bool {
         return lhs.reversedHeaderHashHex == rhs.reversedHeaderHashHex
+    }
+
+}
+
+extension BlockHash: Hashable {
+
+    var hashValue: Int {
+        return headerHash.hashValue ^ height.hashValue
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(headerHash)
+        hasher.combine(height)
     }
 
 }

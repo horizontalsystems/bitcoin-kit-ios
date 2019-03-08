@@ -114,7 +114,7 @@
 		2FA5DF914AC51B522EDDCD24 /* BlockHeaderSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DFCE859758F42448A02B /* BlockHeaderSerializer.swift */; };
 		2FA5DFD4DDEA0B2F36600346 /* IPeerTaskRequesterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DAAAC2F759FD42948DDE /* IPeerTaskRequesterTests.swift */; };
 		3C7B91298318097F1615EFFF /* TransactionInputExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C7B9EBABAFF96958CFB2CB7 /* TransactionInputExtractorTests.swift */; };
-		3C7B913CB012F68959606805 /* BCoinApiManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C7B91E6E6DBA06A79ED8005 /* BCoinApiManager.swift */; };
+		3C7B913CB012F68959606805 /* BCoinApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C7B91E6E6DBA06A79ED8005 /* BCoinApi.swift */; };
 		3C7B9B6F34A3C30648B65661 /* TransactionPublicKeySetter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C7B983C4EC7F79E44560A7C /* TransactionPublicKeySetter.swift */; };
 		58AAA050DC164978E21C62FA /* RealmFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA3531D010C855B8846FC /* RealmFactory.swift */; };
 		58AAA0628AAE41265F75FE99 /* PaymentAddressParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA97A777A2F1E5734C89B /* PaymentAddressParser.swift */; };
@@ -341,7 +341,7 @@
 		2FA5DFCE859758F42448A02B /* BlockHeaderSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockHeaderSerializer.swift; sourceTree = "<group>"; };
 		2FA5DFDD75C8D896B99C2ED6 /* IMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IMessage.swift; sourceTree = "<group>"; };
 		30C70D5B1A6435BFE9B244ED /* Pods_HSBitcoinKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_HSBitcoinKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		3C7B91E6E6DBA06A79ED8005 /* BCoinApiManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BCoinApiManager.swift; sourceTree = "<group>"; };
+		3C7B91E6E6DBA06A79ED8005 /* BCoinApi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BCoinApi.swift; sourceTree = "<group>"; };
 		3C7B983C4EC7F79E44560A7C /* TransactionPublicKeySetter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionPublicKeySetter.swift; sourceTree = "<group>"; };
 		3C7B9EBABAFF96958CFB2CB7 /* TransactionInputExtractorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionInputExtractorTests.swift; sourceTree = "<group>"; };
 		5718FF6FEB058540D331F8AA /* Pods-HSBitcoinKit.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HSBitcoinKit.release.xcconfig"; path = "../Pods/Target Support Files/Pods-HSBitcoinKit/Pods-HSBitcoinKit.release.xcconfig"; sourceTree = "<group>"; };
@@ -851,7 +851,7 @@
 				58AAAE784BD9490F8775E78A /* InitialSyncer.swift */,
 				58AAAFF6092A4436B5FF46FF /* BlockHashFetcher.swift */,
 				58AAAC136573542B0D16C283 /* BlockHashFetcherHelper.swift */,
-				3C7B91E6E6DBA06A79ED8005 /* BCoinApiManager.swift */,
+				3C7B91E6E6DBA06A79ED8005 /* BCoinApi.swift */,
 			);
 			path = InitialSync;
 			sourceTree = "<group>";
@@ -1477,7 +1477,7 @@
 				58AAAE076B1930CB8B2C3C65 /* InitialSyncer.swift in Sources */,
 				58AAA445FA83E69172FFC1ED /* BlockHashFetcher.swift in Sources */,
 				58AAA572F80B63848F95B065 /* BlockHashFetcherHelper.swift in Sources */,
-				3C7B913CB012F68959606805 /* BCoinApiManager.swift in Sources */,
+				3C7B913CB012F68959606805 /* BCoinApi.swift in Sources */,
 				58AAA32402EFCE6218A9D082 /* Signal.swift in Sources */,
 				11B3536E9A39907FCA035C33 /* GrdbStorage.swift in Sources */,
 				11B35492125E5C4D4E12B779 /* FeeRate.swift in Sources */,

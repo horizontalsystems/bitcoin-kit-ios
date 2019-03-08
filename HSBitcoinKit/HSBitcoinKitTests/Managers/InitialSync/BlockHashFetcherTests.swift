@@ -7,7 +7,7 @@ import RxBlocking
 
 class BlockHashFetcherTests: XCTestCase {
 
-    private var mockApiManager: MockIBCoinApiManager!
+    private var mockApiManager: MockIBCoinApi!
     private var mockAddressSelector: MockIAddressSelector!
     private var mockBlockHashFetcherHelper: MockIBlockHashFetcherHelper!
 
@@ -25,7 +25,7 @@ class BlockHashFetcherTests: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        mockApiManager = MockIBCoinApiManager()
+        mockApiManager = MockIBCoinApi()
         mockAddressSelector = MockIAddressSelector()
         mockBlockHashFetcherHelper = MockIBlockHashFetcherHelper()
 
@@ -64,8 +64,8 @@ class BlockHashFetcherTests: XCTestCase {
     }
 
     func testNonEmptyBlockHashes() {
-        let responses = [BCoinTransactionResponse(hash: "1234", height: 1234, txOutputs: []),
-                         BCoinTransactionResponse(hash: "5678", height: 5678, txOutputs: [])]
+        let responses = [BCoinApi.TransactionItem(hash: "1234", height: 1234, txOutputs: []),
+                         BCoinApi.TransactionItem(hash: "5678", height: 5678, txOutputs: [])]
 
         stub(mockApiManager) { mock in
             when(mock.getTransactions(addresses: equal(to: addresses.flatMap { $0 }))).thenReturn(Observable.just(responses))
@@ -80,9 +80,9 @@ class BlockHashFetcherTests: XCTestCase {
         do{
             let result = try resultObservable.toBlocking().first()
             XCTAssertEqual(2, result!.responses.count)
-            XCTAssertEqual("1234", result!.responses[0].hash)
+            XCTAssertEqual("1234", result!.responses[0].reversedHeaderHashHex)
             XCTAssertEqual(1234, result!.responses[0].height)
-            XCTAssertEqual("5678", result!.responses[1].hash)
+            XCTAssertEqual("5678", result!.responses[1].reversedHeaderHashHex)
             XCTAssertEqual(5678, result!.responses[1].height)
             XCTAssertEqual(lastUsedIndex, result!.lastUsedIndex)
         } catch {

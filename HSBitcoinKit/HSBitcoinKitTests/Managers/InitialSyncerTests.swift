@@ -107,8 +107,8 @@
 //
 //    func testSync() {
 ////        stub(mockBlockDiscovery) { mock in
-////            when(mock.discoverBlockHashes(account: 0, external: true)).thenReturn(Observable.just(([PublicKey(withAccount: 0, index: 0, external: true, hdPublicKeyData: Data())], [BlockResponse(hash: "", height: 0)])))
-////            when(mock.discoverBlockHashes(account: 0, external: false)).thenReturn(Observable.just(([PublicKey(withAccount: 0, index: 0, external: false, hdPublicKeyData: Data())], [BlockResponse(hash: "", height: 0)])))
+////            when(mock.discoverBlockHashes(account: 0, external: true)).thenReturn(Observable.just(([PublicKey(withAccount: 0, index: 0, external: true, hdPublicKeyData: Data())], [BlockHash(hash: "", height: 0)])))
+////            when(mock.discoverBlockHashes(account: 0, external: false)).thenReturn(Observable.just(([PublicKey(withAccount: 0, index: 0, external: false, hdPublicKeyData: Data())], [BlockHash(hash: "", height: 0)])))
 ////            when(mock.discoverBlockHashes(account: 1, external: true)).thenReturn(Observable.just(([], [])))
 ////            when(mock.discoverBlockHashes(account: 1, external: false)).thenReturn(Observable.just(([], [])))
 ////        }
@@ -146,11 +146,11 @@
 ////        let externalPublicKey = PublicKey(withAccount: 0, index: 555, external: true, hdPublicKeyData: Data(hex: "e555")!)
 ////        let internalPublicKey = PublicKey(withAccount: 0, index: 123, external: false, hdPublicKeyData: Data(hex: "e123")!)
 ////
-////        let externalBlocks = [BlockResponse(hash: "00", height: 110),
-////                              BlockResponse(hash: "01", height: 111),
+////        let externalBlocks = [BlockHash(hash: "00", height: 110),
+////                              BlockHash(hash: "01", height: 111),
 ////        ]
-////        let internalBlocks = [BlockResponse(hash: "10", height: 112),
-////                              BlockResponse(hash: "11", height: 113),
+////        let internalBlocks = [BlockHash(hash: "10", height: 112),
+////                              BlockHash(hash: "11", height: 113),
 ////        ]
 ////
 ////        stub(mockBlockDiscovery) { mock in
