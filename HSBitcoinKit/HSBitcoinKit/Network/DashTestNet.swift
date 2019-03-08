@@ -25,7 +25,7 @@ class DashTestNet: INetwork {
     var syncableFromApi: Bool = true
 
     var maxTargetBits = 0x1e0fffff
-    var targetTimeSpan = 600                          // 10 min for 24 blocks
+    var targetTimeSpan = 3600                          // 1 hour for 24 blocks
     var targetSpacing = 150                           // 2.5 min. for mining 1 Block
 
     let dnsSeeds = [
@@ -48,14 +48,14 @@ class DashTestNet: INetwork {
     let checkpointBlock = Block(
             withHeader: BlockHeader(
                     version: 536870912,
-                    headerHash: "00000c047c7aa022871971bf7e2c066bbb5df64de1dd673495451a38e9bf167f".reversedData,
-                    previousBlockHeaderReversedHex: "00000ce22113f3eb8636e225d6a1691e132fdd587aed993e1bc9b07a0235eea4",
-                    merkleRootReversedHex: "53508abc886ee283341105a6366f78c82b22d442c9e8d42ec89c11a7b6460667",
-                    timestamp: 1544736446,
-                    bits: 0x1e0fffff,
-                    nonce: 24357
+                    headerHash: "0000000f10a125d1d97784028be7c3b737e21a3ab76d59a60f8d244ab548de14".reversedData,
+                    previousBlockHeaderReversedHex: "00000025a533a276a43aaacc27d44f1e599f07fde18b8348c1355a9bcf0ea339",
+                    merkleRootReversedHex: "fe39bdb86999ba1eaca10e56bf12528c9cce278c8dde66f399605d8e79e12fe6",
+                    timestamp: 1551699279,
+                    bits: 0x1d312d59,
+                    nonce: 4281733120
             ),
-            height: 4001)
+            height: 55032)
 
     required init(validatorFactory: IBlockValidatorFactory, blockHelper: IBlockHelper) {
         self.blockHelper = blockHelper

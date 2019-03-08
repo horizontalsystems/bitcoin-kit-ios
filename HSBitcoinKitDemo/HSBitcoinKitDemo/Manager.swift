@@ -8,7 +8,7 @@ class Manager {
 
     private let keyWords = "mnemonic_words"
 
-    let coin: BitcoinKit.Coin = .dash(network: .mainNet)
+    let coin: BitcoinKit.Coin = .dash(network: .testNet)
 
     var bitcoinKit: BitcoinKit!
 

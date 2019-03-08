@@ -25,7 +25,7 @@ class DashMainNet: INetwork {
     var syncableFromApi: Bool = true
 
     var maxTargetBits: Int { return 0x1e0ffff0 }
-    var targetTimeSpan = 600                          // 10 min for 24 blocks
+    var targetTimeSpan = 3600                          // 1 hour for 24 blocks
     var targetSpacing = 150                           // 2.5 min. for mining 1 Block
 
     let dnsSeeds = [
