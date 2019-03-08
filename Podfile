@@ -44,6 +44,8 @@ target :HSBitcoinKitTests do
   project 'HSBitcoinKit/HSBitcoinKit'
 
   internal_pods
+  pod 'Quick'
+  pod 'Nimble'
   pod 'Cuckoo'
   pod 'RxBlocking', '~> 4.0'
 end

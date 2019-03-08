@@ -78,7 +78,8 @@ public class BitcoinKit {
     public init(withWords words: [String], coin: Coin, walletId: String, newWallet: Bool = false, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) {
         let databaseFileName = "\(walletId)-\(coin.rawValue)"
 
-        storage = GrdbStorage(databaseFileName: databaseFileName)
+        realmFactory = RealmFactory(realmFileName: "\(databaseFileName).realm")
+        storage = GrdbStorage(databaseFileName: databaseFileName, realmFactory: realmFactory)
 
         difficultyEncoder = DifficultyEncoder()
         blockHelper = BlockHelper()
@@ -116,8 +117,6 @@ public class BitcoinKit {
         addressConverter = AddressConverter(network: network, bech32AddressConverter: bech32AddressConverter)
         logger = Logger(network: network, minLogLevel: minLogLevel)
 
-        realmFactory = RealmFactory(realmFileName: "\(databaseFileName).realm")
-
         hdWallet = HDWallet(seed: Mnemonic.seed(mnemonic: words), coinType: network.coinType, xPrivKey: network.xPrivKey, xPubKey: network.xPubKey, gapLimit: 20)
 
         stateManager = StateManager(storage: storage, network: network, newWallet: newWallet)
@@ -152,7 +151,7 @@ public class BitcoinKit {
         peerGroup = PeerGroup(factory: factory, network: network, listener: kitStateProvider, reachabilityManager: reachabilityManager, peerAddressManager: peerAddressManager, bloomFilterManager: bloomFilterManager, logger: logger)
 
         addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, addressConverter: addressConverter)
-        initialSyncer = InitialSyncer(realmFactory: realmFactory, listener: kitStateProvider, hdWallet: hdWallet, stateManager: stateManager, blockDiscovery: blockDiscovery, addressManager: addressManager, factory: factory, peerGroup: peerGroup, reachabilityManager: reachabilityManager, logger: logger)
+        initialSyncer = InitialSyncer(storage: storage, listener: kitStateProvider, hdWallet: hdWallet, stateManager: stateManager, blockDiscovery: blockDiscovery, addressManager: addressManager, factory: factory, peerGroup: peerGroup, reachabilityManager: reachabilityManager, logger: logger)
 
         bcoinReachabilityManager = ReachabilityManager(configProvider: feeRateApiProvider)
 
@@ -179,7 +178,7 @@ public class BitcoinKit {
         dataProvider = DataProvider(realmFactory: realmFactory, storage: storage, addressManager: addressManager, addressConverter: addressConverter, paymentAddressParser: paymentAddressParser, unspentOutputProvider: unspentOutputProvider, transactionCreator: transactionCreator, transactionBuilder: transactionBuilder, network: network)
 
         blockchain = Blockchain(network: network, factory: factory, listener: dataProvider)
-        blockSyncer = BlockSyncer(realmFactory: realmFactory, network: network, listener: kitStateProvider, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager, logger: logger)
+        blockSyncer = BlockSyncer(storage: storage, network: network, factory: factory, listener: kitStateProvider, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager, logger: logger)
 
         syncManager = SyncManager(reachabilityManager: reachabilityManager, feeRateSyncer: feeRateSyncer)
 

@@ -1,10 +1,15 @@
 import RxSwift
 import GRDB
+import RealmSwift
 
 class GrdbStorage {
     private let dbPool: DatabasePool
 
-    init(databaseFileName: String) {
+    private let realmFactory: IRealmFactory
+
+    init(databaseFileName: String, realmFactory: IRealmFactory) {
+        self.realmFactory = realmFactory
+
         let databaseURL = try! FileManager.default
                 .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
                 .appendingPathComponent("\(databaseFileName).sqlite")
@@ -47,13 +52,26 @@ class GrdbStorage {
             }
         }
 
+        migrator.registerMigration("createBlockHashes") { db in
+            try db.create(table: BlockHash.databaseTableName) { t in
+                t.column(BlockHash.Columns.reversedHeaderHashHex.name, .text).notNull()
+                t.column(BlockHash.Columns.headerHash.name, .blob).notNull()
+                t.column(BlockHash.Columns.height.name, .integer).notNull()
+                t.column(BlockHash.Columns.order.name, .integer).notNull()
+
+                t.primaryKey([BlockHash.Columns.reversedHeaderHashHex.name], onConflict: .replace)
+            }
+        }
+
         return migrator
     }
 
 }
 
 extension GrdbStorage: IStorage {
-
+    var realm: Realm {
+        return realmFactory.realm
+    }
     // FeeRate
 
     var feeRate: FeeRate? {
@@ -126,6 +144,128 @@ extension GrdbStorage: IStorage {
         }
     }
 
+    // BlockHash
+
+    var blockchainBlockHashes: [BlockHash] {
+        return try! dbPool.read { db in
+            try BlockHash.filter(BlockHash.Columns.height == 0).fetchAll(db)
+        }
+    }
+
+    var lastBlockchainBlockHash: BlockHash? {
+        return try! dbPool.read { db in
+            try BlockHash.filter(BlockHash.Columns.height == 0).order(BlockHash.Columns.order.desc).fetchOne(db)
+        }
+    }
+
+    var lastBlockHash: BlockHash? {
+        return try! dbPool.read { db in
+            try BlockHash.order(BlockHash.Columns.order.desc).fetchOne(db)
+        }
+    }
+
+    var blockHashHeaderHashes: [Data] {
+        return try! dbPool.read { db in
+            let rows = try Row.fetchCursor(db, "SELECT headerHash from blockHashes")
+            var hashes = [Data]()
+
+            while let row = try rows.next() {
+                hashes.append(row[0] as Data)
+            }
+
+            return hashes
+        }
+    }
+
+    func blockHashHeaderHashHexes(except excludedHash: String) -> [String] {
+        return try! dbPool.read { db in
+            let rows = try Row.fetchCursor(db, "SELECT reversedHeaderHashHex from blockHashes WHERE reversedHeaderHashHex != ?", arguments: [excludedHash])
+            var hexes = [String]()
+
+            while let row = try rows.next() {
+                hexes.append(row[0] as String)
+            }
+
+            return hexes
+        }
+    }
+
+    func blockHashes(filters: [(fieldName: BlockHash.Columns, value: Any, equal: Bool)], orders: [(fieldName: BlockHash.Columns, ascending: Bool)]) -> [BlockHash] {
+        return try! dbPool.read { db in
+            var request = BlockHash.all()
+
+            for (fieldName, value, equal) in filters {
+                let predicate = equal ? fieldName == DatabaseValue(value: value) : fieldName != DatabaseValue(value: value)
+                request = request.filter(predicate)
+            }
+
+            return try request.fetchAll(db)
+        }
+    }
+
+    func blockHashes(sortedBy: BlockHash.Columns, secondSortedBy: BlockHash.Columns, limit: Int) -> [BlockHash] {
+        return try! dbPool.read { db in
+            try BlockHash.order(sortedBy.asc).order(secondSortedBy.asc).limit(limit).fetchAll(db)
+        }
+    }
+
+    func add(blockHashes: [BlockHash]) {
+        _ = try? dbPool.write { db in
+            for blockHash in blockHashes {
+                try blockHash.insert(db)
+            }
+        }
+    }
+
+    func deleteBlockHash(byHashHex hashHex: String) {
+        _ = try? dbPool.write { db in
+            try BlockHash.filter(BlockHash.Columns.reversedHeaderHashHex == hashHex).deleteAll(db)
+        }
+    }
+
+    func deleteBlockchainBlockHashes() {
+        _ = try? dbPool.write { db in
+            try BlockHash.filter(BlockHash.Columns.height == 0).deleteAll(db)
+        }
+    }
+
+    // Block
+
+    var blocksCount: Int {
+        return realmFactory.realm.objects(Block.self).count
+    }
+
+    var lastBlock: Block? {
+        return realmFactory.realm.objects(Block.self).sorted(byKeyPath: "height").last
+    }
+
+    func blocksCount(reversedHeaderHashHexes: [String]) -> Int {
+        return realmFactory.realm.objects(Block.self).filter(NSPredicate(format: "reversedHeaderHashHex IN %@", reversedHeaderHashHexes)).count
+    }
+
+    func save(block: Block) {
+        let realm = realmFactory.realm
+        try? realm.write {
+            realm.add(block)
+        }
+    }
+
+    func blocks(heightGreaterThan leastHeight: Int, sortedBy sortField: String, limit: Int) -> [Block] {
+        return Array(realmFactory.realm.objects(Block.self).filter("height > %@", leastHeight).sorted(byKeyPath: sortField, ascending: false).prefix(limit))
+    }
+
+    func blocks(byHexes hexes: [String], realm: Realm) -> Results<Block> {
+        return realm.objects(Block.self).filter(NSPredicate(format: "reversedHeaderHashHex IN %@", hexes))
+    }
+
+    func block(byHeight height: Int32) -> Block? {
+        return realmFactory.realm.objects(Block.self).filter("height = %@", height).first
+    }
+
+    func block(byHeaderHash hash: Data) -> Block? {
+        return realmFactory.realm.objects(Block.self).filter("headerHash == %@", hash).first
+    }
+
     // Clear
 
     func clear() {
@@ -133,6 +273,15 @@ extension GrdbStorage: IStorage {
             try FeeRate.deleteAll(db)
             try BlockchainState.deleteAll(db)
             try PeerAddress.deleteAll(db)
+            try BlockHash.deleteAll(db)
+        }
+    }
+
+    func inTransaction(_ block: ((_ realm: Realm) throws -> Void)) throws {
+        let realm = realmFactory.realm
+
+        try realm.write {
+            try block(realm)
         }
     }
 

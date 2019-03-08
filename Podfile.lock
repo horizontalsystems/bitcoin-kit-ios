@@ -7,7 +7,9 @@ PODS:
   - HSCryptoKit (1.3.0)
   - HSHDWalletKit (1.0.4):
     - HSCryptoKit (~> 1.3.0)
+  - Nimble (7.3.4)
   - ObjectMapper (3.4.2)
+  - Quick (1.3.4)
   - Realm (3.11.2):
     - Realm/Headers (= 3.11.2)
   - Realm/Headers (3.11.2)
@@ -31,7 +33,9 @@ DEPENDENCIES:
   - GRDB.swift (~> 3.6.2)
   - HSCryptoKit (~> 1.3.0)
   - HSHDWalletKit (~> 1.0.4)
+  - Nimble
   - ObjectMapper (~> 3.4.0)
+  - Quick
   - RealmSwift (~> 3.11.0)
   - RxBlocking (~> 4.0)
   - RxRealm (~> 0.7.0)
@@ -45,7 +49,9 @@ SPEC REPOS:
     - GRDB.swift
     - HSCryptoKit
     - HSHDWalletKit
+    - Nimble
     - ObjectMapper
+    - Quick
     - Realm
     - RealmSwift
     - RxAtomic
@@ -61,7 +67,9 @@ SPEC CHECKSUMS:
   GRDB.swift: e10787d857b6b8135354b9e08fb23b4bb8e2fab7
   HSCryptoKit: 564a3888691658cba58aa60f7d037654fd3c6fb0
   HSHDWalletKit: e09162c2bb121c9db9b0cf203bd93b40965aad74
+  Nimble: 051e3d8912d40138fa5591c78594f95fb172af37
   ObjectMapper: 0d4402610f4e468903ae64629eec4784531e5c51
+  Quick: f4f7f063c524394c73ed93ac70983c609805d481
   Realm: 864477d028db77f7c5a0cba64a4892ad53db128a
   RealmSwift: 12b8262fc08020b47de4fd88eb3d5c9425b34ec7
   RxAtomic: f8d6adc1ccb87a767811269e4875887bc74dbf19
@@ -70,6 +78,6 @@ SPEC CHECKSUMS:
   RxSwift: 92fcf68dfef21f3e2ab1965363d9e7b3d787597e
   SipHash: fad90a4683e420c52ef28063063dbbce248ea6d4
 
-PODFILE CHECKSUM: 46d338e73e333b4c890358259fb3a1b1788644f9
+PODFILE CHECKSUM: a508787054874021ab6d8e31d33f36ba9ba1a182
 
 COCOAPODS: 1.5.3

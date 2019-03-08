@@ -95,6 +95,7 @@
 		2FA5DA409AB91D54163250D7 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D9929AB239235F9B6895 /* Logger.swift */; };
 		2FA5DB74D510BA9F6D9525A4 /* BloomFilterManagerDelegateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D0A6A8C6C5A4E2AAFB74 /* BloomFilterManagerDelegateTests.swift */; };
 		2FA5DB7F5BD8E25DCAF9AC83 /* PeerAddressManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DF9ADB516A45C797889D /* PeerAddressManagerTests.swift */; };
+		2FA5DBABD18D15E003686989 /* BlockSyncerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D2DDF60A9C5DA3776D8A /* BlockSyncerState.swift */; };
 		2FA5DBF35EDF66F6977BA032 /* ConnectionTimeoutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DEC11B1DA4DA336DBB28 /* ConnectionTimeoutManager.swift */; };
 		2FA5DC1C403D74796F4131EC /* InputSignerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DA9D7F78A26107F7209C /* InputSignerTests.swift */; };
 		2FA5DC27C4032E13E157A0D7 /* AddressConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D23A8EC7BB3569F51ABD /* AddressConverterTests.swift */; };
@@ -293,6 +294,7 @@
 		2FA5D27387B0CF46C2B0A22A /* PeerManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerManagerTests.swift; sourceTree = "<group>"; };
 		2FA5D2907674257196C4F586 /* GetMerkleBlocksTaskTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetMerkleBlocksTaskTests.swift; sourceTree = "<group>"; };
 		2FA5D2DAB8485F5F9E2E23B6 /* SendTransactionTaskTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SendTransactionTaskTests.swift; sourceTree = "<group>"; };
+		2FA5D2DDF60A9C5DA3776D8A /* BlockSyncerState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockSyncerState.swift; sourceTree = "<group>"; };
 		2FA5D307095385625960B0A0 /* TransactionMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionMessage.swift; sourceTree = "<group>"; };
 		2FA5D316DD8A722A5300002B /* TransactionSyncerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionSyncerTests.swift; sourceTree = "<group>"; };
 		2FA5D349EBA047CDDBE94057 /* FilterAddMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FilterAddMessage.swift; sourceTree = "<group>"; };
@@ -516,6 +518,7 @@
 			children = (
 				2FA5D05597A1DC332C67BDF7 /* Blockchain.swift */,
 				11B35C07292793FCE3096D03 /* BlockSyncer.swift */,
+				2FA5D2DDF60A9C5DA3776D8A /* BlockSyncerState.swift */,
 				58AAAC9FD7A9AD220E52F974 /* MerkleBlockValidator.swift */,
 			);
 			path = Blocks;
@@ -917,11 +920,11 @@
 				11B35D7D1D8F72DFA208F497 /* PeerTask */,
 				2FA5DEC11B1DA4DA336DBB28 /* ConnectionTimeoutManager.swift */,
 				2FA5D5A744085AD28EFBB868 /* Peer.swift */,
+				D093F45D21414CC000C5D8CD /* PeerAddressManager.swift */,
+				11B35FE0F5B2A705A5C42439 /* PeerAddressManagerState.swift */,
 				D31711E920F7192300AEF61B /* PeerConnection.swift */,
 				11B359E44D75610DF2841327 /* PeerGroup.swift */,
-				D093F45D21414CC000C5D8CD /* PeerAddressManager.swift */,
 				2FA5D3968E6E11AF76368CA5 /* PeerManager.swift */,
-				11B35FE0F5B2A705A5C42439 /* PeerAddressManagerState.swift */,
 			);
 			path = Peer;
 			sourceTree = "<group>";
@@ -1170,6 +1173,8 @@
 				"${BUILT_PRODUCTS_DIR}/RxAtomic/RxAtomic.framework",
 				"${BUILT_PRODUCTS_DIR}/RxSwift/RxSwift.framework",
 				"${BUILT_PRODUCTS_DIR}/Cuckoo/Cuckoo.framework",
+				"${BUILT_PRODUCTS_DIR}/Nimble/Nimble.framework",
+				"${BUILT_PRODUCTS_DIR}/Quick/Quick.framework",
 				"${BUILT_PRODUCTS_DIR}/RxBlocking/RxBlocking.framework",
 				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
 				"${BUILT_PRODUCTS_DIR}/BigInt/BigInt.framework",
@@ -1187,6 +1192,8 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxAtomic.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxSwift.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Cuckoo.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Nimble.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Quick.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxBlocking.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/BigInt.framework",
@@ -1230,6 +1237,7 @@
 				"$(SRCROOT)/${PROJECT_NAME}/Transactions/Scripts/Script.swift",
 				"$(SRCROOT)/${PROJECT_NAME}/Network/Peer/PeerTask/PeerTask.swift",
 				"$(SRCROOT)/${PROJECT_NAME}/Network/Peer/PeerAddressManagerState.swift",
+				"$(SRCROOT)/${PROJECT_NAME}/Blocks/BlockSyncerState.swift",
 			);
 			name = Cuckoo;
 			outputPaths = (
@@ -1475,6 +1483,7 @@
 				11B35492125E5C4D4E12B779 /* FeeRate.swift in Sources */,
 				11B35CFD56E66080A63C060E /* BlockchainState.swift in Sources */,
 				11B3579EE9017ED27A4F301E /* PeerAddressManagerState.swift in Sources */,
+				2FA5DBABD18D15E003686989 /* BlockSyncerState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
