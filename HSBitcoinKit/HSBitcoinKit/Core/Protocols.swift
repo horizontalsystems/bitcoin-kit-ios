@@ -4,7 +4,7 @@ import RealmSwift
 import Alamofire
 import HSCryptoKit
 
-enum BlockValidatorType { case header, bits, legacy, testNet, EDA, DAA }
+enum BlockValidatorType { case header, bits, legacy, testNet, EDA, DAA, DGW }
 
 protocol IDifficultyEncoder {
     func decodeCompact(bits: Int) -> BigInt
@@ -414,7 +414,7 @@ protocol INetwork: class {
     var maxTargetBits: Int { get }                                      // Maximum difficulty.
 
     var targetTimeSpan: Int { get }                                     // seconds per difficulty cycle, on average.
-    var targetSpacing: Int { get }                                      // 10 minutes per block.
+    var targetSpacing: Int { get }                                      // minutes per block.
     var heightInterval: Int { get }                                     // Blocks in cycle
 
     func validate(block: Block, previousBlock: Block) throws
@@ -433,7 +433,7 @@ extension INetwork {
     var maxTargetBits: Int { return 0x1d00ffff }
 
     var targetTimeSpan: Int { return 14 * 24 * 60 * 60 }                // Seconds in Bitcoin cycle
-    var targetSpacing: Int { return 10 * 60 }                           // 10 min. for mining 1 Block
+    var targetSpacing: Int { return 10 * 60 }                           // 10 min. for mining 1 Block (Bitcoin)
 
     var heightInterval: Int { return targetTimeSpan / targetSpacing }   // 2016 Blocks in Bitcoin cycle
 

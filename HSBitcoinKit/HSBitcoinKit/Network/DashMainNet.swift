@@ -2,9 +2,9 @@ import Foundation
 import HSCryptoX11
 
 class DashMainNet: INetwork {
-//    private let headerValidator: IBlockValidator
-//    private let bitsValidator: IBlockValidator
-//    private let difficultyValidator: IBlockValidator
+    private let headerValidator: IBlockValidator
+    private let difficultyValidator: IBlockValidator
+    private let blockHelper: IBlockHelper
 
     let merkleBlockValidator: IMerkleBlockValidator
     let protocolVersion: Int32 = 70213
@@ -23,6 +23,10 @@ class DashMainNet: INetwork {
     let coinType: UInt32 = 5
     let sigHash: SigHashType = .bitcoinAll
     var syncableFromApi: Bool = true
+
+    var maxTargetBits: Int { return 0x1e0ffff0 }
+    var targetTimeSpan = 600                          // 10 min for 24 blocks
+    var targetSpacing = 150                           // 2.5 min. for mining 1 Block
 
     let dnsSeeds = [
         "dnsseed.dash.org",
@@ -54,21 +58,20 @@ class DashMainNet: INetwork {
             ),
             height: 1030968)
 
-    required init(validatorFactory: IBlockValidatorFactory) {
-//        headerValidator = validatorFactory.validator(for: .header)
-//        bitsValidator = validatorFactory.validator(for: .bits)
-//        difficultyValidator = validatorFactory.validator(for: .legacy)
+    required init(validatorFactory: IBlockValidatorFactory, blockHelper: IBlockHelper) {
+        self.blockHelper = blockHelper
+        headerValidator = validatorFactory.validator(for: .header)
+        difficultyValidator = validatorFactory.validator(for: .DGW)
 
-        merkleBlockValidator = MerkleBlockValidator(maxBlockSize: 1_000_000_000)
+        merkleBlockValidator = MerkleBlockValidator(maxBlockSize: 2_000_000_000)
     }
 
     func validate(block: Block, previousBlock: Block) throws {
-//        try headerValidator.validate(candidate: block, block: previousBlock, network: self)
-//        if isDifficultyTransitionPoint(height: block.height) {
-//            try difficultyValidator.validate(candidate: block, block: previousBlock, network: self)
-//        } else {
-//            try bitsValidator.validate(candidate: block, block: previousBlock, network: self)
-//        }
+        try headerValidator.validate(candidate: block, block: previousBlock, network: self)
+        if blockHelper.previous(for: previousBlock, index: 24) == nil {                        //TODO: Remove trust first 24 block  in dash
+            return
+        }
+        try difficultyValidator.validate(candidate: block, block: previousBlock, network: self)
     }
 
     func generateBlockHeaderHash(from data: Data) -> Data {

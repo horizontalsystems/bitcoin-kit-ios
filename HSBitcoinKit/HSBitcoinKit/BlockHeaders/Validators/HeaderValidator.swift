@@ -17,7 +17,7 @@ class HeaderValidator: IBlockValidator {
         }
         guard let headerHashBigInt = BigInt(candidate.reversedHeaderHashHex, radix: 16),
               headerHashBigInt < difficultyEncoder.decodeCompact(bits: candidateHeader.bits) else {
-            throw BlockValidatorError.invalidProveOfWork
+            throw BlockValidatorError.invalidProofOfWork
         }
 
     }

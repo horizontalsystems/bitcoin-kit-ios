@@ -108,9 +108,9 @@ public class BitcoinKit {
             paymentAddressParser = PaymentAddressParser(validScheme: "dash", removeScheme: true)
             switch networkType {
             case .mainNet:
-                network = DashMainNet(validatorFactory: validatorFactory)
+                network = DashMainNet(validatorFactory: validatorFactory, blockHelper: blockHelper)
             case .testNet, .regTest:
-                network = DashTestNet(validatorFactory: validatorFactory)
+                network = DashTestNet(validatorFactory: validatorFactory, blockHelper: blockHelper)
             }
         }
         addressConverter = AddressConverter(network: network, bech32AddressConverter: bech32AddressConverter)

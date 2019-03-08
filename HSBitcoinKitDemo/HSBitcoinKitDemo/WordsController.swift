@@ -10,6 +10,7 @@ class WordsController: UIViewController {
         super.viewDidLoad()
 
         title = "WalletKit Demo"
+        textView?.text = "used ugly meat glad balance divorce inner artwork hire invest already piano"
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {

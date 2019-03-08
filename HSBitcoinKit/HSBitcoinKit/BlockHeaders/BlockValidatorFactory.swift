@@ -18,6 +18,7 @@ extension BlockValidatorFactory: IBlockValidatorFactory {
         case .legacy: return LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockHelper: blockHelper)
         case .EDA: return EDAValidator(encoder: difficultyEncoder, blockHelper: blockHelper)
         case .DAA: return DAAValidator(encoder: difficultyEncoder, blockHelper: blockHelper)
+        case .DGW: return DarkGravityWaveValidator(encoder: difficultyEncoder, blockHelper: blockHelper)
         }
     }
 

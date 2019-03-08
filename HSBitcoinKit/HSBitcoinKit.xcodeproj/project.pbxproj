@@ -188,6 +188,7 @@
 		58AAAF46F1284262682AA94D /* DashMainNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAACC202C4280FDD4293A9 /* DashMainNet.swift */; };
 		58AAAF9EF0EEF4BE3E5AD283 /* FeeRate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAC720D5E001AF458B29B /* FeeRate.swift */; };
 		58AAAFC2807F72C22A3E9D08 /* SegWitBech32AddressConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA7903061E05B9698EF80 /* SegWitBech32AddressConverter.swift */; };
+		58AAAFE1B5CCCA5879F1267B /* DarkGravityWaveValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA7B3935DA210265716DF /* DarkGravityWaveValidator.swift */; };
 		73CCAF11A9BCDCAF9242BC41 /* Pods_HSBitcoinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 30C70D5B1A6435BFE9B244ED /* Pods_HSBitcoinKit.framework */; };
 		80B18C5C460869800C695CE9 /* Pods_HSBitcoinKitTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2C6FEBBDAA35CAE1B816EAC /* Pods_HSBitcoinKitTests.framework */; };
 		D00DA94E213E86BC007F82D6 /* MemPoolMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00DA94D213E86BC007F82D6 /* MemPoolMessage.swift */; };
@@ -373,6 +374,7 @@
 		58AAA6BB66ECE0543BE377E3 /* ScriptTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScriptTests.swift; sourceTree = "<group>"; };
 		58AAA6E376400C5BFF7DDCDB /* LegacyTestNetDifficultyValidator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LegacyTestNetDifficultyValidator.swift; sourceTree = "<group>"; };
 		58AAA7903061E05B9698EF80 /* SegWitBech32AddressConverter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegWitBech32AddressConverter.swift; sourceTree = "<group>"; };
+		58AAA7B3935DA210265716DF /* DarkGravityWaveValidator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DarkGravityWaveValidator.swift; sourceTree = "<group>"; };
 		58AAA7B8F141FBC32B735966 /* TransactionOutputAddressExtractorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionOutputAddressExtractorTests.swift; sourceTree = "<group>"; };
 		58AAA87CCEAF26775DD01445 /* Bech32.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bech32.swift; sourceTree = "<group>"; };
 		58AAA8E5589E67C620317173 /* BlockValidatorFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockValidatorFactory.swift; sourceTree = "<group>"; };
@@ -828,6 +830,7 @@
 				58AAAB4878F15C91F08E0C15 /* BlockValidatorError.swift */,
 				58AAA6970A592ECB1C6E73D3 /* LegacyDifficultyAdjustmentValidator.swift */,
 				58AAA6E376400C5BFF7DDCDB /* LegacyTestNetDifficultyValidator.swift */,
+				58AAA7B3935DA210265716DF /* DarkGravityWaveValidator.swift */,
 			);
 			path = Validators;
 			sourceTree = "<group>";
@@ -1474,6 +1477,7 @@
 				58AAA32402EFCE6218A9D082 /* Signal.swift in Sources */,
 				58AAAF46F1284262682AA94D /* DashMainNet.swift in Sources */,
 				58AAA10C849DB1D16115A2EB /* DashTestNet.swift in Sources */,
+				58AAAFE1B5CCCA5879F1267B /* DarkGravityWaveValidator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
