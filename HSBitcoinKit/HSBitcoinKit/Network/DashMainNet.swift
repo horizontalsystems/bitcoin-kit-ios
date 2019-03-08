@@ -24,7 +24,7 @@ class DashMainNet: INetwork {
     let sigHash: SigHashType = .bitcoinAll
     var syncableFromApi: Bool = true
 
-    var maxTargetBits: Int { return 0x1e0ffff0 }
+    var maxTargetBits: Int { return 0x1e0fffff }
     var targetTimeSpan = 3600                          // 1 hour for 24 blocks
     var targetSpacing = 150                           // 2.5 min. for mining 1 Block
 

@@ -20,6 +20,9 @@ class IPeerTaskRequesterTests: XCTestCase {
         mockConnectionTimeoutManager = MockIConnectionTimeoutManager()
         mockPeerGroup = MockPeerDelegate()
 
+        stub(mockNetwork) { mock in
+            when(mock.protocolVersion.get).thenReturn(70015)
+        }
         stub(mockConnection) { mock in
             when(mock.delegate.set(any())).thenDoNothing()
             when(mock.host.get).thenReturn("")

@@ -45,6 +45,7 @@ class DAAValidatorTests: XCTestCase {
     candidate = Block(
             withHeader: BlockHeader(
                     version: 536870912,
+                    headerHash: "".reversedData,
                     previousBlockHeaderReversedHex: "000000000000000000c27f91198eb5505005a0863d8deb696a27e2f5bfffe70b",
                     merkleRootReversedHex: "1530edf433fdfd7252bda07bf38629e2c31f31560dbd30dd7f496c4b6fe7e27d",
                     timestamp: 1534820198,
@@ -68,7 +69,7 @@ class DAAValidatorTests: XCTestCase {
         var lastBlock = candidate
         for i in 0..<148 {
             let block = Block(
-                    withHeader: BlockHeader(version: 536870912, previousBlockHeaderReversedHex: "", merkleRootReversedHex: "", timestamp: timestampArray[timestampArray.count - i - 1], bits: bitsArray[bitsArray.count - i - 1], nonce: 0),
+                    withHeader: BlockHeader(version: 536870912, headerHash: "".reversedData, previousBlockHeaderReversedHex: "", merkleRootReversedHex: "", timestamp: timestampArray[timestampArray.count - i - 1], bits: bitsArray[bitsArray.count - i - 1], nonce: 0),
                     height: candidate.height - i - 1
             )
             lastBlock?.previousBlock = block

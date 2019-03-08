@@ -24,6 +24,9 @@ class PeerConnectionDelegateTests: XCTestCase {
         mockPeerGroup = MockPeerDelegate()
 
         resetMockConnection()
+        stub(mockNetwork) { mock in
+            when(mock.protocolVersion.get).thenReturn(70015)
+        }
         stub(mockPeerGroup) { mock in
             when(mock.peerDidConnect(any())).thenDoNothing()
             when(mock.peerDidDisconnect(any(), withError: any())).thenDoNothing()

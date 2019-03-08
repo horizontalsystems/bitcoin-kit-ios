@@ -41,9 +41,12 @@ class GetMerkleBlockTaskTests:XCTestCase {
         }
 
         blockHeaders = [
-            BlockHeader(version: 0, previousBlockHeaderReversedHex: Data(from: 100000).hex, merkleRootReversedHex: "00011122", timestamp: 0, bits: 0, nonce: 0),
-            BlockHeader(version: 0, previousBlockHeaderReversedHex: Data(from: 200000).hex, merkleRootReversedHex: "00011122", timestamp: 0, bits: 0, nonce: 0)
+            BlockHeader(version: 0, headerHash: "".reversedData, previousBlockHeaderReversedHex: Data(from: 100000).hex, merkleRootReversedHex: "00011122", timestamp: 0, bits: 0, nonce: 0),
+            BlockHeader(version: 0, headerHash: "".reversedData, previousBlockHeaderReversedHex: Data(from: 200000).hex, merkleRootReversedHex: "00011122", timestamp: 0, bits: 0, nonce: 0)
         ]
+        blockHeaders.forEach { header in
+            header.headerHash = CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: header))
+        }
         blockHashes = [
             BlockHash(withHeaderHash: CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: blockHeaders[0])), height: 10),
             BlockHash(withHeaderHash: CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: blockHeaders[1])), height: 15)
@@ -75,7 +78,7 @@ class GetMerkleBlockTaskTests:XCTestCase {
     }
 
     func testHandleMerkleBlock_BlockWasNotRequested() {
-        let blockHeader = BlockHeader(version: 0, previousBlockHeaderReversedHex: Data(from: 300000).hex, merkleRootReversedHex: "00011122", timestamp: 0, bits: 0, nonce: 0)
+        let blockHeader = BlockHeader(version: 0, headerHash: "".reversedData, previousBlockHeaderReversedHex: Data(from: 300000).hex, merkleRootReversedHex: "00011122", timestamp: 0, bits: 0, nonce: 0)
         let merkleBlock = MerkleBlock(header: blockHeader, transactionHashes: [], transactions: [])
 
         let handled = task.handle(merkleBlock: merkleBlock)
