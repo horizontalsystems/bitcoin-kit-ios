@@ -21,7 +21,7 @@ class BlockHash: Record {
         }
 
         self.reversedHeaderHashHex = reversedHeaderHashHex
-        self.headerHash = headerHash
+        self.headerHash = Data(headerHash.reversed())
         self.height = height
         self.order = order
 
