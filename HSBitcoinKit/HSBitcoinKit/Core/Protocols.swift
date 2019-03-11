@@ -103,7 +103,7 @@ protocol IStorage {
     func block(byHeight: Int32) -> Block?
     func block(byHeaderHash: Data) -> Block?
 
-    func clear()
+    func clear() throws
     func inTransaction(_ block: ((_ realm: Realm) throws -> Void)) throws
 }
 
@@ -246,8 +246,14 @@ protocol IBCoinApi {
     func getTransactions(addresses: [String]) -> Observable<[BCoinApi.TransactionItem]>
 }
 
+protocol ISyncManager {
+    func start()
+    func stop()
+}
+
 protocol IInitialSyncer {
-    func sync() throws
+    var delegate: IInitialSyncerDelegate? { get set }
+    func sync()
     func stop()
 }
 
@@ -260,7 +266,7 @@ protocol IBlockHashFetcherHelper {
 }
 
 protocol IInitialSyncerDelegate: class {
-    func syncFailed(error: Error)
+    func syncingFinished()
 }
 
 protocol IPaymentAddressParser {

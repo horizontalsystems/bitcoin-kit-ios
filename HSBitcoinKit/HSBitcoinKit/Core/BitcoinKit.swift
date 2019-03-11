@@ -150,8 +150,8 @@ public class BitcoinKit {
         bloomFilterManager = BloomFilterManager(realmFactory: realmFactory, factory: factory)
         peerGroup = PeerGroup(factory: factory, network: network, listener: kitStateProvider, reachabilityManager: reachabilityManager, peerAddressManager: peerAddressManager, bloomFilterManager: bloomFilterManager, logger: logger)
 
-        addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, addressConverter: addressConverter)
-        initialSyncer = InitialSyncer(storage: storage, listener: kitStateProvider, hdWallet: hdWallet, stateManager: stateManager, blockDiscovery: blockDiscovery, addressManager: addressManager, factory: factory, peerGroup: peerGroup, reachabilityManager: reachabilityManager, logger: logger)
+        addressManager = AddressManager.instance(realmFactory: realmFactory, hdWallet: hdWallet, addressConverter: addressConverter)
+        initialSyncer = InitialSyncer(storage: storage, listener: kitStateProvider, stateManager: stateManager, blockDiscovery: blockDiscovery, addressManager: addressManager, logger: logger)
 
         bcoinReachabilityManager = ReachabilityManager(configProvider: feeRateApiProvider)
 
@@ -180,10 +180,11 @@ public class BitcoinKit {
         blockchain = Blockchain(network: network, factory: factory, listener: dataProvider)
         blockSyncer = BlockSyncer(storage: storage, network: network, factory: factory, listener: kitStateProvider, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager, logger: logger)
 
-        syncManager = SyncManager(reachabilityManager: reachabilityManager, feeRateSyncer: feeRateSyncer)
+        syncManager = SyncManager(reachabilityManager: reachabilityManager, feeRateSyncer: feeRateSyncer, initialSyncer: initialSyncer, peerGroup: peerGroup)
 
         peerGroup.blockSyncer = blockSyncer
         peerGroup.transactionSyncer = transactionSyncer
+        initialSyncer.delegate = syncManager
 
         kitStateProvider.delegate = self
         transactionProcessor.listener = dataProvider
@@ -196,20 +197,12 @@ public class BitcoinKit {
 extension BitcoinKit {
 
     public func start() throws {
-        bloomFilterManager.regenerateBloomFilter()
-        try initialSyncer.sync()
         syncManager.start()
     }
 
     public func clear() throws {
-        initialSyncer.stop()
-        storage.clear()
-
-        let realm = realmFactory.realm
-
-        try realm.write {
-            realm.deleteAll()
-        }
+        syncManager.stop()
+        try storage.clear()
     }
 
 }

@@ -268,12 +268,18 @@ extension GrdbStorage: IStorage {
 
     // Clear
 
-    func clear() {
-        _ = try? dbPool.write { db in
+    func clear() throws {
+        _ = try dbPool.write { db in
             try FeeRate.deleteAll(db)
             try BlockchainState.deleteAll(db)
             try PeerAddress.deleteAll(db)
             try BlockHash.deleteAll(db)
+        }
+
+        let realm = realmFactory.realm
+
+        try realm.write {
+            realm.deleteAll()
         }
     }
 

@@ -190,6 +190,7 @@ extension DataProvider: IDataProvider {
         let realm = realmFactory.realm
 
         let blocks = realm.objects(Block.self).sorted(byKeyPath: "height")
+        let transactions = realm.objects(Transaction.self)
         let pubKeys = realm.objects(PublicKey.self)
 
         for pubKey in pubKeys {
@@ -204,7 +205,7 @@ extension DataProvider: IDataProvider {
             lines.append("legacy: \(addressConverter.convertToLegacy(keyHash: pubKey.keyHash, version: network.pubKeyHash, addressType: .pubKeyHash).stringValue) --- bech32: \(bechAddress ?? "none") --- SH(WPKH): \(addressConverter.convertToLegacy(keyHash: pubKey.scriptHashForP2WPKH, version: network.scriptHash, addressType: .scriptHash).stringValue) \n")
         }
         lines.append("PUBLIC KEYS COUNT: \(pubKeys.count)")
-
+        lines.append("TRANSACTIONS COUNT: \(transactions.count)")
         lines.append("BLOCK COUNT: \(blocks.count)")
         if let block = blocks.first {
             lines.append("First Block: \(block.height) --- \(block.reversedHeaderHashHex)")
