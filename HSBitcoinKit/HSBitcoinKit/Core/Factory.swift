@@ -24,8 +24,8 @@ class Factory: IFactory {
         return Peer(host: host, network: network, connection: PeerConnection(host: host, network: network, logger: logger), connectionTimeoutManager: ConnectionTimeoutManager(), logger: logger)
     }
 
-    func blockHash(withHeaderHash headerHash: Data, height: Int) -> BlockHash {
-        return BlockHash(withHeaderHash: headerHash, height: height)
+    func blockHash(withHeaderHash headerHash: Data, height: Int, order: Int = 0) -> BlockHash {
+        return BlockHash(headerHash: headerHash, height: height, order: order)
     }
 
     func bloomFilter(withElements elements: [Data]) -> BloomFilter {

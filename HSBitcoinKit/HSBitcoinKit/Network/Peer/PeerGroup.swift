@@ -18,7 +18,7 @@ class PeerGroup {
 
     private let factory: IFactory
     private let network: INetwork
-    private var peerHostManager: IPeerHostManager
+    private var peerAddressManager: IPeerAddressManager
     private var bloomFilterManager: IBloomFilterManager
     private var peerCount: Int
 
@@ -33,7 +33,7 @@ class PeerGroup {
     private let logger: Logger?
 
     init(factory: IFactory, network: INetwork, listener: ISyncStateListener, reachabilityManager: IReachabilityManager,
-         peerHostManager: IPeerHostManager, bloomFilterManager: IBloomFilterManager,
+         peerAddressManager: IPeerAddressManager, bloomFilterManager: IBloomFilterManager,
          peerCount: Int = 10, peerManager: IPeerManager = PeerManager(),
          peersQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Local Queue", qos: .userInitiated),
          inventoryQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Inventory Queue", qos: .background),
@@ -42,7 +42,7 @@ class PeerGroup {
         self.network = network
         self.syncStateListener = listener
         self.reachabilityManager = reachabilityManager
-        self.peerHostManager = peerHostManager
+        self.peerAddressManager = peerAddressManager
         self.bloomFilterManager = bloomFilterManager
         self.peerCount = peerCount
         self.peerManager = peerManager
@@ -52,7 +52,7 @@ class PeerGroup {
 
         self.logger = logger
 
-        self.peerHostManager.delegate = self
+        self.peerAddressManager.delegate = self
         self.bloomFilterManager.delegate = self
     }
 
@@ -67,7 +67,7 @@ class PeerGroup {
             }
 
             for _ in self.peerManager.totalPeersCount()..<self.peerCount {
-                if let host = self.peerHostManager.peerHost {
+                if let host = self.peerAddressManager.ip {
                     let peer = self.factory.peer(withHost: host, network: self.network, logger: self.logger)
                     peer.delegate = self
                     peer.localBestBlockHeight = self.blockSyncer?.localDownloadedBestBlockHeight ?? 0
@@ -268,7 +268,11 @@ extension PeerGroup: PeerDelegate {
             logger?.warning("Peer \(peer.logName)(\(peer.host)) disconnected. Network reachable: \(reachabilityManager.isReachable). Error: \(error)")
         }
 
-        peerHostManager.hostDisconnected(host: peer.host, withError: error, networkReachable: reachabilityManager.isReachable)
+        if reachabilityManager.isReachable && error != nil {
+            peerAddressManager.markFailed(ip: peer.host)
+        } else {
+            peerAddressManager.markSuccess(ip: peer.host)
+        }
 
         peersQueue.async {
             self.peerManager.peerDisconnected(peer: peer)
@@ -313,7 +317,7 @@ extension PeerGroup: PeerDelegate {
     }
 
     func peer(_ peer: IPeer, didReceiveAddresses addresses: [NetworkAddress]) {
-        self.peerHostManager.addHosts(hosts: addresses.map {
+        self.peerAddressManager.add(ips: addresses.map {
             $0.address
         })
     }
@@ -352,9 +356,9 @@ extension PeerGroup: PeerDelegate {
     }
 }
 
-extension PeerGroup: PeerHostManagerDelegate {
+extension PeerGroup: IPeerAddressManagerDelegate {
 
-    func newHostsAdded() {
+    func newIpsAdded() {
         connectPeersIfRequired()
     }
 

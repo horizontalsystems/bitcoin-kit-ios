@@ -25,10 +25,10 @@ class PeerHostManagerDelegateTests: PeerGroupTests {
             when(mock.totalPeersCount()).thenReturn(1)
         }
 
-        delegate.newHostsAdded()
+        delegate.newIpsAdded()
         waitForMainQueue()
 
-        verify(mockPeerHostManager).peerHost.get
+        verify(mockPeerAddressManager).ip.get
     }
 
 }

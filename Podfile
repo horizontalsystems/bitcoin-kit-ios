@@ -10,19 +10,22 @@ project 'HSBitcoinKit/HSBitcoinKit'
 
 
 def internal_pods
-  pod 'HSCryptoKit', '~> 1.1.0'
-  pod 'HSHDWalletKit', '~> 1.0.3'
+  pod 'HSCryptoKit', '~> 1.3.0'
+  pod 'HSHDWalletKit', '~> 1.0.4'
 end
 
 def kit_pods
   internal_pods
 
   pod 'Alamofire', '~> 4.8.0'
-  pod 'ObjectMapper', '~> 3.3.0'
+  pod 'ObjectMapper', '~> 3.4.0'
 
   pod 'RxSwift', '~> 4.0'
 
   pod 'BigInt', '~> 3.1.0'
+
+  pod 'GRDB.swift', '~> 3.6.2'
+
   pod 'RealmSwift', '~> 3.11.0'
   pod 'RxRealm', '~> 0.7.0'
 end
@@ -41,6 +44,8 @@ target :HSBitcoinKitTests do
   project 'HSBitcoinKit/HSBitcoinKit'
 
   internal_pods
+  pod 'Quick'
+  pod 'Nimble'
   pod 'Cuckoo'
   pod 'RxBlocking', '~> 4.0'
 end

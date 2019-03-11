@@ -17,7 +17,7 @@ class BlockDiscoveryBatch {
         gapLimit = wallet.gapLimit
     }
 
-    private func fetchRecursive(account: Int, external: Bool, publicKeys: [PublicKey] = [], blockHashes: [BlockResponse] = [], prevCount: Int = 0, prevLastUsedIndex: Int = -1, startIndex: Int = 0) -> Observable<([PublicKey], [BlockResponse])> {
+    private func fetchRecursive(account: Int, external: Bool, publicKeys: [PublicKey] = [], blockHashes: [BlockHash] = [], prevCount: Int = 0, prevLastUsedIndex: Int = -1, startIndex: Int = 0) -> Observable<([PublicKey], [BlockHash])> {
         let maxHeight = self.maxHeight
 
         let count = gapLimit - prevCount + prevLastUsedIndex + 1
@@ -29,7 +29,7 @@ class BlockDiscoveryBatch {
                 return Observable.error(error)
             }
         }
-        return blockHashFetcher.getBlockHashes(publicKeys: newPublicKeys).flatMap { [weak self] fetcherResult -> Observable<([PublicKey], [BlockResponse])> in
+        return blockHashFetcher.getBlockHashes(publicKeys: newPublicKeys).flatMap { [weak self] fetcherResult -> Observable<([PublicKey], [BlockHash])> in
             let resultBlockHashes = blockHashes + fetcherResult.responses.filter { $0.height <= maxHeight }
             let resultPublicKeys = publicKeys + newPublicKeys
 
@@ -46,7 +46,7 @@ class BlockDiscoveryBatch {
 
 extension BlockDiscoveryBatch: IBlockDiscovery {
 
-    func discoverBlockHashes(account: Int, external: Bool) -> Observable<([PublicKey], [BlockResponse])> {
+    func discoverBlockHashes(account: Int, external: Bool) -> Observable<([PublicKey], [BlockHash])> {
         return fetchRecursive(account: account, external: external)
     }
 

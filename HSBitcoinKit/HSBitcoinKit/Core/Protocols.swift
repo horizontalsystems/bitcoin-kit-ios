@@ -2,6 +2,7 @@ import BigInt
 import RxSwift
 import RealmSwift
 import Alamofire
+import GRDB
 
 enum BlockValidatorType { case header, bits, legacy, testNet, EDA, DAA }
 
@@ -44,11 +45,12 @@ protocol IReachabilityManager {
     var reachabilitySignal: Signal { get }
 }
 
-protocol IPeerHostManager {
-    var delegate: PeerHostManagerDelegate? { get set }
-    var peerHost: String? { get }
-    func hostDisconnected(host: String, withError error: Error?, networkReachable: Bool)
-    func addHosts(hosts: [String])
+protocol IPeerAddressManager: class {
+    var delegate: IPeerAddressManagerDelegate? { get set }
+    var ip: String? { get }
+    func markSuccess(ip: String)
+    func markFailed(ip: String)
+    func add(ips: [String])
 }
 
 protocol IStateManager {
@@ -56,34 +58,57 @@ protocol IStateManager {
 }
 
 protocol IBlockDiscovery {
-    func discoverBlockHashes(account: Int, external: Bool) -> Observable<([PublicKey], [BlockResponse])>
+    func discoverBlockHashes(account: Int, external: Bool) -> Observable<([PublicKey], [BlockHash])>
 }
 
 protocol IFeeRateApi {
     func getFeeRate() -> Observable<FeeRate>
 }
 
-protocol IFeeRateStorage {
+protocol IStorage {
+    var realm: Realm { get }
+
     var feeRate: FeeRate? { get }
-    func save(feeRate: FeeRate)
-    func clear()
+    func set(feeRate: FeeRate)
+
+    var initialRestored: Bool? { get }
+    func set(initialRestored: Bool)
+
+    func existingPeerAddresses(fromIps ips: [String]) -> [PeerAddress]
+    func leastScorePeerAddress(excludingIps: [String]) -> PeerAddress?
+    func save(peerAddresses: [PeerAddress])
+    func increasePeerAddressScore(ip: String)
+    func deletePeerAddress(byIp ip: String)
+
+
+
+    var blockchainBlockHashes: [BlockHash] { get }
+    var lastBlockchainBlockHash: BlockHash? { get }
+    func blockHashHeaderHashHexes(except: String) -> [String]
+    func deleteBlockchainBlockHashes()
+
+    var blockHashHeaderHashes: [Data] { get }
+    var lastBlockHash: BlockHash? { get }
+    func blockHashes(filters: [(fieldName: BlockHash.Columns, value: Any, equal: Bool)], orders: [(fieldName: BlockHash.Columns, ascending: Bool)]) -> [BlockHash]
+    func blockHashes(sortedBy: BlockHash.Columns, secondSortedBy: BlockHash.Columns, limit: Int) -> [BlockHash]
+    func add(blockHashes: [BlockHash])
+    func deleteBlockHash(byHashHex: String)
+
+    var blocksCount: Int { get }
+    var lastBlock: Block? { get }
+    func blocksCount(reversedHeaderHashHexes: [String]) -> Int
+    func save(block: Block)
+    func blocks(heightGreaterThan: Int, sortedBy: String, limit: Int) -> [Block]
+    func blocks(byHexes: [String], realm: Realm) -> Results<Block>
+    func block(byHeight: Int32) -> Block?
+    func block(byHeaderHash: Data) -> Block?
+
+    func clear() throws
+    func inTransaction(_ block: ((_ realm: Realm) throws -> Void)) throws
 }
 
 protocol IFeeRateSyncer {
-    var delegate: IFeeRateSyncerDelegate? { get set }
     func sync()
-}
-
-protocol IFeeRateSyncerDelegate: class {
-    func didSync(feeRate: FeeRate)
-}
-
-protocol IFeeRateManager {
-    var subject: PublishSubject<Void> { get }
-    var feeRate: FeeRate { get }
-    var lowValue: Int { get }
-    var mediumValue: Int { get }
-    var highValue: Int { get }
 }
 
 protocol IAddressSelector {
@@ -197,18 +222,19 @@ protocol ISyncStateListener: class {
     func currentBestBlockHeightUpdated(height: Int32, maxBlockHeight: Int32)
 }
 
-protocol PeerHostManagerDelegate: class {
-    func newHostsAdded()
+protocol IPeerAddressManagerDelegate: class {
+    func newIpsAdded()
 }
 
-protocol IHostDiscovery {
-    func lookup(dnsSeed: String) -> [String]
+protocol IPeerDiscovery {
+    var peerAddressManager: IPeerAddressManager? { get set }
+    func lookup(dnsSeed: String)
 }
 
 protocol IFactory {
     func block(withHeader header: BlockHeader, previousBlock: Block) -> Block
     func block(withHeader header: BlockHeader, height: Int) -> Block
-    func blockHash(withHeaderHash headerHash: Data, height: Int) -> BlockHash
+    func blockHash(withHeaderHash headerHash: Data, height: Int, order: Int) -> BlockHash
     func peer(withHost host: String, network: INetwork, logger: Logger?) -> IPeer
     func transaction(version: Int, inputs: [TransactionInput], outputs: [TransactionOutput], lockTime: Int) -> Transaction
     func transactionInput(withPreviousOutputTxReversedHex previousOutputTxReversedHex: String, previousOutputIndex: Int, script: Data, sequence: Int) -> TransactionInput
@@ -216,25 +242,31 @@ protocol IFactory {
     func bloomFilter(withElements: [Data]) -> BloomFilter
 }
 
-protocol IBCoinApiManager {
-    func getTransactions(addresses: [String]) -> Observable<[BCoinTransactionResponse]>
+protocol IBCoinApi {
+    func getTransactions(addresses: [String]) -> Observable<[BCoinApi.TransactionItem]>
+}
+
+protocol ISyncManager {
+    func start()
+    func stop()
 }
 
 protocol IInitialSyncer {
-    func sync() throws
+    var delegate: IInitialSyncerDelegate? { get set }
+    func sync()
     func stop()
 }
 
 protocol IBlockHashFetcher {
-    func getBlockHashes(publicKeys: [PublicKey]) -> Observable<(responses: [BlockResponse], lastUsedIndex: Int)>
+    func getBlockHashes(publicKeys: [PublicKey]) -> Observable<(responses: [BlockHash], lastUsedIndex: Int)>
 }
 
 protocol IBlockHashFetcherHelper {
-    func lastUsedIndex(addresses: [[String]], outputs: [BCoinTransactionOutput]) -> Int
+    func lastUsedIndex(addresses: [[String]], outputs: [BCoinApi.TransactionOutputItem]) -> Int
 }
 
 protocol IInitialSyncerDelegate: class {
-    func syncFailed(error: Error)
+    func syncingFinished()
 }
 
 protocol IPaymentAddressParser {
