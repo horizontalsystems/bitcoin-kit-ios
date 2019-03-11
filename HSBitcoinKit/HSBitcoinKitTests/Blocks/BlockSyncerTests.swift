@@ -49,14 +49,6 @@ class BlockSyncerTests: QuickSpec {
             stub(mockState) { mock in
                 when(mock.iteration(hasPartialBlocks: any())).thenDoNothing()
             }
-
-            syncer = BlockSyncer(storage: mockStorage, network: mockNetwork, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
-                    blockchain: mockBlockchain, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager, hashCheckpointThreshold: 100,
-                    state: mockState)
-
-            verify(mockStorage).blocksCount.get()
-            verify(mockStorage).lastBlock.get()
-            verify(mockListener).initialBestBlockHeightUpdated(height: equal(to: 0))
         }
 
         afterEach {
@@ -65,103 +57,143 @@ class BlockSyncerTests: QuickSpec {
             syncer = nil
         }
 
-        describe("#initialization") {
+        context("static methods") {
+            describe("#instance") {
+                context("when there are some blocks in storage") {
+                    beforeEach {
+                        stub(mockStorage) { mock in
+                            when(mock.blocksCount.get).thenReturn(1)
+                            when(mock.lastBlock.get).thenReturn(checkpointBlock)
+                        }
+
+                        stub(mockListener) { mock in
+                            when(mock.initialBestBlockHeightUpdated(height: equal(to: Int32(checkpointBlock.height)))).thenDoNothing()
+                        }
+
+                        let _ = BlockSyncer.instance(storage: mockStorage, network: mockNetwork, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
+                                blockchain: mockBlockchain, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager, hashCheckpointThreshold: 100)
+                    }
+
+                    it("doesn't save checkpointBlock to storage") {
+                        verify(mockStorage, never()).save(block: any())
+                        verify(mockStorage).blocksCount.get()
+                        verify(mockStorage).lastBlock.get()
+                        verifyNoMoreInteractions(mockStorage)
+                    }
+
+                    it("triggers #initialBestBlockHeightUpdated event on listener") {
+                        verify(mockListener).initialBestBlockHeightUpdated(height: equal(to: Int32(checkpointBlock.height)))
+                        verifyNoMoreInteractions(mockListener)
+                    }
+                }
+
+                context("when there's no block in storage") {
+                    beforeEach {
+                        stub(mockStorage) { mock in
+                            when(mock.blocksCount.get).thenReturn(0)
+                            when(mock.lastBlock.get).thenReturn(checkpointBlock)
+                            when(mock.save(block: sameInstance(as: checkpointBlock))).thenDoNothing()
+                        }
+                        stub(mockListener) { mock in
+                            when(mock.initialBestBlockHeightUpdated(height: equal(to: Int32(checkpointBlock.height)))).thenDoNothing()
+                        }
+
+                        let _ = BlockSyncer.instance(storage: mockStorage, network: mockNetwork, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
+                                blockchain: mockBlockchain, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager, hashCheckpointThreshold: 100)
+                    }
+
+                    it("saves checkpointBlock to storage") {
+                        verify(mockStorage).save(block: sameInstance(as: checkpointBlock))
+                    }
+
+                    it("triggers #initialBestBlockHeightUpdated event on listener") {
+                        verify(mockListener).initialBestBlockHeightUpdated(height: equal(to: Int32(checkpointBlock.height)))
+                    }
+                }
+            }
+        }
+
+        context("instance methods") {
             beforeEach {
-                reset(mockStorage, mockListener)
+                syncer = BlockSyncer(storage: mockStorage, network: mockNetwork, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
+                        blockchain: mockBlockchain, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager,
+                        hashCheckpointThreshold: 100, logger: nil, state: mockState)
             }
 
-            context("when there are some blocks in storage") {
-                beforeEach {
-                    stub(mockStorage) { mock in
-                        when(mock.blocksCount.get).thenReturn(1)
-                        when(mock.lastBlock.get).thenReturn(checkpointBlock)
-                    }
-
-                    stub(mockListener) { mock in
-                        when(mock.initialBestBlockHeightUpdated(height: equal(to: Int32(checkpointBlock.height)))).thenDoNothing()
-                    }
-
-                    let _ = BlockSyncer(storage: mockStorage, network: mockNetwork, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
-                            blockchain: mockBlockchain, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager, hashCheckpointThreshold: 100)
-                }
-
-                it("doesn't save checkpointBlock to storage") {
-                    verify(mockStorage, never()).save(block: any())
-                    verify(mockStorage).blocksCount.get()
-                    verify(mockStorage).lastBlock.get()
-                    verifyNoMoreInteractions(mockStorage)
-                }
-
-                it("triggers #initialBestBlockHeightUpdated event on listener") {
-                    verify(mockListener).initialBestBlockHeightUpdated(height: equal(to: Int32(checkpointBlock.height)))
-                    verifyNoMoreInteractions(mockListener)
-                }
-            }
-
-            context("when there's no block in storage") {
-                beforeEach {
-                    stub(mockStorage) { mock in
-                        when(mock.blocksCount.get).thenReturn(0)
-                        when(mock.lastBlock.get).thenReturn(checkpointBlock)
-                        when(mock.save(block: sameInstance(as: checkpointBlock))).thenDoNothing()
-                    }
-                    stub(mockListener) { mock in
-                        when(mock.initialBestBlockHeightUpdated(height: equal(to: Int32(checkpointBlock.height)))).thenDoNothing()
-                    }
-
-                    let _ = BlockSyncer(storage: mockStorage, network: mockNetwork, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
-                            blockchain: mockBlockchain, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager, hashCheckpointThreshold: 100)
-                }
-
-                it("saves checkpointBlock to storage") {
-                    verify(mockStorage).save(block: sameInstance(as: checkpointBlock))
-                }
-
-                it("triggers #initialBestBlockHeightUpdated event on listener") {
-                    verify(mockListener).initialBestBlockHeightUpdated(height: equal(to: Int32(checkpointBlock.height)))
-                }
-            }
-        }
-
-        describe("#localDownloadedBestBlockHeight") {
-            context("when there are some blocks in storage") {
-                it("returns the height of the last block") {
-                    stub(mockStorage) { mock in
-                        when(mock.lastBlock.get).thenReturn(checkpointBlock)
-                    }
-                    expect(syncer.localDownloadedBestBlockHeight).to(equal(Int32(checkpointBlock.height)))
-                }
-            }
-
-            context("when there's no block in storage") {
-                it("returns 0") {
-                    stub(mockStorage) { mock in
-                        when(mock.lastBlock.get).thenReturn(nil)
-                    }
-                    expect(syncer.localDownloadedBestBlockHeight).to(equal(0))
-                }
-            }
-        }
-
-        describe("#localKnownBestBlockHeight") {
-            let blockHash = BlockHash(headerHash: Data(repeating: 0, count: 32), height: 0, order: 0)
-
-            context("when no blockHashes") {
-                beforeEach {
-                    stub(mockStorage) { mock in
-                        when(mock.blockchainBlockHashes.get).thenReturn([])
-                        when(mock.blocksCount(reversedHeaderHashHexes: equal(to: []))).thenReturn(0)
+            describe("#localDownloadedBestBlockHeight") {
+                context("when there are some blocks in storage") {
+                    it("returns the height of the last block") {
+                        stub(mockStorage) { mock in
+                            when(mock.lastBlock.get).thenReturn(checkpointBlock)
+                        }
+                        expect(syncer.localDownloadedBestBlockHeight).to(equal(Int32(checkpointBlock.height)))
                     }
                 }
 
-                context("when no blocks") {
+                context("when there's no block in storage") {
                     it("returns 0") {
-                        expect(syncer.localKnownBestBlockHeight).to(equal(0))
+                        stub(mockStorage) { mock in
+                            when(mock.lastBlock.get).thenReturn(nil)
+                        }
+                        expect(syncer.localDownloadedBestBlockHeight).to(equal(0))
+                    }
+                }
+            }
+
+            describe("#localKnownBestBlockHeight") {
+                let blockHash = BlockHash(headerHash: Data(repeating: 0, count: 32), height: 0, order: 0)
+
+                context("when no blockHashes") {
+                    beforeEach {
+                        stub(mockStorage) { mock in
+                            when(mock.blockchainBlockHashes.get).thenReturn([])
+                            when(mock.blocksCount(reversedHeaderHashHexes: equal(to: []))).thenReturn(0)
+                        }
+                    }
+
+                    context("when no blocks") {
+                        it("returns 0") {
+                            expect(syncer.localKnownBestBlockHeight).to(equal(0))
+                        }
+                    }
+
+                    context("when there are some blocks") {
+                        it("returns last block's height + blocks count") {
+                            stub(mockStorage) { mock in
+                                when(mock.lastBlock.get).thenReturn(checkpointBlock)
+                            }
+                            expect(syncer.localKnownBestBlockHeight).to(equal(Int32(checkpointBlock.height)))
+                        }
                     }
                 }
 
-                context("when there are some blocks") {
-                    it("returns last block's height + blocks count") {
+                context("when there are some blockHashes which haven't downloaded blocks") {
+                    beforeEach {
+                        stub(mockStorage) { mock in
+                            when(mock.blockchainBlockHashes.get).thenReturn([blockHash])
+                            when(mock.blocksCount(reversedHeaderHashHexes: equal(to: [blockHash.reversedHeaderHashHex]))).thenReturn(0)
+                        }
+                    }
+
+                    it("returns lastBlock + blockHashes count") {
+                        expect(syncer.localKnownBestBlockHeight).to(equal(1))
+                        stub(mockStorage) { mock in
+                            when(mock.lastBlock.get).thenReturn(checkpointBlock)
+                        }
+                        expect(syncer.localKnownBestBlockHeight).to(equal(Int32(checkpointBlock.height + 1)))
+                    }
+                }
+
+                context("when there are some blockHashes which have downloaded blocks") {
+                    beforeEach {
+                        stub(mockStorage) { mock in
+                            when(mock.blockchainBlockHashes.get).thenReturn([blockHash])
+                            when(mock.blocksCount(reversedHeaderHashHexes: equal(to: [blockHash.reversedHeaderHashHex]))).thenReturn(1)
+                        }
+                    }
+
+                    it("returns lastBlock + count of blockHashes without downloaded blocks") {
+                        expect(syncer.localKnownBestBlockHeight).to(equal(0))
                         stub(mockStorage) { mock in
                             when(mock.lastBlock.get).thenReturn(checkpointBlock)
                         }
@@ -170,348 +202,314 @@ class BlockSyncerTests: QuickSpec {
                 }
             }
 
-            context("when there are some blockHashes which haven't downloaded blocks") {
+            describe("#prepareForDownload") {
+                let emptyBlocks = realm.objects(Block.self)
+
                 beforeEach {
                     stub(mockStorage) { mock in
-                        when(mock.blockchainBlockHashes.get).thenReturn([blockHash])
-                        when(mock.blocksCount(reversedHeaderHashHexes: equal(to: [blockHash.reversedHeaderHashHex]))).thenReturn(0)
+                        when(mock.blockHashHeaderHashHexes(except: equal(to: checkpointBlock.reversedHeaderHashHex))).thenReturn([])
+                        when(mock.blocks(byHexes: equal(to: []), realm: equal(to: realm))).thenReturn(emptyBlocks)
                     }
-                }
-
-                it("returns lastBlock + blockHashes count") {
-                    expect(syncer.localKnownBestBlockHeight).to(equal(1))
-                    stub(mockStorage) { mock in
-                        when(mock.lastBlock.get).thenReturn(checkpointBlock)
+                    stub(mockBlockchain) { mock in
+                        when(mock.deleteBlocks(blocks: equal(to: emptyBlocks), realm: equal(to: realm))).thenDoNothing()
                     }
-                    expect(syncer.localKnownBestBlockHeight).to(equal(Int32(checkpointBlock.height + 1)))
-                }
-            }
 
-            context("when there are some blockHashes which have downloaded blocks") {
-                beforeEach {
-                    stub(mockStorage) { mock in
-                        when(mock.blockchainBlockHashes.get).thenReturn([blockHash])
-                        when(mock.blocksCount(reversedHeaderHashHexes: equal(to: [blockHash.reversedHeaderHashHex]))).thenReturn(1)
-                    }
+                    syncer.prepareForDownload()
                 }
 
-                it("returns lastBlock + count of blockHashes without downloaded blocks") {
-                    expect(syncer.localKnownBestBlockHeight).to(equal(0))
-                    stub(mockStorage) { mock in
-                        when(mock.lastBlock.get).thenReturn(checkpointBlock)
-                    }
-                    expect(syncer.localKnownBestBlockHeight).to(equal(Int32(checkpointBlock.height)))
-                }
-            }
-        }
-
-        describe("#prepareForDownload") {
-            let emptyBlocks = realm.objects(Block.self)
-
-            beforeEach {
-                stub(mockStorage) { mock in
-                    when(mock.blockHashHeaderHashHexes(except: equal(to: checkpointBlock.reversedHeaderHashHex))).thenReturn([])
-                    when(mock.blocks(byHexes: equal(to: []), realm: equal(to: realm))).thenReturn(emptyBlocks)
-                }
-                stub(mockBlockchain) { mock in
-                    when(mock.deleteBlocks(blocks: equal(to: emptyBlocks), realm: equal(to: realm))).thenDoNothing()
-                }
-
-                syncer.prepareForDownload()
-            }
-
-            it("handles partial blocks") {
-                verify(mockAddressManager).fillGap()
-                verify(mockBloomFilterManager).regenerateBloomFilter()
-                verify(mockState).iteration(hasPartialBlocks: equal(to: false))
-            }
-
-            it("clears BlockHashes") {
-                verify(mockStorage).deleteBlockchainBlockHashes()
-            }
-
-            it("clears partialBlock blocks") {
-                verify(mockStorage).blockHashHeaderHashHexes(except: equal(to: checkpointBlock.reversedHeaderHashHex))
-                verify(mockStorage).blocks(byHexes: equal(to: []), realm: equal(to: realm))
-                verify(mockBlockchain).deleteBlocks(blocks: equal(to: emptyBlocks), realm: equal(to: realm))
-            }
-
-            it("handles fork") {
-                verify(mockBlockchain).handleFork(realm: equal(to: realm))
-            }
-        }
-
-        describe("#downloadIterationCompleted") {
-            context("when iteration has partial blocks") {
                 it("handles partial blocks") {
-                    stub(mockState) { mock in
-                        when(mock.iterationHasPartialBlocks.get).thenReturn(true)
-                    }
-                    syncer.downloadIterationCompleted()
-
                     verify(mockAddressManager).fillGap()
                     verify(mockBloomFilterManager).regenerateBloomFilter()
                     verify(mockState).iteration(hasPartialBlocks: equal(to: false))
                 }
+
+                it("clears BlockHashes") {
+                    verify(mockStorage).deleteBlockchainBlockHashes()
+                }
+
+                it("clears partialBlock blocks") {
+                    verify(mockStorage).blockHashHeaderHashHexes(except: equal(to: checkpointBlock.reversedHeaderHashHex))
+                    verify(mockStorage).blocks(byHexes: equal(to: []), realm: equal(to: realm))
+                    verify(mockBlockchain).deleteBlocks(blocks: equal(to: emptyBlocks), realm: equal(to: realm))
+                }
+
+                it("handles fork") {
+                    verify(mockBlockchain).handleFork(realm: equal(to: realm))
+                }
             }
 
-            context("when iteration has not partial blocks") {
-                it("does not handle partial blocks") {
+            describe("#downloadIterationCompleted") {
+                context("when iteration has partial blocks") {
+                    it("handles partial blocks") {
+                        stub(mockState) { mock in
+                            when(mock.iterationHasPartialBlocks.get).thenReturn(true)
+                        }
+                        syncer.downloadIterationCompleted()
+
+                        verify(mockAddressManager).fillGap()
+                        verify(mockBloomFilterManager).regenerateBloomFilter()
+                        verify(mockState).iteration(hasPartialBlocks: equal(to: false))
+                    }
+                }
+
+                context("when iteration has not partial blocks") {
+                    it("does not handle partial blocks") {
+                        stub(mockState) { mock in
+                            when(mock.iterationHasPartialBlocks.get).thenReturn(false)
+                        }
+                        syncer.downloadIterationCompleted()
+
+                        verify(mockAddressManager, never()).fillGap()
+                        verify(mockBloomFilterManager, never()).regenerateBloomFilter()
+                        verify(mockState, never()).iteration(hasPartialBlocks: any())
+                    }
+                }
+            }
+
+            describe("#downloadCompleted") {
+                it("handles fork") {
+                    syncer.downloadCompleted()
+                    verify(mockBlockchain).handleFork(realm: equal(to: realm))
+                }
+            }
+
+            describe("#downloadFailed") {
+                let emptyBlocks = realm.objects(Block.self)
+
+                beforeEach {
+                    stub(mockStorage) { mock in
+                        when(mock.blockHashHeaderHashHexes(except: equal(to: checkpointBlock.reversedHeaderHashHex))).thenReturn([])
+                        when(mock.blocks(byHexes: equal(to: []), realm: equal(to: realm))).thenReturn(emptyBlocks)
+                    }
+                    stub(mockBlockchain) { mock in
+                        when(mock.deleteBlocks(blocks: equal(to: emptyBlocks), realm: equal(to: realm))).thenDoNothing()
+                    }
+
+                    syncer.downloadFailed()
+                }
+
+                it("handles partial blocks") {
+                    verify(mockAddressManager).fillGap()
+                    verify(mockBloomFilterManager).regenerateBloomFilter()
+                    verify(mockState).iteration(hasPartialBlocks: equal(to: false))
+                }
+
+                it("clears BlockHashes") {
+                    verify(mockStorage).deleteBlockchainBlockHashes()
+                }
+
+                it("clears partialBlock blocks") {
+                    verify(mockStorage).blockHashHeaderHashHexes(except: equal(to: checkpointBlock.reversedHeaderHashHex))
+                    verify(mockStorage).blocks(byHexes: equal(to: []), realm: equal(to: realm))
+                    verify(mockBlockchain).deleteBlocks(blocks: equal(to: emptyBlocks), realm: equal(to: realm))
+                }
+
+                it("handles fork") {
+                    verify(mockBlockchain).handleFork(realm: equal(to: realm))
+                }
+            }
+
+            describe("#getBlockHashes") {
+                it("returns first 500 blockhashes") {
+                    let blockHashes = [BlockHash(headerHash: Data(repeating: 0, count: 0), height: 0, order: 0)]
+                    stub(mockStorage) { mock in
+                        when(mock.blockHashes(sortedBy: equal(to: BlockHash.Columns.order), secondSortedBy: equal(to: BlockHash.Columns.height), limit: equal(to: 500))).thenReturn(blockHashes)
+                    }
+
+                    expect(syncer.getBlockHashes()).to(equal(blockHashes))
+                    verify(mockStorage).blockHashes(sortedBy: equal(to: BlockHash.Columns.order), secondSortedBy: equal(to: BlockHash.Columns.height), limit: equal(to: 500))
+                }
+            }
+
+            describe("#getBlockLocatorHashes(peerLastBlockHeight:)") {
+                let peerLastBlockHeight: Int32 = 10
+                let firstBlock = TestData.firstBlock
+                let secondBlock = TestData.secondBlock
+
+                beforeEach {
+                    stub(mockStorage) { mock in
+                        when(mock.lastBlockchainBlockHash.get).thenReturn(nil)
+                        when(mock.blocks(heightGreaterThan: equal(to: checkpointBlock.height), sortedBy: equal(to: "height"), limit: equal(to: 10))).thenReturn([Block]())
+                        when(mock.block(byHeight: equal(to: peerLastBlockHeight))).thenReturn(nil)
+                    }
+                }
+
+                context("when there's no blocks or blockhashes") {
+                    it("returns checkpointBlock's header hash") {
+                        expect(syncer.getBlockLocatorHashes(peerLastBlockHeight: peerLastBlockHeight)).to(equal([checkpointBlock.headerHash]))
+                    }
+                }
+
+                context("when there are blockchain blockhashes") {
+                    it("returns last blockchain blockhash") {
+                        let blockHash = BlockHash(headerHash: Data(repeating: 0, count: 0), height: 0, order: 0)
+                        stub(mockStorage) { mock in
+                            when(mock.lastBlockchainBlockHash.get).thenReturn(blockHash)
+                            when(mock.blocks(heightGreaterThan: equal(to: checkpointBlock.height), sortedBy: equal(to: "height"), limit: equal(to: 10))).thenReturn([firstBlock, secondBlock])
+                        }
+
+                        expect(syncer.getBlockLocatorHashes(peerLastBlockHeight: peerLastBlockHeight)).to(equal([
+                            blockHash.headerHash, checkpointBlock.headerHash
+                        ]))
+                    }
+                }
+
+                context("when there's no blockhashes but there are blocks") {
+                    it("returns last 10 blocks' header hashes") {
+                        stub(mockStorage) { mock in
+                            when(mock.blocks(heightGreaterThan: equal(to: checkpointBlock.height), sortedBy: equal(to: "height"), limit: equal(to: 10))).thenReturn([secondBlock, firstBlock])
+                        }
+
+                        expect(syncer.getBlockLocatorHashes(peerLastBlockHeight: peerLastBlockHeight)).to(equal([
+                            secondBlock.headerHash, firstBlock.headerHash, checkpointBlock.headerHash
+                        ]))
+                    }
+                }
+
+                context("when the peers last block is already in storage") {
+                    it("returns peers last block's headerHash instead of checkpointBlocks'") {
+                        stub(mockStorage) { mock in
+                            when(mock.block(byHeight: equal(to: peerLastBlockHeight))).thenReturn(firstBlock)
+                        }
+
+                        expect(syncer.getBlockLocatorHashes(peerLastBlockHeight: peerLastBlockHeight)).to(equal([firstBlock.headerHash]))
+                    }
+                }
+            }
+
+            describe("#add(blockHashes:)") {
+                let existingBlockHash = Data(repeating: 0, count: 32)
+                let newBlockHash = Data(repeating: 1, count: 32)
+                let blockHash = BlockHash(headerHash: existingBlockHash, height: 0, order: 10)
+
+                beforeEach {
+                    stub(mockStorage) { mock in
+                        when(mock.blockHashHeaderHashes.get).thenReturn([existingBlockHash])
+                        when(mock.add(blockHashes: any())).thenDoNothing()
+                    }
+                    stub(mockFactory) { mock in
+                        when(mock.blockHash(withHeaderHash: equal(to: newBlockHash), height: equal(to: 0), order: any())).thenReturn(blockHash)
+                    }
+                }
+
+                context("when there's a blockHash in storage") {
+                    it("sets order of given blockhashes starting from last blockhashes order") {
+                        let lastBlockHash = BlockHash(headerHash: Data(repeating: 0, count: 0), height: 0, order: 10)
+                        stub(mockStorage) { mock in
+                            when(mock.lastBlockHash.get).thenReturn(lastBlockHash)
+                        }
+
+                        syncer.add(blockHashes: [existingBlockHash, newBlockHash])
+
+                        verify(mockFactory).blockHash(withHeaderHash: equal(to: newBlockHash), height: equal(to: 0), order: equal(to: lastBlockHash.order + 1))
+                        verify(mockStorage).add(blockHashes: equal(to: [blockHash]))
+                    }
+                }
+
+                context("when there's no blockhashes") {
+                    it("sets order of given blockhashes starting from 0") {
+                        stub(mockStorage) { mock in
+                            when(mock.lastBlockHash.get).thenReturn(nil)
+                        }
+
+                        syncer.add(blockHashes: [existingBlockHash, newBlockHash])
+
+                        verify(mockFactory).blockHash(withHeaderHash: equal(to: newBlockHash), height: equal(to: 0), order: equal(to: 1))
+                        verify(mockStorage).add(blockHashes: equal(to: [blockHash]))
+                    }
+                }
+            }
+
+            describe("#handle(merkleBlock:,maxBlockHeight:)") {
+                let block = TestData.firstBlock
+                let merkleBlock = MerkleBlock(header: block.header!, transactionHashes: [], transactions: [])
+                let maxBlockHeight: Int32 = Int32(block.height + 100)
+
+                beforeEach {
+                    stub(mockBlockchain) { mock in
+                        when(mock.forceAdd(merkleBlock: equal(to: merkleBlock), height: equal(to: block.height), realm: equal(to: realm))).thenReturn(block)
+                        when(mock.connect(merkleBlock: equal(to: merkleBlock), realm: equal(to: realm))).thenReturn(block)
+                    }
+                    stub(mockTransactionProcessor) { mock in
+                        when(mock.process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: equal(to: false), realm: equal(to: realm))).thenDoNothing()
+                    }
                     stub(mockState) { mock in
                         when(mock.iterationHasPartialBlocks.get).thenReturn(false)
                     }
-                    syncer.downloadIterationCompleted()
-
-                    verify(mockAddressManager, never()).fillGap()
-                    verify(mockBloomFilterManager, never()).regenerateBloomFilter()
-                    verify(mockState, never()).iteration(hasPartialBlocks: any())
-                }
-            }
-        }
-
-        describe("#downloadCompleted") {
-            it("handles fork") {
-                syncer.downloadCompleted()
-                verify(mockBlockchain).handleFork(realm: equal(to: realm))
-            }
-        }
-
-        describe("#downloadFailed") {
-            let emptyBlocks = realm.objects(Block.self)
-
-            beforeEach {
-                stub(mockStorage) { mock in
-                    when(mock.blockHashHeaderHashHexes(except: equal(to: checkpointBlock.reversedHeaderHashHex))).thenReturn([])
-                    when(mock.blocks(byHexes: equal(to: []), realm: equal(to: realm))).thenReturn(emptyBlocks)
-                }
-                stub(mockBlockchain) { mock in
-                    when(mock.deleteBlocks(blocks: equal(to: emptyBlocks), realm: equal(to: realm))).thenDoNothing()
-                }
-
-                syncer.downloadFailed()
-            }
-
-            it("handles partial blocks") {
-                verify(mockAddressManager).fillGap()
-                verify(mockBloomFilterManager).regenerateBloomFilter()
-                verify(mockState).iteration(hasPartialBlocks: equal(to: false))
-            }
-
-            it("clears BlockHashes") {
-                verify(mockStorage).deleteBlockchainBlockHashes()
-            }
-
-            it("clears partialBlock blocks") {
-                verify(mockStorage).blockHashHeaderHashHexes(except: equal(to: checkpointBlock.reversedHeaderHashHex))
-                verify(mockStorage).blocks(byHexes: equal(to: []), realm: equal(to: realm))
-                verify(mockBlockchain).deleteBlocks(blocks: equal(to: emptyBlocks), realm: equal(to: realm))
-            }
-
-            it("handles fork") {
-                verify(mockBlockchain).handleFork(realm: equal(to: realm))
-            }
-        }
-
-        describe("#getBlockHashes") {
-            it("returns first 500 blockhashes") {
-                let blockHashes = [BlockHash(headerHash: Data(repeating: 0, count: 0), height: 0, order: 0)]
-                stub(mockStorage) { mock in
-                    when(mock.blockHashes(sortedBy: equal(to: BlockHash.Columns.order), secondSortedBy: equal(to: BlockHash.Columns.height), limit: equal(to: 500))).thenReturn(blockHashes)
-                }
-
-                expect(syncer.getBlockHashes()).to(equal(blockHashes))
-                verify(mockStorage).blockHashes(sortedBy: equal(to: BlockHash.Columns.order), secondSortedBy: equal(to: BlockHash.Columns.height), limit: equal(to: 500))
-            }
-        }
-
-        describe("#getBlockLocatorHashes(peerLastBlockHeight:)") {
-            let peerLastBlockHeight: Int32 = 10
-            let firstBlock = TestData.firstBlock
-            let secondBlock = TestData.secondBlock
-
-            beforeEach {
-                stub(mockStorage) { mock in
-                    when(mock.lastBlockchainBlockHash.get).thenReturn(nil)
-                    when(mock.blocks(heightGreaterThan: equal(to: checkpointBlock.height), sortedBy: equal(to: "height"), limit: equal(to: 10))).thenReturn([Block]())
-                    when(mock.block(byHeight: equal(to: peerLastBlockHeight))).thenReturn(nil)
-                }
-            }
-
-            context("when there's no blocks or blockhashes") {
-                it("returns checkpointBlock's header hash") {
-                    expect(syncer.getBlockLocatorHashes(peerLastBlockHeight: peerLastBlockHeight)).to(equal([checkpointBlock.headerHash]))
-                }
-            }
-
-            context("when there are blockchain blockhashes") {
-                it("returns last blockchain blockhash") {
-                    let blockHash = BlockHash(headerHash: Data(repeating: 0, count: 0), height: 0, order: 0)
                     stub(mockStorage) { mock in
-                        when(mock.lastBlockchainBlockHash.get).thenReturn(blockHash)
-                        when(mock.blocks(heightGreaterThan: equal(to: checkpointBlock.height), sortedBy: equal(to: "height"), limit: equal(to: 10))).thenReturn([firstBlock, secondBlock])
+                        when(mock.deleteBlockHash(byHashHex: equal(to: block.reversedHeaderHashHex))).thenDoNothing()
                     }
-
-                    expect(syncer.getBlockLocatorHashes(peerLastBlockHeight: peerLastBlockHeight)).to(equal([
-                        blockHash.headerHash, checkpointBlock.headerHash
-                    ]))
-                }
-            }
-
-            context("when there's no blockhashes but there are blocks") {
-                it("returns last 10 blocks' header hashes") {
-                    stub(mockStorage) { mock in
-                        when(mock.blocks(heightGreaterThan: equal(to: checkpointBlock.height), sortedBy: equal(to: "height"), limit: equal(to: 10))).thenReturn([secondBlock, firstBlock])
+                    stub(mockListener) { mock in
+                        when(mock.currentBestBlockHeightUpdated(height: equal(to: Int32(block.height)), maxBlockHeight: equal(to: maxBlockHeight))).thenDoNothing()
                     }
-
-                    expect(syncer.getBlockLocatorHashes(peerLastBlockHeight: peerLastBlockHeight)).to(equal([
-                        secondBlock.headerHash, firstBlock.headerHash, checkpointBlock.headerHash
-                    ]))
                 }
-            }
 
-            context("when the peers last block is already in storage") {
-                it("returns peers last block's headerHash instead of checkpointBlocks'") {
-                    stub(mockStorage) { mock in
-                        when(mock.block(byHeight: equal(to: peerLastBlockHeight))).thenReturn(firstBlock)
-                    }
-
-                    expect(syncer.getBlockLocatorHashes(peerLastBlockHeight: peerLastBlockHeight)).to(equal([firstBlock.headerHash]))
-                }
-            }
-        }
-
-        describe("#add(blockHashes:)") {
-            let existingBlockHash = Data(repeating: 0, count: 32)
-            let newBlockHash = Data(repeating: 1, count: 32)
-            let blockHash = BlockHash(headerHash: existingBlockHash, height: 0, order: 10)
-
-            beforeEach {
-                stub(mockStorage) { mock in
-                    when(mock.blockHashHeaderHashes.get).thenReturn([existingBlockHash])
-                    when(mock.add(blockHashes: any())).thenDoNothing()
-                }
-                stub(mockFactory) { mock in
-                    when(mock.blockHash(withHeaderHash: equal(to: newBlockHash), height: equal(to: 0), order: any())).thenReturn(blockHash)
-                }
-            }
-
-            context("when there's a blockHash in storage") {
-                it("sets order of given blockhashes starting from last blockhashes order") {
-                    let lastBlockHash = BlockHash(headerHash: Data(repeating: 0, count: 0), height: 0, order: 10)
-                    stub(mockStorage) { mock in
-                        when(mock.lastBlockHash.get).thenReturn(lastBlockHash)
-                    }
-
-                    syncer.add(blockHashes: [existingBlockHash, newBlockHash])
-
-                    verify(mockFactory).blockHash(withHeaderHash: equal(to: newBlockHash), height: equal(to: 0), order: equal(to: lastBlockHash.order + 1))
-                    verify(mockStorage).add(blockHashes: equal(to: [blockHash]))
-                }
-            }
-
-            context("when there's no blockhashes") {
-                it("sets order of given blockhashes starting from 0") {
-                    stub(mockStorage) { mock in
-                        when(mock.lastBlockHash.get).thenReturn(nil)
-                    }
-
-                    syncer.add(blockHashes: [existingBlockHash, newBlockHash])
-
-                    verify(mockFactory).blockHash(withHeaderHash: equal(to: newBlockHash), height: equal(to: 0), order: equal(to: 1))
-                    verify(mockStorage).add(blockHashes: equal(to: [blockHash]))
-                }
-            }
-        }
-
-        describe("#handle(merkleBlock:,maxBlockHeight:)") {
-            let block = TestData.firstBlock
-            let merkleBlock = MerkleBlock(header: block.header!, transactionHashes: [], transactions: [])
-            let maxBlockHeight: Int32 = Int32(block.height + 100)
-
-            beforeEach {
-                stub(mockBlockchain) { mock in
-                    when(mock.forceAdd(merkleBlock: equal(to: merkleBlock), height: equal(to: block.height), realm: equal(to: realm))).thenReturn(block)
-                    when(mock.connect(merkleBlock: equal(to: merkleBlock), realm: equal(to: realm))).thenReturn(block)
-                }
-                stub(mockTransactionProcessor) { mock in
-                    when(mock.process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: equal(to: false), realm: equal(to: realm))).thenDoNothing()
-                }
-                stub(mockState) { mock in
-                    when(mock.iterationHasPartialBlocks.get).thenReturn(false)
-                }
-                stub(mockStorage) { mock in
-                    when(mock.deleteBlockHash(byHashHex: equal(to: block.reversedHeaderHashHex))).thenDoNothing()
-                }
-                stub(mockListener) { mock in
-                    when(mock.currentBestBlockHeightUpdated(height: equal(to: Int32(block.height)), maxBlockHeight: equal(to: maxBlockHeight))).thenDoNothing()
-                }
-            }
-
-            it("handles merkleBlock") {
-                try! syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: maxBlockHeight)
-
-                verify(mockBlockchain).connect(merkleBlock: equal(to: merkleBlock), realm: equal(to: realm))
-                verify(mockTransactionProcessor).process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: equal(to: false), realm: equal(to: realm))
-                verify(mockStorage).deleteBlockHash(byHashHex: equal(to: block.reversedHeaderHashHex))
-                verify(mockListener).currentBestBlockHeightUpdated(height: equal(to: Int32(block.height)), maxBlockHeight: equal(to: maxBlockHeight))
-            }
-
-            context("when merklBlocks's height is null") {
-                it("force adds the block to blockchain") {
-                    merkleBlock.height = block.height
+                it("handles merkleBlock") {
                     try! syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: maxBlockHeight)
 
-                    verify(mockBlockchain).forceAdd(merkleBlock: equal(to: merkleBlock), height: equal(to: block.height), realm: equal(to: realm))
-                    verifyNoMoreInteractions(mockBlockchain)
+                    verify(mockBlockchain).connect(merkleBlock: equal(to: merkleBlock), realm: equal(to: realm))
+                    verify(mockTransactionProcessor).process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: equal(to: false), realm: equal(to: realm))
+                    verify(mockStorage).deleteBlockHash(byHashHex: equal(to: block.reversedHeaderHashHex))
+                    verify(mockListener).currentBestBlockHeightUpdated(height: equal(to: Int32(block.height)), maxBlockHeight: equal(to: maxBlockHeight))
+                }
+
+                context("when merklBlocks's height is null") {
+                    it("force adds the block to blockchain") {
+                        merkleBlock.height = block.height
+                        try! syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: maxBlockHeight)
+
+                        verify(mockBlockchain).forceAdd(merkleBlock: equal(to: merkleBlock), height: equal(to: block.height), realm: equal(to: realm))
+                        verifyNoMoreInteractions(mockBlockchain)
+                    }
+                }
+
+                context("when bloom filter is expired while processing transactions") {
+                    it("sets iteration state to hasPartialBlocks") {
+                        stub(mockTransactionProcessor) { mock in
+                            when(mock.process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: equal(to: false), realm: equal(to: realm))).thenThrow(BloomFilterManager.BloomFilterExpired())
+                        }
+                        try! syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: maxBlockHeight)
+
+                        verify(mockState).iteration(hasPartialBlocks: equal(to: true))
+                    }
+                }
+
+                context("when iteration has partial blocks") {
+                    it("doesn't delete block hash") {
+                        stub(mockState) { mock in
+                            when(mock.iterationHasPartialBlocks.get).thenReturn(true)
+                        }
+                        stub(mockTransactionProcessor) { mock in
+                            when(mock.process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: equal(to: true), realm: equal(to: realm))).thenDoNothing()
+                        }
+                        try! syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: maxBlockHeight)
+
+                        verify(mockStorage, never()).deleteBlockHash(byHashHex: equal(to: block.reversedHeaderHashHex))
+                    }
                 }
             }
 
-            context("when bloom filter is expired while processing transactions") {
-                it("sets iteration state to hasPartialBlocks") {
-                    stub(mockTransactionProcessor) { mock in
-                        when(mock.process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: equal(to: false), realm: equal(to: realm))).thenThrow(BloomFilterManager.BloomFilterExpired())
-                    }
-                    try! syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: maxBlockHeight)
+            describe("#shouldRequestBlock(withHash:)") {
+                let hash = Data(repeating: 0, count: 32)
 
-                    verify(mockState).iteration(hasPartialBlocks: equal(to: true))
+                context("when the given block is in storage") {
+                    it("returns false") {
+                        stub(mockStorage) { mock in
+                            when(mock.block(byHeaderHash: equal(to: hash))).thenReturn(TestData.firstBlock)
+                        }
+
+                        expect(syncer.shouldRequestBlock(withHash: hash)).to(beFalsy())
+                    }
                 }
-            }
 
-            context("when iteration has partial blocks") {
-                it("doesn't delete block hash") {
-                    stub(mockState) { mock in
-                        when(mock.iterationHasPartialBlocks.get).thenReturn(true)
+                context("when the given block is not in storage") {
+                    it("returns true") {
+                        stub(mockStorage) { mock in
+                            when(mock.block(byHeaderHash: equal(to: hash))).thenReturn(nil)
+                        }
+
+                        expect(syncer.shouldRequestBlock(withHash: hash)).to(beTruthy())
                     }
-                    stub(mockTransactionProcessor) { mock in
-                        when(mock.process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: equal(to: true), realm: equal(to: realm))).thenDoNothing()
-                    }
-                    try! syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: maxBlockHeight)
-
-                    verify(mockStorage, never()).deleteBlockHash(byHashHex: equal(to: block.reversedHeaderHashHex))
-                }
-            }
-        }
-
-        describe("#shouldRequestBlock(withHash:)") {
-            let hash = Data(repeating: 0, count: 32)
-
-            context("when the given block is in storage") {
-                it("returns false") {
-                    stub(mockStorage) { mock in
-                        when(mock.block(byHeaderHash: equal(to: hash))).thenReturn(TestData.firstBlock)
-                    }
-
-                    expect(syncer.shouldRequestBlock(withHash: hash)).to(beFalsy())
-                }
-            }
-
-            context("when the given block is not in storage") {
-                it("returns true") {
-                    stub(mockStorage) { mock in
-                        when(mock.block(byHeaderHash: equal(to: hash))).thenReturn(nil)
-                    }
-
-                    expect(syncer.shouldRequestBlock(withHash: hash)).to(beTruthy())
                 }
             }
         }

@@ -20,7 +20,7 @@ class BlockSyncer {
 
     init(storage: IStorage, network: INetwork, factory: IFactory, listener: ISyncStateListener, transactionProcessor: ITransactionProcessor,
          blockchain: IBlockchain, addressManager: IAddressManager, bloomFilterManager: IBloomFilterManager,
-         hashCheckpointThreshold: Int = 100, logger: Logger? = nil, state: BlockSyncerState = BlockSyncerState()
+         hashCheckpointThreshold: Int, logger: Logger?, state: BlockSyncerState
     ) {
         self.storage = storage
         self.network = network
@@ -31,15 +31,8 @@ class BlockSyncer {
         self.bloomFilterManager = bloomFilterManager
         self.hashCheckpointThreshold = hashCheckpointThreshold
         self.listener = listener
-
         self.logger = logger
         self.state = state
-
-        if storage.blocksCount == 0 {
-            storage.save(block: network.checkpointBlock)
-        }
-
-        listener.initialBestBlockHeightUpdated(height: localDownloadedBestBlockHeight)
     }
 
     var localDownloadedBestBlockHeight: Int32 {
@@ -175,6 +168,27 @@ extension BlockSyncer: IBlockSyncer {
 
     func shouldRequestBlock(withHash hash: Data) -> Bool {
         return storage.block(byHeaderHash: hash) == nil
+    }
+
+}
+
+extension BlockSyncer {
+
+    public static func instance(storage: IStorage, network: INetwork, factory: IFactory, listener: ISyncStateListener, transactionProcessor: ITransactionProcessor,
+                                blockchain: IBlockchain, addressManager: IAddressManager, bloomFilterManager: IBloomFilterManager,
+                                hashCheckpointThreshold: Int = 100, logger: Logger? = nil, state: BlockSyncerState = BlockSyncerState()) -> BlockSyncer {
+
+        let syncer = BlockSyncer(storage: storage, network: network, factory: factory, listener: listener, transactionProcessor: transactionProcessor,
+                blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager,
+                hashCheckpointThreshold: hashCheckpointThreshold, logger: logger, state: state)
+
+        if storage.blocksCount == 0 {
+            storage.save(block: network.checkpointBlock)
+        }
+
+        listener.initialBestBlockHeightUpdated(height: syncer.localDownloadedBestBlockHeight)
+
+        return syncer
     }
 
 }
