@@ -266,6 +266,34 @@ extension GrdbStorage: IStorage {
         return realmFactory.realm.objects(Block.self).filter("headerHash == %@", hash).first
     }
 
+
+    // Transaction
+    func newTransactions() -> [Transaction] {
+        return Array(realmFactory.realm.objects(Transaction.self).filter("status = %@", TransactionStatus.new.rawValue))
+    }
+
+    func newTransaction(byReversedHashHex hex: String) -> Transaction? {
+        return realmFactory.realm.objects(Transaction.self)
+                .filter("reversedHashHex = %@ AND status = %@", hex, TransactionStatus.new.rawValue)
+                .first
+    }
+
+    func relayedTransactionExists(byReversedHashHex hex: String) -> Bool {
+        return !realmFactory.realm.objects(Transaction.self).filter("reversedHashHex = %@ AND status = %@", hex, TransactionStatus.relayed.rawValue).isEmpty
+    }
+
+    // SentTransaction
+    func sentTransaction(byReversedHashHex hex: String) -> SentTransaction? {
+        return realmFactory.realm.objects(SentTransaction.self).filter("reversedHashHex = %@", hex).first
+    }
+
+    func update(sentTransaction: SentTransaction) {
+    }
+
+    func add(sentTransaction: SentTransaction, realm: Realm) {
+        realm.add(sentTransaction)
+    }
+
     // Clear
 
     func clear() throws {

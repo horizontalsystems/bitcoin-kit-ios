@@ -103,6 +103,17 @@ protocol IStorage {
     func block(byHeight: Int32) -> Block?
     func block(byHeaderHash: Data) -> Block?
 
+
+    func newTransactions() -> [Transaction]
+    func newTransaction(byReversedHashHex: String) -> Transaction?
+    func relayedTransactionExists(byReversedHashHex: String) -> Bool
+
+
+    func sentTransaction(byReversedHashHex: String) -> SentTransaction?
+    func update(sentTransaction: SentTransaction)
+    func add(sentTransaction: SentTransaction, realm: Realm)
+
+
     func clear() throws
     func inTransaction(_ block: ((_ realm: Realm) throws -> Void)) throws
 }

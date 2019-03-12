@@ -1,11 +1,13 @@
 import XCTest
+import Quick
+import Nimble
 import Cuckoo
 import RealmSwift
 @testable import HSBitcoinKit
 
 class TransactionSyncerTests: XCTestCase {
 
-    private var mockRealmFactory: MockIRealmFactory!
+    private var mockStorage: MockIStorage!
     private var mockTransactionProcessor: MockITransactionProcessor!
     private var mockAddressManager: MockIAddressManager!
     private var mockBloomFilterManager: MockIBloomFilterManager!
@@ -25,15 +27,14 @@ class TransactionSyncerTests: XCTestCase {
             realm.deleteAll()
         }
 
-        mockRealmFactory = MockIRealmFactory()
-        stub(mockRealmFactory) { mock in
-            when(mock.realm.get).thenReturn(realm)
-        }
-
+        mockStorage = MockIStorage()
         mockTransactionProcessor = MockITransactionProcessor()
         mockAddressManager = MockIAddressManager()
         mockBloomFilterManager = MockIBloomFilterManager()
 
+        stub(mockStorage) { mock in
+            when(mock.inTransaction(_: any())).then({ try? $0(self.realm) })
+        }
         stub(mockTransactionProcessor) { mock in
             when(mock.process(transactions: any(), inBlock: any(), skipCheckBloomFilter: any(), realm: any())).thenDoNothing()
         }
@@ -49,12 +50,12 @@ class TransactionSyncerTests: XCTestCase {
         totalRetriesPeriod = 60 * 60 * 24
 
         syncer = TransactionSyncer(
-                realmFactory: mockRealmFactory, processor: mockTransactionProcessor, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager,
+                storage: mockStorage, processor: mockTransactionProcessor, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager,
                 maxRetriesCount: maxRetriesCount, retriesPeriod: retriesPeriod, totalRetriesPeriod: totalRetriesPeriod)
     }
 
     override func tearDown() {
-        mockRealmFactory = nil
+        mockStorage = nil
         mockTransactionProcessor = nil
         mockAddressManager = nil
         mockBloomFilterManager = nil
@@ -70,20 +71,15 @@ class TransactionSyncerTests: XCTestCase {
     }
 
     func testPendingTransactions() {
-        let relayedTransaction = TestData.p2pkhTransaction
         let newTransaction = TestData.p2wpkhTransaction
         let newSentTransaction = TestData.p2pkTransaction
         let sentTransaction = SentTransaction(reversedHashHex: newSentTransaction.reversedHashHex)
-        relayedTransaction.status = .relayed
-        newTransaction.status = .new
-        newSentTransaction.status = .new
         sentTransaction.lastSendTime = CACurrentMediaTime() - retriesPeriod - 1
 
-        try! realm.write {
-            realm.add(relayedTransaction)
-            realm.add(newTransaction)
-            realm.add(newSentTransaction)
-            realm.add(sentTransaction)
+        stub(mockStorage) { mock in
+            when(mock.newTransactions()).thenReturn([newTransaction, newSentTransaction])
+            when(mock.sentTransaction(byReversedHashHex: newTransaction.reversedHashHex)).thenReturn(nil)
+            when(mock.sentTransaction(byReversedHashHex: newSentTransaction.reversedHashHex)).thenReturn(sentTransaction)
         }
 
         var transactions = syncer.pendingTransactions()
@@ -91,45 +87,39 @@ class TransactionSyncerTests: XCTestCase {
         XCTAssertEqual(transactions.first!.dataHash, newTransaction.dataHash)
         XCTAssertEqual(transactions.last!.dataHash, newSentTransaction.dataHash)
 
-        try! realm.write {
-            realm.delete(newTransaction)
-            // sentTransaction retriesCount has exceeded
-            sentTransaction.retriesCount = maxRetriesCount
+        stub(mockStorage) { mock in
+            when(mock.newTransactions()).thenReturn([newSentTransaction])
         }
-
+        sentTransaction.retriesCount = maxRetriesCount
         transactions = syncer.pendingTransactions()
         XCTAssertEqual(transactions.count, 0)
 
-        try! realm.write {
-            sentTransaction.retriesCount = 0
-            // sentTransaction retriesPeriod has not elapsed
-            sentTransaction.lastSendTime = CACurrentMediaTime()
-        }
-
+        sentTransaction.retriesCount = 0
+        sentTransaction.lastSendTime = CACurrentMediaTime()
         transactions = syncer.pendingTransactions()
         XCTAssertEqual(transactions.count, 0)
 
-        try! realm.write {
-            sentTransaction.lastSendTime = CACurrentMediaTime() - retriesPeriod - 1
-            // sentTransaction totalRetriesPeriod has elapsed
-            sentTransaction.firstSendTime = CACurrentMediaTime() - totalRetriesPeriod - 1
-        }
-
+        sentTransaction.lastSendTime = CACurrentMediaTime() - retriesPeriod - 1
+        sentTransaction.firstSendTime = CACurrentMediaTime() - totalRetriesPeriod - 1
         transactions = syncer.pendingTransactions()
         XCTAssertEqual(transactions.count, 0)
     }
 
     func testHandleSentTransaction() {
         let transaction = TestData.p2pkhTransaction
-        transaction.status = .new
 
-        try! realm.write {
-            realm.add(transaction)
+        stub(mockStorage) { mock in
+            when(mock.newTransaction(byReversedHashHex: transaction.reversedHashHex)).thenReturn(transaction)
+            when(mock.sentTransaction(byReversedHashHex: transaction.reversedHashHex)).thenReturn(nil)
+            when(mock.add(sentTransaction: any(), realm: equal(to: realm))).thenDoNothing()
         }
 
         syncer.handle(sentTransaction: transaction)
 
-        let sentTransaction = realm.objects(SentTransaction.self).last!
+        let argumentCaptor = ArgumentCaptor<SentTransaction>()
+        verify(mockStorage).add(sentTransaction: argumentCaptor.capture(), realm: equal(to: realm))
+        let sentTransaction = argumentCaptor.value!
+
         XCTAssertEqual(sentTransaction.reversedHashHex, transaction.reversedHashHex)
         XCTAssertEqual(sentTransaction.retriesCount, 0)
         XCTAssertLessThanOrEqual(abs(CACurrentMediaTime() - sentTransaction.firstSendTime), 0.1)
@@ -138,17 +128,21 @@ class TransactionSyncerTests: XCTestCase {
 
     func testHandleSentTransaction_SentTransactionExists() {
         let transaction = TestData.p2pkhTransaction
-        transaction.status = .new
-        let sentTransaction = SentTransaction(reversedHashHex: transaction.reversedHashHex)
+        var sentTransaction = SentTransaction(reversedHashHex: transaction.reversedHashHex)
         sentTransaction.firstSendTime = sentTransaction.firstSendTime - 100
         sentTransaction.lastSendTime = sentTransaction.lastSendTime - 100
 
-        try! realm.write {
-            realm.add(transaction)
-            realm.add(sentTransaction)
+        stub(mockStorage) { mock in
+            when(mock.newTransaction(byReversedHashHex: transaction.reversedHashHex)).thenReturn(transaction)
+            when(mock.sentTransaction(byReversedHashHex: transaction.reversedHashHex)).thenReturn(sentTransaction)
+            when(mock.update(sentTransaction: any())).thenDoNothing()
         }
 
         syncer.handle(sentTransaction: transaction)
+
+        let argumentCaptor = ArgumentCaptor<SentTransaction>()
+        verify(mockStorage).update(sentTransaction: argumentCaptor.capture())
+        sentTransaction = argumentCaptor.value!
 
         XCTAssertEqual(sentTransaction.reversedHashHex, transaction.reversedHashHex)
         XCTAssertEqual(sentTransaction.retriesCount, 1)
@@ -158,20 +152,15 @@ class TransactionSyncerTests: XCTestCase {
 
     func testHandleSentTransaction_transactionNotExists() {
         let transaction = TestData.p2pkhTransaction
-        transaction.status = .new
+
+        stub(mockStorage) { mock in
+            when(mock.newTransaction(byReversedHashHex: transaction.reversedHashHex)).thenReturn(nil)
+        }
 
         syncer.handle(sentTransaction: transaction)
 
-        XCTAssertEqual(realm.objects(SentTransaction.self).count, 0)
-    }
-
-    func testHandleSentTransaction_transactionIsNotNew() {
-        let transaction = TestData.p2pkhTransaction
-        transaction.status = .relayed
-
-        syncer.handle(sentTransaction: transaction)
-
-        XCTAssertEqual(realm.objects(SentTransaction.self).count, 0)
+        verify(mockStorage, never()).add(sentTransaction: any(), realm: any())
+        verify(mockStorage, never()).update(sentTransaction: any())
     }
 
     func testHandle_emptyTransactions() {
@@ -211,8 +200,8 @@ class TransactionSyncerTests: XCTestCase {
     func testShouldRequestTransaction_TransactionExists() {
         let transaction = TestData.p2wpkhTransaction
 
-        try! realm.write {
-            realm.add(transaction)
+        stub(mockStorage) { mock in
+            when(mock.relayedTransactionExists(byReversedHashHex: transaction.reversedHashHex)).thenReturn(true)
         }
 
         XCTAssertEqual(syncer.shouldRequestTransaction(hash: transaction.dataHash), false)
@@ -220,6 +209,10 @@ class TransactionSyncerTests: XCTestCase {
 
     func testShouldRequestTransaction_TransactionNotExists() {
         let transaction = TestData.p2wpkhTransaction
+
+        stub(mockStorage) { mock in
+            when(mock.relayedTransactionExists(byReversedHashHex: transaction.reversedHashHex)).thenReturn(false)
+        }
 
         XCTAssertEqual(syncer.shouldRequestTransaction(hash: transaction.dataHash), true)
     }
