@@ -97,7 +97,7 @@ class GetMerkleBlockTaskTests:XCTestCase {
     }
 
     func testHandleMerkleBlock_CompleteMerkleBlock_BlockHashHeightIsZero() {
-        blockHashes[0] = BlockHash(headerHash: blockHashes[0].headerHash, height: 0, order: blockHashes[0].order)
+        blockHashes[0] = BlockHash(headerHash: blockHashes[0].headerHash, height: 0, order: blockHashes[0].sequence)
         task = GetMerkleBlocksTask(blockHashes: blockHashes, dateGenerator: dateGenerator)
         task.requester = mockRequester
         task.delegate = mockDelegate

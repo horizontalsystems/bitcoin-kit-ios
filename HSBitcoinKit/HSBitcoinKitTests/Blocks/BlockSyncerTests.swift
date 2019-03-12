@@ -313,11 +313,11 @@ class BlockSyncerTests: QuickSpec {
                 it("returns first 500 blockhashes") {
                     let blockHashes = [BlockHash(headerHash: Data(repeating: 0, count: 0), height: 0, order: 0)]
                     stub(mockStorage) { mock in
-                        when(mock.blockHashes(sortedBy: equal(to: BlockHash.Columns.order), secondSortedBy: equal(to: BlockHash.Columns.height), limit: equal(to: 500))).thenReturn(blockHashes)
+                        when(mock.blockHashesSortedBySequenceAndHeight(limit: equal(to: 500))).thenReturn(blockHashes)
                     }
 
                     expect(syncer.getBlockHashes()).to(equal(blockHashes))
-                    verify(mockStorage).blockHashes(sortedBy: equal(to: BlockHash.Columns.order), secondSortedBy: equal(to: BlockHash.Columns.height), limit: equal(to: 500))
+                    verify(mockStorage).blockHashesSortedBySequenceAndHeight(limit: equal(to: 500))
                 }
             }
 
@@ -401,7 +401,7 @@ class BlockSyncerTests: QuickSpec {
 
                         syncer.add(blockHashes: [existingBlockHash, newBlockHash])
 
-                        verify(mockFactory).blockHash(withHeaderHash: equal(to: newBlockHash), height: equal(to: 0), order: equal(to: lastBlockHash.order + 1))
+                        verify(mockFactory).blockHash(withHeaderHash: equal(to: newBlockHash), height: equal(to: 0), order: equal(to: lastBlockHash.sequence + 1))
                         verify(mockStorage).add(blockHashes: equal(to: [blockHash]))
                     }
                 }

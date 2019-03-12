@@ -90,7 +90,7 @@ protocol IStorage {
     var blockHashHeaderHashes: [Data] { get }
     var lastBlockHash: BlockHash? { get }
     func blockHashes(filters: [(fieldName: BlockHash.Columns, value: Any, equal: Bool)], orders: [(fieldName: BlockHash.Columns, ascending: Bool)]) -> [BlockHash]
-    func blockHashes(sortedBy: BlockHash.Columns, secondSortedBy: BlockHash.Columns, limit: Int) -> [BlockHash]
+    func blockHashesSortedBySequenceAndHeight(limit: Int) -> [BlockHash]
     func add(blockHashes: [BlockHash])
     func deleteBlockHash(byHashHex: String)
 

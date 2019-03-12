@@ -57,7 +57,7 @@ class GrdbStorage {
                 t.column(BlockHash.Columns.reversedHeaderHashHex.name, .text).notNull()
                 t.column(BlockHash.Columns.headerHash.name, .blob).notNull()
                 t.column(BlockHash.Columns.height.name, .integer).notNull()
-                t.column(BlockHash.Columns.order.name, .integer).notNull()
+                t.column(BlockHash.Columns.sequence.name, .integer).notNull()
 
                 t.primaryKey([BlockHash.Columns.reversedHeaderHashHex.name], onConflict: .replace)
             }
@@ -165,13 +165,13 @@ extension GrdbStorage: IStorage {
 
     var lastBlockchainBlockHash: BlockHash? {
         return try! dbPool.read { db in
-            try BlockHash.filter(BlockHash.Columns.height == 0).order(BlockHash.Columns.order.desc).fetchOne(db)
+            try BlockHash.filter(BlockHash.Columns.height == 0).order(BlockHash.Columns.sequence.desc).fetchOne(db)
         }
     }
 
     var lastBlockHash: BlockHash? {
         return try! dbPool.read { db in
-            try BlockHash.order(BlockHash.Columns.order.desc).fetchOne(db)
+            try BlockHash.order(BlockHash.Columns.sequence.desc).fetchOne(db)
         }
     }
 
@@ -214,9 +214,9 @@ extension GrdbStorage: IStorage {
         }
     }
 
-    func blockHashes(sortedBy: BlockHash.Columns, secondSortedBy: BlockHash.Columns, limit: Int) -> [BlockHash] {
+    func blockHashesSortedBySequenceAndHeight(limit: Int) -> [BlockHash] {
         return try! dbPool.read { db in
-            try BlockHash.order(sortedBy.asc).order(secondSortedBy.asc).limit(limit).fetchAll(db)
+            try BlockHash.order(BlockHash.Columns.sequence.asc).order(BlockHash.Columns.height.asc).limit(limit).fetchAll(db)
         }
     }
 

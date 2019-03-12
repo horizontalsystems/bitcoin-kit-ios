@@ -100,7 +100,7 @@ extension BlockSyncer: IBlockSyncer {
     }
 
     func getBlockHashes() -> [BlockHash] {
-        return storage.blockHashes(sortedBy: .order, secondSortedBy: .height, limit: 500)
+        return storage.blockHashesSortedBySequenceAndHeight(limit: 500)
     }
 
     func getBlockLocatorHashes(peerLastBlockHeight: Int32) -> [Data] {
@@ -128,7 +128,7 @@ extension BlockSyncer: IBlockSyncer {
     }
 
     func add(blockHashes: [Data]) {
-        var lastOrder = storage.lastBlockHash?.order ?? 0
+        var lastOrder = storage.lastBlockHash?.sequence ?? 0
         let existingHashes = storage.blockHashHeaderHashes
 
         let blockHashes: [BlockHash] = blockHashes
