@@ -44,14 +44,12 @@ extension TransactionSyncer: ITransactionSyncer {
             return
         }
 
-        try? storage.inTransaction { realm in
-            if let sentTransaction = storage.sentTransaction(byReversedHashHex: transaction.reversedHashHex) {
-                sentTransaction.lastSendTime = CACurrentMediaTime()
-                sentTransaction.retriesCount = sentTransaction.retriesCount + 1
-                storage.update(sentTransaction: sentTransaction)
-            } else {
-                storage.add(sentTransaction: SentTransaction(reversedHashHex: transaction.reversedHashHex), realm: realm)
-            }
+        if let sentTransaction = storage.sentTransaction(byReversedHashHex: transaction.reversedHashHex) {
+            sentTransaction.lastSendTime = CACurrentMediaTime()
+            sentTransaction.retriesCount = sentTransaction.retriesCount + 1
+            storage.update(sentTransaction: sentTransaction)
+        } else {
+            storage.add(sentTransaction: SentTransaction(reversedHashHex: transaction.reversedHashHex))
         }
     }
 

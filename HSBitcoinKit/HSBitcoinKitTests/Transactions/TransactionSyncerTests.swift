@@ -26,7 +26,7 @@ class TransactionSyncerTests: QuickSpec {
 
             stub(mockStorage) { mock in
                 when(mock.inTransaction(_: any())).then({ try? $0(realm) })
-                when(mock.add(sentTransaction: any(), realm: equal(to: realm))).thenDoNothing()
+                when(mock.add(sentTransaction: any())).thenDoNothing()
                 when(mock.update(sentTransaction: any())).thenDoNothing()
             }
             stub(mockTransactionProcessor) { mock in
@@ -137,7 +137,7 @@ class TransactionSyncerTests: QuickSpec {
                     syncer.handle(sentTransaction: transaction)
 
                     let argumentCaptor = ArgumentCaptor<SentTransaction>()
-                    verify(mockStorage).add(sentTransaction: argumentCaptor.capture(), realm: equal(to: realm))
+                    verify(mockStorage).add(sentTransaction: argumentCaptor.capture())
                     let sentTransaction = argumentCaptor.value!
 
                     expect(sentTransaction.reversedHashHex).to(equal(transaction.reversedHashHex))
@@ -173,7 +173,7 @@ class TransactionSyncerTests: QuickSpec {
 
                     syncer.handle(sentTransaction: transaction)
 
-                    verify(mockStorage, never()).add(sentTransaction: any(), realm: any())
+                    verify(mockStorage, never()).add(sentTransaction: any())
                     verify(mockStorage, never()).update(sentTransaction: any())
                 }
             }

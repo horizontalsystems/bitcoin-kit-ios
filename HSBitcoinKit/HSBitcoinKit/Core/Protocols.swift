@@ -111,7 +111,7 @@ protocol IStorage {
 
     func sentTransaction(byReversedHashHex: String) -> SentTransaction?
     func update(sentTransaction: SentTransaction)
-    func add(sentTransaction: SentTransaction, realm: Realm)
+    func add(sentTransaction: SentTransaction)
 
 
     func clear() throws

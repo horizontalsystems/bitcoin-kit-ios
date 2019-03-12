@@ -63,6 +63,17 @@ class GrdbStorage {
             }
         }
 
+        migrator.registerMigration("createSentTransactions") { db in
+            try db.create(table: SentTransaction.databaseTableName) { t in
+                t.column(SentTransaction.Columns.reversedHashHex.name, .text).notNull()
+                t.column(SentTransaction.Columns.firstSendTime.name, .double).notNull()
+                t.column(SentTransaction.Columns.lastSendTime.name, .double).notNull()
+                t.column(SentTransaction.Columns.retriesCount.name, .integer).notNull()
+
+                t.primaryKey([SentTransaction.Columns.reversedHashHex.name], onConflict: .replace)
+            }
+        }
+
         return migrator
     }
 
@@ -284,14 +295,21 @@ extension GrdbStorage: IStorage {
 
     // SentTransaction
     func sentTransaction(byReversedHashHex hex: String) -> SentTransaction? {
-        return realmFactory.realm.objects(SentTransaction.self).filter("reversedHashHex = %@", hex).first
+        return try! dbPool.read { db in
+            try SentTransaction.filter(SentTransaction.Columns.reversedHashHex == hex).fetchOne(db)
+        }
     }
 
     func update(sentTransaction: SentTransaction) {
+        _ = try? dbPool.write { db in
+            try sentTransaction.update(db)
+        }
     }
 
-    func add(sentTransaction: SentTransaction, realm: Realm) {
-        realm.add(sentTransaction)
+    func add(sentTransaction: SentTransaction) {
+        _ = try? dbPool.write { db in
+            try sentTransaction.insert(db)
+        }
     }
 
     // Clear
