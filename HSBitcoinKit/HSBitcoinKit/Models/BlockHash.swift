@@ -4,18 +4,18 @@ class BlockHash: Record {
     let reversedHeaderHashHex: String
     let headerHash: Data
     let height: Int
-    let order: Int
+    let sequence: Int
 
     init(headerHash: Data, height: Int, order: Int) {
         self.headerHash = headerHash
         self.reversedHeaderHashHex = headerHash.reversedHex
         self.height = height
-        self.order = order
+        self.sequence = order
 
         super.init()
     }
 
-    init?(reversedHeaderHashHex: String, height: Int, order: Int) {
+    init?(reversedHeaderHashHex: String, height: Int, sequence: Int) {
         guard let headerHash = Data(hex: reversedHeaderHashHex) else {
             return nil
         }
@@ -23,7 +23,7 @@ class BlockHash: Record {
         self.reversedHeaderHashHex = reversedHeaderHashHex
         self.headerHash = Data(headerHash.reversed())
         self.height = height
-        self.order = order
+        self.sequence = sequence
 
         super.init()
     }
@@ -36,14 +36,14 @@ class BlockHash: Record {
         case reversedHeaderHashHex
         case headerHash
         case height
-        case order
+        case sequence
     }
 
     required init(row: Row) {
         reversedHeaderHashHex = row[Columns.reversedHeaderHashHex]
         headerHash = row[Columns.headerHash]
         height = row[Columns.height]
-        order = row[Columns.order]
+        sequence = row[Columns.sequence]
 
         super.init(row: row)
     }
@@ -52,7 +52,7 @@ class BlockHash: Record {
         container[Columns.reversedHeaderHashHex] = reversedHeaderHashHex
         container[Columns.headerHash] = headerHash
         container[Columns.height] = height
-        container[Columns.order] = order
+        container[Columns.sequence] = sequence
     }
 
 }

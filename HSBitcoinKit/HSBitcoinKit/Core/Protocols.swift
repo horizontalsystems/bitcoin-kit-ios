@@ -90,7 +90,7 @@ protocol IStorage {
     var blockHashHeaderHashes: [Data] { get }
     var lastBlockHash: BlockHash? { get }
     func blockHashes(filters: [(fieldName: BlockHash.Columns, value: Any, equal: Bool)], orders: [(fieldName: BlockHash.Columns, ascending: Bool)]) -> [BlockHash]
-    func blockHashes(sortedBy: BlockHash.Columns, secondSortedBy: BlockHash.Columns, limit: Int) -> [BlockHash]
+    func blockHashesSortedBySequenceAndHeight(limit: Int) -> [BlockHash]
     func add(blockHashes: [BlockHash])
     func deleteBlockHash(byHashHex: String)
 
@@ -102,6 +102,17 @@ protocol IStorage {
     func blocks(byHexes: [String], realm: Realm) -> Results<Block>
     func block(byHeight: Int32) -> Block?
     func block(byHeaderHash: Data) -> Block?
+
+
+    func newTransactions() -> [Transaction]
+    func newTransaction(byReversedHashHex: String) -> Transaction?
+    func relayedTransactionExists(byReversedHashHex: String) -> Bool
+
+
+    func sentTransaction(byReversedHashHex: String) -> SentTransaction?
+    func update(sentTransaction: SentTransaction)
+    func add(sentTransaction: SentTransaction)
+
 
     func clear() throws
     func inTransaction(_ block: ((_ realm: Realm) throws -> Void)) throws

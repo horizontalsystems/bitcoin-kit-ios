@@ -57,9 +57,20 @@ class GrdbStorage {
                 t.column(BlockHash.Columns.reversedHeaderHashHex.name, .text).notNull()
                 t.column(BlockHash.Columns.headerHash.name, .blob).notNull()
                 t.column(BlockHash.Columns.height.name, .integer).notNull()
-                t.column(BlockHash.Columns.order.name, .integer).notNull()
+                t.column(BlockHash.Columns.sequence.name, .integer).notNull()
 
                 t.primaryKey([BlockHash.Columns.reversedHeaderHashHex.name], onConflict: .replace)
+            }
+        }
+
+        migrator.registerMigration("createSentTransactions") { db in
+            try db.create(table: SentTransaction.databaseTableName) { t in
+                t.column(SentTransaction.Columns.reversedHashHex.name, .text).notNull()
+                t.column(SentTransaction.Columns.firstSendTime.name, .double).notNull()
+                t.column(SentTransaction.Columns.lastSendTime.name, .double).notNull()
+                t.column(SentTransaction.Columns.retriesCount.name, .integer).notNull()
+
+                t.primaryKey([SentTransaction.Columns.reversedHashHex.name], onConflict: .replace)
             }
         }
 
@@ -154,13 +165,13 @@ extension GrdbStorage: IStorage {
 
     var lastBlockchainBlockHash: BlockHash? {
         return try! dbPool.read { db in
-            try BlockHash.filter(BlockHash.Columns.height == 0).order(BlockHash.Columns.order.desc).fetchOne(db)
+            try BlockHash.filter(BlockHash.Columns.height == 0).order(BlockHash.Columns.sequence.desc).fetchOne(db)
         }
     }
 
     var lastBlockHash: BlockHash? {
         return try! dbPool.read { db in
-            try BlockHash.order(BlockHash.Columns.order.desc).fetchOne(db)
+            try BlockHash.order(BlockHash.Columns.sequence.desc).fetchOne(db)
         }
     }
 
@@ -203,9 +214,9 @@ extension GrdbStorage: IStorage {
         }
     }
 
-    func blockHashes(sortedBy: BlockHash.Columns, secondSortedBy: BlockHash.Columns, limit: Int) -> [BlockHash] {
+    func blockHashesSortedBySequenceAndHeight(limit: Int) -> [BlockHash] {
         return try! dbPool.read { db in
-            try BlockHash.order(sortedBy.asc).order(secondSortedBy.asc).limit(limit).fetchAll(db)
+            try BlockHash.order(BlockHash.Columns.sequence.asc).order(BlockHash.Columns.height.asc).limit(limit).fetchAll(db)
         }
     }
 
@@ -264,6 +275,41 @@ extension GrdbStorage: IStorage {
 
     func block(byHeaderHash hash: Data) -> Block? {
         return realmFactory.realm.objects(Block.self).filter("headerHash == %@", hash).first
+    }
+
+
+    // Transaction
+    func newTransactions() -> [Transaction] {
+        return Array(realmFactory.realm.objects(Transaction.self).filter("status = %@", TransactionStatus.new.rawValue))
+    }
+
+    func newTransaction(byReversedHashHex hex: String) -> Transaction? {
+        return realmFactory.realm.objects(Transaction.self)
+                .filter("reversedHashHex = %@ AND status = %@", hex, TransactionStatus.new.rawValue)
+                .first
+    }
+
+    func relayedTransactionExists(byReversedHashHex hex: String) -> Bool {
+        return !realmFactory.realm.objects(Transaction.self).filter("reversedHashHex = %@ AND status = %@", hex, TransactionStatus.relayed.rawValue).isEmpty
+    }
+
+    // SentTransaction
+    func sentTransaction(byReversedHashHex hex: String) -> SentTransaction? {
+        return try! dbPool.read { db in
+            try SentTransaction.filter(SentTransaction.Columns.reversedHashHex == hex).fetchOne(db)
+        }
+    }
+
+    func update(sentTransaction: SentTransaction) {
+        _ = try? dbPool.write { db in
+            try sentTransaction.update(db)
+        }
+    }
+
+    func add(sentTransaction: SentTransaction) {
+        _ = try? dbPool.write { db in
+            try sentTransaction.insert(db)
+        }
     }
 
     // Clear

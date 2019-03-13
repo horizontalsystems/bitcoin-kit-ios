@@ -1,21 +1,49 @@
-import Foundation
-import HSCryptoKit
-import RealmSwift
+import GRDB
 
-class SentTransaction: Object {
-    @objc dynamic var reversedHashHex: String = ""
-    @objc dynamic var firstSendTime: Double = CACurrentMediaTime()
-    @objc dynamic var lastSendTime: Double = CACurrentMediaTime()
-    @objc dynamic var retriesCount: Int = 0
+class SentTransaction: Record {
+    let reversedHashHex: String
+    var firstSendTime: Double
+    var lastSendTime: Double
+    var retriesCount: Int
 
-    override class func primaryKey() -> String? {
-        return "reversedHashHex"
+    init(reversedHashHex: String, firstSendTime: Double, lastSendTime: Double, retriesCount: Int) {
+        self.reversedHashHex = reversedHashHex
+        self.firstSendTime = firstSendTime
+        self.lastSendTime = lastSendTime
+        self.retriesCount = retriesCount
+
+        super.init()
+    }
+
+    override class var databaseTableName: String {
+        return "sentTransactions"
     }
 
     convenience init(reversedHashHex: String) {
-        self.init()
+        self.init(reversedHashHex: reversedHashHex, firstSendTime: CACurrentMediaTime(), lastSendTime: CACurrentMediaTime(), retriesCount: 0)
+    }
 
-        self.reversedHashHex = reversedHashHex
+    enum Columns: String, ColumnExpression {
+        case reversedHashHex
+        case firstSendTime
+        case lastSendTime
+        case retriesCount
+    }
+
+    required init(row: Row) {
+        reversedHashHex = row[Columns.reversedHashHex]
+        firstSendTime = row[Columns.firstSendTime]
+        lastSendTime = row[Columns.lastSendTime]
+        retriesCount = row[Columns.retriesCount]
+
+        super.init(row: row)
+    }
+
+    override func encode(to container: inout PersistenceContainer) {
+        container[Columns.reversedHashHex] = reversedHashHex
+        container[Columns.firstSendTime] = firstSendTime
+        container[Columns.lastSendTime] = lastSendTime
+        container[Columns.retriesCount] = retriesCount
     }
 
 }
