@@ -48,8 +48,8 @@ class GetMerkleBlockTaskTests:XCTestCase {
             header.headerHash = CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: header))
         }
         blockHashes = [
-            BlockHash(withHeaderHash: CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: blockHeaders[0])), height: 10),
-            BlockHash(withHeaderHash: CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: blockHeaders[1])), height: 15)
+            BlockHash(headerHash: CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: blockHeaders[0])), height: 10, order: 0),
+            BlockHash(headerHash: CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: blockHeaders[1])), height: 15, order: 0)
         ]
 
         task = GetMerkleBlocksTask(blockHashes: blockHashes, dateGenerator: dateGenerator)
@@ -99,8 +99,11 @@ class GetMerkleBlockTaskTests:XCTestCase {
         verifyNoMoreInteractions(mockDelegate)
     }
 
-    func testHandleMerkleBlock_CompleteMerkleBlock_BlockHasHeightIsZero() {
-        blockHashes[0].height = 0
+    func testHandleMerkleBlock_CompleteMerkleBlock_BlockHashHeightIsZero() {
+        blockHashes[0] = BlockHash(headerHash: blockHashes[0].headerHash, height: 0, order: blockHashes[0].sequence)
+        task = GetMerkleBlocksTask(blockHashes: blockHashes, dateGenerator: dateGenerator)
+        task.requester = mockRequester
+        task.delegate = mockDelegate
         let merkleBlock = MerkleBlock(header: blockHeaders[0], transactionHashes: [], transactions: [])
 
         let handled = task.handle(merkleBlock: merkleBlock)

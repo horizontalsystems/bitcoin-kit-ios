@@ -1,29 +1,12 @@
-import RealmSwift
-
 class StateManager {
-    private let realmFactory: IRealmFactory
+    private let storage: IStorage
+    private let network: INetwork
+    private let newWallet: Bool
 
-    init(realmFactory: IRealmFactory, syncableFromApi: Bool, newWallet: Bool) {
-        self.realmFactory = realmFactory
-
-        if !syncableFromApi || newWallet {
-            self.restored = true
-        }
-    }
-
-    private func getRestoreState() -> RestoreState {
-        return realmFactory.realm.objects(RestoreState.self).first ?? RestoreState()
-    }
-
-    private func setRestoreState(_ block: (RestoreState) -> ()) {
-        let realm = realmFactory.realm
-
-        let restoreState = realm.objects(RestoreState.self).first ?? RestoreState()
-
-        try? realm.write {
-            block(restoreState)
-            realm.add(restoreState, update: true)
-        }
+    init(storage: IStorage, network: INetwork, newWallet: Bool) {
+        self.storage = storage
+        self.network = network
+        self.newWallet = newWallet
     }
 
 }
@@ -32,12 +15,18 @@ extension StateManager: IStateManager {
 
     var restored: Bool {
         get {
-            return getRestoreState().restored
+            guard network.syncableFromApi else {
+                return true
+            }
+
+            guard !newWallet else {
+                return true
+            }
+
+            return storage.initialRestored ?? false
         }
         set {
-            setRestoreState { kitState in
-                kitState.restored = newValue
-            }
+            storage.set(initialRestored: newValue)
         }
     }
 

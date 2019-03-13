@@ -8,8 +8,8 @@ import HSCryptoKit
 class DataProvider {
     private let disposeBag = DisposeBag()
 
-    private let feeRateManager: IFeeRateManager
     private let realmFactory: IRealmFactory
+    private let storage: IStorage
     private let addressManager: IAddressManager
     private let addressConverter: IAddressConverter
     private let paymentAddressParser: IPaymentAddressParser
@@ -31,13 +31,13 @@ class DataProvider {
 
     weak var delegate: IDataProviderDelegate?
 
-    init(realmFactory: IRealmFactory, addressManager: IAddressManager, addressConverter: IAddressConverter, paymentAddressParser: IPaymentAddressParser, unspentOutputProvider: IUnspentOutputProvider, feeRateManager: IFeeRateManager, transactionCreator: ITransactionCreator, transactionBuilder: ITransactionBuilder, network: INetwork, debounceTime: Double = 0.5) {
+    init(realmFactory: IRealmFactory, storage: IStorage, addressManager: IAddressManager, addressConverter: IAddressConverter, paymentAddressParser: IPaymentAddressParser, unspentOutputProvider: IUnspentOutputProvider, transactionCreator: ITransactionCreator, transactionBuilder: ITransactionBuilder, network: INetwork, debounceTime: Double = 0.5) {
         self.realmFactory = realmFactory
+        self.storage = storage
         self.addressManager = addressManager
         self.addressConverter = addressConverter
         self.paymentAddressParser = paymentAddressParser
         self.unspentOutputProvider = unspentOutputProvider
-        self.feeRateManager = feeRateManager
         self.transactionCreator = transactionCreator
         self.transactionBuilder = transactionBuilder
         self.network = network
@@ -102,6 +102,10 @@ class DataProvider {
         )
     }
 
+    private var feeRate: FeeRate {
+        return storage.feeRate ?? FeeRate.defaultFeeRate
+    }
+
 }
 
 extension DataProvider: IBlockchainDataListener {
@@ -161,7 +165,7 @@ extension DataProvider: IDataProvider {
     }
 
     func send(to address: String, value: Int) throws {
-        try transactionCreator.create(to: address, value: value, feeRate: feeRateManager.mediumValue, senderPay: true)
+        try transactionCreator.create(to: address, value: value, feeRate: feeRate.medium, senderPay: true)
     }
 
     func parse(paymentAddress: String) -> BitcoinPaymentData {
@@ -173,7 +177,7 @@ extension DataProvider: IDataProvider {
     }
 
     func fee(for value: Int, toAddress: String? = nil, senderPay: Bool) throws -> Int {
-        return try transactionBuilder.fee(for: value, feeRate: feeRateManager.mediumValue, senderPay: senderPay, address: toAddress)
+        return try transactionBuilder.fee(for: value, feeRate: feeRate.medium, senderPay: senderPay, address: toAddress)
     }
 
     var receiveAddress: String {
@@ -186,6 +190,7 @@ extension DataProvider: IDataProvider {
         let realm = realmFactory.realm
 
         let blocks = realm.objects(Block.self).sorted(byKeyPath: "height")
+        let transactions = realm.objects(Transaction.self)
         let pubKeys = realm.objects(PublicKey.self)
 
         for pubKey in pubKeys {
@@ -200,7 +205,7 @@ extension DataProvider: IDataProvider {
             lines.append("legacy: \(addressConverter.convertToLegacy(keyHash: pubKey.keyHash, version: network.pubKeyHash, addressType: .pubKeyHash).stringValue) --- bech32: \(bechAddress ?? "none") --- SH(WPKH): \(addressConverter.convertToLegacy(keyHash: pubKey.scriptHashForP2WPKH, version: network.scriptHash, addressType: .scriptHash).stringValue) \n")
         }
         lines.append("PUBLIC KEYS COUNT: \(pubKeys.count)")
-
+        lines.append("TRANSACTIONS COUNT: \(transactions.count)")
         lines.append("BLOCK COUNT: \(blocks.count)")
         if let block = blocks.first {
             lines.append("First Block: \(block.height) --- \(block.reversedHeaderHashHex)")

@@ -27,40 +27,33 @@ class BitcoinRegTest: INetwork {
          "btc03-regtest.horizontalsystems.xyz",
     ]
 
-    let genesisBlock = Block(
-            withHeader: BlockHeader(
-                    version: 1,
-                    headerHash: nil,
-                    previousBlockHeaderReversedHex: "0000000000000000000000000000000000000000000000000000000000000000",
-                    merkleRootReversedHex: "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b",
-                    timestamp: 1296688602,
-                    bits: 545259519,
-                    nonce: 2
-            ),
-            height: 0)
+    var genesisBlock: Block {
+        return Block(
+                withHeader: BlockHeader(
+                        version: 1,
+                        headerHash: nil,
+                        previousBlockHeaderReversedHex: "0000000000000000000000000000000000000000000000000000000000000000",
+                        merkleRootReversedHex: "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b",
+                        timestamp: 1296688602,
+                        bits: 545259519,
+                        nonce: 2
+                ),
+                height: 0)
+    }
 
-    let checkpointBlock = Block(
-            withHeader: BlockHeader(
-                    version: 1,
-                    headerHash: nil,
-                    previousBlockHeaderReversedHex: "0000000000000000000000000000000000000000000000000000000000000000",
-                    merkleRootReversedHex: "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b",
-                    timestamp: 1296688602,
-                    bits: 545259519,
-                    nonce: 2
-            ),
-            height: 0)
-
-//    let checkpointBlock = Block(
-//            withHeader: BlockHeader(
-//                    version: 536870912,
-//                    previousBlockHeaderReversedHex: "5dc07110c9986c22d0cf760b68dfec769da89e465c73eb08b0b8bd7a7e9e4743",
-//                    merkleRootReversedHex: "1d9bb98732dad67e431d1983d368a389cb73dbcc495b06de7cd26c9dddccab60",
-//                    timestamp: 1536572186,
-//                    bits: 545259519,
-//                    nonce: 0
-//            ),
-//            height: 2016)
+    var checkpointBlock: Block {
+        return Block(
+                withHeader: BlockHeader(
+                        version: 1,
+                        headerHash: nil,
+                        previousBlockHeaderReversedHex: "0000000000000000000000000000000000000000000000000000000000000000",
+                        merkleRootReversedHex: "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b",
+                        timestamp: 1296688602,
+                        bits: 545259519,
+                        nonce: 2
+                ),
+                height: 0)
+    }
 
     required init(validatorFactory: IBlockValidatorFactory) {
         headerValidator = validatorFactory.validator(for: .header)

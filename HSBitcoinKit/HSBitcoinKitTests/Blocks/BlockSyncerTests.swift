@@ -1,521 +1,517 @@
 import XCTest
+import Quick
+import Nimble
 import Cuckoo
-import HSCryptoKit
 import RealmSwift
 @testable import HSBitcoinKit
 
-class BlockSyncerTests: XCTestCase {
-    private var mockNetwork: MockINetwork!
-    private var mockListener: MockISyncStateListener!
-    private var mockTransactionProcessor: MockITransactionProcessor!
-    private var mockBlockchain: MockIBlockchain!
-    private var mockAddressManager: MockIAddressManager!
-    private var mockBloomFilterManager: MockIBloomFilterManager!
+class BlockSyncerTests: QuickSpec {
+    override func spec() {
+        let mockStorage = MockIStorage()
+        let mockNetwork = MockINetwork()
+        let mockFactory = MockIFactory()
+        let mockListener = MockISyncStateListener()
+        let mockTransactionProcessor = MockITransactionProcessor()
+        let mockBlockchain = MockIBlockchain()
+        let mockAddressManager = MockIAddressManager()
+        let mockBloomFilterManager = MockIBloomFilterManager()
+        let mockState = MockBlockSyncerState()
 
-    private var checkpointBlock: Block!
-    private var newBlock1: Block!
-    private var newBlock2: Block!
-    private var newTransaction1: Transaction!
-    private var newTransaction2: Transaction!
-    private var merkleBlock1: MerkleBlock!
-    private var merkleBlock2: MerkleBlock!
+        let checkpointBlock = TestData.checkpointBlock
+        let realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
+        var syncer: BlockSyncer!
 
-    private var syncer: BlockSyncer!
+        beforeEach {
+            try! realm.write { realm.deleteAll() }
 
-    private var realm: Realm!
-
-    override func setUp() {
-        super.setUp()
-
-        realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
-        try! realm.write { realm.deleteAll() }
-
-        let mockRealmFactory = MockIRealmFactory()
-        stub(mockRealmFactory) { mock in
-            when(mock.realm.get).thenReturn(realm)
+            stub(mockNetwork) { mock in
+                when(mock.checkpointBlock.get).thenReturn(checkpointBlock)
+            }
+            stub(mockStorage) { mock in
+                when(mock.blocksCount.get).thenReturn(1)
+                when(mock.lastBlock.get).thenReturn(nil)
+                when(mock.inTransaction(_: any())).then({ try? $0(realm) })
+                when(mock.realm.get).thenReturn(realm)
+                when(mock.deleteBlockchainBlockHashes()).thenDoNothing()
+            }
+            stub(mockListener) { mock in
+                when(mock.initialBestBlockHeightUpdated(height: equal(to: 0))).thenDoNothing()
+            }
+            stub(mockBlockchain) { mock in
+                when(mock.handleFork(realm: equal(to: realm))).thenDoNothing()
+            }
+            stub(mockAddressManager) { mock in
+                when(mock.fillGap()).thenDoNothing()
+            }
+            stub(mockBloomFilterManager) { mock in
+                when(mock.regenerateBloomFilter()).thenDoNothing()
+            }
+            stub(mockState) { mock in
+                when(mock.iteration(hasPartialBlocks: any())).thenDoNothing()
+            }
         }
 
-        mockNetwork = MockINetwork()
-        mockListener = MockISyncStateListener()
-        mockTransactionProcessor = MockITransactionProcessor()
-        mockBlockchain = MockIBlockchain()
-        mockAddressManager = MockIAddressManager()
-        mockBloomFilterManager = MockIBloomFilterManager()
+        afterEach {
+            reset(mockStorage, mockNetwork, mockListener, mockTransactionProcessor, mockBlockchain, mockAddressManager, mockBloomFilterManager, mockState)
 
-        stub(mockNetwork) { mock in
-            when(mock.checkpointBlock.get).thenReturn(TestData.checkpointBlock)
-        }
-        stub(mockListener) { mock in
-            when(mock.initialBestBlockHeightUpdated(height: any())).thenDoNothing()
-            when(mock.currentBestBlockHeightUpdated(height: any(), maxBlockHeight: any())).thenDoNothing()
+            syncer = nil
         }
 
-        stub(mockTransactionProcessor) { mock in
-            when(mock.processOutgoing(transaction: any(), realm: any())).thenDoNothing()
-        }
-        stub(mockBlockchain) { mock in
-            when(mock.deleteBlocks(blocks: any(), realm: any())).thenDoNothing()
-            when(mock.handleFork(realm: any())).thenDoNothing()
-        }
-        stub(mockAddressManager) { mock in
-            when(mock.fillGap()).thenDoNothing()
-        }
-        stub(mockBloomFilterManager) { mock in
-            when(mock.regenerateBloomFilter()).thenDoNothing()
+        context("static methods") {
+            describe("#instance") {
+                context("when there are some blocks in storage") {
+                    beforeEach {
+                        stub(mockStorage) { mock in
+                            when(mock.blocksCount.get).thenReturn(1)
+                            when(mock.lastBlock.get).thenReturn(checkpointBlock)
+                        }
+
+                        stub(mockListener) { mock in
+                            when(mock.initialBestBlockHeightUpdated(height: equal(to: Int32(checkpointBlock.height)))).thenDoNothing()
+                        }
+
+                        let _ = BlockSyncer.instance(storage: mockStorage, network: mockNetwork, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
+                                blockchain: mockBlockchain, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager, hashCheckpointThreshold: 100)
+                    }
+
+                    it("doesn't save checkpointBlock to storage") {
+                        verify(mockStorage, never()).save(block: any())
+                        verify(mockStorage).blocksCount.get()
+                        verify(mockStorage).lastBlock.get()
+                        verifyNoMoreInteractions(mockStorage)
+                    }
+
+                    it("triggers #initialBestBlockHeightUpdated event on listener") {
+                        verify(mockListener).initialBestBlockHeightUpdated(height: equal(to: Int32(checkpointBlock.height)))
+                        verifyNoMoreInteractions(mockListener)
+                    }
+                }
+
+                context("when there's no block in storage") {
+                    beforeEach {
+                        stub(mockStorage) { mock in
+                            when(mock.blocksCount.get).thenReturn(0)
+                            when(mock.lastBlock.get).thenReturn(checkpointBlock)
+                            when(mock.save(block: sameInstance(as: checkpointBlock))).thenDoNothing()
+                        }
+                        stub(mockListener) { mock in
+                            when(mock.initialBestBlockHeightUpdated(height: equal(to: Int32(checkpointBlock.height)))).thenDoNothing()
+                        }
+
+                        let _ = BlockSyncer.instance(storage: mockStorage, network: mockNetwork, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
+                                blockchain: mockBlockchain, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager, hashCheckpointThreshold: 100)
+                    }
+
+                    it("saves checkpointBlock to storage") {
+                        verify(mockStorage).save(block: sameInstance(as: checkpointBlock))
+                    }
+
+                    it("triggers #initialBestBlockHeightUpdated event on listener") {
+                        verify(mockListener).initialBestBlockHeightUpdated(height: equal(to: Int32(checkpointBlock.height)))
+                    }
+                }
+            }
         }
 
-        syncer = BlockSyncer(
-                realmFactory: mockRealmFactory, network: mockNetwork, listener: mockListener,
-                transactionProcessor: mockTransactionProcessor, blockchain: mockBlockchain, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager,
-                hashCheckpointThreshold: 100
-        )
+        context("instance methods") {
+            beforeEach {
+                syncer = BlockSyncer(storage: mockStorage, network: mockNetwork, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
+                        blockchain: mockBlockchain, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager,
+                        hashCheckpointThreshold: 100, logger: nil, state: mockState)
+            }
 
-        verify(mockListener).initialBestBlockHeightUpdated(height: equal(to: Int32(TestData.checkpointBlock.height)))
+            describe("#localDownloadedBestBlockHeight") {
+                context("when there are some blocks in storage") {
+                    it("returns the height of the last block") {
+                        stub(mockStorage) { mock in
+                            when(mock.lastBlock.get).thenReturn(checkpointBlock)
+                        }
+                        expect(syncer.localDownloadedBestBlockHeight).to(equal(Int32(checkpointBlock.height)))
+                    }
+                }
 
-        checkpointBlock = realm.objects(Block.self).filter("reversedHeaderHashHex = %@", TestData.checkpointBlock.reversedHeaderHashHex).first!
-        newBlock2 = TestData.secondBlock
-        newBlock1 = newBlock2.previousBlock!
-        newBlock1.previousBlock = checkpointBlock
-        newTransaction1 = TestData.p2pkTransaction
-        newTransaction2 = TestData.p2pkhTransaction
-        newTransaction1.isMine = true
-        newTransaction2.isMine = false
-        merkleBlock1 = MerkleBlock(header: newBlock1.header!, transactionHashes: [], transactions: [newTransaction1, newTransaction2])
-        merkleBlock2 = MerkleBlock(header: newBlock2.header!, transactionHashes: [], transactions: [])
+                context("when there's no block in storage") {
+                    it("returns 0") {
+                        stub(mockStorage) { mock in
+                            when(mock.lastBlock.get).thenReturn(nil)
+                        }
+                        expect(syncer.localDownloadedBestBlockHeight).to(equal(0))
+                    }
+                }
+            }
 
+            describe("#localKnownBestBlockHeight") {
+                let blockHash = BlockHash(headerHash: Data(repeating: 0, count: 32), height: 0, order: 0)
+
+                context("when no blockHashes") {
+                    beforeEach {
+                        stub(mockStorage) { mock in
+                            when(mock.blockchainBlockHashes.get).thenReturn([])
+                            when(mock.blocksCount(reversedHeaderHashHexes: equal(to: []))).thenReturn(0)
+                        }
+                    }
+
+                    context("when no blocks") {
+                        it("returns 0") {
+                            expect(syncer.localKnownBestBlockHeight).to(equal(0))
+                        }
+                    }
+
+                    context("when there are some blocks") {
+                        it("returns last block's height + blocks count") {
+                            stub(mockStorage) { mock in
+                                when(mock.lastBlock.get).thenReturn(checkpointBlock)
+                            }
+                            expect(syncer.localKnownBestBlockHeight).to(equal(Int32(checkpointBlock.height)))
+                        }
+                    }
+                }
+
+                context("when there are some blockHashes which haven't downloaded blocks") {
+                    beforeEach {
+                        stub(mockStorage) { mock in
+                            when(mock.blockchainBlockHashes.get).thenReturn([blockHash])
+                            when(mock.blocksCount(reversedHeaderHashHexes: equal(to: [blockHash.reversedHeaderHashHex]))).thenReturn(0)
+                        }
+                    }
+
+                    it("returns lastBlock + blockHashes count") {
+                        expect(syncer.localKnownBestBlockHeight).to(equal(1))
+                        stub(mockStorage) { mock in
+                            when(mock.lastBlock.get).thenReturn(checkpointBlock)
+                        }
+                        expect(syncer.localKnownBestBlockHeight).to(equal(Int32(checkpointBlock.height + 1)))
+                    }
+                }
+
+                context("when there are some blockHashes which have downloaded blocks") {
+                    beforeEach {
+                        stub(mockStorage) { mock in
+                            when(mock.blockchainBlockHashes.get).thenReturn([blockHash])
+                            when(mock.blocksCount(reversedHeaderHashHexes: equal(to: [blockHash.reversedHeaderHashHex]))).thenReturn(1)
+                        }
+                    }
+
+                    it("returns lastBlock + count of blockHashes without downloaded blocks") {
+                        expect(syncer.localKnownBestBlockHeight).to(equal(0))
+                        stub(mockStorage) { mock in
+                            when(mock.lastBlock.get).thenReturn(checkpointBlock)
+                        }
+                        expect(syncer.localKnownBestBlockHeight).to(equal(Int32(checkpointBlock.height)))
+                    }
+                }
+            }
+
+            describe("#prepareForDownload") {
+                let emptyBlocks = realm.objects(Block.self)
+
+                beforeEach {
+                    stub(mockStorage) { mock in
+                        when(mock.blockHashHeaderHashHexes(except: equal(to: checkpointBlock.reversedHeaderHashHex))).thenReturn([])
+                        when(mock.blocks(byHexes: equal(to: []), realm: equal(to: realm))).thenReturn(emptyBlocks)
+                    }
+                    stub(mockBlockchain) { mock in
+                        when(mock.deleteBlocks(blocks: equal(to: emptyBlocks), realm: equal(to: realm))).thenDoNothing()
+                    }
+
+                    syncer.prepareForDownload()
+                }
+
+                it("handles partial blocks") {
+                    verify(mockAddressManager).fillGap()
+                    verify(mockBloomFilterManager).regenerateBloomFilter()
+                    verify(mockState).iteration(hasPartialBlocks: equal(to: false))
+                }
+
+                it("clears BlockHashes") {
+                    verify(mockStorage).deleteBlockchainBlockHashes()
+                }
+
+                it("clears partialBlock blocks") {
+                    verify(mockStorage).blockHashHeaderHashHexes(except: equal(to: checkpointBlock.reversedHeaderHashHex))
+                    verify(mockStorage).blocks(byHexes: equal(to: []), realm: equal(to: realm))
+                    verify(mockBlockchain).deleteBlocks(blocks: equal(to: emptyBlocks), realm: equal(to: realm))
+                }
+
+                it("handles fork") {
+                    verify(mockBlockchain).handleFork(realm: equal(to: realm))
+                }
+            }
+
+            describe("#downloadIterationCompleted") {
+                context("when iteration has partial blocks") {
+                    it("handles partial blocks") {
+                        stub(mockState) { mock in
+                            when(mock.iterationHasPartialBlocks.get).thenReturn(true)
+                        }
+                        syncer.downloadIterationCompleted()
+
+                        verify(mockAddressManager).fillGap()
+                        verify(mockBloomFilterManager).regenerateBloomFilter()
+                        verify(mockState).iteration(hasPartialBlocks: equal(to: false))
+                    }
+                }
+
+                context("when iteration has not partial blocks") {
+                    it("does not handle partial blocks") {
+                        stub(mockState) { mock in
+                            when(mock.iterationHasPartialBlocks.get).thenReturn(false)
+                        }
+                        syncer.downloadIterationCompleted()
+
+                        verify(mockAddressManager, never()).fillGap()
+                        verify(mockBloomFilterManager, never()).regenerateBloomFilter()
+                        verify(mockState, never()).iteration(hasPartialBlocks: any())
+                    }
+                }
+            }
+
+            describe("#downloadCompleted") {
+                it("handles fork") {
+                    syncer.downloadCompleted()
+                    verify(mockBlockchain).handleFork(realm: equal(to: realm))
+                }
+            }
+
+            describe("#downloadFailed") {
+                let emptyBlocks = realm.objects(Block.self)
+
+                beforeEach {
+                    stub(mockStorage) { mock in
+                        when(mock.blockHashHeaderHashHexes(except: equal(to: checkpointBlock.reversedHeaderHashHex))).thenReturn([])
+                        when(mock.blocks(byHexes: equal(to: []), realm: equal(to: realm))).thenReturn(emptyBlocks)
+                    }
+                    stub(mockBlockchain) { mock in
+                        when(mock.deleteBlocks(blocks: equal(to: emptyBlocks), realm: equal(to: realm))).thenDoNothing()
+                    }
+
+                    syncer.downloadFailed()
+                }
+
+                it("handles partial blocks") {
+                    verify(mockAddressManager).fillGap()
+                    verify(mockBloomFilterManager).regenerateBloomFilter()
+                    verify(mockState).iteration(hasPartialBlocks: equal(to: false))
+                }
+
+                it("clears BlockHashes") {
+                    verify(mockStorage).deleteBlockchainBlockHashes()
+                }
+
+                it("clears partialBlock blocks") {
+                    verify(mockStorage).blockHashHeaderHashHexes(except: equal(to: checkpointBlock.reversedHeaderHashHex))
+                    verify(mockStorage).blocks(byHexes: equal(to: []), realm: equal(to: realm))
+                    verify(mockBlockchain).deleteBlocks(blocks: equal(to: emptyBlocks), realm: equal(to: realm))
+                }
+
+                it("handles fork") {
+                    verify(mockBlockchain).handleFork(realm: equal(to: realm))
+                }
+            }
+
+            describe("#getBlockHashes") {
+                it("returns first 500 blockhashes") {
+                    let blockHashes = [BlockHash(headerHash: Data(repeating: 0, count: 0), height: 0, order: 0)]
+                    stub(mockStorage) { mock in
+                        when(mock.blockHashesSortedBySequenceAndHeight(limit: equal(to: 500))).thenReturn(blockHashes)
+                    }
+
+                    expect(syncer.getBlockHashes()).to(equal(blockHashes))
+                    verify(mockStorage).blockHashesSortedBySequenceAndHeight(limit: equal(to: 500))
+                }
+            }
+
+            describe("#getBlockLocatorHashes(peerLastBlockHeight:)") {
+                let peerLastBlockHeight: Int32 = 10
+                let firstBlock = TestData.firstBlock
+                let secondBlock = TestData.secondBlock
+
+                beforeEach {
+                    stub(mockStorage) { mock in
+                        when(mock.lastBlockchainBlockHash.get).thenReturn(nil)
+                        when(mock.blocks(heightGreaterThan: equal(to: checkpointBlock.height), sortedBy: equal(to: "height"), limit: equal(to: 10))).thenReturn([Block]())
+                        when(mock.block(byHeight: equal(to: peerLastBlockHeight))).thenReturn(nil)
+                    }
+                }
+
+                context("when there's no blocks or blockhashes") {
+                    it("returns checkpointBlock's header hash") {
+                        expect(syncer.getBlockLocatorHashes(peerLastBlockHeight: peerLastBlockHeight)).to(equal([checkpointBlock.headerHash]))
+                    }
+                }
+
+                context("when there are blockchain blockhashes") {
+                    it("returns last blockchain blockhash") {
+                        let blockHash = BlockHash(headerHash: Data(repeating: 0, count: 0), height: 0, order: 0)
+                        stub(mockStorage) { mock in
+                            when(mock.lastBlockchainBlockHash.get).thenReturn(blockHash)
+                            when(mock.blocks(heightGreaterThan: equal(to: checkpointBlock.height), sortedBy: equal(to: "height"), limit: equal(to: 10))).thenReturn([firstBlock, secondBlock])
+                        }
+
+                        expect(syncer.getBlockLocatorHashes(peerLastBlockHeight: peerLastBlockHeight)).to(equal([
+                            blockHash.headerHash, checkpointBlock.headerHash
+                        ]))
+                    }
+                }
+
+                context("when there's no blockhashes but there are blocks") {
+                    it("returns last 10 blocks' header hashes") {
+                        stub(mockStorage) { mock in
+                            when(mock.blocks(heightGreaterThan: equal(to: checkpointBlock.height), sortedBy: equal(to: "height"), limit: equal(to: 10))).thenReturn([secondBlock, firstBlock])
+                        }
+
+                        expect(syncer.getBlockLocatorHashes(peerLastBlockHeight: peerLastBlockHeight)).to(equal([
+                            secondBlock.headerHash, firstBlock.headerHash, checkpointBlock.headerHash
+                        ]))
+                    }
+                }
+
+                context("when the peers last block is already in storage") {
+                    it("returns peers last block's headerHash instead of checkpointBlocks'") {
+                        stub(mockStorage) { mock in
+                            when(mock.block(byHeight: equal(to: peerLastBlockHeight))).thenReturn(firstBlock)
+                        }
+
+                        expect(syncer.getBlockLocatorHashes(peerLastBlockHeight: peerLastBlockHeight)).to(equal([firstBlock.headerHash]))
+                    }
+                }
+            }
+
+            describe("#add(blockHashes:)") {
+                let existingBlockHash = Data(repeating: 0, count: 32)
+                let newBlockHash = Data(repeating: 1, count: 32)
+                let blockHash = BlockHash(headerHash: existingBlockHash, height: 0, order: 10)
+
+                beforeEach {
+                    stub(mockStorage) { mock in
+                        when(mock.blockHashHeaderHashes.get).thenReturn([existingBlockHash])
+                        when(mock.add(blockHashes: any())).thenDoNothing()
+                    }
+                    stub(mockFactory) { mock in
+                        when(mock.blockHash(withHeaderHash: equal(to: newBlockHash), height: equal(to: 0), order: any())).thenReturn(blockHash)
+                    }
+                }
+
+                context("when there's a blockHash in storage") {
+                    it("sets order of given blockhashes starting from last blockhashes order") {
+                        let lastBlockHash = BlockHash(headerHash: Data(repeating: 0, count: 0), height: 0, order: 10)
+                        stub(mockStorage) { mock in
+                            when(mock.lastBlockHash.get).thenReturn(lastBlockHash)
+                        }
+
+                        syncer.add(blockHashes: [existingBlockHash, newBlockHash])
+
+                        verify(mockFactory).blockHash(withHeaderHash: equal(to: newBlockHash), height: equal(to: 0), order: equal(to: lastBlockHash.sequence + 1))
+                        verify(mockStorage).add(blockHashes: equal(to: [blockHash]))
+                    }
+                }
+
+                context("when there's no blockhashes") {
+                    it("sets order of given blockhashes starting from 0") {
+                        stub(mockStorage) { mock in
+                            when(mock.lastBlockHash.get).thenReturn(nil)
+                        }
+
+                        syncer.add(blockHashes: [existingBlockHash, newBlockHash])
+
+                        verify(mockFactory).blockHash(withHeaderHash: equal(to: newBlockHash), height: equal(to: 0), order: equal(to: 1))
+                        verify(mockStorage).add(blockHashes: equal(to: [blockHash]))
+                    }
+                }
+            }
+
+            describe("#handle(merkleBlock:,maxBlockHeight:)") {
+                let block = TestData.firstBlock
+                let merkleBlock = MerkleBlock(header: block.header!, transactionHashes: [], transactions: [])
+                let maxBlockHeight: Int32 = Int32(block.height + 100)
+
+                beforeEach {
+                    stub(mockBlockchain) { mock in
+                        when(mock.forceAdd(merkleBlock: equal(to: merkleBlock), height: equal(to: block.height), realm: equal(to: realm))).thenReturn(block)
+                        when(mock.connect(merkleBlock: equal(to: merkleBlock), realm: equal(to: realm))).thenReturn(block)
+                    }
+                    stub(mockTransactionProcessor) { mock in
+                        when(mock.process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: equal(to: false), realm: equal(to: realm))).thenDoNothing()
+                    }
+                    stub(mockState) { mock in
+                        when(mock.iterationHasPartialBlocks.get).thenReturn(false)
+                    }
+                    stub(mockStorage) { mock in
+                        when(mock.deleteBlockHash(byHashHex: equal(to: block.reversedHeaderHashHex))).thenDoNothing()
+                    }
+                    stub(mockListener) { mock in
+                        when(mock.currentBestBlockHeightUpdated(height: equal(to: Int32(block.height)), maxBlockHeight: equal(to: maxBlockHeight))).thenDoNothing()
+                    }
+                }
+
+                it("handles merkleBlock") {
+                    try! syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: maxBlockHeight)
+
+                    verify(mockBlockchain).connect(merkleBlock: equal(to: merkleBlock), realm: equal(to: realm))
+                    verify(mockTransactionProcessor).process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: equal(to: false), realm: equal(to: realm))
+                    verify(mockStorage).deleteBlockHash(byHashHex: equal(to: block.reversedHeaderHashHex))
+                    verify(mockListener).currentBestBlockHeightUpdated(height: equal(to: Int32(block.height)), maxBlockHeight: equal(to: maxBlockHeight))
+                }
+
+                context("when merklBlocks's height is null") {
+                    it("force adds the block to blockchain") {
+                        merkleBlock.height = block.height
+                        try! syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: maxBlockHeight)
+
+                        verify(mockBlockchain).forceAdd(merkleBlock: equal(to: merkleBlock), height: equal(to: block.height), realm: equal(to: realm))
+                        verifyNoMoreInteractions(mockBlockchain)
+                    }
+                }
+
+                context("when bloom filter is expired while processing transactions") {
+                    it("sets iteration state to hasPartialBlocks") {
+                        stub(mockTransactionProcessor) { mock in
+                            when(mock.process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: equal(to: false), realm: equal(to: realm))).thenThrow(BloomFilterManager.BloomFilterExpired())
+                        }
+                        try! syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: maxBlockHeight)
+
+                        verify(mockState).iteration(hasPartialBlocks: equal(to: true))
+                    }
+                }
+
+                context("when iteration has partial blocks") {
+                    it("doesn't delete block hash") {
+                        stub(mockState) { mock in
+                            when(mock.iterationHasPartialBlocks.get).thenReturn(true)
+                        }
+                        stub(mockTransactionProcessor) { mock in
+                            when(mock.process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: equal(to: true), realm: equal(to: realm))).thenDoNothing()
+                        }
+                        try! syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: maxBlockHeight)
+
+                        verify(mockStorage, never()).deleteBlockHash(byHashHex: equal(to: block.reversedHeaderHashHex))
+                    }
+                }
+            }
+
+            describe("#shouldRequestBlock(withHash:)") {
+                let hash = Data(repeating: 0, count: 32)
+
+                context("when the given block is in storage") {
+                    it("returns false") {
+                        stub(mockStorage) { mock in
+                            when(mock.block(byHeaderHash: equal(to: hash))).thenReturn(TestData.firstBlock)
+                        }
+
+                        expect(syncer.shouldRequestBlock(withHash: hash)).to(beFalsy())
+                    }
+                }
+
+                context("when the given block is not in storage") {
+                    it("returns true") {
+                        stub(mockStorage) { mock in
+                            when(mock.block(byHeaderHash: equal(to: hash))).thenReturn(nil)
+                        }
+
+                        expect(syncer.shouldRequestBlock(withHash: hash)).to(beTruthy())
+                    }
+                }
+            }
+        }
     }
-
-    override func tearDown() {
-        mockNetwork = nil
-        mockTransactionProcessor = nil
-        mockBlockchain = nil
-        mockAddressManager = nil
-        realm = nil
-
-        checkpointBlock = nil
-        newBlock1 = nil
-        newBlock2 = nil
-        newTransaction1 = nil
-        newTransaction2 = nil
-        merkleBlock1 = nil
-        merkleBlock2 = nil
-
-        syncer = nil
-
-        super.tearDown()
-    }
-
-    func testPrepareForDownload() {
-        let transaction = TestData.p2pkTransaction
-        transaction.block = newBlock1
-
-        try! realm.write {
-            realm.add(newBlock1)
-            realm.add(BlockHash(withHeaderHash: newBlock1.headerHash, height: 0))
-            realm.add(BlockHash(withHeaderHash: checkpointBlock.headerHash, height: 0))
-            realm.add(transaction)
-        }
-
-        let newBlockHeaderHash = newBlock1.headerHash
-
-        syncer.prepareForDownload()
-
-        verify(mockAddressManager).fillGap()
-        verify(mockBloomFilterManager).regenerateBloomFilter()
-        verify(mockBlockchain).handleFork(realm: any())
-
-        let equalFunction: (Results<Block>, Results<Block>) -> Bool =
-                { $1.contains { block in block.headerHash == newBlockHeaderHash } && $1.count == 1 }
-        verify(mockBlockchain).deleteBlocks(blocks: equal(to: realm.objects(Block.self), equalWhen: equalFunction), realm: any())
-
-        XCTAssertEqual(realm.objects(BlockHash.self).count, 0)
-    }
-
-    func testLocalDownloadedBestBlockHeight() {
-        let secondBlock = TestData.secondBlock
-        secondBlock.previousBlock!.previousBlock = realm.objects(Block.self).first
-
-        try! realm.write {
-            realm.add(secondBlock)
-        }
-
-        XCTAssertEqual(realm.objects(Block.self).count, 3)
-        XCTAssertEqual(syncer.localDownloadedBestBlockHeight, Int32(secondBlock.height))
-    }
-
-    func testLocalKnownBestBlockHeight_NoBlockHashes() {
-        let secondBlock = TestData.secondBlock
-        secondBlock.previousBlock!.previousBlock = realm.objects(Block.self).first
-
-        try! realm.write {
-            realm.add(secondBlock)
-        }
-
-        XCTAssertEqual(realm.objects(Block.self).count, 3)
-        XCTAssertEqual(syncer.localKnownBestBlockHeight, Int32(secondBlock.height))
-    }
-
-    func testLocalKnownBestBlockHeight_BlockHashesWithExistingBlocks() {
-        let secondBlock = TestData.secondBlock
-        secondBlock.previousBlock!.previousBlock = realm.objects(Block.self).first
-
-        try! realm.write {
-            realm.add(secondBlock)
-            realm.add(BlockHash(withHeaderHash: secondBlock.headerHash, height: 0))
-        }
-
-        XCTAssertEqual(realm.objects(Block.self).count, 3)
-        XCTAssertEqual(syncer.localKnownBestBlockHeight, Int32(secondBlock.height))
-    }
-
-    func testLocalKnownBestBlockHeight_BlockHashesWithoutExistingBlocks() {
-        let secondBlock = TestData.secondBlock
-        secondBlock.previousBlock!.previousBlock = realm.objects(Block.self).first
-
-        try! realm.write {
-            realm.add(secondBlock)
-            realm.add(BlockHash(withHeaderHash: Data(from: 10000000), height: 0))
-        }
-
-        XCTAssertEqual(realm.objects(Block.self).count, 3)
-        XCTAssertEqual(syncer.localKnownBestBlockHeight, Int32(secondBlock.height + 1))
-    }
-
-    func testPrepareForDownload_PreValidatedBlocks() {
-        newBlock1 = Block(withHeaderHash: Data(hex: "1111111111111111")!, height: 1)
-        try! realm.write {
-            realm.add(newBlock1)
-            realm.add(BlockHash(withHeaderHash: newBlock1.headerHash, height: 1))
-        }
-
-        let newBlockHeaderHash = newBlock1.headerHash
-
-        syncer.prepareForDownload()
-
-        verify(mockAddressManager).fillGap()
-        verify(mockBloomFilterManager).regenerateBloomFilter()
-        verify(mockBlockchain).handleFork(realm: any())
-
-        let equalFunction: (Results<Block>, Results<Block>) -> Bool =
-                { $1.contains { block in block.headerHash == newBlockHeaderHash } && $1.count == 1 }
-        verify(mockBlockchain).deleteBlocks(blocks: equal(to: realm.objects(Block.self), equalWhen: equalFunction), realm: any())
-
-        XCTAssertEqual(realm.objects(BlockHash.self).filter("headerHash = %@", newBlockHeaderHash).count, 1)
-    }
-
-    func testDownloadIterationCompleted_NeedToReDownloadIsTrue() {
-        setTrueToNeedToReDownload()
-
-        syncer.downloadIterationCompleted()
-
-        verify(mockAddressManager).fillGap()
-        verify(mockBloomFilterManager).regenerateBloomFilter()
-
-        verifyNeedToReDownloadSet(to: false)
-    }
-
-    func testDownloadIterationCompleted_NeedToReDownloadIsFalse() {
-        verifyNeedToReDownloadSet(to: false)
-
-        syncer.downloadIterationCompleted()
-
-        verify(mockAddressManager, never()).fillGap()
-        verify(mockBloomFilterManager, never()).regenerateBloomFilter()
-        verifyNeedToReDownloadSet(to: false)
-    }
-
-    func testDownloadCompleted() {
-        syncer.downloadCompleted()
-        verify(mockBlockchain).handleFork(realm: any())
-    }
-
-    func testDownloadFailed() {
-        let transaction = TestData.p2pkTransaction
-        transaction.block = newBlock1
-
-        try! realm.write {
-            realm.add(newBlock1)
-            realm.add(BlockHash(withHeaderHash: newBlock1.headerHash, height: 0))
-            realm.add(BlockHash(withHeaderHash: checkpointBlock.headerHash, height: 0))
-            realm.add(transaction)
-        }
-
-        let newBlockHeaderHash = newBlock1.headerHash
-
-        syncer.downloadFailed()
-
-        verify(mockAddressManager).fillGap()
-        verify(mockBloomFilterManager).regenerateBloomFilter()
-        verify(mockBlockchain).handleFork(realm: any())
-
-        let equalFunction: (Results<Block>, Results<Block>) -> Bool =
-                { $1.contains { block in block.headerHash == newBlockHeaderHash } && $1.count == 1 }
-        verify(mockBlockchain).deleteBlocks(blocks: equal(to: realm.objects(Block.self), equalWhen: equalFunction), realm: any())
-
-        XCTAssertEqual(realm.objects(BlockHash.self).count, 0)
-    }
-
-    func testGetBlockHashes() {
-        var blockHashes = [BlockHash]()
-        for i in 0..<1000 {
-            blockHashes.append(BlockHash(withHeaderHash: Data(from: i), height: 0, order: i + 1))
-        }
-        blockHashes.append(BlockHash(withHeaderHash: Data(from: 10000), height: 1, order: 0))
-
-        try! realm.write {
-            realm.add(blockHashes)
-        }
-
-        let results = syncer.getBlockHashes()
-        XCTAssertEqual(results.count, 500)
-
-        XCTAssertEqual(results[0].headerHash, blockHashes[1000].headerHash)
-        XCTAssertEqual(results[1].headerHash, blockHashes[0].headerHash)
-        XCTAssertEqual(results.last!.headerHash, blockHashes[498].headerHash)
-    }
-
-    func testGetBlockLocatorHashes_BlockHashesExist() {
-        var blocks = [Block]()
-        var blockHashes = [BlockHash]()
-
-        for i in 0..<20 {
-            blocks.append(Block(withHeaderHash: Data(from: i), height: i+1))
-        }
-        for i in 0..<10 {
-            blockHashes.append(BlockHash(withHeaderHash: Data(from: i + 100), height: [i-900, 0].max()!, order: i))
-        }
-
-        try! realm.write {
-            realm.add(blocks)
-            realm.add(blockHashes)
-        }
-
-        let results = syncer.getBlockLocatorHashes(peerLastBlockHeight: 0)
-        XCTAssertEqual(results.count, 2)
-        XCTAssertEqual(results[0], blockHashes.last!.headerHash)
-        XCTAssertEqual(results[1], TestData.checkpointBlock.headerHash)
-    }
-
-    func testGetBlockLocatorHashes_NoBlockHashes() {
-        var blocks = [Block]()
-        for i in 0..<20 {
-            blocks.append(Block(withHeaderHash: Data(from: i), height: i+10000000))
-        }
-
-        try! realm.write {
-            realm.add(blocks)
-        }
-
-        let results = syncer.getBlockLocatorHashes(peerLastBlockHeight: 0)
-        XCTAssertEqual(results.count, 11)
-        for i in 0..<10 {
-            XCTAssertEqual(results[i], blocks[19-i].headerHash)
-        }
-        XCTAssertEqual(results[10], TestData.checkpointBlock.headerHash)
-    }
-
-    func testAdd_BlockHashesExist() {
-        var blockHashDatas = [Data]()
-        for i in 0..<10 {
-            blockHashDatas.append(Data(from: i))
-        }
-
-        try! realm.write {
-            realm.add(BlockHash(withHeaderHash: Data(from: 10000), height: 0, order: 10))
-        }
-        syncer.add(blockHashes: blockHashDatas)
-
-        XCTAssertEqual(realm.objects(BlockHash.self).count, 11)
-        for i in 0..<10 {
-            let blockHash = realm.objects(BlockHash.self).filter("headerHash = %@", Data(from: i)).first!
-            XCTAssertEqual(blockHash.order, 11 + i)
-            XCTAssertEqual(blockHash.height, 0)
-        }
-    }
-
-    func testAdd_BlockHashesExistWithTheSameHeaderHash() {
-        var blockHashDatas = [Data]()
-        for i in 0..<10 {
-            blockHashDatas.append(Data(from: i))
-        }
-
-        try! realm.write {
-            realm.add(BlockHash(withHeaderHash: blockHashDatas[0], height: 0, order: 10))
-        }
-        syncer.add(blockHashes: blockHashDatas)
-
-        XCTAssertEqual(realm.objects(BlockHash.self).count, 10)
-        for i in 0..<10 {
-            let blockHash = realm.objects(BlockHash.self).filter("headerHash = %@", Data(from: i)).first!
-            XCTAssertEqual(blockHash.order, 10 + i)
-            XCTAssertEqual(blockHash.height, 0)
-        }
-    }
-
-    func testHandleMerkleBlock() {
-        let merkleBlock = MerkleBlock(header: TestData.secondBlock.header!, transactionHashes: [], transactions: [])
-        let block = TestData.secondBlock
-        let blockHash = BlockHash(withHeaderHash: block.headerHash, height: block.height)
-        let maxBlockHeight: Int32 = 1000
-
-        try! realm.write {
-            realm.add(blockHash)
-        }
-
-        stub(mockBlockchain) { mock in
-            when(mock.connect(merkleBlock: equal(to: merkleBlock), realm: any())).thenReturn(block)
-        }
-        stub(mockTransactionProcessor) { mock in
-            when(mock.process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: any(), realm: any())).thenDoNothing()
-        }
-
-        try! syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: maxBlockHeight)
-        verify(mockBlockchain).connect(merkleBlock: equal(to: merkleBlock), realm: any())
-        verify(mockTransactionProcessor).process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: equal(to: false), realm: any())
-        verify(mockListener).currentBestBlockHeightUpdated(height: Int32(block.height), maxBlockHeight: equal(to: maxBlockHeight))
-        XCTAssertEqual(realm.objects(BlockHash.self).count, 0)
-        verifyNeedToReDownloadSet(to: false)
-    }
-
-    func testHandleMerkleBlock_PreValidatedBlock() {
-        let merkleBlock = MerkleBlock(header: TestData.secondBlock.header!, transactionHashes: [], transactions: [])
-        merkleBlock.height = 1000
-        let block = TestData.secondBlock
-        let forceAddedBlock = Block(withHeaderHash: Data(from: 100000000), height: merkleBlock.height!)
-        let blockHash = BlockHash(withHeaderHash: block.headerHash, height: block.height)
-
-        try! realm.write {
-            realm.add(blockHash)
-        }
-
-        stub(mockBlockchain) { mock in
-            when(mock.connect(merkleBlock: equal(to: merkleBlock), realm: any())).thenReturn(forceAddedBlock)
-            when(mock.forceAdd(merkleBlock: equal(to: merkleBlock), height: equal(to: merkleBlock.height!), realm: any())).thenReturn(forceAddedBlock)
-        }
-        stub(mockTransactionProcessor) { mock in
-            when(mock.process(transactions: equal(to: []), inBlock: equal(to: forceAddedBlock), skipCheckBloomFilter: any(), realm: any())).thenDoNothing()
-        }
-
-        try! syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: 0)
-        verify(mockBlockchain, never()).connect(merkleBlock: any(), realm: any())
-        verify(mockBlockchain).forceAdd(merkleBlock: equal(to: merkleBlock), height: equal(to: merkleBlock.height!), realm: any())
-        verify(mockTransactionProcessor).process(transactions: equal(to: []), inBlock: equal(to: forceAddedBlock), skipCheckBloomFilter: equal(to: false), realm: any())
-    }
-
-    func testHandleMerkleBlock_ErrorWhileConnectingBlock() {
-        let merkleBlock = MerkleBlock(header: TestData.secondBlock.header!, transactionHashes: [], transactions: [])
-
-        stub(mockBlockchain) { mock in
-            when(mock.connect(merkleBlock: equal(to: merkleBlock), realm: any())).thenThrow(BlockValidatorError.noPreviousBlock)
-        }
-
-        do {
-            try syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: 0)
-            XCTFail("Should throw an error")
-        } catch let error as BlockValidatorError {
-            XCTAssertEqual(error, BlockValidatorError.noPreviousBlock)
-        } catch {
-            XCTFail("Wrong error thrown")
-        }
-
-        verify(mockBlockchain).connect(merkleBlock: equal(to: merkleBlock), realm: any())
-        verify(mockBlockchain, never()).forceAdd(merkleBlock: any(), height: any(), realm: any())
-        verify(mockTransactionProcessor, never()).process(transactions: any(), inBlock: any(), skipCheckBloomFilter: any(), realm: any())
-    }
-
-    func testHandleMerkleBlock_NeedToReDownloadTrue() {
-        setTrueToNeedToReDownload()
-
-        let merkleBlock = MerkleBlock(header: TestData.secondBlock.header!, transactionHashes: [], transactions: [])
-        let block = TestData.secondBlock
-        let blockHash = BlockHash(withHeaderHash: block.headerHash, height: block.height)
-
-        try! realm.write {
-            realm.add(blockHash)
-        }
-
-        stub(mockBlockchain) { mock in
-            when(mock.connect(merkleBlock: equal(to: merkleBlock), realm: any())).thenReturn(block)
-        }
-        stub(mockTransactionProcessor) { mock in
-            when(mock.process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: any(), realm: any())).thenDoNothing()
-        }
-
-        try! syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: 0)
-        verify(mockBlockchain).connect(merkleBlock: equal(to: merkleBlock), realm: any())
-        verify(mockTransactionProcessor).process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: equal(to: true), realm: any())
-        XCTAssertEqual(realm.objects(BlockHash.self).count, 1)
-        verifyNeedToReDownloadSet(to: true)
-    }
-
-    func testHandleMerkleBlock_BloomFilterExpired() {
-        let merkleBlock = MerkleBlock(header: TestData.secondBlock.header!, transactionHashes: [], transactions: [])
-        let block = TestData.secondBlock
-        let blockHash = BlockHash(withHeaderHash: block.headerHash, height: block.height)
-
-        try! realm.write {
-            realm.add(blockHash)
-        }
-
-        stub(mockBlockchain) { mock in
-            when(mock.connect(merkleBlock: equal(to: merkleBlock), realm: any())).thenReturn(block)
-        }
-        stub(mockTransactionProcessor) { mock in
-            when(mock.process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: any(), realm: any())).thenThrow(BloomFilterManager.BloomFilterExpired())
-        }
-
-        try! syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: 0)
-        verify(mockBlockchain).connect(merkleBlock: equal(to: merkleBlock), realm: any())
-        verify(mockTransactionProcessor).process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: equal(to: false), realm: any())
-        XCTAssertEqual(realm.objects(BlockHash.self).count, 1)
-        verifyNeedToReDownloadSet(to: true)
-    }
-
-
-    func testShouldRequestBlock() {
-        try! realm.write {
-            realm.add(newBlock1)
-        }
-
-        XCTAssertEqual(syncer.shouldRequestBlock(withHash: newBlock1.headerHash), false)
-        XCTAssertEqual(syncer.shouldRequestBlock(withHash: newBlock2.headerHash), true)
-    }
-
-
-    private func verifyNeedToReDownloadSet(to value: Bool) {
-        let merkleBlock = MerkleBlock(header: TestData.firstBlock.header!, transactionHashes: [], transactions: [])
-        let block = TestData.firstBlock
-
-        stub(mockBlockchain) { mock in
-            when(mock.connect(merkleBlock: equal(to: merkleBlock), realm: any())).thenReturn(block)
-        }
-        stub(mockTransactionProcessor) { mock in
-            when(mock.process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: any(), realm: any())).thenDoNothing()
-        }
-
-        try? syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: 0)
-
-        verify(mockTransactionProcessor).process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: value, realm: any())
-    }
-
-    private func setTrueToNeedToReDownload() {
-        let merkleBlock = MerkleBlock(header: TestData.firstBlock.header!, transactionHashes: [], transactions: [])
-        let block = TestData.firstBlock
-
-        stub(mockBlockchain) { mock in
-            when(mock.connect(merkleBlock: equal(to: merkleBlock), realm: any())).thenReturn(block)
-        }
-        stub(mockTransactionProcessor) { mock in
-            when(mock.process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: false, realm: any())).thenThrow(BloomFilterManager.BloomFilterExpired())
-        }
-        try? syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: 0)
-
-        stub(mockTransactionProcessor) { mock in
-            when(mock.process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: true, realm: any())).thenThrow(BloomFilterManager.BloomFilterExpired())
-        }
-        try? syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: 0)
-
-        verify(mockTransactionProcessor).process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: true, realm: any())
-    }
-
 }

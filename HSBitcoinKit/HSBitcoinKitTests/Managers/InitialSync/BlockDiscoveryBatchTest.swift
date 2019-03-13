@@ -57,10 +57,10 @@ class BlockDiscoveryBatchTest: XCTestCase {
         }
 
         let lastUsedIndex = 1
-        let blockResponse = BlockResponse(hash: "1234", height: 1234)
+        let blockHash = BlockHash(reversedHeaderHashHex: "1234", height: 1234, sequence: 0)!
 
         stub(mockBlockHashFetcher) { mock in
-            when(mock.getBlockHashes(publicKeys: equal(to: [publicKeys[0], publicKeys[1], publicKeys[2]]))).thenReturn(Observable.just(([blockResponse], lastUsedIndex)))
+            when(mock.getBlockHashes(publicKeys: equal(to: [publicKeys[0], publicKeys[1], publicKeys[2]]))).thenReturn(Observable.just(([blockHash], lastUsedIndex)))
             when(mock.getBlockHashes(publicKeys: equal(to: [publicKeys[3], publicKeys[4]]))).thenReturn(Observable.just(([], -1)))
         }
 
@@ -68,7 +68,7 @@ class BlockDiscoveryBatchTest: XCTestCase {
         do{
             let result = try resultObservable.toBlocking().first()
             XCTAssertEqual(publicKeys, result!.0)
-            XCTAssertEqual([blockResponse], result!.1)
+            XCTAssertEqual([blockHash], result!.1)
         } catch {
             XCTFail("Catch error!")
         }

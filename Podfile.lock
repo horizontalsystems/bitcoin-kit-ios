@@ -2,12 +2,15 @@ PODS:
   - Alamofire (4.8.1)
   - BigInt (3.1.0):
     - SipHash (~> 1.2)
-  - Cuckoo (0.12.0)
-  - HSCryptoKit (1.1.0)
+  - Cuckoo (0.12.1)
+  - GRDB.swift (3.6.2)
+  - HSCryptoKit (1.3.0)
   - HSCryptoX11 (1.0.0)
-  - HSHDWalletKit (1.0.3):
-    - HSCryptoKit (~> 1.1.0)
-  - ObjectMapper (3.3.0)
+  - HSHDWalletKit (1.0.4):
+    - HSCryptoKit (~> 1.3.0)
+  - Nimble (7.3.4)
+  - ObjectMapper (3.4.2)
+  - Quick (1.3.4)
   - Realm (3.11.2):
     - Realm/Headers (= 3.11.2)
   - Realm/Headers (3.11.2)
@@ -28,10 +31,13 @@ DEPENDENCIES:
   - Alamofire (~> 4.8.0)
   - BigInt (~> 3.1.0)
   - Cuckoo
-  - HSCryptoKit (~> 1.1.0)
+  - GRDB.swift (~> 3.6.2)
+  - HSCryptoKit (~> 1.3.0)
   - HSCryptoX11 (from `https://github.com/horizontalsystems/crypto-x11-ios`)
-  - HSHDWalletKit (~> 1.0.3)
-  - ObjectMapper (~> 3.3.0)
+  - HSHDWalletKit (~> 1.0.4)
+  - Nimble
+  - ObjectMapper (~> 3.4.0)
+  - Quick
   - RealmSwift (~> 3.11.0)
   - RxBlocking (~> 4.0)
   - RxRealm (~> 0.7.0)
@@ -42,9 +48,12 @@ SPEC REPOS:
     - Alamofire
     - BigInt
     - Cuckoo
+    - GRDB.swift
     - HSCryptoKit
     - HSHDWalletKit
+    - Nimble
     - ObjectMapper
+    - Quick
     - Realm
     - RealmSwift
     - RxAtomic
@@ -65,11 +74,14 @@ CHECKOUT OPTIONS:
 SPEC CHECKSUMS:
   Alamofire: 16ce2c353fb72865124ddae8a57c5942388f4f11
   BigInt: 76b5dfdfa3e2e478d4ffdf161aeede5502e2742f
-  Cuckoo: d30b6c149e52ffbcfe6b4a9543e4627d08947274
-  HSCryptoKit: 8679d53083d1136fc128bbf9b040976110ce1491
+  Cuckoo: 2f10364798baa4b0d4aacabfa475249cf29977bc
+  GRDB.swift: e10787d857b6b8135354b9e08fb23b4bb8e2fab7
+  HSCryptoKit: 564a3888691658cba58aa60f7d037654fd3c6fb0
   HSCryptoX11: 9619fbffb53e9de913d77a531c5ef35cd0402dfe
-  HSHDWalletKit: f75cd8186f00bae4f6aa76548a0b1f24c13dff72
-  ObjectMapper: b612bf8c8e99c4dc0bb6013a51f7c27966ed5da9
+  HSHDWalletKit: e09162c2bb121c9db9b0cf203bd93b40965aad74
+  Nimble: 051e3d8912d40138fa5591c78594f95fb172af37
+  ObjectMapper: 0d4402610f4e468903ae64629eec4784531e5c51
+  Quick: f4f7f063c524394c73ed93ac70983c609805d481
   Realm: 864477d028db77f7c5a0cba64a4892ad53db128a
   RealmSwift: 12b8262fc08020b47de4fd88eb3d5c9425b34ec7
   RxAtomic: f8d6adc1ccb87a767811269e4875887bc74dbf19
@@ -78,6 +90,6 @@ SPEC CHECKSUMS:
   RxSwift: 92fcf68dfef21f3e2ab1965363d9e7b3d787597e
   SipHash: fad90a4683e420c52ef28063063dbbce248ea6d4
 
-PODFILE CHECKSUM: 7dc9ba5571e627d46ee1c73df59ffca832857889
+PODFILE CHECKSUM: c19f7895a47b7aa2c9eb3f8a6e3ea319f38e81bd
 
 COCOAPODS: 1.5.3

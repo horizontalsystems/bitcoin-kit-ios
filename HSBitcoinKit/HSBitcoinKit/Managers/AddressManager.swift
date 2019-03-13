@@ -116,3 +116,13 @@ extension AddressManager: IAddressManager {
     }
 
 }
+
+extension AddressManager {
+
+    public static func instance(realmFactory: IRealmFactory, hdWallet: IHDWallet, addressConverter: IAddressConverter) -> AddressManager {
+        let addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, addressConverter: addressConverter)
+        try? addressManager.fillGap()
+        return addressManager
+    }
+
+}

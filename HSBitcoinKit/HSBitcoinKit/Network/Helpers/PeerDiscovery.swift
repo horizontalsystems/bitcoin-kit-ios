@@ -1,8 +1,15 @@
 import Foundation
 
-class HostDiscovery: IHostDiscovery {
+class PeerDiscovery: IPeerDiscovery {
+    weak var peerAddressManager: IPeerAddressManager?
 
-    func lookup(dnsSeed: String) -> [String] {
+    func lookup(dnsSeed: String) {
+        DispatchQueue.global(qos: .background).async {
+            self.peerAddressManager?.add(ips: self.lookup(dnsSeed: dnsSeed))
+        }
+    }
+
+    private func lookup(dnsSeed: String) -> [String] {
         let hostRef = CFHostCreateWithName(kCFAllocatorDefault, dnsSeed as CFString).takeRetainedValue()
         let resolved = CFHostStartInfoResolution(hostRef, CFHostInfoType.addresses, nil)
         var resolvedDarwin = DarwinBoolean(resolved)

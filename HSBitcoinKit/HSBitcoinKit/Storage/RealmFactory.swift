@@ -12,13 +12,8 @@ class RealmFactory {
                 deleteRealmIfMigrationNeeded: true,
                 objectTypes: [
                     Block.self,
-                    BlockHash.self,
                     BlockHeader.self,
-                    FeeRate.self,
-                    RestoreState.self,
-                    PeerAddress.self,
                     PublicKey.self,
-                    SentTransaction.self,
                     Transaction.self,
                     TransactionInput.self,
                     TransactionOutput.self

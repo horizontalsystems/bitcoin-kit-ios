@@ -54,3 +54,11 @@ extension TransactionInfo: Equatable {
     }
 
 }
+
+extension PeerAddress: Equatable {
+
+    public static func ==(lhs: PeerAddress, rhs: PeerAddress) -> Bool {
+        return lhs.ip == rhs.ip
+    }
+
+}

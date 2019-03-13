@@ -57,40 +57,40 @@
 //    }
 //
 //    func testSinglePageResponse() {
-//        var expectedBlockResponse = [BlockResponse]()
+//        var expectedBlockHash = [BlockHash]()
 //        for i in 1...4 {
-//            expectedBlockResponse.append(BlockResponse(hash: "block\(i)", height: i))
+//            expectedBlockHash.append(BlockHash(hash: "block\(i)", height: i))
 //        }
 //        stub(apiRequester) { mock in
-//            when(mock.requestTransactions(address: "base58-addr", page: 1)).thenReturn(Observable.just(ApiAddressTxResponse(totalCount: 2, page: 1, pageSize: 50, list: [expectedBlockResponse[0], expectedBlockResponse[1]])))
-//            when(mock.requestTransactions(address: "publicKeyHex", page: 1)).thenReturn(Observable.just(ApiAddressTxResponse(totalCount: 2, page: 1, pageSize: 50, list: [expectedBlockResponse[1], expectedBlockResponse[2]])))
-//            when(mock.requestTransactions(address: "pkhsh-addr", page: 1)).thenReturn(Observable.just(ApiAddressTxResponse(totalCount: 2, page: 1, pageSize: 50, list: [expectedBlockResponse[0], expectedBlockResponse[3]])))
+//            when(mock.requestTransactions(address: "base58-addr", page: 1)).thenReturn(Observable.just(ApiAddressTxResponse(totalCount: 2, page: 1, pageSize: 50, list: [expectedBlockHash[0], expectedBlockHash[1]])))
+//            when(mock.requestTransactions(address: "publicKeyHex", page: 1)).thenReturn(Observable.just(ApiAddressTxResponse(totalCount: 2, page: 1, pageSize: 50, list: [expectedBlockHash[1], expectedBlockHash[2]])))
+//            when(mock.requestTransactions(address: "pkhsh-addr", page: 1)).thenReturn(Observable.just(ApiAddressTxResponse(totalCount: 2, page: 1, pageSize: 50, list: [expectedBlockHash[0], expectedBlockHash[3]])))
 //        }
 //        _ = apiSyncer.getBlockHashes(publicKey: publicKey).subscribe(onNext: { response in
 //            let sortedResponse = response.sorted { response, response2 in response.height < response2.height }
 //
-//            if response.isEmpty || !sortedResponse.elementsEqual(expectedBlockResponse) {
+//            if response.isEmpty || !sortedResponse.elementsEqual(expectedBlockHash) {
 //                XCTFail("Wrong response!")
 //            }
 //        })
 //    }
 //
 //    func testMultiPageResponse() {
-//        var expectedBlockResponse = [BlockResponse]()
+//        var expectedBlockHash = [BlockHash]()
 //        for i in 1...7 {
-//            expectedBlockResponse.append(BlockResponse(hash: "block\(i)", height: i))
+//            expectedBlockHash.append(BlockHash(hash: "block\(i)", height: i))
 //        }
 //        stub(apiRequester) { mock in
-//            when(mock.requestTransactions(address: "base58-addr", page: 1)).thenReturn(Observable.just(ApiAddressTxResponse(totalCount: 5, page: 1, pageSize: 2, list: [expectedBlockResponse[0], expectedBlockResponse[1]])))
-//            when(mock.requestTransactions(address: "base58-addr", page: 2)).thenReturn(Observable.just(ApiAddressTxResponse(totalCount: 5, page: 2, pageSize: 2, list: [expectedBlockResponse[2], expectedBlockResponse[3]])))
-//            when(mock.requestTransactions(address: "base58-addr", page: 3)).thenReturn(Observable.just(ApiAddressTxResponse(totalCount: 5, page: 3, pageSize: 2, list: [expectedBlockResponse[6]])))
-//            when(mock.requestTransactions(address: "publicKeyHex", page: 1)).thenReturn(Observable.just(ApiAddressTxResponse(totalCount: 3, page: 1, pageSize: 50, list: [expectedBlockResponse[4], expectedBlockResponse[3], expectedBlockResponse[5]])))
-//            when(mock.requestTransactions(address: "pkhsh-addr", page: 1)).thenReturn(Observable.just(ApiAddressTxResponse(totalCount: 2, page: 1, pageSize: 50, list: [expectedBlockResponse[0], expectedBlockResponse[3]])))
+//            when(mock.requestTransactions(address: "base58-addr", page: 1)).thenReturn(Observable.just(ApiAddressTxResponse(totalCount: 5, page: 1, pageSize: 2, list: [expectedBlockHash[0], expectedBlockHash[1]])))
+//            when(mock.requestTransactions(address: "base58-addr", page: 2)).thenReturn(Observable.just(ApiAddressTxResponse(totalCount: 5, page: 2, pageSize: 2, list: [expectedBlockHash[2], expectedBlockHash[3]])))
+//            when(mock.requestTransactions(address: "base58-addr", page: 3)).thenReturn(Observable.just(ApiAddressTxResponse(totalCount: 5, page: 3, pageSize: 2, list: [expectedBlockHash[6]])))
+//            when(mock.requestTransactions(address: "publicKeyHex", page: 1)).thenReturn(Observable.just(ApiAddressTxResponse(totalCount: 3, page: 1, pageSize: 50, list: [expectedBlockHash[4], expectedBlockHash[3], expectedBlockHash[5]])))
+//            when(mock.requestTransactions(address: "pkhsh-addr", page: 1)).thenReturn(Observable.just(ApiAddressTxResponse(totalCount: 2, page: 1, pageSize: 50, list: [expectedBlockHash[0], expectedBlockHash[3]])))
 //        }
 //        _ = apiSyncer.getBlockHashes(publicKey: publicKey).subscribe(onNext: { response in
 //            let sortedResponse = response.sorted { response, response2 in response.height < response2.height }
 //
-//            if response.isEmpty || !sortedResponse.elementsEqual(expectedBlockResponse) {
+//            if response.isEmpty || !sortedResponse.elementsEqual(expectedBlockHash) {
 //                XCTFail("Wrong response!")
 //            }
 //

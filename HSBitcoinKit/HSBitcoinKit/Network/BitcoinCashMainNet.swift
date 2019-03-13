@@ -29,29 +29,33 @@ class BitcoinCashMainNet: INetwork {
         "seed.bitcoinabc.org",
     ]
 
-    let genesisBlock = Block(
-            withHeader: BlockHeader(
-                    version: 1,
-                    headerHash: "00000000839a8e6886ab5951d76f411475428afc90947ee320161bbf18eb6048".reversedData,
-                    previousBlockHeaderReversedHex: "0000000000000000000000000000000000000000000000000000000000000000",
-                    merkleRootReversedHex: "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b",
-                    timestamp: 1231006505,
-                    bits: 486604799,
-                    nonce: 2083236893
-            ),
-            height: 0)
+    var genesisBlock: Block {
+        return Block(
+                withHeader: BlockHeader(
+                        version: 1,
+                        headerHash: "00000000839a8e6886ab5951d76f411475428afc90947ee320161bbf18eb6048".reversedData,
+                        previousBlockHeaderReversedHex: "0000000000000000000000000000000000000000000000000000000000000000",
+                        merkleRootReversedHex: "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b",
+                        timestamp: 1231006505,
+                        bits: 486604799,
+                        nonce: 2083236893
+                ),
+                height: 0)
+    }
 
-    let checkpointBlock = Block(
-            withHeader: BlockHeader(
-                    version: 549453824,
-                    headerHash: "00000000000000000356c9c3f92f22b88bd8d0544f40a09260235d6cf95d491b".reversedData,
-                    previousBlockHeaderReversedHex: "000000000000000002e4009667ba236d52f605cd44c12ebd79208c14b520968e",
-                    merkleRootReversedHex: "65822e3caa2a4709abd37df7de6464a58830da0f8e308af44586114e1c73914f",
-                    timestamp: 1551084121,
-                    bits: 403013590,
-                    nonce: 2244691553
-            ),
-            height: 571268)
+    var checkpointBlock: Block {
+        return Block(
+                withHeader: BlockHeader(
+                        version: 549453824,
+                        headerHash: "00000000000000000356c9c3f92f22b88bd8d0544f40a09260235d6cf95d491b".reversedData,
+                        previousBlockHeaderReversedHex: "000000000000000002e4009667ba236d52f605cd44c12ebd79208c14b520968e",
+                        merkleRootReversedHex: "65822e3caa2a4709abd37df7de6464a58830da0f8e308af44586114e1c73914f",
+                        timestamp: 1551084121,
+                        bits: 403013590,
+                        nonce: 2244691553
+                ),
+                height: 571268)
+    }
 
 //    var targetTimeSpan: Int { return 24 * 60 * 60 }                     // Seconds in Bitcoin cycle
 

@@ -5,53 +5,94 @@ import RxSwift
 @testable import HSBitcoinKit
 
 class StateManagerTests: XCTestCase {
+    private var mockStorage: MockIStorage!
+    private var mockNetwork: MockINetwork!
 
-    private var mockRealmFactory: MockIRealmFactory!
-
-    private var realm: Realm!
-    private var stateManager: StateManager!
+    private var manager: StateManager!
 
     override func setUp() {
         super.setUp()
 
-        mockRealmFactory = MockIRealmFactory()
+        mockStorage = MockIStorage()
+        mockNetwork = MockINetwork()
 
-        realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
-        try! realm.write { realm.deleteAll() }
-        stub(mockRealmFactory) {mock in
-            when(mock.realm.get).thenReturn(realm)
+        stub(mockStorage) { mock in
+            when(mock.set(initialRestored: any())).thenDoNothing()
         }
 
-        stateManager = StateManager(realmFactory: mockRealmFactory, syncableFromApi: true, newWallet: false)
+        manager = StateManager(storage: mockStorage, network: mockNetwork, newWallet: false)
     }
 
     override func tearDown() {
-        mockRealmFactory = nil
-        realm = nil
+        mockStorage = nil
+        mockNetwork = nil
 
-        stateManager = nil
+        manager = nil
 
         super.tearDown()
     }
 
-    func testConstructor() {
-        XCTAssertFalse(stateManager.restored)
+    func testRestored_get_notSyncableFromApi() {
+        stub(mockNetwork) { mock in
+            when(mock.syncableFromApi.get).thenReturn(false)
+        }
 
-        stateManager = StateManager(realmFactory: mockRealmFactory, syncableFromApi: false, newWallet: false)
-        XCTAssertTrue(stateManager.restored)
-
-        stateManager = StateManager(realmFactory: mockRealmFactory, syncableFromApi: true, newWallet: true)
-        XCTAssertTrue(stateManager.restored)
-
-        stateManager = StateManager(realmFactory: mockRealmFactory, syncableFromApi: false, newWallet: true)
-        XCTAssertTrue(stateManager.restored)
+        XCTAssertTrue(manager.restored)
     }
 
-    func testRestored_Set() {
-        stateManager.restored = true
-        XCTAssertTrue(realm.objects(RestoreState.self).first!.restored)
+    func testRestored_get_newWallet() {
+        stub(mockNetwork) { mock in
+            when(mock.syncableFromApi.get).thenReturn(true)
+        }
 
-        stateManager.restored = false
-        XCTAssertFalse(realm.objects(RestoreState.self).first!.restored)
+        let manager = StateManager(storage: mockStorage, network: mockNetwork, newWallet: true)
+
+        XCTAssertTrue(manager.restored)
     }
+
+    func testRestored_get_true() {
+        stub(mockNetwork) { mock in
+            when(mock.syncableFromApi.get).thenReturn(true)
+        }
+        stub(mockStorage) { mock in
+            when(mock.initialRestored.get).thenReturn(true)
+        }
+
+        XCTAssertTrue(manager.restored)
+    }
+
+    func testRestored_get_false() {
+        stub(mockNetwork) { mock in
+            when(mock.syncableFromApi.get).thenReturn(true)
+        }
+        stub(mockStorage) { mock in
+            when(mock.initialRestored.get).thenReturn(false)
+        }
+
+        XCTAssertFalse(manager.restored)
+    }
+
+    func testRestored_get_nilFromStorage() {
+        stub(mockNetwork) { mock in
+            when(mock.syncableFromApi.get).thenReturn(true)
+        }
+        stub(mockStorage) { mock in
+            when(mock.initialRestored.get).thenReturn(nil)
+        }
+
+        XCTAssertFalse(manager.restored)
+    }
+
+    func testRestored_set_true() {
+        manager.restored = true
+
+        verify(mockStorage).set(initialRestored: true)
+    }
+
+    func testRestored_set_false() {
+        manager.restored = false
+
+        verify(mockStorage).set(initialRestored: false)
+    }
+
 }
