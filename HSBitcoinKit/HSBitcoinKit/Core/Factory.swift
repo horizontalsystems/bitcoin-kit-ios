@@ -20,8 +20,8 @@ class Factory: IFactory {
         return TransactionOutput(withValue: value, index: index, lockingScript: script, type: type, address: address, keyHash: keyHash, publicKey: publicKey)
     }
 
-    func peer(withHost host: String, network: INetwork, logger: Logger? = nil) -> IPeer {
-        return Peer(host: host, network: network, connection: PeerConnection(host: host, network: network, logger: logger), connectionTimeoutManager: ConnectionTimeoutManager(), logger: logger)
+    func peer(withHost host: String, network: INetwork, networkMessageParser: NetworkMessageParser, logger: Logger? = nil) -> IPeer {
+        return Peer(host: host, network: network, connection: PeerConnection(host: host, network: network, networkMessageParser: networkMessageParser, logger: logger), connectionTimeoutManager: ConnectionTimeoutManager(), logger: logger)
     }
 
     func blockHash(withHeaderHash headerHash: Data, height: Int, order: Int = 0) -> BlockHash {

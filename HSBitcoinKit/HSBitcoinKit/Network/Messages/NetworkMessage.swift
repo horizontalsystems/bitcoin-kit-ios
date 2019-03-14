@@ -15,7 +15,7 @@ struct NetworkMessage {
 
     static let minimumLength = 24
 
-    private init(network: INetwork, command: String, length: UInt32, checksum: Data, message: IMessage) {
+    init(network: INetwork, command: String, length: UInt32, checksum: Data, message: IMessage) {
         self.magic = network.magic
         self.command = command
         self.length = length

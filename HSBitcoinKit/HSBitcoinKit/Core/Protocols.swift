@@ -247,7 +247,7 @@ protocol IFactory {
     func block(withHeader header: BlockHeader, previousBlock: Block) -> Block
     func block(withHeader header: BlockHeader, height: Int) -> Block
     func blockHash(withHeaderHash headerHash: Data, height: Int, order: Int) -> BlockHash
-    func peer(withHost host: String, network: INetwork, logger: Logger?) -> IPeer
+    func peer(withHost host: String, network: INetwork, networkMessageParser: NetworkMessageParser, logger: Logger?) -> IPeer
     func transaction(version: Int, inputs: [TransactionInput], outputs: [TransactionOutput], lockTime: Int) -> Transaction
     func transactionInput(withPreviousOutputTxReversedHex previousOutputTxReversedHex: String, previousOutputIndex: Int, script: Data, sequence: Int) -> TransactionInput
     func transactionOutput(withValue value: Int, index: Int, lockingScript script: Data, type: ScriptType, address: String?, keyHash: Data?, publicKey: PublicKey?) -> TransactionOutput

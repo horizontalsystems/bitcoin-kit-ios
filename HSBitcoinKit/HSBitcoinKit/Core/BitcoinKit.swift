@@ -151,7 +151,22 @@ public class BitcoinKit {
         kitStateProvider = KitStateProvider()
 
         bloomFilterManager = BloomFilterManager(realmFactory: realmFactory, factory: factory)
-        peerGroup = PeerGroup(factory: factory, network: network, listener: kitStateProvider, reachabilityManager: reachabilityManager, peerAddressManager: peerAddressManager, bloomFilterManager: bloomFilterManager, logger: logger)
+
+        let messageParsers = SetOfResponsibility()
+                .append(id: "addr", element: AddressMessageParser())
+                .append(id: "getdata", element: GetDataMessageParser())
+                .append(id: "inv", element: InventoryMessageParser())
+                .append(id: "ping", element: PingMessageParser())
+                .append(id: "pong", element: PongMessageParser())
+                .append(id: "verack", element: VerackMessageParser())
+                .append(id: "version", element: VersionMessageParser())
+                .append(id: "mempool", element: MemPoolMessageParser())
+                .append(id: "merkleblock", element: MerkleBlockMessageParser(network: network))
+                .append(id: "tx", element: TransactionMessageParser())
+
+        let networkMessageParser = NetworkMessageParser(network: network, messageParsers: messageParsers)
+
+        peerGroup = PeerGroup(factory: factory, network: network, networkMessageParser: networkMessageParser, listener: kitStateProvider, reachabilityManager: reachabilityManager, peerAddressManager: peerAddressManager, bloomFilterManager: bloomFilterManager, logger: logger)
 
         addressManager = AddressManager.instance(realmFactory: realmFactory, hdWallet: hdWallet, addressConverter: addressConverter)
         initialSyncer = InitialSyncer(storage: storage, listener: kitStateProvider, stateManager: stateManager, blockDiscovery: blockDiscovery, addressManager: addressManager, logger: logger)

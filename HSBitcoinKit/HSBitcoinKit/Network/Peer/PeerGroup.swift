@@ -18,6 +18,8 @@ class PeerGroup {
 
     private let factory: IFactory
     private let network: INetwork
+    private let networkMessageParser: NetworkMessageParser
+
     private var peerAddressManager: IPeerAddressManager
     private var bloomFilterManager: IBloomFilterManager
     private var peerCount: Int
@@ -32,7 +34,7 @@ class PeerGroup {
 
     private let logger: Logger?
 
-    init(factory: IFactory, network: INetwork, listener: ISyncStateListener, reachabilityManager: IReachabilityManager,
+    init(factory: IFactory, network: INetwork, networkMessageParser: NetworkMessageParser, listener: ISyncStateListener, reachabilityManager: IReachabilityManager,
          peerAddressManager: IPeerAddressManager, bloomFilterManager: IBloomFilterManager,
          peerCount: Int = 10, peerManager: IPeerManager = PeerManager(),
          peersQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Local Queue", qos: .userInitiated),
@@ -40,6 +42,8 @@ class PeerGroup {
          logger: Logger? = nil) {
         self.factory = factory
         self.network = network
+        self.networkMessageParser = networkMessageParser
+
         self.syncStateListener = listener
         self.reachabilityManager = reachabilityManager
         self.peerAddressManager = peerAddressManager
@@ -68,7 +72,7 @@ class PeerGroup {
 
             for _ in self.peerManager.totalPeersCount()..<self.peerCount {
                 if let host = self.peerAddressManager.ip {
-                    let peer = self.factory.peer(withHost: host, network: self.network, logger: self.logger)
+                    let peer = self.factory.peer(withHost: host, network: self.network, networkMessageParser: self.networkMessageParser, logger: self.logger)
                     peer.delegate = self
                     peer.localBestBlockHeight = self.blockSyncer?.localDownloadedBestBlockHeight ?? 0
                     self.peerManager.add(peer: peer)
