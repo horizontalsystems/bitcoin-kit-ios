@@ -99,11 +99,18 @@ protocol IStorage {
     func blocksCount(reversedHeaderHashHexes: [String]) -> Int
     func save(block: Block)
     func blocks(heightGreaterThan: Int, sortedBy: String, limit: Int) -> [Block]
-    func blocks(byHexes: [String], realm: Realm) -> Results<Block>
+    func blocks(byHexes: [String], realm: Realm) -> [Block]
+    func blocks(heightGreaterThanOrEqualTo: Int, stale: Bool, realm: Realm) -> [Block]
+    func blocks(stale: Bool, realm: Realm) -> [Block]
     func block(byHeight: Int32) -> Block?
-    func block(byHeaderHash: Data) -> Block?
+    func block(byHashHex: String) -> Block?
+    func block(stale: Bool, sortedHeight: String, realm: Realm?) -> Block?
+    func add(block: Block, realm: Realm)
+    func update(block: Block, realm: Realm)
+    func delete(blocks: [Block], realm: Realm)
 
 
+    func transactions(ofBlock: Block, realm: Realm) -> [Transaction]
     func newTransactions() -> [Transaction]
     func newTransaction(byReversedHashHex: String) -> Transaction?
     func relayedTransactionExists(byReversedHashHex: String) -> Bool
@@ -348,8 +355,8 @@ protocol IBlockchain {
 
     func connect(merkleBlock: MerkleBlock, realm: Realm) throws -> Block
     func forceAdd(merkleBlock: MerkleBlock, height: Int, realm: Realm) -> Block
-    func handleFork(realm: Realm)
-    func deleteBlocks(blocks: Results<Block>, realm: Realm)
+    func handleFork()
+    func deleteBlocks(blocks: [Block], realm: Realm)
 }
 
 protocol IBlockchainDataListener: class {

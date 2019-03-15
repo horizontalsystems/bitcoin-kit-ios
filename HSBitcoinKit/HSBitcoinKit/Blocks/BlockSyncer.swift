@@ -76,7 +76,7 @@ extension BlockSyncer: IBlockSyncer {
             try clearPartialBlocks()
             clearBlockHashes()
 
-            blockchain.handleFork(realm: storage.realm)
+            blockchain.handleFork()
         } catch {
             logger?.error(error)
         }
@@ -92,7 +92,7 @@ extension BlockSyncer: IBlockSyncer {
     }
 
     func downloadCompleted() {
-        blockchain.handleFork(realm: storage.realm)
+        blockchain.handleFork()
     }
 
     func downloadFailed() {
@@ -167,7 +167,7 @@ extension BlockSyncer: IBlockSyncer {
     }
 
     func shouldRequestBlock(withHash hash: Data) -> Bool {
-        return storage.block(byHeaderHash: hash) == nil
+        return storage.block(byHashHex: hash.reversedHex) == nil
     }
 
 }

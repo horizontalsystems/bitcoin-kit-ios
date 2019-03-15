@@ -38,7 +38,7 @@ class BlockSyncerTests: QuickSpec {
                 when(mock.initialBestBlockHeightUpdated(height: equal(to: 0))).thenDoNothing()
             }
             stub(mockBlockchain) { mock in
-                when(mock.handleFork(realm: equal(to: realm))).thenDoNothing()
+                when(mock.handleFork()).thenDoNothing()
             }
             stub(mockAddressManager) { mock in
                 when(mock.fillGap()).thenDoNothing()
@@ -203,7 +203,7 @@ class BlockSyncerTests: QuickSpec {
             }
 
             describe("#prepareForDownload") {
-                let emptyBlocks = realm.objects(Block.self)
+                let emptyBlocks = Array(realm.objects(Block.self))
 
                 beforeEach {
                     stub(mockStorage) { mock in
@@ -234,7 +234,7 @@ class BlockSyncerTests: QuickSpec {
                 }
 
                 it("handles fork") {
-                    verify(mockBlockchain).handleFork(realm: equal(to: realm))
+                    verify(mockBlockchain).handleFork()
                 }
             }
 
@@ -269,12 +269,12 @@ class BlockSyncerTests: QuickSpec {
             describe("#downloadCompleted") {
                 it("handles fork") {
                     syncer.downloadCompleted()
-                    verify(mockBlockchain).handleFork(realm: equal(to: realm))
+                    verify(mockBlockchain).handleFork()
                 }
             }
 
             describe("#downloadFailed") {
-                let emptyBlocks = realm.objects(Block.self)
+                let emptyBlocks = Array(realm.objects(Block.self))
 
                 beforeEach {
                     stub(mockStorage) { mock in
@@ -305,7 +305,7 @@ class BlockSyncerTests: QuickSpec {
                 }
 
                 it("handles fork") {
-                    verify(mockBlockchain).handleFork(realm: equal(to: realm))
+                    verify(mockBlockchain).handleFork()
                 }
             }
 
@@ -495,7 +495,7 @@ class BlockSyncerTests: QuickSpec {
                 context("when the given block is in storage") {
                     it("returns false") {
                         stub(mockStorage) { mock in
-                            when(mock.block(byHeaderHash: equal(to: hash))).thenReturn(TestData.firstBlock)
+                            when(mock.block(byHashHex: equal(to: hash.reversedHex))).thenReturn(TestData.firstBlock)
                         }
 
                         expect(syncer.shouldRequestBlock(withHash: hash)).to(beFalsy())
@@ -505,7 +505,7 @@ class BlockSyncerTests: QuickSpec {
                 context("when the given block is not in storage") {
                     it("returns true") {
                         stub(mockStorage) { mock in
-                            when(mock.block(byHeaderHash: equal(to: hash))).thenReturn(nil)
+                            when(mock.block(byHashHex: equal(to: hash.reversedHex))).thenReturn(nil)
                         }
 
                         expect(syncer.shouldRequestBlock(withHash: hash)).to(beTruthy())

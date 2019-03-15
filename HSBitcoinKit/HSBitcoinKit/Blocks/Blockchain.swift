@@ -1,14 +1,23 @@
 import RealmSwift
 
 class Blockchain {
+    private let storage: IStorage
     private let network: INetwork
     private let factory: IFactory
     weak var listener: IBlockchainDataListener?
 
-    init(network: INetwork, factory: IFactory, listener: IBlockchainDataListener? = nil) {
+    init(storage: IStorage, network: INetwork, factory: IFactory, listener: IBlockchainDataListener? = nil) {
+        self.storage = storage
         self.network = network
         self.factory = factory
         self.listener = listener
+    }
+
+    private func unstaleAllBlocks(realm: Realm) {
+        for block in storage.blocks(stale: true, realm: realm) {
+            block.stale = false
+            storage.update(block: block, realm: realm)
+        }
     }
 
 }
@@ -16,11 +25,13 @@ class Blockchain {
 extension Blockchain: IBlockchain {
 
     func connect(merkleBlock: MerkleBlock, realm: Realm) throws -> Block {
-        if let existingBlock = realm.objects(Block.self).filter("headerHash = %@", merkleBlock.headerHash).first {
+        // realm.objects(Block.self).filter("headerHash = %@", merkleBlock.headerHash).first
+        if let existingBlock = storage.block(byHashHex: merkleBlock.reversedHeaderHashHex) {
             return existingBlock
         }
 
-        guard let previousBlock = realm.objects(Block.self).filter("headerHash = %@", merkleBlock.header.previousBlockHeaderHash).first else {
+        // realm.objects(Block.self).filter("headerHash = %@", merkleBlock.header.previousBlockHeaderHash).first
+        guard let previousBlock = storage.block(byHashHex: merkleBlock.header.previousBlockHeaderHash.reversedHex) else {
             throw BlockValidatorError.noPreviousBlock
         }
 
@@ -28,8 +39,8 @@ extension Blockchain: IBlockchain {
         let block = factory.block(withHeader: merkleBlock.header, previousBlock: previousBlock)
         try network.validate(block: block, previousBlock: previousBlock)
         block.stale = true
-        realm.add(block)
 
+        storage.add(block: block, realm: realm)
         listener?.onInsert(block: block)
 
         return block
@@ -37,53 +48,44 @@ extension Blockchain: IBlockchain {
 
     func forceAdd(merkleBlock: MerkleBlock, height: Int, realm: Realm) -> Block {
         let block = factory.block(withHeader: merkleBlock.header, height: height)
-        realm.add(block)
+        storage.add(block: block, realm: realm)
 
         listener?.onInsert(block: block)
 
         return block
     }
 
-    func handleFork(realm: Realm) {
-        guard let firstStaleHeight = realm.objects(Block.self).filter("stale = %@", true).sorted(byKeyPath: "height").first?.height else {
+    func handleFork() {
+        guard let firstStaleHeight = storage.block(stale: true, sortedHeight: "ASC", realm: nil)?.height else {
             return
         }
 
-        let lastNotStaleHeight = realm.objects(Block.self).filter("stale = %@", false).sorted(byKeyPath: "height").last?.height ?? 0
+        let lastNotStaleHeight = storage.block(stale: false, sortedHeight: "DESC", realm: nil)?.height ?? 0
 
-        try? realm.write {
+        try? storage.inTransaction { realm in
             if (firstStaleHeight <= lastNotStaleHeight) {
-                let lastStaleHeight = realm.objects(Block.self).filter("stale = %@", true).sorted(byKeyPath: "height").last?.height ?? firstStaleHeight
+                let lastStaleHeight = storage.block(stale: true, sortedHeight: "DESC", realm: realm)?.height ?? firstStaleHeight
 
                 if (lastStaleHeight > lastNotStaleHeight) {
-                    let notStaleBlocks = realm.objects(Block.self).filter("stale = %@ AND height >= %@", false, firstStaleHeight)
+                    let notStaleBlocks = storage.blocks(heightGreaterThanOrEqualTo: firstStaleHeight, stale: false, realm: realm)
                     deleteBlocks(blocks: notStaleBlocks, realm: realm)
+                    unstaleAllBlocks(realm: realm)
                 } else {
-                    let staleBlocks = realm.objects(Block.self).filter("stale = %@", true)
+                    let staleBlocks = storage.blocks(stale: true, realm: realm)
                     deleteBlocks(blocks: staleBlocks, realm: realm)
                 }
-            }
-
-            for block in realm.objects(Block.self).filter("stale = %@", true) {
-                block.stale = false
+            } else {
+                unstaleAllBlocks(realm: realm)
             }
         }
     }
 
-    func deleteBlocks(blocks: Results<Block>, realm: Realm) {
-        var hashes = [String]()
-        for block in blocks {
-            for transaction in block.transactions {
-                realm.delete(transaction.outputs)
-                realm.delete(transaction.inputs)
-            }
-            hashes.append(contentsOf: block.transactions.map { $0.reversedHashHex })
+    func deleteBlocks(blocks: [Block], realm: Realm) {
+        let hashes =  blocks.reduce(into: [String](), { acc, block in
+            acc.append(contentsOf: storage.transactions(ofBlock: block, realm: realm).map { $0.reversedHashHex })
+        })
 
-            realm.delete(block.transactions)
-        }
-
-        realm.delete(blocks)
-
+        storage.delete(blocks: blocks, realm: realm)
         listener?.onDelete(transactionHashes: hashes)
     }
 

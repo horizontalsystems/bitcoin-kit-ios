@@ -6,6 +6,7 @@ import RealmSwift
 
 class BlockchainTest: XCTestCase {
 
+    private var mockStorage: MockIStorage!
     private var mockNetwork: MockINetwork!
     private var mockFactory: MockIFactory!
     private var mockBlockchainDataListener: MockIBlockchainDataListener!
@@ -21,9 +22,17 @@ class BlockchainTest: XCTestCase {
             realm.deleteAll()
         }
 
+        mockStorage = MockIStorage()
         mockNetwork = MockINetwork()
         mockFactory = MockIFactory()
         mockBlockchainDataListener = MockIBlockchainDataListener()
+
+        stub(mockStorage) { mock in
+            when(mock.inTransaction(_: any())).then({ try? $0(self.realm) })
+            when(mock.add(block: any(), realm: any())).thenDoNothing()
+            when(mock.update(block: any(), realm: any())).thenDoNothing()
+            when(mock.delete(blocks: any(), realm: any())).thenDoNothing()
+        }
 
         stub(mockNetwork) { mock in
             when(mock.validate(block: any(), previousBlock: any())).thenDoNothing()
@@ -35,10 +44,11 @@ class BlockchainTest: XCTestCase {
             when(mock.onInsert(block: any())).thenDoNothing()
         }
 
-        blockchain = Blockchain(network: mockNetwork, factory: mockFactory, listener: mockBlockchainDataListener)
+        blockchain = Blockchain(storage: mockStorage, network: mockNetwork, factory: mockFactory, listener: mockBlockchainDataListener)
     }
 
     override func tearDown() {
+        mockStorage = nil
         mockNetwork = nil
         mockFactory = nil
         mockBlockchainDataListener = nil
@@ -53,16 +63,17 @@ class BlockchainTest: XCTestCase {
         let merkleBlock = MerkleBlock(header: TestData.checkpointBlock.header!, transactionHashes: [Data](), transactions: [Transaction]())
         let block = Block(withHeader: TestData.checkpointBlock.header!, height: 0)
 
-        try! realm.write {
-            realm.add(block)
+        stub(mockStorage) { mock in
+            when(mock.block(byHashHex: merkleBlock.reversedHeaderHashHex)).thenReturn(block)
         }
 
         let connectedBlock = try! blockchain.connect(merkleBlock: merkleBlock, realm: realm)
 
-        verifyNoMoreInteractions(mockBlockchainDataListener)
-
         XCTAssertEqual(connectedBlock, block)
-        XCTAssertEqual(realm.objects(Block.self).count, 1)
+
+        verify(mockStorage).block(byHashHex: merkleBlock.reversedHeaderHashHex)
+        verifyNoMoreInteractions(mockBlockchainDataListener)
+        verifyNoMoreInteractions(mockStorage)
     }
 
     func testConnect_NewBlockInChain() {
@@ -70,37 +81,35 @@ class BlockchainTest: XCTestCase {
         let merkleBlock = MerkleBlock(header: TestData.firstBlock.header!, transactionHashes: [Data](), transactions: [Transaction]())
         let newBlock = Block(withHeader: merkleBlock.header, previousBlock: block)
 
-        try! realm.write {
-            realm.add(block)
+        stub(mockStorage) { mock in
+            when(mock.block(byHashHex: merkleBlock.reversedHeaderHashHex)).thenReturn(nil)
+            when(mock.block(byHashHex: merkleBlock.header.previousBlockHeaderHash.reversedHex)).thenReturn(block)
         }
-
         stub(mockFactory) { mock in
             when(mock.block(withHeader: equal(to: merkleBlock.header), previousBlock: equal(to: block))).thenReturn(newBlock)
         }
 
-        XCTAssertEqual(realm.objects(Block.self).count, 1)
-
-        var connectedBlock: Block!
-        try! realm.write {
-            connectedBlock = try! blockchain.connect(merkleBlock: merkleBlock, realm: realm)
-        }
+        let connectedBlock = try! blockchain.connect(merkleBlock: merkleBlock, realm: realm)
 
         verify(mockFactory).block(withHeader: equal(to: merkleBlock.header), previousBlock: equal(to: block))
         verify(mockBlockchainDataListener).onInsert(block: equal(to: newBlock))
+        verify(mockStorage).add(block: equal(to: newBlock), realm: any())
 
-        XCTAssertEqual(connectedBlock!.headerHash, newBlock.headerHash)
-        XCTAssertEqual(connectedBlock!.previousBlock, block)
+        XCTAssertEqual(connectedBlock.headerHash, newBlock.headerHash)
+        XCTAssertEqual(connectedBlock.previousBlock, block)
         XCTAssertEqual(connectedBlock.stale, true)
-        XCTAssertEqual(realm.objects(Block.self).count, 2)
     }
 
     func testConnect_NewBlockNotInChain() {
         let merkleBlock = MerkleBlock(header: TestData.firstBlock.header!, transactionHashes: [Data](), transactions: [Transaction]())
 
+        stub(mockStorage) { mock in
+            when(mock.block(byHashHex: merkleBlock.reversedHeaderHashHex)).thenReturn(nil)
+            when(mock.block(byHashHex: merkleBlock.header.previousBlockHeaderHash.reversedHex)).thenReturn(nil)
+        }
+
         do {
-            try realm.write {
-                let _ = try blockchain.connect(merkleBlock: merkleBlock, realm: realm)
-            }
+            _ = try blockchain.connect(merkleBlock: merkleBlock, realm: realm)
             XCTFail("Should throw exception")
         } catch let error as BlockValidatorError {
             XCTAssertEqual(error, BlockValidatorError.noPreviousBlock)
@@ -108,8 +117,7 @@ class BlockchainTest: XCTestCase {
             XCTFail("Unexpected exception thrown")
         }
         verifyNoMoreInteractions(mockBlockchainDataListener)
-
-        XCTAssertEqual(realm.objects(Block.self).count, 0)
+        verify(mockStorage, never()).add(block: any(), realm: any())
     }
 
     func testConnect_NewInvalidBlock() {
@@ -117,10 +125,10 @@ class BlockchainTest: XCTestCase {
         let merkleBlock = MerkleBlock(header: TestData.firstBlock.header!, transactionHashes: [Data](), transactions: [Transaction]())
         let newBlock = Block(withHeader: merkleBlock.header, previousBlock: block)
 
-        try! realm.write {
-            realm.add(block)
+        stub(mockStorage) { mock in
+            when(mock.block(byHashHex: merkleBlock.reversedHeaderHashHex)).thenReturn(nil)
+            when(mock.block(byHashHex: merkleBlock.header.previousBlockHeaderHash.reversedHex)).thenReturn(block)
         }
-
         stub(mockFactory) { mock in
             when(mock.block(withHeader: equal(to: merkleBlock.header), previousBlock: equal(to: block))).thenReturn(newBlock)
         }
@@ -129,9 +137,7 @@ class BlockchainTest: XCTestCase {
         }
 
         do {
-            try realm.write {
-                let _ = try blockchain.connect(merkleBlock: merkleBlock, realm: realm)
-            }
+            _ = try blockchain.connect(merkleBlock: merkleBlock, realm: realm)
             XCTFail("Should throw exception")
         } catch let error as BlockValidatorError {
             XCTAssertEqual(error, BlockValidatorError.wrongPreviousHeaderHash)
@@ -140,6 +146,7 @@ class BlockchainTest: XCTestCase {
         }
 
         verifyNoMoreInteractions(mockBlockchainDataListener)
+        verify(mockStorage, never()).add(block: any(), realm: any())
     }
 
     func testForceAdd() {
@@ -150,161 +157,175 @@ class BlockchainTest: XCTestCase {
             when(mock.block(withHeader: equal(to: merkleBlock.header), height: equal(to: 1))).thenReturn(newBlock)
         }
 
-        try! realm.write {
-            let _ = blockchain.forceAdd(merkleBlock: merkleBlock, height: 1, realm: realm)
-        }
+        _ = blockchain.forceAdd(merkleBlock: merkleBlock, height: 1, realm: realm)
 
         verify(mockNetwork, never()).validate(block: any(), previousBlock: any())
         verify(mockBlockchainDataListener).onInsert(block: equal(to: newBlock))
-
-        let realmBlocks = realm.objects(Block.self)
-        XCTAssertEqual(realmBlocks.count, 1)
-        XCTAssertEqual(realmBlocks.last!.headerHash, merkleBlock.headerHash)
+        verify(mockStorage).add(block: equal(to: newBlock), realm: any())
     }
 
     func testHandleFork_noFork() {
         let blocksInChain = [1: "00000001", 2: "00000002", 3: "00000003"]
         let newBlocks = [4: "11111114", 5: "11111115", 6: "11111116"]
 
-        prefillBlocks(blocksInChain: blocksInChain, newBlocks: newBlocks)
+        let mockedBlocks = mockBlocks(blocksInChain: blocksInChain, newBlocks: newBlocks, mockStorage: mockStorage)
 
+        blockchain.handleFork()
 
-        blockchain.handleFork(realm: realm)
-
-        assertBlocksPresent(blocks: blocksInChain, realm: realm)
-        assertNotStaleBlocksPresent(realm: realm)
+        let captor = ArgumentCaptor<Block>()
+        verify(mockStorage, times(3)).update(block: captor.capture(), realm: any())
+        for (ind, block) in mockedBlocks.newBlocks.enumerated() {
+            XCTAssertEqual(captor.allValues[ind].stale, false)
+            XCTAssertEqual(captor.allValues[ind].headerHash, block.headerHash)
+        }
     }
 
     func testHandleFork_forkExists_newBlocksLonger() {
         let blocksInChain = [1: "00000001", 2: "00000002", 3: "00000003"]
         let newBlocks = [2: "11111112", 3: "11111113", 4: "11111114"]
 
-        prefillBlocks(blocksInChain: blocksInChain, newBlocks: newBlocks)
+        let mockedBlocks = mockBlocks(blocksInChain: blocksInChain, newBlocks: newBlocks, mockStorage: mockStorage)
+        let inChainBlocksAfterFork = Array(mockedBlocks.blocksInChain.suffix(from: 1))
+        let inChainBlocksAfterForkTransactionHexes = Array(mockedBlocks.blocksInChainTransactionHexes.suffix(from: 1))
 
-        blockchain.handleFork(realm: realm)
+        blockchain.handleFork()
 
-        assertBlocksPresent(blocks: [1: "00000001"], realm: realm)
-        assertBlocksNotPresent(blocks: [2: "00000002", 3: "00000003"], realm: realm)
-        assertNotStaleBlocksPresent(realm: realm)
+        verify(mockStorage).delete(blocks: equal(to: inChainBlocksAfterFork), realm: any())
+        verify(mockStorage, never()).delete(blocks: equal(to: mockedBlocks.newBlocks), realm: any())
+        verify(mockBlockchainDataListener).onDelete(transactionHashes: equal(to: inChainBlocksAfterForkTransactionHexes))
     }
 
     func testHandleFork_forkExists_newBlocksShorter() {
         let blocksInChain = [1: "00000001", 2: "00000002", 3: "00000003", 4: "00000004"]
         let newBlocks = [2: "11111112", 3: "11111113"]
 
-        prefillBlocks(blocksInChain: blocksInChain, newBlocks: newBlocks)
+        let mockedBlocks = mockBlocks(blocksInChain: blocksInChain, newBlocks: newBlocks, mockStorage: mockStorage)
+        let inChainBlocksAfterFork = Array(mockedBlocks.blocksInChain.suffix(from: 2))
 
-        blockchain.handleFork(realm: realm)
+        blockchain.handleFork()
 
-        assertBlocksPresent(blocks: blocksInChain, realm: realm)
-        assertBlocksNotPresent(blocks: newBlocks, realm: realm)
+        verify(mockStorage).delete(blocks: equal(to: mockedBlocks.newBlocks), realm: any())
+        verify(mockStorage, never()).delete(blocks: equal(to: inChainBlocksAfterFork), realm: any())
+        verify(mockBlockchainDataListener).onDelete(transactionHashes: equal(to: mockedBlocks.newBlocksTransactionHexes))
     }
 
     func testHandleFork_forkExists_newBlocksEqual() {
         let blocksInChain = [1: "00000001", 2: "00000002", 3: "00000003"]
         let newBlocks = [2: "11111112", 3: "11111113"]
 
-        prefillBlocks(blocksInChain: blocksInChain, newBlocks: newBlocks)
+        let mockedBlocks = mockBlocks(blocksInChain: blocksInChain, newBlocks: newBlocks, mockStorage: mockStorage)
+        let inChainBlocksAfterFork = Array(mockedBlocks.blocksInChain.suffix(from: 1))
 
-        blockchain.handleFork(realm: realm)
+        blockchain.handleFork()
 
-        assertBlocksPresent(blocks: blocksInChain, realm: realm)
-        assertBlocksNotPresent(blocks: newBlocks, realm: realm)
+        verify(mockStorage).delete(blocks: equal(to: mockedBlocks.newBlocks), realm: any())
+        verify(mockStorage, never()).delete(blocks: equal(to: inChainBlocksAfterFork), realm: any())
+        verify(mockBlockchainDataListener).onDelete(transactionHashes: equal(to: mockedBlocks.newBlocksTransactionHexes))
     }
 
     func testHandleFork_noNewBlocks() {
         let blocksInChain = [1: "00000001", 2: "00000002", 3: "00000003"]
         let newBlocks = [Int: String]()
 
-        prefillBlocks(blocksInChain: blocksInChain, newBlocks: newBlocks)
+        _ = mockBlocks(blocksInChain: blocksInChain, newBlocks: newBlocks, mockStorage: mockStorage)
 
-        blockchain.handleFork(realm: realm)
+        blockchain.handleFork()
 
-        assertBlocksPresent(blocks: blocksInChain, realm: realm)
+        verify(mockStorage, never()).delete(blocks: any(), realm: any())
+        verify(mockBlockchainDataListener, never()).onDelete(transactionHashes: any())
     }
 
     func testHandleFork_forkExists_noBlocksInChain() {
         let blocksInChain = [Int: String]()
         let newBlocks = [2: "11111112", 3: "11111113", 4: "11111114"]
 
-        prefillBlocks(blocksInChain: blocksInChain, newBlocks: newBlocks)
+        let mockedBlocks = mockBlocks(blocksInChain: blocksInChain, newBlocks: newBlocks, mockStorage: mockStorage)
 
-        blockchain.handleFork(realm: realm)
+        blockchain.handleFork()
 
-        assertNotStaleBlocksPresent(realm: realm)
+        verify(mockStorage, never()).delete(blocks: any(), realm: any())
+        let captor = ArgumentCaptor<Block>()
+        verify(mockStorage, times(3)).update(block: captor.capture(), realm: any())
+        for (ind, block) in mockedBlocks.newBlocks.enumerated() {
+            XCTAssertEqual(captor.allValues[ind].stale, false)
+            XCTAssertEqual(captor.allValues[ind].headerHash, block.headerHash)
+        }
     }
 
     func testRemoveBlocks() {
         let newBlocks = [2: "11111112", 3: "11111113", 4: "11111114"]
 
-        prefillBlocks(blocksInChain: [Int: String](), newBlocks: newBlocks)
+        let mockedBlocks = mockBlocks(blocksInChain: [Int: String](), newBlocks: newBlocks, mockStorage: mockStorage)
 
-        let hashes = Array(realm.objects(Block.self)).compactMap { $0.reversedHeaderHashHex }
+        blockchain.deleteBlocks(blocks: mockedBlocks.newBlocks, realm: realm)
 
-        try! realm.write {
-            blockchain.deleteBlocks(blocks: realm.objects(Block.self), realm: realm)
-        }
-
-        verify(mockBlockchainDataListener).onDelete(transactionHashes: equal(to: hashes))
-        assertBlocksNotPresent(blocks: newBlocks, realm: realm)
+        verify(mockStorage).delete(blocks: equal(to: mockedBlocks.newBlocks), realm: any())
+        verify(mockBlockchainDataListener).onDelete(transactionHashes: equal(to: mockedBlocks.newBlocksTransactionHexes))
     }
 
-    private func assertBlocksPresent(blocks: [Int: String], realm: Realm) {
-        for (height, id) in blocks {
-            if realm.objects(Block.self).filter("height = %@ AND headerHash = %@", height, Data(hex: id)!).count == 0 {
-                XCTFail("Block \(id)(\(height)) not found")
-            }
 
-            if realm.objects(Transaction.self).filter("dataHash = %@", Data(hex: id)!).count == 0 {
-                XCTFail("Transaction \(id) not found")
-            }
-        }
-    }
+    private func mockBlocks(blocksInChain: [Int: String], newBlocks: [Int: String], mockStorage: MockIStorage) -> MockedBlocks {
+        var mockedBlocks = MockedBlocks()
 
-    private func assertBlocksNotPresent(blocks: [Int: String], realm: Realm) {
-        for (height, id) in blocks {
-            if realm.objects(Block.self).filter("height = %@ AND headerHash = %@", height, Data(hex: id)!).count > 0 {
-                XCTFail("Block \(id)(\(height)) should not present")
-            }
-
-            if realm.objects(Transaction.self).filter("dataHash = %@", Data(hex: id)!).count > 0 {
-                XCTFail("Transaction \(id) should not present")
-            }
-        }
-    }
-
-    private func assertNotStaleBlocksPresent(realm: Realm) {
-        if realm.objects(Block.self).filter("stale = %@", true).count > 0 {
-            XCTFail("Stale blocks found!")
-        }
-    }
-
-    private func prefillBlocks(blocksInChain: [Int: String], newBlocks: [Int: String]) {
-        try! realm.write {
-            for (height, id) in blocksInChain {
+        stub(mockStorage) { mock in
+            for (height, id) in blocksInChain.sorted(by: { $0.key < $1.key }) {
                 let block = Block(withHeaderHash: Data(hex: id)!, height: height)
                 block.stale = false
-                realm.add(block)
+                mockedBlocks.blocksInChain.append(block)
 
                 let transaction = TestData.p2pkTransaction
                 transaction.dataHash = block.headerHash
                 transaction.reversedHashHex = block.headerHash.reversedHex
                 transaction.block = block
-                realm.add(transaction)
+
+                when(mock.transactions(ofBlock: equal(to: block), realm: any())).thenReturn([transaction])
+                mockedBlocks.blocksInChainTransactionHexes.append(transaction.reversedHashHex)
             }
 
-            for (height, id) in newBlocks {
+            for (height, id) in newBlocks.sorted(by: { $0.key < $1.key }) {
                 let block = Block(withHeaderHash: Data(hex: id)!, height: height)
                 block.stale = true
-                realm.add(block)
+                mockedBlocks.newBlocks.append(block)
 
                 let transaction = TestData.p2pkTransaction
                 transaction.dataHash = block.headerHash
                 transaction.reversedHashHex = block.headerHash.reversedHex
                 transaction.block = block
-                realm.add(transaction)
+
+                when(mock.transactions(ofBlock: equal(to: block), realm: any())).thenReturn([transaction])
+                mockedBlocks.newBlocksTransactionHexes.append(transaction.reversedHashHex)
+            }
+
+            when(mock.blocks(stale: true, realm: any())).thenReturn(mockedBlocks.newBlocks)
+
+            if let firstStale = mockedBlocks.newBlocks.first {
+                when(mock.block(stale: true, sortedHeight: equal(to: "ASC"), realm: any())).thenReturn(firstStale)
+
+                if let lastStale = mockedBlocks.newBlocks.last {
+                    when(mock.block(stale: true, sortedHeight: "DESC", realm: any())).thenReturn(lastStale)
+
+                    let inChainBlocksAfterForkPoint = mockedBlocks.blocksInChain.filter { $0.height >= firstStale.height }
+                    when(mock.blocks(heightGreaterThanOrEqualTo: firstStale.height, stale: false, realm: any())).thenReturn(inChainBlocksAfterForkPoint)
+                }
+            } else {
+                when(mock.block(stale: true, sortedHeight: equal(to: "ASC"), realm: any())).thenReturn(nil)
+            }
+
+            if let lastNotStale = mockedBlocks.blocksInChain.last {
+                when(mock.block(stale: false, sortedHeight: "DESC", realm: any())).thenReturn(lastNotStale)
+            } else {
+                when(mock.block(stale: false, sortedHeight: "DESC", realm: any())).thenReturn(nil)
             }
         }
+
+        return mockedBlocks
+    }
+
+    struct MockedBlocks {
+        var newBlocks = [Block]()
+        var blocksInChain = [Block]()
+        var newBlocksTransactionHexes = [String]()
+        var blocksInChainTransactionHexes = [String]()
     }
 
 }

@@ -265,20 +265,62 @@ extension GrdbStorage: IStorage {
         return Array(realmFactory.realm.objects(Block.self).filter("height > %@", leastHeight).sorted(byKeyPath: sortField, ascending: false).prefix(limit))
     }
 
-    func blocks(byHexes hexes: [String], realm: Realm) -> Results<Block> {
-        return realm.objects(Block.self).filter(NSPredicate(format: "reversedHeaderHashHex IN %@", hexes))
+    func blocks(byHexes hexes: [String], realm: Realm) -> [Block] {
+        return Array(realm.objects(Block.self).filter(NSPredicate(format: "reversedHeaderHashHex IN %@", hexes)))
+    }
+
+    func blocks(heightGreaterThanOrEqualTo height: Int, stale: Bool, realm: Realm) -> [Block] {
+        return Array(realm.objects(Block.self).filter("stale = %@ AND height >= %@", stale, height))
+    }
+
+    func blocks(stale: Bool, realm: Realm) -> [Block] {
+        return Array(realm.objects(Block.self).filter("stale = %@", stale))
     }
 
     func block(byHeight height: Int32) -> Block? {
         return realmFactory.realm.objects(Block.self).filter("height = %@", height).first
     }
 
-    func block(byHeaderHash hash: Data) -> Block? {
-        return realmFactory.realm.objects(Block.self).filter("headerHash == %@", hash).first
+    func block(byHashHex hex: String) -> Block? {
+        return realmFactory.realm.objects(Block.self).filter("reversedHeaderHashHex == %@", hex).first
     }
 
+    func block(stale: Bool, sortedHeight: String, realm: Realm?) -> Block? {
+        let realm = realm ?? realmFactory.realm
+        let result = realm.objects(Block.self).filter("stale = %@", stale).sorted(byKeyPath: "height")
+
+        return sortedHeight == "ASC" ? result.first : result.last
+    }
+
+    func add(block: Block, realm: Realm) {
+        realm.add(block)
+    }
+
+    func update(block: Block, realm: Realm) {
+    }
+
+    func delete(blocks: [Block], realm: Realm) {
+        for block in blocks {
+            for transaction in block.transactions {
+                realm.delete(transaction.outputs)
+                realm.delete(transaction.inputs)
+            }
+
+            realm.delete(block.transactions)
+        }
+
+        realm.delete(blocks)
+    }
 
     // Transaction
+    func transactions(ofBlock block: Block, realm: Realm) -> [Transaction] {
+        guard let block = realm.objects(Block.self).filter("reversedHeaderHashHex = @", block.reversedHeaderHashHex).first else {
+            return []
+        }
+
+        return Array(block.transactions)
+    }
+
     func newTransactions() -> [Transaction] {
         return Array(realmFactory.realm.objects(Transaction.self).filter("status = %@", TransactionStatus.new.rawValue))
     }

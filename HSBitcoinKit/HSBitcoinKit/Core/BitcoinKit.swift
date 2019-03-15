@@ -177,7 +177,7 @@ public class BitcoinKit {
 
         dataProvider = DataProvider(realmFactory: realmFactory, storage: storage, addressManager: addressManager, addressConverter: addressConverter, paymentAddressParser: paymentAddressParser, unspentOutputProvider: unspentOutputProvider, transactionCreator: transactionCreator, transactionBuilder: transactionBuilder, network: network)
 
-        blockchain = Blockchain(network: network, factory: factory, listener: dataProvider)
+        blockchain = Blockchain(storage: storage, network: network, factory: factory, listener: dataProvider)
         blockSyncer = BlockSyncer.instance(storage: storage, network: network, factory: factory, listener: kitStateProvider, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager, logger: logger)
 
         syncManager = SyncManager(reachabilityManager: reachabilityManager, feeRateSyncer: feeRateSyncer, initialSyncer: initialSyncer, peerGroup: peerGroup)
