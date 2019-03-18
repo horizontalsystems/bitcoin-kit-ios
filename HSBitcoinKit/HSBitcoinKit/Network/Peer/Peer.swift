@@ -104,7 +104,7 @@ class Peer {
         case let pingMessage as PingMessage: handle(message: pingMessage)
         case let pongMessage as PongMessage: handle(message: pongMessage)
         case let rejectMessage as RejectMessage: handle(message: rejectMessage)
-        default: break
+        default: handle(anyMessage: message)
         }
     }
 
@@ -217,6 +217,14 @@ class Peer {
 
     private func handle(message: RejectMessage) {
         log("<-- REJECT: \(message.message) code: 0x\(String(message.ccode, radix: 16)) reason: \(message.reason)")
+    }
+
+    private func handle(anyMessage: IMessage) {
+        for task in tasks {
+            if task.handle(message: anyMessage) {
+                break
+            }
+        }
     }
 
     private func log(_ message: String, level: Logger.Level = .debug, file: String = #file, function: String = #function, line: Int = #line) {
@@ -381,6 +389,10 @@ extension Peer: IPeerTaskRequester {
         let message = TransactionMessage(transaction: transaction)
 
         log("--> TX: \(message.transaction.reversedHashHex)")
+        connection.send(message: message)
+    }
+
+    func send(message: IMessage) {
         connection.send(message: message)
     }
 

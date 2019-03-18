@@ -13,7 +13,7 @@ class PeerConnection: NSObject {
     let host: String
     let port: UInt32
     private let network: INetwork
-    private let networkMessageParser: NetworkMessageParser
+    private let networkMessageParser: INetworkMessageParser
 
     weak var delegate: PeerConnectionDelegate?
 
@@ -36,7 +36,7 @@ class PeerConnection: NSObject {
         return "[\(WordList.english[index])]".uppercased()
     }
 
-    init(host: String, network: INetwork, networkMessageParser: NetworkMessageParser, logger: Logger? = nil) {
+    init(host: String, network: INetwork, networkMessageParser: INetworkMessageParser, logger: Logger? = nil) {
         self.host = host
         self.port = UInt32(network.port)
         self.network = network
@@ -141,7 +141,7 @@ extension PeerConnection: IPeerConnection {
     }
 
     func send(message: IMessage) {
-        let message = NetworkMessage(network: network, message: message)
+        let message = NetworkMessage(magic: network.magic, message: message)
 
         let data = message.serialized()
         _ = data.withUnsafeBytes {

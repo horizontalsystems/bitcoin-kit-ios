@@ -18,7 +18,7 @@ class PeerGroup {
 
     private let factory: IFactory
     private let network: INetwork
-    private let networkMessageParser: NetworkMessageParser
+    var networkMessageParser: INetworkMessageParser
 
     private var peerAddressManager: IPeerAddressManager
     private var bloomFilterManager: IBloomFilterManager
@@ -34,7 +34,12 @@ class PeerGroup {
 
     private let logger: Logger?
 
-    init(factory: IFactory, network: INetwork, networkMessageParser: NetworkMessageParser, listener: ISyncStateListener, reachabilityManager: IReachabilityManager,
+    var inventoryItemsHandler: IInventoryItemsHandler? = nil
+    var peerTaskHandler: IPeerTaskHandler? = nil
+
+    var taskQueue = SynchronizedArray<PeerTask>()
+
+    init(factory: IFactory, network: INetwork, networkMessageParser: INetworkMessageParser, listener: ISyncStateListener, reachabilityManager: IReachabilityManager,
          peerAddressManager: IPeerAddressManager, bloomFilterManager: IBloomFilterManager,
          peerCount: Int = 10, peerManager: IPeerManager = PeerManager(),
          peersQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Local Queue", qos: .userInitiated),
@@ -257,6 +262,10 @@ extension PeerGroup: PeerDelegate {
 
     func peerReady(_ peer: IPeer) {
         self.downloadBlockchain()
+
+        if let task = taskQueue.first {
+            peer.add(task: task)
+        }
     }
 
     func peerDidConnect(_ peer: IPeer) {
@@ -306,8 +315,7 @@ extension PeerGroup: PeerDelegate {
         case let task as SendTransactionTask:
             handle(sentTransaction: task.transaction)
 
-        default: ()
-
+        default: peerTaskHandler?.handleCompletedTask(peer: peer, task: task)
         }
     }
 
@@ -356,8 +364,20 @@ extension PeerGroup: PeerDelegate {
             if !transactionHashes.isEmpty {
                 peer.add(task: RequestTransactionsTask(hashes: transactionHashes))
             }
+            self.inventoryItemsHandler?.handleInventoryItems(peer: peer, inventoryItems: items)
         }
     }
+
+    func addTask(peerTask: PeerTask) {
+        // todo find better solution
+        if let peer = peerManager.someReadyPeers().first {
+            peer.add(task: peerTask)
+        } else {
+            taskQueue.append(peerTask)
+        }
+
+    }
+
 }
 
 extension PeerGroup: IPeerAddressManagerDelegate {

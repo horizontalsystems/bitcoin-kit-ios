@@ -15,15 +15,15 @@ struct NetworkMessage {
 
     static let minimumLength = 24
 
-    init(network: INetwork, command: String, length: UInt32, checksum: Data, message: IMessage) {
-        self.magic = network.magic
+    init(magic: UInt32, command: String, length: UInt32, checksum: Data, message: IMessage) {
+        self.magic = magic
         self.command = command
         self.length = length
         self.checksum = checksum
         self.message = message
     }
 
-    init(network: INetwork, message: IMessage) {
+    init(magic: UInt32, message: IMessage) {
         let serializedMessage = message.serialized()
         let checksum = Data(CryptoKit.sha256sha256(serializedMessage).prefix(4))
         let length = UInt32(serializedMessage.count)
@@ -36,7 +36,7 @@ struct NetworkMessage {
             }
         }
 
-        self.init(network: network, command: resolvedCommand, length: length, checksum: checksum, message: message)
+        self.init(magic: magic, command: resolvedCommand, length: length, checksum: checksum, message: message)
     }
 
     func serialized() -> Data {
@@ -64,7 +64,9 @@ struct NetworkMessage {
         "mempool": MemPoolMessage.self,
         "merkleblock": MerkleBlockMessage.self,
         "tx": TransactionMessage.self,
-        "filterload": FilterLoadMessage.self
+        "filterload": FilterLoadMessage.self,
+        "getmnlistd": GetMasternodeListDiffMessage.self,
+        "mnlistdiff": MasternodeListDiffMessage.self
     ]
 
     static func deserialize(data: Data, network: INetwork) -> NetworkMessage? {
@@ -106,6 +108,6 @@ struct NetworkMessage {
         default: message = UnknownMessage(data: data)
         }
 
-        return NetworkMessage(network: network, command: command, length: length, checksum: checksum, message: message)
+        return NetworkMessage(magic: network.magic, command: command, length: length, checksum: checksum, message: message)
     }
 }

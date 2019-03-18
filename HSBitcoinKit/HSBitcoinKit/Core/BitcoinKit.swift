@@ -18,7 +18,7 @@ public class BitcoinKit {
     private let blockHelper: IBlockHelper
     private let validatorFactory: IBlockValidatorFactory
 
-    private let network: INetwork
+    let network: INetwork
     private let logger: Logger
 
     private let realmFactory: IRealmFactory
@@ -37,7 +37,7 @@ public class BitcoinKit {
     private let addressManager: IAddressManager
     private let bloomFilterManager: IBloomFilterManager
 
-    private var peerGroup: IPeerGroup
+    var peerGroup: IPeerGroup
     private let factory: IFactory
 
     private var initialSyncer: IInitialSyncer
@@ -57,7 +57,7 @@ public class BitcoinKit {
     private let transactionOutputAddressExtractor: ITransactionOutputAddressExtractor
     private let transactionPublicKeySetter: ITransactionPublicKeySetter
     private let transactionLinker: ITransactionLinker
-    private let transactionSyncer: ITransactionSyncer
+    let transactionSyncer: ITransactionSyncer
     private let transactionCreator: ITransactionCreator
     private let transactionBuilder: ITransactionBuilder
     private let blockchain: IBlockchain
@@ -74,6 +74,9 @@ public class BitcoinKit {
 
     private let kitStateProvider: IKitStateProvider & ISyncStateListener
     private var dataProvider: IDataProvider & IBlockchainDataListener
+
+    let bitCoreConfigurator: IBitCoreConfigurator
+    var networkMessageParser: INetworkMessageParser
 
     public init(withWords words: [String], coin: Coin, walletId: String, newWallet: Bool = false, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) {
         let databaseFileName = "\(walletId)-\(coin.rawValue)"
@@ -152,19 +155,8 @@ public class BitcoinKit {
 
         bloomFilterManager = BloomFilterManager(realmFactory: realmFactory, factory: factory)
 
-        let messageParsers = SetOfResponsibility()
-                .append(id: "addr", element: AddressMessageParser())
-                .append(id: "getdata", element: GetDataMessageParser())
-                .append(id: "inv", element: InventoryMessageParser())
-                .append(id: "ping", element: PingMessageParser())
-                .append(id: "pong", element: PongMessageParser())
-                .append(id: "verack", element: VerackMessageParser())
-                .append(id: "version", element: VersionMessageParser())
-                .append(id: "mempool", element: MemPoolMessageParser())
-                .append(id: "merkleblock", element: MerkleBlockMessageParser(network: network))
-                .append(id: "tx", element: TransactionMessageParser())
-
-        let networkMessageParser = NetworkMessageParser(network: network, messageParsers: messageParsers)
+        bitCoreConfigurator = BitCoreConfigurator(network: network)
+        networkMessageParser = NetworkMessageParser(magic: network.magic, messageParsers: bitCoreConfigurator.networkMessageParsers)
 
         peerGroup = PeerGroup(factory: factory, network: network, networkMessageParser: networkMessageParser, listener: kitStateProvider, reachabilityManager: reachabilityManager, peerAddressManager: peerAddressManager, bloomFilterManager: bloomFilterManager, logger: logger)
 

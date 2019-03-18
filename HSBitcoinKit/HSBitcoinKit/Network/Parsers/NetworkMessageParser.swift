@@ -1,11 +1,11 @@
 import HSCryptoKit
 
-class NetworkMessageParser {
-    private let network: INetwork
+class NetworkMessageParser: INetworkMessageParser {
+    private let magic: UInt32
     var messageParsers: SetOfResponsibility<String, Data, IMessage>
 
-    init(network: INetwork, messageParsers: SetOfResponsibility<String, Data, IMessage>) {
-        self.network = network
+    init(magic: UInt32, messageParsers: SetOfResponsibility<String, Data, IMessage>) {
+        self.magic = magic
         self.messageParsers = messageParsers
     }
 
@@ -13,7 +13,7 @@ class NetworkMessageParser {
         let byteStream = ByteStream(data)
 
         let magic = byteStream.read(UInt32.self).bigEndian
-        guard network.magic == magic else {
+        guard self.magic == magic else {
             return nil
         }
         let command = byteStream.read(Data.self, count: 12).to(type: String.self)
@@ -32,7 +32,7 @@ class NetworkMessageParser {
 
         let message = messageParsers.process(id: command, payload) ?? UnknownMessage(data: payload)
 
-        return NetworkMessage(network: network, command: command, length: length, checksum: checksum, message: message)
+        return NetworkMessage(magic: magic, command: command, length: length, checksum: checksum, message: message)
     }
 
 }

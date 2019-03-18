@@ -37,12 +37,12 @@ class BalanceController: UIViewController {
     }
 
     func initializeBitcoinKit() {
-        let bitcoinKit = Manager.shared.bitcoinKit!
+        let dashKit = Manager.shared.dashKit!
 
-        update(balance: bitcoinKit.balance)
-        update(state: bitcoinKit.syncState)
+        update(balance: dashKit.balance)
+        update(state: dashKit.syncState)
 
-        if let info = bitcoinKit.lastBlockInfo {
+        if let info = dashKit.lastBlockInfo {
             update(lastBlockInfo: info)
         }
 
@@ -74,7 +74,7 @@ class BalanceController: UIViewController {
     @objc func start() {
         DispatchQueue.global(qos: .userInitiated).async {
             do {
-                try Manager.shared.bitcoinKit.start()
+                try Manager.shared.dashKit.start()
             } catch {
                 print("Start Error: \(error)")
             }
@@ -82,7 +82,7 @@ class BalanceController: UIViewController {
     }
 
     @IBAction func showRealmInfo() {
-        print(Manager.shared.bitcoinKit.debugInfo)
+        print(Manager.shared.dashKit.debugInfo)
     }
 
     private func update(balance: Int) {

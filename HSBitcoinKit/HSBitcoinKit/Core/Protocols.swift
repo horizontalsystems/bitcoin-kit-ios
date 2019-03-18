@@ -146,12 +146,18 @@ protocol BloomFilterManagerDelegate: class {
 }
 
 protocol IPeerGroup: class {
+    var networkMessageParser: INetworkMessageParser { get set }
+    var inventoryItemsHandler: IInventoryItemsHandler? { get set }
+    var peerTaskHandler: IPeerTaskHandler? { get set }
+
     var blockSyncer: IBlockSyncer? { get set }
     var transactionSyncer: ITransactionSyncer? { get set }
     func start()
     func stop()
     func sendPendingTransactions() throws
     func checkPeersSynced() throws
+
+    func addTask(peerTask: PeerTask)
 }
 
 protocol IPeerManager: class {
@@ -202,6 +208,7 @@ protocol IPeerTaskRequester: class {
     func getData(items: [InventoryItem])
     func sendTransactionInventory(hash: Data)
     func send(transaction: Transaction)
+    func send(message: IMessage)
     func ping(nonce: UInt64)
 }
 
@@ -247,7 +254,7 @@ protocol IFactory {
     func block(withHeader header: BlockHeader, previousBlock: Block) -> Block
     func block(withHeader header: BlockHeader, height: Int) -> Block
     func blockHash(withHeaderHash headerHash: Data, height: Int, order: Int) -> BlockHash
-    func peer(withHost host: String, network: INetwork, networkMessageParser: NetworkMessageParser, logger: Logger?) -> IPeer
+    func peer(withHost host: String, network: INetwork, networkMessageParser: INetworkMessageParser, logger: Logger?) -> IPeer
     func transaction(version: Int, inputs: [TransactionInput], outputs: [TransactionOutput], lockTime: Int) -> Transaction
     func transactionInput(withPreviousOutputTxReversedHex previousOutputTxReversedHex: String, previousOutputIndex: Int, script: Data, sequence: Int) -> TransactionInput
     func transactionOutput(withValue value: Int, index: Int, lockingScript script: Data, type: ScriptType, address: String?, keyHash: Data?, publicKey: PublicKey?) -> TransactionOutput
@@ -488,4 +495,25 @@ extension INetwork {
         return CryptoKit.sha256sha256(data)
     }
 
+}
+
+protocol INetworkMessageParser {
+    func parse(data: Data) -> NetworkMessage?
+}
+
+protocol IBitCoreConfigurator {
+    var networkMessageParsers: SetOfResponsibility<String, Data, IMessage> { get }
+    var peerTaskHandler: IPeerTaskHandler? { get }
+    var inventoryItemsHandler: IInventoryItemsHandler? { get }
+}
+
+protocol IInventoryItemsHandler {
+    func handleInventoryItems(peer: IPeer, inventoryItems: [InventoryItem])
+}
+
+protocol IPeerTaskHandler {
+    @discardableResult func set(successor: IPeerTaskHandler) -> IPeerTaskHandler
+    @discardableResult func attach(to element: IPeerTaskHandler) -> IPeerTaskHandler
+
+    func handleCompletedTask(peer: IPeer, task: PeerTask)
 }

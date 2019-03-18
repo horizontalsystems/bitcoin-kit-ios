@@ -8,9 +8,9 @@ class Manager {
 
     private let keyWords = "mnemonic_words"
 
-    let coin: BitcoinKit.Coin = .bitcoin(network: .testNet)
+    let coin: BitcoinKit.Coin = .dash(network: .testNet)
 
-    var bitcoinKit: BitcoinKit!
+    var dashKit: DashKit!
 
     let kitInitializationCompleted = BehaviorSubject<Bool>(value: false)
 
@@ -32,7 +32,7 @@ class Manager {
 
     func logout() {
         do {
-            try bitcoinKit.clear()
+            try dashKit.clear()
         } catch {
             print("WalletKit Clear Error: \(error)")
         }
@@ -40,12 +40,12 @@ class Manager {
         clearWords()
 
         kitInitializationCompleted.onNext(false)
-        bitcoinKit = nil
+        dashKit = nil
     }
 
     private func initWalletKit(words: [String]) {
-        bitcoinKit = BitcoinKit(withWords: words, coin: self.coin, walletId: "SomeId", confirmationsThreshold: 1)
-        bitcoinKit.delegate = self
+        dashKit = DashKit(withWords: words, coin: self.coin, walletId: "SomeId", newWallet: true, confirmationsThreshold: 1)
+        dashKit.delegate = self
 
         kitInitializationCompleted.onNext(true)
     }
@@ -69,21 +69,20 @@ class Manager {
 
 }
 
-extension Manager: BitcoinKitDelegate {
-
-    public func transactionsUpdated(bitcoinKit: BitcoinKit, inserted: [TransactionInfo], updated: [TransactionInfo]) {
+extension Manager: DashKitDelegate {
+    public func transactionsUpdated(BitcoinKit: BitcoinKit, inserted: [TransactionInfo], updated: [TransactionInfo]) {
         transactionsSubject.onNext(())
+    }
+
+    public func balanceUpdated(BitcoinKit: BitcoinKit, balance: Int) {
+        balanceSubject.onNext(balance)
     }
 
     public func transactionsDeleted(hashes: [String]) {
         // transactionsSubject.onNext(())
     }
 
-    public func balanceUpdated(bitcoinKit: BitcoinKit, balance: Int) {
-        balanceSubject.onNext(balance)
-    }
-
-    public func lastBlockInfoUpdated(bitcoinKit: BitcoinKit, lastBlockInfo: BlockInfo) {
+    public func lastBlockInfoUpdated(BitcoinKit: BitcoinKit, lastBlockInfo: BlockInfo) {
         lastBlockInfoSubject.onNext(lastBlockInfo)
     }
 
