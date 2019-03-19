@@ -23,8 +23,12 @@ public class DashKit {
         bitcoinKit.delegate = self
 
         bitcoinKit.networkMessageParser = NetworkMessageParser(magic: bitcoinKit.network.magic, messageParsers: dashConfigurator.networkMessageParsers)
-        bitcoinKit.peerGroup.peerTaskHandler = dashConfigurator.peerTaskHandler
+        bitcoinKit.networkMessageSerializer = NetworkMessageSerializer(magic: bitcoinKit.network.magic, messageSerializers: dashConfigurator.networkMessageSerializers)
+
         bitcoinKit.peerGroup.networkMessageParser = bitcoinKit.networkMessageParser
+        bitcoinKit.peerGroup.networkMessageSerializer = NetworkMessageSerializer(magic: bitcoinKit.network.magic, messageSerializers: dashConfigurator.networkMessageSerializers)
+
+        bitcoinKit.peerGroup.peerTaskHandler = dashConfigurator.peerTaskHandler
         bitcoinKit.peerGroup.inventoryItemsHandler = dashConfigurator.inventoryItemsHandler
     }
 

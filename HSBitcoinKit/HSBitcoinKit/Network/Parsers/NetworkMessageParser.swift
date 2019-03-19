@@ -1,10 +1,12 @@
 import HSCryptoKit
 
+typealias MessageParsers = SetOfResponsibility<Data, IMessage>
+
 class NetworkMessageParser: INetworkMessageParser {
     private let magic: UInt32
-    var messageParsers: SetOfResponsibility<String, Data, IMessage>
+    var messageParsers: MessageParsers
 
-    init(magic: UInt32, messageParsers: SetOfResponsibility<String, Data, IMessage>) {
+    init(magic: UInt32, messageParsers: MessageParsers) {
         self.magic = magic
         self.messageParsers = messageParsers
     }
@@ -38,6 +40,7 @@ class NetworkMessageParser: INetworkMessageParser {
 }
 
 class AddressMessageParser: ListElement<Data, IMessage> {
+    override var id: String { return "addr" }
 
     override func process(_ request: Data) -> IMessage? {
         let byteStream = ByteStream(request)
@@ -56,6 +59,7 @@ class AddressMessageParser: ListElement<Data, IMessage> {
 }
 
 class GetDataMessageParser: ListElement<Data, IMessage> {
+    override var id: String { return "getdata" }
 
     override func process(_ request: Data) -> IMessage? {
         let byteStream = ByteStream(request)
@@ -76,6 +80,7 @@ class GetDataMessageParser: ListElement<Data, IMessage> {
 }
 
 class InventoryMessageParser: ListElement<Data, IMessage> {
+    override var id: String { return "inv" }
 
     override func process(_ request: Data) -> IMessage? {
         let byteStream = ByteStream(request)
@@ -101,6 +106,7 @@ class InventoryMessageParser: ListElement<Data, IMessage> {
 }
 
 class PingMessageParser: ListElement<Data, IMessage> {
+    override var id: String { return "ping" }
 
     override func process(_ request: Data) -> IMessage? {
         let byteStream = ByteStream(request)
@@ -110,6 +116,7 @@ class PingMessageParser: ListElement<Data, IMessage> {
 }
 
 class PongMessageParser: ListElement<Data, IMessage> {
+    override var id: String { return "pong" }
 
     override func process(_ request: Data) -> IMessage? {
         let byteStream = ByteStream(request)
@@ -119,6 +126,7 @@ class PongMessageParser: ListElement<Data, IMessage> {
 }
 
 class VerackMessageParser: ListElement<Data, IMessage> {
+    override var id: String { return "verack" }
 
     override func process(_ request: Data) -> IMessage? {
         return VerackMessage()
@@ -127,6 +135,7 @@ class VerackMessageParser: ListElement<Data, IMessage> {
 }
 
 class VersionMessageParser: ListElement<Data, IMessage> {
+    override var id: String { return "version" }
 
     override func process(_ request: Data) -> IMessage? {
         let byteStream = ByteStream(request)
@@ -150,6 +159,7 @@ class VersionMessageParser: ListElement<Data, IMessage> {
 }
 
 class MemPoolMessageParser: ListElement<Data, IMessage> {
+    override var id: String { return "mempool" }
 
     override func process(_ request: Data) -> IMessage? {
         return MemPoolMessage()
@@ -158,6 +168,8 @@ class MemPoolMessageParser: ListElement<Data, IMessage> {
 }
 
 class MerkleBlockMessageParser: ListElement<Data, IMessage> {
+    override var id: String { return  "merkleblock" }
+
     private let network: INetwork
 
     init(network: INetwork) {
@@ -193,50 +205,16 @@ class MerkleBlockMessageParser: ListElement<Data, IMessage> {
 }
 
 class TransactionMessageParser: ListElement<Data, IMessage> {
+    override var id: String { return "tx" }
 
     override func process(_ request: Data) -> IMessage? {
-        let byteStream = ByteStream(request)
-
-        let transaction = Transaction()
-
-        transaction.version = Int(byteStream.read(Int32.self))
-        // peek at marker
-        if let marker = byteStream.last {
-            transaction.segWit = marker == 0
-        }
-        // marker, flag
-        if transaction.segWit {
-            _ = byteStream.read(Int16.self)
-        }
-
-        let txInCount = byteStream.read(VarInt.self)
-        for _ in 0..<Int(txInCount.underlyingValue) {
-            transaction.inputs.append(TransactionInputSerializer.deserialize(byteStream: byteStream))
-        }
-
-        let txOutCount = byteStream.read(VarInt.self)
-        for i in 0..<Int(txOutCount.underlyingValue) {
-            let output = TransactionOutputSerializer.deserialize(byteStream: byteStream)
-            output.index = i
-            transaction.outputs.append(output)
-        }
-
-        if transaction.segWit {
-            for i in 0..<Int(txInCount.underlyingValue) {
-                transaction.inputs[i].witnessData = TransactionWitnessSerializer.deserialize(byteStream: byteStream)
-            }
-        }
-
-        transaction.lockTime = Int(byteStream.read(UInt32.self))
-        transaction.dataHash = CryptoKit.sha256sha256(TransactionSerializer.serialize(transaction: transaction, withoutWitness: true))
-        transaction.reversedHashHex = transaction.dataHash.reversedHex
-
-        return TransactionMessage(transaction: transaction)
+        return TransactionMessage(transaction: TransactionSerializer.deserialize(data: request))
     }
 
 }
 
 class UnknownMessageParser: ListElement<Data, IMessage> {
+    override var id: String { return "unknown" }
 
     override func process(_ request: Data) -> IMessage? {
         return UnknownMessage(data: request)

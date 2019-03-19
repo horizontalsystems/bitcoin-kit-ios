@@ -2,6 +2,7 @@ import Foundation
 import HSCryptoKit
 
 struct GetHeadersMessage: IMessage {
+    let command: String = "getheaders"
     /// the protocol version
     let version: UInt32
     /// number of block locator hash entries
@@ -16,24 +17,6 @@ struct GetHeadersMessage: IMessage {
         hashCount = VarInt(headerHashes.count)
         blockLocatorHashes = headerHashes
         hashStop = Data(count: 32)
-    }
-
-    init(data: Data) {
-        version = 0
-        hashCount = 0
-        blockLocatorHashes = [Data]()
-        hashStop = Data()
-    }
-
-    func serialized() -> Data {
-        var data = Data()
-        data += version
-        data += hashCount.serialized()
-        for hash in blockLocatorHashes {
-            data += hash
-        }
-        data += hashStop
-        return data
     }
 
 }

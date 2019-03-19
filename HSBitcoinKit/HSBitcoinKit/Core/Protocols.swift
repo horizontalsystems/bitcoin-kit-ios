@@ -147,6 +147,7 @@ protocol BloomFilterManagerDelegate: class {
 
 protocol IPeerGroup: class {
     var networkMessageParser: INetworkMessageParser { get set }
+    var networkMessageSerializer: INetworkMessageSerializer { get set }
     var inventoryItemsHandler: IInventoryItemsHandler? { get set }
     var peerTaskHandler: IPeerTaskHandler? { get set }
 
@@ -254,7 +255,7 @@ protocol IFactory {
     func block(withHeader header: BlockHeader, previousBlock: Block) -> Block
     func block(withHeader header: BlockHeader, height: Int) -> Block
     func blockHash(withHeaderHash headerHash: Data, height: Int, order: Int) -> BlockHash
-    func peer(withHost host: String, network: INetwork, networkMessageParser: INetworkMessageParser, logger: Logger?) -> IPeer
+    func peer(withHost host: String, network: INetwork, networkMessageParser: INetworkMessageParser, networkMessageSerializer: INetworkMessageSerializer, logger: Logger?) -> IPeer
     func transaction(version: Int, inputs: [TransactionInput], outputs: [TransactionOutput], lockTime: Int) -> Transaction
     func transactionInput(withPreviousOutputTxReversedHex previousOutputTxReversedHex: String, previousOutputIndex: Int, script: Data, sequence: Int) -> TransactionInput
     func transactionOutput(withValue value: Int, index: Int, lockingScript script: Data, type: ScriptType, address: String?, keyHash: Data?, publicKey: PublicKey?) -> TransactionOutput
@@ -501,8 +502,13 @@ protocol INetworkMessageParser {
     func parse(data: Data) -> NetworkMessage?
 }
 
+protocol INetworkMessageSerializer {
+    func serialize(message: IMessage) -> Data?
+}
+
 protocol IBitCoreConfigurator {
-    var networkMessageParsers: SetOfResponsibility<String, Data, IMessage> { get }
+    var networkMessageParsers: MessageParsers { get }
+    var networkMessageSerializers: MessageSerializers { get }
     var peerTaskHandler: IPeerTaskHandler? { get }
     var inventoryItemsHandler: IInventoryItemsHandler? { get }
 }

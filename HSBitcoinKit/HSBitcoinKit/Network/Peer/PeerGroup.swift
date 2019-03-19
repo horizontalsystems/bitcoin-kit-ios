@@ -19,6 +19,7 @@ class PeerGroup {
     private let factory: IFactory
     private let network: INetwork
     var networkMessageParser: INetworkMessageParser
+    var networkMessageSerializer: INetworkMessageSerializer
 
     private var peerAddressManager: IPeerAddressManager
     private var bloomFilterManager: IBloomFilterManager
@@ -39,7 +40,9 @@ class PeerGroup {
 
     var taskQueue = SynchronizedArray<PeerTask>()
 
-    init(factory: IFactory, network: INetwork, networkMessageParser: INetworkMessageParser, listener: ISyncStateListener, reachabilityManager: IReachabilityManager,
+    init(factory: IFactory, network: INetwork,
+         networkMessageParser: INetworkMessageParser, networkMessageSerializer: INetworkMessageSerializer,
+         listener: ISyncStateListener, reachabilityManager: IReachabilityManager,
          peerAddressManager: IPeerAddressManager, bloomFilterManager: IBloomFilterManager,
          peerCount: Int = 10, peerManager: IPeerManager = PeerManager(),
          peersQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Local Queue", qos: .userInitiated),
@@ -48,6 +51,7 @@ class PeerGroup {
         self.factory = factory
         self.network = network
         self.networkMessageParser = networkMessageParser
+        self.networkMessageSerializer = networkMessageSerializer
 
         self.syncStateListener = listener
         self.reachabilityManager = reachabilityManager
@@ -77,7 +81,7 @@ class PeerGroup {
 
             for _ in self.peerManager.totalPeersCount()..<self.peerCount {
                 if let host = self.peerAddressManager.ip {
-                    let peer = self.factory.peer(withHost: host, network: self.network, networkMessageParser: self.networkMessageParser, logger: self.logger)
+                    let peer = self.factory.peer(withHost: host, network: self.network, networkMessageParser: self.networkMessageParser, networkMessageSerializer: self.networkMessageSerializer, logger: self.logger)
                     peer.delegate = self
                     peer.localBestBlockHeight = self.blockSyncer?.localDownloadedBestBlockHeight ?? 0
                     self.peerManager.add(peer: peer)

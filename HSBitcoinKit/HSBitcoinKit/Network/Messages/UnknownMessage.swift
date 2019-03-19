@@ -1,12 +1,6 @@
 import Foundation
 
 struct UnknownMessage: IMessage {
-
-    init(data: Data) {
-    }
-
-    func serialized() -> Data {
-        return Data()
-    }
-
+    let command: String = "unknown"
+    let data: Data
 }

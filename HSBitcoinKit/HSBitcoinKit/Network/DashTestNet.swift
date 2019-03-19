@@ -13,8 +13,8 @@ class DashTestNet: INetwork {
     let pubKeyHash: UInt8 = 0x8c
     let privateKey: UInt8 = 0x80
     let scriptHash: UInt8 = 0x13
-    let pubKeyPrefixPattern: String = "1"
-    let scriptPrefixPattern: String = "3"
+    let pubKeyPrefixPattern: String = "y"
+    let scriptPrefixPattern: String = "8|9"
     let bech32PrefixPattern: String = "bc"
     let xPubKey: UInt32 = 0x0488b21e
     let xPrivKey: UInt32 = 0x0488ade4

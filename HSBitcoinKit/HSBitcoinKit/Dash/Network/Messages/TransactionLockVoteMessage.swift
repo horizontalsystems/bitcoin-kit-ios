@@ -1,4 +1,5 @@
 struct TransactionLockVoteMessage: IMessage {
+    let command: String = "txlvote"
 
     //  TXID of the transaction to lock
     let txHash: Data
@@ -14,9 +15,5 @@ struct TransactionLockVoteMessage: IMessage {
     let vchMasternodeSignature: Data
 
     let hash: Data
-
-    func serialized() -> Data {
-        return Data()
-    }
 
 }

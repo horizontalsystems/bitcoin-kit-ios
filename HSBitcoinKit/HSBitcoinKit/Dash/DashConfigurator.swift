@@ -10,11 +10,16 @@ class DashConfigurator: IBitCoreConfigurator {
         self.masternodeSyncer = masternodeSyncer
     }
 
-    var networkMessageParsers: SetOfResponsibility<String, Data, IMessage> {
+    var networkMessageParsers: MessageParsers {
         return bitCoreConfigurator.networkMessageParsers
-                .append(id: "ix", element: TransactionLockMessageParser())
-                .append(id: "txlvote", element: TransactionLockVoteMessageParser())
-                .append(id: "mnlistdiff", element: MasternodeListDiffMessageParser())
+                .append(element: TransactionLockMessageParser())
+                .append(element: TransactionLockVoteMessageParser())
+                .append(element: MasternodeListDiffMessageParser())
+    }
+
+    var networkMessageSerializers: MessageSerializers {
+        return bitCoreConfigurator.networkMessageSerializers
+                .append(element: GetMasternodeListDiffMessageSerializer())
     }
 
     var peerTaskHandler: IPeerTaskHandler? {

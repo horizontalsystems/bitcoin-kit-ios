@@ -1,6 +1,7 @@
 import Foundation
 
-struct MasternodeListDiffMessage: IMessage { //"mnlistdiff"
+struct MasternodeListDiffMessage: IMessage {
+    let command: String = "mnlistdiff"
 
     let baseBlockHash: Data
     let blockHash: Data
@@ -14,9 +15,4 @@ struct MasternodeListDiffMessage: IMessage { //"mnlistdiff"
     let deletedMNs: [Data]
     let mnListCount: UInt32
     let mnList: [Masternode]
-
-    func serialized() -> Data {
-        return Data()
-    }
-
 }

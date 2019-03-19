@@ -1,6 +1,7 @@
 import HSCryptoKit
 
-class MasternodeListDiffMessageParser: ListElement<Data, IMessage> {  // "getmnlistd"
+class MasternodeListDiffMessageParser: ListElement<Data, IMessage> {
+    override var id: String { return "mnlistdiff" }
 
     override func process(_ request: Data) -> IMessage? {
         let byteStream = ByteStream(request)
@@ -16,7 +17,7 @@ class MasternodeListDiffMessageParser: ListElement<Data, IMessage> {  // "getmnl
         }
 
         let merkleFlagsCount = UInt32((byteStream.read(VarInt.self)).underlyingValue)
-        let merkleFlags = byteStream.read(Data.self, count: Int(merkleHashesCount))
+        let merkleFlags = byteStream.read(Data.self, count: Int(merkleFlagsCount))
         let cbTx = CoinbaseTransaction(byteStream: byteStream)
 
         let deletedMNsCount = UInt32((byteStream.read(VarInt.self)).underlyingValue)

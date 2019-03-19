@@ -1,6 +1,7 @@
 import HSCryptoKit
 
 class TransactionLockVoteMessageParser: ListElement<Data, IMessage> {
+    override var id: String { return "txlvote" }
 
     override func process(_ request: Data) -> IMessage? {
         let byteStream = ByteStream(request)

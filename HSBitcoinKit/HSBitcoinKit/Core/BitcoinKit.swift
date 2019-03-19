@@ -77,6 +77,7 @@ public class BitcoinKit {
 
     let bitCoreConfigurator: IBitCoreConfigurator
     var networkMessageParser: INetworkMessageParser
+    var networkMessageSerializer: INetworkMessageSerializer
 
     public init(withWords words: [String], coin: Coin, walletId: String, newWallet: Bool = false, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) {
         let databaseFileName = "\(walletId)-\(coin.rawValue)"
@@ -157,8 +158,8 @@ public class BitcoinKit {
 
         bitCoreConfigurator = BitCoreConfigurator(network: network)
         networkMessageParser = NetworkMessageParser(magic: network.magic, messageParsers: bitCoreConfigurator.networkMessageParsers)
-
-        peerGroup = PeerGroup(factory: factory, network: network, networkMessageParser: networkMessageParser, listener: kitStateProvider, reachabilityManager: reachabilityManager, peerAddressManager: peerAddressManager, bloomFilterManager: bloomFilterManager, logger: logger)
+        networkMessageSerializer = NetworkMessageSerializer(magic: network.magic, messageSerializers: bitCoreConfigurator.networkMessageSerializers)
+        peerGroup = PeerGroup(factory: factory, network: network, networkMessageParser: networkMessageParser, networkMessageSerializer: networkMessageSerializer, listener: kitStateProvider, reachabilityManager: reachabilityManager, peerAddressManager: peerAddressManager, bloomFilterManager: bloomFilterManager, logger: logger)
 
         addressManager = AddressManager.instance(realmFactory: realmFactory, hdWallet: hdWallet, addressConverter: addressConverter)
         initialSyncer = InitialSyncer(storage: storage, listener: kitStateProvider, stateManager: stateManager, blockDiscovery: blockDiscovery, addressManager: addressManager, logger: logger)
