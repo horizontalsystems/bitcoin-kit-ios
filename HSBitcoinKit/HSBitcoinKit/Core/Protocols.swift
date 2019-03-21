@@ -372,10 +372,10 @@ protocol IDataProvider {
     var balance: Int { get }
     var receiveAddress: String { get }
     func transactions(fromHash: String?, limit: Int?) -> Single<[TransactionInfo]>
-    func send(to address: String, value: Int) throws
+    func send(to address: String, value: Int, feeRate: Int) throws
     func parse(paymentAddress: String) -> BitcoinPaymentData
     func validate(address: String) throws
-    func fee(for value: Int, toAddress: String?, senderPay: Bool) throws -> Int
+    func fee(for value: Int, feeRate: Int, toAddress: String?, senderPay: Bool) throws -> Int
 
     var debugInfo: String { get }
 }

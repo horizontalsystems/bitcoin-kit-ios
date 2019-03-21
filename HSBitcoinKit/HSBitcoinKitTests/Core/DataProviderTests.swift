@@ -9,7 +9,6 @@ class DataProviderTests: XCTestCase {
     private var mockAddressConverter: MockIAddressConverter!
     private var mockPaymentAddressParser: MockIPaymentAddressParser!
     private var mockUnspentOutputProvider: MockIUnspentOutputProvider!
-    private var mockFeeRateManager: MockIFeeRateManager!
     private var mockTransactionCreator: MockITransactionCreator!
     private var mockTransactionBuilder: MockITransactionBuilder!
     private var mockNetwork: MockINetwork!
@@ -35,7 +34,6 @@ class DataProviderTests: XCTestCase {
         mockAddressConverter = MockIAddressConverter()
         mockPaymentAddressParser = MockIPaymentAddressParser()
         mockUnspentOutputProvider = MockIUnspentOutputProvider()
-        mockFeeRateManager = MockIFeeRateManager()
         mockTransactionCreator = MockITransactionCreator()
         mockTransactionBuilder = MockITransactionBuilder()
         mockNetwork = MockINetwork()
@@ -53,7 +51,7 @@ class DataProviderTests: XCTestCase {
 
         dataProvider = DataProvider(
                 realmFactory: mockRealmFactory, addressManager: mockAddressManager, addressConverter: mockAddressConverter,
-                paymentAddressParser: mockPaymentAddressParser, unspentOutputProvider: mockUnspentOutputProvider, feeRateManager: mockFeeRateManager,
+                paymentAddressParser: mockPaymentAddressParser, unspentOutputProvider: mockUnspentOutputProvider,
                 transactionCreator: mockTransactionCreator, transactionBuilder: mockTransactionBuilder, network: mockNetwork, debounceTime: 0
         )
         dataProvider.delegate = mockDataProviderDelegate
@@ -64,7 +62,6 @@ class DataProviderTests: XCTestCase {
         mockAddressConverter = nil
         mockPaymentAddressParser = nil
         mockUnspentOutputProvider = nil
-        mockFeeRateManager = nil
         mockTransactionCreator = nil
         mockTransactionBuilder = nil
         mockNetwork = nil

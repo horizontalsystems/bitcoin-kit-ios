@@ -18,7 +18,7 @@ def kit_pods
   internal_pods
 
   pod 'Alamofire', '~> 4.8.0'
-  pod 'ObjectMapper', '~> 3.3.0'
+  pod 'ObjectMapper', '~> 3.4.0'
 
   pod 'RxSwift', '~> 4.0'
 

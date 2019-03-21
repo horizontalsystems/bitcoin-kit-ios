@@ -12,11 +12,16 @@ class FeeRateManagerTests: XCTestCase {
 
     private var manager: FeeRateManager!
 
-    private let feeRate = FeeRate(dateInterval: 0, date: "", low: 0, medium: 0, high: 0)
+    private let feeRate = FeeRate()
     private let reachabilitySubject = PublishSubject<()>()
 
     override func setUp() {
         super.setUp()
+
+        feeRate.lowPriority = 0
+        feeRate.mediumPriority = 0
+        feeRate.highPriority = 0
+        feeRate.date = Date()
 
         mockStorage = MockIFeeRateStorage()
         mockSyncer = MockIFeeRateSyncer()
