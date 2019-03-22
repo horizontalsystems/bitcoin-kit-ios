@@ -20,7 +20,7 @@ Pod::Spec.new do |spec|
   spec.dependency 'HSCryptoKit', '~> 1.3.0'
   spec.dependency 'HSHDWalletKit', '~> 1.0.4'
   spec.dependency 'Alamofire', '~> 4.8.0'
-  spec.dependency 'ObjectMapper', '~> 3.3.0'
+  spec.dependency 'ObjectMapper', '~> 3.4.0'
   spec.dependency 'RxSwift', '~> 4.0'
   spec.dependency 'BigInt', '~> 3.1.0'
   spec.dependency 'RealmSwift', '~> 3.11.0'
