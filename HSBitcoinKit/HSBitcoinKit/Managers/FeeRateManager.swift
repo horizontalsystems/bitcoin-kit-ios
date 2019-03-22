@@ -47,17 +47,13 @@ extension FeeRateManager: IFeeRateManager {
     }
 
     var lowValue: Int {
-        return valueInSatoshi(value: feeRate.lowPriority)
+        return feeRate.low
     }
     var mediumValue: Int {
-        return valueInSatoshi(value: feeRate.mediumPriority)
+        return feeRate.medium
     }
     var highValue: Int {
-        return valueInSatoshi(value: feeRate.highPriority)
-    }
-
-    private func valueInSatoshi(value: Double) -> Int {
-        return max(Int(round(value * 100_000_000 / 1000)), 1)
+        return feeRate.high
     }
 
 }

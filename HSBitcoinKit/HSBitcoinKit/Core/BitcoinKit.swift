@@ -174,7 +174,7 @@ public class BitcoinKit {
         transactionBuilder = TransactionBuilder(unspentOutputSelector: unspentOutputSelector, unspentOutputProvider: unspentOutputProvider, addressManager: addressManager, addressConverter: addressConverter, inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory)
         transactionCreator = TransactionCreator(realmFactory: realmFactory, transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, peerGroup: peerGroup)
 
-        dataProvider = DataProvider(realmFactory: realmFactory, addressManager: addressManager, addressConverter: addressConverter, paymentAddressParser: paymentAddressParser, unspentOutputProvider: unspentOutputProvider, feeRateManager: feeRateManager, transactionCreator: transactionCreator, transactionBuilder: transactionBuilder, network: network)
+        dataProvider = DataProvider(realmFactory: realmFactory, addressManager: addressManager, addressConverter: addressConverter, paymentAddressParser: paymentAddressParser, unspentOutputProvider: unspentOutputProvider, transactionCreator: transactionCreator, transactionBuilder: transactionBuilder, network: network)
 
         blockchain = Blockchain(network: network, factory: factory, listener: dataProvider)
         blockSyncer = BlockSyncer(realmFactory: realmFactory, network: network, listener: kitStateProvider, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager, logger: logger)
@@ -227,8 +227,8 @@ extension BitcoinKit {
         return dataProvider.transactions(fromHash: fromHash, limit: limit)
     }
 
-    public func send(to address: String, value: Int) throws {
-        try dataProvider.send(to: address, value: value)
+    public func send(to address: String, value: Int, feePriority: FeePriority = .medium) throws {
+        try dataProvider.send(to: address, value: value, feeRate: getFeeRate(priority: feePriority))
     }
 
     public func validate(address: String) throws {
@@ -239,8 +239,8 @@ extension BitcoinKit {
         return dataProvider.parse(paymentAddress: paymentAddress)
     }
 
-    public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool) throws -> Int {
-        return try dataProvider.fee(for: value, toAddress: toAddress, senderPay: senderPay)
+    public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feePriority: FeePriority = .medium) throws -> Int {
+        return try dataProvider.fee(for: value, feeRate: getFeeRate(priority: feePriority), toAddress: toAddress, senderPay: senderPay)
     }
 
     public var receiveAddress: String {
@@ -249,6 +249,23 @@ extension BitcoinKit {
 
     public var debugInfo: String {
         return dataProvider.debugInfo
+    }
+
+    private func getFeeRate(priority: FeePriority) -> Int {
+        switch priority {
+        case .lowest:
+            return feeRateManager.feeRate.low
+        case .low:
+            return (feeRateManager.feeRate.low + feeRateManager.feeRate.medium) / 2
+        case .medium:
+            return feeRateManager.feeRate.medium
+        case .high:
+            return (feeRateManager.feeRate.medium + feeRateManager.feeRate.high) / 2
+        case .highest:
+            return feeRateManager.feeRate.high
+        case .custom(let value):
+            return value
+        }
     }
 
 }

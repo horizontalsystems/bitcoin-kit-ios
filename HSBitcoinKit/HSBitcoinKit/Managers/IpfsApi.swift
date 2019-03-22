@@ -5,22 +5,16 @@ import ObjectMapper
 // https://ipfs.horizontalsystems.xyz/ipns/Qmd4Gv2YVPqs6dmSy1XEq7pQRSgLihqYKL2JjK7DMUFPVz/io-hs/data/blockchain/BTC/mainnet/estimatefee/index.json
 
 class IpfsApi {
-    private let apiKey = "Qmd4Gv2YVPqs6dmSy1XEq7pQRSgLihqYKL2JjK7DMUFPVz"
+    private let apiKey = "QmXTJZBMMRmBbPun6HFt3tmb3tfYF2usLPxFoacL7G5uMX"
 
     private let apiManager: ApiManager
 
     private var coinType: String
-    private let networkType: String
 
     init(network: INetwork, apiProvider: IApiConfigProvider, logger: Logger? = nil) {
         switch network {
         case is BitcoinCashMainNet, is BitcoinCashTestNet: coinType = "BCH"
         default: coinType = "BTC"
-        }
-
-        switch network {
-        case is BitcoinTestNet, is BitcoinCashTestNet: networkType = "testnet"
-        default: networkType = ""
         }
 
         apiManager = ApiManager(apiUrl: apiProvider.apiUrl + "/\(apiKey)", logger: logger)
@@ -31,27 +25,35 @@ class IpfsApi {
 extension IpfsApi: IFeeRateApi {
 
     func getFeeRate() -> Observable<FeeRate> {
-        let observable: Observable<FeeRateResponse> = apiManager.observable(forRequest: apiManager.request(withMethod: .get, path: "/io-hs/data/blockchain/\(coinType)/\(networkType)/estimatefee/index.json"))
-
-        return observable.map { FeeRate(dateInterval: $0.dateInterval, date: $0.date, low: Double($0.lowPriority) ?? 0, medium: Double($0.mediumPriority) ?? 0, high: Double($0.highPriority) ?? 0)}
+        let coinType = self.coinType
+        let observable: Observable<FeeRateData> = apiManager.observable(forRequest: apiManager.request(withMethod: .get, path: "/blockchain/estimatefee/index.json"))
+        return observable.map { feeRateData in
+            if let data = feeRateData.data[coinType] as? [String: Any],
+               let lowPriority = data["low_priority"] as? Double,
+               let mediumPriority = data["medium_priority"] as? Double,
+               let highPriority = data["high_priority"] as? Double
+            {
+                let rate = FeeRate()
+                rate.lowPriority = lowPriority
+                rate.mediumPriority = mediumPriority
+                rate.highPriority = highPriority
+                rate.date = feeRateData.date
+                return rate
+            } else {
+                return FeeRate.defaultFeeRate
+            }
+        }
     }
 
 }
 
-struct FeeRateResponse: ImmutableMappable {
-    let lowPriority: String
-    let mediumPriority: String
-    let highPriority: String
-    let date: String
-    let dateInterval: Int
+struct FeeRateData: ImmutableMappable {
+    var data: [String: Any]
+    var date: Date
 
     init(map: Map) throws {
-        lowPriority = try map.value("low_priority")
-        mediumPriority = try map.value("medium_priority")
-        highPriority = try map.value("high_priority")
-
-        date = try map.value("date_str")
-        dateInterval = try map.value("date")
+        data = try map.value("rates")
+        date = try map.value("time", using: DateTransform(unit: .milliseconds))
     }
-}
 
+}

@@ -8,7 +8,6 @@ import HSCryptoKit
 class DataProvider {
     private let disposeBag = DisposeBag()
 
-    private let feeRateManager: IFeeRateManager
     private let realmFactory: IRealmFactory
     private let addressManager: IAddressManager
     private let addressConverter: IAddressConverter
@@ -31,13 +30,12 @@ class DataProvider {
 
     weak var delegate: IDataProviderDelegate?
 
-    init(realmFactory: IRealmFactory, addressManager: IAddressManager, addressConverter: IAddressConverter, paymentAddressParser: IPaymentAddressParser, unspentOutputProvider: IUnspentOutputProvider, feeRateManager: IFeeRateManager, transactionCreator: ITransactionCreator, transactionBuilder: ITransactionBuilder, network: INetwork, debounceTime: Double = 0.5) {
+    init(realmFactory: IRealmFactory, addressManager: IAddressManager, addressConverter: IAddressConverter, paymentAddressParser: IPaymentAddressParser, unspentOutputProvider: IUnspentOutputProvider, transactionCreator: ITransactionCreator, transactionBuilder: ITransactionBuilder, network: INetwork, debounceTime: Double = 0.5) {
         self.realmFactory = realmFactory
         self.addressManager = addressManager
         self.addressConverter = addressConverter
         self.paymentAddressParser = paymentAddressParser
         self.unspentOutputProvider = unspentOutputProvider
-        self.feeRateManager = feeRateManager
         self.transactionCreator = transactionCreator
         self.transactionBuilder = transactionBuilder
         self.network = network
@@ -160,8 +158,8 @@ extension DataProvider: IDataProvider {
         }
     }
 
-    func send(to address: String, value: Int) throws {
-        try transactionCreator.create(to: address, value: value, feeRate: feeRateManager.mediumValue, senderPay: true)
+    func send(to address: String, value: Int, feeRate: Int) throws {
+        try transactionCreator.create(to: address, value: value, feeRate: feeRate, senderPay: true)
     }
 
     func parse(paymentAddress: String) -> BitcoinPaymentData {
@@ -172,8 +170,8 @@ extension DataProvider: IDataProvider {
         _ = try addressConverter.convert(address: address)
     }
 
-    func fee(for value: Int, toAddress: String? = nil, senderPay: Bool) throws -> Int {
-        return try transactionBuilder.fee(for: value, feeRate: feeRateManager.mediumValue, senderPay: senderPay, address: toAddress)
+    func fee(for value: Int, feeRate: Int, toAddress: String? = nil, senderPay: Bool) throws -> Int {
+        return try transactionBuilder.fee(for: value, feeRate: feeRate, senderPay: senderPay, address: toAddress)
     }
 
     var receiveAddress: String {
