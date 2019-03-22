@@ -1,6 +1,5 @@
 import XCTest
 import Cuckoo
-import RealmSwift
 @testable import HSBitcoinKit
 
 class TransactionProcessorTests: XCTestCase {
@@ -83,7 +82,7 @@ class TransactionProcessorTests: XCTestCase {
     func testProcessSingleTransaction() {
         let transaction = TestData.p2pkhTransaction
 
-        try! transactionProcessor.processOutgoing(transaction: transaction, realm: realm)
+        try! transactionProcessor.processCreated(transaction: transaction, realm: realm)
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
         verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
@@ -97,7 +96,7 @@ class TransactionProcessorTests: XCTestCase {
         let transaction = TestData.p2pkhTransaction
         transaction.isMine = true
 
-        try! transactionProcessor.processOutgoing(transaction: transaction, realm: realm)
+        try! transactionProcessor.processCreated(transaction: transaction, realm: realm)
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
         verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
@@ -119,7 +118,7 @@ class TransactionProcessorTests: XCTestCase {
         }
 
         try! realm.write {
-            try! transactionProcessor.process(transactions: [incomingTransaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
+            try! transactionProcessor.processReceived(transactions: [incomingTransaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
         }
 
         verify(mockOutputExtractor, never()).extract(transaction: equal(to: transaction))
@@ -148,7 +147,7 @@ class TransactionProcessorTests: XCTestCase {
         }
 
         try! realm.write {
-            try! transactionProcessor.process(transactions: [transactions[3], transactions[1], transactions[2], transactions[0]], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
+            try! transactionProcessor.processReceived(transactions: [transactions[3], transactions[1], transactions[2], transactions[0]], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
         }
 
         let realmTransactions = realm.objects(Transaction.self).sorted(byKeyPath: "order")
@@ -181,7 +180,7 @@ class TransactionProcessorTests: XCTestCase {
         }
 
         try! realm.write {
-            try! transactionProcessor.process(transactions: [transactions[3], transactions[1], transactions[2], transactions[0]], inBlock: block, skipCheckBloomFilter: false, realm: realm)
+            try! transactionProcessor.processReceived(transactions: [transactions[3], transactions[1], transactions[2], transactions[0]], inBlock: block, skipCheckBloomFilter: false, realm: realm)
         }
 
         let realmTransactions = realm.objects(Transaction.self).sorted(byKeyPath: "order")
@@ -190,7 +189,7 @@ class TransactionProcessorTests: XCTestCase {
 
         XCTAssertEqual(realmTransactions.count, 4)
         for (i, transaction) in transactions.enumerated() {
-            XCTAssertEqual(realmTransactions[i].block?.reversedHeaderHashHex, block.reversedHeaderHashHex)
+            XCTAssertEqual(realmTransactions[i].block?.headerHashReversedHex, block.headerHashReversedHex)
             XCTAssertEqual(realmTransactions[i].dataHash, transaction.dataHash)
             XCTAssertEqual(realmTransactions[i].status, .relayed)
             XCTAssertEqual(realmTransactions[i].order, i)
@@ -203,7 +202,7 @@ class TransactionProcessorTests: XCTestCase {
         transaction.isMine = true
 
         try! realm.write {
-            try! transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
+            try! transactionProcessor.processReceived(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
         }
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
@@ -224,7 +223,7 @@ class TransactionProcessorTests: XCTestCase {
         transaction.isMine = false
 
         try! realm.write {
-            try! transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
+            try! transactionProcessor.processReceived(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
         }
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
@@ -246,7 +245,7 @@ class TransactionProcessorTests: XCTestCase {
 
         try! realm.write {
             do {
-                try transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
+                try transactionProcessor.processReceived(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
                 XCTFail("Should throw exception")
             } catch _ as BloomFilterManager.BloomFilterExpired {
             } catch {
@@ -278,7 +277,7 @@ class TransactionProcessorTests: XCTestCase {
 
         try! realm.write {
             do {
-                try transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
+                try transactionProcessor.processReceived(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
                 XCTFail("Should throw exception")
             } catch _ as BloomFilterManager.BloomFilterExpired {
             } catch {
@@ -308,7 +307,7 @@ class TransactionProcessorTests: XCTestCase {
 
         try! realm.write {
             do {
-                try transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: true, realm: realm)
+                try transactionProcessor.processReceived(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: true, realm: realm)
             } catch {
                 XCTFail("Shouldn't throw exception")
             }
@@ -336,7 +335,7 @@ class TransactionProcessorTests: XCTestCase {
 
         try! realm.write {
             do {
-                try transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
+                try transactionProcessor.processReceived(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
             } catch {
                 XCTFail("Shouldn't throw exception")
             }
@@ -371,12 +370,12 @@ class TransactionProcessorTests: XCTestCase {
 
                         calledTransactions = []
 
-                        try! transactionProcessor.process(transactions: [transactions[i], transactions[j], transactions[k], transactions[l]], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
+                        try! transactionProcessor.processReceived(transactions: [transactions[i], transactions[j], transactions[k], transactions[l]], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
 
                         verifyNoMoreInteractions(mockBlockchainDataListener)
 
                         for (m, transaction) in calledTransactions.enumerated() {
-                            XCTAssertEqual(transaction.reversedHashHex, transactions[m].reversedHashHex)
+                            XCTAssertEqual(transaction.dataHashReversedHex, transactions[m].dataHashReversedHex)
                         }
                     }
                 }
@@ -389,7 +388,7 @@ class TransactionProcessorTests: XCTestCase {
         let transaction = Transaction(
                 version: 0,
                 inputs: [
-                    TransactionInput(
+                    Input(
                             withPreviousOutputTxReversedHex: Data(from: 1).hex,
                             previousOutputIndex: 0,
                             script: Data(from: 999999999999),
@@ -397,7 +396,7 @@ class TransactionProcessorTests: XCTestCase {
                     )
                 ],
                 outputs: [
-                    TransactionOutput(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data())
+                    Output(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data())
                 ],
                 lockTime: 0
         )
@@ -405,16 +404,16 @@ class TransactionProcessorTests: XCTestCase {
         let transaction2 = Transaction(
                 version: 0,
                 inputs: [
-                    TransactionInput(
-                            withPreviousOutputTxReversedHex: transaction.reversedHashHex,
+                    Input(
+                            withPreviousOutputTxReversedHex: transaction.dataHashReversedHex,
                             previousOutputIndex: 0,
                             script: Data(from: 999999999999),
                             sequence: 0
                     )
                 ],
                 outputs: [
-                    TransactionOutput(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data()),
-                    TransactionOutput(withValue: 0, index: 1, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data())
+                    Output(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data()),
+                    Output(withValue: 0, index: 1, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data())
                 ],
                 lockTime: 0
         )
@@ -422,15 +421,15 @@ class TransactionProcessorTests: XCTestCase {
         let transaction3 = Transaction(
                 version: 0,
                 inputs: [
-                    TransactionInput(
-                            withPreviousOutputTxReversedHex: transaction2.reversedHashHex,
+                    Input(
+                            withPreviousOutputTxReversedHex: transaction2.dataHashReversedHex,
                             previousOutputIndex: 0,
                             script: Data(from: 999999999999),
                             sequence: 0
                     )
                 ],
                 outputs: [
-                    TransactionOutput(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data()),
+                    Output(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data()),
                 ],
                 lockTime: 0
         )
@@ -438,21 +437,21 @@ class TransactionProcessorTests: XCTestCase {
         let transaction4 = Transaction(
                 version: 0,
                 inputs: [
-                    TransactionInput(
-                            withPreviousOutputTxReversedHex: transaction2.reversedHashHex,
+                    Input(
+                            withPreviousOutputTxReversedHex: transaction2.dataHashReversedHex,
                             previousOutputIndex: 1,
                             script: Data(from: 999999999999),
                             sequence: 0
                     ),
-                    TransactionInput(
-                            withPreviousOutputTxReversedHex: transaction3.reversedHashHex,
+                    Input(
+                            withPreviousOutputTxReversedHex: transaction3.dataHashReversedHex,
                             previousOutputIndex: 0,
                             script: Data(from: 999999999999),
                             sequence: 0
                     )
                 ],
                 outputs: [
-                    TransactionOutput(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data())
+                    Output(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data())
                 ],
                 lockTime: 0
         )

@@ -19,11 +19,11 @@ class TransactionBuilderTests: XCTestCase {
     private var unspentOutputs: SelectedUnspentOutputInfo!
     private var previousTransaction: Transaction!
     private var transaction: Transaction!
-    private var toOutputPKH: TransactionOutput!
-    private var toOutputWPKH: TransactionOutput!
-    private var toOutputSH: TransactionOutput!
-    private var changeOutput: TransactionOutput!
-    private var input: TransactionInput!
+    private var toOutputPKH: Output!
+    private var toOutputWPKH: Output!
+    private var toOutputSH: Output!
+    private var changeOutput: Output!
+    private var input: Input!
     private var totalInputValue: Int!
     private var value: Int!
     private var feeRate: Int!
@@ -71,11 +71,11 @@ class TransactionBuilderTests: XCTestCase {
         fee = 1008
 
         transaction = Transaction(version: 1, inputs: [], outputs: [])
-        input = TransactionInput(withPreviousOutputTxReversedHex: previousTransaction.reversedHashHex, previousOutputIndex: unspentOutputs.outputs[0].index, script: Data(), sequence: 0)
-        toOutputPKH = TransactionOutput(withValue: value - fee, index: 0, lockingScript: Data(), type: .p2pkh, address: toAdressPKH, keyHash: nil)
-        toOutputWPKH = TransactionOutput(withValue: value - fee, index: 0, lockingScript: Data(), type: .p2wpkh, address: toAddressWPKH, keyHash: nil)
-        toOutputSH = TransactionOutput(withValue: value - fee, index: 0, lockingScript: Data(), type: .p2sh, address: toAddressSH, keyHash: nil)
-        changeOutput = TransactionOutput(withValue: totalInputValue - value, index: 1, lockingScript: Data(), type: .p2pkh, keyHash: changePubKey.keyHash)
+        input = Input(withPreviousOutputTxReversedHex: previousTransaction.dataHashReversedHex, previousOutputIndex: unspentOutputs.outputs[0].index, script: Data(), sequence: 0)
+        toOutputPKH = Output(withValue: value - fee, index: 0, lockingScript: Data(), type: .p2pkh, address: toAdressPKH, keyHash: nil)
+        toOutputWPKH = Output(withValue: value - fee, index: 0, lockingScript: Data(), type: .p2wpkh, address: toAddressWPKH, keyHash: nil)
+        toOutputSH = Output(withValue: value - fee, index: 0, lockingScript: Data(), type: .p2sh, address: toAddressSH, keyHash: nil)
+        changeOutput = Output(withValue: totalInputValue - value, index: 1, lockingScript: Data(), type: .p2pkh, keyHash: changePubKey.keyHash)
 
         stub(mockUnspentOutputSelector) { mock in
             when(mock.select(value: any(), feeRate: any(), outputScriptType: any(), changeType: any(), senderPay: any(), outputs: any())).thenReturn(unspentOutputs)
@@ -169,7 +169,7 @@ class TransactionBuilderTests: XCTestCase {
     func testBuildTransaction_P2PKH() {
         let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAdressPKH)
 
-        XCTAssertNotEqual(resultTx.reversedHashHex, "")
+        XCTAssertNotEqual(resultTx.hashReversedHex, "")
         XCTAssertEqual(resultTx.status, .new)
         XCTAssertEqual(resultTx.isMine, true)
         XCTAssertEqual(resultTx.segWit, false)
@@ -206,7 +206,7 @@ class TransactionBuilderTests: XCTestCase {
 
         let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressWPKH)
 
-        XCTAssertNotEqual(resultTx.reversedHashHex, "")
+        XCTAssertNotEqual(resultTx.hashReversedHex, "")
         XCTAssertEqual(resultTx.status, .new)
         XCTAssertEqual(resultTx.isMine, true)
         XCTAssertEqual(resultTx.segWit, true)
@@ -225,7 +225,7 @@ class TransactionBuilderTests: XCTestCase {
     func testBuildTransaction_P2SH() {
         let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressSH)
 
-        XCTAssertNotEqual(resultTx.reversedHashHex, "")
+        XCTAssertNotEqual(resultTx.hashReversedHex, "")
         XCTAssertEqual(resultTx.status, .new)
         XCTAssertEqual(resultTx.isMine, true)
         XCTAssertEqual(resultTx.inputs.count, 1)

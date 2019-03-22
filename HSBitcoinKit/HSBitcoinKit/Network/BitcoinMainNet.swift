@@ -35,8 +35,8 @@ class BitcoinMainNet: INetwork {
         return Block(
                 withHeader: BlockHeader(
                         version: 1,
-                        previousBlockHeaderReversedHex: "0000000000000000000000000000000000000000000000000000000000000000",
-                        merkleRootReversedHex: "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b",
+                        previousBlockHeaderHash: "0000000000000000000000000000000000000000000000000000000000000000".reversedData!,
+                        merkleRoot: "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b".reversedData!,
                         timestamp: 1231006505,
                         bits: 486604799,
                         nonce: 2083236893
@@ -48,8 +48,8 @@ class BitcoinMainNet: INetwork {
         return Block(
                 withHeader: BlockHeader(
                         version: 536870912,
-                        previousBlockHeaderReversedHex: "00000000000000000017e5c36734296b27065045f181e028c0d91cebb336d50c",
-                        merkleRootReversedHex: "2f9963d6eb332a0dd03ad806f504981e6180226dbca4385dc801db8974b2c17b",
+                        previousBlockHeaderHash: "00000000000000000017e5c36734296b27065045f181e028c0d91cebb336d50c".reversedData!,
+                        merkleRoot: "2f9963d6eb332a0dd03ad806f504981e6180226dbca4385dc801db8974b2c17b".reversedData!,
                         timestamp: 1551026038,
                         bits: 388914000,
                         nonce: 1427093839

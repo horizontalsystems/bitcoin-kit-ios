@@ -1,9 +1,9 @@
 import Foundation
 
 struct TransactionMessage: IMessage {
-    let transaction: Transaction
+    let transaction: FullTransaction
 
-    init(transaction: Transaction) {
+    init(transaction: FullTransaction) {
         self.transaction = transaction
     }
 

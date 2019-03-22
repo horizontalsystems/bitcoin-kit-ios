@@ -36,7 +36,7 @@ class InputSignerTests: XCTestCase {
         transaction = Transaction()
         transaction.version = 1
         let payInput = TestData.transactionInput(previousTransaction: previousTransaction, previousOutput: previousTransaction.outputs[0], script: Data(), sequence: 0)
-        let payOutput = TransactionOutput(withValue: 9, index: 0, lockingScript: Data(hex: "76a914e4de5d630c5cacd7af96418a8f35c411c8ff3c0688ac")!, type: .p2pkh, keyHash: Data())
+        let payOutput = Output(withValue: 9, index: 0, lockingScript: Data(hex: "76a914e4de5d630c5cacd7af96418a8f35c411c8ff3c0688ac")!, type: .p2pkh, keyHash: Data())
         transaction.inputs.append(payInput)
         transaction.outputs.append(payOutput)
 
@@ -89,7 +89,7 @@ class InputSignerTests: XCTestCase {
         transaction = Transaction()
         transaction.version = 1
         let payInput = TestData.transactionInput(previousTransaction: previousTransaction, previousOutput: previousTransaction.outputs[0], script: Data(), sequence: 0)
-        let payOutput = TransactionOutput(withValue: 9, index: 0, lockingScript: Data(hex: "76a914e4de5d630c5cacd7af96418a8f35c411c8ff3c0688ac")!, type: .p2pkh, keyHash: Data())
+        let payOutput = Output(withValue: 9, index: 0, lockingScript: Data(hex: "76a914e4de5d630c5cacd7af96418a8f35c411c8ff3c0688ac")!, type: .p2pkh, keyHash: Data())
         transaction.inputs.append(payInput)
         transaction.outputs.append(payOutput)
 
@@ -119,7 +119,7 @@ class InputSignerTests: XCTestCase {
         transaction = Transaction()
         transaction.version = 1
         let payInput = TestData.transactionInput(previousTransaction: previousTransaction, previousOutput: previousTransaction.outputs[0], script: Data(), sequence: 0)
-        let payOutput = TransactionOutput(withValue: 9, index: 0, lockingScript: Data(hex: "76a914e4de5d630c5cacd7af96418a8f35c411c8ff3c0688ac")!, type: .p2pkh, keyHash: Data())
+        let payOutput = Output(withValue: 9, index: 0, lockingScript: Data(hex: "76a914e4de5d630c5cacd7af96418a8f35c411c8ff3c0688ac")!, type: .p2pkh, keyHash: Data())
         transaction.inputs.append(payInput)
         transaction.outputs.append(payOutput)
 

@@ -1,5 +1,4 @@
 import HSCryptoKit
-import RealmSwift
 import GRDB
 
 class BlockSyncer {
@@ -42,7 +41,7 @@ class BlockSyncer {
 
     var localKnownBestBlockHeight: Int32 {
         let blockchainHashes = storage.blockchainBlockHashes
-        let existingHashesCount = storage.blocksCount(reversedHeaderHashHexes: blockchainHashes.map { $0.reversedHeaderHashHex })
+        let existingHashesCount = storage.blocksCount(reversedHeaderHashHexes: blockchainHashes.map { $0.headerHashReversedHex })
         return localDownloadedBestBlockHeight + Int32(blockchainHashes.count - existingHashesCount)
     }
 
@@ -52,11 +51,11 @@ class BlockSyncer {
     }
 
     private func clearPartialBlocks() throws {
-        let blockReversedHashes = storage.blockHashHeaderHashHexes(except: network.checkpointBlock.reversedHeaderHashHex)
+        let blockReversedHashes = storage.blockHashHeaderHashHexes(except: network.checkpointBlock.headerHashReversedHex)
 
-        try storage.inTransaction { realm in
-            let blocksToDelete = storage.blocks(byHexes: blockReversedHashes, realm: realm)
-            blockchain.deleteBlocks(blocks: blocksToDelete, realm: realm)
+        try storage.inTransaction { db in
+            let blocksToDelete = storage.blocks(byHexes: blockReversedHashes)
+            try blockchain.deleteBlocks(blocks: blocksToDelete, db: db)
         }
     }
 
@@ -111,7 +110,7 @@ extension BlockSyncer: IBlockSyncer {
         }
 
         if blockLocatorHashes.isEmpty {
-            for block in storage.blocks(heightGreaterThan: network.checkpointBlock.height, sortedBy: "height", limit: 10) {
+            for block in storage.blocks(heightGreaterThan: network.checkpointBlock.height, sortedBy: Block.Columns.height, limit: 10) {
                 blockLocatorHashes.append(block.headerHash)
             }
         }
@@ -145,21 +144,21 @@ extension BlockSyncer: IBlockSyncer {
     func handle(merkleBlock: MerkleBlock, maxBlockHeight: Int32) throws {
         var block: Block!
 
-        try storage.inTransaction { realm in
+        try storage.inTransaction { db in
             if let height = merkleBlock.height {
-                block = blockchain.forceAdd(merkleBlock: merkleBlock, height: height, realm: realm)
+                block = try blockchain.forceAdd(merkleBlock: merkleBlock, height: height, db: db)
             } else {
-                block = try blockchain.connect(merkleBlock: merkleBlock, realm: realm)
+                block = try blockchain.connect(merkleBlock: merkleBlock, db: db)
             }
 
             do {
-                try transactionProcessor.process(transactions: merkleBlock.transactions, inBlock: block, skipCheckBloomFilter: self.state.iterationHasPartialBlocks, realm: realm)
+                try transactionProcessor.processReceived(transactions: merkleBlock.transactions, inBlock: block, skipCheckBloomFilter: self.state.iterationHasPartialBlocks, db: db)
             } catch _ as BloomFilterManager.BloomFilterExpired {
                 state.iteration(hasPartialBlocks: true)
             }
 
             if !state.iterationHasPartialBlocks {
-                storage.deleteBlockHash(byHashHex: block.reversedHeaderHashHex)
+                storage.deleteBlockHash(byHashHex: block.headerHashReversedHex, db: db)
             }
         }
 

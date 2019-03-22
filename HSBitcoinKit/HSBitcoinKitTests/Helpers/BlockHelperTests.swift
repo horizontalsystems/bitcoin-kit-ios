@@ -24,14 +24,14 @@ class BlockHelperTests: XCTestCase {
     func testPrevious() {
         let block = TestData.thirdBlock
 
-        XCTAssertEqual(blockHelper.previous(for: block, index: 1)?.reversedHeaderHashHex, TestData.secondBlock.reversedHeaderHashHex)
+        XCTAssertEqual(blockHelper.previous(for: block, index: 1)?.headerHashReversedHex, TestData.secondBlock.headerHashReversedHex)
         XCTAssertEqual(blockHelper.previous(for: block, index: 4), nil)
     }
 
     func testPreviousWindow() {
         let block = TestData.secondBlock
 
-        XCTAssertEqual(blockHelper.previousWindow(for: block, count: 2)?.map { $0.reversedHeaderHashHex }, [TestData.checkpointBlock.reversedHeaderHashHex, TestData.firstBlock.reversedHeaderHashHex])
+        XCTAssertEqual(blockHelper.previousWindow(for: block, count: 2)?.map { $0.headerHashReversedHex }, [TestData.checkpointBlock.headerHashReversedHex, TestData.firstBlock.headerHashReversedHex])
         XCTAssertEqual(blockHelper.previousWindow(for: block, count: 3), nil)
     }
 

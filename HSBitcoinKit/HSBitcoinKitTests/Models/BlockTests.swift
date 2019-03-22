@@ -18,7 +18,7 @@ class BlockTests: XCTestCase {
         XCTAssertEqual(block.previousBlock, previousBlock)
         XCTAssertEqual(block.height, 2)
         XCTAssertEqual(block.headerHash, headerHash)
-        XCTAssertEqual(block.reversedHeaderHashHex, headerHash.reversedHex)
+        XCTAssertEqual(block.headerHashReversedHex, headerHash.reversedHex)
     }
 
     func testCreateWithHeight() {
@@ -33,7 +33,7 @@ class BlockTests: XCTestCase {
         XCTAssertEqual(block.previousBlock, nil)
         XCTAssertEqual(block.height, height)
         XCTAssertEqual(block.headerHash, headerHash)
-        XCTAssertEqual(block.reversedHeaderHashHex, headerHash.reversedHex)
+        XCTAssertEqual(block.headerHashReversedHex, headerHash.reversedHex)
     }
 
 }

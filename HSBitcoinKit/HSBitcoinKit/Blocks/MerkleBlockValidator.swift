@@ -31,7 +31,7 @@ class MerkleBlockValidator: IMerkleBlockValidator {
             throw ValidationError.wrongMerkleRoot
         }
 
-        return MerkleBlock(header: message.blockHeader, transactionHashes: matchedTxIds, transactions: [Transaction]())
+        return MerkleBlock(header: message.blockHeader, transactionHashes: matchedTxIds, transactions: [FullTransaction]())
     }
 
     /**

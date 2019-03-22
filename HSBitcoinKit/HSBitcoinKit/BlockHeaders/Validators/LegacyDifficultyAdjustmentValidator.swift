@@ -14,23 +14,17 @@ class LegacyDifficultyAdjustmentValidator: IBlockValidator {
     }
 
     func validate(candidate: Block, block: Block, network: INetwork) throws {
-        guard let candidateHeader = candidate.header, let blockHeader = block.header else {
-            throw Block.BlockError.noHeader
-        }
         guard let firstBlock = blockHelper.previous(for: block, index: network.heightInterval - 1) else {
             throw BlockValidatorError.noPreviousBlock
         }
-        guard let firstBlockTime = firstBlock.header?.timestamp else {
-            throw Block.BlockError.noHeader
-        }
-        let timeSpan = limit(timeSpan: blockHeader.timestamp - firstBlockTime, targetTimeSpan: network.targetTimeSpan)
+        let timeSpan = limit(timeSpan: block.timestamp - firstBlock.timestamp, targetTimeSpan: network.targetTimeSpan)
 
-        var bigIntDifficulty = difficultyEncoder.decodeCompact(bits: blockHeader.bits)
+        var bigIntDifficulty = difficultyEncoder.decodeCompact(bits: block.bits)
         bigIntDifficulty *= BigInt(timeSpan)
         bigIntDifficulty /= BigInt(network.targetTimeSpan)
         let newDifficulty = min(difficultyEncoder.encodeCompact(from: bigIntDifficulty), network.maxTargetBits)
 
-        guard newDifficulty == candidateHeader.bits else {
+        guard newDifficulty == candidate.bits else {
             throw BlockValidatorError.notDifficultyTransitionEqualBits
         }
     }

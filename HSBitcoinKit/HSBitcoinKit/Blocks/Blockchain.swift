@@ -1,4 +1,4 @@
-import RealmSwift
+import GRDB
 
 class Blockchain {
     private let storage: IStorage
@@ -13,10 +13,10 @@ class Blockchain {
         self.listener = listener
     }
 
-    private func unstaleAllBlocks(realm: Realm) {
-        for block in storage.blocks(stale: true, realm: realm) {
+    private func unstaleAllBlocks(db: Database) throws {
+        for block in storage.blocks(stale: true) {
             block.stale = false
-            storage.update(block: block, realm: realm)
+            try storage.update(block: block, db: db)
         }
     }
 
@@ -24,13 +24,11 @@ class Blockchain {
 
 extension Blockchain: IBlockchain {
 
-    func connect(merkleBlock: MerkleBlock, realm: Realm) throws -> Block {
-        // realm.objects(Block.self).filter("headerHash = %@", merkleBlock.headerHash).first
-        if let existingBlock = storage.block(byHashHex: merkleBlock.reversedHeaderHashHex) {
+    func connect(merkleBlock: MerkleBlock, db: Database) throws -> Block {
+        if let existingBlock = storage.block(byHashHex: merkleBlock.headerHashReversedHex) {
             return existingBlock
         }
 
-        // realm.objects(Block.self).filter("headerHash = %@", merkleBlock.header.previousBlockHeaderHash).first
         guard let previousBlock = storage.block(byHashHex: merkleBlock.header.previousBlockHeaderHash.reversedHex) else {
             throw BlockValidatorError.noPreviousBlock
         }
@@ -40,15 +38,15 @@ extension Blockchain: IBlockchain {
         try network.validate(block: block, previousBlock: previousBlock)
         block.stale = true
 
-        storage.add(block: block, realm: realm)
+        try storage.add(block: block, db: db)
         listener?.onInsert(block: block)
 
         return block
     }
 
-    func forceAdd(merkleBlock: MerkleBlock, height: Int, realm: Realm) -> Block {
+    func forceAdd(merkleBlock: MerkleBlock, height: Int, db: Database) throws -> Block {
         let block = factory.block(withHeader: merkleBlock.header, height: height)
-        storage.add(block: block, realm: realm)
+        try storage.add(block: block, db: db)
 
         listener?.onInsert(block: block)
 
@@ -56,36 +54,36 @@ extension Blockchain: IBlockchain {
     }
 
     func handleFork() {
-        guard let firstStaleHeight = storage.block(stale: true, sortedHeight: "ASC", realm: nil)?.height else {
+        guard let firstStaleHeight = storage.block(stale: true, sortedHeight: "ASC")?.height else {
             return
         }
 
-        let lastNotStaleHeight = storage.block(stale: false, sortedHeight: "DESC", realm: nil)?.height ?? 0
+        let lastNotStaleHeight = storage.block(stale: false, sortedHeight: "DESC")?.height ?? 0
 
-        try? storage.inTransaction { realm in
+        try? storage.inTransaction { db in
             if (firstStaleHeight <= lastNotStaleHeight) {
-                let lastStaleHeight = storage.block(stale: true, sortedHeight: "DESC", realm: realm)?.height ?? firstStaleHeight
+                let lastStaleHeight = storage.block(stale: true, sortedHeight: "DESC")?.height ?? firstStaleHeight
 
                 if (lastStaleHeight > lastNotStaleHeight) {
-                    let notStaleBlocks = storage.blocks(heightGreaterThanOrEqualTo: firstStaleHeight, stale: false, realm: realm)
-                    deleteBlocks(blocks: notStaleBlocks, realm: realm)
-                    unstaleAllBlocks(realm: realm)
+                    let notStaleBlocks = storage.blocks(heightGreaterThanOrEqualTo: firstStaleHeight, stale: false)
+                    try deleteBlocks(blocks: notStaleBlocks, db: db)
+                    try unstaleAllBlocks(db: db)
                 } else {
-                    let staleBlocks = storage.blocks(stale: true, realm: realm)
-                    deleteBlocks(blocks: staleBlocks, realm: realm)
+                    let staleBlocks = storage.blocks(stale: true)
+                    try deleteBlocks(blocks: staleBlocks, db: db)
                 }
             } else {
-                unstaleAllBlocks(realm: realm)
+                try unstaleAllBlocks(db: db)
             }
         }
     }
 
-    func deleteBlocks(blocks: [Block], realm: Realm) {
+    func deleteBlocks(blocks: [Block], db: Database) throws {
         let hashes =  blocks.reduce(into: [String](), { acc, block in
-            acc.append(contentsOf: storage.transactions(ofBlock: block, realm: realm).map { $0.reversedHashHex })
+            acc.append(contentsOf: storage.transactions(ofBlock: block).map { $0.dataHashReversedHex })
         })
 
-        storage.delete(blocks: blocks, realm: realm)
+        try storage.delete(blocks: blocks, db: db)
         listener?.onDelete(transactionHashes: hashes)
     }
 

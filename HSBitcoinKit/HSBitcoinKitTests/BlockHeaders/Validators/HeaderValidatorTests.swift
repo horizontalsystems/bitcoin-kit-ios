@@ -52,7 +52,7 @@ class HeaderValidatorTests: XCTestCase {
     }
 
     func testWrongProofOfWork_nBitsLessThanHeaderHash() {
-        candidate.header!.bits = DifficultyEncoder().encodeCompact(from: BigInt(candidate.reversedHeaderHashHex, radix: 16)! - 1)
+        candidate.header!.bits = DifficultyEncoder().encodeCompact(from: BigInt(candidate.headerHashReversedHex, radix: 16)! - 1)
         do {
             try validator.validate(candidate: candidate, block: block, network: network)
             XCTFail("invalidProveOfWork exception not thrown")

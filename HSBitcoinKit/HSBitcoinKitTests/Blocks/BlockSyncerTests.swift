@@ -2,7 +2,6 @@ import XCTest
 import Quick
 import Nimble
 import Cuckoo
-import RealmSwift
 @testable import HSBitcoinKit
 
 class BlockSyncerTests: QuickSpec {
@@ -171,7 +170,7 @@ class BlockSyncerTests: QuickSpec {
                     beforeEach {
                         stub(mockStorage) { mock in
                             when(mock.blockchainBlockHashes.get).thenReturn([blockHash])
-                            when(mock.blocksCount(reversedHeaderHashHexes: equal(to: [blockHash.reversedHeaderHashHex]))).thenReturn(0)
+                            when(mock.blocksCount(reversedHeaderHashHexes: equal(to: [blockHash.headerHashReversedHex]))).thenReturn(0)
                         }
                     }
 
@@ -188,7 +187,7 @@ class BlockSyncerTests: QuickSpec {
                     beforeEach {
                         stub(mockStorage) { mock in
                             when(mock.blockchainBlockHashes.get).thenReturn([blockHash])
-                            when(mock.blocksCount(reversedHeaderHashHexes: equal(to: [blockHash.reversedHeaderHashHex]))).thenReturn(1)
+                            when(mock.blocksCount(reversedHeaderHashHexes: equal(to: [blockHash.headerHashReversedHex]))).thenReturn(1)
                         }
                     }
 
@@ -207,7 +206,7 @@ class BlockSyncerTests: QuickSpec {
 
                 beforeEach {
                     stub(mockStorage) { mock in
-                        when(mock.blockHashHeaderHashHexes(except: equal(to: checkpointBlock.reversedHeaderHashHex))).thenReturn([])
+                        when(mock.blockHashHeaderHashHexes(except: equal(to: checkpointBlock.headerHashReversedHex))).thenReturn([])
                         when(mock.blocks(byHexes: equal(to: []), realm: equal(to: realm))).thenReturn(emptyBlocks)
                     }
                     stub(mockBlockchain) { mock in
@@ -228,7 +227,7 @@ class BlockSyncerTests: QuickSpec {
                 }
 
                 it("clears partialBlock blocks") {
-                    verify(mockStorage).blockHashHeaderHashHexes(except: equal(to: checkpointBlock.reversedHeaderHashHex))
+                    verify(mockStorage).blockHashHeaderHashHexes(except: equal(to: checkpointBlock.headerHashReversedHex))
                     verify(mockStorage).blocks(byHexes: equal(to: []), realm: equal(to: realm))
                     verify(mockBlockchain).deleteBlocks(blocks: equal(to: emptyBlocks), realm: equal(to: realm))
                 }
@@ -278,7 +277,7 @@ class BlockSyncerTests: QuickSpec {
 
                 beforeEach {
                     stub(mockStorage) { mock in
-                        when(mock.blockHashHeaderHashHexes(except: equal(to: checkpointBlock.reversedHeaderHashHex))).thenReturn([])
+                        when(mock.blockHashHeaderHashHexes(except: equal(to: checkpointBlock.headerHashReversedHex))).thenReturn([])
                         when(mock.blocks(byHexes: equal(to: []), realm: equal(to: realm))).thenReturn(emptyBlocks)
                     }
                     stub(mockBlockchain) { mock in
@@ -299,7 +298,7 @@ class BlockSyncerTests: QuickSpec {
                 }
 
                 it("clears partialBlock blocks") {
-                    verify(mockStorage).blockHashHeaderHashHexes(except: equal(to: checkpointBlock.reversedHeaderHashHex))
+                    verify(mockStorage).blockHashHeaderHashHexes(except: equal(to: checkpointBlock.headerHashReversedHex))
                     verify(mockStorage).blocks(byHexes: equal(to: []), realm: equal(to: realm))
                     verify(mockBlockchain).deleteBlocks(blocks: equal(to: emptyBlocks), realm: equal(to: realm))
                 }
@@ -437,7 +436,7 @@ class BlockSyncerTests: QuickSpec {
                         when(mock.iterationHasPartialBlocks.get).thenReturn(false)
                     }
                     stub(mockStorage) { mock in
-                        when(mock.deleteBlockHash(byHashHex: equal(to: block.reversedHeaderHashHex))).thenDoNothing()
+                        when(mock.deleteBlockHash(byHashHex: equal(to: block.headerHashReversedHex))).thenDoNothing()
                     }
                     stub(mockListener) { mock in
                         when(mock.currentBestBlockHeightUpdated(height: equal(to: Int32(block.height)), maxBlockHeight: equal(to: maxBlockHeight))).thenDoNothing()
@@ -449,7 +448,7 @@ class BlockSyncerTests: QuickSpec {
 
                     verify(mockBlockchain).connect(merkleBlock: equal(to: merkleBlock), realm: equal(to: realm))
                     verify(mockTransactionProcessor).process(transactions: equal(to: []), inBlock: equal(to: block), skipCheckBloomFilter: equal(to: false), realm: equal(to: realm))
-                    verify(mockStorage).deleteBlockHash(byHashHex: equal(to: block.reversedHeaderHashHex))
+                    verify(mockStorage).deleteBlockHash(byHashHex: equal(to: block.headerHashReversedHex))
                     verify(mockListener).currentBestBlockHeightUpdated(height: equal(to: Int32(block.height)), maxBlockHeight: equal(to: maxBlockHeight))
                 }
 
@@ -484,7 +483,7 @@ class BlockSyncerTests: QuickSpec {
                         }
                         try! syncer.handle(merkleBlock: merkleBlock, maxBlockHeight: maxBlockHeight)
 
-                        verify(mockStorage, never()).deleteBlockHash(byHashHex: equal(to: block.reversedHeaderHashHex))
+                        verify(mockStorage, never()).deleteBlockHash(byHashHex: equal(to: block.headerHashReversedHex))
                     }
                 }
             }

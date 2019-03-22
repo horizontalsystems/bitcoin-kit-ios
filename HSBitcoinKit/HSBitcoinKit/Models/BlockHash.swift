@@ -1,26 +1,26 @@
 import GRDB
 
 class BlockHash: Record {
-    let reversedHeaderHashHex: String
+    let headerHashReversedHex: String
     let headerHash: Data
     let height: Int
     let sequence: Int
 
     init(headerHash: Data, height: Int, order: Int) {
         self.headerHash = headerHash
-        self.reversedHeaderHashHex = headerHash.reversedHex
+        self.headerHashReversedHex = headerHash.reversedHex
         self.height = height
         self.sequence = order
 
         super.init()
     }
 
-    init?(reversedHeaderHashHex: String, height: Int, sequence: Int) {
-        guard let headerHash = Data(hex: reversedHeaderHashHex) else {
+    init?(headerHashReversedHex: String, height: Int, sequence: Int) {
+        guard let headerHash = Data(hex: headerHashReversedHex) else {
             return nil
         }
 
-        self.reversedHeaderHashHex = reversedHeaderHashHex
+        self.headerHashReversedHex = headerHashReversedHex
         self.headerHash = Data(headerHash.reversed())
         self.height = height
         self.sequence = sequence
@@ -33,14 +33,14 @@ class BlockHash: Record {
     }
 
     enum Columns: String, ColumnExpression {
-        case reversedHeaderHashHex
+        case headerHashReversedHex
         case headerHash
         case height
         case sequence
     }
 
     required init(row: Row) {
-        reversedHeaderHashHex = row[Columns.reversedHeaderHashHex]
+        headerHashReversedHex = row[Columns.headerHashReversedHex]
         headerHash = row[Columns.headerHash]
         height = row[Columns.height]
         sequence = row[Columns.sequence]
@@ -49,7 +49,7 @@ class BlockHash: Record {
     }
 
     override func encode(to container: inout PersistenceContainer) {
-        container[Columns.reversedHeaderHashHex] = reversedHeaderHashHex
+        container[Columns.headerHashReversedHex] = headerHashReversedHex
         container[Columns.headerHash] = headerHash
         container[Columns.height] = height
         container[Columns.sequence] = sequence
@@ -60,7 +60,7 @@ class BlockHash: Record {
 extension BlockHash: Equatable {
 
     public static func ==(lhs: BlockHash, rhs: BlockHash) -> Bool {
-        return lhs.reversedHeaderHashHex == rhs.reversedHeaderHashHex
+        return lhs.headerHashReversedHex == rhs.headerHashReversedHex
     }
 
 }

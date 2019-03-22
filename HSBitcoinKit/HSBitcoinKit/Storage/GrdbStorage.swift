@@ -1,15 +1,10 @@
 import RxSwift
 import GRDB
-import RealmSwift
 
 class GrdbStorage {
     private let dbPool: DatabasePool
 
-    private let realmFactory: IRealmFactory
-
-    init(databaseFileName: String, realmFactory: IRealmFactory) {
-        self.realmFactory = realmFactory
-
+    init(databaseFileName: String) {
         let databaseURL = try! FileManager.default
                 .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
                 .appendingPathComponent("\(databaseFileName).sqlite")
@@ -54,23 +49,107 @@ class GrdbStorage {
 
         migrator.registerMigration("createBlockHashes") { db in
             try db.create(table: BlockHash.databaseTableName) { t in
-                t.column(BlockHash.Columns.reversedHeaderHashHex.name, .text).notNull()
+                t.column(BlockHash.Columns.headerHashReversedHex.name, .text).notNull()
                 t.column(BlockHash.Columns.headerHash.name, .blob).notNull()
                 t.column(BlockHash.Columns.height.name, .integer).notNull()
                 t.column(BlockHash.Columns.sequence.name, .integer).notNull()
 
-                t.primaryKey([BlockHash.Columns.reversedHeaderHashHex.name], onConflict: .replace)
+                t.primaryKey([BlockHash.Columns.headerHashReversedHex.name], onConflict: .replace)
             }
         }
 
         migrator.registerMigration("createSentTransactions") { db in
             try db.create(table: SentTransaction.databaseTableName) { t in
-                t.column(SentTransaction.Columns.reversedHashHex.name, .text).notNull()
+                t.column(SentTransaction.Columns.hashReversedHex.name, .text).notNull()
                 t.column(SentTransaction.Columns.firstSendTime.name, .double).notNull()
                 t.column(SentTransaction.Columns.lastSendTime.name, .double).notNull()
                 t.column(SentTransaction.Columns.retriesCount.name, .integer).notNull()
 
-                t.primaryKey([SentTransaction.Columns.reversedHashHex.name], onConflict: .replace)
+                t.primaryKey([SentTransaction.Columns.hashReversedHex.name], onConflict: .replace)
+            }
+        }
+
+        migrator.registerMigration("createPublicKeys") { db in
+            try db.create(table: PublicKey.databaseTableName) { t in
+                t.column(PublicKey.Columns.path.name, .text).notNull()
+                t.column(PublicKey.Columns.account.name, .integer).notNull()
+                t.column(PublicKey.Columns.index.name, .integer).notNull()
+                t.column(PublicKey.Columns.external.name, .boolean).notNull()
+                t.column(PublicKey.Columns.raw.name, .blob).notNull()
+                t.column(PublicKey.Columns.keyHash.name, .blob).notNull()
+                t.column(PublicKey.Columns.scriptHashForP2WPKH.name, .blob).notNull()
+                t.column(PublicKey.Columns.keyHashHex.name, .text).notNull()
+
+                t.primaryKey([PublicKey.Columns.path.name], onConflict: .replace)
+            }
+        }
+
+        migrator.registerMigration("createBlocks") { db in
+            try db.create(table: Block.databaseTableName) { t in
+                t.column(Block.Columns.version.name, .integer).notNull()
+                t.column(Block.Columns.previousBlockHashReversedHex.name, .text).notNull()
+                t.column(Block.Columns.merkleRoot.name, .blob).notNull()
+                t.column(Block.Columns.timestamp.name, .integer).notNull()
+                t.column(Block.Columns.bits.name, .integer).notNull()
+                t.column(Block.Columns.nonce.name, .integer).notNull()
+                t.column(Block.Columns.headerHashReversedHex.name, .text).notNull()
+                t.column(Block.Columns.headerHash.name, .blob).notNull()
+                t.column(Block.Columns.height.name, .integer).notNull()
+                t.column(Block.Columns.stale.name, .boolean)
+
+                t.primaryKey([Block.Columns.headerHashReversedHex.name], onConflict: .replace)
+            }
+        }
+
+        migrator.registerMigration("createTransactions") { db in
+            try db.create(table: Transaction.databaseTableName) { t in
+                t.column(Transaction.Columns.dataHashReversedHex.name, .text).notNull()
+                t.column(Transaction.Columns.dataHash.name, .blob).notNull()
+                t.column(Transaction.Columns.version.name, .integer).notNull()
+                t.column(Transaction.Columns.lockTime.name, .integer).notNull()
+                t.column(Transaction.Columns.timestamp.name, .integer).notNull()
+                t.column(Transaction.Columns.order.name, .integer).notNull()
+                t.column(Transaction.Columns.blockHashReversedHex.name, .text)
+                t.column(Transaction.Columns.isMine.name, .boolean)
+                t.column(Transaction.Columns.isOutgoing.name, .boolean)
+                t.column(Transaction.Columns.status.name, .integer)
+                t.column(Transaction.Columns.segWit.name, .boolean)
+
+                t.primaryKey([Transaction.Columns.dataHashReversedHex.name], onConflict: .replace)
+                t.foreignKey([Transaction.Columns.blockHashReversedHex.name], references: Block.databaseTableName, columns: [Block.Columns.headerHashReversedHex.name], onDelete: .cascade, onUpdate: .cascade)
+            }
+        }
+
+        migrator.registerMigration("createInputs") { db in
+            try db.create(table: Input.databaseTableName) { t in
+                t.column(Input.Columns.previousOutputTxReversedHex.name, .text).notNull()
+                t.column(Input.Columns.previousOutputIndex.name, .integer).notNull()
+                t.column(Input.Columns.signatureScript.name, .blob).notNull()
+                t.column(Input.Columns.sequence.name, .integer).notNull()
+                t.column(Input.Columns.transactionHashReversedHex.name, .text).notNull()
+                t.column(Input.Columns.keyHash.name, .blob)
+                t.column(Input.Columns.address.name, .text)
+                t.column(Input.Columns.witnessData.name, .blob)
+
+                t.primaryKey([Input.Columns.previousOutputTxReversedHex.name, Input.Columns.previousOutputIndex.name], onConflict: .replace)
+                t.foreignKey([Input.Columns.transactionHashReversedHex.name], references: Transaction.databaseTableName, columns: [Transaction.Columns.dataHashReversedHex.name], onDelete: .cascade, onUpdate: .cascade, deferred: true)
+            }
+        }
+
+        migrator.registerMigration("createOutputs") { db in
+            try db.create(table: Output.databaseTableName) { t in
+                t.column(Output.Columns.value.name, .integer).notNull()
+                t.column(Output.Columns.lockingScript.name, .blob).notNull()
+                t.column(Output.Columns.index.name, .integer).notNull()
+                t.column(Output.Columns.transactionHashReversedHex.name, .text).notNull()
+                t.column(Output.Columns.publicKeyPath.name, .text)
+                t.column(Output.Columns.scriptType.name, .integer)
+                t.column(Output.Columns.keyHash.name, .blob)
+                t.column(Output.Columns.address.name, .text)
+
+                t.primaryKey([Output.Columns.transactionHashReversedHex.name, Output.Columns.index.name], onConflict: .replace)
+                t.foreignKey([Output.Columns.transactionHashReversedHex.name], references: Transaction.databaseTableName, columns: [Transaction.Columns.dataHashReversedHex.name], onDelete: .cascade, onUpdate: .cascade, deferred: true)
+                t.foreignKey([Output.Columns.publicKeyPath.name], references: PublicKey.databaseTableName, columns: [PublicKey.Columns.path.name], onDelete: .setNull, onUpdate: .setNull)
             }
         }
 
@@ -80,9 +159,6 @@ class GrdbStorage {
 }
 
 extension GrdbStorage: IStorage {
-    var realm: Realm {
-        return realmFactory.realm
-    }
     // FeeRate
 
     var feeRate: FeeRate? {
@@ -190,7 +266,7 @@ extension GrdbStorage: IStorage {
 
     func blockHashHeaderHashHexes(except excludedHash: String) -> [String] {
         return try! dbPool.read { db in
-            let rows = try Row.fetchCursor(db, "SELECT reversedHeaderHashHex from blockHashes WHERE reversedHeaderHashHex != ?", arguments: [excludedHash])
+            let rows = try Row.fetchCursor(db, "SELECT headerHashReversedHex from blockHashes WHERE headerHashReversedHex != ?", arguments: [excludedHash])
             var hexes = [String]()
 
             while let row = try rows.next() {
@@ -228,10 +304,8 @@ extension GrdbStorage: IStorage {
         }
     }
 
-    func deleteBlockHash(byHashHex hashHex: String) {
-        _ = try? dbPool.write { db in
-            try BlockHash.filter(BlockHash.Columns.reversedHeaderHashHex == hashHex).deleteAll(db)
-        }
+    func deleteBlockHash(byHashHex hashHex: String, db: Database) {
+        _ = try? BlockHash.filter(BlockHash.Columns.headerHashReversedHex == hashHex).deleteAll(db)
     }
 
     func deleteBlockchainBlockHashes() {
@@ -243,102 +317,298 @@ extension GrdbStorage: IStorage {
     // Block
 
     var blocksCount: Int {
-        return realmFactory.realm.objects(Block.self).count
+        return try! dbPool.read { db in
+            try Block.fetchCount(db)
+        }
+    }
+
+    var firstBlock: Block? {
+        return try! dbPool.read { db in
+            try Block.order(Block.Columns.height.asc).fetchOne(db)
+        }
     }
 
     var lastBlock: Block? {
-        return realmFactory.realm.objects(Block.self).sorted(byKeyPath: "height").last
+        return try! dbPool.read { db in
+            try Block.order(Block.Columns.height.desc).fetchOne(db)
+        }
     }
 
     func blocksCount(reversedHeaderHashHexes: [String]) -> Int {
-        return realmFactory.realm.objects(Block.self).filter(NSPredicate(format: "reversedHeaderHashHex IN %@", reversedHeaderHashHexes)).count
+        return try! dbPool.read { db in
+            try Block.filter(reversedHeaderHashHexes.contains(Block.Columns.headerHashReversedHex)).fetchCount(db)
+        }
     }
 
     func save(block: Block) {
-        let realm = realmFactory.realm
-        try? realm.write {
-            realm.add(block)
+        _ = try? dbPool.write { db in
+            try block.insert(db)
         }
     }
 
-    func blocks(heightGreaterThan leastHeight: Int, sortedBy sortField: String, limit: Int) -> [Block] {
-        return Array(realmFactory.realm.objects(Block.self).filter("height > %@", leastHeight).sorted(byKeyPath: sortField, ascending: false).prefix(limit))
+    func blocks(heightGreaterThan leastHeight: Int, sortedBy sortField: Block.Columns, limit: Int) -> [Block] {
+        return try! dbPool.read { db in
+            try Block.filter(Block.Columns.height > leastHeight).order(sortField.desc).limit(limit).fetchAll(db)
+        }
     }
 
-    func blocks(byHexes hexes: [String], realm: Realm) -> [Block] {
-        return Array(realm.objects(Block.self).filter(NSPredicate(format: "reversedHeaderHashHex IN %@", hexes)))
+    func blocks(byHexes hexes: [String]) -> [Block] {
+        return try! dbPool.read { db in
+            try Block.filter(hexes.contains(Block.Columns.headerHashReversedHex)).fetchAll(db)
+        }
     }
 
-    func blocks(heightGreaterThanOrEqualTo height: Int, stale: Bool, realm: Realm) -> [Block] {
-        return Array(realm.objects(Block.self).filter("stale = %@ AND height >= %@", stale, height))
+    func blocks(heightGreaterThanOrEqualTo height: Int, stale: Bool) -> [Block] {
+        return try! dbPool.read { db in
+            try Block.filter(Block.Columns.stale == stale).filter(Block.Columns.height >= height).fetchAll(db)
+        }
     }
 
-    func blocks(stale: Bool, realm: Realm) -> [Block] {
-        return Array(realm.objects(Block.self).filter("stale = %@", stale))
+    func blocks(stale: Bool) -> [Block] {
+        return try! dbPool.read { db in
+            try Block.filter(Block.Columns.stale == stale).fetchAll(db)
+        }
     }
 
     func block(byHeight height: Int32) -> Block? {
-        return realmFactory.realm.objects(Block.self).filter("height = %@", height).first
+        return try! dbPool.read { db in
+            try Block.filter(Block.Columns.height == height).fetchOne(db)
+        }
     }
 
     func block(byHashHex hex: String) -> Block? {
-        return realmFactory.realm.objects(Block.self).filter("reversedHeaderHashHex == %@", hex).first
+        return try! dbPool.read { db in
+            try Block.filter(Block.Columns.headerHashReversedHex == hex).fetchOne(db)
+        }
     }
 
-    func block(stale: Bool, sortedHeight: String, realm: Realm?) -> Block? {
-        let realm = realm ?? realmFactory.realm
-        let result = realm.objects(Block.self).filter("stale = %@", stale).sorted(byKeyPath: "height")
-
-        return sortedHeight == "ASC" ? result.first : result.last
+    func block(stale: Bool, sortedHeight: String) -> Block? {
+        return try! dbPool.read { db in
+            let order = sortedHeight == "ASC" ? Block.Columns.height.asc : Block.Columns.height.desc
+            return try Block.filter(Block.Columns.stale == stale).order(order).fetchOne(db)
+        }
     }
 
-    func add(block: Block, realm: Realm) {
-        realm.add(block)
+    func add(block: Block, db: Database) throws {
+        try block.insert(db)
     }
 
-    func update(block: Block, realm: Realm) {
+    func update(block: Block, db: Database) throws {
+        try block.update(db)
     }
 
-    func delete(blocks: [Block], realm: Realm) {
+    func delete(blocks: [Block], db: Database) throws {
         for block in blocks {
-            for transaction in block.transactions {
-                realm.delete(transaction.outputs)
-                realm.delete(transaction.inputs)
+            for transaction in transactions(ofBlock: block) {
+                try Input.filter(Input.Columns.transactionHashReversedHex == transaction.dataHashReversedHex).deleteAll(db)
+                try Output.filter(Output.Columns.transactionHashReversedHex == transaction.dataHashReversedHex).deleteAll(db)
             }
 
-            realm.delete(block.transactions)
+            try Transaction.filter(Transaction.Columns.blockHashReversedHex == block.headerHashReversedHex).deleteAll(db)
         }
 
-        realm.delete(blocks)
+        try Block.filter(blocks.map{$0.headerHashReversedHex}.contains(Block.Columns.headerHashReversedHex)).deleteAll(db)
     }
 
     // Transaction
-    func transactions(ofBlock block: Block, realm: Realm) -> [Transaction] {
-        guard let block = realm.objects(Block.self).filter("reversedHeaderHashHex = @", block.reversedHeaderHashHex).first else {
-            return []
+    func transaction(byHashHex hex: String) -> Transaction? {
+        return try! dbPool.read { db in
+            try Transaction.filter(Transaction.Columns.dataHashReversedHex == hex).fetchOne(db)
         }
+    }
 
-        return Array(block.transactions)
+    func transactions() -> [Transaction] {
+        return try! dbPool.read { db in
+            try Transaction.order([Transaction.Columns.timestamp.desc, Transaction.Columns.order.desc]).fetchAll(db)
+        }
+    }
+
+    func transactions(ofBlock block: Block) -> [Transaction] {
+        return try! dbPool.read { db in
+            try Transaction.filter(Transaction.Columns.blockHashReversedHex == block.headerHashReversedHex).fetchAll(db)
+        }
     }
 
     func newTransactions() -> [Transaction] {
-        return Array(realmFactory.realm.objects(Transaction.self).filter("status = %@", TransactionStatus.new.rawValue))
+        return try! dbPool.read { db in
+            try Transaction.filter(Transaction.Columns.status == TransactionStatus.new).fetchAll(db)
+        }
     }
 
     func newTransaction(byReversedHashHex hex: String) -> Transaction? {
-        return realmFactory.realm.objects(Transaction.self)
-                .filter("reversedHashHex = %@ AND status = %@", hex, TransactionStatus.new.rawValue)
-                .first
+        return try! dbPool.read { db in
+            try Transaction
+                    .filter(Transaction.Columns.status == TransactionStatus.new)
+                    .filter(Transaction.Columns.dataHashReversedHex == hex)
+                    .fetchOne(db)
+        }
     }
 
     func relayedTransactionExists(byReversedHashHex hex: String) -> Bool {
-        return !realmFactory.realm.objects(Transaction.self).filter("reversedHashHex = %@ AND status = %@", hex, TransactionStatus.relayed.rawValue).isEmpty
+        return try! dbPool.read { db in
+            try Transaction
+                    .filter(Transaction.Columns.status == TransactionStatus.relayed)
+                    .filter(Transaction.Columns.dataHashReversedHex == hex)
+                    .fetchCount(db) > 1
+        }
+    }
+
+    func add(transaction: FullTransaction, db: Database) throws {
+        try transaction.header.insert(db)
+
+        for input in transaction.inputs {
+            try input.insert(db)
+        }
+
+        for output in transaction.outputs {
+            try output.insert(db)
+        }
+    }
+
+    func add(transaction: FullTransaction) throws {
+        _ = try dbPool.write { db in
+            try self.add(transaction: transaction, db: db)
+        }
+    }
+
+    func update(transaction: Transaction, db: Database) throws {
+        try transaction.update(db)
+    }
+
+    // Inputs and Outputs
+    func outputsWithPublicKeys() -> [OutputWithPublicKey] {
+        return try! dbPool.read { db in
+            let outputC = Output.Columns.allCases.count
+            let publicKeyC = PublicKey.Columns.allCases.count
+
+            let adapter = ScopeAdapter([
+                "output": RangeRowAdapter(0..<outputC),
+                "publicKey": RangeRowAdapter(outputC..<outputC + publicKeyC)
+            ])
+
+            let sql = """
+                      SELECT outputs.*, publicKeys.*
+                      FROM outputs 
+                      INNER JOIN publicKeys ON outputs.publicKeyPath = publicKeys.path
+                      """
+            let rows = try Row.fetchCursor(db, sql, adapter: adapter)
+
+            var outputs = [OutputWithPublicKey]()
+            while let row = try rows.next() {
+                outputs.append(OutputWithPublicKey(output: row["output"], publicKey: row["publicKey"]))
+            }
+
+            return outputs
+        }
+    }
+
+    func unspentOutputs() -> [UnspentOutput] {
+        return try! dbPool.read { db in
+            let inputs = try Input.fetchAll(db)
+
+            let outputC = Output.Columns.allCases.count
+            let publicKeyC = PublicKey.Columns.allCases.count
+            let transactionC = Transaction.Columns.allCases.count
+            let blockC = Block.Columns.allCases.count
+
+            let adapter = ScopeAdapter([
+                "output": RangeRowAdapter(0..<outputC),
+                "publicKey": RangeRowAdapter(outputC..<outputC + publicKeyC),
+                "transaction": RangeRowAdapter(outputC + publicKeyC..<outputC + publicKeyC + transactionC),
+                "block": RangeRowAdapter(outputC + publicKeyC + transactionC..<outputC + publicKeyC + transactionC + blockC),
+            ])
+
+            let sql = """
+                      SELECT outputs.*, publicKeys.*, transactions.*, blocks.* 
+                      FROM outputs 
+                      INNER JOIN publicKeys ON outputs.publicKeyPath = publicKeys.path
+                      INNER JOIN transactions ON outputs.transactionHashReversedHex = transactions.dataHashReversedHex
+                      LEFT JOIN blocks ON transactions.blockHashReversedHex = blocks.headerHashReversedHex
+                      WHERE outputs.scriptType != \(ScriptType.unknown.rawValue)
+                      """
+            let rows = try Row.fetchCursor(db, sql, adapter: adapter)
+
+            var outputs = [UnspentOutput]()
+            while let row = try rows.next() {
+                let output: Output = row["output"]
+
+                if !inputs.contains(where: { $0.previousOutputTxReversedHex == output.transactionHashReversedHex && $0.previousOutputIndex == output.index }) {
+                    outputs.append(UnspentOutput(output: output, publicKey: row["publicKey"], transaction: row["transaction"], block: row["block"]))
+                }
+            }
+
+            return outputs
+        }
+    }
+
+    func inputs(ofTransaction transaction: Transaction) -> [Input] {
+        return try! dbPool.read { db in
+            try Input.filter(Input.Columns.transactionHashReversedHex == transaction.dataHashReversedHex).fetchAll(db)
+        }
+    }
+
+    func inputsWithBlock(ofOutput output: Output) -> [InputWithBlock] {
+        return try! dbPool.read { db in
+            let inputC = Input.Columns.allCases.count
+            let blockC = Block.Columns.allCases.count
+
+            let adapter = ScopeAdapter([
+                "input": RangeRowAdapter(0..<inputC),
+                "block": RangeRowAdapter(inputC..<inputC + blockC),
+            ])
+
+            let sql = """
+                      SELECT inputs.*, blocks.* 
+                      FROM inputs 
+                      INNER JOIN transactions ON inputs.transactionHashReversedHex = transactions.dataHashReversedHex
+                      LEFT JOIN blocks ON transactions.blockHashReversedHex = blocks.headerHashReversedHex
+                      WHERE inputs.previousOutputTxReversedHex = \(output.transactionHashReversedHex) AND inputs.previousOutputIndex = \(output.index)
+                      """
+            let rows = try Row.fetchCursor(db, sql, adapter: adapter)
+
+            var inputs = [InputWithBlock]()
+            while let row = try rows.next() {
+                inputs.append(InputWithBlock(input: row["input"], block: row["block"]))
+            }
+
+            return inputs
+        }
+    }
+
+    func outputs(ofTransaction transaction: Transaction) -> [Output] {
+        return try! dbPool.read { db in
+            try Output.filter(Output.Columns.transactionHashReversedHex == transaction.dataHashReversedHex).fetchAll(db)
+        }
+    }
+
+    func previousOutput(ofInput input: Input) -> Output? {
+        return try! dbPool.read { db in
+            try Output
+                    .filter(Output.Columns.transactionHashReversedHex == input.previousOutputTxReversedHex)
+                    .filter(Output.Columns.index == input.previousOutputIndex)
+                    .fetchOne(db)
+        }
+    }
+
+    func hasInputs(ofOutput output: Output) -> Bool {
+        return try! dbPool.read { db in
+            try Input
+                    .filter(Input.Columns.previousOutputTxReversedHex == output.transactionHashReversedHex)
+                    .filter(Input.Columns.previousOutputIndex == output.index)
+                    .fetchCount(db) > 1
+        }
+    }
+
+    func hasOutputs(ofPublicKey publicKey: PublicKey) -> Bool {
+        return try! dbPool.read { db in
+            try Output.filter(Output.Columns.publicKeyPath == publicKey.path).fetchCount(db) > 0
+        }
     }
 
     // SentTransaction
     func sentTransaction(byReversedHashHex hex: String) -> SentTransaction? {
         return try! dbPool.read { db in
-            try SentTransaction.filter(SentTransaction.Columns.reversedHashHex == hex).fetchOne(db)
+            try SentTransaction.filter(SentTransaction.Columns.hashReversedHex == hex).fetchOne(db)
         }
     }
 
@@ -354,6 +624,39 @@ extension GrdbStorage: IStorage {
         }
     }
 
+    // PublicKeys
+    func publicKeys() -> [PublicKey] {
+        return try! dbPool.read { db in
+            try PublicKey.fetchAll(db)
+        }
+    }
+
+    func publicKey(byPath path: String) -> PublicKey? {
+        return try! dbPool.read { db in
+            try PublicKey.filter(PublicKey.Columns.path == path).fetchOne(db)
+        }
+    }
+
+    func publicKey(byScriptHashForP2WPKH hash: Data) -> PublicKey? {
+        return try! dbPool.read { db in
+            try PublicKey.filter(PublicKey.Columns.scriptHashForP2WPKH == hash).fetchOne(db)
+        }
+    }
+
+    func publicKey(byRawOrKeyHash hash: Data) -> PublicKey? {
+        return try! dbPool.read { db in
+            try PublicKey.filter(PublicKey.Columns.raw == hash || PublicKey.Columns.keyHash == hash).fetchOne(db)
+        }
+    }
+
+    func add(publicKeys: [PublicKey]) {
+        _ = try? dbPool.write { db in
+            for publicKey in publicKeys {
+                try publicKey.insert(db)
+            }
+        }
+    }
+
     // Clear
 
     func clear() throws {
@@ -362,20 +665,18 @@ extension GrdbStorage: IStorage {
             try BlockchainState.deleteAll(db)
             try PeerAddress.deleteAll(db)
             try BlockHash.deleteAll(db)
-        }
-
-        let realm = realmFactory.realm
-
-        try realm.write {
-            realm.deleteAll()
+            try SentTransaction.deleteAll(db)
+            try Input.deleteAll(db)
+            try Output.deleteAll(db)
+            try Transaction.deleteAll(db)
+            try PublicKey.deleteAll(db)
+            try Block.deleteAll(db)
         }
     }
 
-    func inTransaction(_ block: ((_ realm: Realm) throws -> Void)) throws {
-        let realm = realmFactory.realm
-
-        try realm.write {
-            try block(realm)
+    func inTransaction(_ block: ((_ db: Database) throws -> Void)) throws {
+        _ = try dbPool.write { db in
+            try block(db)
         }
     }
 

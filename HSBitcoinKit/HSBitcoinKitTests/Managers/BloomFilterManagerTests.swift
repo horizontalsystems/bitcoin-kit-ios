@@ -131,8 +131,8 @@ class BloomFilterManagerTests: XCTestCase {
 
         let transactions = [TestData.p2wpkhTransaction, TestData.p2pkTransaction, TestData.p2pkhTransaction, TestData.p2shTransaction]
 
-        let txInput1 = TransactionInput(withPreviousOutputTxReversedHex: "00000001111111", previousOutputIndex: 0, script: Data(), sequence: 0)
-        let txInput2 = TransactionInput(withPreviousOutputTxReversedHex: "00000002222222", previousOutputIndex: 0, script: Data(), sequence: 0)
+        let txInput1 = Input(withPreviousOutputTxReversedHex: "00000001111111", previousOutputIndex: 0, script: Data(), sequence: 0)
+        let txInput2 = Input(withPreviousOutputTxReversedHex: "00000002222222", previousOutputIndex: 0, script: Data(), sequence: 0)
         txInput1.previousOutput = transactions[0].outputs[0]
         txInput2.previousOutput = transactions[1].outputs[0]
         let tx1 = Transaction(version: 0, inputs: [txInput1], outputs: [])

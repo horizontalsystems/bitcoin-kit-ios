@@ -10,11 +10,8 @@ class EDAValidator: IBlockValidator {
     }
 
     func validate(candidate: Block, block: Block, network: INetwork) throws {
-        guard let candidateHeader = candidate.header, let blockHeader = block.header else {
-            throw Block.BlockError.noHeader
-        }
-        if blockHeader.bits == network.maxTargetBits {
-            if candidateHeader.bits != network.maxTargetBits {
+        if block.bits == network.maxTargetBits {
+            if candidate.bits != network.maxTargetBits {
                 throw BlockValidatorError.notEqualBits
             }
             return
@@ -24,14 +21,14 @@ class EDAValidator: IBlockValidator {
         }
         let mpt6blocks = try blockHelper.medianTimePast(block: block) - blockHelper.medianTimePast(block: cursorBlock)
         if(mpt6blocks >= 12 * 3600) {
-            let pow = difficultyEncoder.decodeCompact(bits: blockHeader.bits) >> 2
+            let pow = difficultyEncoder.decodeCompact(bits: block.bits) >> 2
             let powBits = min(difficultyEncoder.encodeCompact(from: pow), network.maxTargetBits)
 
-            guard powBits == candidateHeader.bits else {
+            guard powBits == candidate.bits else {
                 throw BlockValidatorError.notEqualBits
             }
         } else {
-            guard blockHeader.bits == candidateHeader.bits else {
+            guard block.bits == candidate.bits else {
                 throw BlockValidatorError.notEqualBits
             }
         }

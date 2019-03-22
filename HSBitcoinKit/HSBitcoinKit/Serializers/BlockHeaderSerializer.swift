@@ -15,16 +15,17 @@ class BlockHeaderSerializer {
     }
 
     static func deserialize(byteStream: ByteStream) -> BlockHeader {
-        let blockHeader = BlockHeader()
+        let version = Int(byteStream.read(Int32.self))
+        let previousBlockHeaderHash = byteStream.read(Data.self, count: 32)
+        let merkleRoot = byteStream.read(Data.self, count: 32)
+        let timestamp = Int(byteStream.read(UInt32.self))
+        let bits = Int(byteStream.read(UInt32.self))
+        let nonce = Int(byteStream.read(UInt32.self))
 
-        blockHeader.version = Int(byteStream.read(Int32.self))
-        blockHeader.previousBlockHeaderHash = byteStream.read(Data.self, count: 32)
-        blockHeader.merkleRoot = byteStream.read(Data.self, count: 32)
-        blockHeader.timestamp = Int(byteStream.read(UInt32.self))
-        blockHeader.bits = Int(byteStream.read(UInt32.self))
-        blockHeader.nonce = Int(byteStream.read(UInt32.self))
-
-        return blockHeader
+        return BlockHeader(
+                version: version, previousBlockHeaderHash: previousBlockHeaderHash, merkleRoot: merkleRoot,
+                timestamp: timestamp, bits: bits, nonce: nonce
+        )
     }
 
 }

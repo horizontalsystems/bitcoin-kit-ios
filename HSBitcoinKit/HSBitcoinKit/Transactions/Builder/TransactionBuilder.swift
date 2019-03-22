@@ -25,20 +25,14 @@ class TransactionBuilder {
         self.factory = factory
     }
 
-    private func addInputToTransaction(transaction: Transaction, fromUnspentOutput output: TransactionOutput) throws {
-        guard let previousTransaction = output.transaction else {
-            throw BuildError.noPreviousTransaction
-        }
-
-        let input = factory.transactionInput(withPreviousOutputTxReversedHex: previousTransaction.reversedHashHex, previousOutputIndex: output.index, script: Data(), sequence: 0xFFFFFFFF)
-        input.previousOutput = output
-        transaction.inputs.append(input)
+    private func input(fromUnspentOutput unspentOutput: UnspentOutput) throws -> InputToSign {
+        return factory.inputToSign(withPreviousOutput: unspentOutput, script: Data(), sequence: 0xFFFFFFFF)
     }
 
-    private func addOutputToTransaction(transaction: Transaction, address: Address, pubKey: PublicKey? = nil, value: Int) throws {
+    private func output(withIndex index: Int, address: Address, pubKey: PublicKey? = nil, value: Int) throws -> Output {
         let script = try scriptBuilder.lockingScript(for: address)
-        let output = factory.transactionOutput(withValue: value, index: transaction.outputs.count, lockingScript: script, type: address.scriptType, address: address.stringValue, keyHash: address.keyHash, publicKey: pubKey)
-        transaction.outputs.append(output)
+        let output = factory.output(withValue: value, index: index, lockingScript: script, type: address.scriptType, address: address.stringValue, keyHash: address.keyHash, publicKey: pubKey)
+        return output
     }
 
 }
@@ -56,19 +50,19 @@ extension TransactionBuilder: ITransactionBuilder {
         } else {
             // Estimated fee
             // Default to .p2pkh address
-            let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: .p2pkh, changeType: .p2pkh, senderPay: senderPay, outputs: unspentOutputProvider.allUnspentOutputs)
+            let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: .p2pkh, changeType: .p2pkh, senderPay: senderPay, unspentOutputs: unspentOutputProvider.allUnspentOutputs)
             return selectedOutputsInfo.fee
         }
     }
 
-    func buildTransaction(value: Int, feeRate: Int, senderPay: Bool, toAddress: String) throws -> Transaction {
+    func buildTransaction(value: Int, feeRate: Int, senderPay: Bool, toAddress: String) throws -> FullTransaction {
         guard let changePubKey = try? addressManager.changePublicKey() else {
             throw BuildError.noChangeAddress
         }
 
         let changeScriptType = ScriptType.p2pkh
         let address = try addressConverter.convert(address: toAddress)
-        let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: address.scriptType, changeType: changeScriptType, senderPay: senderPay, outputs: unspentOutputProvider.allUnspentOutputs)
+        let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: address.scriptType, changeType: changeScriptType, senderPay: senderPay, unspentOutputs: unspentOutputProvider.allUnspentOutputs)
 
         if !senderPay {
             guard selectedOutputsInfo.fee < value else {
@@ -76,54 +70,65 @@ extension TransactionBuilder: ITransactionBuilder {
             }
         }
 
-        // Build transaction
-        let transaction = factory.transaction(version: 1, inputs: [], outputs: [], lockTime: 0)
+        var inputsToSign = [InputToSign]()
+        var outputs = [Output]()
 
         // Add inputs without unlocking scripts
-        for output in selectedOutputsInfo.outputs {
-            try addInputToTransaction(transaction: transaction, fromUnspentOutput: output)
+        for output in selectedOutputsInfo.unspentOutputs {
+            inputsToSign.append(try input(fromUnspentOutput: output))
         }
 
-        // Add :to output
-        try addOutputToTransaction(transaction: transaction, address: address, value: 0)
-
-        // Calculate fee and add :change output if needed
+        // Calculate fee
         let receivedValue = senderPay ? value : value - selectedOutputsInfo.fee
         let sentValue = senderPay ? value + selectedOutputsInfo.fee : value
 
-        transaction.outputs[0].value = receivedValue
+        // Add :to output
+        outputs.append(try output(withIndex: 0, address: address, value: receivedValue))
+
+        // Add :change output if needed
         if selectedOutputsInfo.addChangeOutput {
             let changeAddress = try addressConverter.convert(keyHash: changePubKey.keyHash, type: changeScriptType)
-            try addOutputToTransaction(transaction: transaction, address: changeAddress, value: selectedOutputsInfo.totalValue - sentValue)
+            outputs.append(try output(withIndex: 1, address: changeAddress, value: selectedOutputsInfo.totalValue - sentValue))
         }
 
-        // Sign inputs
-        for i in 0..<transaction.inputs.count {
-            let output = selectedOutputsInfo.outputs[i]
+        // Build transaction
+        let transaction = factory.transaction(version: 1, lockTime: 0)
 
-            let sigScriptData = try inputSigner.sigScriptData(transaction: transaction, index: i)
-            switch output.scriptType {
+        // Sign inputs
+        for i in 0..<inputsToSign.count {
+            let previousUnspentOutput = selectedOutputsInfo.unspentOutputs[i]
+
+            let sigScriptData = try inputSigner.sigScriptData(transaction: transaction, inputsToSign: inputsToSign, outputs: outputs, index: i)
+            switch previousUnspentOutput.output.scriptType {
             case .p2wpkh:
                 transaction.segWit = true
-                transaction.inputs[i].witnessData.append(objectsIn: sigScriptData)
+                inputsToSign[i].input.witnessData.append(contentsOf: sigScriptData)
             case .p2wpkhSh:
-                guard let pubKey = output.publicKey else {
-                    throw BuildError.noPreviousTransaction
-                }
                 transaction.segWit = true
-                let witnessProgram = OpCode.scriptWPKH(pubKey.keyHash)
-                transaction.inputs[i].signatureScript = scriptBuilder.unlockingScript(params: [witnessProgram])
-                transaction.inputs[i].witnessData.append(objectsIn: sigScriptData)
-            default: transaction.inputs[i].signatureScript = scriptBuilder.unlockingScript(params: sigScriptData)
+                let witnessProgram = OpCode.scriptWPKH(previousUnspentOutput.publicKey.keyHash)
+                inputsToSign[i].input.signatureScript = scriptBuilder.unlockingScript(params: [witnessProgram])
+                inputsToSign[i].input.witnessData.append(contentsOf: sigScriptData)
+            default: inputsToSign[i].input.signatureScript = scriptBuilder.unlockingScript(params: sigScriptData)
             }
         }
 
         transaction.status = .new
         transaction.isMine = true
         transaction.isOutgoing = true
-        transaction.dataHash = CryptoKit.sha256sha256(TransactionSerializer.serialize(transaction: transaction, withoutWitness: true))
-        transaction.reversedHashHex = transaction.dataHash.reversedHex
-        return transaction
+
+        let fullTransaction = FullTransaction(header: transaction, inputs: inputsToSign.map{ $0.input }, outputs: outputs)
+
+        fullTransaction.header.dataHash = CryptoKit.sha256sha256(TransactionSerializer.serialize(transaction: fullTransaction, withoutWitness: true))
+        fullTransaction.header.dataHashReversedHex = transaction.dataHash.reversedHex
+        for input in fullTransaction.inputs {
+            input.transactionHashReversedHex = fullTransaction.header.dataHashReversedHex
+        }
+        for output in fullTransaction.outputs {
+            output.transactionHashReversedHex = fullTransaction.header.dataHashReversedHex
+        }
+
+
+        return fullTransaction
     }
 
 }

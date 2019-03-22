@@ -3,11 +3,12 @@ import HSCryptoKit
 
 class TransactionSerializer {
 
-    static func serialize(transaction: Transaction, withoutWitness: Bool = false) -> Data {
+    static func serialize(transaction: FullTransaction, withoutWitness: Bool = false) -> Data {
+        let header = transaction.header
         var data = Data()
 
-        data += UInt32(transaction.version)
-        if transaction.segWit && !withoutWitness {
+        data += UInt32(header.version)
+        if header.segWit && !withoutWitness {
             data += UInt8(0)       // marker 0x00
             data += UInt8(1)       // flag 0x01
         }
@@ -15,54 +16,50 @@ class TransactionSerializer {
         data += transaction.inputs.flatMap { TransactionInputSerializer.serialize(input: $0) }
         data += VarInt(transaction.outputs.count).serialized()
         data += transaction.outputs.flatMap { TransactionOutputSerializer.serialize(output: $0) }
-        if transaction.segWit && !withoutWitness {
+        if header.segWit && !withoutWitness {
             data += transaction.inputs.flatMap {
-                TransactionWitnessSerializer.serialize(witnessData: $0.witnessData)
+                DataListSerializer.serialize(dataList: $0.witnessData)
             }
         }
-        data += UInt32(transaction.lockTime)
+        data += UInt32(header.lockTime)
 
         return data
     }
 
-    static func serializedForSignature(transaction: Transaction, inputIndex: Int, forked: Bool = false) throws -> Data {
+    static func serializedForSignature(transaction: Transaction, inputsToSign: [InputToSign], outputs: [Output], inputIndex: Int, forked: Bool = false) throws -> Data {
         var data = Data()
 
         if forked {     // use bip143 for new transaction digest algorithm
             data += UInt32(transaction.version)
 
-            let hashPrevouts = try transaction.inputs.flatMap { input in
+            let hashPrevouts = try inputsToSign.flatMap { input in
                 try TransactionInputSerializer.serializedOutPoint(input: input)
             }
             data += CryptoKit.sha256sha256((Data(hashPrevouts)))
 
             var sequences = Data()
-            for input in transaction.inputs {
-                sequences += UInt32(input.sequence)
+            for inputToSign in inputsToSign {
+                sequences += UInt32(inputToSign.input.sequence)
             }
             data += CryptoKit.sha256sha256(sequences)
 
-            let inputToSign = transaction.inputs[inputIndex]
+            let inputToSign = inputsToSign[inputIndex]
 
-            guard let previousOutput = inputToSign.previousOutput else {
-                throw SerializationError.noPreviousOutput
-            }
             data += try TransactionInputSerializer.serializedOutPoint(input: inputToSign)
+            data += OpCode.push(OpCode.p2pkhStart + OpCode.push(inputToSign.previousOutput.keyHash!) + OpCode.p2pkhFinish)
+            data += inputToSign.previousOutput.value
+            data += UInt32(inputToSign.input.sequence)
 
-            data += OpCode.push(OpCode.p2pkhStart + OpCode.push(previousOutput.keyHash!) + OpCode.p2pkhFinish)
-            data += previousOutput.value
-            data += UInt32(inputToSign.sequence)
-
-            let hashOutputs = transaction.outputs.flatMap { TransactionOutputSerializer.serialize(output: $0) }
+            let hashOutputs = outputs.flatMap { TransactionOutputSerializer.serialize(output: $0) }
             data += CryptoKit.sha256sha256((Data(hashOutputs)))
         } else {
             data += UInt32(transaction.version)
-            data += VarInt(transaction.inputs.count).serialized()
-            data += try transaction.inputs.enumerated().flatMap { index, input in
-                try TransactionInputSerializer.serializedForSignature(input: input, forCurrentInputSignature: inputIndex == index)
+            data += VarInt(inputsToSign.count).serialized()
+            data += try inputsToSign.enumerated().flatMap { index, input in
+                try TransactionInputSerializer.serializedForSignature(inputToSign: input, forCurrentInputSignature: inputIndex == index)
             }
-            data += VarInt(transaction.outputs.count).serialized()
-            data += transaction.outputs.flatMap { TransactionOutputSerializer.serialize(output: $0) }
+            data += VarInt(outputs.count).serialized()
+            data += outputs.flatMap { TransactionOutputSerializer.serialize(output: $0) }
         }
 
         data += UInt32(transaction.lockTime)
@@ -70,12 +67,14 @@ class TransactionSerializer {
         return data
     }
 
-    static func deserialize(data: Data) -> Transaction {
+    static func deserialize(data: Data) -> FullTransaction {
         return deserialize(byteStream: ByteStream(data))
     }
 
-    static func deserialize(byteStream: ByteStream) -> Transaction {
+    static func deserialize(byteStream: ByteStream) -> FullTransaction {
         let transaction = Transaction()
+        var inputs = [Input]()
+        var outputs = [Output]()
 
         transaction.version = Int(byteStream.read(Int32.self))
         // peek at marker
@@ -89,27 +88,36 @@ class TransactionSerializer {
 
         let txInCount = byteStream.read(VarInt.self)
         for _ in 0..<Int(txInCount.underlyingValue) {
-            transaction.inputs.append(TransactionInputSerializer.deserialize(byteStream: byteStream))
+            inputs.append(TransactionInputSerializer.deserialize(byteStream: byteStream))
         }
 
         let txOutCount = byteStream.read(VarInt.self)
         for i in 0..<Int(txOutCount.underlyingValue) {
             let output = TransactionOutputSerializer.deserialize(byteStream: byteStream)
             output.index = i
-            transaction.outputs.append(output)
+            outputs.append(output)
         }
 
         if transaction.segWit {
             for i in 0..<Int(txInCount.underlyingValue) {
-                transaction.inputs[i].witnessData = TransactionWitnessSerializer.deserialize(byteStream: byteStream)
+                inputs[i].witnessData = DataListSerializer.deserialize(byteStream: byteStream)
             }
         }
 
         transaction.lockTime = Int(byteStream.read(UInt32.self))
-        transaction.dataHash = CryptoKit.sha256sha256(serialize(transaction: transaction, withoutWitness: true))
-        transaction.reversedHashHex = transaction.dataHash.reversedHex
 
-        return transaction
+        let fullTransaction = FullTransaction(header: transaction, inputs: inputs, outputs: outputs)
+
+        fullTransaction.header.dataHash = CryptoKit.sha256sha256(serialize(transaction: fullTransaction, withoutWitness: true))
+        fullTransaction.header.dataHashReversedHex = transaction.dataHash.reversedHex
+        for input in fullTransaction.inputs {
+            input.transactionHashReversedHex = fullTransaction.header.dataHashReversedHex
+        }
+        for output in fullTransaction.outputs {
+            output.transactionHashReversedHex = fullTransaction.header.dataHashReversedHex
+        }
+
+        return fullTransaction
     }
 
 }

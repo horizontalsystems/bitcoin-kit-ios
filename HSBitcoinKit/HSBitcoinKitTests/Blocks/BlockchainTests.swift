@@ -49,7 +49,7 @@ class BlockchainTest: QuickSpec {
 
                 beforeEach {
                     stub(mockStorage) { mock in
-                        when(mock.block(byHashHex: merkleBlock.reversedHeaderHashHex)).thenReturn(block)
+                        when(mock.block(byHashHex: merkleBlock.headerHashReversedHex)).thenReturn(block)
                     }
                 }
 
@@ -71,7 +71,7 @@ class BlockchainTest: QuickSpec {
 
                 beforeEach {
                     stub(mockStorage) { mock in
-                        when(mock.block(byHashHex: merkleBlock.reversedHeaderHashHex)).thenReturn(nil)
+                        when(mock.block(byHashHex: merkleBlock.headerHashReversedHex)).thenReturn(nil)
                     }
                 }
 
@@ -333,11 +333,11 @@ class BlockchainTest: QuickSpec {
 
                 let transaction = TestData.p2pkTransaction
                 transaction.dataHash = block.headerHash
-                transaction.reversedHashHex = block.headerHash.reversedHex
+                transaction.dataHashReversedHex = block.headerHash.reversedHex
                 transaction.block = block
 
                 when(mock.transactions(ofBlock: equal(to: block), realm: any())).thenReturn([transaction])
-                mockedBlocks.blocksInChainTransactionHexes.append(transaction.reversedHashHex)
+                mockedBlocks.blocksInChainTransactionHexes.append(transaction.dataHashReversedHex)
             }
 
             for (height, id) in newBlocks.sorted(by: { $0.key < $1.key }) {
@@ -347,11 +347,11 @@ class BlockchainTest: QuickSpec {
 
                 let transaction = TestData.p2pkTransaction
                 transaction.dataHash = block.headerHash
-                transaction.reversedHashHex = block.headerHash.reversedHex
+                transaction.dataHashReversedHex = block.headerHash.reversedHex
                 transaction.block = block
 
                 when(mock.transactions(ofBlock: equal(to: block), realm: any())).thenReturn([transaction])
-                mockedBlocks.newBlocksTransactionHexes.append(transaction.reversedHashHex)
+                mockedBlocks.newBlocksTransactionHexes.append(transaction.dataHashReversedHex)
             }
 
             when(mock.blocks(stale: true, realm: any())).thenReturn(mockedBlocks.newBlocks)

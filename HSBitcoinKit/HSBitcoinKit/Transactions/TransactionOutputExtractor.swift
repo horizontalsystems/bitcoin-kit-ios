@@ -1,4 +1,3 @@
-import RealmSwift
 import HSCryptoKit
 
 class TransactionOutputExtractor {
@@ -14,7 +13,7 @@ class TransactionOutputExtractor {
 
 extension TransactionOutputExtractor: ITransactionExtractor {
 
-    func extract(transaction: Transaction) {
+    func extract(transaction: FullTransaction) {
         for output in transaction.outputs {
             var payload: Data?
             var validScriptType: ScriptType = .unknown
@@ -56,7 +55,7 @@ extension TransactionOutputExtractor: ITransactionExtractor {
             output.keyHash = payload
 
             if transactionKeySetter.set(output: output) {
-                transaction.isMine = true
+                transaction.header.isMine = true
             }
 
         }

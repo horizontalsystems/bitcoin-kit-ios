@@ -64,7 +64,7 @@ class TransactionSyncerTests: QuickSpec {
                 context("when it wasn't sent") {
                     it("returns transaction") {
                         stub(mockStorage) { mock in
-                            when(mock.sentTransaction(byReversedHashHex: transaction.reversedHashHex)).thenReturn(nil)
+                            when(mock.sentTransaction(byReversedHashHex: transaction.dataHashReversedHex)).thenReturn(nil)
                         }
                         let transactions = syncer.pendingTransactions()
 
@@ -74,12 +74,12 @@ class TransactionSyncerTests: QuickSpec {
                 }
 
                 context("when it was sent") {
-                    let sentTransaction = SentTransaction(reversedHashHex: transaction.reversedHashHex)
+                    let sentTransaction = SentTransaction(hashReversedHex: transaction.dataHashReversedHex)
                     sentTransaction.lastSendTime = CACurrentMediaTime() - retriesPeriod - 1
                     sentTransaction.retriesCount = 0
                     beforeEach {
                         stub(mockStorage) { mock in
-                            when(mock.sentTransaction(byReversedHashHex: transaction.reversedHashHex)).thenReturn(sentTransaction)
+                            when(mock.sentTransaction(byReversedHashHex: transaction.dataHashReversedHex)).thenReturn(sentTransaction)
                         }
                     }
 
@@ -130,8 +130,8 @@ class TransactionSyncerTests: QuickSpec {
             context("when SentTransaction does not exist") {
                 it("adds new SentTransaction object") {
                     stub(mockStorage) { mock in
-                        when(mock.newTransaction(byReversedHashHex: transaction.reversedHashHex)).thenReturn(transaction)
-                        when(mock.sentTransaction(byReversedHashHex: transaction.reversedHashHex)).thenReturn(nil)
+                        when(mock.newTransaction(byReversedHashHex: transaction.dataHashReversedHex)).thenReturn(transaction)
+                        when(mock.sentTransaction(byReversedHashHex: transaction.dataHashReversedHex)).thenReturn(nil)
                     }
 
                     syncer.handle(sentTransaction: transaction)
@@ -140,19 +140,19 @@ class TransactionSyncerTests: QuickSpec {
                     verify(mockStorage).add(sentTransaction: argumentCaptor.capture())
                     let sentTransaction = argumentCaptor.value!
 
-                    expect(sentTransaction.reversedHashHex).to(equal(transaction.reversedHashHex))
+                    expect(sentTransaction.hashReversedHex).to(equal(transaction.dataHashReversedHex))
                 }
             }
 
             context("when SentTransaction exists") {
-                var sentTransaction = SentTransaction(reversedHashHex: transaction.reversedHashHex)
+                var sentTransaction = SentTransaction(hashReversedHex: transaction.dataHashReversedHex)
                 sentTransaction.firstSendTime = sentTransaction.firstSendTime - 100
                 sentTransaction.lastSendTime = sentTransaction.lastSendTime - 100
 
                 it("updates existing SentTransaction object") {
                     stub(mockStorage) { mock in
-                        when(mock.newTransaction(byReversedHashHex: transaction.reversedHashHex)).thenReturn(transaction)
-                        when(mock.sentTransaction(byReversedHashHex: transaction.reversedHashHex)).thenReturn(sentTransaction)
+                        when(mock.newTransaction(byReversedHashHex: transaction.dataHashReversedHex)).thenReturn(transaction)
+                        when(mock.sentTransaction(byReversedHashHex: transaction.dataHashReversedHex)).thenReturn(sentTransaction)
                     }
 
                     syncer.handle(sentTransaction: transaction)
@@ -161,14 +161,14 @@ class TransactionSyncerTests: QuickSpec {
                     verify(mockStorage).update(sentTransaction: argumentCaptor.capture())
                     sentTransaction = argumentCaptor.value!
 
-                    expect(sentTransaction.reversedHashHex).to(equal(transaction.reversedHashHex))
+                    expect(sentTransaction.hashReversedHex).to(equal(transaction.dataHashReversedHex))
                 }
             }
 
             context("when Transaction doesn't exist") {
                 it("neither adds new nor updates existing") {
                     stub(mockStorage) { mock in
-                        when(mock.newTransaction(byReversedHashHex: transaction.reversedHashHex)).thenReturn(nil)
+                        when(mock.newTransaction(byReversedHashHex: transaction.dataHashReversedHex)).thenReturn(nil)
                     }
 
                     syncer.handle(sentTransaction: transaction)
@@ -228,7 +228,7 @@ class TransactionSyncerTests: QuickSpec {
             context("when relayed transaction exists") {
                 it("returns false") {
                     stub(mockStorage) { mock in
-                        when(mock.relayedTransactionExists(byReversedHashHex: transaction.reversedHashHex)).thenReturn(true)
+                        when(mock.relayedTransactionExists(byReversedHashHex: transaction.dataHashReversedHex)).thenReturn(true)
                     }
 
                     XCTAssertEqual(syncer.shouldRequestTransaction(hash: transaction.dataHash), false)
@@ -238,7 +238,7 @@ class TransactionSyncerTests: QuickSpec {
             context("when relayed transaction doesn't exist") {
                 it("returns true") {
                     stub(mockStorage) { mock in
-                        when(mock.relayedTransactionExists(byReversedHashHex: transaction.reversedHashHex)).thenReturn(false)
+                        when(mock.relayedTransactionExists(byReversedHashHex: transaction.dataHashReversedHex)).thenReturn(false)
                     }
 
                     XCTAssertEqual(syncer.shouldRequestTransaction(hash: transaction.dataHash), true)

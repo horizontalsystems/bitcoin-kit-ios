@@ -57,7 +57,7 @@ class BlockDiscoveryBatchTest: XCTestCase {
         }
 
         let lastUsedIndex = 1
-        let blockHash = BlockHash(reversedHeaderHashHex: "1234", height: 1234, sequence: 0)!
+        let blockHash = BlockHash(headerHashReversedHex: "1234", height: 1234, sequence: 0)!
 
         stub(mockBlockHashFetcher) { mock in
             when(mock.getBlockHashes(publicKeys: equal(to: [publicKeys[0], publicKeys[1], publicKeys[2]]))).thenReturn(Observable.just(([blockHash], lastUsedIndex)))

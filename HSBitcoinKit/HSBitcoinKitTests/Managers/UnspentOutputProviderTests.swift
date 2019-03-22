@@ -7,7 +7,7 @@ class UnspentOutputProviderTests: XCTestCase {
 
     private var realm: Realm!
 
-    private var outputs: [TransactionOutput]!
+    private var outputs: [Output]!
     private var unspentOutputProvider: UnspentOutputProvider!
     private var pubKey: PublicKey!
 
@@ -20,7 +20,7 @@ class UnspentOutputProviderTests: XCTestCase {
         realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
 
         let lastBlock = Block(withHeader: BlockHeader(), height: lastBlockHeight)
-        lastBlock.reversedHeaderHashHex = "123"
+        lastBlock.headerHashReversedHex = "123"
         try! realm.write {
             realm.deleteAll()
             realm.add(lastBlock)
@@ -34,11 +34,11 @@ class UnspentOutputProviderTests: XCTestCase {
         pubKey = TestData.pubKey()
 
         unspentOutputProvider = UnspentOutputProvider(realmFactory: mockRealmFactory, confirmationsThreshold: confirmationsThreshold)
-        outputs = [TransactionOutput(withValue: 1, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data(hex: "000010000")!),
-                   TransactionOutput(withValue: 2, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data(hex: "000010001")!),
-                   TransactionOutput(withValue: 4, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data(hex: "000010002")!),
-                   TransactionOutput(withValue: 8, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data(hex: "000010003")!),
-                   TransactionOutput(withValue: 16, index: 0, lockingScript: Data(), type: .p2sh, keyHash: Data(hex: "000010004")!)
+        outputs = [Output(withValue: 1, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data(hex: "000010000")!),
+                   Output(withValue: 2, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data(hex: "000010001")!),
+                   Output(withValue: 4, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data(hex: "000010002")!),
+                   Output(withValue: 8, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data(hex: "000010003")!),
+                   Output(withValue: 16, index: 0, lockingScript: Data(), type: .p2sh, keyHash: Data(hex: "000010004")!)
         ]
     }
 
@@ -146,9 +146,9 @@ class UnspentOutputProviderTests: XCTestCase {
         XCTAssertEqual(unspentOutputProvider.balance, outputs[2].value + outputs[3].value + outputs[4].value)
     }
 
-    private func inputsWithPreviousOutputs(range: Range<Int>) -> [TransactionInput] {
+    private func inputsWithPreviousOutputs(range: Range<Int>) -> [Input] {
         let transaction = outputs[0].transaction!
-        var inputs = [TransactionInput]()
+        var inputs = [Input]()
         for i in range.lowerBound..<range.upperBound {
             let input = TestData.transactionInput(previousTransaction: transaction, previousOutput: outputs[i], script: Data(), sequence: 2)
             inputs.append(input)

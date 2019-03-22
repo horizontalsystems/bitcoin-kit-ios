@@ -1,6 +1,5 @@
 import XCTest
 import Cuckoo
-import RealmSwift
 @testable import HSBitcoinKit
 
 class TransactionLinkerTests: XCTestCase {
@@ -40,12 +39,12 @@ class TransactionLinkerTests: XCTestCase {
         }
 
         let input = TransactionInput()
-        input.previousOutputTxReversedHex = previousTransaction.reversedHashHex
+        input.previousOutputTxReversedHex = previousTransaction.dataHashReversedHex
         input.previousOutputIndex = previousTransaction.outputs.first!.index
         input.sequence = 100
 
         let transaction = Transaction()
-        transaction.reversedHashHex = "0000000000000000000111111111111122222222222222333333333333333000"
+        transaction.dataHashReversedHex = "0000000000000000000111111111111122222222222222333333333333333000"
         transaction.inputs.append(input)
 
         try! realm.write {
@@ -66,12 +65,12 @@ class TransactionLinkerTests: XCTestCase {
 
     func testHandle_HasPreviousOutputWhichIsNotMine() {
         let input = TransactionInput()
-        input.previousOutputTxReversedHex = previousTransaction.reversedHashHex
+        input.previousOutputTxReversedHex = previousTransaction.dataHashReversedHex
         input.previousOutputIndex = previousTransaction.outputs.first!.index
         input.sequence = 100
 
         let transaction = Transaction()
-        transaction.reversedHashHex = "0000000000000000000111111111111122222222222222333333333333333000"
+        transaction.dataHashReversedHex = "0000000000000000000111111111111122222222222222333333333333333000"
         transaction.inputs.append(input)
 
         try! realm.write {
@@ -92,12 +91,12 @@ class TransactionLinkerTests: XCTestCase {
 
     func testHandle_HasNotPreviousOutput() {
         let input = TransactionInput()
-        input.previousOutputTxReversedHex = TestData.p2pkTransaction.reversedHashHex
+        input.previousOutputTxReversedHex = TestData.p2pkTransaction.dataHashReversedHex
         input.previousOutputIndex = TestData.p2pkTransaction.outputs.first!.index
         input.sequence = 100
 
         let transaction = Transaction()
-        transaction.reversedHashHex = "0000000000000000000111111111111122222222222222333333333333333000"
+        transaction.dataHashReversedHex = "0000000000000000000111111111111122222222222222333333333333333000"
         transaction.inputs.append(input)
 
         try! realm.write {
@@ -114,7 +113,7 @@ class TransactionLinkerTests: XCTestCase {
         XCTAssertEqual(transaction.inputs.first!.previousOutput, nil)
     }
 
-    private func assertOutputEqual(out1: TransactionOutput, out2: TransactionOutput) {
+    private func assertOutputEqual(out1: Output, out2: Output) {
         XCTAssertEqual(out1.value, out2.value)
         XCTAssertEqual(out1.lockingScript, out2.lockingScript)
         XCTAssertEqual(out1.index, out2.index)

@@ -197,7 +197,7 @@ class Peer {
 
     private func handle(message: TransactionMessage) {
         let transaction = message.transaction
-        log("<-- TX: \(transaction.reversedHashHex)")
+        log("<-- TX: \(transaction.header.dataHashReversedHex)")
 
         for task in tasks {
             if task.handle(transaction: transaction) {
@@ -381,10 +381,10 @@ extension Peer: IPeerTaskRequester {
         connection.send(message: message)
     }
 
-    func send(transaction: Transaction) {
+    func send(transaction: FullTransaction) {
         let message = TransactionMessage(transaction: transaction)
 
-        log("--> TX: \(message.transaction.reversedHashHex)")
+        log("--> TX: \(message.transaction.header.dataHashReversedHex)")
         connection.send(message: message)
     }
 

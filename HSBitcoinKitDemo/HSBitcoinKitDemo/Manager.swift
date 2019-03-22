@@ -1,6 +1,5 @@
 import Foundation
 import HSBitcoinKit
-import RealmSwift
 import RxSwift
 
 class Manager {

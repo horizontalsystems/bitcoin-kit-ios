@@ -1,6 +1,5 @@
 import HSHDWalletKit
 import RxSwift
-import RealmSwift
 
 class InitialSyncer {
     weak var delegate: IInitialSyncerDelegate?

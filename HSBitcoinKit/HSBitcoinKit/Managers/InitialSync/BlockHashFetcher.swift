@@ -28,7 +28,7 @@ extension BlockHashFetcher: IBlockHashFetcher {
             let lastUsedIndex = self?.helper.lastUsedIndex(addresses: addresses, outputs: transactionResponses.flatMap { $0.txOutputs })
 
             let blockHashes: [BlockHash] = transactionResponses.compactMap {
-                BlockHash(reversedHeaderHashHex: $0.blockHash, height: $0.blockHeight, sequence: 0)
+                BlockHash(headerHashReversedHex: $0.blockHash, height: $0.blockHeight, sequence: 0)
             }
 
             return (responses: blockHashes, lastUsedIndex: lastUsedIndex ?? -1)

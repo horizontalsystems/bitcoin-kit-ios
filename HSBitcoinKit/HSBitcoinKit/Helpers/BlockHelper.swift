@@ -1,5 +1,10 @@
 class BlockHelper: IBlockHelper {
     private let medianTimeSpan = 11
+    private let storage: IStorage
+
+    init(storage: IStorage) {
+        self.storage = storage
+    }
 
     func previous(for block: Block, index: Int) -> Block? {
         return previousWindow(for: block, count: index)?.first
@@ -12,7 +17,7 @@ class BlockHelper: IBlockHelper {
         var blocks = [Block]()
         var block = block
         for _ in 0..<count {
-            if let prevBlock = block.previousBlock {
+            if let prevBlock = block.previousBlock(storage: storage) {
                 block = prevBlock
                 blocks.insert(block, at: 0)
             } else {
@@ -26,11 +31,8 @@ class BlockHelper: IBlockHelper {
         var median = [Int]()
         var currentBlock = block
         for _ in 0..<medianTimeSpan {
-            guard let header = currentBlock.header else {
-                throw Block.BlockError.noHeader
-            }
-            median.append(header.timestamp)
-            if let prevBlock = currentBlock.previousBlock {
+            median.append(currentBlock.timestamp)
+            if let prevBlock = currentBlock.previousBlock(storage: storage) {
                 currentBlock = prevBlock
             } else {
                 break
@@ -38,10 +40,7 @@ class BlockHelper: IBlockHelper {
         }
         median.sort()
         guard !median.isEmpty else {
-            guard let header = block.header else {
-                throw Block.BlockError.noHeader
-            }
-            return header.timestamp
+            return block.timestamp
         }
         return median[median.count / 2]
     }

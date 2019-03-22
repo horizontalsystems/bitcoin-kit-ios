@@ -98,9 +98,9 @@ class DataProviderTests: XCTestCase {
         waitForMainQueue()
 
         XCTAssertEqual(results.count, 3)
-        XCTAssertEqual(results[0].transactionHash, transactions[0].reversedHashHex)
-        XCTAssertEqual(results[1].transactionHash, transactions[3].reversedHashHex)
-        XCTAssertEqual(results[2].transactionHash, transactions[1].reversedHashHex)
+        XCTAssertEqual(results[0].transactionHash, transactions[0].dataHashReversedHex)
+        XCTAssertEqual(results[1].transactionHash, transactions[3].dataHashReversedHex)
+        XCTAssertEqual(results[2].transactionHash, transactions[1].dataHashReversedHex)
     }
 
     func testTransactions_WithEqualTimestamps() {
@@ -130,9 +130,9 @@ class DataProviderTests: XCTestCase {
         waitForMainQueue()
 
         XCTAssertEqual(results.count, 3)
-        XCTAssertEqual(results[0].transactionHash, transactions[2].reversedHashHex)
-        XCTAssertEqual(results[1].transactionHash, transactions[0].reversedHashHex)
-        XCTAssertEqual(results[2].transactionHash, transactions[3].reversedHashHex)
+        XCTAssertEqual(results[0].transactionHash, transactions[2].dataHashReversedHex)
+        XCTAssertEqual(results[1].transactionHash, transactions[0].dataHashReversedHex)
+        XCTAssertEqual(results[2].transactionHash, transactions[3].dataHashReversedHex)
     }
 
     func testTransactions_FromHashGiven() {
@@ -155,7 +155,7 @@ class DataProviderTests: XCTestCase {
 
         // Sort by timestamps
         var results = [TransactionInfo]()
-        dataProvider.transactions(fromHash: transactions[0].reversedHashHex, limit: 3).subscribe(
+        dataProvider.transactions(fromHash: transactions[0].dataHashReversedHex, limit: 3).subscribe(
                 onSuccess: { transactionInfos in
                     results = transactionInfos
                 }
@@ -163,11 +163,11 @@ class DataProviderTests: XCTestCase {
         waitForMainQueue()
 
         XCTAssertEqual(results.count, 2)
-        XCTAssertEqual(results[0].transactionHash, transactions[3].reversedHashHex)
-        XCTAssertEqual(results[1].transactionHash, transactions[1].reversedHashHex)
+        XCTAssertEqual(results[0].transactionHash, transactions[3].dataHashReversedHex)
+        XCTAssertEqual(results[1].transactionHash, transactions[1].dataHashReversedHex)
 
         // Sort by timestamps and order
-        dataProvider.transactions(fromHash: transactions[3].reversedHashHex, limit: 3).subscribe(
+        dataProvider.transactions(fromHash: transactions[3].dataHashReversedHex, limit: 3).subscribe(
                 onSuccess: { transactionInfos in
                     results = transactionInfos
                 }
@@ -175,7 +175,7 @@ class DataProviderTests: XCTestCase {
         waitForMainQueue()
 
         XCTAssertEqual(results.count, 1)
-        XCTAssertEqual(results[0].transactionHash, transactions[1].reversedHashHex)
+        XCTAssertEqual(results[0].transactionHash, transactions[1].dataHashReversedHex)
     }
 
     func testTransactions_LimitNotGiven() {
@@ -206,16 +206,16 @@ class DataProviderTests: XCTestCase {
         waitForMainQueue()
 
         XCTAssertEqual(results.count, 4)
-        XCTAssertEqual(results[0].transactionHash, transactions[2].reversedHashHex)
-        XCTAssertEqual(results[1].transactionHash, transactions[0].reversedHashHex)
-        XCTAssertEqual(results[2].transactionHash, transactions[3].reversedHashHex)
-        XCTAssertEqual(results[3].transactionHash, transactions[1].reversedHashHex)
+        XCTAssertEqual(results[0].transactionHash, transactions[2].dataHashReversedHex)
+        XCTAssertEqual(results[1].transactionHash, transactions[0].dataHashReversedHex)
+        XCTAssertEqual(results[2].transactionHash, transactions[3].dataHashReversedHex)
+        XCTAssertEqual(results[3].transactionHash, transactions[1].dataHashReversedHex)
     }
 
     func testOnInsertBlock() {
         let block = TestData.firstBlock
         let blockInfo = BlockInfo(
-                headerHash: block.reversedHeaderHashHex,
+                headerHash: block.headerHashReversedHex,
                 height: block.height,
                 timestamp: block.header?.timestamp
         )
@@ -247,7 +247,7 @@ class DataProviderTests: XCTestCase {
     func testTransactionsExist() {
 //        let transaction = TestData.p2pkTransaction
 //        transaction.isMine = true
-//        let transactionInfo = TransactionInfo(transactionHash: transaction.reversedHashHex, from: [TransactionAddressInfo](), to: [TransactionAddressInfo](), amount: 0, blockHeight: nil, timestamp: 0)
+//        let transactionInfo = TransactionInfo(transactionHash: transaction.hashReversedHex, from: [TransactionAddressInfo](), to: [TransactionAddressInfo](), amount: 0, blockHeight: nil, timestamp: 0)
 //
 //        stub(mockUnspentOutputProvider) { mock in
 //            when(mock.balance.get).thenReturn(3)
@@ -270,7 +270,7 @@ class DataProviderTests: XCTestCase {
         let transaction = Transaction(
                 version: 0,
                 inputs: [
-                    TransactionInput(
+                    Input(
                             withPreviousOutputTxReversedHex: Data(from: 1).hex,
                             previousOutputIndex: 0,
                             script: Data(from: 999999999999),
@@ -278,7 +278,7 @@ class DataProviderTests: XCTestCase {
                     )
                 ],
                 outputs: [
-                    TransactionOutput(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data())
+                    Output(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data())
                 ],
                 lockTime: 0
         )
@@ -286,16 +286,16 @@ class DataProviderTests: XCTestCase {
         let transaction2 = Transaction(
                 version: 0,
                 inputs: [
-                    TransactionInput(
-                            withPreviousOutputTxReversedHex: transaction.reversedHashHex,
+                    Input(
+                            withPreviousOutputTxReversedHex: transaction.dataHashReversedHex,
                             previousOutputIndex: 0,
                             script: Data(from: 999999999999),
                             sequence: 0
                     )
                 ],
                 outputs: [
-                    TransactionOutput(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data()),
-                    TransactionOutput(withValue: 0, index: 1, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data())
+                    Output(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data()),
+                    Output(withValue: 0, index: 1, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data())
                 ],
                 lockTime: 0
         )
@@ -303,15 +303,15 @@ class DataProviderTests: XCTestCase {
         let transaction3 = Transaction(
                 version: 0,
                 inputs: [
-                    TransactionInput(
-                            withPreviousOutputTxReversedHex: transaction2.reversedHashHex,
+                    Input(
+                            withPreviousOutputTxReversedHex: transaction2.dataHashReversedHex,
                             previousOutputIndex: 0,
                             script: Data(from: 999999999999),
                             sequence: 0
                     )
                 ],
                 outputs: [
-                    TransactionOutput(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data()),
+                    Output(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data()),
                 ],
                 lockTime: 0
         )
@@ -319,21 +319,21 @@ class DataProviderTests: XCTestCase {
         let transaction4 = Transaction(
                 version: 0,
                 inputs: [
-                    TransactionInput(
-                            withPreviousOutputTxReversedHex: transaction2.reversedHashHex,
+                    Input(
+                            withPreviousOutputTxReversedHex: transaction2.dataHashReversedHex,
                             previousOutputIndex: 1,
                             script: Data(from: 999999999999),
                             sequence: 0
                     ),
-                    TransactionInput(
-                            withPreviousOutputTxReversedHex: transaction3.reversedHashHex,
+                    Input(
+                            withPreviousOutputTxReversedHex: transaction3.dataHashReversedHex,
                             previousOutputIndex: 0,
                             script: Data(from: 999999999999),
                             sequence: 0
                     )
                 ],
                 outputs: [
-                    TransactionOutput(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data())
+                    Output(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data())
                 ],
                 lockTime: 0
         )

@@ -1,5 +1,4 @@
 import Foundation
-import RealmSwift
 import RxSwift
 
 class PeerGroup {
@@ -34,7 +33,7 @@ class PeerGroup {
 
     init(factory: IFactory, network: INetwork, listener: ISyncStateListener, reachabilityManager: IReachabilityManager,
          peerAddressManager: IPeerAddressManager, bloomFilterManager: IBloomFilterManager,
-         peerCount: Int = 10, peerManager: IPeerManager = PeerManager(),
+         peerCount: Int = 1, peerManager: IPeerManager = PeerManager(),
          peersQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Local Queue", qos: .userInitiated),
          inventoryQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Inventory Queue", qos: .background),
          logger: Logger? = nil) {
@@ -168,11 +167,11 @@ class PeerGroup {
         self.blockSyncer?.downloadIterationCompleted()
     }
 
-    private func handle(transactions: [Transaction]) {
+    private func handle(transactions: [FullTransaction]) {
         transactionSyncer?.handle(transactions: transactions)
     }
 
-    private func handle(sentTransaction transaction: Transaction) {
+    private func handle(sentTransaction transaction: FullTransaction) {
         transactionSyncer?.handle(sentTransaction: transaction)
     }
 
