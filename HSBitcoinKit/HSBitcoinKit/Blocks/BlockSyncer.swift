@@ -1,5 +1,4 @@
 import HSCryptoKit
-import GRDB
 
 class BlockSyncer {
     private let storage: IStorage
@@ -53,9 +52,9 @@ class BlockSyncer {
     private func clearPartialBlocks() throws {
         let blockReversedHashes = storage.blockHashHeaderHashHexes(except: network.checkpointBlock.headerHashReversedHex)
 
-        try storage.inTransaction { db in
+        try storage.inTransaction {
             let blocksToDelete = storage.blocks(byHexes: blockReversedHashes)
-            try blockchain.deleteBlocks(blocks: blocksToDelete, db: db)
+            try blockchain.deleteBlocks(blocks: blocksToDelete)
         }
     }
 
@@ -144,21 +143,21 @@ extension BlockSyncer: IBlockSyncer {
     func handle(merkleBlock: MerkleBlock, maxBlockHeight: Int32) throws {
         var block: Block!
 
-        try storage.inTransaction { db in
+        try storage.inTransaction {
             if let height = merkleBlock.height {
-                block = try blockchain.forceAdd(merkleBlock: merkleBlock, height: height, db: db)
+                block = try blockchain.forceAdd(merkleBlock: merkleBlock, height: height)
             } else {
-                block = try blockchain.connect(merkleBlock: merkleBlock, db: db)
+                block = try blockchain.connect(merkleBlock: merkleBlock)
             }
 
             do {
-                try transactionProcessor.processReceived(transactions: merkleBlock.transactions, inBlock: block, skipCheckBloomFilter: self.state.iterationHasPartialBlocks, db: db)
+                try transactionProcessor.processReceived(transactions: merkleBlock.transactions, inBlock: block, skipCheckBloomFilter: self.state.iterationHasPartialBlocks)
             } catch _ as BloomFilterManager.BloomFilterExpired {
                 state.iteration(hasPartialBlocks: true)
             }
 
             if !state.iterationHasPartialBlocks {
-                storage.deleteBlockHash(byHashHex: block.headerHashReversedHex, db: db)
+                storage.deleteBlockHash(byHashHex: block.headerHashReversedHex)
             }
         }
 

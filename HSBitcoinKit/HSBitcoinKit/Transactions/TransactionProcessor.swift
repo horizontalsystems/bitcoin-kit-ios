@@ -1,4 +1,3 @@
-import GRDB
 import RxSwift
 
 class TransactionProcessor {
@@ -46,7 +45,7 @@ class TransactionProcessor {
 
 extension TransactionProcessor: ITransactionProcessor {
 
-    func processReceived(transactions: [FullTransaction], inBlock block: Block?, skipCheckBloomFilter: Bool, db: Database) throws {
+    func processReceived(transactions: [FullTransaction], inBlock block: Block?, skipCheckBloomFilter: Bool) throws {
         var needToUpdateBloomFilter = false
 
         var updated = [Transaction]()
@@ -54,7 +53,7 @@ extension TransactionProcessor: ITransactionProcessor {
         for (index, transaction) in transactions.inTopologicalOrder().enumerated() {
             if let existingTransaction = storage.transaction(byHashHex: transaction.header.dataHashReversedHex) {
                 relay(transaction: existingTransaction, withOrder: index, inBlock: block)
-                try storage.update(transaction: existingTransaction, db: db)
+                try storage.update(transaction: existingTransaction)
                 updated.append(existingTransaction)
                 continue
             }
@@ -63,7 +62,7 @@ extension TransactionProcessor: ITransactionProcessor {
 
             if transaction.header.isMine {
                 relay(transaction: transaction.header, withOrder: index, inBlock: block)
-                try storage.add(transaction: transaction, db: db)
+                try storage.add(transaction: transaction)
 
                 inserted.append(transaction.header)
 

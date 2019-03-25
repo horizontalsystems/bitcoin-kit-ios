@@ -59,9 +59,9 @@ extension TransactionSyncer: ITransactionSyncer {
 
         var needToUpdateBloomFilter = false
 
-        try? storage.inTransaction { db in
+        try? storage.inTransaction {
             do {
-                try self.transactionProcessor.processReceived(transactions: transactions, inBlock: nil, skipCheckBloomFilter: false, db: db)
+                try self.transactionProcessor.processReceived(transactions: transactions, inBlock: nil, skipCheckBloomFilter: false)
             } catch _ as BloomFilterManager.BloomFilterExpired {
                 needToUpdateBloomFilter = true
             }

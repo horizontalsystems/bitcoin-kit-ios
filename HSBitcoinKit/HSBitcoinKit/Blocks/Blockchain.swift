@@ -1,5 +1,3 @@
-import GRDB
-
 class Blockchain {
     private let storage: IStorage
     private let network: INetwork
@@ -13,10 +11,10 @@ class Blockchain {
         self.listener = listener
     }
 
-    private func unstaleAllBlocks(db: Database) throws {
+    private func unstaleAllBlocks() throws {
         for block in storage.blocks(stale: true) {
             block.stale = false
-            try storage.update(block: block, db: db)
+            try storage.update(block: block)
         }
     }
 
@@ -24,7 +22,7 @@ class Blockchain {
 
 extension Blockchain: IBlockchain {
 
-    func connect(merkleBlock: MerkleBlock, db: Database) throws -> Block {
+    func connect(merkleBlock: MerkleBlock) throws -> Block {
         if let existingBlock = storage.block(byHashHex: merkleBlock.headerHashReversedHex) {
             return existingBlock
         }
@@ -38,15 +36,15 @@ extension Blockchain: IBlockchain {
         try network.validate(block: block, previousBlock: previousBlock)
         block.stale = true
 
-        try storage.add(block: block, db: db)
+        try storage.add(block: block)
         listener?.onInsert(block: block)
 
         return block
     }
 
-    func forceAdd(merkleBlock: MerkleBlock, height: Int, db: Database) throws -> Block {
+    func forceAdd(merkleBlock: MerkleBlock, height: Int) throws -> Block {
         let block = factory.block(withHeader: merkleBlock.header, height: height)
-        try storage.add(block: block, db: db)
+        try storage.add(block: block)
 
         listener?.onInsert(block: block)
 
@@ -60,30 +58,30 @@ extension Blockchain: IBlockchain {
 
         let lastNotStaleHeight = storage.block(stale: false, sortedHeight: "DESC")?.height ?? 0
 
-        try? storage.inTransaction { db in
+        try? storage.inTransaction {
             if (firstStaleHeight <= lastNotStaleHeight) {
                 let lastStaleHeight = storage.block(stale: true, sortedHeight: "DESC")?.height ?? firstStaleHeight
 
                 if (lastStaleHeight > lastNotStaleHeight) {
                     let notStaleBlocks = storage.blocks(heightGreaterThanOrEqualTo: firstStaleHeight, stale: false)
-                    try deleteBlocks(blocks: notStaleBlocks, db: db)
-                    try unstaleAllBlocks(db: db)
+                    try deleteBlocks(blocks: notStaleBlocks)
+                    try unstaleAllBlocks()
                 } else {
                     let staleBlocks = storage.blocks(stale: true)
-                    try deleteBlocks(blocks: staleBlocks, db: db)
+                    try deleteBlocks(blocks: staleBlocks)
                 }
             } else {
-                try unstaleAllBlocks(db: db)
+                try unstaleAllBlocks()
             }
         }
     }
 
-    func deleteBlocks(blocks: [Block], db: Database) throws {
+    func deleteBlocks(blocks: [Block]) throws {
         let hashes =  blocks.reduce(into: [String](), { acc, block in
             acc.append(contentsOf: storage.transactions(ofBlock: block).map { $0.dataHashReversedHex })
         })
 
-        try storage.delete(blocks: blocks, db: db)
+        try storage.delete(blocks: blocks)
         listener?.onDelete(transactionHashes: hashes)
     }
 

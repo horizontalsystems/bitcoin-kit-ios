@@ -1,7 +1,6 @@
 import BigInt
 import RxSwift
 import Alamofire
-import GRDB
 
 enum BlockValidatorType { case header, bits, legacy, testNet, EDA, DAA }
 
@@ -85,7 +84,7 @@ protocol IStorage {
     func blockHashes(filters: [(fieldName: BlockHash.Columns, value: Any, equal: Bool)], orders: [(fieldName: BlockHash.Columns, ascending: Bool)]) -> [BlockHash]
     func blockHashesSortedBySequenceAndHeight(limit: Int) -> [BlockHash]
     func add(blockHashes: [BlockHash])
-    func deleteBlockHash(byHashHex: String, db: Database)
+    func deleteBlockHash(byHashHex: String)
 
     var blocksCount: Int { get }
     var firstBlock: Block? { get }
@@ -99,9 +98,9 @@ protocol IStorage {
     func block(byHeight: Int32) -> Block?
     func block(byHashHex: String) -> Block?
     func block(stale: Bool, sortedHeight: String) -> Block?
-    func add(block: Block, db: Database) throws
-    func update(block: Block, db: Database) throws
-    func delete(blocks: [Block], db: Database) throws
+    func add(block: Block) throws
+    func update(block: Block) throws
+    func delete(blocks: [Block]) throws
 
 
     func transaction(byHashHex: String) -> Transaction?
@@ -111,8 +110,7 @@ protocol IStorage {
     func newTransaction(byReversedHashHex: String) -> Transaction?
     func relayedTransactionExists(byReversedHashHex: String) -> Bool
     func add(transaction: FullTransaction) throws
-    func add(transaction: FullTransaction, db: Database) throws
-    func update(transaction: Transaction, db: Database) throws
+    func update(transaction: Transaction) throws
 
     func outputsWithPublicKeys() -> [OutputWithPublicKey]
     func unspentOutputs() -> [UnspentOutput]
@@ -137,7 +135,7 @@ protocol IStorage {
 
 
     func clear() throws
-    func inTransaction(_ block: ((_ db: Database) throws -> Void)) throws
+    func inTransaction(_ block: (() throws -> Void)) throws
 }
 
 protocol IFeeRateSyncer {
@@ -329,7 +327,7 @@ protocol IScriptExtractor: class {
 protocol ITransactionProcessor: class {
     var listener: IBlockchainDataListener? { get set }
 
-    func processReceived(transactions: [FullTransaction], inBlock block: Block?, skipCheckBloomFilter: Bool, db: Database) throws
+    func processReceived(transactions: [FullTransaction], inBlock block: Block?, skipCheckBloomFilter: Bool) throws
     func processCreated(transaction: FullTransaction) throws
 }
 
@@ -368,10 +366,10 @@ protocol ITransactionBuilder {
 protocol IBlockchain {
     var listener: IBlockchainDataListener? { get set }
 
-    func connect(merkleBlock: MerkleBlock, db: Database) throws -> Block
-    func forceAdd(merkleBlock: MerkleBlock, height: Int, db: Database) throws -> Block
+    func connect(merkleBlock: MerkleBlock) throws -> Block
+    func forceAdd(merkleBlock: MerkleBlock, height: Int) throws -> Block
     func handleFork()
-    func deleteBlocks(blocks: [Block], db: Database) throws
+    func deleteBlocks(blocks: [Block]) throws
 }
 
 protocol IBlockchainDataListener: class {
