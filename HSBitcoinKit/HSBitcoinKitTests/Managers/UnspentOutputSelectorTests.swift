@@ -1,12 +1,11 @@
 import XCTest
 import Cuckoo
-import RealmSwift
 @testable import HSBitcoinKit
 
 class UnspentOutputSelectorTests: XCTestCase {
 
     private var unspentOutputSelector: UnspentOutputSelector!
-    private var outputs: [Output]!
+    private var outputs: [UnspentOutput]!
 
     override func setUp() {
         super.setUp()
@@ -21,11 +20,11 @@ class UnspentOutputSelectorTests: XCTestCase {
 
         unspentOutputSelector = UnspentOutputSelector(calculator: mockTransactionSizeCalculator)
 
-        outputs = [Output(withValue: 1000, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data()),
-                   Output(withValue: 2000, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data()),
-                   Output(withValue: 4000, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data()),
-                   Output(withValue: 8000, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data()),
-                   Output(withValue: 16000, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data())
+        outputs = [TestData.unspentOutput(output: Output(withValue: 1000, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data())),
+                   TestData.unspentOutput(output: Output(withValue: 2000, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data())),
+                   TestData.unspentOutput(output: Output(withValue: 4000, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data())),
+                   TestData.unspentOutput(output: Output(withValue: 8000, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data())),
+                   TestData.unspentOutput(output: Output(withValue: 16000, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data()))
         ]
     }
 
@@ -37,17 +36,17 @@ class UnspentOutputSelectorTests: XCTestCase {
     }
 
     func testExactlyValueReceiverPay() {
-        validExactlyTest(value: 4000, feeRate: 1, fee: 100, senderPay: false, output: outputs[2])         // exactly, without fee
-        validExactlyTest(value: 4000 - 5, feeRate: 1, fee: 100, senderPay: false, output: outputs[2]) // in range using dust, without fee
-        validExactlyTest(value: 3900, feeRate: 1, fee: 100, senderPay: true, output: outputs[2])          // exactly, with fee
-        validExactlyTest(value: 3900 - 5, feeRate: 1, fee: 105, senderPay: true, output: outputs[2])  // in range using dust, with fee
+        validExactlyTest(value: 4000, feeRate: 1, fee: 100, senderPay: false, unspentOutput: outputs[2])         // exactly, without fee
+        validExactlyTest(value: 4000 - 5, feeRate: 1, fee: 100, senderPay: false, unspentOutput: outputs[2]) // in range using dust, without fee
+        validExactlyTest(value: 3900, feeRate: 1, fee: 100, senderPay: true, unspentOutput: outputs[2])          // exactly, with fee
+        validExactlyTest(value: 3900 - 5, feeRate: 1, fee: 105, senderPay: true, unspentOutput: outputs[2])  // in range using dust, with fee
     }
 
-    func validExactlyTest(value: Int, feeRate: Int, fee: Int, senderPay: Bool, output: Output) {
+    func validExactlyTest(value: Int, feeRate: Int, fee: Int, senderPay: Bool, unspentOutput: UnspentOutput) {
         do {
             let selectedOutputs = try unspentOutputSelector.select(value: value, feeRate: feeRate, senderPay: senderPay, unspentOutputs: outputs)
-            XCTAssertEqual(selectedOutputs.outputs, [output])
-            XCTAssertEqual(selectedOutputs.totalValue, output.value)
+            XCTAssertEqual(selectedOutputs.unspentOutputs, [unspentOutput])
+            XCTAssertEqual(selectedOutputs.totalValue, unspentOutput.output.value)
             XCTAssertEqual(selectedOutputs.fee, fee)
             XCTAssertEqual(selectedOutputs.addChangeOutput, false)
         } catch {
@@ -58,7 +57,7 @@ class UnspentOutputSelectorTests: XCTestCase {
     func testSummaryValueReceiverPay() {
         do {
             let selectedOutputs = try unspentOutputSelector.select(value: 7000, feeRate: 1, senderPay: false, unspentOutputs: outputs)
-            XCTAssertEqual(selectedOutputs.outputs, [outputs[0], outputs[1], outputs[2]])
+            XCTAssertEqual(selectedOutputs.unspentOutputs, [outputs[0], outputs[1], outputs[2]])
             XCTAssertEqual(selectedOutputs.totalValue, 7000)
             XCTAssertEqual(selectedOutputs.fee, 100)
             XCTAssertEqual(selectedOutputs.addChangeOutput, false)
@@ -71,7 +70,7 @@ class UnspentOutputSelectorTests: XCTestCase {
         // with change output
         do {
             let selectedOutputs = try unspentOutputSelector.select(value: 7000, feeRate: 1, senderPay: true, unspentOutputs: outputs)
-            XCTAssertEqual(selectedOutputs.outputs, [outputs[0], outputs[1], outputs[2], outputs[3]])
+            XCTAssertEqual(selectedOutputs.unspentOutputs, [outputs[0], outputs[1], outputs[2], outputs[3]])
             XCTAssertEqual(selectedOutputs.totalValue, 15000)
             XCTAssertEqual(selectedOutputs.fee, 100)
             XCTAssertEqual(selectedOutputs.addChangeOutput, true)
@@ -82,7 +81,7 @@ class UnspentOutputSelectorTests: XCTestCase {
         do {
             let expectedFee = 100 + 10 + 2  // fee for tx + fee for change input + fee for change output
             let selectedOutputs = try unspentOutputSelector.select(value: 15000 - expectedFee, feeRate: 1, senderPay: true, unspentOutputs: outputs)
-            XCTAssertEqual(selectedOutputs.outputs, [outputs[0], outputs[1], outputs[2], outputs[3]])
+            XCTAssertEqual(selectedOutputs.unspentOutputs, [outputs[0], outputs[1], outputs[2], outputs[3]])
             XCTAssertEqual(selectedOutputs.totalValue, 15000)
             XCTAssertEqual(selectedOutputs.fee, expectedFee)
             XCTAssertEqual(selectedOutputs.addChangeOutput, false)

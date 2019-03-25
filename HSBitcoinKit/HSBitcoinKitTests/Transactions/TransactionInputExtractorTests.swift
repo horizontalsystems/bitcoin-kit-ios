@@ -1,12 +1,12 @@
 import XCTest
 import Cuckoo
-import RealmSwift
 @testable import HSBitcoinKit
 
 class TransactionInputExtractorTests: XCTestCase {
 
     private var addressConverter: MockIAddressConverter!
     private var scriptConverter: MockIScriptConverter!
+    private var storage: MockIStorage!
 
     private var extractor: TransactionInputExtractor!
 
@@ -15,8 +15,12 @@ class TransactionInputExtractorTests: XCTestCase {
 
         addressConverter = MockIAddressConverter()
         scriptConverter = MockIScriptConverter()
+        storage = MockIStorage()
+        stub(storage) { mock in
+            when(mock.previousOutput(ofInput: any())).thenReturn(nil)
+        }
 
-        extractor = TransactionInputExtractor(scriptConverter: scriptConverter, addressConverter: addressConverter)
+        extractor = TransactionInputExtractor(storage: storage, scriptConverter: scriptConverter, addressConverter: addressConverter)
 
         stub(scriptConverter) { mock in
             when(mock.decode(data: any())).thenThrow(ScriptError.wrongScriptLength)
@@ -27,6 +31,7 @@ class TransactionInputExtractorTests: XCTestCase {
         extractor = nil
         addressConverter = nil
         scriptConverter = nil
+        storage = nil
 
         super.tearDown()
     }

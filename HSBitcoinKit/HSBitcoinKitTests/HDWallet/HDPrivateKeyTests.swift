@@ -1,7 +1,6 @@
 import XCTest
 import Cuckoo
 import HSHDWalletKit
-import RealmSwift
 @testable import HSBitcoinKit
 
 class HDPrivateKeyTests: XCTestCase {

@@ -1,25 +1,28 @@
 import XCTest
 import Cuckoo
-import RealmSwift
 @testable import HSBitcoinKit
 
 class TransactionOutputAddressExtractorTests: XCTestCase {
     private var extractor: TransactionOutputAddressExtractor!
     private var mockAddressConverter: MockIAddressConverter!
+    private var mockStorage: MockIStorage!
 
-    private var transaction: Transaction!
+    private var transaction: FullTransaction!
 
     override func setUp() {
         super.setUp()
 
         mockAddressConverter = MockIAddressConverter()
-        extractor = TransactionOutputAddressExtractor(addressConverter: mockAddressConverter)
+        mockStorage = MockIStorage()
+        extractor = TransactionOutputAddressExtractor(storage: mockStorage, addressConverter: mockAddressConverter)
         transaction = TestData.p2pkhTransaction
     }
 
     override func tearDown() {
         extractor = nil
         transaction = nil
+        mockStorage = nil
+        mockAddressConverter = nil
 
         super.tearDown()
     }

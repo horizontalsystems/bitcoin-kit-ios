@@ -44,7 +44,7 @@ enum ScriptType: Int, DatabaseValueConvertible {
 class Output: Record {
 
     var value: Int
-    let lockingScript: Data
+    var lockingScript: Data
     var index: Int
     var transactionHashReversedHex: String = ""
     var publicKeyPath: String? = nil

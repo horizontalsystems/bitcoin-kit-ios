@@ -1,6 +1,5 @@
 import XCTest
 import Cuckoo
-import RealmSwift
 @testable import HSBitcoinKit
 
 class AddressConverterTests: XCTestCase {

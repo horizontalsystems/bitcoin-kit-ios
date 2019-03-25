@@ -3,18 +3,30 @@ import Cuckoo
 @testable import HSBitcoinKit
 
 class BlockHelperTests: XCTestCase {
+    private var mockStorage: MockIStorage!
     private var blockHelper: BlockHelper!
     private var firstBlock: Block!
 
     override func setUp() {
         super.setUp()
-        blockHelper = BlockHelper()
+        mockStorage = MockIStorage()
+
+        stub(mockStorage) { mock in
+            when(mock.block(byHashHex: TestData.checkpointBlock.previousBlockHashReversedHex)).thenReturn(nil)
+            when(mock.block(byHashHex: TestData.checkpointBlock.headerHashReversedHex)).thenReturn(TestData.checkpointBlock)
+            when(mock.block(byHashHex: TestData.firstBlock.headerHashReversedHex)).thenReturn(TestData.firstBlock)
+            when(mock.block(byHashHex: TestData.secondBlock.headerHashReversedHex)).thenReturn(TestData.secondBlock)
+            when(mock.block(byHashHex: TestData.thirdBlock.headerHashReversedHex)).thenReturn(TestData.thirdBlock)
+        }
 
         firstBlock = TestData.thirdBlock
-        firstBlock.header?.timestamp = 1000
+        firstBlock.timestamp = 1000
+
+        blockHelper = BlockHelper(storage: mockStorage)
     }
 
     override func tearDown() {
+        mockStorage = nil
         blockHelper = nil
         firstBlock = nil
 
@@ -25,32 +37,20 @@ class BlockHelperTests: XCTestCase {
         let block = TestData.thirdBlock
 
         XCTAssertEqual(blockHelper.previous(for: block, index: 1)?.headerHashReversedHex, TestData.secondBlock.headerHashReversedHex)
-        XCTAssertEqual(blockHelper.previous(for: block, index: 4), nil)
+        XCTAssertNil(blockHelper.previous(for: block, index: 4))
     }
 
     func testPreviousWindow() {
         let block = TestData.secondBlock
 
         XCTAssertEqual(blockHelper.previousWindow(for: block, count: 2)?.map { $0.headerHashReversedHex }, [TestData.checkpointBlock.headerHashReversedHex, TestData.firstBlock.headerHashReversedHex])
-        XCTAssertEqual(blockHelper.previousWindow(for: block, count: 3), nil)
+        XCTAssertNil(blockHelper.previousWindow(for: block, count: 3))
     }
 
     func testWrongPrevious() {
         let block = TestData.checkpointBlock
 
-        XCTAssertEqual(blockHelper.previous(for: block, index: 1), nil)
-    }
-
-    func chain(from firstBlock: Block, length: Int, timeInterval: Int = 100) -> Block {
-        var currentBlock = firstBlock
-        for _ in 0..<length {
-            let header = BlockHeader()
-            header.timestamp = (currentBlock.header?.timestamp ?? 0) + timeInterval
-            let block = Block(withHeader: header, previousBlock: currentBlock)
-
-            currentBlock = block
-        }
-        return currentBlock
+        XCTAssertNil(blockHelper.previous(for: block, index: 1))
     }
 
     func testMedianTimePast() {
@@ -65,7 +65,9 @@ class BlockHelperTests: XCTestCase {
     }
 
     func testMedianTimePastFor3() {
-        firstBlock.previousBlock = nil
+        stub(mockStorage) { mock in
+            when(mock.block(byHashHex: firstBlock.previousBlockHashReversedHex)).thenReturn(nil)
+        }
         let block = chain(from: firstBlock, length: 2)
 
         do {
@@ -76,18 +78,23 @@ class BlockHelperTests: XCTestCase {
         }
     }
 
-    func testNoHeader() {
-        let block = chain(from: firstBlock, length: 11)
-        block.previousBlock?.header = nil
+    private func chain(from firstBlock: Block, length: Int, timeInterval: Int = 100) -> Block {
+        var currentBlock = firstBlock
 
-        do {
-            let _ = try blockHelper.medianTimePast(block: block)
-            XCTFail("noHeader exception not thrown")
-        } catch let error as Block.BlockError {
-            XCTAssertEqual(error, Block.BlockError.noHeader)
-        } catch {
-            XCTFail("Unknown exception thrown")
+        stub(mockStorage) { mock in
+            for _ in 0..<length {
+                let header = BlockHeader(version: 0, previousBlockHeaderHash: Data(from: currentBlock.timestamp + timeInterval),
+                        merkleRoot: Data(), timestamp: currentBlock.timestamp + timeInterval, bits: 0, nonce: 0)
+                let block = Block(withHeader: header, previousBlock: currentBlock)
+
+                currentBlock.setHeaderHash(hash: block.previousBlockHashReversedHex.reversedData!)
+                when(mock.block(byHashHex: currentBlock.headerHashReversedHex)).thenReturn(currentBlock)
+
+                currentBlock = block
+            }
         }
+
+        return currentBlock
     }
 
 }

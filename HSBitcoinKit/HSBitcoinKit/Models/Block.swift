@@ -3,16 +3,16 @@ import GRDB
 
 class Block: Record {
 
-    let version: Int
+    var version: Int
     var previousBlockHashReversedHex: String
-    let merkleRoot: Data
-    let timestamp: Int
-    let bits: Int
-    let nonce: Int
+    var merkleRoot: Data
+    var timestamp: Int
+    var bits: Int
+    var nonce: Int
 
-    let headerHashReversedHex: String
-    let headerHash: Data
-    let height: Int
+    var headerHashReversedHex: String
+    var headerHash: Data
+    var height: Int
     var stale: Bool = false
 
     func previousBlock(storage: IStorage) -> Block? {

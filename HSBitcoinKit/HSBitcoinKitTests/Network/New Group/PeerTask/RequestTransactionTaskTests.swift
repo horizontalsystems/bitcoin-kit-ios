@@ -7,7 +7,7 @@ class RequestTransactionTaskTests: XCTestCase {
     private var mockRequester: MockIPeerTaskRequester!
     private var mockDelegate: MockIPeerTaskDelegate!
 
-    private var transactions: [Transaction]!
+    private var transactions: [FullTransaction]!
     private var task: RequestTransactionsTask!
 
     override func setUp() {
@@ -27,7 +27,7 @@ class RequestTransactionTaskTests: XCTestCase {
             TestData.p2wpkhTransaction,
             TestData.p2pkhTransaction
         ]
-        task = RequestTransactionsTask(hashes: transactions.map { $0.dataHash })
+        task = RequestTransactionsTask(hashes: transactions.map { $0.header.dataHash })
 
         task.requester = mockRequester
         task.delegate = mockDelegate
@@ -46,7 +46,7 @@ class RequestTransactionTaskTests: XCTestCase {
         verify(mockRequester).getData(items: equal(to: [], equalWhen: { value, given in
             return given.filter { inv in
                 return self.transactions.contains { transaction in
-                    return transaction.dataHash == inv.hash
+                    return transaction.header.dataHash == inv.hash
                 }
             }.count == given.count
         }))
@@ -92,12 +92,6 @@ class RequestTransactionTaskTests: XCTestCase {
 
         XCTAssertEqual(handled, false)
         verifyNoMoreInteractions(mockDelegate)
-    }
-
-    func testIsRequestingInventory() {
-        XCTAssertEqual(task.isRequestingInventory(hash: transactions[0].dataHash), true)
-        XCTAssertEqual(task.isRequestingInventory(hash: transactions[1].dataHash), true)
-        XCTAssertEqual(task.isRequestingInventory(hash: Data(from: 10000000)), false)
     }
 
 }

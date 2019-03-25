@@ -7,7 +7,7 @@ class SendTransactionTaskTests:XCTestCase {
     private var mockRequester: MockIPeerTaskRequester!
     private var mockDelegate: MockIPeerTaskDelegate!
 
-    private var transaction: Transaction!
+    private var transaction: FullTransaction!
     private var task: SendTransactionTask!
 
     override func setUp() {
@@ -41,23 +41,23 @@ class SendTransactionTaskTests:XCTestCase {
     func testStart() {
         task.start()
 
-        verify(mockRequester).sendTransactionInventory(hash: equal(to: transaction.dataHash))
+        verify(mockRequester).sendTransactionInventory(hash: equal(to: transaction.header.dataHash))
     }
 
     func testHandleGetData() {
-        let inv = InventoryItem(type: InventoryItem.ObjectType.transaction.rawValue, hash: transaction.dataHash)
+        let inv = InventoryItem(type: InventoryItem.ObjectType.transaction.rawValue, hash: transaction.header.dataHash)
 
         let handled = task.handle(getDataInventoryItem: inv)
 
         XCTAssertEqual(handled, true)
-        verify(mockRequester).send(transaction: equal(to: transaction, equalWhen: { $0.dataHash == $1.dataHash }))
+        verify(mockRequester).send(transaction: equal(to: transaction, equalWhen: { $0.header.dataHash == $1.header.dataHash }))
         verify(mockDelegate).handle(completedTask: equal(to: task))
         verifyNoMoreInteractions(mockRequester)
         verifyNoMoreInteractions(mockDelegate)
     }
 
     func testHandleGetData_NotTransactionInventory() {
-        let inv = InventoryItem(type: InventoryItem.ObjectType.blockMessage.rawValue, hash: transaction.dataHash)
+        let inv = InventoryItem(type: InventoryItem.ObjectType.blockMessage.rawValue, hash: transaction.header.dataHash)
 
         let handled = task.handle(getDataInventoryItem: inv)
 

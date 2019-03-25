@@ -1,6 +1,5 @@
 import XCTest
 import Cuckoo
-import RealmSwift
 @testable import HSBitcoinKit
 
 class TransactionOutputExtractorTests: XCTestCase {
@@ -8,7 +7,7 @@ class TransactionOutputExtractorTests: XCTestCase {
 
     private var mockPublicKeySetter: MockITransactionPublicKeySetter!
 
-    private var transaction: Transaction!
+    private var transaction: FullTransaction!
 
     override func setUp() {
         super.setUp()
@@ -36,7 +35,7 @@ class TransactionOutputExtractorTests: XCTestCase {
         transaction.outputs[0].lockingScript = Data(hex: "76a9141ec865abcb88cec71c484d4dadec3d7dc0271a7b88ac")!
 
         extractor.extract(transaction: transaction)
-        XCTAssertEqual(transaction.isMine, false)
+        XCTAssertEqual(transaction.header.isMine, false)
         XCTAssertEqual(transaction.outputs[0].keyHash, keyHash)
         XCTAssertEqual(transaction.outputs[0].scriptType, ScriptType.p2pkh)
     }
@@ -49,7 +48,7 @@ class TransactionOutputExtractorTests: XCTestCase {
         transaction.outputs[0].lockingScript = Data(hex: "76a9141ec865abcb88cec71c484d4dadec3d7dc0271a7b88ac")!
 
         extractor.extract(transaction: transaction)
-        XCTAssertEqual(transaction.isMine, true)
+        XCTAssertEqual(transaction.header.isMine, true)
         XCTAssertEqual(transaction.outputs[0].keyHash, keyHash)
         XCTAssertEqual(transaction.outputs[0].scriptType, ScriptType.p2pkh)
     }

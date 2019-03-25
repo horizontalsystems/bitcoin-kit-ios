@@ -1,6 +1,5 @@
 import XCTest
 import Cuckoo
-import RealmSwift
 @testable import HSBitcoinKit
 
 class BitcoinCashMainNetTests: XCTestCase {
@@ -17,7 +16,7 @@ class BitcoinCashMainNetTests: XCTestCase {
         mockBlockHelper = MockIBlockHelper()
         stub(mockBlockHelper) { mock in
             when(mock.medianTimePast(block: any())).thenReturn(0)
-            when(mock.previous(for: any(), index: any())).thenReturn(Block())
+            when(mock.previous(for: any(), index: any())).thenReturn(TestData.checkpointBlock)
         }
         mockNetwork = BitcoinCashMainNet(validatorFactory: mockValidatorHelper.mockFactory, blockHelper: mockBlockHelper)
     }
@@ -34,7 +33,7 @@ class BitcoinCashMainNetTests: XCTestCase {
         let block = TestData.firstBlock
         block.height = 4032
         do {
-            try mockNetwork.validate(block: block, previousBlock: block.previousBlock!)
+            try mockNetwork.validate(block: block, previousBlock: TestData.checkpointBlock)
             verify(mockValidatorHelper.mockHeaderValidator, times(1)).validate(candidate: any(), block: any(), network: any())
             verify(mockValidatorHelper.mockLegacyValidator, times(1)).validate(candidate: any(), block: any(), network: any())
             verify(mockValidatorHelper.mockEDAValidator, never()).validate(candidate: any(), block: any(), network: any())
@@ -47,7 +46,7 @@ class BitcoinCashMainNetTests: XCTestCase {
     func testValidateLegacyBits() {
         let block = TestData.firstBlock
         do {
-            try mockNetwork.validate(block: block, previousBlock: block.previousBlock!)
+            try mockNetwork.validate(block: block, previousBlock: TestData.checkpointBlock)
             verify(mockValidatorHelper.mockHeaderValidator, times(1)).validate(candidate: any(), block: any(), network: any())
             verify(mockValidatorHelper.mockLegacyValidator, never()).validate(candidate: any(), block: any(), network: any())
             verify(mockValidatorHelper.mockEDAValidator, times(1)).validate(candidate: any(), block: any(), network: any())
@@ -63,7 +62,7 @@ class BitcoinCashMainNetTests: XCTestCase {
         }
         let block = TestData.firstBlock
         do {
-            try mockNetwork.validate(block: block, previousBlock: block.previousBlock!)
+            try mockNetwork.validate(block: block, previousBlock: TestData.checkpointBlock)
             verify(mockValidatorHelper.mockHeaderValidator, times(1)).validate(candidate: any(), block: any(), network: any())
             verify(mockValidatorHelper.mockLegacyValidator, never()).validate(candidate: any(), block: any(), network: any())
             verify(mockValidatorHelper.mockEDAValidator, never()).validate(candidate: any(), block: any(), network: any())

@@ -1,6 +1,5 @@
 import XCTest
 import Cuckoo
-import RealmSwift
 @testable import HSBitcoinKit
 
 class BitcoinMainNetTests:XCTestCase {
@@ -26,7 +25,7 @@ class BitcoinMainNetTests:XCTestCase {
         let block = TestData.firstBlock
         block.height = 4032
         do {
-            try mockNetwork.validate(block: block, previousBlock: block.previousBlock!)
+            try mockNetwork.validate(block: block, previousBlock: TestData.checkpointBlock)
             verify(mockValidatorHelper.mockHeaderValidator, times(1)).validate(candidate: any(), block: any(), network: any())
             verify(mockValidatorHelper.mockLegacyValidator, times(1)).validate(candidate: any(), block: any(), network: any())
             verify(mockValidatorHelper.mockBitsValidator, never()).validate(candidate: any(), block: any(), network: any())
@@ -38,7 +37,7 @@ class BitcoinMainNetTests:XCTestCase {
     func testValidateLegacyBits() {
         let block = TestData.firstBlock
         do {
-            try mockNetwork.validate(block: block, previousBlock: block.previousBlock!)
+            try mockNetwork.validate(block: block, previousBlock: TestData.checkpointBlock)
             verify(mockValidatorHelper.mockHeaderValidator, times(1)).validate(candidate: any(), block: any(), network: any())
             verify(mockValidatorHelper.mockLegacyValidator, never()).validate(candidate: any(), block: any(), network: any())
             verify(mockValidatorHelper.mockBitsValidator, times(1)).validate(candidate: any(), block: any(), network: any())

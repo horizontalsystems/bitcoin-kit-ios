@@ -1,9 +1,9 @@
 import XCTest
 import Cuckoo
-import RealmSwift
 @testable import HSBitcoinKit
 
 class MerkleBlockValidatorTests: XCTestCase {
+    private var mockStorage: MockIStorage!
     private var validator: MerkleBlockValidator!
     private var blockHeader: BlockHeader!
     private var totalTransactions: UInt32!
@@ -15,8 +15,10 @@ class MerkleBlockValidatorTests: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        blockHeader = BlockHeader()
-        blockHeader.merkleRoot = Data(hex: "2368b4465fe95716f7e8d510eafb26ee72cb843610fe0f38cfdc60561e0b50b2")!
+        mockStorage = MockIStorage()
+        blockHeader = BlockHeader(version: 0, previousBlockHeaderHash: Data(),
+                merkleRoot: Data(hex: "2368b4465fe95716f7e8d510eafb26ee72cb843610fe0f38cfdc60561e0b50b2")!,
+                timestamp: 0, bits: 0, nonce: 0)
 
         totalTransactions = 309
         numberOfHashes = 10
@@ -41,6 +43,8 @@ class MerkleBlockValidatorTests: XCTestCase {
     }
 
     override func tearDown() {
+        mockStorage = nil
+
         super.tearDown()
     }
 
@@ -80,8 +84,9 @@ class MerkleBlockValidatorTests: XCTestCase {
     }
 
     func testWrongMerkleRoot() {
-        blockHeader = BlockHeader()
-        blockHeader.merkleRoot = Data(hex: "0000000000000000000000000000000000000000000000000000000000000001")!
+        blockHeader = BlockHeader(version: 0, previousBlockHeaderHash: Data(),
+                merkleRoot: Data(hex: "0000000000000000000000000000000000000000000000000000000000000001")!,
+                timestamp: 0, bits: 0, nonce: 0)
 
         var caught = false
         do {
