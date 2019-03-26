@@ -2,12 +2,12 @@ import RxSwift
 import GRDB
 import RealmSwift
 
-class GrdbStorage {
-    private let dbPool: DatabasePool
+public class GrdbStorage {
+    let dbPool: DatabasePool
 
     private let realmFactory: IRealmFactory
 
-    init(databaseFileName: String, realmFactory: IRealmFactory) {
+    public init(databaseFileName: String, realmFactory: IRealmFactory) {
         self.realmFactory = realmFactory
 
         let databaseURL = try! FileManager.default

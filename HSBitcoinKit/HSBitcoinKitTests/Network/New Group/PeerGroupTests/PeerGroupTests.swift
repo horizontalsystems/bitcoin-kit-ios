@@ -12,6 +12,8 @@ class PeerGroupTests: XCTestCase {
     internal var mockNetwork: MockINetwork!
     internal var mockListener: MockISyncStateListener!
     internal var mockReachabilityManager: MockIReachabilityManager!
+    internal var mockNetworkMessageParser: MockINetworkMessageParser!
+    internal var mockNetworkMessageSerializer: MockINetworkMessageSerializer!
     internal var mockPeerAddressManager: MockIPeerAddressManager!
     internal var mockBloomFilterManager: MockIBloomFilterManager!
     internal var mockPeerManager: MockIPeerManager!
@@ -31,6 +33,8 @@ class PeerGroupTests: XCTestCase {
         mockNetwork = MockINetwork()
         mockListener = MockISyncStateListener()
         mockReachabilityManager = MockIReachabilityManager()
+        mockNetworkMessageParser = MockINetworkMessageParser()
+        mockNetworkMessageSerializer = MockINetworkMessageSerializer()
         mockPeerAddressManager = MockIPeerAddressManager()
         mockBloomFilterManager = MockIBloomFilterManager()
         mockPeerManager = MockIPeerManager()
@@ -45,7 +49,7 @@ class PeerGroupTests: XCTestCase {
             peers[hostString] = mockPeer
 
             stub(mockFactory) { mock in
-                when(mock.peer(withHost: equal(to: hostString), network: any(), logger: any())).thenReturn(mockPeer)
+                when(mock.peer(withHost: equal(to: hostString), network: any(), networkMessageParser: any(), networkMessageSerializer: any(), logger: any())).thenReturn(mockPeer)
             }
         }
         resetStubsAndInvocationsOfPeers()
@@ -94,7 +98,7 @@ class PeerGroupTests: XCTestCase {
         }
 
         peerGroup = PeerGroup(
-                factory: mockFactory, network: mockNetwork, listener: mockListener, reachabilityManager: mockReachabilityManager, peerAddressManager: mockPeerAddressManager, bloomFilterManager: mockBloomFilterManager,
+                factory: mockFactory, network: mockNetwork, networkMessageParser: mockNetworkMessageParser, networkMessageSerializer: mockNetworkMessageSerializer, listener: mockListener, reachabilityManager: mockReachabilityManager, peerAddressManager: mockPeerAddressManager, bloomFilterManager: mockBloomFilterManager,
                 peerCount: peersCount, peerManager: mockPeerManager,
                 peersQueue: DispatchQueue.main, inventoryQueue: DispatchQueue.main
         )

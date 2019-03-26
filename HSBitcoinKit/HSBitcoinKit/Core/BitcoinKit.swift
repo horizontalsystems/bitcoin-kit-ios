@@ -14,6 +14,9 @@ public class BitcoinKit {
     private var transactionsNotificationToken: NotificationToken?
     private var blocksNotificationToken: NotificationToken?
 
+    let hasher: IHasher & IMerkleHasher
+    let merkleBranch: IMerkleBranch
+
     private let difficultyEncoder: IDifficultyEncoder
     private let blockHelper: IBlockHelper
     private let validatorFactory: IBlockValidatorFactory
@@ -79,11 +82,12 @@ public class BitcoinKit {
     var networkMessageParser: INetworkMessageParser
     var networkMessageSerializer: INetworkMessageSerializer
 
-    public init(withWords words: [String], coin: Coin, walletId: String, newWallet: Bool = false, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) {
-        let databaseFileName = "\(walletId)-\(coin.rawValue)"
+    public init(withWords words: [String], coin: Coin, storage: GrdbStorage, realFactory: RealmFactory, newWallet: Bool = false, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) {
+        realmFactory = realFactory
+        self.storage = storage
 
-        realmFactory = RealmFactory(realmFileName: "\(databaseFileName).realm")
-        storage = GrdbStorage(databaseFileName: databaseFileName, realmFactory: realmFactory)
+        hasher = MerkleRootHasher()
+        merkleBranch = MerkleBranch(hasher: hasher)
 
         difficultyEncoder = DifficultyEncoder()
         blockHelper = BlockHelper()
@@ -96,29 +100,29 @@ public class BitcoinKit {
             paymentAddressParser = PaymentAddressParser(validScheme: "bitcoin", removeScheme: true)
             switch networkType {
             case .mainNet:
-                network = BitcoinMainNet(validatorFactory: validatorFactory)
+                network = BitcoinMainNet(validatorFactory: validatorFactory, merkleBranch: merkleBranch)
             case .testNet:
-                network = BitcoinTestNet(validatorFactory: validatorFactory)
+                network = BitcoinTestNet(validatorFactory: validatorFactory, merkleBranch: merkleBranch)
             case .regTest:
-                network = BitcoinRegTest(validatorFactory: validatorFactory)
+                network = BitcoinRegTest(validatorFactory: validatorFactory, merkleBranch: merkleBranch)
             }
         case .bitcoinCash(let networkType):
             bech32AddressConverter = CashBech32AddressConverter()
             paymentAddressParser = PaymentAddressParser(validScheme: "bitcoincash", removeScheme: false)
             switch networkType {
             case .mainNet:
-                network = BitcoinCashMainNet(validatorFactory: validatorFactory, blockHelper: blockHelper)
+                network = BitcoinCashMainNet(validatorFactory: validatorFactory, blockHelper: blockHelper, merkleBranch: merkleBranch)
             case .testNet, .regTest:
-                network = BitcoinCashTestNet(validatorFactory: validatorFactory)
+                network = BitcoinCashTestNet(validatorFactory: validatorFactory, merkleBranch: merkleBranch)
             }
         case .dash(let networkType):
             bech32AddressConverter = nil
             paymentAddressParser = PaymentAddressParser(validScheme: "dash", removeScheme: true)
             switch networkType {
             case .mainNet:
-                network = DashMainNet(validatorFactory: validatorFactory, blockHelper: blockHelper)
+                network = DashMainNet(validatorFactory: validatorFactory, blockHelper: blockHelper, merkleBranch: merkleBranch)
             case .testNet, .regTest:
-                network = DashTestNet(validatorFactory: validatorFactory, blockHelper: blockHelper)
+                network = DashTestNet(validatorFactory: validatorFactory, blockHelper: blockHelper, merkleBranch: merkleBranch)
             }
         }
         addressConverter = AddressConverter(network: network, bech32AddressConverter: bech32AddressConverter)

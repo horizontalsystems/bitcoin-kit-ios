@@ -1,5 +1,5 @@
 class MasternodeListSyncer: IMasternodeListSyncer {
-    var successor: IPeerTaskHandler?
+    private var successor: IPeerTaskHandler?
 
     let peerGroup: IPeerGroup
     let peerTaskFactory: IPeerTaskFactory
@@ -24,12 +24,12 @@ class MasternodeListSyncer: IMasternodeListSyncer {
 
 extension MasternodeListSyncer: IPeerTaskHandler {
 
-    func set(successor: IPeerTaskHandler) -> IPeerTaskHandler {
+    @discardableResult func set(successor: IPeerTaskHandler) -> IPeerTaskHandler {
         self.successor = successor
         return self
     }
 
-    func attach(to element: IPeerTaskHandler) -> IPeerTaskHandler {
+    @discardableResult func attach(to element: IPeerTaskHandler) -> IPeerTaskHandler {
         return element.set(successor: self)
     }
 

@@ -1,4 +1,3 @@
-
 import XCTest
 import Cuckoo
 import RealmSwift

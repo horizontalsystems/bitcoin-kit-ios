@@ -60,13 +60,13 @@ class DashTestNet: INetwork {
                 ),
                 height: 55032)
     }
-    required init(validatorFactory: IBlockValidatorFactory, blockHelper: IBlockHelper) {
+    required init(validatorFactory: IBlockValidatorFactory, blockHelper: IBlockHelper, merkleBranch: IMerkleBranch) {
         self.blockHelper = blockHelper
 
         headerValidator = validatorFactory.validator(for: .header)
         difficultyValidator = validatorFactory.validator(for: .DGW)
 
-        merkleBlockValidator = MerkleBlockValidator(maxBlockSize: 1_000_000_000)
+        merkleBlockValidator = MerkleBlockValidator(maxBlockSize: 1_000_000_000, merkleBranch: merkleBranch)
     }
 
     func validate(block: Block, previousBlock: Block) throws {

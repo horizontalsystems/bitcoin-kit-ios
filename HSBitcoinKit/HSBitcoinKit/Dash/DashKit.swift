@@ -11,13 +11,31 @@ public class DashKit {
 
     public weak var delegate: DashKitDelegate?
     private let bitcoinKit: BitcoinKit
+    private let storage: IDashStorage
+
     private let dashConfigurator: IBitCoreConfigurator
+
     private let masternodeSyncer: MasternodeListSyncer
+    private let masternodeListManager: MasternodeListManager
+    private let masternodeListMerkleRootCalculator: MasternodeListMerkleRootCalculator
 
     public init(withWords words: [String], coin: BitcoinKit.Coin, walletId: String, newWallet: Bool = true, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) {
-        bitcoinKit = BitcoinKit(withWords: words, coin: coin, walletId: walletId, newWallet: newWallet, confirmationsThreshold: confirmationsThreshold, minLogLevel: minLogLevel)
+        let databaseFileName = "\(walletId)-\(coin.rawValue)"
 
-        let masternodeListManager = MasternodeListManager()
+        let realmFactory = RealmFactory(realmFileName: "\(databaseFileName).realm")
+        let storage = DashGrdbStorage(databaseFileName: databaseFileName, realmFactory: realmFactory)
+        self.storage = storage
+
+        bitcoinKit = BitcoinKit(withWords: words, coin: coin, storage: storage, realFactory: realmFactory, newWallet: newWallet, confirmationsThreshold: confirmationsThreshold, minLogLevel: minLogLevel)
+
+        let masternodeSerializer = MasternodeSerializer()
+        let coinbaseTransactionSerializer = CoinbaseTransactionSerializer()
+        let masternodeCbTxHasher = MasternodeCbTxHasher(coinbaseTransactionSerializer: coinbaseTransactionSerializer, hasher: bitcoinKit.hasher)
+        let masternodeMerkleRootCreator = MerkleRootCreator(hasher: bitcoinKit.hasher)
+
+        masternodeListMerkleRootCalculator = MasternodeListMerkleRootCalculator(masternodeSerializer: masternodeSerializer, masternodeHasher: bitcoinKit.hasher, masternodeMerkleRootCreator: masternodeMerkleRootCreator)
+        masternodeListManager = MasternodeListManager(storage: storage, masternodeListMerkleRootCalculator: masternodeListMerkleRootCalculator, masternodeCbTxHasher: masternodeCbTxHasher, merkleBranch: bitcoinKit.merkleBranch)
+
         masternodeSyncer = MasternodeListSyncer(peerGroup: bitcoinKit.peerGroup, peerTaskFactory: PeerTaskFactory(), masternodeListManager: masternodeListManager)
         dashConfigurator = DashConfigurator(transactionSyncer: bitcoinKit.transactionSyncer, masternodeSyncer: masternodeSyncer, bitCoreConfigurator: bitcoinKit.bitCoreConfigurator)
         bitcoinKit.delegate = self
@@ -100,6 +118,12 @@ extension DashKit: BitcoinKitDelegate {
 
     public func lastBlockInfoUpdated(bitcoinKit: BitcoinKit, lastBlockInfo: BlockInfo) {
         self.delegate?.lastBlockInfoUpdated(BitcoinKit: bitcoinKit, lastBlockInfo: lastBlockInfo)
+        if (bitcoinKit.syncState == BitcoinKit.KitState.synced) {
+            if let hash = lastBlockInfo.headerHash.reversedData {
+                masternodeSyncer.sync(blockHash: hash)
+            }
+        }
+
     }
 
     public func kitStateUpdated(state: BitcoinKit.KitState) {

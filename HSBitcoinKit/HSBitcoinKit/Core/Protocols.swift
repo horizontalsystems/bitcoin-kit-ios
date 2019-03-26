@@ -26,7 +26,7 @@ protocol IBlockValidatorFactory {
     func validator(for validatorType: BlockValidatorType) -> IBlockValidator
 }
 
-protocol IRealmFactory {
+public protocol IRealmFactory {
     var realm: Realm { get }
 }
 
@@ -474,6 +474,10 @@ protocol INetwork: class {
 
 protocol IMerkleBlockValidator: class {
     func merkleBlock(from message: MerkleBlockMessage) throws -> MerkleBlock
+}
+
+protocol IMerkleBranch: class {
+    func calculateMerkleRoot(txCount: Int, hashes: [Data], flags: [UInt8]) throws -> (merkleRoot: Data, matchedHashes: [Data])
 }
 
 extension INetwork {

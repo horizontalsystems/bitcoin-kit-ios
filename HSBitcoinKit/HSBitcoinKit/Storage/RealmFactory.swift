@@ -1,9 +1,9 @@
 import RealmSwift
 
-class RealmFactory {
+public class RealmFactory {
     private let configuration: Realm.Configuration
 
-    init(realmFileName: String) {
+    public init(realmFileName: String) {
         let documentsUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
 
         configuration = Realm.Configuration(
@@ -25,7 +25,7 @@ class RealmFactory {
 
 extension RealmFactory: IRealmFactory {
 
-    var realm: Realm {
+    public var realm: Realm {
         return try! Realm(configuration: configuration)
     }
 

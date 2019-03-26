@@ -59,12 +59,12 @@ class BitcoinMainNet: INetwork {
                 height: 564480)
     }
 
-    required init(validatorFactory: IBlockValidatorFactory) {
+    required init(validatorFactory: IBlockValidatorFactory, merkleBranch: IMerkleBranch) {
         headerValidator = validatorFactory.validator(for: .header)
         bitsValidator = validatorFactory.validator(for: .bits)
         difficultyValidator = validatorFactory.validator(for: .legacy)
 
-        merkleBlockValidator = MerkleBlockValidator(maxBlockSize: 1_000_000)
+        merkleBlockValidator = MerkleBlockValidator(maxBlockSize: 1_000_000, merkleBranch: merkleBranch)
     }
 
     func validate(block: Block, previousBlock: Block) throws {

@@ -6,8 +6,8 @@ class DashConfigurator: IBitCoreConfigurator {
 
     init(transactionSyncer: ITransactionSyncer, masternodeSyncer: IPeerTaskHandler, bitCoreConfigurator: IBitCoreConfigurator) {
         self.bitCoreConfigurator = bitCoreConfigurator
-        instantSend = InstantSend(transactionSyncer: transactionSyncer)
         self.masternodeSyncer = masternodeSyncer
+        instantSend = InstantSend(transactionSyncer: transactionSyncer)
     }
 
     var networkMessageParsers: MessageParsers {

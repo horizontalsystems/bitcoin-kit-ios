@@ -59,14 +59,14 @@ class BitcoinCashMainNet: INetwork {
 
 //    var targetTimeSpan: Int { return 24 * 60 * 60 }                     // Seconds in Bitcoin cycle
 
-    required init(validatorFactory: IBlockValidatorFactory, blockHelper: IBlockHelper) {
+    required init(validatorFactory: IBlockValidatorFactory, blockHelper: IBlockHelper, merkleBranch: IMerkleBranch) {
         self.blockHelper = blockHelper
         headerValidator = validatorFactory.validator(for: .header)
         legacyDifficultyValidator = validatorFactory.validator(for: .legacy)
         dAAValidator = validatorFactory.validator(for: .DAA)
         eDAValidator = validatorFactory.validator(for: .EDA)
 
-        merkleBlockValidator = MerkleBlockValidator(maxBlockSize: 32 * 1024 * 1024)
+        merkleBlockValidator = MerkleBlockValidator(maxBlockSize: 32 * 1024 * 1024, merkleBranch: merkleBranch)
     }
 
     func validate(block: Block, previousBlock: Block) throws {

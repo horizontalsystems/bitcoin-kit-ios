@@ -55,10 +55,10 @@ class BitcoinRegTest: INetwork {
                 height: 0)
     }
 
-    required init(validatorFactory: IBlockValidatorFactory) {
+    required init(validatorFactory: IBlockValidatorFactory, merkleBranch: IMerkleBranch) {
         headerValidator = validatorFactory.validator(for: .header)
 
-        merkleBlockValidator = MerkleBlockValidator(maxBlockSize: 1_000_000)
+        merkleBlockValidator = MerkleBlockValidator(maxBlockSize: 1_000_000, merkleBranch: merkleBranch)
     }
 
     func validate(block: Block, previousBlock: Block) throws {
