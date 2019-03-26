@@ -177,14 +177,11 @@ class TestData {
     }
 
     static func pubKey(pubKeyHash: Data = Data(hex: "1ec865abcb88cec71c484d4dadec3d7dc0271a7b")!) -> PublicKey {
-        let pubKey = PublicKey(withAccount: 0, index: 0, external: true, hdPublicKeyData: pubKeyHash)
-
-        return pubKey
+        return PublicKey(withAccount: 0, index: 0, external: true, hdPublicKeyData: pubKeyHash)
     }
 
     static func input(previousTransaction: Transaction, previousOutput: Output, script: Data, sequence: Int) -> Input {
-        let input = Input(withPreviousOutputTxReversedHex: previousTransaction.dataHashReversedHex, previousOutputIndex: previousOutput.index, script: script, sequence: sequence)
-        return input
+        return Input(withPreviousOutputTxReversedHex: previousTransaction.dataHashReversedHex, previousOutputIndex: previousOutput.index, script: script, sequence: sequence)
     }
 
     static func unspentOutput(output: Output) -> UnspentOutput {

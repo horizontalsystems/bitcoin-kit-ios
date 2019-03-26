@@ -1,3 +1,5 @@
+import HSCryptoKit
+
 struct BlockHeader {
 
     let version: Int
@@ -14,6 +16,21 @@ struct FullTransaction {
     let header: Transaction
     let inputs: [Input]
     let outputs: [Output]
+
+    init(header: Transaction, inputs: [Input], outputs: [Output]) {
+        self.header = header
+        self.inputs = inputs
+        self.outputs = outputs
+
+        self.header.dataHash = CryptoKit.sha256sha256(TransactionSerializer.serialize(transaction: self, withoutWitness: true))
+        self.header.dataHashReversedHex = self.header.dataHash.reversedHex
+        for input in self.inputs {
+            input.transactionHashReversedHex = self.header.dataHashReversedHex
+        }
+        for output in self.outputs {
+            output.transactionHashReversedHex = self.header.dataHashReversedHex
+        }
+    }
 
 }
 

@@ -22,9 +22,9 @@ class BloomFilterManager {
         ]
     }
 
-    private func needToSetToBloomFilter(output: OutputWithPublicKey, bestBlockHeight: Int) -> Bool {
+    private func needToSetToBloomFilter(output: Output, bestBlockHeight: Int) -> Bool {
         // Need to set if output is unspent
-        let inputs = storage.inputsWithBlock(ofOutput: output.output)
+        let inputs = storage.inputsWithBlock(ofOutput: output)
         if inputs.count == 0 {
             return true
         }
@@ -57,13 +57,13 @@ extension BloomFilterManager: IBloomFilterManager {
 
         if let bestBlockHeight = storage.lastBlock?.height {
             outputs = outputs.filter {
-                self.needToSetToBloomFilter(output: $0, bestBlockHeight: bestBlockHeight)
+                self.needToSetToBloomFilter(output: $0.output, bestBlockHeight: bestBlockHeight)
             }
         }
 
-        for output in outputs {
-            if let transaction = output.output.transaction(storage: storage) {
-                let outpoint = transaction.dataHash + byteArrayLittleEndian(int: output.output.index)
+        for outputWithPublicKey in outputs {
+            if let transactionHash = outputWithPublicKey.output.transactionHashReversedHex.reversedData {
+                let outpoint = transactionHash + byteArrayLittleEndian(int: outputWithPublicKey.output.index)
                 elements.append(outpoint)
             }
         }

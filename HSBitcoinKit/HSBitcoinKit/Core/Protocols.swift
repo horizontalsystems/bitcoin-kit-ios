@@ -104,7 +104,7 @@ protocol IStorage {
 
 
     func transaction(byHashHex: String) -> Transaction?
-    func transactions() -> [Transaction]
+    func transactions(sortedBy: Transaction.Columns, secondSortedBy: Transaction.Columns, ascending: Bool) -> [Transaction]
     func transactions(ofBlock: Block) -> [Transaction]
     func newTransactions() -> [Transaction]
     func newTransaction(byReversedHashHex: String) -> Transaction?

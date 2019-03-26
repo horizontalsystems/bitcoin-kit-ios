@@ -3,10 +3,10 @@ import GRDB
 
 class Input: Record {
 
-    let previousOutputTxReversedHex: String
-    let previousOutputIndex: Int
+    var previousOutputTxReversedHex: String
+    var previousOutputIndex: Int
     var signatureScript: Data
-    let sequence: Int
+    var sequence: Int
     var transactionHashReversedHex = ""
     var keyHash: Data? = nil
     var address: String? = nil

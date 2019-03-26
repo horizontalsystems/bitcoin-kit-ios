@@ -106,18 +106,7 @@ class TransactionSerializer {
 
         transaction.lockTime = Int(byteStream.read(UInt32.self))
 
-        let fullTransaction = FullTransaction(header: transaction, inputs: inputs, outputs: outputs)
-
-        fullTransaction.header.dataHash = CryptoKit.sha256sha256(serialize(transaction: fullTransaction, withoutWitness: true))
-        fullTransaction.header.dataHashReversedHex = transaction.dataHash.reversedHex
-        for input in fullTransaction.inputs {
-            input.transactionHashReversedHex = fullTransaction.header.dataHashReversedHex
-        }
-        for output in fullTransaction.outputs {
-            output.transactionHashReversedHex = fullTransaction.header.dataHashReversedHex
-        }
-
-        return fullTransaction
+        return FullTransaction(header: transaction, inputs: inputs, outputs: outputs)
     }
 
 }

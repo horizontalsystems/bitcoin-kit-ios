@@ -25,10 +25,10 @@ class Transaction: Record {
         return storage.block(byHashHex: blockHash)
     }
 
-    init(version: Int = 0, lockTime: Int = 0) {
+    init(version: Int = 0, lockTime: Int = 0, timestamp: Int? = nil) {
         self.version = version
         self.lockTime = lockTime
-        self.timestamp = Int(Date().timeIntervalSince1970)
+        self.timestamp = timestamp ?? Int(Date().timeIntervalSince1970)
         self.order = 0
         self.dataHash = Data()
         self.dataHashReversedHex = dataHash.reversedHex

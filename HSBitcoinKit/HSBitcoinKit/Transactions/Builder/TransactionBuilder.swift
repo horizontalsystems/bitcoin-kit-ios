@@ -2,7 +2,6 @@ import HSCryptoKit
 
 class TransactionBuilder {
     enum BuildError: Error {
-        case noPreviousTransaction
         case noChangeAddress
         case feeMoreThanValue
     }
@@ -116,19 +115,7 @@ extension TransactionBuilder: ITransactionBuilder {
         transaction.isMine = true
         transaction.isOutgoing = true
 
-        let fullTransaction = FullTransaction(header: transaction, inputs: inputsToSign.map{ $0.input }, outputs: outputs)
-
-        fullTransaction.header.dataHash = CryptoKit.sha256sha256(TransactionSerializer.serialize(transaction: fullTransaction, withoutWitness: true))
-        fullTransaction.header.dataHashReversedHex = transaction.dataHash.reversedHex
-        for input in fullTransaction.inputs {
-            input.transactionHashReversedHex = fullTransaction.header.dataHashReversedHex
-        }
-        for output in fullTransaction.outputs {
-            output.transactionHashReversedHex = fullTransaction.header.dataHashReversedHex
-        }
-
-
-        return fullTransaction
+        return FullTransaction(header: transaction, inputs: inputsToSign.map{ $0.input }, outputs: outputs)
     }
 
 }

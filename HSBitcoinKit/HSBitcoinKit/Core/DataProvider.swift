@@ -137,7 +137,7 @@ extension DataProvider: IDataProvider {
 
     func transactions(fromHash: String?, limit: Int?) -> Single<[TransactionInfo]> {
         return Single.create { observer in
-            var transactions = self.storage.transactions()
+            var transactions = self.storage.transactions(sortedBy: Transaction.Columns.timestamp, secondSortedBy:  Transaction.Columns.order, ascending: false)
 
             if let fromHash = fromHash, let fromTransaction = self.storage.transaction(byHashHex: fromHash) {
                 transactions = transactions.filter { transaction in
@@ -178,7 +178,7 @@ extension DataProvider: IDataProvider {
     var debugInfo: String {
         var lines = [String]()
 
-        let transactions = storage.transactions()
+        let transactions = storage.transactions(sortedBy: Transaction.Columns.timestamp, secondSortedBy: Transaction.Columns.order, ascending: false)
         let pubKeys = storage.publicKeys()
 
         for pubKey in pubKeys {

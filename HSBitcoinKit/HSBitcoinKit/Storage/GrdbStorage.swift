@@ -448,9 +448,17 @@ extension GrdbStorage: IStorage {
         }
     }
 
-    func transactions() -> [Transaction] {
+    func transactions(sortedBy: Transaction.Columns, secondSortedBy: Transaction.Columns, ascending: Bool) -> [Transaction] {
         return try! read { db in
-            try Transaction.order([Transaction.Columns.timestamp.desc, Transaction.Columns.order.desc]).fetchAll(db)
+            var sortItems = [SQLOrderingTerm]()
+
+            if ascending {
+                sortItems.append(contentsOf: [sortedBy.asc, secondSortedBy.asc])
+            } else {
+                sortItems.append(contentsOf: [sortedBy.desc, secondSortedBy.desc])
+            }
+
+            return try Transaction.order(sortItems).fetchAll(db)
         }
     }
 

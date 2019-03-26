@@ -34,7 +34,18 @@ class TransactionProcessor {
         return false
     }
 
-    func relay(transaction: Transaction, withOrder order: Int, inBlock block: Block?) {
+    private func process(transaction: FullTransaction) {
+        outputExtractor.extract(transaction: transaction)
+        linker.handle(transaction: transaction)
+
+        guard transaction.header.isMine else {
+            return
+        }
+        outputAddressExtractor.extractOutputAddresses(transaction: transaction)
+        inputExtractor.extract(transaction: transaction)
+    }
+
+    private func relay(transaction: Transaction, withOrder order: Int, inBlock block: Block?) {
         transaction.blockHashReversedHex = block?.headerHashReversedHex
         transaction.status = .relayed
         transaction.timestamp = block?.timestamp ?? Int(dateGenerator().timeIntervalSince1970)
@@ -89,17 +100,6 @@ extension TransactionProcessor: ITransactionProcessor {
         process(transaction: transaction)
         try storage.add(transaction: transaction)
         listener?.onUpdate(updated: [], inserted: [transaction.header])
-    }
-
-    private func process(transaction: FullTransaction) {
-        outputExtractor.extract(transaction: transaction)
-        linker.handle(transaction: transaction)
-
-        guard transaction.header.isMine else {
-            return
-        }
-        outputAddressExtractor.extractOutputAddresses(transaction: transaction)
-        inputExtractor.extract(transaction: transaction)
     }
 
 }
