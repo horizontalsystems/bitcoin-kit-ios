@@ -38,36 +38,12 @@ class BitsValidatorTests: XCTestCase {
     }
 
     func testNotEqualBits() {
-        candidate.header!.bits = 3
+        candidate.bits = 3
         do {
             try validator.validate(candidate: candidate, block: block, network: network)
             XCTFail("notEqualBits exception not thrown")
         } catch let error as BlockValidatorError {
             XCTAssertEqual(error, BlockValidatorError.notEqualBits)
-        } catch {
-            XCTFail("Unknown exception thrown")
-        }
-    }
-
-    func testNoCandidateHeader() {
-        candidate.header = nil
-        do {
-            try validator.validate(candidate: candidate, block: block, network: network)
-            XCTFail("noHeader exception not thrown")
-        } catch let error as Block.BlockError {
-            XCTAssertEqual(error, Block.BlockError.noHeader)
-        } catch {
-            XCTFail("Unknown exception thrown")
-        }
-    }
-
-    func testNoBlockHeader() {
-        block.header = nil
-        do {
-            try validator.validate(candidate: candidate, block: block, network: network)
-            XCTFail("noHeader exception not thrown")
-        } catch let error as Block.BlockError {
-            XCTAssertEqual(error, Block.BlockError.noHeader)
         } catch {
             XCTFail("Unknown exception thrown")
         }

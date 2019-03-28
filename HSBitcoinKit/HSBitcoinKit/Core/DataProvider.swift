@@ -1,6 +1,5 @@
 import Foundation
 import HSHDWalletKit
-import RealmSwift
 import RxSwift
 import BigInt
 import HSCryptoKit
@@ -8,7 +7,6 @@ import HSCryptoKit
 class DataProvider {
     private let disposeBag = DisposeBag()
 
-    private let realmFactory: IRealmFactory
     private let storage: IStorage
     private let addressManager: IAddressManager
     private let addressConverter: IAddressConverter
@@ -31,8 +29,7 @@ class DataProvider {
 
     weak var delegate: IDataProviderDelegate?
 
-    init(realmFactory: IRealmFactory, storage: IStorage, addressManager: IAddressManager, addressConverter: IAddressConverter, paymentAddressParser: IPaymentAddressParser, unspentOutputProvider: IUnspentOutputProvider, transactionCreator: ITransactionCreator, transactionBuilder: ITransactionBuilder, network: INetwork, debounceTime: Double = 0.5) {
-        self.realmFactory = realmFactory
+    init(storage: IStorage, addressManager: IAddressManager, addressConverter: IAddressConverter, paymentAddressParser: IPaymentAddressParser, unspentOutputProvider: IUnspentOutputProvider, transactionCreator: ITransactionCreator, transactionBuilder: ITransactionBuilder, network: INetwork, debounceTime: Double = 0.5) {
         self.storage = storage
         self.addressManager = addressManager
         self.addressConverter = addressConverter
@@ -42,7 +39,7 @@ class DataProvider {
         self.transactionBuilder = transactionBuilder
         self.network = network
         self.balance = unspentOutputProvider.balance
-        self.lastBlockInfo = realmFactory.realm.objects(Block.self).sorted(byKeyPath: "height").last.map { blockInfo(fromBlock: $0) }
+        self.lastBlockInfo = storage.lastBlock.map { blockInfo(fromBlock: $0) }
 
         balanceUpdateSubject.debounce(debounceTime, scheduler: ConcurrentDispatchQueueScheduler(qos: .background)).subscribe(onNext: {
             self.balance = unspentOutputProvider.balance
@@ -55,24 +52,25 @@ class DataProvider {
         var fromAddresses = [TransactionAddressInfo]()
         var toAddresses = [TransactionAddressInfo]()
 
-        for input in transaction.inputs {
-            if let previousOutput = input.previousOutput {
-                if previousOutput.publicKey != nil {
+        for input in storage.inputs(ofTransaction: transaction) {
+            var mine = false
+
+            if let previousOutput = storage.previousOutput(ofInput: input) {
+                if previousOutput.publicKeyPath != nil {
                     totalMineInput += previousOutput.value
+                    mine = true
                 }
             }
-
-            let mine = input.previousOutput?.publicKey != nil
 
             if let address = input.address {
                 fromAddresses.append(TransactionAddressInfo(address: address, mine: mine))
             }
         }
 
-        for output in transaction.outputs {
+        for output in storage.outputs(ofTransaction: transaction) {
             var mine = false
 
-            if output.publicKey != nil {
+            if output.publicKeyPath != nil {
                 totalMineOutput += output.value
                 mine = true
             }
@@ -85,20 +83,20 @@ class DataProvider {
         let amount = totalMineOutput - totalMineInput
 
         return TransactionInfo(
-                transactionHash: transaction.reversedHashHex,
+                transactionHash: transaction.dataHashReversedHex,
                 from: fromAddresses,
                 to: toAddresses,
                 amount: amount,
-                blockHeight: transaction.block?.height,
+                blockHeight: transaction.block(storage: storage)?.height,
                 timestamp: transaction.timestamp
         )
     }
 
     private func blockInfo(fromBlock block: Block) -> BlockInfo {
         return BlockInfo(
-                headerHash: block.reversedHeaderHashHex,
+                headerHash: block.headerHashReversedHex,
                 height: block.height,
-                timestamp: block.header?.timestamp
+                timestamp: block.timestamp
         )
     }
 
@@ -112,7 +110,7 @@ extension DataProvider: IBlockchainDataListener {
 
     func onUpdate(updated: [Transaction], inserted: [Transaction]) {
         delegate?.transactionsUpdated(inserted: inserted.map { transactionInfo(fromTransaction: $0) },
-                                      updated: updated.map { transactionInfo(fromTransaction: $0) })
+                updated: updated.map { transactionInfo(fromTransaction: $0) })
 
         balanceUpdateSubject.onNext(())
     }
@@ -139,27 +137,20 @@ extension DataProvider: IDataProvider {
 
     func transactions(fromHash: String?, limit: Int?) -> Single<[TransactionInfo]> {
         return Single.create { observer in
-            let realm = self.realmFactory.realm
-            var transactions = realm.objects(Transaction.self)
-                    .sorted(by: [SortDescriptor(keyPath: "timestamp", ascending: false), SortDescriptor(keyPath: "order", ascending: false)])
+            var transactions = self.storage.transactions(sortedBy: Transaction.Columns.timestamp, secondSortedBy:  Transaction.Columns.order, ascending: false)
 
-            if let fromHash = fromHash, let fromTransaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", fromHash).first {
-                transactions = transactions.filter(
-                        "timestamp < %@ OR (timestamp = %@ AND order < %@)",
-                        fromTransaction.timestamp,
-                        fromTransaction.timestamp,
-                        fromTransaction.order
-                )
+            if let fromHash = fromHash, let fromTransaction = self.storage.transaction(byHashHex: fromHash) {
+                transactions = transactions.filter { transaction in
+                    return transaction.timestamp < fromTransaction.timestamp ||
+                            (transaction.timestamp == fromTransaction.timestamp && transaction.order < fromTransaction.order)
+                }
             }
 
-            let results: [Transaction]
             if let limit = limit {
-                results = Array(transactions.prefix(limit))
-            } else {
-                results = Array(transactions)
+                transactions = Array(transactions.prefix(limit))
             }
 
-            observer(.success(results.map() { self.transactionInfo(fromTransaction: $0) }))
+            observer(.success(transactions.map() { self.transactionInfo(fromTransaction: $0) }))
             return Disposables.create()
         }
     }
@@ -187,11 +178,8 @@ extension DataProvider: IDataProvider {
     var debugInfo: String {
         var lines = [String]()
 
-        let realm = realmFactory.realm
-
-        let blocks = realm.objects(Block.self).sorted(byKeyPath: "height")
-        let transactions = realm.objects(Transaction.self)
-        let pubKeys = realm.objects(PublicKey.self)
+        let transactions = storage.transactions(sortedBy: Transaction.Columns.timestamp, secondSortedBy: Transaction.Columns.order, ascending: false)
+        let pubKeys = storage.publicKeys()
 
         for pubKey in pubKeys {
             var bechAddress: String?
@@ -206,12 +194,12 @@ extension DataProvider: IDataProvider {
         }
         lines.append("PUBLIC KEYS COUNT: \(pubKeys.count)")
         lines.append("TRANSACTIONS COUNT: \(transactions.count)")
-        lines.append("BLOCK COUNT: \(blocks.count)")
-        if let block = blocks.first {
-            lines.append("First Block: \(block.height) --- \(block.reversedHeaderHashHex)")
+        lines.append("BLOCK COUNT: \(storage.blocksCount)")
+        if let block = storage.firstBlock {
+            lines.append("First Block: \(block.height) --- \(block.headerHashReversedHex)")
         }
-        if let block = blocks.last {
-            lines.append("Last Block: \(block.height) --- \(block.reversedHeaderHashHex)")
+        if let block = storage.lastBlock {
+            lines.append("Last Block: \(block.height) --- \(block.headerHashReversedHex)")
         }
 
         return lines.joined(separator: "\n")

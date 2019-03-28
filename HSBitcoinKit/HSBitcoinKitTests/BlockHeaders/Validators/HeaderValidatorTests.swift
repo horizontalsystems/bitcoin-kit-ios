@@ -40,7 +40,7 @@ class HeaderValidatorTests: XCTestCase {
     }
 
     func testWrongPreviousHeaderHash() {
-        candidate.header!.previousBlockHeaderHash = Data(hex: "da1a")!
+        candidate.previousBlockHashReversedHex = Data(hex: "da1a")!.reversedHex
         do {
             try validator.validate(candidate: candidate, block: block, network: network)
             XCTFail("wrongPreviousHeaderHash exception not thrown")
@@ -52,24 +52,12 @@ class HeaderValidatorTests: XCTestCase {
     }
 
     func testWrongProofOfWork_nBitsLessThanHeaderHash() {
-        candidate.header!.bits = DifficultyEncoder().encodeCompact(from: BigInt(candidate.reversedHeaderHashHex, radix: 16)! - 1)
+        candidate.bits = DifficultyEncoder().encodeCompact(from: BigInt(candidate.headerHashReversedHex, radix: 16)! - 1)
         do {
             try validator.validate(candidate: candidate, block: block, network: network)
             XCTFail("invalidProveOfWork exception not thrown")
         } catch let error as BlockValidatorError {
             XCTAssertEqual(error, BlockValidatorError.invalidProveOfWork)
-        } catch {
-            XCTFail("Unknown exception thrown")
-        }
-    }
-
-    func testNoCandidateHeader() {
-        candidate.header = nil
-        do {
-            try validator.validate(candidate: candidate, block: block, network: network)
-            XCTFail("noHeader exception not thrown")
-        } catch let error as Block.BlockError {
-            XCTAssertEqual(error, Block.BlockError.noHeader)
         } catch {
             XCTFail("Unknown exception thrown")
         }

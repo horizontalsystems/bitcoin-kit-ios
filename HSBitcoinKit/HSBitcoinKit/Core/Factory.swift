@@ -8,16 +8,21 @@ class Factory: IFactory {
         return Block(withHeader: header, height: height)
     }
 
-    func transaction(version: Int, inputs: [TransactionInput], outputs: [TransactionOutput], lockTime: Int) -> Transaction {
-        return Transaction(version: version, inputs: inputs, outputs: outputs, lockTime: lockTime)
+    func transaction(version: Int, lockTime: Int) -> Transaction {
+        return Transaction(version: version, lockTime: lockTime)
     }
 
-    func transactionInput(withPreviousOutputTxReversedHex previousOutputTxReversedHex: String, previousOutputIndex: Int, script: Data, sequence: Int) -> TransactionInput {
-        return TransactionInput(withPreviousOutputTxReversedHex: previousOutputTxReversedHex, previousOutputIndex: previousOutputIndex, script: script, sequence: sequence)
+    func inputToSign(withPreviousOutput previousOutput: UnspentOutput, script: Data, sequence: Int) -> InputToSign {
+        let input = Input(
+                withPreviousOutputTxReversedHex: previousOutput.output.transactionHashReversedHex, previousOutputIndex: previousOutput.output.index,
+                script: script, sequence: sequence
+        )
+
+        return InputToSign(input: input, previousOutput: previousOutput.output, previousOutputPublicKey: previousOutput.publicKey)
     }
 
-    func transactionOutput(withValue value: Int, index: Int, lockingScript script: Data = Data(), type: ScriptType = .unknown, address: String? = nil, keyHash: Data? = nil, publicKey: PublicKey? = nil) -> TransactionOutput {
-        return TransactionOutput(withValue: value, index: index, lockingScript: script, type: type, address: address, keyHash: keyHash, publicKey: publicKey)
+    func output(withValue value: Int, index: Int, lockingScript script: Data = Data(), type: ScriptType, address: String?, keyHash: Data?, publicKey: PublicKey?) -> Output {
+        return Output(withValue: value, index: index, lockingScript: script, type: type, address: address, keyHash: keyHash, publicKey: publicKey)
     }
 
     func peer(withHost host: String, network: INetwork, logger: Logger? = nil) -> IPeer {

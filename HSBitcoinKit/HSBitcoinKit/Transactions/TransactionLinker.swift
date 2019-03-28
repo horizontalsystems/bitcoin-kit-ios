@@ -1,23 +1,19 @@
-import RealmSwift
-
 class TransactionLinker: ITransactionLinker {
 
-    func handle(transaction: Transaction, realm: Realm) {
+    private let storage: IStorage
+
+    init(storage: IStorage) {
+        self.storage = storage
+    }
+
+    func handle(transaction: FullTransaction) {
         for input in transaction.inputs {
-            if let previousTransaction = realm.objects(Transaction.self).filter("reversedHashHex = %@", input.previousOutputTxReversedHex).last {
-                if previousTransaction.outputs.count <= input.previousOutputIndex {
-                    continue
-                }
-
-                let previousOutput = previousTransaction.outputs[input.previousOutputIndex]
-                if previousOutput.publicKey == nil {
-                    continue
-                }
-
-                input.previousOutput = previousOutput
-                transaction.isMine = true
-                transaction.isOutgoing = true
+            guard let previousOutput = storage.previousOutput(ofInput: input), let _ = previousOutput.publicKey(storage: storage) else {
+                continue
             }
+
+            transaction.header.isMine = true
+            transaction.header.isOutgoing = true
         }
     }
 

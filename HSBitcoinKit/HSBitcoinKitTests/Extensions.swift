@@ -11,6 +11,40 @@ extension XCTestCase {
 
 }
 
+public func equalErrors(_ lhs: Error?, _ rhs: Error?) -> Bool {
+    return lhs?.reflectedString == rhs?.reflectedString
+}
+
+
+public extension Error {
+    var reflectedString: String {
+        // NOTE 1: We can just use the standard reflection for our case
+        return String(reflecting: self)
+    }
+
+    // Same typed Equality
+    public func isEqual(to: Self) -> Bool {
+        return self.reflectedString == to.reflectedString
+    }
+
+}
+
+extension Block {
+
+    var header: BlockHeader {
+        return BlockHeader(
+                version: version, previousBlockHeaderHash: previousBlockHashReversedHex.reversedData!, merkleRoot: merkleRoot,
+                timestamp: timestamp, bits: bits, nonce: nonce
+        )
+    }
+
+    func setHeaderHash(hash: Data) {
+        headerHash = hash
+        headerHashReversedHex = hash.reversedHex
+    }
+
+}
+
 extension BitcoinKit.KitState: Equatable {
 
     public static func ==(lhs: BitcoinKit.KitState, rhs: BitcoinKit.KitState) -> Bool {
@@ -59,6 +93,54 @@ extension PeerAddress: Equatable {
 
     public static func ==(lhs: PeerAddress, rhs: PeerAddress) -> Bool {
         return lhs.ip == rhs.ip
+    }
+
+}
+
+extension PublicKey: Equatable {
+
+    public static func ==(lhs: PublicKey, rhs: PublicKey) -> Bool {
+        return lhs.path == rhs.path
+    }
+
+}
+
+extension Block: Equatable {
+
+    public static func ==(lhs: Block, rhs: Block) -> Bool {
+        return lhs.headerHash == rhs.headerHash
+    }
+
+}
+
+extension Transaction: Equatable {
+
+    public static func ==(lhs: Transaction, rhs: Transaction) -> Bool {
+        return lhs.dataHashReversedHex == rhs.dataHashReversedHex
+    }
+
+}
+
+extension BlockHeader: Equatable {
+
+    public static func ==(lhs: BlockHeader, rhs: BlockHeader) -> Bool {
+        return lhs.previousBlockHeaderHash == rhs.previousBlockHeaderHash && lhs.merkleRoot == rhs.merkleRoot
+    }
+
+}
+
+extension UnspentOutput: Equatable {
+
+    public static func ==(lhs: UnspentOutput, rhs: UnspentOutput) -> Bool {
+        return TransactionOutputSerializer.serialize(output: lhs.output) == TransactionOutputSerializer.serialize(output: rhs.output)
+    }
+
+}
+
+extension FullTransaction: Equatable {
+
+    public static func ==(lhs: FullTransaction, rhs: FullTransaction) -> Bool {
+        return TransactionSerializer.serialize(transaction: lhs) == TransactionSerializer.serialize(transaction: rhs)
     }
 
 }

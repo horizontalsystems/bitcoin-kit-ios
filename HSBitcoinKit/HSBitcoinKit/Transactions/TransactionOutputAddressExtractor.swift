@@ -2,9 +2,11 @@ import Foundation
 import HSCryptoKit
 
 class TransactionOutputAddressExtractor {
+    private let storage: IStorage
     private let addressConverter: IAddressConverter
 
-    init(addressConverter: IAddressConverter) {
+    init(storage: IStorage, addressConverter: IAddressConverter) {
+        self.storage = storage
         self.addressConverter = addressConverter
     }
 
@@ -12,7 +14,7 @@ class TransactionOutputAddressExtractor {
 
 extension TransactionOutputAddressExtractor: ITransactionOutputAddressExtractor {
 
-    public func extractOutputAddresses(transaction: Transaction) {
+    public func extractOutputAddresses(transaction: FullTransaction) {
         for output in transaction.outputs {
             guard let key = output.keyHash else {
                 continue
@@ -20,7 +22,7 @@ extension TransactionOutputAddressExtractor: ITransactionOutputAddressExtractor 
             let keyHash: Data
 
             switch output.scriptType {
-            case .p2pk: keyHash = output.publicKey?.keyHash ?? CryptoKit.sha256ripemd160(key)
+            case .p2pk: keyHash = output.publicKey(storage: storage)?.keyHash ?? CryptoKit.sha256ripemd160(key)
             default: keyHash = key
             }
 

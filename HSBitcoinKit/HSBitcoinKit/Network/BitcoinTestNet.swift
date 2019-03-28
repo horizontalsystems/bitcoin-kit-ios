@@ -37,8 +37,8 @@ class BitcoinTestNet: INetwork {
         return Block(
                 withHeader: BlockHeader(
                         version: 1,
-                        previousBlockHeaderReversedHex: "0000000000000000000000000000000000000000000000000000000000000000",
-                        merkleRootReversedHex: "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b",
+                        previousBlockHeaderHash: "0000000000000000000000000000000000000000000000000000000000000000".reversedData!,
+                        merkleRoot: "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b".reversedData!,
                         timestamp: 1296688602,
                         bits: 486604799,
                         nonce: 414098458
@@ -50,8 +50,8 @@ class BitcoinTestNet: INetwork {
         return Block(
                 withHeader: BlockHeader(
                         version: 2079170560,
-                        previousBlockHeaderReversedHex: "00000000000007524a71cc81cadbd1ddf9d38848fa8081ad2a72eade4b70d1c1",
-                        merkleRootReversedHex: "975b76235d1a9b97fbf4a4f203a762728fb404d568dd33921e328e2d5a712c46",
+                        previousBlockHeaderHash: "00000000000007524a71cc81cadbd1ddf9d38848fa8081ad2a72eade4b70d1c1".reversedData!,
+                        merkleRoot: "975b76235d1a9b97fbf4a4f203a762728fb404d568dd33921e328e2d5a712c46".reversedData!,
                         timestamp: 1550688527,
                         bits: 436465680,
                         nonce: 489544448
@@ -69,15 +69,11 @@ class BitcoinTestNet: INetwork {
     }
 
     func validate(block: Block, previousBlock: Block) throws {
-        guard let previousBlockHeader = previousBlock.header else {
-            throw Block.BlockError.noHeader
-        }
-
         try headerValidator.validate(candidate: block, block: previousBlock, network: self)
         if isDifficultyTransitionPoint(height: block.height) {
             try legacyDifficultyValidator.validate(candidate: block, block: previousBlock, network: self)
         } else {
-            if previousBlockHeader.timestamp > BitcoinTestNet.testNetDiffDate {
+            if previousBlock.timestamp > BitcoinTestNet.testNetDiffDate {
                 try testNetDifficultyValidator.validate(candidate: block, block: previousBlock, network: self)
             } else {
                 try bitsValidator.validate(candidate: block, block: previousBlock, network: self)

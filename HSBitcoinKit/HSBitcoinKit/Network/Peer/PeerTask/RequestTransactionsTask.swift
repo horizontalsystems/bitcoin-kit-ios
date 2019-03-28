@@ -3,7 +3,7 @@ import Foundation
 class RequestTransactionsTask: PeerTask {
 
     private var hashes: [Data]
-    var transactions = [Transaction]()
+    var transactions = [FullTransaction]()
 
     init(hashes: [Data]) {
         self.hashes = hashes
@@ -17,8 +17,8 @@ class RequestTransactionsTask: PeerTask {
         requester?.getData(items: items)
     }
 
-    override func handle(transaction: Transaction) -> Bool {
-        guard let index = hashes.index(where: { $0 == transaction.dataHash }) else {
+    override func handle(transaction: FullTransaction) -> Bool {
+        guard let index = hashes.index(where: { $0 == transaction.header.dataHash }) else {
             return false
         }
 

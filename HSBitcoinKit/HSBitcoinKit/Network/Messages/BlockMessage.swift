@@ -6,7 +6,7 @@ struct BlockMessage: IMessage {
     /// Number of transaction entries
     let transactionCount: VarInt
     /// Block transactions, in format of "tx" command
-    let transactions: [Transaction]
+    let transactions: [FullTransaction]
 
     init(data: Data) {
         let byteStream = ByteStream(data)
@@ -14,7 +14,7 @@ struct BlockMessage: IMessage {
         blockHeaderItem = BlockHeaderSerializer.deserialize(byteStream: byteStream)
         transactionCount = byteStream.read(VarInt.self)
 
-        var transactions = [Transaction]()
+        var transactions = [FullTransaction]()
         for _ in 0..<transactionCount.underlyingValue {
             transactions.append(TransactionSerializer.deserialize(byteStream: byteStream))
         }

@@ -80,9 +80,9 @@ class BlockHashFetcherTests: XCTestCase {
         do{
             let result = try resultObservable.toBlocking().first()
             XCTAssertEqual(2, result!.responses.count)
-            XCTAssertEqual("1234", result!.responses[0].reversedHeaderHashHex)
+            XCTAssertEqual("1234", result!.responses[0].headerHashReversedHex)
             XCTAssertEqual(1234, result!.responses[0].height)
-            XCTAssertEqual("5678", result!.responses[1].reversedHeaderHashHex)
+            XCTAssertEqual("5678", result!.responses[1].headerHashReversedHex)
             XCTAssertEqual(5678, result!.responses[1].height)
             XCTAssertEqual(lastUsedIndex, result!.lastUsedIndex)
         } catch {

@@ -28,8 +28,8 @@ class BitcoinCashTestNet: INetwork {
         return Block(
                 withHeader: BlockHeader(
                         version: 1,
-                        previousBlockHeaderReversedHex: "0000000000000000000000000000000000000000000000000000000000000000",
-                        merkleRootReversedHex: "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b",
+                        previousBlockHeaderHash: "0000000000000000000000000000000000000000000000000000000000000000".reversedData!,
+                        merkleRoot: "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b".reversedData!,
                         timestamp: 1296688602,
                         bits: 486604799,
                         nonce: 414098458
@@ -41,8 +41,8 @@ class BitcoinCashTestNet: INetwork {
         return Block(
                 withHeader: BlockHeader(
                         version: 536870912,
-                        previousBlockHeaderReversedHex: "000000000dea8d3a526bc2d7b3a26588935992a1a412a6c5c449ffaa41b070b0",
-                        merkleRootReversedHex: "dfa42c8fc3d8bac6d6fb51007128092f41d590ace1b3522af7062b8a848ebde7",
+                        previousBlockHeaderHash: "000000000dea8d3a526bc2d7b3a26588935992a1a412a6c5c449ffaa41b070b0".reversedData!,
+                        merkleRoot: "dfa42c8fc3d8bac6d6fb51007128092f41d590ace1b3522af7062b8a848ebde7".reversedData!,
                         timestamp: 1551085591,
                         bits: 486604799,
                         nonce: 1684221831

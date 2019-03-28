@@ -37,8 +37,8 @@ class GetMerkleBlocksTask: PeerTask {
         return true
     }
 
-    override func handle(transaction: Transaction) -> Bool {
-        if let index = pendingMerkleBlocks.index(where: { $0.transactionHashes.contains(transaction.dataHash) }) {
+    override func handle(transaction: FullTransaction) -> Bool {
+        if let index = pendingMerkleBlocks.index(where: { $0.transactionHashes.contains(transaction.header.dataHash) }) {
             resetTimer()
 
             let block = pendingMerkleBlocks[index]

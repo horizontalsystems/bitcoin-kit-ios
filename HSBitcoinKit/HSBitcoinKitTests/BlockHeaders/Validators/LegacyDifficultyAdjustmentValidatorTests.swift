@@ -35,18 +35,18 @@ class LegacyDifficultyAdjustmentValidatorTests: XCTestCase {
 
         checkPointBlock = TestData.checkpointBlock
         checkPointBlock.height = 40320
-        checkPointBlock.header?.bits = 476399191
-        checkPointBlock.header?.timestamp = 1266169979
+        checkPointBlock.bits = 476399191
+        checkPointBlock.timestamp = 1266169979
 
         block = TestData.firstBlock
         block.height = 40320 + 2015
-        block.header?.bits = 476399191
-        block.header?.timestamp = 1266978603
+        block.bits = 476399191
+        block.timestamp = 1266978603
 
         candidate = TestData.secondBlock
         candidate.height = 40320 + 2016
-        candidate.header?.bits = 474199013
-        candidate.header?.timestamp = 1266979264
+        candidate.bits = 474199013
+        candidate.timestamp = 1266979264
 
         stub(mockBlockHelper) { mock in
             when(mock.previous(for: any(), index: any())).thenReturn(checkPointBlock)
@@ -69,42 +69,6 @@ class LegacyDifficultyAdjustmentValidatorTests: XCTestCase {
             try validator.validate(candidate: candidate, block: block, network: mockNetwork)
         } catch let error {
             XCTFail("\(error) Exception Thrown")
-        }
-    }
-
-    func testNoCandidateHeader() {
-        candidate.header = nil
-        do {
-            try validator.validate(candidate: candidate, block: block, network: mockNetwork)
-            XCTFail("noHeader exception not thrown")
-        } catch let error as Block.BlockError {
-            XCTAssertEqual(error, Block.BlockError.noHeader)
-        } catch {
-            XCTFail("Unknown exception thrown")
-        }
-    }
-
-    func testNoBlockHeader() {
-        block.header = nil
-        do {
-            try validator.validate(candidate: candidate, block: block, network: mockNetwork)
-            XCTFail("noHeader exception not thrown")
-        } catch let error as Block.BlockError {
-            XCTAssertEqual(error, Block.BlockError.noHeader)
-        } catch {
-            XCTFail("Unknown exception thrown")
-        }
-    }
-
-    func testCheckPointNoBlockHeader() {
-        checkPointBlock.header = nil
-        do {
-            try validator.validate(candidate: candidate, block: block, network: mockNetwork)
-            XCTFail("noHeader exception not thrown")
-        } catch let error as Block.BlockError {
-            XCTAssertEqual(error, Block.BlockError.noHeader)
-        } catch {
-            XCTFail("Unknown exception thrown")
         }
     }
 

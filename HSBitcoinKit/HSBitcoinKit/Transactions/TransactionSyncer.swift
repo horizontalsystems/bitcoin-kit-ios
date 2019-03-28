@@ -1,5 +1,4 @@
 import Foundation
-import RealmSwift
 
 class TransactionSyncer {
     private let storage: IStorage
@@ -25,44 +24,44 @@ class TransactionSyncer {
 
 extension TransactionSyncer: ITransactionSyncer {
 
-    func pendingTransactions() -> [Transaction] {
-        let pendingTransactions = storage.newTransactions().filter { transaction in
-            if let sentTransaction = storage.sentTransaction(byReversedHashHex: transaction.reversedHashHex) {
-                return sentTransaction.retriesCount < self.maxRetriesCount &&
-                        sentTransaction.lastSendTime < CACurrentMediaTime() - self.retriesPeriod &&
-                        sentTransaction.firstSendTime > CACurrentMediaTime() - self.totalRetriesPeriod
-            } else {
-                return true
-            }
-        }
-
-        return Array(pendingTransactions)
+    func pendingTransactions() -> [FullTransaction] {
+        return storage.newTransactions()
+                .filter { transaction in
+                    if let sentTransaction = storage.sentTransaction(byReversedHashHex: transaction.dataHashReversedHex) {
+                        return sentTransaction.retriesCount < self.maxRetriesCount &&
+                                sentTransaction.lastSendTime < CACurrentMediaTime() - self.retriesPeriod &&
+                                sentTransaction.firstSendTime > CACurrentMediaTime() - self.totalRetriesPeriod
+                    } else {
+                        return true
+                    }
+                }
+                .map { FullTransaction(header: $0, inputs: self.storage.inputs(ofTransaction: $0), outputs: self.storage.outputs(ofTransaction: $0)) }
     }
 
-    func handle(sentTransaction transaction: Transaction) {
-        guard let transaction = storage.newTransaction(byReversedHashHex: transaction.reversedHashHex) else {
+    func handle(sentTransaction transaction: FullTransaction) {
+        guard let transaction = storage.newTransaction(byReversedHashHex: transaction.header.dataHashReversedHex) else {
             return
         }
 
-        if let sentTransaction = storage.sentTransaction(byReversedHashHex: transaction.reversedHashHex) {
+        if let sentTransaction = storage.sentTransaction(byReversedHashHex: transaction.dataHashReversedHex) {
             sentTransaction.lastSendTime = CACurrentMediaTime()
             sentTransaction.retriesCount = sentTransaction.retriesCount + 1
             storage.update(sentTransaction: sentTransaction)
         } else {
-            storage.add(sentTransaction: SentTransaction(reversedHashHex: transaction.reversedHashHex))
+            storage.add(sentTransaction: SentTransaction(hashReversedHex: transaction.dataHashReversedHex))
         }
     }
 
-    func handle(transactions: [Transaction]) {
+    func handle(transactions: [FullTransaction]) {
         guard !transactions.isEmpty else {
             return
         }
 
         var needToUpdateBloomFilter = false
 
-        try? storage.inTransaction { realm in
+        try? storage.inTransaction {
             do {
-                try self.transactionProcessor.process(transactions: transactions, inBlock: nil, skipCheckBloomFilter: false, realm: realm)
+                try self.transactionProcessor.processReceived(transactions: transactions, inBlock: nil, skipCheckBloomFilter: false)
             } catch _ as BloomFilterManager.BloomFilterExpired {
                 needToUpdateBloomFilter = true
             }

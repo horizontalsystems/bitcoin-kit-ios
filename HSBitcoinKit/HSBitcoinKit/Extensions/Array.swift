@@ -1,9 +1,10 @@
 import Foundation
+import GRDB
 
-extension Array where Element == Transaction {
+extension Array where Element == FullTransaction {
 
-    func inTopologicalOrder() -> [Transaction] {
-        var ordered = [Transaction]()
+    func inTopologicalOrder() -> [FullTransaction] {
+        var ordered = [FullTransaction]()
 
         var visited = [Bool](repeating: false, count: self.count)
 
@@ -14,8 +15,8 @@ extension Array where Element == Transaction {
         return ordered
     }
 
-    private func visit(transactionWithIndex transactionIndex: Int, picked: inout [Transaction], visited: inout [Bool]) {
-        guard !picked.contains(where: { self[transactionIndex].reversedHashHex == $0.reversedHashHex }) else {
+    private func visit(transactionWithIndex transactionIndex: Int, picked: inout [FullTransaction], visited: inout [Bool]) {
+        guard !picked.contains(where: { self[transactionIndex].header.dataHashReversedHex == $0.header.dataHashReversedHex }) else {
             return
         }
 
@@ -27,7 +28,7 @@ extension Array where Element == Transaction {
 
         for candidateTransactionIndex in 0..<self.count {
             for input in self[transactionIndex].inputs {
-                if input.previousOutputTxReversedHex == self[candidateTransactionIndex].reversedHashHex,
+                if input.previousOutputTxReversedHex == self[candidateTransactionIndex].header.dataHashReversedHex,
                    self[candidateTransactionIndex].outputs.count > input.previousOutputIndex {
                     visit(transactionWithIndex: candidateTransactionIndex, picked: &picked, visited: &visited)
                 }
@@ -46,4 +47,28 @@ extension Array where Element : Hashable {
         return Array(Set(self))
     }
 
+}
+
+extension Array: SQLExpressible where Element == Data {
+    
+    public var sqlExpression: SQLExpression {
+        return databaseValue
+    }
+    
+}
+
+extension Array: DatabaseValueConvertible where Element == Data {
+    
+    public var databaseValue: DatabaseValue {
+        return DataListSerializer.serialize(dataList: self).databaseValue
+    }
+    
+    public static func fromDatabaseValue(_ dbValue: DatabaseValue) -> Array<Element>? {
+        if case let DatabaseValue.Storage.blob(value) = dbValue.storage {
+            return DataListSerializer.deserialize(data: value)
+        }
+        
+        return nil
+    }
+    
 }
