@@ -28,11 +28,25 @@ class DashGrdbStorage: GrdbStorage {
             }
         }
 
+        migrator.registerMigration("createInstantTransactionOutputs") { db in
+            try db.create(table: InstantTransactionInput.databaseTableName) { t in
+                t.column(InstantTransactionInput.Columns.txHash.name, .text).notNull()
+                t.column(InstantTransactionInput.Columns.inputTxHash.name, .text).notNull()
+                t.column(InstantTransactionInput.Columns.timeCreated.name, .integer).notNull()
+                t.column(InstantTransactionInput.Columns.voteCount.name, .integer).notNull()
+                t.column(InstantTransactionInput.Columns.blockHeight.name, .integer)
+
+                t.primaryKey([InstantTransactionInput.Columns.inputTxHash.name], onConflict: .replace)
+            }
+        }
+
         return migrator
     }
+
 }
 
 extension DashGrdbStorage: IDashStorage {
+
 
     var masternodes: [Masternode] {
         get {
@@ -64,6 +78,24 @@ extension DashGrdbStorage: IDashStorage {
             _ = try? dbPool.write { db in
                 try newValue.insert(db)
             }
+        }
+    }
+
+    func instantTransactionInput(for inputTxHash: Data) -> InstantTransactionInput? {
+        return try! dbPool.read { db in
+            try InstantTransactionInput.filter(InstantTransactionInput.Columns.inputTxHash == inputTxHash).fetchOne(db)
+        }
+    }
+
+    func instantTransactionInputs(for txHash: Data) -> [InstantTransactionInput] {
+        return try! dbPool.read { db in
+            try InstantTransactionInput.filter(InstantTransactionInput.Columns.txHash == txHash).fetchAll(db)
+        }
+    }
+
+    func add(instantTransactionInput: InstantTransactionInput) {
+        _ = try? dbPool.write { db in
+            try instantTransactionInput.insert(db)
         }
     }
 

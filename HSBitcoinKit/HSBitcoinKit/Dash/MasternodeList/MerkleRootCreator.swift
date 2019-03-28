@@ -1,4 +1,9 @@
 class MerkleRootCreator: IMerkleRootCreator {
+    private struct MerkleChunk {
+        let first: Data
+        let last: Data
+    }
+
     let hasher: IMerkleHasher
 
     init(hasher: IMerkleHasher) {
@@ -9,30 +14,28 @@ class MerkleRootCreator: IMerkleRootCreator {
         guard !hashes.isEmpty else {
             return nil
         }
+        var tmpHashes = hashes
+        repeat {
+            tmpHashes = joinHashes(hashes: tmpHashes)
+        } while tmpHashes.count > 1
+        
+        return tmpHashes.first
+    }
 
-        let hashesCount = hashes.count
+    private func joinHashes(hashes: [Data]) -> [Data] {
+        let chunks = chunked(data: hashes, into: 2)
 
-        var roundCount = hashesCount == 1 ? 1 : Int(log2(Double(hashesCount)))
-        if hashesCount - roundCount > 0 {
-            roundCount += 1
+        return chunks.map {
+            hasher.hash(left: $0.first, right: $0.last)
         }
+    }
 
-        var hashes = hashes
-        for _ in 0..<roundCount {
-            let hashesCount = hashes.count
-            // make list even
-            if hashesCount % 2 == 1 {
-                hashes.append(hashes[hashesCount - 1])
-            }
-
-            var newHashes = [Data]()
-            for i in 0..<(hashes.count / 2) {
-                newHashes.append(hasher.hash(left: hashes[2 * i], right: hashes[2 * i + 1]))
-            }
-            hashes = newHashes
+    private func chunked(data: [Data], into size: Int) -> [MerkleChunk] {
+        let count = data.count
+        return stride(from: 0, to: count, by: size).map {
+            let upperBound = max($0, min($0 + size, count) - 1)
+            return MerkleChunk(first: data[$0], last: data[upperBound])
         }
-
-        return hashes.first
     }
 
 }

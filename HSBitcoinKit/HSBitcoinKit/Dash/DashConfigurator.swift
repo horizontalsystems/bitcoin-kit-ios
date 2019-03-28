@@ -4,10 +4,11 @@ class DashConfigurator: IBitCoreConfigurator {
     let instantSend: IPeerTaskHandler & IInventoryItemsHandler
     let masternodeSyncer: IPeerTaskHandler
 
-    init(transactionSyncer: ITransactionSyncer, masternodeSyncer: IPeerTaskHandler, bitCoreConfigurator: IBitCoreConfigurator) {
+    init(instantTransactionManager: IInstantTransactionManager, masternodeSyncer: IPeerTaskHandler, bitCoreConfigurator: IBitCoreConfigurator) {
         self.bitCoreConfigurator = bitCoreConfigurator
         self.masternodeSyncer = masternodeSyncer
-        instantSend = InstantSend(transactionSyncer: transactionSyncer)
+
+        instantSend = InstantSend(instantTransactionManager: instantTransactionManager)
     }
 
     var networkMessageParsers: MessageParsers {

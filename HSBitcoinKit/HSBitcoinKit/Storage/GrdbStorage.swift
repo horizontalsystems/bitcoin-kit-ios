@@ -3,17 +3,25 @@ import GRDB
 import RealmSwift
 
 public class GrdbStorage {
-    let dbPool: DatabasePool
+    var dbPool: DatabasePool
+    private let databaseName: String
+    private var databaseURL: URL
 
     private let realmFactory: IRealmFactory
 
     public init(databaseFileName: String, realmFactory: IRealmFactory) {
+        self.databaseName = databaseFileName
         self.realmFactory = realmFactory
 
-        let databaseURL = try! FileManager.default
+        databaseURL = try! FileManager.default
                 .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-                .appendingPathComponent("\(databaseFileName).sqlite")
+                .appendingPathComponent("\(databaseName).sqlite")
 
+        dbPool = try! DatabasePool(path: databaseURL.path)
+        try? migrator.migrate(dbPool)
+    }
+
+    private func initDatabase() {
         dbPool = try! DatabasePool(path: databaseURL.path)
 
         try? migrator.migrate(dbPool)
@@ -75,6 +83,12 @@ public class GrdbStorage {
         }
 
         return migrator
+    }
+
+    func clearGrdb() throws {
+        try FileManager.default.removeItem(at: databaseURL)
+
+        initDatabase()
     }
 
 }
@@ -315,12 +329,7 @@ extension GrdbStorage: IStorage {
     // Clear
 
     func clear() throws {
-        _ = try dbPool.write { db in
-            try FeeRate.deleteAll(db)
-            try BlockchainState.deleteAll(db)
-            try PeerAddress.deleteAll(db)
-            try BlockHash.deleteAll(db)
-        }
+        try clearGrdb()
 
         let realm = realmFactory.realm
 

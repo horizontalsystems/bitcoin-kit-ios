@@ -269,6 +269,7 @@ extension PeerGroup: PeerDelegate {
 
         if let task = taskQueue.first {
             peer.add(task: task)
+            taskQueue.remove(at: 0)
         }
     }
 

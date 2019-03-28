@@ -2,7 +2,7 @@ import Foundation
 import RealmSwift
 
 class TransactionInput: Object {
-    @objc dynamic var previousOutputTxReversedHex = ""
+    @objc dynamic var previousOutputTxReversedHex = "" // todo: non used hex representation. We can use hash data value
     @objc dynamic var previousOutputIndex: Int = 0
     @objc dynamic var signatureScript = Data()
     @objc dynamic var sequence: Int = 0

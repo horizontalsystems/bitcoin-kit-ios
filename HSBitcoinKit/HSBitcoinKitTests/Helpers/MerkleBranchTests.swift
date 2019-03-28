@@ -44,7 +44,7 @@ class MerkleBranchTests: QuickSpec {
 
             it("unnecessaryBits error") {
                 do {
-                    let data = try merkleBranch.calculateMerkleRoot(txCount: totalTransactions, hashes: hashes, flags: [223, 22, 0, 1])
+                    _ = try merkleBranch.calculateMerkleRoot(txCount: totalTransactions, hashes: hashes, flags: [223, 22, 0, 1])
                     fail("Must have exception")
                 } catch let error as MerkleBlockValidator.ValidationError {
                     expect(error).to(equal(MerkleBlockValidator.ValidationError.unnecessaryBits) )
@@ -55,7 +55,7 @@ class MerkleBranchTests: QuickSpec {
 
             it("notEnoughHashes error") {
                 do {
-                    let data = try merkleBranch.calculateMerkleRoot(txCount: totalTransactions, hashes: hashes, flags: [223, 22, 5])
+                    _ = try merkleBranch.calculateMerkleRoot(txCount: totalTransactions, hashes: hashes, flags: [223, 22, 5])
                     fail("Must have exception")
                 } catch let error as MerkleBlockValidator.ValidationError {
                     expect(error).to(equal(MerkleBlockValidator.ValidationError.notEnoughHashes) )
@@ -66,7 +66,7 @@ class MerkleBranchTests: QuickSpec {
 
             it("notEnoughBits error") {
                 do {
-                    let data = try merkleBranch.calculateMerkleRoot(txCount: totalTransactions, hashes: hashes, flags: [223, 22])
+                    _ = try merkleBranch.calculateMerkleRoot(txCount: totalTransactions, hashes: hashes, flags: [223, 22])
                     fail("Must have exception")
                 } catch let error as MerkleBlockValidator.ValidationError {
                     expect(error).to(equal(MerkleBlockValidator.ValidationError.notEnoughBits) )

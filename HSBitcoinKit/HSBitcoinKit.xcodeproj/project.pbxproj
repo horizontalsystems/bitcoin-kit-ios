@@ -117,8 +117,10 @@
 		58AAA050DC164978E21C62FA /* RealmFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA3531D010C855B8846FC /* RealmFactory.swift */; };
 		58AAA0628AAE41265F75FE99 /* PaymentAddressParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA97A777A2F1E5734C89B /* PaymentAddressParser.swift */; };
 		58AAA0666D35796E4F59EDEB /* MasternodeListMerkleRootCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA9CCC518E9B32E231D1F /* MasternodeListMerkleRootCalculator.swift */; };
+		58AAA0790521E3D7B39B7062 /* InstantTransactionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAAAD608CB5CC910A5BFB /* InstantTransactionManager.swift */; };
 		58AAA07C6A2D87E83E2C5FD8 /* RequestMasternodeListDiffTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAA7590021B1562E70929 /* RequestMasternodeListDiffTask.swift */; };
 		58AAA0AEFEBBBA597001B1EC /* MockValidatorHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA9A9A73DE22FB87CD1B1 /* MockValidatorHelper.swift */; };
+		58AAA10C4F6C724DD75542AE /* InstantTransactionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAE6F91DCCB58F561B7F9 /* InstantTransactionManagerTests.swift */; };
 		58AAA10C849DB1D16115A2EB /* DashTestNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA4A8F6F79B0C2E0FFA67 /* DashTestNet.swift */; };
 		58AAA120B3EEA225FFFBE2BC /* TransactionOutputAddressExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA674EE7C1523F42648DD /* TransactionOutputAddressExtractor.swift */; };
 		58AAA134246DD8ED3323FEC9 /* MasternodeListState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA6FB6701F7E50E8674F2 /* MasternodeListState.swift */; };
@@ -130,6 +132,7 @@
 		58AAA1E4DEA7C5A4CD1DFFC0 /* LegacyTestNetDifficultyValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAB31CA6F582F89A1BA14 /* LegacyTestNetDifficultyValidatorTests.swift */; };
 		58AAA1E87B62806CD5891D43 /* Chunk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA3BE8FA350BD415CD5B3 /* Chunk.swift */; };
 		58AAA23384287398D79F14A6 /* TransactionPublicKeySetterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA97B8114B3CE27A6D32C /* TransactionPublicKeySetterTests.swift */; };
+		58AAA2A11E9FFB217530A47D /* InstantSendTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAED41598B02B3D1E90F5 /* InstantSendTests.swift */; };
 		58AAA2A75319CE12862DF305 /* TransactionLockVoteMessageParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA45DBF2782339B315D7F /* TransactionLockVoteMessageParser.swift */; };
 		58AAA2C85BFE1C624D1A1997 /* SigHashType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAA63CA9758D7D97E1416 /* SigHashType.swift */; };
 		58AAA2EC7A7825B8E4408AA7 /* HeaderValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAACDCDC4B51B6E2C9C07D /* HeaderValidatorTests.swift */; };
@@ -153,10 +156,10 @@
 		58AAA47B7ED94A1FF4C3CA16 /* MasternodeSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAB5B99CECD3BEE65C4CD /* MasternodeSerializer.swift */; };
 		58AAA48B4BB2AF4B9E3F883E /* MerkleRootHasherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA432CEEFACECF54F2430 /* MerkleRootHasherTests.swift */; };
 		58AAA4EC0C96AF2E10FE58CA /* RequestTransactionLockVotesTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA802FEC6665E48786D37 /* RequestTransactionLockVotesTask.swift */; };
-		58AAA51895A6578C77C1809E /* InstantSend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA0212BDE6FB71B109EF2 /* InstantSend.swift */; };
 		58AAA51D2E6F57CEB8947032 /* BitcoinTestNetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAEDC9D0D7BAE56C71DE0 /* BitcoinTestNetTests.swift */; };
 		58AAA547F82D82D5D4189459 /* MasternodeListSyncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAABB3D5ADE294A982242A /* MasternodeListSyncer.swift */; };
 		58AAA572F80B63848F95B065 /* BlockHashFetcherHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAC136573542B0D16C283 /* BlockHashFetcherHelper.swift */; };
+		58AAA607DA37D64035808C7E /* InstantTransactionInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAA13732079506D0FC39D /* InstantTransactionInput.swift */; };
 		58AAA6103D8D3B13F8512DCA /* PeerTaskFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA6DE56F97AEBDE5A5AB8 /* PeerTaskFactory.swift */; };
 		58AAA649DF284C668B495AB2 /* ScriptBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA422686CE355CACA11DF /* ScriptBuilderTests.swift */; };
 		58AAA6546322BDA56924A74D /* BlockHashFetcherHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA1C4F57CC56BB8CC772C /* BlockHashFetcherHelperTests.swift */; };
@@ -167,6 +170,7 @@
 		58AAA6CC180FE488B3E946F2 /* MerkleRootHasher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAEBC193535087F9E3B18 /* MerkleRootHasher.swift */; };
 		58AAA6D586BB4E3E39C15E36 /* TransactionSizeCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAED5E10009C0720D949E /* TransactionSizeCalculatorTests.swift */; };
 		58AAA6EF974E88D9FBECB99D /* BitcoinCashMainNetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA3744E23993E6BA283AC /* BitcoinCashMainNetTests.swift */; };
+		58AAA70E89F32F2FCCF07B23 /* InstantSend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAADD4FEF653718C1FA53 /* InstantSend.swift */; };
 		58AAA71254EB5F1E465058E1 /* Bech32.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA87CCEAF26775DD01445 /* Bech32.swift */; };
 		58AAA7228BFECCAF8DF86686 /* BitCoreConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA1658B2D43049E043B78 /* BitCoreConfigurator.swift */; };
 		58AAA744EF8A7193BB2EF860 /* NetworkMessageSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA201AEA32587BD5E2E12 /* NetworkMessageSerializer.swift */; };
@@ -197,6 +201,7 @@
 		58AAAABD66D9BAAD64F6C91C /* DashProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA03C460AC1CF08FEAD13 /* DashProtocols.swift */; };
 		58AAAAC9184F9395A71E318B /* UnspentOutputProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAECE6429C4CBD7FD2394 /* UnspentOutputProviderTests.swift */; };
 		58AAAAD9899571564F5FE67C /* MasternodeCbTxHashCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA85046CEB547798CD811 /* MasternodeCbTxHashCalculatorTests.swift */; };
+		58AAAAFE135E1CFDC1B05982 /* InstantSendFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAB139D93C1E07A6271EE /* InstantSendFactory.swift */; };
 		58AAAB093EAF9D753D12FA9E /* MasternodeListManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAD000FBB6E72FF194154 /* MasternodeListManager.swift */; };
 		58AAAB13BBB298E483A81CC6 /* MerkleRootCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAEACD47C5ECFDD2530CE /* MerkleRootCreator.swift */; };
 		58AAAB3DDA7EA6B600DF4C05 /* DashKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA5734FCB2AA29724E3D3 /* DashKit.swift */; };
@@ -392,7 +397,6 @@
 		3C7B9EBABAFF96958CFB2CB7 /* TransactionInputExtractorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionInputExtractorTests.swift; sourceTree = "<group>"; };
 		5718FF6FEB058540D331F8AA /* Pods-HSBitcoinKit.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HSBitcoinKit.release.xcconfig"; path = "../Pods/Target Support Files/Pods-HSBitcoinKit/Pods-HSBitcoinKit.release.xcconfig"; sourceTree = "<group>"; };
 		58AAA0125762CC01D08AB167 /* BitcoinPaymentData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinPaymentData.swift; sourceTree = "<group>"; };
-		58AAA0212BDE6FB71B109EF2 /* InstantSend.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstantSend.swift; sourceTree = "<group>"; };
 		58AAA03C460AC1CF08FEAD13 /* DashProtocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashProtocols.swift; sourceTree = "<group>"; };
 		58AAA0616D186C35DC0F3367 /* BlockHelperTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockHelperTests.swift; sourceTree = "<group>"; };
 		58AAA078A7C546673B2CB6B5 /* TransactionLockMessageParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionLockMessageParser.swift; sourceTree = "<group>"; };
@@ -472,10 +476,14 @@
 		58AAA9BB5301D7CB5292473B /* BlockDiscoveryBatchTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockDiscoveryBatchTest.swift; sourceTree = "<group>"; };
 		58AAA9C5C3A65FCEBB46F340 /* MerkleBranch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MerkleBranch.swift; sourceTree = "<group>"; };
 		58AAA9CCC518E9B32E231D1F /* MasternodeListMerkleRootCalculator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeListMerkleRootCalculator.swift; sourceTree = "<group>"; };
+		58AAAA13732079506D0FC39D /* InstantTransactionInput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstantTransactionInput.swift; sourceTree = "<group>"; };
 		58AAAA63CA9758D7D97E1416 /* SigHashType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SigHashType.swift; sourceTree = "<group>"; };
 		58AAAA7590021B1562E70929 /* RequestMasternodeListDiffTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestMasternodeListDiffTask.swift; sourceTree = "<group>"; };
 		58AAAA7C33E2529A70D0E529 /* TransactionSizeCalculator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionSizeCalculator.swift; sourceTree = "<group>"; };
+		58AAAAAD608CB5CC910A5BFB /* InstantTransactionManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstantTransactionManager.swift; sourceTree = "<group>"; };
+		58AAAADD4FEF653718C1FA53 /* InstantSend.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstantSend.swift; sourceTree = "<group>"; };
 		58AAAAFCA9E73AD5A7AB4CA6 /* BitcoinMainNetTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinMainNetTests.swift; sourceTree = "<group>"; };
+		58AAAB139D93C1E07A6271EE /* InstantSendFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstantSendFactory.swift; sourceTree = "<group>"; };
 		58AAAB1D6A97B37E472A0A05 /* MasternodeSortedList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeSortedList.swift; sourceTree = "<group>"; };
 		58AAAB31CA6F582F89A1BA14 /* LegacyTestNetDifficultyValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LegacyTestNetDifficultyValidatorTests.swift; sourceTree = "<group>"; };
 		58AAAB4878F15C91F08E0C15 /* BlockValidatorError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockValidatorError.swift; sourceTree = "<group>"; };
@@ -503,11 +511,13 @@
 		58AAADB5192FBF35116EE5B5 /* BcoinProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BcoinProvider.swift; sourceTree = "<group>"; };
 		58AAAE1DA82FC3585855DED3 /* ChunkTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChunkTests.swift; sourceTree = "<group>"; };
 		58AAAE28D740FD1FCF9DC1B2 /* TransactionOutputExtractorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionOutputExtractorTests.swift; sourceTree = "<group>"; };
+		58AAAE6F91DCCB58F561B7F9 /* InstantTransactionManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstantTransactionManagerTests.swift; sourceTree = "<group>"; };
 		58AAAE784BD9490F8775E78A /* InitialSyncer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InitialSyncer.swift; sourceTree = "<group>"; };
 		58AAAEACD47C5ECFDD2530CE /* MerkleRootCreator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MerkleRootCreator.swift; sourceTree = "<group>"; };
 		58AAAEBC193535087F9E3B18 /* MerkleRootHasher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MerkleRootHasher.swift; sourceTree = "<group>"; };
 		58AAAEC495CF2E374A20C74D /* CashBech32AddressConverter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CashBech32AddressConverter.swift; sourceTree = "<group>"; };
 		58AAAECE6429C4CBD7FD2394 /* UnspentOutputProviderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnspentOutputProviderTests.swift; sourceTree = "<group>"; };
+		58AAAED41598B02B3D1E90F5 /* InstantSendTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstantSendTests.swift; sourceTree = "<group>"; };
 		58AAAED5E10009C0720D949E /* TransactionSizeCalculatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionSizeCalculatorTests.swift; sourceTree = "<group>"; };
 		58AAAEDC9D0D7BAE56C71DE0 /* BitcoinTestNetTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinTestNetTests.swift; sourceTree = "<group>"; };
 		58AAAF2482982ED7215EEBF9 /* ScriptBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScriptBuilder.swift; sourceTree = "<group>"; };
@@ -846,13 +856,6 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
-		58AAA09F1559FE79455DE909 /* Managers */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Managers;
-			sourceTree = "<group>";
-		};
 		58AAA11F421202A1ADFF0CE2 /* Scripts */ = {
 			isa = PBXGroup;
 			children = (
@@ -887,6 +890,15 @@
 				58AAA083BD353C56BA4DAE69 /* GetMasternodeListDiffMessageSerializer.swift */,
 			);
 			path = Serializers;
+			sourceTree = "<group>";
+		};
+		58AAA4CACFB32C7EF27FEF3C /* InstantSend */ = {
+			isa = PBXGroup;
+			children = (
+				58AAAED41598B02B3D1E90F5 /* InstantSendTests.swift */,
+				58AAAE6F91DCCB58F561B7F9 /* InstantTransactionManagerTests.swift */,
+			);
+			path = InstantSend;
 			sourceTree = "<group>";
 		};
 		58AAA51CC86606E7CB7FB1AB /* PeerTask */ = {
@@ -994,6 +1006,7 @@
 				58AAA1C0B253BC64FE90C167 /* Masternode.swift */,
 				58AAA6FB6701F7E50E8674F2 /* MasternodeListState.swift */,
 				58AAA3C29AB9FDF5DC17F7D0 /* ModelSerializers */,
+				58AAAA13732079506D0FC39D /* InstantTransactionInput.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1015,11 +1028,11 @@
 				58AAAF2A639FCC0E1BC1001A /* Network */,
 				58AAAABA80218BCC91C13F7C /* Models */,
 				58AAA6ACA9D5B58394BAF165 /* DashConfigurator.swift */,
-				58AAA0212BDE6FB71B109EF2 /* InstantSend.swift */,
 				58AAAF00ADF1F63097AC3F1C /* Managers */,
 				58AAA03C460AC1CF08FEAD13 /* DashProtocols.swift */,
 				58AAACC3C52BC6218BFD6446 /* Storage */,
 				58AAAC548264CB479A559BE8 /* MasternodeList */,
+				58AAAE324EA7B2BA8CDBC354 /* InstantSend */,
 			);
 			path = Dash;
 			sourceTree = "<group>";
@@ -1058,6 +1071,16 @@
 			path = Storage;
 			sourceTree = "<group>";
 		};
+		58AAAE324EA7B2BA8CDBC354 /* InstantSend */ = {
+			isa = PBXGroup;
+			children = (
+				58AAAAAD608CB5CC910A5BFB /* InstantTransactionManager.swift */,
+				58AAAADD4FEF653718C1FA53 /* InstantSend.swift */,
+				58AAAB139D93C1E07A6271EE /* InstantSendFactory.swift */,
+			);
+			path = InstantSend;
+			sourceTree = "<group>";
+		};
 		58AAAE6FA58584ACE3F5AFBB /* Validators */ = {
 			isa = PBXGroup;
 			children = (
@@ -1076,10 +1099,10 @@
 		58AAAE727DDA14E53FA710D1 /* Dash */ = {
 			isa = PBXGroup;
 			children = (
-				58AAA09F1559FE79455DE909 /* Managers */,
 				58AAA858CBEF10029ADFEBB1 /* DashExtensions.swift */,
 				58AAA954982C60C14D50D96A /* MasternodeList */,
 				58AAA60F2494A5D68115AEBD /* DashTestData.swift */,
+				58AAA4CACFB32C7EF27FEF3C /* InstantSend */,
 			);
 			path = Dash;
 			sourceTree = "<group>";
@@ -1634,6 +1657,8 @@
 				58AAA48B4BB2AF4B9E3F883E /* MerkleRootHasherTests.swift in Sources */,
 				58AAAAD9899571564F5FE67C /* MasternodeCbTxHashCalculatorTests.swift in Sources */,
 				58AAAA0E73B45A6262D8272F /* MerkleBranchTests.swift in Sources */,
+				58AAA2A11E9FFB217530A47D /* InstantSendTests.swift in Sources */,
+				58AAA10C4F6C724DD75542AE /* InstantTransactionManagerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1789,7 +1814,6 @@
 				58AAA2A75319CE12862DF305 /* TransactionLockVoteMessageParser.swift in Sources */,
 				58AAA3BEA62A09471A0D9062 /* DashConfigurator.swift in Sources */,
 				58AAA7228BFECCAF8DF86686 /* BitCoreConfigurator.swift in Sources */,
-				58AAA51895A6578C77C1809E /* InstantSend.swift in Sources */,
 				58AAAC2D6479DCC6D5BFFB0F /* RequestTransactionLockRequestsTask.swift in Sources */,
 				58AAA4EC0C96AF2E10FE58CA /* RequestTransactionLockVotesTask.swift in Sources */,
 				58AAAABD66D9BAAD64F6C91C /* DashProtocols.swift in Sources */,
@@ -1815,6 +1839,10 @@
 				58AAA39FBD94E9D1C7F0EFAF /* CoinbaseTransactionSerializer.swift in Sources */,
 				58AAAE0F4A37E4C78146953F /* MasternodeCbTxHashCalculator.swift in Sources */,
 				58AAA958A19346CAFE9B38D8 /* MerkleBranch.swift in Sources */,
+				58AAA607DA37D64035808C7E /* InstantTransactionInput.swift in Sources */,
+				58AAA0790521E3D7B39B7062 /* InstantTransactionManager.swift in Sources */,
+				58AAA70E89F32F2FCCF07B23 /* InstantSend.swift in Sources */,
+				58AAAAFE135E1CFDC1B05982 /* InstantSendFactory.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

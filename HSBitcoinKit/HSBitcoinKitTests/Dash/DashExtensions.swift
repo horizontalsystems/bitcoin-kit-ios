@@ -25,3 +25,11 @@ extension MasternodeListState: Equatable {
     }
 
 }
+
+extension TransactionLockVoteMessage: Equatable {
+
+    public static func ==(lhs: TransactionLockVoteMessage, rhs: TransactionLockVoteMessage) -> Bool {
+        return lhs.txHash == rhs.txHash && lhs.outpoint.txHash == rhs.outpoint.txHash
+    }
+
+}

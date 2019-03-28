@@ -23,4 +23,10 @@ class DashTestData {
                 deletedMNs: deletedMNs, mnListCount: mnListCount, mnList: mnList)
     }
 
+    static func transactionLockVote(txHash: Data, inputTxHash: Data = Data()) -> TransactionLockVoteMessage {
+        return TransactionLockVoteMessage(txHash: txHash, outpoint: Outpoint(txHash: inputTxHash, vout: 0),
+                outpointMasternode: Outpoint(txHash: txHash, vout: 0), quorumModifierHash: Data(),
+                masternodeProTxHash: Data(), vchMasternodeSignature: Data(), hash: Data())
+    }
+
 }

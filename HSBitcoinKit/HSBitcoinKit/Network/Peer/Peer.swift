@@ -156,7 +156,17 @@ class Peer {
     }
 
     private func handle(message: InventoryMessage) {
-        log("<-- INV: \(message.inventoryItems.map { "[\($0.objectType): \($0.hash.reversedHex)]" }.joined(separator: ", "))")
+        let items = message.inventoryItems.map { item in
+            let objectTypeString: String
+            if case .unknown = item.objectType {
+                objectTypeString = String(item.type)
+            } else {
+                objectTypeString = "\(item.objectType)"
+            }
+            return "[\(objectTypeString): \(item.hash.reversedHex)]" }.joined(separator: ", ")
+
+        log("<-- INV: \(items)")
+//        log("<-- INV: \(message.inventoryItems.map { "[\($0.objectType): \($0.hash.reversedHex)]" }.joined(separator: ", "))")
 
         for task in tasks {
             if task.handle(items: message.inventoryItems) {

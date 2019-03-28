@@ -8,12 +8,20 @@ protocol IMasternodeListManager {
 }
 
 protocol IMasternodeListSyncer {
-
+    func sync(blockHash: Data)
 }
 
 protocol IDashStorage: IStorage {
     var masternodes: [Masternode] { get set }
     var masternodeListState: MasternodeListState? { get set }
+
+    func instantTransactionInput(for inputTxHash: Data) -> InstantTransactionInput?
+    func instantTransactionInputs(for txHash: Data) -> [InstantTransactionInput]
+    func add(instantTransactionInput: InstantTransactionInput)
+}
+
+protocol IInstantSendFactory {
+    func instantTransactionInput(txHash: Data, inputTxHash: Data, voteCount: Int, blockHeight: Int?) -> InstantTransactionInput
 }
 
 protocol IMasternodeSortedList {
@@ -51,4 +59,9 @@ protocol IHasher {
 
 protocol IMerkleHasher {
     func hash(left: Data, right: Data) -> Data
+}
+
+protocol IInstantTransactionManager {
+    func handle(transactions: [Transaction])
+    func handle(lockVote: TransactionLockVoteMessage) throws
 }

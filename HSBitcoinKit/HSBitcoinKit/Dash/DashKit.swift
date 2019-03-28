@@ -19,6 +19,9 @@ public class DashKit {
     private let masternodeListManager: MasternodeListManager
     private let masternodeListMerkleRootCalculator: MasternodeListMerkleRootCalculator
 
+    private let instantSendFactory: IInstantSendFactory
+    private let instantTransactionManager: IInstantTransactionManager
+
     public init(withWords words: [String], coin: BitcoinKit.Coin, walletId: String, newWallet: Bool = true, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) {
         let databaseFileName = "\(walletId)-\(coin.rawValue)"
 
@@ -35,9 +38,12 @@ public class DashKit {
 
         masternodeListMerkleRootCalculator = MasternodeListMerkleRootCalculator(masternodeSerializer: masternodeSerializer, masternodeHasher: bitcoinKit.hasher, masternodeMerkleRootCreator: masternodeMerkleRootCreator)
         masternodeListManager = MasternodeListManager(storage: storage, masternodeListMerkleRootCalculator: masternodeListMerkleRootCalculator, masternodeCbTxHasher: masternodeCbTxHasher, merkleBranch: bitcoinKit.merkleBranch)
-
         masternodeSyncer = MasternodeListSyncer(peerGroup: bitcoinKit.peerGroup, peerTaskFactory: PeerTaskFactory(), masternodeListManager: masternodeListManager)
-        dashConfigurator = DashConfigurator(transactionSyncer: bitcoinKit.transactionSyncer, masternodeSyncer: masternodeSyncer, bitCoreConfigurator: bitcoinKit.bitCoreConfigurator)
+
+        instantSendFactory = InstantSendFactory()
+        instantTransactionManager = InstantTransactionManager(storage: storage, instantSendFactory: instantSendFactory, transactionSyncer: bitcoinKit.transactionSyncer)
+
+        dashConfigurator = DashConfigurator(instantTransactionManager: instantTransactionManager, masternodeSyncer: masternodeSyncer, bitCoreConfigurator: bitcoinKit.bitCoreConfigurator)
         bitcoinKit.delegate = self
 
         bitcoinKit.networkMessageParser = NetworkMessageParser(magic: bitcoinKit.network.magic, messageParsers: dashConfigurator.networkMessageParsers)

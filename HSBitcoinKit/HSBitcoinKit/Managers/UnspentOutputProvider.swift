@@ -25,7 +25,7 @@ extension UnspentOutputProvider: IUnspentOutputProvider {
                 guard let transaction = output.transaction else {
                     return false
                 }
-                return transaction.isOutgoing || ((transaction.block?.height ?? lastBlockHeight) <= lastBlockHeight - confirmationsThreshold + 1)
+                return ((transaction.block?.height ?? lastBlockHeight) <= lastBlockHeight - confirmationsThreshold + 1)
         }
     }
 
