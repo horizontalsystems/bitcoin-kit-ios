@@ -3,8 +3,7 @@ import GRDB
 
 class GrdbStorage {
     private let dbPool: DatabasePool
-    private var inTransactionDb: Database?
-    private var inTransactionDbThreadHash: Int?
+    private var dbsInTransaction = [Int: Database]()
 
     init(databaseFileName: String) {
         let databaseURL = try! FileManager.default
@@ -159,7 +158,7 @@ class GrdbStorage {
     }
 
     public func read<T>(_ block: (Database) throws -> T) throws -> T {
-        if let db = inTransactionDb, let dbThreadHash = inTransactionDbThreadHash, dbThreadHash == Thread.current.hash {
+        if let db = dbsInTransaction[Thread.current.hash] {
             return try block(db)
         }
 
@@ -169,7 +168,7 @@ class GrdbStorage {
     }
 
     public func write(_ block: (Database) throws -> Void) throws {
-        if let db = inTransactionDb, let dbThreadHash = inTransactionDbThreadHash, dbThreadHash == Thread.current.hash {
+        if let db = dbsInTransaction[Thread.current.hash] {
             _ = try block(db)
             return
         }
@@ -712,23 +711,20 @@ extension GrdbStorage: IStorage {
     }
 
     func inTransaction(_ block: (() throws -> Void)) throws {
-        var errorToThrow: Error?
+        let currentThreadHash = Thread.current.hash
 
-        do {
-            _ = try dbPool.write { db in
-                self.inTransactionDb = db
-                self.inTransactionDbThreadHash = Thread.current.hash
-                try block()
-            }
-        } catch {
-            errorToThrow = error
+        if let _ = dbsInTransaction[currentThreadHash] {
+            try block()
+            return
         }
 
-        self.inTransactionDb = nil
-        self.inTransactionDbThreadHash = nil
+        defer {
+            dbsInTransaction.removeValue(forKey: currentThreadHash)
+        }
 
-        if let error = errorToThrow {
-            throw error
+        _ = try dbPool.write { db in
+            self.dbsInTransaction[currentThreadHash] = db
+            try block()
         }
     }
 
