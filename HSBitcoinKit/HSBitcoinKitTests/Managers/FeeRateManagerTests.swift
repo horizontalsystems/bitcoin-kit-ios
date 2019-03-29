@@ -32,9 +32,7 @@ class FeeRateManagerTests: XCTestCase {
             when(mock.save(feeRate: any())).thenDoNothing()
         }
         stub(mockSyncer) { mock in
-            when(mock.sync()).then {
-                print("sdfsdfdssdf")
-            }
+            when(mock.sync()).thenDoNothing()
             when(mock.delegate.set(any())).thenDoNothing()
         }
         stub(mockReachabilityManager) { mock in

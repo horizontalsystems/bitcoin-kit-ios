@@ -93,9 +93,9 @@ class PeerGroup {
         }
     }
 
-    private func downloadBlockchain() {
+    private func downloadBlockchain(syncPeer: IPeer) {
         peersQueue.async {
-            guard let syncPeer = self.peerManager.syncPeer, syncPeer.ready else {
+            guard syncPeer.equalTo(self.peerManager.syncPeer), syncPeer.ready else {
                 return
             }
 
@@ -139,7 +139,7 @@ class PeerGroup {
                 self.logger?.debug("Setting sync peer to \(nonSyncedPeer.logName)")
                 self.peerManager.syncPeer = nonSyncedPeer
                 self.blockSyncer?.downloadStarted()
-                self.downloadBlockchain()
+                self.downloadBlockchain(syncPeer: nonSyncedPeer)
             } else {
                 try? self.handlePendingTransactions()
             }
@@ -238,7 +238,7 @@ extension PeerGroup: IPeerGroup {
             throw PeerGroupError.noConnectedPeers
         }
 
-        guard peerManager.nonSyncedPeer() == nil else {
+        guard peerManager.halfIsSynced() else {
             throw PeerGroupError.peersNotSynced
         }
     }
@@ -252,7 +252,7 @@ extension PeerGroup: IPeerGroup {
 extension PeerGroup: PeerDelegate {
 
     func peerReady(_ peer: IPeer) {
-        self.downloadBlockchain()
+        self.downloadBlockchain(syncPeer: peer)
     }
 
     func peerDidConnect(_ peer: IPeer) {
