@@ -1,35 +1,33 @@
 import XCTest
 import Cuckoo
-import RealmSwift
 @testable import HSBitcoinKit
 
 class TransactionPublicKeySetterTests: XCTestCase {
-    private var realm: Realm!
 
+    private var mockStorage: MockIStorage!
     private var publicKey: PublicKey!
+
     private var transactionKeySetter: TransactionPublicKeySetter!
 
     override func setUp() {
         super.setUp()
 
-        realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
-
-        let mockRealmFactory = MockIRealmFactory()
-        stub(mockRealmFactory) { mock in
-            when(mock.realm.get).thenReturn(realm)
-        }
-
         publicKey = PublicKey(withAccount: 0, index: 0, external: true, hdPublicKeyData: Data(hex: "0011223344")!)
-        try! realm.write {
-            realm.deleteAll()
-            realm.add(publicKey)
+        mockStorage = MockIStorage()
+        stub(mockStorage) { mock in
+            when(mock.publicKey(byRawOrKeyHash: any())).thenReturn(nil)
+            when(mock.publicKey(byScriptHashForP2WPKH: equal(to: publicKey.scriptHashForP2WPKH))).thenReturn(publicKey)
+            when(mock.publicKey(byRawOrKeyHash: equal(to: publicKey.keyHash))).thenReturn(publicKey)
+            when(mock.publicKey(byRawOrKeyHash: equal(to: publicKey.raw))).thenReturn(publicKey)
         }
 
-        transactionKeySetter = TransactionPublicKeySetter(realmFactory: mockRealmFactory)
+        transactionKeySetter = TransactionPublicKeySetter(storage: mockStorage)
     }
 
     override func tearDown() {
-        realm = nil
+        mockStorage = nil
+        publicKey = nil
+        transactionKeySetter = nil
 
         super.tearDown()
     }
@@ -40,7 +38,7 @@ class TransactionPublicKeySetterTests: XCTestCase {
         let mine = transactionKeySetter.set(output: tx.outputs[0])
 
         XCTAssertEqual(mine, true)
-        XCTAssertEqual(tx.outputs[0].publicKey, publicKey)
+        XCTAssertEqual(tx.outputs[0].publicKeyPath, publicKey.path)
 
         let notMine = transactionKeySetter.set(output: tx.outputs[1])
         XCTAssertEqual(notMine, false)
@@ -52,7 +50,7 @@ class TransactionPublicKeySetterTests: XCTestCase {
         let mine = transactionKeySetter.set(output: tx.outputs[0])
 
         XCTAssertEqual(mine, true)
-        XCTAssertEqual(tx.outputs[0].publicKey, publicKey)
+        XCTAssertEqual(tx.outputs[0].publicKeyPath, publicKey.path)
     }
 
     func testSetP2WPKHSHKeys() {
@@ -62,7 +60,7 @@ class TransactionPublicKeySetterTests: XCTestCase {
         let mine = transactionKeySetter.set(output: tx.outputs[0])
 
         XCTAssertEqual(mine, true)
-        XCTAssertEqual(tx.outputs[0].publicKey, publicKey)
+        XCTAssertEqual(tx.outputs[0].publicKeyPath, publicKey.path)
         XCTAssertEqual(tx.outputs[0].scriptType, .p2wpkhSh)
     }
 

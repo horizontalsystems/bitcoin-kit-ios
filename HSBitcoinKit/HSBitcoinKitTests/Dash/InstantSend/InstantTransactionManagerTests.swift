@@ -42,7 +42,7 @@ class InstantTransactionManagerTests: QuickSpec {
             }
 
             it("creates successful instant transaction") {
-                let input = InstantTransactionInput(txHash: transaction.dataHash, inputTxHash: inputTxHash, timeCreated: Int(Date().timeIntervalSince1970), voteCount: 0, blockHeight: nil)
+                let input = InstantTransactionInput(txHash: transaction.header.dataHash, inputTxHash: inputTxHash, timeCreated: Int(Date().timeIntervalSince1970), voteCount: 0, blockHeight: nil)
                 stub(mockInstantSendFactory) { mock in
                     when(mock.instantTransactionInput(txHash: equal(to: transaction.dataHash), inputTxHash: equal(to: inputTxHash), voteCount: input.voteCount, blockHeight: isNil())).thenReturn(input)
                 }
@@ -58,8 +58,8 @@ class InstantTransactionManagerTests: QuickSpec {
         describe("#handle(lockVote:)") {
 
             it("adds successful lockVote") {
-                let transactionLockMessage = DashTestData.transactionLockVote(txHash: transaction.dataHash, inputTxHash: inputTxHash)
-                let input = InstantTransactionInput(txHash: transaction.dataHash, inputTxHash: inputTxHash, timeCreated: 0, voteCount: 0, blockHeight: nil)
+                let transactionLockMessage = DashTestData.transactionLockVote(txHash: transaction.header.dataHash, inputTxHash: inputTxHash)
+                let input = InstantTransactionInput(txHash: transaction.header.dataHash, inputTxHash: inputTxHash, timeCreated: 0, voteCount: 0, blockHeight: nil)
 
                 stub(mockStorage) { mock in
                     when(mock.add(instantTransactionInput: any())).thenDoNothing()

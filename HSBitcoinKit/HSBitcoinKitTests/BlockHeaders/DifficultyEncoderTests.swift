@@ -1,6 +1,5 @@
 import XCTest
 import Cuckoo
-import RealmSwift
 import BigInt
 @testable import HSBitcoinKit
 

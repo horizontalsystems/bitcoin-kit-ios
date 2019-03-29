@@ -181,8 +181,7 @@ class MerkleBlockMessageParser: ListElement<Data, IMessage> {
     override func process(_ request: Data) -> IMessage? {
         let byteStream = ByteStream(request)
 
-        let blockHeader = BlockHeaderSerializer.deserialize(byteStream: byteStream)
-        blockHeader.headerHash = network.generateBlockHeaderHash(from: BlockHeaderSerializer.serialize(header: blockHeader))
+        let blockHeader = BlockHeaderSerializer.deserialize(byteStream: byteStream, network: network)
 
         let totalTransactions = byteStream.read(UInt32.self)
         let numberOfHashes = byteStream.read(VarInt.self)

@@ -1,6 +1,5 @@
 import XCTest
 import Cuckoo
-import RealmSwift
 import RxSwift
 import Alamofire
 import HSHDWalletKit
@@ -91,7 +90,7 @@ class PeerGroupTests: XCTestCase {
             when(mock.downloadCompleted()).thenDoNothing()
         }
         stub(mockTransactionSyncer) { mock in
-            when(mock.pendingTransactions()).thenReturn([Transaction]())
+            when(mock.pendingTransactions()).thenReturn([FullTransaction]())
             when(mock.handle(transactions: any())).thenDoNothing()
             when(mock.handle(sentTransaction: any())).thenDoNothing()
             when(mock.shouldRequestTransaction(hash: any())).thenReturn(false)

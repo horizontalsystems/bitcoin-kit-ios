@@ -8,7 +8,7 @@ class DashTestData {
         return Masternode(proRegTxHash: proRegTxHash, confirmedHash: confirmedHash, ipAddress: Data(), port: 0, pubKeyOperator: Data(), keyIDVoting: Data(), isValid: isValid)
     }
 
-    static func coinbaseTransaction(transaction: Transaction = TestData.p2pkhTransaction, size: UInt32 = 0, merkleRootMNList: Data = Data()) -> CoinbaseTransaction {
+    static func coinbaseTransaction(transaction: FullTransaction = TestData.p2pkhTransaction, size: UInt32 = 0, merkleRootMNList: Data = Data()) -> CoinbaseTransaction {
         return CoinbaseTransaction(transaction: transaction, coinbaseTransactionSize: Data(from: size), version: 0, height: 0, merkleRootMNList: merkleRootMNList)
     }
 

@@ -1,6 +1,4 @@
 import HSHDWalletKit
-import Realm
-import RealmSwift
 
 class AddressManager {
 
@@ -8,24 +6,23 @@ class AddressManager {
         case noUnusedPublicKey
     }
 
-    private let realmFactory: IRealmFactory
+    private let storage: IStorage
     private let hdWallet: IHDWallet
     private let addressConverter: IAddressConverter
 
-    init(realmFactory: IRealmFactory, hdWallet: IHDWallet, addressConverter: IAddressConverter) {
-        self.realmFactory = realmFactory
+    init(storage: IStorage, hdWallet: IHDWallet, addressConverter: IAddressConverter) {
+        self.storage = storage
         self.addressConverter = addressConverter
         self.hdWallet = hdWallet
     }
 
     private func fillGap(account: Int, external: Bool) throws {
-        let realm = realmFactory.realm
-        let publicKeys = realm.objects(PublicKey.self).filter("account = %@ AND external = %@", account, external)
+        let publicKeys = storage.publicKeys().filter({ $0.account == account && $0.external == external })
         let gapKeysCount = self.gapKeysCount(publicKeyResults: publicKeys)
         var keys = [PublicKey]()
 
         if gapKeysCount < hdWallet.gapLimit {
-            let allKeys = publicKeys.sorted(byKeyPath: "index")
+            let allKeys = publicKeys.sorted(by: { $0.index < $1.index })
             let lastIndex = allKeys.last?.index ?? -1
 
             for i in 1..<(hdWallet.gapLimit - gapKeysCount + 1) {
@@ -37,20 +34,18 @@ class AddressManager {
         try addKeys(keys: keys)
     }
 
-    private func gapKeysCount(publicKeyResults publicKeys: Results<PublicKey>) -> Int {
-        if let lastUsedKey = publicKeys.filter("outputs.@count > 0").sorted(byKeyPath: "index").last {
-            return publicKeys.filter("index > %@", lastUsedKey.index).count
+    private func gapKeysCount(publicKeyResults publicKeys: [PublicKey]) -> Int {
+        if let lastUsedKey = publicKeys.filter({ $0.used(storage: self.storage) }).sorted(by: { $0.index < $1.index }).last {
+            return publicKeys.filter({ $0.index > lastUsedKey.index }).count
         } else {
             return publicKeys.count
         }
     }
 
     private func publicKey(external: Bool) throws -> PublicKey {
-        let realm = realmFactory.realm
-
-        guard let unusedKey = realm.objects(PublicKey.self)
-                .filter("external = %@ AND outputs.@count = 0", external)
-                .sorted(by: [SortDescriptor(keyPath: "account"), SortDescriptor(keyPath: "index")])
+        guard let unusedKey = storage.publicKeys()
+                .filter({ $0.external == external && !$0.used(storage: self.storage) })
+                .sorted(by: { $0.account < $1.account || ( $0.account == $1.account && $0.index < $1.index ) })
                 .first else {
             throw AddressManagerError.noUnusedPublicKey
         }
@@ -72,7 +67,7 @@ extension AddressManager: IAddressManager {
     func fillGap() throws {
         let requiredAccountsCount: Int!
 
-        if let lastUsedAccount = realmFactory.realm.objects(PublicKey.self).filter("outputs.@count > 0").sorted(byKeyPath: "account").last?.account {
+        if let lastUsedAccount = storage.publicKeys().filter({ $0.used(storage: storage) }).sorted(by: { $0.account < $1.account }).last?.account {
             requiredAccountsCount = lastUsedAccount + 1 + 1 // One because account starts from 0, One because we must have n+1 accounts
         } else {
             requiredAccountsCount = 1
@@ -89,25 +84,22 @@ extension AddressManager: IAddressManager {
             return
         }
 
-        let realm = realmFactory.realm
-        try realm.write {
-            realm.add(keys, update: true)
-        }
+        storage.add(publicKeys: keys)
     }
 
     func gapShifts() -> Bool {
-        guard let lastAccount = realmFactory.realm.objects(PublicKey.self).sorted(byKeyPath: "account").last?.account else {
+        guard let lastAccount = storage.publicKeys().sorted(by: { $0.account < $1.account }).last?.account else {
             return false
         }
 
-        let publicKeys = realmFactory.realm.objects(PublicKey.self)
+        let publicKeys = storage.publicKeys()
 
         for i in 0..<(lastAccount + 1) {
-            if gapKeysCount(publicKeyResults: publicKeys.filter("account = %@ AND external = %@", i, true)) < hdWallet.gapLimit {
+            if gapKeysCount(publicKeyResults: publicKeys.filter{ $0.account == i && $0.external }) < hdWallet.gapLimit {
                 return true
             }
 
-            if gapKeysCount(publicKeyResults: publicKeys.filter("account = %@ AND external = %@", i, false)) < hdWallet.gapLimit {
+            if gapKeysCount(publicKeyResults: publicKeys.filter{ $0.account == i && !$0.external }) < hdWallet.gapLimit {
                 return true
             }
         }
@@ -119,8 +111,8 @@ extension AddressManager: IAddressManager {
 
 extension AddressManager {
 
-    public static func instance(realmFactory: IRealmFactory, hdWallet: IHDWallet, addressConverter: IAddressConverter) -> AddressManager {
-        let addressManager = AddressManager(realmFactory: realmFactory, hdWallet: hdWallet, addressConverter: addressConverter)
+    public static func instance(storage: IStorage, hdWallet: IHDWallet, addressConverter: IAddressConverter) -> AddressManager {
+        let addressManager = AddressManager(storage: storage, hdWallet: hdWallet, addressConverter: addressConverter)
         try? addressManager.fillGap()
         return addressManager
     }

@@ -3,6 +3,6 @@ import Foundation
 struct TransactionLockMessage: IMessage {
     let command: String = "ix"
 
-    let transaction: Transaction
+    let transaction: FullTransaction
 
 }

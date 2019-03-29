@@ -2,22 +2,18 @@ import Foundation
 
 class SendTransactionTask: PeerTask {
 
-    var transaction: Transaction
+    var transaction: FullTransaction
 
-    init(transaction: Transaction) {
-        // Transaction is managed by Realm. We need to serialize and deserialize it in order to make it non-managed.
-        let data = TransactionSerializer.serialize(transaction: transaction)
-        let transaction = TransactionSerializer.deserialize(data: data)
-
+    init(transaction: FullTransaction) {
         self.transaction = transaction
     }
 
     override func start() {
-        requester?.sendTransactionInventory(hash: transaction.dataHash)
+        requester?.sendTransactionInventory(hash: transaction.header.dataHash)
     }
 
     override func handle(getDataInventoryItem item: InventoryItem) -> Bool {
-        guard item.objectType == .transaction && item.hash == transaction.dataHash else {
+        guard item.objectType == .transaction && item.hash == transaction.header.dataHash else {
             return false
         }
 
@@ -32,7 +28,7 @@ class SendTransactionTask: PeerTask {
             return false
         }
 
-        return transaction.reversedHashHex == task.transaction.reversedHashHex
+        return transaction.header.dataHashReversedHex == task.transaction.header.dataHashReversedHex
     }
 
 }

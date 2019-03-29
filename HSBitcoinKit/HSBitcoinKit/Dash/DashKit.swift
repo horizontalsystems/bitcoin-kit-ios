@@ -1,6 +1,5 @@
 import Foundation
 import HSHDWalletKit
-import RealmSwift
 import BigInt
 import HSCryptoKit
 import RxSwift
@@ -25,11 +24,10 @@ public class DashKit {
     public init(withWords words: [String], coin: BitcoinKit.Coin, walletId: String, newWallet: Bool = true, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) {
         let databaseFileName = "\(walletId)-\(coin.rawValue)"
 
-        let realmFactory = RealmFactory(realmFileName: "\(databaseFileName).realm")
-        let storage = DashGrdbStorage(databaseFileName: databaseFileName, realmFactory: realmFactory)
+        let storage = DashGrdbStorage(databaseFileName: databaseFileName)
         self.storage = storage
 
-        bitcoinKit = BitcoinKit(withWords: words, coin: coin, storage: storage, realFactory: realmFactory, newWallet: newWallet, confirmationsThreshold: confirmationsThreshold, minLogLevel: minLogLevel)
+        bitcoinKit = BitcoinKit(withWords: words, coin: coin, storage: storage, newWallet: newWallet, confirmationsThreshold: confirmationsThreshold, minLogLevel: minLogLevel)
 
         let masternodeSerializer = MasternodeSerializer()
         let coinbaseTransactionSerializer = CoinbaseTransactionSerializer()

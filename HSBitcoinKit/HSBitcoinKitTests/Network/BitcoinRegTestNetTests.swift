@@ -1,6 +1,5 @@
 import XCTest
 import Cuckoo
-import RealmSwift
 @testable import HSBitcoinKit
 
 class BitcoinRegTestNetTests:XCTestCase {
@@ -27,7 +26,7 @@ class BitcoinRegTestNetTests:XCTestCase {
     func testValidate() {
         let block = TestData.firstBlock
         do {
-            try mockNetwork.validate(block: block, previousBlock: block.previousBlock!)
+            try mockNetwork.validate(block: block, previousBlock: TestData.checkpointBlock)
             verify(mockValidatorHelper.mockHeaderValidator, times(1)).validate(candidate: any(), block: any(), network: any())
         } catch let error {
             XCTFail("\(error) Exception Thrown")

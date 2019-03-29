@@ -1,7 +1,7 @@
 class RequestTransactionLockRequestsTask: PeerTask {
 
     var hashes = [Data]()
-    var transactions = [Transaction]()
+    var transactions = [FullTransaction]()
 
     init(hashes: [Data], dateGenerator: @escaping () -> Date = Date.init) {
         self.hashes = hashes
@@ -21,8 +21,8 @@ class RequestTransactionLockRequestsTask: PeerTask {
         return false
     }
 
-    private func handleTransactionLockRequest(transaction: Transaction) -> Bool {
-        guard let index = hashes.firstIndex(of: transaction.dataHash) else {
+    private func handleTransactionLockRequest(transaction: FullTransaction) -> Bool {
+        guard let index = hashes.firstIndex(of: transaction.header.dataHash) else {
             return false
         }
 

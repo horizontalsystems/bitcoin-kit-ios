@@ -1,16 +1,14 @@
-import RealmSwift
-
 class BloomFilterManager {
     class BloomFilterExpired: Error {}
 
-    private let realmFactory: IRealmFactory
+    private let storage: IStorage
     private let factory: IFactory
     weak var delegate: BloomFilterManagerDelegate?
 
     var bloomFilter: BloomFilter?
 
-    init(realmFactory: IRealmFactory, factory: IFactory) {
-        self.realmFactory = realmFactory
+    init(storage: IStorage, factory: IFactory) {
+        self.storage = storage
         self.factory = factory
     }
 
@@ -24,13 +22,14 @@ class BloomFilterManager {
         ]
     }
 
-    private func needToSetToBloomFilter(output: TransactionOutput, bestBlockHeight: Int) -> Bool {
+    private func needToSetToBloomFilter(output: Output, bestBlockHeight: Int) -> Bool {
         // Need to set if output is unspent
-        if output.inputs.count == 0 {
+        let inputs = storage.inputsWithBlock(ofOutput: output)
+        if inputs.count == 0 {
             return true
         }
 
-        if let outputSpentBlockHeight = output.inputs.first?.transaction?.block?.height {
+        if let outputSpentBlockHeight = inputs.first?.block?.height {
             // If output is spent, we still need to set to bloom filter if it hasn't at least 100 confirmations 
             return bestBlockHeight - outputSpentBlockHeight < 100
         }
@@ -43,31 +42,28 @@ class BloomFilterManager {
 extension BloomFilterManager: IBloomFilterManager {
 
     func regenerateBloomFilter() {
-        let realm = realmFactory.realm
         var elements = [Data]()
 
-        let publicKeys = realm.objects(PublicKey.self)
+        let publicKeys = storage.publicKeys()
         for publicKey in publicKeys {
             elements.append(publicKey.keyHash)
             elements.append(publicKey.raw)
             elements.append(publicKey.scriptHashForP2WPKH)
         }
 
-        var transactionOutputs = Array(
-                realm.objects(TransactionOutput.self)
-                        .filter("publicKey != nil")
-                        .filter("scriptType = %@ OR scriptType = %@", ScriptType.p2wpkh.rawValue, ScriptType.p2pk.rawValue)
-        )
+        var outputs = storage.outputsWithPublicKeys().filter { output in
+            return output.output.scriptType == ScriptType.p2wpkh || output.output.scriptType == ScriptType.p2pk
+        }
 
-        if let bestBlockHeight = realm.objects(Block.self).sorted(byKeyPath: "height").last?.height {
-            transactionOutputs = transactionOutputs.filter {
-                self.needToSetToBloomFilter(output: $0, bestBlockHeight: bestBlockHeight)
+        if let bestBlockHeight = storage.lastBlock?.height {
+            outputs = outputs.filter {
+                self.needToSetToBloomFilter(output: $0.output, bestBlockHeight: bestBlockHeight)
             }
         }
 
-        for output in transactionOutputs {
-            if let transaction = output.transaction {
-                let outpoint = transaction.dataHash + byteArrayLittleEndian(int: output.index)
+        for outputWithPublicKey in outputs {
+            if let transactionHash = outputWithPublicKey.output.transactionHashReversedHex.reversedData {
+                let outpoint = transactionHash + byteArrayLittleEndian(int: outputWithPublicKey.output.index)
                 elements.append(outpoint)
             }
         }

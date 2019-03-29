@@ -13,13 +13,15 @@ class DarkGravityWaveValidatorTests: XCTestCase {
 
     private var validator: DarkGravityWaveValidator!
     private var network: MockINetwork!
+    private var storage: MockIStorage!
 
     private var candidate: Block!
 
     override func setUp() {
         super.setUp()
+        storage = MockIStorage()
 
-        validator = DarkGravityWaveValidator(encoder: DifficultyEncoder(), blockHelper: BlockHelper())
+        validator = DarkGravityWaveValidator(storage: storage, encoder: DifficultyEncoder(), blockHelper: BlockHelper(storage: storage))
         network = MockINetwork()
         stub(network) { mock in
             when(mock.heightInterval.get).thenReturn(24)
@@ -31,9 +33,9 @@ class DarkGravityWaveValidatorTests: XCTestCase {
         candidate = Block(
                 withHeader: BlockHeader(
                         version: 1,
-                        headerHash: "".reversedData,
-                        previousBlockHeaderReversedHex: "",
-                        merkleRootReversedHex: "",
+                        headerHash: Data(),
+                        previousBlockHeaderHash: Data(),
+                        merkleRoot: Data(),
                         timestamp: 1408732505,
                         bits: 0x1b1441de,
                         nonce: 1
@@ -44,6 +46,7 @@ class DarkGravityWaveValidatorTests: XCTestCase {
     override func tearDown() {
         validator = nil
         network = nil
+        storage = nil
 
         candidate = nil
 
@@ -55,10 +58,10 @@ class DarkGravityWaveValidatorTests: XCTestCase {
         var lastBlock = candidate
         for i in 0..<24 {
             let block = Block(
-                    withHeader: BlockHeader(version: 1, headerHash: "".reversedData, previousBlockHeaderReversedHex: "", merkleRootReversedHex: "", timestamp: timestampArray[timestampArray.count - i - 1], bits: bitsArray[bitsArray.count - i - 1], nonce: 0),
+                    withHeader: BlockHeader(version: 1, headerHash: Data(), previousBlockHeaderHash: Data(), merkleRoot: Data(), timestamp: timestampArray[timestampArray.count - i - 1], bits: bitsArray[bitsArray.count - i - 1], nonce: 0),
                     height: candidate.height - i - 1
             )
-            lastBlock?.previousBlock = block
+            lastBlock?.previousBlock(storage: storage) = block
             lastBlock = block
         }
     }

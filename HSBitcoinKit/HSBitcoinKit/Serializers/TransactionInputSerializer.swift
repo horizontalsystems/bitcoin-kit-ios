@@ -3,7 +3,7 @@ import HSCryptoKit
 
 class TransactionInputSerializer {
 
-    static func serialize(input: TransactionInput) -> Data {
+    static func serialize(input: Input) -> Data {
         var data = Data()
         data += input.previousOutputTxReversedHex.reversedData ?? Data()
         data += UInt32(input.previousOutputIndex)
@@ -16,34 +16,21 @@ class TransactionInputSerializer {
         return data
     }
 
-    static func serializedOutPoint(input: TransactionInput) throws -> Data {
+    static func serializedOutPoint(input: InputToSign) throws -> Data {
         var data = Data()
+        let output = input.previousOutput
 
-        guard let output = input.previousOutput else {
-            throw SerializationError.noPreviousOutput
-        }
-
-        guard let previousTransactionData = output.transaction?.dataHash else {
-            throw SerializationError.noPreviousTransaction
-        }
-
-        data += previousTransactionData
+        data += output.transactionHashReversedHex.reversedData ?? Data()
         data += UInt32(output.index)
 
         return data
     }
 
-    static func serializedForSignature(input: TransactionInput, forCurrentInputSignature: Bool) throws -> Data {
+    static func serializedForSignature(inputToSign: InputToSign, forCurrentInputSignature: Bool) throws -> Data {
         var data = Data()
+        let output = inputToSign.previousOutput
 
-        guard let output = input.previousOutput else {
-            throw SerializationError.noPreviousOutput
-        }
-
-        guard let previousTransactionData = output.transaction?.dataHash else {
-            throw SerializationError.noPreviousTransaction
-        }
-        data += previousTransactionData
+        data += output.transactionHashReversedHex.reversedData ?? Data()
         data += UInt32(output.index)
 
         if forCurrentInputSignature {
@@ -54,23 +41,22 @@ class TransactionInputSerializer {
             data += VarInt(0).serialized()
         }
 
-        data += UInt32(input.sequence)
+        data += UInt32(inputToSign.input.sequence)
 
         return data
     }
 
-    static func deserialize(byteStream: ByteStream) -> TransactionInput {
-        let transactionInput = TransactionInput()
-
-        transactionInput.previousOutputTxReversedHex = Data(byteStream.read(Data.self, count: 32).reversed()).hex
-        transactionInput.previousOutputIndex = Int(byteStream.read(UInt32.self))
-
+    static func deserialize(byteStream: ByteStream) -> Input {
+        let previousOutputTxReversedHex = Data(byteStream.read(Data.self, count: 32).reversed()).hex
+        let previousOutputIndex = Int(byteStream.read(UInt32.self))
         let scriptLength: VarInt = byteStream.read(VarInt.self)
+        let signatureScript = byteStream.read(Data.self, count: Int(scriptLength.underlyingValue))
+        let sequence = Int(byteStream.read(UInt32.self))
 
-        transactionInput.signatureScript = byteStream.read(Data.self, count: Int(scriptLength.underlyingValue))
-        transactionInput.sequence = Int(byteStream.read(UInt32.self))
-
-        return transactionInput
+        return Input(
+                withPreviousOutputTxReversedHex: previousOutputTxReversedHex, previousOutputIndex: previousOutputIndex,
+                script: signatureScript, sequence: sequence
+        )
     }
 
 }

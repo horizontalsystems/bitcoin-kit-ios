@@ -12,7 +12,7 @@ class InstantTransactionManager: IInstantTransactionManager {
         self.transactionSyncer = transactionSyncer
     }
 
-    func handle(transactions: [Transaction]) {
+    func handle(transactions: [FullTransaction]) {
         guard !transactions.isEmpty else {
             return
         }
@@ -23,13 +23,13 @@ class InstantTransactionManager: IInstantTransactionManager {
         transactionSyncer.handle(transactions: transactions)
     }
 
-    private func updateInputs(for transaction: Transaction) {
+    private func updateInputs(for transaction: FullTransaction) {
         for i in 0..<transaction.inputs.count {
             let previousOutputTxReversedHex = transaction.inputs[i].previousOutputTxReversedHex // todo: need to use data from new grdb database
             guard let previousOutputTxReversedHash = Data(hex: previousOutputTxReversedHex) else {
                 continue
             }
-            let input = instantSendFactory.instantTransactionInput(txHash: transaction.dataHash, inputTxHash: Data(previousOutputTxReversedHash.reversed()), voteCount: 0, blockHeight: nil)
+            let input = instantSendFactory.instantTransactionInput(txHash: transaction.header.dataHash, inputTxHash: Data(previousOutputTxReversedHash.reversed()), voteCount: 0, blockHeight: nil)
 
             storage.add(instantTransactionInput: input)
         }

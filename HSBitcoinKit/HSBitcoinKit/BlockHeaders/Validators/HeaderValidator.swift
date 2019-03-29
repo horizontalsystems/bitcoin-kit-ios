@@ -9,14 +9,11 @@ class HeaderValidator: IBlockValidator {
     }
 
     func validate(candidate: Block, block: Block, network: INetwork) throws {
-        guard let candidateHeader = candidate.header else {
-            throw Block.BlockError.noHeader
-        }
-        guard candidateHeader.previousBlockHeaderHash == block.headerHash else {
+        guard candidate.previousBlockHashReversedHex.reversedData == block.headerHash else {
             throw BlockValidatorError.wrongPreviousHeaderHash
         }
-        guard let headerHashBigInt = BigInt(candidate.reversedHeaderHashHex, radix: 16),
-              headerHashBigInt < difficultyEncoder.decodeCompact(bits: candidateHeader.bits) else {
+        guard let headerHashBigInt = BigInt(candidate.headerHashReversedHex, radix: 16),
+              headerHashBigInt < difficultyEncoder.decodeCompact(bits: candidate.bits) else {
             throw BlockValidatorError.invalidProofOfWork
         }
 

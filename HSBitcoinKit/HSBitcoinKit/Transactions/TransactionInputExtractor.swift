@@ -3,12 +3,14 @@ import HSCryptoKit
 enum ScriptError: Error { case wrongScriptLength, wrongSequence }
 
 class TransactionInputExtractor {
-    let scriptConverter: IScriptConverter
-    let addressConverter: IAddressConverter
+    private let storage: IStorage
+    private let scriptConverter: IScriptConverter
+    private let addressConverter: IAddressConverter
 
-    let logger: Logger?
+    private let logger: Logger?
     
-    init(scriptConverter: IScriptConverter, addressConverter: IAddressConverter, logger: Logger? = nil) {
+    init(storage: IStorage, scriptConverter: IScriptConverter, addressConverter: IAddressConverter, logger: Logger? = nil) {
+        self.storage = storage
         self.scriptConverter = scriptConverter
         self.addressConverter = addressConverter
         
@@ -19,9 +21,9 @@ class TransactionInputExtractor {
 
 extension TransactionInputExtractor: ITransactionExtractor {
 
-    func extract(transaction: Transaction) {
+    func extract(transaction: FullTransaction) {
         for input in transaction.inputs {
-            if let previousOutput = input.previousOutput {
+            if let previousOutput = storage.previousOutput(ofInput: input) {
                 input.address = previousOutput.address
                 input.keyHash = previousOutput.keyHash
                 continue

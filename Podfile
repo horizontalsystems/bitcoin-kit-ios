@@ -27,9 +27,6 @@ def kit_pods
   pod 'BigInt', '~> 3.1.0'
 
   pod 'GRDB.swift', '~> 3.6.2'
-
-  pod 'RealmSwift', '~> 3.11.0'
-  pod 'RxRealm', '~> 0.7.0'
 end
 
 target :HSBitcoinKitDemo do

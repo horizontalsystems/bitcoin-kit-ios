@@ -1,6 +1,5 @@
 import XCTest
 import Cuckoo
-import RealmSwift
 import HSHDWalletKit
 @testable import HSBitcoinKit
 
@@ -556,7 +555,7 @@ class PeerDelegateTests: PeerGroupTests {
 
     func testHandleMerkleBlock() {
         let peer = peers["0"]!
-        let merkleBlock = MerkleBlock(header: TestData.firstBlock.header!, transactionHashes: [], transactions: [])
+        let merkleBlock = MerkleBlock(header: TestData.firstBlock.header, transactionHashes: [], transactions: [])
 
         stub(peer) { mock in
             when(mock.announcedLastBlockHeight.get).thenReturn(100)
@@ -573,7 +572,7 @@ class PeerDelegateTests: PeerGroupTests {
 
     func testHandleMerkleBlock_HandleWithError() {
         let peer = peers["0"]!
-        let merkleBlock = MerkleBlock(header: TestData.firstBlock.header!, transactionHashes: [], transactions: [])
+        let merkleBlock = MerkleBlock(header: TestData.firstBlock.header, transactionHashes: [], transactions: [])
 
         stub(mockBlockSyncer) { mock in
             when(mock.handle(merkleBlock: any(), maxBlockHeight: any())).thenThrow(MerkleBlockValidator.ValidationError.notEnoughBits)
@@ -582,7 +581,7 @@ class PeerDelegateTests: PeerGroupTests {
         peerGroup.handle(peer, merkleBlock: merkleBlock)
 
         verify(mockBlockSyncer).handle(merkleBlock: equal(to: merkleBlock), maxBlockHeight: any())
-        verify(peer).disconnect(error: equal(to: MerkleBlockValidator.ValidationError.notEnoughBits, equalWhen: { $0! == $1! }))
+        verify(peer).disconnect(error: equal(to: MerkleBlockValidator.ValidationError.notEnoughBits, equalWhen: equalErrors))
     }
 
     func testPeerDidReceiveAddresses() {
@@ -735,7 +734,7 @@ class PeerDelegateTests: PeerGroupTests {
         return task
     }
 
-    private func getCompleted_RequestTransactionsTask(transactions: [Transaction]) -> RequestTransactionsTask {
+    private func getCompleted_RequestTransactionsTask(transactions: [FullTransaction]) -> RequestTransactionsTask {
         let task = RequestTransactionsTask(hashes: [Data(from: 10000)])
 
         for transaction in transactions {

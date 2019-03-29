@@ -1,6 +1,5 @@
 import UIKit
 import HSBitcoinKit
-import RealmSwift
 import RxSwift
 
 class TransactionsController: UITableViewController {

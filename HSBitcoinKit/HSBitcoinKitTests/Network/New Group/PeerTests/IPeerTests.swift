@@ -1,6 +1,5 @@
 import XCTest
 import Cuckoo
-import RealmSwift
 import RxSwift
 import Alamofire
 import HSHDWalletKit

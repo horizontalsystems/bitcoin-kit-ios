@@ -27,14 +27,16 @@ class DAAValidatorTests: XCTestCase {
 
     private var validator: DAAValidator!
     private var network: MockINetwork!
+    private var storage: MockIStorage!
 
     private var candidate: Block!
 
     override func setUp() {
         super.setUp()
 
-        validator = DAAValidator(encoder: DifficultyEncoder(), blockHelper: BlockHelper())
         network = MockINetwork()
+        storage = MockIStorage()
+
         stub(network) { mock in
             when(mock.heightInterval.get).thenReturn(144)
             when(mock.targetTimeSpan.get).thenReturn(86400)
@@ -42,22 +44,25 @@ class DAAValidatorTests: XCTestCase {
             when(mock.targetSpacing.get).thenReturn(600)
         }
 
-    candidate = Block(
+        candidate = Block(
             withHeader: BlockHeader(
                     version: 536870912,
-                    headerHash: "".reversedData,
-                    previousBlockHeaderReversedHex: "000000000000000000c27f91198eb5505005a0863d8deb696a27e2f5bfffe70b",
-                    merkleRootReversedHex: "1530edf433fdfd7252bda07bf38629e2c31f31560dbd30dd7f496c4b6fe7e27d",
+                    headerHash: Data(),
+                    previousBlockHeaderHash: "000000000000000000c27f91198eb5505005a0863d8deb696a27e2f5bfffe70b".reversedData!,
+                    merkleRoot: "1530edf433fdfd7252bda07bf38629e2c31f31560dbd30dd7f496c4b6fe7e27d".reversedData!,
                     timestamp: 1534820198,
                     bits: 402796414,
                     nonce: 1748283264
             ),
             height: 544320)
+
+        validator = DAAValidator(storage: storage, encoder: DifficultyEncoder(), blockHelper: BlockHelper(storage: storage))
     }
 
     override func tearDown() {
         validator = nil
         network = nil
+        storage = nil
 
         candidate = nil
 
@@ -66,21 +71,28 @@ class DAAValidatorTests: XCTestCase {
 
     // MAKE real test data from bitcoin cash mainnet
     func makeBlocks() {
-        var lastBlock = candidate
-        for i in 0..<148 {
-            let block = Block(
-                    withHeader: BlockHeader(version: 536870912, headerHash: "".reversedData, previousBlockHeaderReversedHex: "", merkleRootReversedHex: "", timestamp: timestampArray[timestampArray.count - i - 1], bits: bitsArray[bitsArray.count - i - 1], nonce: 0),
-                    height: candidate.height - i - 1
-            )
-            lastBlock?.previousBlock = block
-            lastBlock = block
+        var lastBlock = candidate!
+        stub(storage) { mock in
+            for i in 0..<148 {
+                let block = Block(
+                        withHeader: BlockHeader(version: 536870912, headerHash: Data(), previousBlockHeaderHash: Data(from: i), merkleRoot: Data(), timestamp: timestampArray[timestampArray.count - i - 1], bits: bitsArray[bitsArray.count - i - 1], nonce: 0),
+                        height: candidate.height - i - 1
+                )
+
+                lastBlock.previousBlockHashReversedHex = block.headerHashReversedHex
+                when(mock.block(byHashHex: lastBlock.previousBlockHashReversedHex)).thenReturn(block)
+
+                lastBlock = block
+            }
+
+            when(mock.block(byHashHex: lastBlock.previousBlockHashReversedHex)).thenReturn(nil)
         }
     }
 
     func testValidate() {
         makeBlocks()
         do {
-            try validator.validate(candidate: candidate, block: candidate.previousBlock!, network: network)
+            try validator.validate(candidate: candidate, block: candidate.previousBlock(storage: storage)!, network: network)
         } catch let error {
             XCTFail("\(error) Exception Thrown")
         }

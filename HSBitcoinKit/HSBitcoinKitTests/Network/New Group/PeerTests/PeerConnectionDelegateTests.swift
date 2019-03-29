@@ -1,6 +1,5 @@
 import XCTest
 import Cuckoo
-import RealmSwift
 import RxSwift
 import Alamofire
 import HSHDWalletKit
@@ -345,7 +344,7 @@ class PeerConnectionDelegateTests: XCTestCase {
 
     func testConnectionDidReceiveMessage_MerkleBlockMessage() {
         let mockValidator = MockIMerkleBlockValidator()
-        let merkleBlock = MerkleBlock(header: TestData.firstBlock.header!, transactionHashes: [], transactions: [])
+        let merkleBlock = MerkleBlock(header: TestData.firstBlock.header, transactionHashes: [], transactions: [])
         stub(mockValidator) { mock in
             when(mock.merkleBlock(from: any())).thenReturn(merkleBlock)
         }
@@ -353,7 +352,7 @@ class PeerConnectionDelegateTests: XCTestCase {
             when(mock.merkleBlockValidator.get).thenReturn(mockValidator)
         }
 
-        let message = MerkleBlockMessage(blockHeader: TestData.firstBlock.header!, totalTransactions: 0, numberOfHashes: 0, hashes: [], numberOfFlags: 0, flags: [])
+        let message = MerkleBlockMessage(blockHeader: TestData.firstBlock.header, totalTransactions: 0, numberOfHashes: 0, hashes: [], numberOfFlags: 0, flags: [])
         let task = newTask(extraMocks: { when($0).handle(merkleBlock: any()).thenReturn(true) })
         let task2 = newTask(extraMocks: { when($0).handle(merkleBlock: any()).thenReturn(false) })
 
@@ -371,7 +370,7 @@ class PeerConnectionDelegateTests: XCTestCase {
 
     func testConnectionDidReceiveMessage_MerkleBlockMessage_WhenNoInternet() {
         let mockValidator = MockIMerkleBlockValidator()
-        let merkleBlock = MerkleBlock(header: TestData.firstBlock.header!, transactionHashes: [], transactions: [])
+        let merkleBlock = MerkleBlock(header: TestData.firstBlock.header, transactionHashes: [], transactions: [])
         stub(mockValidator) { mock in
             when(mock.merkleBlock(from: any())).thenReturn(merkleBlock)
         }
@@ -379,7 +378,7 @@ class PeerConnectionDelegateTests: XCTestCase {
             when(mock.merkleBlockValidator.get).thenReturn(mockValidator)
         }
 
-        let message = MerkleBlockMessage(blockHeader: TestData.firstBlock.header!, totalTransactions: 0, numberOfHashes: 0, hashes: [], numberOfFlags: 0, flags: [])
+        let message = MerkleBlockMessage(blockHeader: TestData.firstBlock.header, totalTransactions: 0, numberOfHashes: 0, hashes: [], numberOfFlags: 0, flags: [])
         let task = newTask(extraMocks: { when($0).handle(merkleBlock: any()).thenReturn(true) })
 
         peer.connected = false
@@ -402,7 +401,7 @@ class PeerConnectionDelegateTests: XCTestCase {
             when(mock.merkleBlockValidator.get).thenReturn(mockValidator)
         }
 
-        let message = MerkleBlockMessage(blockHeader: TestData.firstBlock.header!, totalTransactions: 0, numberOfHashes: 0, hashes: [], numberOfFlags: 0, flags: [])
+        let message = MerkleBlockMessage(blockHeader: TestData.firstBlock.header, totalTransactions: 0, numberOfHashes: 0, hashes: [], numberOfFlags: 0, flags: [])
         let task = newTask(extraMocks: { when($0).handle(merkleBlock: any()).thenReturn(true) })
 
         peer.connected = true
@@ -428,7 +427,7 @@ class PeerConnectionDelegateTests: XCTestCase {
         peer.connection(didReceiveMessage: message)
         waitForMainQueue()
 
-        verify(task).handle(transaction: equal(to: transaction, equalWhen: { $0.dataHash == $1.dataHash }))
+        verify(task).handle(transaction: equal(to: transaction, equalWhen: { $0.header.dataHash == $1.header.dataHash }))
         verify(task2, never()).handle(transaction: any())
         verifyNoMoreInteractions(mockPeerGroup)
     }

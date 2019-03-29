@@ -58,11 +58,11 @@ class MasternodeListManager: IMasternodeListManager {
             throw ValidationError.wrongCoinbaseHash
         }
 
-        guard let block = storage.block(byHeaderHash: masternodeListDiffMessage.blockHash), let merkleRoot = block.header?.merkleRoot else {
+        guard let block = storage.block(byHashHex: masternodeListDiffMessage.blockHash.reversedHex) else {
             throw ValidationError.noMerkleBlockHeader
         }
 
-        guard merkleRoot == calculatedMerkleRootData.merkleRoot else {
+        guard block.merkleRoot == calculatedMerkleRootData.merkleRoot else {
             throw ValidationError.wrongMerkleRoot
         }
         //07.

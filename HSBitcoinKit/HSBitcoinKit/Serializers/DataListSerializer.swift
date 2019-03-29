@@ -1,19 +1,18 @@
 import Foundation
-import RealmSwift
 
-class TransactionWitnessSerializer {
+class DataListSerializer {
 
-    static func serialize(witnessData: List<Data>) -> Data {
+    static func serialize(dataList: [Data]) -> Data {
         var data = Data()
-        data += VarInt(witnessData.count).serialized()
-        for witness in witnessData {
+        data += VarInt(dataList.count).serialized()
+        for witness in dataList {
             data += VarInt(witness.count).serialized() + witness
         }
         return data
     }
 
-    static func deserialize(byteStream: ByteStream) -> List<Data> {
-        let data = List<Data>()
+    static func deserialize(byteStream: ByteStream) -> [Data] {
+        var data = [Data]()
         let count = byteStream.read(VarInt.self)
         for _ in 0..<Int(count.underlyingValue) {
             let dataSize = byteStream.read(VarInt.self)
@@ -21,6 +20,10 @@ class TransactionWitnessSerializer {
         }
 
         return data
+    }
+
+    static func deserialize(data: Data) -> [Data] {
+        return deserialize(byteStream: ByteStream(data))
     }
 
 }

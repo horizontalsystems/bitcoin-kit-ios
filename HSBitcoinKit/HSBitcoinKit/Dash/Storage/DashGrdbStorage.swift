@@ -43,6 +43,16 @@ class DashGrdbStorage: GrdbStorage {
         return migrator
     }
 
+    override func clearGrdb() throws {
+        try inTransaction {
+            _ = try write { db in
+                try Masternode.deleteAll(db)
+                try MasternodeListState.deleteAll(db)
+                try InstantTransactionInput.deleteAll(db)
+            }
+            try super.clearGrdb()
+        }
+    }
 }
 
 extension DashGrdbStorage: IDashStorage {

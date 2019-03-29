@@ -62,6 +62,6 @@ protocol IMerkleHasher {
 }
 
 protocol IInstantTransactionManager {
-    func handle(transactions: [Transaction])
+    func handle(transactions: [FullTransaction])
     func handle(lockVote: TransactionLockVoteMessage) throws
 }

@@ -2,7 +2,6 @@ import Quick
 import Nimble
 import XCTest
 import Cuckoo
-import RealmSwift
 import RxSwift
 @testable import HSBitcoinKit
 
@@ -65,8 +64,8 @@ class InitialSyncerTests: QuickSpec {
             context("when not synced yet") {
                 let internalKeys = [PublicKey(withAccount: 0, index: 0, external: true, hdPublicKeyData: Data())]
                 let externalKeys = [PublicKey(withAccount: 0, index: 0, external: false, hdPublicKeyData: Data())]
-                let blockHash0 = BlockHash(reversedHeaderHashHex: "00", height: 0, sequence: 0)!
-                let blockHash1 = BlockHash(reversedHeaderHashHex: "01", height: 1, sequence: 1)!
+                let blockHash0 = BlockHash(headerHashReversedHex: "00", height: 0, sequence: 0)!
+                let blockHash1 = BlockHash(headerHashReversedHex: "01", height: 1, sequence: 1)!
                 let internalBlockHashes = [blockHash0, blockHash1]
                 let externalBlockHashes = [blockHash1]
 

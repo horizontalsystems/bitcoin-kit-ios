@@ -11,17 +11,9 @@ PODS:
   - Nimble (7.3.4)
   - ObjectMapper (3.4.2)
   - Quick (1.3.4)
-  - Realm (3.11.2):
-    - Realm/Headers (= 3.11.2)
-  - Realm/Headers (3.11.2)
-  - RealmSwift (3.11.2):
-    - Realm (= 3.11.2)
   - RxAtomic (4.4.1)
   - RxBlocking (4.4.1):
     - RxAtomic (~> 4.4)
-    - RxSwift (~> 4.0)
-  - RxRealm (0.7.6):
-    - RealmSwift (~> 3.0)
     - RxSwift (~> 4.0)
   - RxSwift (4.4.1):
     - RxAtomic (~> 4.4)
@@ -38,9 +30,7 @@ DEPENDENCIES:
   - Nimble
   - ObjectMapper (~> 3.4.0)
   - Quick
-  - RealmSwift (~> 3.11.0)
   - RxBlocking (~> 4.0)
-  - RxRealm (~> 0.7.0)
   - RxSwift (~> 4.0)
 
 SPEC REPOS:
@@ -54,11 +44,8 @@ SPEC REPOS:
     - Nimble
     - ObjectMapper
     - Quick
-    - Realm
-    - RealmSwift
     - RxAtomic
     - RxBlocking
-    - RxRealm
     - RxSwift
     - SipHash
 
@@ -82,14 +69,11 @@ SPEC CHECKSUMS:
   Nimble: 051e3d8912d40138fa5591c78594f95fb172af37
   ObjectMapper: 0d4402610f4e468903ae64629eec4784531e5c51
   Quick: f4f7f063c524394c73ed93ac70983c609805d481
-  Realm: 864477d028db77f7c5a0cba64a4892ad53db128a
-  RealmSwift: 12b8262fc08020b47de4fd88eb3d5c9425b34ec7
   RxAtomic: f8d6adc1ccb87a767811269e4875887bc74dbf19
   RxBlocking: 5508e90d36ca2304632dc9378ece4e9b5d4bf656
-  RxRealm: 5379eddd74f8d617ca7681d1f8d144af25b432b0
   RxSwift: 92fcf68dfef21f3e2ab1965363d9e7b3d787597e
   SipHash: fad90a4683e420c52ef28063063dbbce248ea6d4
 
-PODFILE CHECKSUM: c19f7895a47b7aa2c9eb3f8a6e3ea319f38e81bd
+PODFILE CHECKSUM: e79a47efe30f6b9ab6b1ba7905722eae8035cd15
 
 COCOAPODS: 1.5.3

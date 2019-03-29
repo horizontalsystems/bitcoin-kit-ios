@@ -1,11 +1,11 @@
 struct CoinbaseTransaction {
-    let transaction: Transaction
+    let transaction: FullTransaction
     let coinbaseTransactionSize: Data
     let version: UInt16
     let height: UInt32
     let merkleRootMNList: Data
 
-    init(transaction: Transaction, coinbaseTransactionSize: Data, version: UInt16, height: UInt32, merkleRootMNList: Data) {
+    init(transaction: FullTransaction, coinbaseTransactionSize: Data, version: UInt16, height: UInt32, merkleRootMNList: Data) {
         self.transaction = transaction
         self.coinbaseTransactionSize = coinbaseTransactionSize
         self.version = version

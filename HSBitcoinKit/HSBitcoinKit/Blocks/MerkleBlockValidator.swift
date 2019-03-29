@@ -49,7 +49,7 @@ class MerkleBlockValidator: IMerkleBlockValidator {
             throw ValidationError.wrongMerkleRoot
         }
 
-        return MerkleBlock(header: message.blockHeader, transactionHashes: merkleRootData.matchedHashes, transactions: [Transaction]())
+        return MerkleBlock(header: message.blockHeader, transactionHashes: merkleRootData.matchedHashes, transactions: [FullTransaction]())
     }
 
 }

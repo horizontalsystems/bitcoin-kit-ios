@@ -69,10 +69,10 @@ class MasternodeListManagerTests: QuickSpec {
             let coinbaseTransaction = DashTestData.coinbaseTransaction(merkleRootMNList: calculatedHash)
 
             let blockHash = Data(repeating: 1, count: 4)
-            let block = Block(withHeaderHash: Data(), height: 0)
             let correctMerkleRoot = Data(repeating: 7, count: 32)
-            block.header = BlockHeader()
-            block.header?.merkleRoot = correctMerkleRoot
+            let block = Block(withHeader: BlockHeader(version: 0, headerHash: Data(), previousBlockHeaderHash: Data(),
+                              merkleRoot: correctMerkleRoot, timestamp: 0, bits: 0, nonce: 0)
+                        , height: 0)
 
             let message = DashTestData.masternodeListDiffMessage(blockHash: blockHash, cbTx: coinbaseTransaction, deletedMNs: [willDeleteProRegTxHash], mnList: mnList)
 

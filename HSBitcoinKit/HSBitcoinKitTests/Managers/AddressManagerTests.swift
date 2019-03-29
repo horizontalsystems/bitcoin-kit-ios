@@ -1,13 +1,11 @@
 import XCTest
 import Cuckoo
 import HSHDWalletKit
-import RealmSwift
 @testable import HSBitcoinKit
 
 class AddressManagerTests: XCTestCase {
 
-    private var realm: Realm!
-    private var mockRealmFactory: MockIRealmFactory!
+    private var mockStorage: MockIStorage!
     private var mockHDWallet: MockIHDWallet!
     private var mockAddressConverter: MockIAddressConverter!
 
@@ -17,22 +15,20 @@ class AddressManagerTests: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        mockRealmFactory = MockIRealmFactory()
-        realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
-        try! realm.write { realm.deleteAll() }
-        stub(mockRealmFactory) {mock in
-            when(mock.realm.get).thenReturn(realm)
-        }
-
+        mockStorage = MockIStorage()
         mockHDWallet = MockIHDWallet()
         mockAddressConverter = MockIAddressConverter()
 
+        stub(mockStorage) { mock in
+            when(mock.add(publicKeys: any())).thenDoNothing()
+        }
+
         hdWallet = HDWallet(seed: Data(), coinType: UInt32(1), xPrivKey: UInt32(0x04358394), xPubKey: UInt32(0x043587cf))
-        manager = AddressManager(realmFactory: mockRealmFactory, hdWallet: mockHDWallet, addressConverter: mockAddressConverter)
+        manager = AddressManager(storage: mockStorage, hdWallet: mockHDWallet, addressConverter: mockAddressConverter)
     }
 
     override func tearDown() {
-        mockRealmFactory = nil
+        mockStorage = nil
         mockHDWallet = nil
         mockAddressConverter = nil
 
@@ -51,12 +47,11 @@ class AddressManagerTests: XCTestCase {
             getPublicKey(withAccount: 0, index: 2, chain: .internal),
             getPublicKey(withAccount: 0, index: 1, chain: .external)
         ]
-        let txOutput = TestData.p2pkhTransaction.outputs[0]
 
-        try! realm.write {
-            realm.add(publicKeys)
-            realm.add(txOutput)
-            txOutput.publicKey = publicKeys[0]
+        stub(mockStorage) { mock in
+            when(mock.publicKeys()).thenReturn(publicKeys)
+            when(mock.hasOutputs(ofPublicKey: any())).thenReturn(false)
+            when(mock.hasOutputs(ofPublicKey: equal(to: publicKeys[0]))).thenReturn(true)
         }
 
         let changePublicKey = try! manager.changePublicKey()
@@ -65,12 +60,10 @@ class AddressManagerTests: XCTestCase {
 
     func testChangePublicKey_NoUnusedPublicKey() {
         let publicKey =  getPublicKey(withAccount: 0, index: 0, chain: .internal)
-        let txOutput = TestData.p2pkhTransaction.outputs[0]
 
-        try! realm.write {
-            realm.add(publicKey)
-            realm.add(txOutput)
-            txOutput.publicKey = publicKey
+        stub(mockStorage) { mock in
+            when(mock.publicKeys()).thenReturn([publicKey])
+            when(mock.hasOutputs(ofPublicKey: equal(to: publicKey))).thenReturn(true)
         }
 
         do {
@@ -92,12 +85,11 @@ class AddressManagerTests: XCTestCase {
             getPublicKey(withAccount: 0, index: 1, chain: .internal),
             getPublicKey(withAccount: 0, index: 2, chain: .external)
         ]
-        let txOutput = TestData.p2pkhTransaction.outputs[0]
 
-        try! realm.write {
-            realm.add(publicKeys)
-            realm.add(txOutput)
-            txOutput.publicKey = publicKeys[0]
+        stub(mockStorage) { mock in
+            when(mock.publicKeys()).thenReturn(publicKeys)
+            when(mock.hasOutputs(ofPublicKey: any())).thenReturn(false)
+            when(mock.hasOutputs(ofPublicKey: equal(to: publicKeys[0]))).thenReturn(true)
         }
 
         let address = LegacyAddress(type: .pubKeyHash, keyHash: publicKeys[3].keyHash, base58: "receiveAddress")
@@ -111,12 +103,10 @@ class AddressManagerTests: XCTestCase {
 
     func testReceiveAddress_NoUnusedPublicKey() {
         let publicKey =  getPublicKey(withAccount: 0, index: 0, chain: .external)
-        let txOutput = TestData.p2pkhTransaction.outputs[0]
 
-        try! realm.write {
-            realm.add(publicKey)
-            realm.add(txOutput)
-            txOutput.publicKey = publicKey
+        stub(mockStorage) { mock in
+            when(mock.publicKeys()).thenReturn([publicKey])
+            when(mock.hasOutputs(ofPublicKey: equal(to: publicKey))).thenReturn(true)
         }
 
         do {
@@ -141,14 +131,12 @@ class AddressManagerTests: XCTestCase {
             getPublicKey(withAccount: 1, index: 0, chain: .external),
             getPublicKey(withAccount: 1, index: 1, chain: .external),
         ]
-        let txOutput = TestData.p2pkhTransaction.outputs[0]
 
-        try! realm.write {
-            realm.add([keys[0], keys[1]])
-            realm.add(txOutput)
-            txOutput.publicKey = keys[0]
+        stub(mockStorage) { mock in
+            when(mock.publicKeys()).thenReturn([keys[0], keys[1]])
+            when(mock.hasOutputs(ofPublicKey: any())).thenReturn(false)
+            when(mock.hasOutputs(ofPublicKey: equal(to: keys[0]))).thenReturn(true)
         }
-
         stub(mockHDWallet) { mock in
             when(mock.gapLimit.get).thenReturn(2)
             when(mock.publicKey(account: equal(to: 0), index: equal(to: 2), external: equal(to: false))).thenReturn(keys[2])
@@ -166,24 +154,10 @@ class AddressManagerTests: XCTestCase {
         verify(mockHDWallet, times(2)).publicKey(account: equal(to: 0), index: any(), external: equal(to: true))
         verify(mockHDWallet, times(2)).publicKey(account: equal(to: 1), index: any(), external: equal(to: true))
 
-        var internalKeys = realm.objects(PublicKey.self).filter("external = false AND account = 0").sorted(byKeyPath: "index")
-        var externalKeys = realm.objects(PublicKey.self).filter("external = true AND account = 0").sorted(byKeyPath: "index")
-
-        XCTAssertEqual(internalKeys.count, 3)
-        XCTAssertEqual(externalKeys.count, 2)
-        XCTAssertEqual(internalKeys[2].keyHash, keys[2].keyHash)
-        XCTAssertEqual(externalKeys[0].keyHash, keys[3].keyHash)
-        XCTAssertEqual(externalKeys[1].keyHash, keys[4].keyHash)
-
-        internalKeys = realm.objects(PublicKey.self).filter("external = false AND account = 1").sorted(byKeyPath: "index")
-        externalKeys = realm.objects(PublicKey.self).filter("external = true AND account = 1").sorted(byKeyPath: "index")
-
-        XCTAssertEqual(internalKeys.count, 2)
-        XCTAssertEqual(externalKeys.count, 2)
-        XCTAssertEqual(internalKeys[0].keyHash, keys[5].keyHash)
-        XCTAssertEqual(internalKeys[1].keyHash, keys[6].keyHash)
-        XCTAssertEqual(externalKeys[0].keyHash, keys[7].keyHash)
-        XCTAssertEqual(externalKeys[1].keyHash, keys[8].keyHash)
+        verify(mockStorage).add(publicKeys: equal(to: [keys[2]]))
+        verify(mockStorage).add(publicKeys: equal(to: [keys[3], keys[4]]))
+        verify(mockStorage).add(publicKeys: equal(to: [keys[5], keys[6]]))
+        verify(mockStorage).add(publicKeys: equal(to: [keys[7], keys[8]]))
     }
 
     func testFillGap_NoUsedKey() {
@@ -194,6 +168,9 @@ class AddressManagerTests: XCTestCase {
             getPublicKey(withAccount: 0, index: 1, chain: .external),
         ]
 
+        stub(mockStorage) { mock in
+            when(mock.publicKeys()).thenReturn([])
+        }
         stub(mockHDWallet) { mock in
             when(mock.gapLimit.get).thenReturn(2)
             when(mock.publicKey(account: equal(to: 0), index: equal(to: 0), external: equal(to: false))).thenReturn(keys[0])
@@ -207,12 +184,8 @@ class AddressManagerTests: XCTestCase {
         verify(mockHDWallet, times(2)).publicKey(account: equal(to: 0), index: any(), external: equal(to: true))
         verify(mockHDWallet, never()).publicKey(account: equal(to: 1), index: any(), external: any())
 
-        let internalKeys = realm.objects(PublicKey.self).filter("external = false").sorted(byKeyPath: "index")
-        let externalKeys = realm.objects(PublicKey.self).filter("external = true").sorted(byKeyPath: "index")
-
-        XCTAssertEqual(internalKeys.count, 2)
-        XCTAssertEqual(externalKeys.count, 2)
-        XCTAssertEqual(realm.objects(PublicKey.self).filter("account != 0").count, 0)
+        verify(mockStorage).add(publicKeys: equal(to: [keys[0], keys[1]]))
+        verify(mockStorage).add(publicKeys: equal(to: [keys[2], keys[3]]))
     }
 
     func testFillGap_NoUnusedKeys() {
@@ -227,14 +200,12 @@ class AddressManagerTests: XCTestCase {
             getPublicKey(withAccount: 1, index: 0, chain: .external),
             getPublicKey(withAccount: 1, index: 1, chain: .external),
         ]
-        let txOutput = TestData.p2pkhTransaction.outputs[0]
 
-        try! realm.write {
-            realm.add([keys[0]])
-            realm.add(txOutput)
-            txOutput.publicKey = keys[0]
+        stub(mockStorage) { mock in
+            when(mock.publicKeys()).thenReturn([keys[0]])
+            when(mock.hasOutputs(ofPublicKey: any())).thenReturn(false)
+            when(mock.hasOutputs(ofPublicKey: equal(to: keys[0]))).thenReturn(true)
         }
-
         stub(mockHDWallet) { mock in
             when(mock.gapLimit.get).thenReturn(2)
             when(mock.publicKey(account: equal(to: 0), index: equal(to: 1), external: equal(to: false))).thenReturn(keys[1])
@@ -251,15 +222,8 @@ class AddressManagerTests: XCTestCase {
         verify(mockHDWallet, times(2)).publicKey(account: equal(to: 0), index: any(), external: equal(to: false))
         verify(mockHDWallet, times(2)).publicKey(account: equal(to: 0), index: any(), external: equal(to: true))
 
-        let internalKeys = realm.objects(PublicKey.self).filter("external = false AND account = 0").sorted(byKeyPath: "index")
-        let externalKeys = realm.objects(PublicKey.self).filter("external = true AND account = 0").sorted(byKeyPath: "index")
-
-        XCTAssertEqual(internalKeys.count, 3)
-        XCTAssertEqual(externalKeys.count, 2)
-        XCTAssertEqual(internalKeys[1].keyHash, keys[1].keyHash)
-        XCTAssertEqual(internalKeys[2].keyHash, keys[2].keyHash)
-        XCTAssertEqual(externalKeys[0].keyHash, keys[3].keyHash)
-        XCTAssertEqual(externalKeys[1].keyHash, keys[4].keyHash)
+        verify(mockStorage).add(publicKeys: equal(to: [keys[1], keys[2]]))
+        verify(mockStorage).add(publicKeys: equal(to: [keys[3], keys[4]]))
     }
 
     func testFillGap_NonSequentiallyUsedKeys() {
@@ -276,18 +240,14 @@ class AddressManagerTests: XCTestCase {
             getPublicKey(withAccount: 1, index: 0, chain: .external),
             getPublicKey(withAccount: 1, index: 1, chain: .external),
         ]
-        let txOutput = TestData.p2pkhTransaction.outputs[0]
-        let txOutput2 = TestData.p2pkTransaction.outputs[0]
-        let txOutput3 = TestData.p2shTransaction.outputs[0]
 
-        try! realm.write {
-            realm.add([keys[0], keys[1], keys[2], keys[3], keys[4]])
-            realm.add([txOutput, txOutput2, txOutput3])
-            txOutput.publicKey = keys[0]
-            txOutput2.publicKey = keys[2]
-            txOutput3.publicKey = keys[4]
+        stub(mockStorage) { mock in
+            when(mock.publicKeys()).thenReturn([keys[0], keys[1], keys[2], keys[3], keys[4]])
+            when(mock.hasOutputs(ofPublicKey: any())).thenReturn(false)
+            when(mock.hasOutputs(ofPublicKey: equal(to: keys[0]))).thenReturn(true)
+            when(mock.hasOutputs(ofPublicKey: equal(to: keys[2]))).thenReturn(true)
+            when(mock.hasOutputs(ofPublicKey: equal(to: keys[4]))).thenReturn(true)
         }
-
         stub(mockHDWallet) { mock in
             when(mock.gapLimit.get).thenReturn(1)
             when(mock.publicKey(account: equal(to: 0), index: equal(to: 3), external: equal(to: false))).thenReturn(keys[5])
@@ -302,18 +262,8 @@ class AddressManagerTests: XCTestCase {
         verify(mockHDWallet, times(1)).publicKey(account: equal(to: 0), index: any(), external: equal(to: false))
         verify(mockHDWallet, times(1)).publicKey(account: equal(to: 0), index: any(), external: equal(to: true))
 
-        let internalKeys = realm.objects(PublicKey.self).filter("external = false AND account = 0").sorted(byKeyPath: "index")
-        let externalKeys = realm.objects(PublicKey.self).filter("external = true AND account = 0").sorted(byKeyPath: "index")
-
-        XCTAssertEqual(internalKeys.count, 4)
-        XCTAssertEqual(externalKeys.count, 3)
-        XCTAssertEqual(internalKeys[0].keyHash, keys[0].keyHash)
-        XCTAssertEqual(internalKeys[1].keyHash, keys[1].keyHash)
-        XCTAssertEqual(internalKeys[2].keyHash, keys[2].keyHash)
-        XCTAssertEqual(internalKeys[3].keyHash, keys[5].keyHash)
-        XCTAssertEqual(externalKeys[0].keyHash, keys[3].keyHash)
-        XCTAssertEqual(externalKeys[1].keyHash, keys[4].keyHash)
-        XCTAssertEqual(externalKeys[2].keyHash, keys[6].keyHash)
+        verify(mockStorage).add(publicKeys: equal(to: [keys[5]]))
+        verify(mockStorage).add(publicKeys: equal(to: [keys[6]]))
     }
 
     func testAddKeys() {
@@ -324,15 +274,7 @@ class AddressManagerTests: XCTestCase {
         ]
 
         try! manager.addKeys(keys: keys)
-
-        let internalKeys = realm.objects(PublicKey.self).filter("external = false").sorted(byKeyPath: "index")
-        let externalKeys = realm.objects(PublicKey.self).filter("external = true").sorted(byKeyPath: "index")
-
-        XCTAssertEqual(internalKeys.count, 2)
-        XCTAssertEqual(externalKeys.count, 1)
-        XCTAssertEqual(internalKeys[0].keyHash, keys[0].keyHash)
-        XCTAssertEqual(internalKeys[1].keyHash, keys[1].keyHash)
-        XCTAssertEqual(externalKeys[0].keyHash, keys[2].keyHash)
+        verify(mockStorage).add(publicKeys: equal(to: keys))
     }
 
     func testGapShifts() {
@@ -343,14 +285,12 @@ class AddressManagerTests: XCTestCase {
             getPublicKey(withAccount: 0, index: 0, chain: .external),
             getPublicKey(withAccount: 0, index: 1, chain: .external),
         ]
-        let txOutput = TestData.p2pkhTransaction.outputs[0]
 
-        try! realm.write {
-            realm.add([keys[0], keys[1]])
-            realm.add(txOutput)
-            txOutput.publicKey = keys[0]
+        stub(mockStorage) { mock in
+            when(mock.publicKeys()).thenReturn([keys[0], keys[1]])
+            when(mock.hasOutputs(ofPublicKey: any())).thenReturn(false)
+            when(mock.hasOutputs(ofPublicKey: equal(to: keys[0]))).thenReturn(true)
         }
-
         stub(mockHDWallet) { mock in
             when(mock.gapLimit.get).thenReturn(2)
         }
@@ -367,14 +307,12 @@ class AddressManagerTests: XCTestCase {
             getPublicKey(withAccount: 0, index: 0, chain: .external),
             getPublicKey(withAccount: 0, index: 1, chain: .external),
         ]
-        let txOutput = TestData.p2pkhTransaction.outputs[0]
 
-        try! realm.write {
-            realm.add([keys[0]])
-            realm.add(txOutput)
-            txOutput.publicKey = keys[0]
+        stub(mockStorage) { mock in
+            when(mock.publicKeys()).thenReturn([keys[0]])
+            when(mock.hasOutputs(ofPublicKey: any())).thenReturn(false)
+            when(mock.hasOutputs(ofPublicKey: equal(to: keys[0]))).thenReturn(true)
         }
-
         stub(mockHDWallet) { mock in
             when(mock.gapLimit.get).thenReturn(2)
         }
@@ -393,19 +331,14 @@ class AddressManagerTests: XCTestCase {
             getPublicKey(withAccount: 0, index: 3, chain: .internal),
             getPublicKey(withAccount: 0, index: 2, chain: .external),
         ]
-        let txOutput = TestData.p2pkhTransaction.outputs[0]
-        let txOutput2 = TestData.p2pkTransaction.outputs[0]
-        let txOutput3 = TestData.p2shTransaction.outputs[0]
 
-        try! realm.write {
-            realm.add([keys[0], keys[1], keys[2], keys[3], keys[4]])
-            realm.add([txOutput, txOutput2, txOutput3])
-            txOutput.publicKey = keys[0]
-            txOutput2.publicKey = keys[2]
-            txOutput3.publicKey = keys[4]
+        stub(mockStorage) { mock in
+            when(mock.publicKeys()).thenReturn([keys[0], keys[1], keys[2], keys[3], keys[4]])
+            when(mock.hasOutputs(ofPublicKey: any())).thenReturn(false)
+            when(mock.hasOutputs(ofPublicKey: equal(to: keys[0]))).thenReturn(true)
+            when(mock.hasOutputs(ofPublicKey: equal(to: keys[2]))).thenReturn(true)
+            when(mock.hasOutputs(ofPublicKey: equal(to: keys[4]))).thenReturn(true)
         }
-
-
         stub(mockHDWallet) { mock in
             when(mock.gapLimit.get).thenReturn(2)
         }
@@ -422,14 +355,12 @@ class AddressManagerTests: XCTestCase {
             getPublicKey(withAccount: 0, index: 1, chain: .external),
             getPublicKey(withAccount: 0, index: 2, chain: .external),
         ]
-        let txOutput = TestData.p2pkhTransaction.outputs[0]
 
-        try! realm.write {
-            realm.add(keys)
-            realm.add(txOutput)
-            txOutput.publicKey = keys[2]
+        stub(mockStorage) { mock in
+            when(mock.publicKeys()).thenReturn(keys)
+            when(mock.hasOutputs(ofPublicKey: any())).thenReturn(false)
+            when(mock.hasOutputs(ofPublicKey: equal(to: keys[2]))).thenReturn(true)
         }
-
         stub(mockHDWallet) { mock in
             when(mock.gapLimit.get).thenReturn(2)
         }

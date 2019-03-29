@@ -25,7 +25,7 @@ class PeerTask {
         return false
     }
 
-    func handle(transaction: Transaction) -> Bool {
+    func handle(transaction: FullTransaction) -> Bool {
         return false
     }
 

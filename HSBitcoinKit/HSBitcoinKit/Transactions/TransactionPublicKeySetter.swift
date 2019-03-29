@@ -1,31 +1,28 @@
 import Foundation
-import RealmSwift
 
 class TransactionPublicKeySetter {
-    let realmFactory: IRealmFactory
+    let storage: IStorage
 
-    init(realmFactory: IRealmFactory) {
-        self.realmFactory = realmFactory
+    init(storage: IStorage) {
+        self.storage = storage
     }
 }
 
 extension TransactionPublicKeySetter: ITransactionPublicKeySetter {
 
-    public func set(output: TransactionOutput) -> Bool {
-        let realm = realmFactory.realm
-
+    public func set(output: Output) -> Bool {
         if let key = output.keyHash {
             var correctKey = key
             if output.scriptType == .p2wpkh, key.count > 2 {
                 correctKey = key.dropFirst(2)
-                if let result = realm.objects(PublicKey.self).filter("scriptHashForP2WPKH = %@", correctKey).first {
-                    output.publicKey = result
+                if let publicKey = storage.publicKey(byScriptHashForP2WPKH: correctKey) {
+                    output.publicKeyPath = publicKey.path
                     output.scriptType = .p2wpkhSh
                     return true
                 }
             }
-            if let result = realm.objects(PublicKey.self).filter("raw = %@ OR keyHash = %@", correctKey, correctKey).first {
-                output.publicKey = result
+            if let publicKey = storage.publicKey(byRawOrKeyHash: correctKey) {
+                output.publicKeyPath = publicKey.path
                 return true
             }
         }

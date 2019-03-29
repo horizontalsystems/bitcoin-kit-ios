@@ -1,39 +1,42 @@
-import RealmSwift
-
 class UnspentOutputProvider {
-    let realmFactory: IRealmFactory
+    let storage: IStorage
     let confirmationsThreshold: Int
 
-    init(realmFactory: IRealmFactory, confirmationsThreshold: Int) {
-        self.realmFactory = realmFactory
+    init(storage: IStorage, confirmationsThreshold: Int) {
+        self.storage = storage
         self.confirmationsThreshold = confirmationsThreshold
     }
 }
 
 extension UnspentOutputProvider: IUnspentOutputProvider {
 
-    var allUnspentOutputs: [TransactionOutput] {
-        let realm = realmFactory.realm
-        let lastBlockHeight = realmFactory.realm.objects(Block.self).sorted(byKeyPath: "height").last?.height ?? 0
+    var allUnspentOutputs: [UnspentOutput] {
+        let lastBlockHeight = storage.lastBlock?.height ?? 0
 
-        let results = Array(realm.objects(TransactionOutput.self)
-                .filter("publicKey != nil")
-                .filter("scriptType != %@", ScriptType.unknown.rawValue)
-                .filter("inputs.@count = %@", 0))
+        // Output must have a public key, that is, must belong to the user
+        return storage.unspentOutputs()
+                .filter({ unspentOutput in
+                    // If a transaction is an outgoing transaction, then it can be used
+                    // even if it's not included in a block yet
+                    if unspentOutput.transaction.isOutgoing {
+                        return true
+                    }
 
-        return results.filter { (output: TransactionOutput) in
-                guard let transaction = output.transaction else {
-                    return false
-                }
-                return ((transaction.block?.height ?? lastBlockHeight) <= lastBlockHeight - confirmationsThreshold + 1)
-        }
+                    // If a transaction is an incoming transaction, then it can be used
+                    // only if it's included in a block and has enough number of confirmations
+                    guard let block = unspentOutput.block else {
+                        return false
+                    }
+
+                    return block.height <= lastBlockHeight - confirmationsThreshold + 1
+                })
     }
 
     var balance: Int {
         var balance = 0
 
-        for output in self.allUnspentOutputs {
-            balance += output.value
+        for unspentOutput in self.allUnspentOutputs {
+            balance += unspentOutput.output.value
         }
 
         return balance

@@ -1,9 +1,9 @@
 import XCTest
 import Cuckoo
-import RealmSwift
 @testable import HSBitcoinKit
 
 class TransactionProcessorTests: XCTestCase {
+    private var mockStorage: MockIStorage!
     private var mockOutputExtractor: MockITransactionExtractor!
     private var mockOutputAddressExtractor: MockITransactionOutputAddressExtractor!
     private var mockInputExtractor: MockITransactionExtractor!
@@ -16,24 +16,15 @@ class TransactionProcessorTests: XCTestCase {
 
     private var transactionProcessor: TransactionProcessor!
 
-    private var realm: Realm!
-
     override func setUp() {
         super.setUp()
-
-        realm = try! Realm(configuration: Realm.Configuration(inMemoryIdentifier: "TestRealm"))
-        try! realm.write { realm.deleteAll() }
 
         generatedDate = Date()
         dateGenerator = {
             return self.generatedDate
         }
 
-        let mockRealmFactory = MockIRealmFactory()
-        stub(mockRealmFactory) { mock in
-            when(mock.realm.get).thenReturn(realm)
-        }
-
+        mockStorage = MockIStorage()
         mockOutputExtractor = MockITransactionExtractor()
         mockOutputAddressExtractor = MockITransactionOutputAddressExtractor()
         mockInputExtractor = MockITransactionExtractor()
@@ -41,8 +32,13 @@ class TransactionProcessorTests: XCTestCase {
         mockAddressManager = MockIAddressManager()
         mockBlockchainDataListener = MockIBlockchainDataListener()
 
+        stub(mockStorage) { mock in
+            when(mock.transaction(byHashHex: any())).thenReturn(nil)
+            when(mock.add(transaction: any())).thenDoNothing()
+            when(mock.update(transaction: any())).thenDoNothing()
+        }
         stub(mockLinker) { mock in
-            when(mock.handle(transaction: any(), realm: any())).thenDoNothing()
+            when(mock.handle(transaction: any())).thenDoNothing()
         }
         stub(mockOutputExtractor) { mock in
             when(mock.extract(transaction: any())).thenDoNothing()
@@ -62,10 +58,11 @@ class TransactionProcessorTests: XCTestCase {
             when(mock.onInsert(block: any())).thenDoNothing()
         }
 
-        transactionProcessor = TransactionProcessor(outputExtractor: mockOutputExtractor, inputExtractor: mockInputExtractor, linker: mockLinker, outputAddressExtractor: mockOutputAddressExtractor, addressManager: mockAddressManager, listener: mockBlockchainDataListener, dateGenerator: dateGenerator)
+        transactionProcessor = TransactionProcessor(storage: mockStorage, outputExtractor: mockOutputExtractor, inputExtractor: mockInputExtractor, linker: mockLinker, outputAddressExtractor: mockOutputAddressExtractor, addressManager: mockAddressManager, listener: mockBlockchainDataListener, dateGenerator: dateGenerator)
     }
 
     override func tearDown() {
+        mockStorage = nil
         mockOutputExtractor = nil
         mockInputExtractor = nil
         mockLinker = nil
@@ -75,285 +72,282 @@ class TransactionProcessorTests: XCTestCase {
         generatedDate = nil
         dateGenerator = nil
 
-        realm = nil
-
         super.tearDown()
     }
 
-    func testProcessSingleTransaction() {
+    func testProcessCreated() {
         let transaction = TestData.p2pkhTransaction
 
-        try! transactionProcessor.processOutgoing(transaction: transaction, realm: realm)
+        try! transactionProcessor.processCreated(transaction: transaction)
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
-        verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
-        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: []), inserted: equal(to: [transaction]))
-
+        verify(mockLinker).handle(transaction: equal(to: transaction))
+        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: [Transaction]()), inserted: equal(to: [transaction.header]))
+        verify(mockStorage).add(transaction: equal(to: transaction))
         verifyNoMoreInteractions(mockOutputAddressExtractor)
         verifyNoMoreInteractions(mockInputExtractor)
     }
 
-    func testProcessSingleTransaction_isMine() {
+    func testProcessCreated_isMine() {
         let transaction = TestData.p2pkhTransaction
-        transaction.isMine = true
+        transaction.header.isMine = true
 
-        try! transactionProcessor.processOutgoing(transaction: transaction, realm: realm)
+        try! transactionProcessor.processCreated(transaction: transaction)
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
-        verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
-
-        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: []), inserted: equal(to: [transaction]))
+        verify(mockLinker).handle(transaction: equal(to: transaction))
+        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: []), inserted: equal(to: [transaction.header]))
+        verify(mockStorage).add(transaction: equal(to: transaction))
         verify(mockOutputAddressExtractor).extractOutputAddresses(transaction: equal(to: transaction))
         verify(mockInputExtractor).extract(transaction: equal(to: transaction))
     }
 
-    func testProcessTransactions_TransactionExists() {
+    func testProcessCreated_TransactionExists() {
         let transaction = TestData.p2pkhTransaction
-        let incomingTransaction = TestData.p2pkhTransaction
-        incomingTransaction.status = .new
+        transaction.header.isMine = true
 
-        transaction.status = .new
-
-        try! realm.write {
-            realm.add(transaction)
+        stub(mockStorage) { mock in
+            when(mock.transaction(byHashHex: equal(to: transaction.header.dataHashReversedHex))).thenReturn(transaction.header)
         }
 
-        try! realm.write {
-            try! transactionProcessor.process(transactions: [incomingTransaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
+        do {
+            try transactionProcessor.processCreated(transaction: transaction)
+            XCTFail("Expecting error")
+        } catch let error as TransactionCreator.CreationError {
+            XCTAssertEqual(error, TransactionCreator.CreationError.transactionAlreadyExists)
+        } catch {
+            XCTFail("Unexpected error")
         }
+
+        verify(mockOutputExtractor, never()).extract(transaction: any())
+        verify(mockLinker, never()).handle(transaction: any())
+        verify(mockBlockchainDataListener, never()).onUpdate(updated: any(), inserted: any())
+        verify(mockStorage, never()).add(transaction: any())
+        verify(mockOutputAddressExtractor, never()).extractOutputAddresses(transaction: any())
+        verify(mockInputExtractor, never()).extract(transaction: any())
+    }
+
+    func testProcessReceived_TransactionExists() {
+        let transaction = TestData.p2pkhTransaction
+        transaction.header.status = .new
+
+        stub(mockStorage) { mock in
+            when(mock.transaction(byHashHex: equal(to: transaction.header.dataHashReversedHex))).thenReturn(transaction.header)
+        }
+
+        try! transactionProcessor.processReceived(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false)
 
         verify(mockOutputExtractor, never()).extract(transaction: equal(to: transaction))
-        verify(mockLinker, never()).handle(transaction: equal(to: transaction), realm: equal(to: realm))
+        verify(mockLinker, never()).handle(transaction: equal(to: transaction))
+        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: [transaction.header]), inserted: equal(to: []))
+        verify(mockStorage).update(transaction: equal(to: transaction.header))
 
-        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: [transaction]), inserted: equal(to: []))
-
-        let realmTransactions = realm.objects(Transaction.self)
-        XCTAssertEqual(realmTransactions.count, 1)
-        XCTAssertEqual(realmTransactions.first!.dataHash, transaction.dataHash)
-        XCTAssertEqual(realmTransactions.first!.status, TransactionStatus.relayed)
-        XCTAssertEqual(realmTransactions.first!.block, nil)
+        XCTAssertEqual(transaction.header.status, TransactionStatus.relayed)
+        XCTAssertEqual(transaction.header.blockHashReversedHex, nil)
+        XCTAssertEqual(transaction.header.order, 0)
     }
 
-    func testProcessTransactions_SeveralMempoolTransactions() {
+    func testProcessReceived_SeveralMempoolTransactions() {
         let transactions = self.transactions()
         for transaction in transactions {
-            transaction.isMine = true
-            transaction.timestamp = 0
-            transaction.order = 0
+            transaction.header.isMine = true
+            transaction.header.timestamp = 0
+            transaction.header.order = 0
+        }
+        transactions[1].header.status = .new
+
+        stub(mockStorage) { mock in
+            when(mock.transaction(byHashHex: equal(to: transactions[1].header.dataHashReversedHex))).thenReturn(transactions[1].header)
+            when(mock.transaction(byHashHex: equal(to: transactions[3].header.dataHashReversedHex))).thenReturn(transactions[3].header)
         }
 
-        try! realm.write {
-            realm.add([transactions[1], transactions[3]])
-            transactions[1].status = .new
-        }
+        try! transactionProcessor.processReceived(transactions: [transactions[3], transactions[1], transactions[2], transactions[0]], inBlock: nil, skipCheckBloomFilter: false)
 
-        try! realm.write {
-            try! transactionProcessor.process(transactions: [transactions[3], transactions[1], transactions[2], transactions[0]], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
-        }
+        verify(mockStorage).add(transaction: equal(to: transactions[0]))
+        verify(mockStorage).update(transaction: equal(to: transactions[1].header))
+        verify(mockStorage).add(transaction: equal(to: transactions[2]))
+        verify(mockStorage).update(transaction: equal(to: transactions[3].header))
+        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: [transactions[1].header, transactions[3].header]), inserted: equal(to: [transactions[0].header, transactions[2].header]))
 
-        let realmTransactions = realm.objects(Transaction.self).sorted(byKeyPath: "order")
-
-        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: [transactions[1], transactions[3]]), inserted: equal(to: [transactions[0], transactions[2]]))
-
-        XCTAssertEqual(realmTransactions.count, 4)
         for (i, transaction) in transactions.enumerated() {
-            XCTAssertEqual(realmTransactions[i].dataHash, transaction.dataHash)
-            XCTAssertEqual(realmTransactions[i].status, .relayed)
-            XCTAssertEqual(realmTransactions[i].order, i)
-            XCTAssertEqual(realmTransactions[i].timestamp, Int(generatedDate.timeIntervalSince1970))
+            XCTAssertEqual(transaction.header.blockHashReversedHex, nil)
+            XCTAssertEqual(transaction.header.status, .relayed)
+            XCTAssertEqual(transaction.header.order, i)
+            XCTAssertEqual(transaction.header.timestamp, Int(generatedDate.timeIntervalSince1970))
         }
     }
 
-    func testProcessTransactions_SeveralTransactionsInBlock() {
+    func testProcessReceived_SeveralTransactionsInBlock() {
         let transactions = self.transactions()
         let block = TestData.firstBlock
 
         for transaction in transactions {
-            transaction.isMine = true
-            transaction.timestamp = 0
-            transaction.order = 0
+            transaction.header.isMine = true
+            transaction.header.timestamp = 0
+            transaction.header.order = 0
+        }
+        transactions[1].header.status = .new
+
+        stub(mockStorage) { mock in
+            when(mock.transaction(byHashHex: equal(to: transactions[1].header.dataHashReversedHex))).thenReturn(transactions[1].header)
+            when(mock.transaction(byHashHex: equal(to: transactions[3].header.dataHashReversedHex))).thenReturn(transactions[3].header)
         }
 
-        try! realm.write {
-            realm.add(block)
-            realm.add([transactions[1], transactions[3]])
-            transactions[1].status = .new
-        }
+        try! transactionProcessor.processReceived(transactions: [transactions[3], transactions[1], transactions[2], transactions[0]], inBlock: block, skipCheckBloomFilter: false)
 
-        try! realm.write {
-            try! transactionProcessor.process(transactions: [transactions[3], transactions[1], transactions[2], transactions[0]], inBlock: block, skipCheckBloomFilter: false, realm: realm)
-        }
+        verify(mockStorage).add(transaction: equal(to: transactions[0]))
+        verify(mockStorage).update(transaction: equal(to: transactions[1].header))
+        verify(mockStorage).add(transaction: equal(to: transactions[2]))
+        verify(mockStorage).update(transaction: equal(to: transactions[3].header))
+        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: [transactions[1].header, transactions[3].header]), inserted: equal(to: [transactions[0].header, transactions[2].header]))
 
-        let realmTransactions = realm.objects(Transaction.self).sorted(byKeyPath: "order")
-
-        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: [transactions[1], transactions[3]]), inserted: equal(to: [transactions[0], transactions[2]]))
-
-        XCTAssertEqual(realmTransactions.count, 4)
         for (i, transaction) in transactions.enumerated() {
-            XCTAssertEqual(realmTransactions[i].block?.reversedHeaderHashHex, block.reversedHeaderHashHex)
-            XCTAssertEqual(realmTransactions[i].dataHash, transaction.dataHash)
-            XCTAssertEqual(realmTransactions[i].status, .relayed)
-            XCTAssertEqual(realmTransactions[i].order, i)
-            XCTAssertEqual(realmTransactions[i].timestamp, block.header!.timestamp)
+            XCTAssertEqual(transaction.header.blockHashReversedHex, block.headerHashReversedHex)
+            XCTAssertEqual(transaction.header.status, .relayed)
+            XCTAssertEqual(transaction.header.order, i)
+            XCTAssertEqual(transaction.header.timestamp, block.header.timestamp)
         }
     }
 
-    func testProcessTransactions_TransactionNotExists_Mine() {
+    func testProcessReceived_TransactionNotExists_Mine() {
         let transaction = TestData.p2pkhTransaction
-        transaction.isMine = true
+        transaction.header.isMine = true
 
-        try! realm.write {
-            try! transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
-        }
+        try! transactionProcessor.processReceived(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false)
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
-        verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
+        verify(mockLinker).handle(transaction: equal(to: transaction))
+        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: []), inserted: equal(to: [transaction.header]))
+        verify(mockStorage).add(transaction: equal(to: transaction))
+        verify(mockOutputAddressExtractor).extractOutputAddresses(transaction: equal(to: transaction))
+        verify(mockInputExtractor).extract(transaction: equal(to: transaction))
 
-        let realmTransactions = realm.objects(Transaction.self)
-
-        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: []), inserted: equal(to: [transaction]))
-
-        XCTAssertEqual(realmTransactions.count, 1)
-        XCTAssertEqual(realmTransactions.first!.dataHash, transaction.dataHash)
-        XCTAssertEqual(realmTransactions.first!.status, TransactionStatus.relayed)
-        XCTAssertEqual(realmTransactions.first!.block, nil)
+        XCTAssertEqual(transaction.header.status, TransactionStatus.relayed)
+        XCTAssertEqual(transaction.header.blockHashReversedHex, nil)
     }
 
-    func testProcessTransactions_TransactionNotExists_NotMine() {
+    func testProcessReceived_TransactionNotExists_NotMine() {
         let transaction = TestData.p2pkhTransaction
-        transaction.isMine = false
+        transaction.header.isMine = false
 
-        try! realm.write {
-            try! transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
-        }
+        try! transactionProcessor.processReceived(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false)
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
-        verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
-
+        verify(mockLinker).handle(transaction: equal(to: transaction))
+        verify(mockStorage, never()).add(transaction: any())
         verifyNoMoreInteractions(mockBlockchainDataListener)
-
-        let realmTransactions = realm.objects(Transaction.self)
-        XCTAssertEqual(realmTransactions.count, 0)
+        verifyNoMoreInteractions(mockOutputAddressExtractor)
+        verifyNoMoreInteractions(mockInputExtractor)
     }
 
-    func testProcessTransactions_TransactionNotExists_Mine_GapShifts() {
+    func testProcessReceived_TransactionNotExists_Mine_GapShifts() {
         let transaction = TestData.p2pkhTransaction
-        transaction.isMine = true
+        transaction.header.isMine = true
 
         stub(mockAddressManager) { mock in
             when(mock.gapShifts()).thenReturn(true)
         }
 
-        try! realm.write {
-            do {
-                try transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
-                XCTFail("Should throw exception")
-            } catch _ as BloomFilterManager.BloomFilterExpired {
-            } catch {
-                XCTFail("Unknown error thrown")
-            }
+        do {
+            try transactionProcessor.processReceived(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false)
+            XCTFail("Should throw exception")
+        } catch _ as BloomFilterManager.BloomFilterExpired {
+        } catch {
+            XCTFail("Unknown error thrown")
         }
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
-        verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
+        verify(mockLinker).handle(transaction: equal(to: transaction))
+        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: []), inserted: equal(to: [transaction.header]))
+        verify(mockStorage).add(transaction: equal(to: transaction))
+        verify(mockOutputAddressExtractor).extractOutputAddresses(transaction: equal(to: transaction))
+        verify(mockInputExtractor).extract(transaction: equal(to: transaction))
 
-        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: []), inserted: equal(to: [transaction]))
-
-        let realmTransactions = realm.objects(Transaction.self)
-        XCTAssertEqual(realmTransactions.count, 1)
-        XCTAssertEqual(realmTransactions.first!.dataHash, transaction.dataHash)
-        XCTAssertEqual(realmTransactions.first!.status, TransactionStatus.relayed)
-        XCTAssertEqual(realmTransactions.first!.block, nil)
+        XCTAssertEqual(transaction.header.status, TransactionStatus.relayed)
+        XCTAssertEqual(transaction.header.blockHashReversedHex, nil)
     }
 
-    func testProcessTransactions_TransactionNotExists_Mine_HasUnspentOutputs() {
+    func testProcessReceived_TransactionNotExists_Mine_HasUnspentOutputs() {
         let publicKey = TestData.pubKey()
         let transaction = TestData.p2wpkhTransaction
-        transaction.isMine = true
-        transaction.outputs[0].publicKey = publicKey
+        transaction.header.isMine = true
+        transaction.outputs[0].publicKeyPath = publicKey.path
 
-        try! realm.write {
-            realm.add(publicKey)
+        stub(mockStorage) { mock in
+            when(mock.publicKey(byPath: publicKey.path)).thenReturn(publicKey)
         }
 
-        try! realm.write {
-            do {
-                try transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
-                XCTFail("Should throw exception")
-            } catch _ as BloomFilterManager.BloomFilterExpired {
-            } catch {
-                XCTFail("Unknown error thrown")
-            }
+        do {
+            try transactionProcessor.processReceived(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false)
+            XCTFail("Should throw exception")
+        } catch _ as BloomFilterManager.BloomFilterExpired {
+        } catch {
+            XCTFail("Unknown error thrown")
         }
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
-        verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
+        verify(mockLinker).handle(transaction: equal(to: transaction))
+        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: []), inserted: equal(to: [transaction.header]))
+        verify(mockStorage).add(transaction: equal(to: transaction))
+        verify(mockOutputAddressExtractor).extractOutputAddresses(transaction: equal(to: transaction))
+        verify(mockInputExtractor).extract(transaction: equal(to: transaction))
 
-        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: []), inserted: equal(to: [transaction]))
-
-        let realmTransactions = realm.objects(Transaction.self)
-        XCTAssertEqual(realmTransactions.count, 1)
-        XCTAssertEqual(realmTransactions.first!.dataHash, transaction.dataHash)
-        XCTAssertEqual(realmTransactions.first!.status, TransactionStatus.relayed)
-        XCTAssertEqual(realmTransactions.first!.block, nil)
+        XCTAssertEqual(transaction.header.status, TransactionStatus.relayed)
+        XCTAssertEqual(transaction.header.blockHashReversedHex, nil)
     }
 
-    func testProcessTransactions_TransactionNotExists_Mine_GapShifts_CheckBloomFilterFalse() {
+    func testProcessReceived_TransactionNotExists_Mine_GapShifts_CheckBloomFilterFalse() {
+        let publicKey = TestData.pubKey()
+        let transaction = TestData.p2wpkhTransaction
+        transaction.header.isMine = true
+        transaction.outputs[0].publicKeyPath = publicKey.path
+
+        stub(mockStorage) { mock in
+            when(mock.publicKey(byPath: publicKey.path)).thenReturn(publicKey)
+        }
+
+        do {
+            try transactionProcessor.processReceived(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: true)
+        } catch {
+            XCTFail("Unknown error thrown")
+        }
+
+        verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
+        verify(mockLinker).handle(transaction: equal(to: transaction))
+        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: []), inserted: equal(to: [transaction.header]))
+        verify(mockStorage).add(transaction: equal(to: transaction))
+        verify(mockOutputAddressExtractor).extractOutputAddresses(transaction: equal(to: transaction))
+        verify(mockInputExtractor).extract(transaction: equal(to: transaction))
+
+        XCTAssertEqual(transaction.header.status, TransactionStatus.relayed)
+        XCTAssertEqual(transaction.header.blockHashReversedHex, nil)
+    }
+
+    func testProcessReceived_TransactionNotExists_NotMine_GapShifts() {
         let transaction = TestData.p2pkhTransaction
-        transaction.isMine = true
+        transaction.header.isMine = false
 
         stub(mockAddressManager) { mock in
             when(mock.gapShifts()).thenReturn(true)
         }
 
-        try! realm.write {
-            do {
-                try transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: true, realm: realm)
-            } catch {
-                XCTFail("Shouldn't throw exception")
-            }
+        do {
+            try transactionProcessor.processReceived(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false)
+        } catch {
+            XCTFail("Shouldn't throw exception")
         }
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
-        verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
-
-        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: []), inserted: equal(to: [transaction]))
-
-        let realmTransactions = realm.objects(Transaction.self)
-        XCTAssertEqual(realmTransactions.count, 1)
-        XCTAssertEqual(realmTransactions.first!.dataHash, transaction.dataHash)
-        XCTAssertEqual(realmTransactions.first!.status, TransactionStatus.relayed)
-        XCTAssertEqual(realmTransactions.first!.block, nil)
-    }
-
-    func testProcessTransactions_TransactionNotExists_NotMine_GapShifts() {
-        let transaction = TestData.p2pkhTransaction
-        transaction.isMine = false
-
-        stub(mockAddressManager) { mock in
-            when(mock.gapShifts()).thenReturn(true)
-        }
-
-        try! realm.write {
-            do {
-                try transactionProcessor.process(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
-            } catch {
-                XCTFail("Shouldn't throw exception")
-            }
-        }
-
+        verify(mockLinker).handle(transaction: equal(to: transaction))
+        verify(mockStorage, never()).add(transaction: any())
         verifyNoMoreInteractions(mockBlockchainDataListener)
-
-        verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
-        verify(mockLinker).handle(transaction: equal(to: transaction), realm: equal(to: realm))
-
-        let realmTransactions = realm.objects(Transaction.self)
-        XCTAssertEqual(realmTransactions.count, 0)
+        verifyNoMoreInteractions(mockOutputAddressExtractor)
+        verifyNoMoreInteractions(mockInputExtractor)
     }
 
-    func testProcessTransactions_TransactionNotInTopologicalOrder() {
+    func testProcessReceived_TransactionNotInTopologicalOrder() {
         let transactions = self.transactions()
-        var calledTransactions = [Transaction]()
+        var calledTransactions = [FullTransaction]()
 
         stub(mockOutputExtractor) { mock in
             when(mock.extract(transaction: any())).then { transaction in
@@ -371,12 +365,12 @@ class TransactionProcessorTests: XCTestCase {
 
                         calledTransactions = []
 
-                        try! transactionProcessor.process(transactions: [transactions[i], transactions[j], transactions[k], transactions[l]], inBlock: nil, skipCheckBloomFilter: false, realm: realm)
+                        try! transactionProcessor.processReceived(transactions: [transactions[i], transactions[j], transactions[k], transactions[l]], inBlock: nil, skipCheckBloomFilter: false)
 
                         verifyNoMoreInteractions(mockBlockchainDataListener)
 
                         for (m, transaction) in calledTransactions.enumerated() {
-                            XCTAssertEqual(transaction.reversedHashHex, transactions[m].reversedHashHex)
+                            XCTAssertEqual(transaction.header.dataHashReversedHex, transactions[m].header.dataHashReversedHex)
                         }
                     }
                 }
@@ -385,11 +379,11 @@ class TransactionProcessorTests: XCTestCase {
     }
 
 
-    private func transactions() -> [Transaction] {
-        let transaction = Transaction(
-                version: 0,
+    private func transactions() -> [FullTransaction] {
+        let transaction = FullTransaction(
+                header: Transaction(version: 0, lockTime: 0),
                 inputs: [
-                    TransactionInput(
+                    Input(
                             withPreviousOutputTxReversedHex: Data(from: 1).hex,
                             previousOutputIndex: 0,
                             script: Data(from: 999999999999),
@@ -397,64 +391,60 @@ class TransactionProcessorTests: XCTestCase {
                     )
                 ],
                 outputs: [
-                    TransactionOutput(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data())
-                ],
-                lockTime: 0
+                    Output(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data())
+                ]
         )
 
-        let transaction2 = Transaction(
-                version: 0,
+        let transaction2 = FullTransaction(
+                header: Transaction(version: 0, lockTime: 0),
                 inputs: [
-                    TransactionInput(
-                            withPreviousOutputTxReversedHex: transaction.reversedHashHex,
+                    Input(
+                            withPreviousOutputTxReversedHex: transaction.header.dataHashReversedHex,
                             previousOutputIndex: 0,
                             script: Data(from: 999999999999),
                             sequence: 0
                     )
                 ],
                 outputs: [
-                    TransactionOutput(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data()),
-                    TransactionOutput(withValue: 0, index: 1, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data())
-                ],
-                lockTime: 0
+                    Output(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data()),
+                    Output(withValue: 0, index: 1, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data())
+                ]
         )
 
-        let transaction3 = Transaction(
-                version: 0,
+        let transaction3 = FullTransaction(
+                header: Transaction(version: 0, lockTime: 0),
                 inputs: [
-                    TransactionInput(
-                            withPreviousOutputTxReversedHex: transaction2.reversedHashHex,
+                    Input(
+                            withPreviousOutputTxReversedHex: transaction2.header.dataHashReversedHex,
                             previousOutputIndex: 0,
                             script: Data(from: 999999999999),
                             sequence: 0
                     )
                 ],
                 outputs: [
-                    TransactionOutput(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data()),
-                ],
-                lockTime: 0
+                    Output(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data()),
+                ]
         )
 
-        let transaction4 = Transaction(
-                version: 0,
+        let transaction4 = FullTransaction(
+                header: Transaction(version: 0, lockTime: 0),
                 inputs: [
-                    TransactionInput(
-                            withPreviousOutputTxReversedHex: transaction2.reversedHashHex,
+                    Input(
+                            withPreviousOutputTxReversedHex: transaction2.header.dataHashReversedHex,
                             previousOutputIndex: 1,
                             script: Data(from: 999999999999),
                             sequence: 0
                     ),
-                    TransactionInput(
-                            withPreviousOutputTxReversedHex: transaction3.reversedHashHex,
+                    Input(
+                            withPreviousOutputTxReversedHex: transaction3.header.dataHashReversedHex,
                             previousOutputIndex: 0,
                             script: Data(from: 999999999999),
                             sequence: 0
                     )
                 ],
                 outputs: [
-                    TransactionOutput(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data())
-                ],
-                lockTime: 0
+                    Output(withValue: 0, index: 0, lockingScript: Data(hex: "9999999999")!, type: .p2pk, keyHash: Data())
+                ]
         )
 
         return [transaction, transaction2, transaction3, transaction4]

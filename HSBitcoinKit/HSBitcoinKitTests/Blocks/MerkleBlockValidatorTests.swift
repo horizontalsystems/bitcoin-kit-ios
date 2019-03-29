@@ -1,9 +1,9 @@
 import XCTest
 import Cuckoo
-import RealmSwift
 @testable import HSBitcoinKit
 
 class MerkleBlockValidatorTests: XCTestCase {
+    private var mockStorage: MockIStorage!
     private var validator: MerkleBlockValidator!
     private var blockHeader: BlockHeader!
     private var matchedHash: Data!
@@ -20,8 +20,7 @@ class MerkleBlockValidatorTests: XCTestCase {
 
         mockMerkleBranch = MockIMerkleBranch() // use real hasher function for real test data
 
-        blockHeader = BlockHeader()
-        blockHeader.merkleRoot = Data(repeating: 9, count: 32)
+        blockHeader = BlockHeader(version: 0, headerHash: Data(), previousBlockHeaderHash: Data(), merkleRoot: Data(repeating: 9, count: 32), timestamp: 0, bits: 0, nonce: 0)
 
         totalTransactions = 10
         numberOfHashes = 10
@@ -83,8 +82,9 @@ class MerkleBlockValidatorTests: XCTestCase {
     }
 
     func testWrongMerkleRoot() {
-        blockHeader = BlockHeader()
-        blockHeader.merkleRoot = Data(hex: "0000000000000000000000000000000000000000000000000000000000000001")!
+        blockHeader = BlockHeader(version: 0, headerHash: Data(repeating: 9, count: 32), previousBlockHeaderHash: Data(),
+                merkleRoot: Data(hex: "0000000000000000000000000000000000000000000000000000000000000001")!,
+                timestamp: 0, bits: 0, nonce: 0)
 
         var caught = false
         do {

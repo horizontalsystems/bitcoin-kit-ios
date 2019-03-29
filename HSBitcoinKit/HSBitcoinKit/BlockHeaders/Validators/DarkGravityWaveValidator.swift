@@ -2,38 +2,37 @@ import Foundation
 import BigInt
 
 class DarkGravityWaveValidator: IBlockValidator {
-    let difficultyEncoder: IDifficultyEncoder
-    let blockHelper: IBlockHelper
+    private let difficultyEncoder: IDifficultyEncoder
+    private let blockHelper: IBlockHelper
+    private let storage: IStorage
 
-    init(encoder: IDifficultyEncoder, blockHelper: IBlockHelper) {
-        difficultyEncoder = encoder
+    init(storage: IStorage, encoder: IDifficultyEncoder, blockHelper: IBlockHelper) {
+        self.storage = storage
+        self.difficultyEncoder = encoder
         self.blockHelper = blockHelper
     }
 
     func validate(candidate: Block, block: Block, network: INetwork) throws {
-        guard let candidateHeader = candidate.header, let blockHeader = block.header else {
-            throw Block.BlockError.noHeader
-        }
         guard block.height >= network.heightInterval else {
-            if candidateHeader.bits != network.maxTargetBits {
+            if candidate.bits != network.maxTargetBits {
                 throw BlockValidatorError.notEqualBits
             }
             return
         }
 
-        let blockTarget = difficultyEncoder.decodeCompact(bits: blockHeader.bits)
+        let blockTarget = difficultyEncoder.decodeCompact(bits: block.bits)
 
         if network is DashTestNet {
-            if candidateHeader.timestamp > blockHeader.timestamp + 2 * network.targetTimeSpan { // more than 2 hours
-                if candidateHeader.bits != network.maxTargetBits {
+            if candidate.timestamp > block.timestamp + 2 * network.targetTimeSpan { // more than 2 hours
+                if candidate.bits != network.maxTargetBits {
                     throw BlockValidatorError.notEqualBits
                 }
                 return
             }
-            if candidateHeader.timestamp > blockHeader.timestamp + 4 * network.targetSpacing {
+            if candidate.timestamp > block.timestamp + 4 * network.targetSpacing {
                 let newTarget = 10 * blockTarget
                 let compact = min(network.maxTargetBits, difficultyEncoder.encodeCompact(from: newTarget))
-                if compact != candidateHeader.bits {
+                if compact != candidate.bits {
                     throw BlockValidatorError.notEqualBits
                 }
                 return
@@ -42,22 +41,19 @@ class DarkGravityWaveValidator: IBlockValidator {
 
         var actualTimeSpan = 0
         var avgTargets = blockTarget
-        var prevBlock: Block? = block.previousBlock
+        var prevBlock: Block? = block.previousBlock(storage: storage)
 
         for blockCount in 2..<(network.heightInterval + 1) {
             guard let currentBlock = prevBlock else {
                 throw BlockValidatorError.noPreviousBlock
             }
-            guard let header = currentBlock.header else {
-                throw Block.BlockError.noHeader
-            }
-            let currentTarget = difficultyEncoder.decodeCompact(bits: header.bits)
+            let currentTarget = difficultyEncoder.decodeCompact(bits: currentBlock.bits)
             avgTargets = (avgTargets * BigInt(blockCount) + currentTarget) / BigInt(blockCount + 1)
 
             if blockCount < network.heightInterval {
-                prevBlock = currentBlock.previousBlock
+                prevBlock = currentBlock.previousBlock(storage: storage)
             } else {
-                actualTimeSpan = blockHeader.timestamp - header.timestamp
+                actualTimeSpan = block.timestamp - currentBlock.timestamp
             }
         }
         var darkTarget = avgTargets
@@ -70,7 +66,7 @@ class DarkGravityWaveValidator: IBlockValidator {
         darkTarget = darkTarget * BigInt(actualTimeSpan) / BigInt(network.targetTimeSpan)
         let compact = min(network.maxTargetBits, difficultyEncoder.encodeCompact(from: darkTarget))
 
-        if compact != candidateHeader.bits {
+        if compact != candidate.bits {
             throw BlockValidatorError.notEqualBits
         }
     }

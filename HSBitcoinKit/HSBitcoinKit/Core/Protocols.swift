@@ -1,9 +1,7 @@
 import BigInt
 import RxSwift
-import RealmSwift
 import Alamofire
 import HSCryptoKit
-import GRDB
 
 enum BlockValidatorType { case header, bits, legacy, testNet, EDA, DAA, DGW }
 
@@ -24,10 +22,6 @@ protocol IBlockValidator: class {
 
 protocol IBlockValidatorFactory {
     func validator(for validatorType: BlockValidatorType) -> IBlockValidator
-}
-
-public protocol IRealmFactory {
-    var realm: Realm { get }
 }
 
 protocol IHDWallet {
@@ -67,8 +61,6 @@ protocol IFeeRateApi {
 }
 
 protocol IStorage {
-    var realm: Realm { get }
-
     var feeRate: FeeRate? { get }
     func set(feeRate: FeeRate)
 
@@ -96,18 +88,39 @@ protocol IStorage {
     func deleteBlockHash(byHashHex: String)
 
     var blocksCount: Int { get }
+    var firstBlock: Block? { get }
     var lastBlock: Block? { get }
     func blocksCount(reversedHeaderHashHexes: [String]) -> Int
     func save(block: Block)
-    func blocks(heightGreaterThan: Int, sortedBy: String, limit: Int) -> [Block]
-    func blocks(byHexes: [String], realm: Realm) -> Results<Block>
+    func blocks(heightGreaterThan: Int, sortedBy: Block.Columns, limit: Int) -> [Block]
+    func blocks(byHexes: [String]) -> [Block]
+    func blocks(heightGreaterThanOrEqualTo: Int, stale: Bool) -> [Block]
+    func blocks(stale: Bool) -> [Block]
     func block(byHeight: Int32) -> Block?
-    func block(byHeaderHash: Data) -> Block?
+    func block(byHashHex: String) -> Block?
+    func block(stale: Bool, sortedHeight: String) -> Block?
+    func add(block: Block) throws
+    func update(block: Block) throws
+    func delete(blocks: [Block]) throws
 
 
+    func transaction(byHashHex: String) -> Transaction?
+    func transactions(sortedBy: Transaction.Columns, secondSortedBy: Transaction.Columns, ascending: Bool) -> [Transaction]
+    func transactions(ofBlock: Block) -> [Transaction]
     func newTransactions() -> [Transaction]
     func newTransaction(byReversedHashHex: String) -> Transaction?
     func relayedTransactionExists(byReversedHashHex: String) -> Bool
+    func add(transaction: FullTransaction) throws
+    func update(transaction: Transaction) throws
+
+    func outputsWithPublicKeys() -> [OutputWithPublicKey]
+    func unspentOutputs() -> [UnspentOutput]
+    func inputs(ofTransaction: Transaction) -> [Input]
+    func inputsWithBlock(ofOutput: Output) -> [InputWithBlock]
+    func outputs(ofTransaction: Transaction) -> [Output]
+    func previousOutput(ofInput: Input) -> Output?
+    func hasInputs(ofOutput: Output) -> Bool
+    func hasOutputs(ofPublicKey: PublicKey) -> Bool
 
 
     func sentTransaction(byReversedHashHex: String) -> SentTransaction?
@@ -115,8 +128,15 @@ protocol IStorage {
     func add(sentTransaction: SentTransaction)
 
 
+    func publicKeys() -> [PublicKey]
+    func publicKey(byPath: String) -> PublicKey?
+    func publicKey(byScriptHashForP2WPKH: Data) -> PublicKey?
+    func publicKey(byRawOrKeyHash: Data) -> PublicKey?
+    func add(publicKeys: [PublicKey])
+
+
     func clear() throws
-    func inTransaction(_ block: ((_ realm: Realm) throws -> Void)) throws
+    func inTransaction(_ block: (() throws -> Void)) throws
 }
 
 protocol IFeeRateSyncer {
@@ -208,7 +228,7 @@ protocol IPeerTaskRequester: class {
     func getBlocks(hashes: [Data])
     func getData(items: [InventoryItem])
     func sendTransactionInventory(hash: Data)
-    func send(transaction: Transaction)
+    func send(transaction: FullTransaction)
     func send(message: IMessage)
     func ping(nonce: UInt64)
 }
@@ -256,9 +276,9 @@ protocol IFactory {
     func block(withHeader header: BlockHeader, height: Int) -> Block
     func blockHash(withHeaderHash headerHash: Data, height: Int, order: Int) -> BlockHash
     func peer(withHost host: String, network: INetwork, networkMessageParser: INetworkMessageParser, networkMessageSerializer: INetworkMessageSerializer, logger: Logger?) -> IPeer
-    func transaction(version: Int, inputs: [TransactionInput], outputs: [TransactionOutput], lockTime: Int) -> Transaction
-    func transactionInput(withPreviousOutputTxReversedHex previousOutputTxReversedHex: String, previousOutputIndex: Int, script: Data, sequence: Int) -> TransactionInput
-    func transactionOutput(withValue value: Int, index: Int, lockingScript script: Data, type: ScriptType, address: String?, keyHash: Data?, publicKey: PublicKey?) -> TransactionOutput
+    func transaction(version: Int, lockTime: Int) -> Transaction
+    func inputToSign(withPreviousOutput: UnspentOutput, script: Data, sequence: Int) -> InputToSign
+    func output(withValue value: Int, index: Int, lockingScript script: Data, type: ScriptType, address: String?, keyHash: Data?, publicKey: PublicKey?) -> Output
     func bloomFilter(withElements: [Data]) -> BloomFilter
 }
 
@@ -316,30 +336,30 @@ protocol IScriptExtractor: class {
 protocol ITransactionProcessor: class {
     var listener: IBlockchainDataListener? { get set }
 
-    func process(transactions: [Transaction], inBlock block: Block?, skipCheckBloomFilter: Bool, realm: Realm) throws
-    func processOutgoing(transaction: Transaction, realm: Realm) throws
+    func processReceived(transactions: [FullTransaction], inBlock block: Block?, skipCheckBloomFilter: Bool) throws
+    func processCreated(transaction: FullTransaction) throws
 }
 
 protocol ITransactionExtractor {
-    func extract(transaction: Transaction)
+    func extract(transaction: FullTransaction)
 }
 
 protocol ITransactionOutputAddressExtractor {
-    func extractOutputAddresses(transaction: Transaction)
+    func extractOutputAddresses(transaction: FullTransaction)
 }
 
 protocol ITransactionLinker {
-    func handle(transaction: Transaction, realm: Realm)
+    func handle(transaction: FullTransaction)
 }
 
 protocol ITransactionPublicKeySetter {
-    func set(output: TransactionOutput) -> Bool
+    func set(output: Output) -> Bool
 }
 
 protocol ITransactionSyncer: class {
-    func pendingTransactions() -> [Transaction]
-    func handle(transactions: [Transaction])
-    func handle(sentTransaction transaction: Transaction)
+    func pendingTransactions() -> [FullTransaction]
+    func handle(transactions: [FullTransaction])
+    func handle(sentTransaction transaction: FullTransaction)
     func shouldRequestTransaction(hash: Data) -> Bool
 }
 
@@ -349,16 +369,16 @@ protocol ITransactionCreator {
 
 protocol ITransactionBuilder {
     func fee(for value: Int, feeRate: Int, senderPay: Bool, address: String?) throws -> Int
-    func buildTransaction(value: Int, feeRate: Int, senderPay: Bool, toAddress: String) throws -> Transaction
+    func buildTransaction(value: Int, feeRate: Int, senderPay: Bool, toAddress: String) throws -> FullTransaction
 }
 
 protocol IBlockchain {
     var listener: IBlockchainDataListener? { get set }
 
-    func connect(merkleBlock: MerkleBlock, realm: Realm) throws -> Block
-    func forceAdd(merkleBlock: MerkleBlock, height: Int, realm: Realm) -> Block
-    func handleFork(realm: Realm)
-    func deleteBlocks(blocks: Results<Block>, realm: Realm)
+    func connect(merkleBlock: MerkleBlock) throws -> Block
+    func forceAdd(merkleBlock: MerkleBlock, height: Int) throws -> Block
+    func handleFork()
+    func deleteBlocks(blocks: [Block]) throws
 }
 
 protocol IBlockchainDataListener: class {
@@ -369,7 +389,7 @@ protocol IBlockchainDataListener: class {
 
 
 protocol IInputSigner {
-    func sigScriptData(transaction: Transaction, index: Int) throws -> [Data]
+    func sigScriptData(transaction: Transaction, inputsToSign: [InputToSign], outputs: [Output], index: Int) throws -> [Data]
 }
 
 protocol IScriptBuilder {
@@ -385,11 +405,11 @@ protocol ITransactionSizeCalculator {
 }
 
 protocol IUnspentOutputSelector {
-    func select(value: Int, feeRate: Int, outputScriptType: ScriptType, changeType: ScriptType, senderPay: Bool, outputs: [TransactionOutput]) throws -> SelectedUnspentOutputInfo
+    func select(value: Int, feeRate: Int, outputScriptType: ScriptType, changeType: ScriptType, senderPay: Bool, unspentOutputs: [UnspentOutput]) throws -> SelectedUnspentOutputInfo
 }
 
 protocol IUnspentOutputProvider {
-    var allUnspentOutputs: [TransactionOutput] { get }
+    var allUnspentOutputs: [UnspentOutput] { get }
     var balance: Int { get }
 }
 

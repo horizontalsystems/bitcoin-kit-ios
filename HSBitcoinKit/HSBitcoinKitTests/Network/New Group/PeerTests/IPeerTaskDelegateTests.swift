@@ -101,7 +101,7 @@ class IPeerTaskDelegateTests: XCTestCase {
     }
 
     func testHandleMerkleBlock() {
-        let merkleBlock = MerkleBlock(header: TestData.firstBlock.header!, transactionHashes: [], transactions: [])
+        let merkleBlock = MerkleBlock(header: TestData.firstBlock.header, transactionHashes: [], transactions: [])
 
         peer.handle(merkleBlock: merkleBlock)
 

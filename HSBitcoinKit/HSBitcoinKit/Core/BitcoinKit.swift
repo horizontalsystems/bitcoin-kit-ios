@@ -1,6 +1,5 @@
 import Foundation
 import HSHDWalletKit
-import RealmSwift
 import BigInt
 import HSCryptoKit
 import RxSwift
@@ -9,10 +8,6 @@ public class BitcoinKit {
 
     public weak var delegate: BitcoinKitDelegate?
     public var delegateQueue = DispatchQueue(label: "bitcoin_delegate_queue")
-
-    private var unspentOutputsNotificationToken: NotificationToken?
-    private var transactionsNotificationToken: NotificationToken?
-    private var blocksNotificationToken: NotificationToken?
 
     let hasher: IHasher & IMerkleHasher
     let merkleBranch: IMerkleBranch
@@ -23,8 +18,6 @@ public class BitcoinKit {
 
     let network: INetwork
     private let logger: Logger
-
-    private let realmFactory: IRealmFactory
 
     private let hdWallet: IHDWallet
 
@@ -82,16 +75,15 @@ public class BitcoinKit {
     var networkMessageParser: INetworkMessageParser
     var networkMessageSerializer: INetworkMessageSerializer
 
-    public init(withWords words: [String], coin: Coin, storage: GrdbStorage, realFactory: RealmFactory, newWallet: Bool = false, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) {
-        realmFactory = realFactory
+    public init(withWords words: [String], coin: Coin, storage: GrdbStorage, newWallet: Bool = false, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) {
         self.storage = storage
 
         hasher = MerkleRootHasher()
         merkleBranch = MerkleBranch(hasher: hasher)
 
         difficultyEncoder = DifficultyEncoder()
-        blockHelper = BlockHelper()
-        validatorFactory = BlockValidatorFactory(difficultyEncoder: difficultyEncoder, blockHelper: blockHelper)
+        blockHelper = BlockHelper(storage: storage)
+        validatorFactory = BlockValidatorFactory(storage: storage, difficultyEncoder: difficultyEncoder, blockHelper: blockHelper)
 
         scriptConverter = ScriptConverter()
         switch coin {
@@ -158,14 +150,14 @@ public class BitcoinKit {
         factory = Factory()
         kitStateProvider = KitStateProvider()
 
-        bloomFilterManager = BloomFilterManager(realmFactory: realmFactory, factory: factory)
+        bloomFilterManager = BloomFilterManager(storage: storage, factory: factory)
 
         bitCoreConfigurator = BitCoreConfigurator(network: network)
         networkMessageParser = NetworkMessageParser(magic: network.magic, messageParsers: bitCoreConfigurator.networkMessageParsers)
         networkMessageSerializer = NetworkMessageSerializer(magic: network.magic, messageSerializers: bitCoreConfigurator.networkMessageSerializers)
         peerGroup = PeerGroup(factory: factory, network: network, networkMessageParser: networkMessageParser, networkMessageSerializer: networkMessageSerializer, listener: kitStateProvider, reachabilityManager: reachabilityManager, peerAddressManager: peerAddressManager, bloomFilterManager: bloomFilterManager, logger: logger)
 
-        addressManager = AddressManager.instance(realmFactory: realmFactory, hdWallet: hdWallet, addressConverter: addressConverter)
+        addressManager = AddressManager.instance(storage: storage, hdWallet: hdWallet, addressConverter: addressConverter)
         initialSyncer = InitialSyncer(storage: storage, listener: kitStateProvider, stateManager: stateManager, blockDiscovery: blockDiscovery, addressManager: addressManager, logger: logger)
 
         bcoinReachabilityManager = ReachabilityManager(configProvider: feeRateApiProvider)
@@ -177,22 +169,22 @@ public class BitcoinKit {
 
         transactionSizeCalculator = TransactionSizeCalculator()
         unspentOutputSelector = UnspentOutputSelector(calculator: transactionSizeCalculator)
-        unspentOutputProvider = UnspentOutputProvider(realmFactory: realmFactory, confirmationsThreshold: confirmationsThreshold)
+        unspentOutputProvider = UnspentOutputProvider(storage: storage, confirmationsThreshold: confirmationsThreshold)
 
-        transactionPublicKeySetter = TransactionPublicKeySetter(realmFactory: realmFactory)
+        transactionPublicKeySetter = TransactionPublicKeySetter(storage: storage)
         transactionOutputExtractor = TransactionOutputExtractor(transactionKeySetter: transactionPublicKeySetter)
-        transactionOutputAddressExtractor = TransactionOutputAddressExtractor(addressConverter: addressConverter)
-        transactionInputExtractor = TransactionInputExtractor(scriptConverter: scriptConverter, addressConverter: addressConverter)
-        transactionLinker = TransactionLinker()
-        transactionProcessor = TransactionProcessor(outputExtractor: transactionOutputExtractor, inputExtractor: transactionInputExtractor, linker: transactionLinker, outputAddressExtractor: transactionOutputAddressExtractor, addressManager: addressManager)
+        transactionOutputAddressExtractor = TransactionOutputAddressExtractor(storage: storage, addressConverter: addressConverter)
+        transactionInputExtractor = TransactionInputExtractor(storage: storage, scriptConverter: scriptConverter, addressConverter: addressConverter)
+        transactionLinker = TransactionLinker(storage: storage)
+        transactionProcessor = TransactionProcessor(storage: storage, outputExtractor: transactionOutputExtractor, inputExtractor: transactionInputExtractor, linker: transactionLinker, outputAddressExtractor: transactionOutputAddressExtractor, addressManager: addressManager)
 
         transactionSyncer = TransactionSyncer(storage: storage, processor: transactionProcessor, addressManager: addressManager, bloomFilterManager: bloomFilterManager)
         transactionBuilder = TransactionBuilder(unspentOutputSelector: unspentOutputSelector, unspentOutputProvider: unspentOutputProvider, addressManager: addressManager, addressConverter: addressConverter, inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory)
-        transactionCreator = TransactionCreator(realmFactory: realmFactory, transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, peerGroup: peerGroup)
+        transactionCreator = TransactionCreator(transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, peerGroup: peerGroup)
 
-        dataProvider = DataProvider(realmFactory: realmFactory, storage: storage, addressManager: addressManager, addressConverter: addressConverter, paymentAddressParser: paymentAddressParser, unspentOutputProvider: unspentOutputProvider, transactionCreator: transactionCreator, transactionBuilder: transactionBuilder, network: network)
+        dataProvider = DataProvider(storage: storage, addressManager: addressManager, addressConverter: addressConverter, paymentAddressParser: paymentAddressParser, unspentOutputProvider: unspentOutputProvider, transactionCreator: transactionCreator, transactionBuilder: transactionBuilder, network: network)
 
-        blockchain = Blockchain(network: network, factory: factory, listener: dataProvider)
+        blockchain = Blockchain(storage: storage, network: network, factory: factory, listener: dataProvider)
         blockSyncer = BlockSyncer.instance(storage: storage, network: network, factory: factory, listener: kitStateProvider, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager, logger: logger)
 
         syncManager = SyncManager(reachabilityManager: reachabilityManager, feeRateSyncer: feeRateSyncer, initialSyncer: initialSyncer, peerGroup: peerGroup)

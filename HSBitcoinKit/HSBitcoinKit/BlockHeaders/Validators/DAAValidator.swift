@@ -1,12 +1,14 @@
 import BigInt
 
 class DAAValidator: IBlockValidator {
+    private let storage: IStorage
     private let largestHash = BigInt(1) << 256
 
     let difficultyEncoder: IDifficultyEncoder
     let blockHelper: IBlockHelper
 
-    init(encoder: IDifficultyEncoder, blockHelper: IBlockHelper) {
+    init(storage: IStorage, encoder: IDifficultyEncoder, blockHelper: IBlockHelper) {
+        self.storage = storage
         difficultyEncoder = encoder
         self.blockHelper = blockHelper
     }
@@ -25,11 +27,8 @@ class DAAValidator: IBlockValidator {
         var blockArray = [(timestamp: Int, block: Block)]()
         var currentBlock = block
         for _ in 0..<3 {
-            guard let header = currentBlock.header else {
-                throw Block.BlockError.noHeader
-            }
-            blockArray.append((timestamp: header.timestamp, block: currentBlock))
-            guard let prevBlock = currentBlock.previousBlock else {
+            blockArray.append((timestamp: currentBlock.timestamp, block: currentBlock))
+            guard let prevBlock = currentBlock.previousBlock(storage: storage) else {
                 throw BlockValidatorError.noPreviousBlock
             }
             currentBlock = prevBlock
@@ -39,9 +38,6 @@ class DAAValidator: IBlockValidator {
     }
 
     func validate(candidate: Block, block: Block, network: INetwork) throws {
-        guard let candidateHeader = candidate.header else {
-            throw Block.BlockError.noHeader
-        }
         let lastBlock = try suitableBlock(for: block)
         let firstBlock = try suitableBlock(for: blockHelper.previous(for: block, index: 144)!)
         let heightInterval = lastBlock.height - firstBlock.height
@@ -51,11 +47,11 @@ class DAAValidator: IBlockValidator {
         }
         blocks.append(lastBlock)
 
-        let timeSpan = limit(timeSpan: lastBlock.header!.timestamp - firstBlock.header!.timestamp, targetSpacing: network.targetSpacing)
+        let timeSpan = limit(timeSpan: lastBlock.timestamp - firstBlock.timestamp, targetSpacing: network.targetSpacing)
 
         var chainWork = BigInt(0)
         for i in 0..<blocks.count {
-            chainWork += work(bits: blocks[i].header!.bits)
+            chainWork += work(bits: blocks[i].bits)
         }
         let projectedWork = chainWork * BigInt(network.targetSpacing) / BigInt(timeSpan)
 
@@ -63,7 +59,7 @@ class DAAValidator: IBlockValidator {
 
         let bits = difficultyEncoder.encodeCompact(from: target)
 
-        guard bits == candidateHeader.bits else {
+        guard bits == candidate.bits else {
             throw BlockValidatorError.notEqualBits
         }
     }

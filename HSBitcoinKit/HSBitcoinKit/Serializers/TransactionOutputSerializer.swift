@@ -3,7 +3,7 @@ import HSCryptoKit
 
 class TransactionOutputSerializer {
 
-     static func serialize(output: TransactionOutput) -> Data {
+     static func serialize(output: Output) -> Data {
         var data = Data()
 
         data += output.value
@@ -14,14 +14,12 @@ class TransactionOutputSerializer {
         return data
     }
 
-    static func deserialize(byteStream: ByteStream) -> TransactionOutput {
-        let transactionOutput = TransactionOutput()
-
-        transactionOutput.value = Int(byteStream.read(Int64.self))
+    static func deserialize(byteStream: ByteStream) -> Output {
+        let value = Int(byteStream.read(Int64.self))
         let scriptLength: VarInt = byteStream.read(VarInt.self)
-        transactionOutput.lockingScript = byteStream.read(Data.self, count: Int(scriptLength.underlyingValue))
+        let lockingScript = byteStream.read(Data.self, count: Int(scriptLength.underlyingValue))
 
-        return transactionOutput
+        return Output(withValue: value, index: 0, lockingScript: lockingScript)
     }
 
 }
