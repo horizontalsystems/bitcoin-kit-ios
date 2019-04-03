@@ -7,7 +7,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
 
-        let controller = Manager.shared.bitcoinKit == nil ? UINavigationController(rootViewController: WordsController()) : MainController()
+        let controller = Manager.shared.kit == nil ? UINavigationController(rootViewController: WordsController()) : MainController()
 
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.makeKeyAndVisible()

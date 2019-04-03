@@ -23,6 +23,9 @@ class PeerConnectionDelegateTests: XCTestCase {
         mockPeerGroup = MockPeerDelegate()
 
         resetMockConnection()
+        stub(mockNetwork) { mock in
+            when(mock.protocolVersion.get).thenReturn(70015)
+        }
         stub(mockPeerGroup) { mock in
             when(mock.peerDidConnect(any())).thenDoNothing()
             when(mock.peerDidDisconnect(any(), withError: any())).thenDoNothing()
@@ -337,16 +340,6 @@ class PeerConnectionDelegateTests: XCTestCase {
 
         verify(task, never()).handle(getDataInventoryItem: any())
         verify(task2, never()).handle(getDataInventoryItem: any())
-    }
-
-    func testConnectionDidReceiveMessage_BlockMessage() {
-        let message = BlockMessage(data: BlockHeaderSerializer.serialize(header: TestData.firstBlock.header) + VarInt(0).serialized())
-
-        peer.connected = true
-        peer.connection(didReceiveMessage: message)
-        waitForMainQueue()
-
-        verifyNoMoreInteractions(mockPeerGroup)
     }
 
     func testConnectionDidReceiveMessage_MerkleBlockMessage() {

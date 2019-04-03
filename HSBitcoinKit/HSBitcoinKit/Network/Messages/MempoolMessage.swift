@@ -1,15 +1,9 @@
 import Foundation
 
 struct MemPoolMessage: IMessage {
+    let command: String = "mempool"
 
     init() {
-    }
-
-    init(data: Data) {
-    }
-
-    func serialized() -> Data {
-        return Data()
     }
 
 }

@@ -1,6 +1,5 @@
 import Foundation
 
-protocol IMessage {
-    init(data: Data)
-    func serialized() -> Data
+public protocol IMessage {
+    var command: String { get }
 }

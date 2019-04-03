@@ -9,7 +9,7 @@ class Peer {
         case peerDoesNotSupportBloomFilter
     }
 
-    private let protocolVersion: Int32 = 70015
+    private let protocolVersion: Int32
     private var sentVersion: Bool = false
     private var sentVerack: Bool = false
     private var mempoolSent: Bool = false
@@ -23,10 +23,13 @@ class Peer {
     private let queue: DispatchQueue
     private let network: INetwork
 
+    private let merkleBlockValidator: IMerkleBlockValidator
+
     private let logger: Logger?
 
     var announcedLastBlockHeight: Int32 = 0
     var localBestBlockHeight: Int32 = 0
+    // TODO seems like property connected is not needed. It is always true in PeerManager. Need to check it and remove
     var connected: Bool = false
     var blockHashesSynced: Bool = false
     var synced: Bool = false
@@ -43,11 +46,13 @@ class Peer {
         return connection.logName
     }
 
-    init(host: String, network: INetwork, connection: IPeerConnection, connectionTimeoutManager: IConnectionTimeoutManager, queue: DispatchQueue? = nil, logger: Logger? = nil) {
+    init(host: String, network: INetwork, connection: IPeerConnection, connectionTimeoutManager: IConnectionTimeoutManager, merkleBlockValidator: IMerkleBlockValidator, queue: DispatchQueue? = nil, logger: Logger? = nil) {
+        self.protocolVersion = network.protocolVersion
         self.connection = connection
         self.connectionTimeoutManager = connectionTimeoutManager
         self.network = network
 
+        self.merkleBlockValidator = merkleBlockValidator
         self.logger = logger
 
         if let queue = queue {
@@ -98,13 +103,12 @@ class Peer {
         case let addressMessage as AddressMessage: handle(message: addressMessage)
         case let inventoryMessage as InventoryMessage: handle(message: inventoryMessage)
         case let getDataMessage as GetDataMessage: handle(message: getDataMessage)
-        case let blockMessage as BlockMessage: handle(message: blockMessage)
         case let merkleBlockMessage as MerkleBlockMessage: try handle(message: merkleBlockMessage)
         case let transactionMessage as TransactionMessage: handle(message: transactionMessage)
         case let pingMessage as PingMessage: handle(message: pingMessage)
         case let pongMessage as PongMessage: handle(message: pongMessage)
         case let rejectMessage as RejectMessage: handle(message: rejectMessage)
-        default: break
+        default: handle(anyMessage: message)
         }
     }
 
@@ -156,7 +160,17 @@ class Peer {
     }
 
     private func handle(message: InventoryMessage) {
-        log("<-- INV: \(message.inventoryItems.map { "[\($0.objectType): \($0.hash.reversedHex)]" }.joined(separator: ", "))")
+        let items = message.inventoryItems.map { item in
+            let objectTypeString: String
+            if case .unknown = item.objectType {
+                objectTypeString = String(item.type)
+            } else {
+                objectTypeString = "\(item.objectType)"
+            }
+            return "[\(objectTypeString): \(item.hash.reversedHex)]" }.joined(separator: ", ")
+
+        log("<-- INV: \(items)")
+//        log("<-- INV: \(message.inventoryItems.map { "[\($0.objectType): \($0.hash.reversedHex)]" }.joined(separator: ", "))")
 
         for task in tasks {
             if task.handle(items: message.inventoryItems) {
@@ -179,14 +193,10 @@ class Peer {
         }
     }
 
-    private func handle(message: BlockMessage) {
-        log("<-- BLOCK: \(CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: message.blockHeaderItem)).reversedHex)")
-    }
-
     private func handle(message: MerkleBlockMessage) throws {
         log("<-- MERKLEBLOCK: \(CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: message.blockHeader)).reversedHex)")
 
-        let merkleBlock = try network.merkleBlockValidator.merkleBlock(from: message)
+        let merkleBlock = try merkleBlockValidator.merkleBlock(from: message)
 
         for task in tasks {
             if task.handle(merkleBlock: merkleBlock) {
@@ -223,6 +233,14 @@ class Peer {
         log("<-- REJECT: \(message.message) code: 0x\(String(message.ccode, radix: 16)) reason: \(message.reason)")
     }
 
+    private func handle(anyMessage: IMessage) {
+        for task in tasks {
+            if task.handle(message: anyMessage) {
+                break
+            }
+        }
+    }
+
     private func log(_ message: String, level: Logger.Level = .debug, file: String = #file, function: String = #function, line: Int = #line) {
         logger?.log(level: level, message: message, file: file, function: function, line: line, context: logName)
     }
@@ -246,15 +264,6 @@ extension Peer: IPeer {
         task.requester = self
 
         task.start()
-    }
-
-    func isRequestingInventory(hash: Data) -> Bool {
-        for task in tasks {
-            if task.isRequestingInventory(hash: hash) {
-                return true
-            }
-        }
-        return false
     }
 
     func filterLoad(bloomFilter: BloomFilter) {
@@ -350,10 +359,6 @@ extension Peer: IPeerTaskDelegate {
         disconnect(error: error)
     }
 
-    func handle(merkleBlock: MerkleBlock) {
-        delegate?.handle(self, merkleBlock: merkleBlock)
-    }
-
 }
 
 extension Peer: IPeerTaskRequester {
@@ -385,6 +390,10 @@ extension Peer: IPeerTaskRequester {
         let message = TransactionMessage(transaction: transaction)
 
         log("--> TX: \(message.transaction.header.dataHashReversedHex)")
+        connection.send(message: message)
+    }
+
+    func send(message: IMessage) {
         connection.send(message: message)
     }
 

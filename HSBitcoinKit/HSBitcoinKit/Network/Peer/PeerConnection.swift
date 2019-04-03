@@ -12,7 +12,8 @@ class PeerConnection: NSObject {
 
     let host: String
     let port: UInt32
-    private let network: INetwork
+    private let networkMessageParser: INetworkMessageParser
+    private let networkMessageSerializer: INetworkMessageSerializer
 
     weak var delegate: PeerConnectionDelegate?
 
@@ -35,10 +36,12 @@ class PeerConnection: NSObject {
         return "[\(WordList.english[index])]".uppercased()
     }
 
-    init(host: String, network: INetwork, logger: Logger? = nil) {
+    init(host: String, port: UInt32, networkMessageParser: INetworkMessageParser, networkMessageSerializer: INetworkMessageSerializer, logger: Logger? = nil) {
         self.host = host
-        self.port = UInt32(network.port)
-        self.network = network
+        self.port = port
+        self.networkMessageParser = networkMessageParser
+        self.networkMessageSerializer = networkMessageSerializer
+
         self.timer = nil
         self.logger = logger
     }
@@ -88,7 +91,7 @@ class PeerConnection: NSObject {
         }
 
         while packets.count >= NetworkMessage.minimumLength {
-            guard let networkMessage = NetworkMessage.deserialize(data: packets, network: network) else {
+            guard let networkMessage = networkMessageParser.parse(data: packets) else {
                 return
             }
 
@@ -138,9 +141,7 @@ extension PeerConnection: IPeerConnection {
     }
 
     func send(message: IMessage) {
-        let message = NetworkMessage(network: network, message: message)
-
-        let data = message.serialized()
+        let data = networkMessageSerializer.serialize(message: message) ?? Data() //todo catch error when try send message not registered in serializers
         _ = data.withUnsafeBytes {
             outputStream?.write($0, maxLength: data.count)
         }

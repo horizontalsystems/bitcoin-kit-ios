@@ -16,7 +16,7 @@ class TransactionsController: UITableViewController {
         tableView.register(UINib(nibName: String(describing: TransactionCell.self), bundle: Bundle(for: TransactionCell.self)), forCellReuseIdentifier: String(describing: TransactionCell.self))
 
         update()
-        lastBlockInfo = Manager.shared.bitcoinKit.lastBlockInfo
+        lastBlockInfo = Manager.shared.kit.lastBlockInfo
 
         Manager.shared.transactionsSubject.observeOn(MainScheduler.instance).subscribe(onNext: { [weak self] in
             self?.update()
@@ -29,7 +29,7 @@ class TransactionsController: UITableViewController {
     }
 
     private func update() {
-        let _ = Manager.shared.bitcoinKit.transactions().subscribe(onSuccess: { transactions in
+        let _ = Manager.shared.kit.transactions().subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background)).observeOn(MainScheduler.instance).subscribe(onSuccess: { transactions in
             self.transactions = transactions
             self.tableView.reloadData()
         })
@@ -49,7 +49,7 @@ class TransactionsController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if let cell = cell as? TransactionCell {
-            cell.bind(transaction: transactions[indexPath.row], lastBlockHeight: lastBlockInfo?.height ?? 0)
+            cell.bind(transaction: transactions[indexPath.row], lastBlockHeight: lastBlockInfo?.height ?? 0, index: transactions.count - indexPath.row)
         }
     }
 

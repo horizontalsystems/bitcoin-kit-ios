@@ -9,7 +9,7 @@ class ReceiveController: UIViewController {
 
         title = "Receive"
 
-        addressLabel?.text = Manager.shared.bitcoinKit.receiveAddress
+        addressLabel?.text = Manager.shared.kit.receiveAddress
     }
 
     @IBAction func copyToClipboard() {

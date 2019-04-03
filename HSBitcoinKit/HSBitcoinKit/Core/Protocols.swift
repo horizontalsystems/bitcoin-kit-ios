@@ -1,8 +1,9 @@
 import BigInt
 import RxSwift
 import Alamofire
+import HSCryptoKit
 
-enum BlockValidatorType { case header, bits, legacy, testNet, EDA, DAA }
+enum BlockValidatorType { case header, bits, legacy, testNet, EDA, DAA, DGW }
 
 protocol IDifficultyEncoder {
     func decodeCompact(bits: Int) -> BigInt
@@ -143,7 +144,7 @@ protocol IFeeRateSyncer {
 }
 
 protocol IAddressSelector {
-    func getAddressVariants(publicKey: PublicKey) -> [String]
+    func getAddressVariants(addressConverter: IAddressConverter, publicKey: PublicKey) -> [String]
 }
 
 protocol IAddressManager {
@@ -154,27 +155,34 @@ protocol IAddressManager {
     func gapShifts() -> Bool
 }
 
+protocol IBloomFilterManagerDelegate: class {
+    func bloomFilterUpdated(bloomFilter: BloomFilter)
+}
+
 protocol IBloomFilterManager {
-    var delegate: BloomFilterManagerDelegate? { get set }
+    var delegate: IBloomFilterManagerDelegate? { get set }
     var bloomFilter: BloomFilter? { get }
     func regenerateBloomFilter()
 }
 
-protocol BloomFilterManagerDelegate: class {
-    func bloomFilterUpdated(bloomFilter: BloomFilter)
-}
 
 protocol IPeerGroup: class {
+    var inventoryItemsHandler: IInventoryItemsHandler? { get set }
+    var peerTaskHandler: IPeerTaskHandler? { get set }
+
     var blockSyncer: IBlockSyncer? { get set }
     var transactionSyncer: ITransactionSyncer? { get set }
+    var someReadyPeers: [IPeer] { get }
+
     func start()
     func stop()
-    func sendPendingTransactions() throws
     func checkPeersSynced() throws
+
+    func addTask(peerTask: PeerTask)
+    func add(peerGroupListener: IPeerGroupListener)
 }
 
 protocol IPeerManager: class {
-    var syncPeer: IPeer? { get set }
     func add(peer: IPeer)
     func peerDisconnected(peer: IPeer)
     func disconnectAll()
@@ -182,7 +190,6 @@ protocol IPeerManager: class {
     func someReadyPeers() -> [IPeer]
     func connected() -> [IPeer]
     func nonSyncedPeer() -> IPeer?
-    func syncPeerIs(peer: IPeer) -> Bool
 }
 
 protocol IPeer: class {
@@ -198,7 +205,6 @@ protocol IPeer: class {
     func connect()
     func disconnect(error: Error?)
     func add(task: PeerTask)
-    func isRequestingInventory(hash: Data) -> Bool
     func filterLoad(bloomFilter: BloomFilter)
     func sendMempoolMessage()
     func sendPing(nonce: UInt64)
@@ -206,7 +212,6 @@ protocol IPeer: class {
 }
 
 protocol PeerDelegate: class {
-    func handle(_ peer: IPeer, merkleBlock: MerkleBlock)
     func peerReady(_ peer: IPeer)
     func peerDidConnect(_ peer: IPeer)
     func peerDidDisconnect(_ peer: IPeer, withError error: Error?)
@@ -221,13 +226,13 @@ protocol IPeerTaskRequester: class {
     func getData(items: [InventoryItem])
     func sendTransactionInventory(hash: Data)
     func send(transaction: FullTransaction)
+    func send(message: IMessage)
     func ping(nonce: UInt64)
 }
 
 protocol IPeerTaskDelegate: class {
     func handle(completedTask task: PeerTask)
     func handle(failedTask task: PeerTask, error: Error)
-    func handle(merkleBlock: MerkleBlock)
 }
 
 protocol IPeerConnection: class {
@@ -266,7 +271,7 @@ protocol IFactory {
     func block(withHeader header: BlockHeader, previousBlock: Block) -> Block
     func block(withHeader header: BlockHeader, height: Int) -> Block
     func blockHash(withHeaderHash headerHash: Data, height: Int, order: Int) -> BlockHash
-    func peer(withHost host: String, network: INetwork, logger: Logger?) -> IPeer
+    func peer(withHost host: String, logger: Logger?) -> IPeer
     func transaction(version: Int, lockTime: Int) -> Transaction
     func inputToSign(withPreviousOutput: UnspentOutput, script: Data, sequence: Int) -> InputToSign
     func output(withValue value: Int, index: Int, lockingScript script: Data, type: ScriptType, address: String?, keyHash: Data?, publicKey: PublicKey?) -> Output
@@ -304,15 +309,9 @@ protocol IPaymentAddressParser {
     func parse(paymentAddress: String) -> BitcoinPaymentData
 }
 
-protocol IBech32AddressConverter {
-    func convert(prefix: String, address: String) throws -> Address
-    func convert(prefix: String, keyData: Data, scriptType: ScriptType) throws -> Address
-}
-
 protocol IAddressConverter {
     func convert(address: String) throws -> Address
     func convert(keyHash: Data, type: ScriptType) throws -> Address
-    func convertToLegacy(keyHash: Data, version: UInt8, addressType: AddressType) -> LegacyAddress
 }
 
 protocol IScriptConverter {
@@ -420,12 +419,12 @@ protocol IBlockSyncer: class {
 }
 
 protocol IKitStateProvider: class {
-    var syncState: BitcoinKit.KitState { get }
+    var syncState: BitcoinCore.KitState { get }
     var delegate: IKitStateProviderDelegate? { get set }
 }
 
 protocol IKitStateProviderDelegate: class {
-    func handleKitStateUpdate(state: BitcoinKit.KitState)
+    func handleKitStateUpdate(state: BitcoinCore.KitState)
 }
 
 protocol IDataProvider {
@@ -433,13 +432,8 @@ protocol IDataProvider {
 
     var lastBlockInfo: BlockInfo? { get }
     var balance: Int { get }
-    var receiveAddress: String { get }
+    var feeRate: FeeRate { get }
     func transactions(fromHash: String?, limit: Int?) -> Single<[TransactionInfo]>
-    func send(to address: String, value: Int) throws
-    func parse(paymentAddress: String) -> BitcoinPaymentData
-    func validate(address: String) throws
-    func fee(for value: Int, toAddress: String?, senderPay: Bool) throws -> Int
-
     var debugInfo: String { get }
 }
 
@@ -451,8 +445,8 @@ protocol IDataProviderDelegate: class {
 }
 
 protocol INetwork: class {
-    var merkleBlockValidator: IMerkleBlockValidator { get }
-
+    var maxBlockSize: UInt32 { get }
+    var protocolVersion: Int32 { get }
     var name: String { get }
     var pubKeyHash: UInt8 { get }
     var privateKey: UInt8 { get }
@@ -475,23 +469,32 @@ protocol INetwork: class {
     var maxTargetBits: Int { get }                                      // Maximum difficulty.
 
     var targetTimeSpan: Int { get }                                     // seconds per difficulty cycle, on average.
-    var targetSpacing: Int { get }                                      // 10 minutes per block.
+    var targetSpacing: Int { get }                                      // minutes per block.
     var heightInterval: Int { get }                                     // Blocks in cycle
 
     func validate(block: Block, previousBlock: Block) throws
+    func generateBlockHeaderHash(from data: Data) -> Data
 }
 
 protocol IMerkleBlockValidator: class {
+    func set(merkleBranch: IMerkleBranch)
     func merkleBlock(from message: MerkleBlockMessage) throws -> MerkleBlock
 }
 
+protocol IMerkleBranch: class {
+    func calculateMerkleRoot(txCount: Int, hashes: [Data], flags: [UInt8]) throws -> (merkleRoot: Data, matchedHashes: [Data])
+}
+
 extension INetwork {
+    var protocolVersion: Int32 { return 70015 }
+
+    var maxBlockSize: UInt32 { return 1_000_000 }
     var serviceFullNode: UInt64 { return 1 }
     var bloomFilter: Int32 { return 70000 }
     var maxTargetBits: Int { return 0x1d00ffff }
 
     var targetTimeSpan: Int { return 14 * 24 * 60 * 60 }                // Seconds in Bitcoin cycle
-    var targetSpacing: Int { return 10 * 60 }                           // 10 min. for mining 1 Block
+    var targetSpacing: Int { return 10 * 60 }                           // 10 min. for mining 1 Block (Bitcoin)
 
     var heightInterval: Int { return targetTimeSpan / targetSpacing }   // 2016 Blocks in Bitcoin cycle
 
@@ -499,4 +502,60 @@ extension INetwork {
         return height % heightInterval == 0
     }
 
+    func generateBlockHeaderHash(from data: Data) -> Data {
+        return CryptoKit.sha256sha256(data)
+    }
+
+}
+
+protocol INetworkMessageParser {
+    func parse(data: Data) -> NetworkMessage?
+}
+
+protocol INetworkMessageSerializer {
+    func serialize(message: IMessage) -> Data?
+}
+
+protocol IMessageParsersConfigurator {
+    var networkMessageParsers: MessageParsers { get }
+    var networkMessageSerializers: MessageSerializers { get }
+}
+
+protocol IInventoryItemsHandler {
+    func handleInventoryItems(peer: IPeer, inventoryItems: [InventoryItem])
+}
+
+protocol IPeerTaskHandler {
+    func handleCompletedTask(peer: IPeer, task: PeerTask) -> Bool
+}
+
+protocol IAllPeersSyncedDelegate {
+    func onAllPeersSynced()
+}
+
+protocol ITransactionSender {
+    func sendPendingTransactions()
+    func canSendTransaction() throws
+}
+
+protocol IPeerGroupListener {
+    func onStart()
+    func onStop()
+    func onPeerCreate(peer: IPeer)
+    func onPeerConnect(peer: IPeer)
+    func onPeerDisconnect(peer: IPeer, error: Error?)
+    func onPeerReady(peer: IPeer)
+}
+
+extension IPeerGroupListener {
+    func onStart() {}
+    func onStop() {}
+    func onPeerCreate(peer: IPeer) {}
+    func onPeerConnect(peer: IPeer) {}
+    func onPeerDisconnect(peer: IPeer, error: Error?) {}
+    func onPeerReady(peer: IPeer) {}
+}
+
+protocol IMerkleBlockHandler {
+    func handle(merkleBlock: MerkleBlock) throws
 }

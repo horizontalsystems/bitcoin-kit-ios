@@ -3,7 +3,7 @@ import Cuckoo
 @testable import HSBitcoinKit
 
 class AddressConverterTests: XCTestCase {
-    private var addressConverter: AddressConverter!
+    private var addressConverter: AddressConverterChain!
     private var mockPaymentAddressParser: MockIPaymentAddressParser!
     private var mockBech32: MockIBech32AddressConverter!
 
@@ -21,11 +21,11 @@ class AddressConverterTests: XCTestCase {
         }
         mockBech32 = MockIBech32AddressConverter()
         stub(mockBech32) { mock in
-            when(mock.convert(prefix: any(), address: any())).thenThrow(AddressConverter.ConversionError.unknownAddressType)
-            when(mock.convert(prefix: any(), keyData: any(), scriptType: any())).thenThrow(AddressConverter.ConversionError.unknownAddressType)
+            when(mock.convert(prefix: any(), address: any())).thenThrow(AddressConverterChain.ConversionError.unknownAddressType)
+            when(mock.convert(prefix: any(), keyData: any(), scriptType: any())).thenThrow(AddressConverterChain.ConversionError.unknownAddressType)
         }
         mockPaymentAddressParser = MockIPaymentAddressParser()
-        addressConverter = AddressConverter(network: mockNetwork, bech32AddressConverter: mockBech32)
+        addressConverter = AddressConverterChain(network: mockNetwork, bech32AddressConverter: mockBech32)
     }
 
     override func tearDown() {
@@ -87,9 +87,9 @@ class AddressConverterTests: XCTestCase {
         var caught = false
         do {
             let _ = try addressConverter.convert(address: address)
-        } catch let error as AddressConverter.ConversionError {
+        } catch let error as AddressConverterChain.ConversionError {
             caught = true
-            XCTAssertEqual(error, AddressConverter.ConversionError.invalidAddressLength)
+            XCTAssertEqual(error, AddressConverterChain.ConversionError.invalidAddressLength)
         } catch {
             XCTFail("Invalid Error thrown!")
         }
@@ -102,8 +102,8 @@ class AddressConverterTests: XCTestCase {
         do {
             let _ = try addressConverter.convert(address: address)
             XCTFail("No error thrown!")
-        } catch let error as AddressConverter.ConversionError {
-            XCTAssertEqual(error, AddressConverter.ConversionError.invalidAddressLength)
+        } catch let error as AddressConverterChain.ConversionError {
+            XCTAssertEqual(error, AddressConverterChain.ConversionError.invalidAddressLength)
         } catch {
             XCTFail("Invalid Error thrown!")
         }
@@ -115,8 +115,8 @@ class AddressConverterTests: XCTestCase {
         do {
             let _ = try addressConverter.convert(address: address)
             XCTFail("No error thrown!")
-        } catch let error as AddressConverter.ConversionError {
-            XCTAssertEqual(error, AddressConverter.ConversionError.invalidChecksum)
+        } catch let error as AddressConverterChain.ConversionError {
+            XCTAssertEqual(error, AddressConverterChain.ConversionError.invalidChecksum)
         } catch {
             XCTFail("Invalid Error thrown!")
         }
@@ -128,8 +128,8 @@ class AddressConverterTests: XCTestCase {
         do {
             let _ = try addressConverter.convert(keyHash: Data(hex: keyHash)!, type: .unknown)
             XCTFail("No error thrown!")
-        } catch let error as AddressConverter.ConversionError {
-            XCTAssertEqual(error, AddressConverter.ConversionError.unknownAddressType)
+        } catch let error as AddressConverterChain.ConversionError {
+            XCTAssertEqual(error, AddressConverterChain.ConversionError.unknownAddressType)
         } catch {
             XCTFail("Invalid Error thrown!")
         }
@@ -140,8 +140,8 @@ class AddressConverterTests: XCTestCase {
         do {
             let _ = try addressConverter.convert(address: address)
             XCTFail("No error handled!")
-        } catch let error as AddressConverter.ConversionError {
-            XCTAssertEqual(error, AddressConverter.ConversionError.wrongAddressPrefix)
+        } catch let error as AddressConverterChain.ConversionError {
+            XCTAssertEqual(error, AddressConverterChain.ConversionError.wrongAddressPrefix)
         } catch {
             XCTFail("Invalid Error thrown!")
         }

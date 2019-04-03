@@ -57,7 +57,7 @@ class HeaderValidatorTests: XCTestCase {
             try validator.validate(candidate: candidate, block: block, network: network)
             XCTFail("invalidProveOfWork exception not thrown")
         } catch let error as BlockValidatorError {
-            XCTAssertEqual(error, BlockValidatorError.invalidProveOfWork)
+            XCTAssertEqual(error, BlockValidatorError.invalidProofOfWork)
         } catch {
             XCTFail("Unknown exception thrown")
         }

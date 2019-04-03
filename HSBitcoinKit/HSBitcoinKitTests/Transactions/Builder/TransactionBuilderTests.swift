@@ -140,13 +140,13 @@ class TransactionBuilderTests: XCTestCase {
 
     func testFee_AddressGiven_Error() {
         stub(mockAddressConverter) { mock in
-            when(mock.convert(address: toAddressPKH)).thenThrow(AddressConverter.ConversionError.invalidAddressLength)
+            when(mock.convert(address: toAddressPKH)).thenThrow(AddressConverterChain.ConversionError.invalidAddressLength)
         }
 
         do {
             let _ = try transactionBuilder.fee(for: value, feeRate: feeRate, senderPay: false, address: toAddressPKH)
-        } catch let error as AddressConverter.ConversionError {
-            XCTAssertEqual(error, AddressConverter.ConversionError.invalidAddressLength)
+        } catch let error as AddressConverterChain.ConversionError {
+            XCTAssertEqual(error, AddressConverterChain.ConversionError.invalidAddressLength)
         } catch let error {
             XCTFail(error.localizedDescription)
         }

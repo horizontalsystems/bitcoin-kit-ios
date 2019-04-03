@@ -1,14 +1,19 @@
 import RxSwift
 import GRDB
 
-class GrdbStorage {
-    private let dbPool: DatabasePool
+public class GrdbStorage {
+    var dbPool: DatabasePool
     private var dbsInTransaction = [Int: Database]()
 
+    private let databaseName: String
+    private var databaseURL: URL
+
     init(databaseFileName: String) {
-        let databaseURL = try! FileManager.default
+        self.databaseName = databaseFileName
+
+        databaseURL = try! FileManager.default
                 .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-                .appendingPathComponent("\(databaseFileName).sqlite")
+                .appendingPathComponent("\(databaseName).sqlite")
 
         dbPool = try! DatabasePool(path: databaseURL.path)
 
@@ -155,6 +160,23 @@ class GrdbStorage {
         }
 
         return migrator
+    }
+
+    func clearGrdb() throws {
+        try inTransaction {
+            _ = try write { db in
+                try FeeRate.deleteAll(db)
+                try BlockchainState.deleteAll(db)
+                try PeerAddress.deleteAll(db)
+                try BlockHash.deleteAll(db)
+                try SentTransaction.deleteAll(db)
+                try Input.deleteAll(db)
+                try Output.deleteAll(db)
+                try Transaction.deleteAll(db)
+                try PublicKey.deleteAll(db)
+                try Block.deleteAll(db)
+            }
+        }
     }
 
     public func read<T>(_ block: (Database) throws -> T) throws -> T {
@@ -696,18 +718,7 @@ extension GrdbStorage: IStorage {
     // Clear
 
     func clear() throws {
-        _ = try dbPool.write { db in
-            try FeeRate.deleteAll(db)
-            try BlockchainState.deleteAll(db)
-            try PeerAddress.deleteAll(db)
-            try BlockHash.deleteAll(db)
-            try SentTransaction.deleteAll(db)
-            try Input.deleteAll(db)
-            try Output.deleteAll(db)
-            try Transaction.deleteAll(db)
-            try PublicKey.deleteAll(db)
-            try Block.deleteAll(db)
-        }
+        try clearGrdb()
     }
 
     func inTransaction(_ block: (() throws -> Void)) throws {

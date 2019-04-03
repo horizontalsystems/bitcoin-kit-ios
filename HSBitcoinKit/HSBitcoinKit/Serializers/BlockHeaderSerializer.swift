@@ -14,7 +14,7 @@ class BlockHeaderSerializer {
         return data
     }
 
-    static func deserialize(byteStream: ByteStream) -> BlockHeader {
+    static func deserialize(byteStream: ByteStream, network: INetwork) -> BlockHeader {
         let version = Int(byteStream.read(Int32.self))
         let previousBlockHeaderHash = byteStream.read(Data.self, count: 32)
         let merkleRoot = byteStream.read(Data.self, count: 32)
@@ -22,8 +22,11 @@ class BlockHeaderSerializer {
         let bits = Int(byteStream.read(UInt32.self))
         let nonce = Int(byteStream.read(UInt32.self))
 
+        let headerData = byteStream.data.prefix(80)
+        let headerHash = network.generateBlockHeaderHash(from: headerData)
+
         return BlockHeader(
-                version: version, previousBlockHeaderHash: previousBlockHeaderHash, merkleRoot: merkleRoot,
+                version: version, headerHash: headerHash, previousBlockHeaderHash: previousBlockHeaderHash, merkleRoot: merkleRoot,
                 timestamp: timestamp, bits: bits, nonce: nonce
         )
     }

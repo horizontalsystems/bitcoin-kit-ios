@@ -37,7 +37,7 @@ class PeerTask {
         return false
     }
 
-    func isRequestingInventory(hash: Data) -> Bool {
+    func handle(message: IMessage) -> Bool {
         return false
     }
 

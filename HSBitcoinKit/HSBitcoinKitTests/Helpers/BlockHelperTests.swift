@@ -83,7 +83,7 @@ class BlockHelperTests: XCTestCase {
 
         stub(mockStorage) { mock in
             for _ in 0..<length {
-                let header = BlockHeader(version: 0, previousBlockHeaderHash: Data(from: currentBlock.timestamp + timeInterval),
+                let header = BlockHeader(version: 0, headerHash: Data(), previousBlockHeaderHash: Data(from: currentBlock.timestamp + timeInterval),
                         merkleRoot: Data(), timestamp: currentBlock.timestamp + timeInterval, bits: 0, nonce: 0)
                 let block = Block(withHeader: header, previousBlock: currentBlock)
 

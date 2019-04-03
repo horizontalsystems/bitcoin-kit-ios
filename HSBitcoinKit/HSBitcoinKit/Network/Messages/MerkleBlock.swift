@@ -8,8 +8,9 @@ class MerkleBlock {
     var transactions: [FullTransaction]
 
     lazy var headerHash: Data = {
-        return CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: header))
+        return self.header.headerHash
     }()
+
     lazy var headerHashReversedHex: String = {
         return self.headerHash.reversedHex
     }()

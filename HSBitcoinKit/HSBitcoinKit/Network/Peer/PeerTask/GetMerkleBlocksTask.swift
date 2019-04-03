@@ -5,9 +5,11 @@ class GetMerkleBlocksTask: PeerTask {
     private let allowedIdleTime = 60.0
     private var blockHashes: [BlockHash]
     private var pendingMerkleBlocks = [MerkleBlock]()
+    private let merkleBlockHandler: IMerkleBlockHandler
 
-    init(blockHashes: [BlockHash], dateGenerator: @escaping () -> Date = Date.init) {
+    init(blockHashes: [BlockHash], merkleBlockHandler: IMerkleBlockHandler, dateGenerator: @escaping () -> Date = Date.init) {
         self.blockHashes = blockHashes
+        self.merkleBlockHandler = merkleBlockHandler
         super.init(dateGenerator: dateGenerator)
     }
 
@@ -72,7 +74,11 @@ class GetMerkleBlocksTask: PeerTask {
             blockHashes.remove(at: index)
         }
 
-        delegate?.handle(merkleBlock: merkleBlock)
+        do {
+            try merkleBlockHandler.handle(merkleBlock: merkleBlock)
+        } catch {
+            delegate?.handle(failedTask: self, error: error)
+        }
 
         if blockHashes.isEmpty {
             delegate?.handle(completedTask: self)

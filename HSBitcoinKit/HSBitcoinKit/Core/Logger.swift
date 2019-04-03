@@ -1,6 +1,7 @@
 import Foundation
 
 public class Logger {
+    private static let logContextEmpty = String(repeating: "-", count: 15)
 
     public enum Level: Int {
         case verbose = 0
@@ -98,7 +99,11 @@ public class Logger {
         str = str + "\(dateFormatter.string(from: Date())) \(colors[level]!)[\(threadName())]"
 
         if let context = context {
-            str = str + " \(context)"
+            let contextString = " \(context)"
+            let formattedString = contextString + String(repeating: " ", count: max(0, 15 - contextString.count))
+            str = str + formattedString
+        } else {
+            str = str + Logger.logContextEmpty
         }
 
         str = str + " \(file).\(functionName(function)):\(line) - \(message())"

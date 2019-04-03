@@ -6,12 +6,14 @@ class BitcoinRegTestNetTests:XCTestCase {
 
     private var mockNetwork: BitcoinMainNet!
     private var mockValidatorHelper: MockValidatorHelper!
+    private var mockMerkleBranch: MockIMerkleBranch!
 
     override func setUp() {
         super.setUp()
 
         mockValidatorHelper = MockValidatorHelper()
-        mockNetwork = BitcoinMainNet(validatorFactory: mockValidatorHelper.mockFactory)
+        mockMerkleBranch = MockIMerkleBranch()
+        mockNetwork = BitcoinMainNet(validatorFactory: mockValidatorHelper.mockFactory, merkleBranch: mockMerkleBranch)
     }
 
     override func tearDown() {

@@ -3,6 +3,7 @@ import HSCryptoKit
 struct BlockHeader {
 
     let version: Int
+    let headerHash: Data
     let previousBlockHeaderHash: Data
     let merkleRoot: Data
     let timestamp: Int

@@ -26,7 +26,7 @@ class Block: Record {
         timestamp = header.timestamp
         bits = header.bits
         nonce = header.nonce
-        headerHash = CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: header))
+        headerHash = header.headerHash
         headerHashReversedHex = headerHash.reversedHex
         self.height = height
 

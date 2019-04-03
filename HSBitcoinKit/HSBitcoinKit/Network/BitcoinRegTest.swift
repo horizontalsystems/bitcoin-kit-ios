@@ -1,9 +1,7 @@
 import Foundation
 
 class BitcoinRegTest: INetwork {
-    private let headerValidator: IBlockValidator
-
-    let merkleBlockValidator: IMerkleBlockValidator
+//    private let headerValidator: IBlockValidator
 
     let name = "bitcoin-reg-test"
     let pubKeyHash: UInt8 = 0x6f
@@ -31,7 +29,8 @@ class BitcoinRegTest: INetwork {
         return Block(
                 withHeader: BlockHeader(
                         version: 1,
-                        previousBlockHeaderHash: "0000000000000000000000000000000000000000000000000000000000000000".reversedData!,
+                        headerHash: Data(repeating: 0, count: 32),
+                        previousBlockHeaderHash: Data(repeating: 0, count: 32),
                         merkleRoot: "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b".reversedData!,
                         timestamp: 1296688602,
                         bits: 545259519,
@@ -44,7 +43,8 @@ class BitcoinRegTest: INetwork {
         return Block(
                 withHeader: BlockHeader(
                         version: 1,
-                        previousBlockHeaderHash: "0000000000000000000000000000000000000000000000000000000000000000".reversedData!,
+                        headerHash: Data(repeating: 0, count: 32),
+                        previousBlockHeaderHash: Data(repeating: 0, count: 32),
                         merkleRoot: "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b".reversedData!,
                         timestamp: 1296688602,
                         bits: 545259519,
@@ -53,14 +53,12 @@ class BitcoinRegTest: INetwork {
                 height: 0)
     }
 
-    required init(validatorFactory: IBlockValidatorFactory) {
-        headerValidator = validatorFactory.validator(for: .header)
-
-        merkleBlockValidator = MerkleBlockValidator(maxBlockSize: 1_000_000)
+    required init() {
+//        headerValidator = validatorFactory.validator(for: .header)
     }
 
     func validate(block: Block, previousBlock: Block) throws {
-        try headerValidator.validate(candidate: block, block: previousBlock, network: self)
+//        try headerValidator.validate(candidate: block, block: previousBlock, network: self)
     }
 
 }

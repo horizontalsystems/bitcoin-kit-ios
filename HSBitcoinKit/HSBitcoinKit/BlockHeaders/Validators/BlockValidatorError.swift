@@ -6,5 +6,5 @@ enum BlockValidatorError: Error {
     case wrongPreviousHeaderHash
     case notEqualBits
     case notDifficultyTransitionEqualBits
-    case invalidProveOfWork
+    case invalidProofOfWork
 }

@@ -33,7 +33,7 @@ extension Block {
 
     var header: BlockHeader {
         return BlockHeader(
-                version: version, previousBlockHeaderHash: previousBlockHashReversedHex.reversedData!, merkleRoot: merkleRoot,
+                version: version, headerHash: headerHash, previousBlockHeaderHash: previousBlockHashReversedHex.reversedData!, merkleRoot: merkleRoot,
                 timestamp: timestamp, bits: bits, nonce: nonce
         )
     }
@@ -124,15 +124,7 @@ extension Transaction: Equatable {
 extension BlockHeader: Equatable {
 
     public static func ==(lhs: BlockHeader, rhs: BlockHeader) -> Bool {
-        return lhs.previousBlockHeaderHash == rhs.previousBlockHeaderHash && lhs.merkleRoot == rhs.merkleRoot
-    }
-
-}
-
-extension UnspentOutput: Equatable {
-
-    public static func ==(lhs: UnspentOutput, rhs: UnspentOutput) -> Bool {
-        return TransactionOutputSerializer.serialize(output: lhs.output) == TransactionOutputSerializer.serialize(output: rhs.output)
+        return lhs.previousBlockHeaderHash == rhs.previousBlockHeaderHash && lhs.headerHash == rhs.headerHash && lhs.merkleRoot == rhs.merkleRoot
     }
 
 }

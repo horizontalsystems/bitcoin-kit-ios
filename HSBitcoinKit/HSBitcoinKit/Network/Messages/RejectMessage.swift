@@ -2,6 +2,7 @@ import Foundation
 
 /// The reject message is sent when messages are rejected.
 struct RejectMessage: IMessage {
+    let command: String = "reject"
     /// type of message rejected
     let message: VarString
     /// code relating to rejected message
@@ -20,25 +21,5 @@ struct RejectMessage: IMessage {
     /// Currently, all errors which provide this field fill it with the TXID or
     /// block header hash of the object being rejected, so the field is 32 bytes.
     let data: Data
-
-    init(message: VarString, ccode: UInt8, reason: VarString, data: Data) {
-        self.message = message
-        self.ccode = ccode
-        self.reason = reason
-        self.data = data
-    }
-
-    init(data: Data) {
-        let byteStream = ByteStream(data)
-
-        message = byteStream.read(VarString.self)
-        ccode = byteStream.read(UInt8.self)
-        reason = byteStream.read(VarString.self)
-        self.data = Data()
-    }
-
-    func serialized() -> Data {
-        return Data()
-    }
 
 }

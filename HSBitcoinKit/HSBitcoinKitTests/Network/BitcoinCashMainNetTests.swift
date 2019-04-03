@@ -7,18 +7,20 @@ class BitcoinCashMainNetTests: XCTestCase {
     private var mockNetwork: BitcoinCashMainNet!
     private var mockValidatorHelper: MockValidatorHelper!
     private var mockBlockHelper: MockIBlockHelper!
+    private var mockMerkleBranch: MockIMerkleBranch!
 
     override func setUp() {
         super.setUp()
 
         mockValidatorHelper = MockValidatorHelper()
+        mockMerkleBranch = MockIMerkleBranch()
 
         mockBlockHelper = MockIBlockHelper()
         stub(mockBlockHelper) { mock in
             when(mock.medianTimePast(block: any())).thenReturn(0)
             when(mock.previous(for: any(), index: any())).thenReturn(TestData.checkpointBlock)
         }
-        mockNetwork = BitcoinCashMainNet(validatorFactory: mockValidatorHelper.mockFactory, blockHelper: mockBlockHelper)
+        mockNetwork = BitcoinCashMainNet(validatorFactory: mockValidatorHelper.mockFactory, blockHelper: mockBlockHelper, merkleBranch: mockMerkleBranch)
     }
 
     override func tearDown() {

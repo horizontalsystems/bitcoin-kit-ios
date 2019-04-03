@@ -24,6 +24,9 @@ class IPeerTests: XCTestCase {
         mockPeerGroup = MockPeerDelegate()
         mockPeerTask = MockPeerTask()
 
+        stub(mockNetwork) { mock in
+            when(mock.protocolVersion.get).thenReturn(70015)
+        }
         stub(mockPeerTask) { mock in
             when(mock.requester.set(any())).thenDoNothing()
             when(mock.delegate.set(any())).thenDoNothing()

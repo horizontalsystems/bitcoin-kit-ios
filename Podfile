@@ -11,6 +11,8 @@ project 'HSBitcoinKit/HSBitcoinKit'
 
 def internal_pods
   pod 'HSCryptoKit', '~> 1.3.0'
+  pod 'HSCryptoX11', git: 'https://github.com/horizontalsystems/crypto-x11-ios'
+
   pod 'HSHDWalletKit', '~> 1.0.4'
 end
 

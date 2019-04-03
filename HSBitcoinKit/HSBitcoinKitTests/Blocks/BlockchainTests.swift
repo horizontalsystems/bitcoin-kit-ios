@@ -320,7 +320,7 @@ class BlockchainTest: QuickSpec {
         stub(mockStorage) { mock in
             for (height, id) in blocksInChain.sorted(by: { $0.key < $1.key }) {
                 let block = Block(
-                        withHeader: BlockHeader(version: 0, previousBlockHeaderHash: Data(), merkleRoot: Data(), timestamp: height, bits: 0, nonce: 0),
+                        withHeader: BlockHeader(version: 0, headerHash: Data(), previousBlockHeaderHash: Data(), merkleRoot: Data(), timestamp: height, bits: 0, nonce: 0),
                         height: height
                 )
                 block.setHeaderHash(hash: Data(from: id))
@@ -337,7 +337,7 @@ class BlockchainTest: QuickSpec {
 
             for (height, id) in newBlocks.sorted(by: { $0.key < $1.key }) {
                 let block = Block(
-                        withHeader: BlockHeader(version: 0, previousBlockHeaderHash: Data(), merkleRoot: Data(), timestamp: height, bits: 0, nonce: 0),
+                        withHeader: BlockHeader(version: 0, headerHash: Data(), previousBlockHeaderHash: Data(), merkleRoot: Data(), timestamp: height, bits: 0, nonce: 0),
                         height: height
                 )
                 block.setHeaderHash(hash: Data(from: id))
