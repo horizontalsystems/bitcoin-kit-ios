@@ -7,15 +7,13 @@ class Manager {
 
     private let keyWords = "mnemonic_words"
 
-    let coin: BitcoinKit.Coin = .dash(network: .testNet)
-
-    var dashKit: DashKit!
+    var kit: DashKit!
 
     let kitInitializationCompleted = BehaviorSubject<Bool>(value: false)
 
     let balanceSubject = PublishSubject<Int>()
     let lastBlockInfoSubject = PublishSubject<BlockInfo>()
-    let progressSubject = PublishSubject<BitcoinKit.KitState>()
+    let progressSubject = PublishSubject<BitcoinCore.KitState>()
     let transactionsSubject = PublishSubject<Void>()
 
     init() {
@@ -31,7 +29,7 @@ class Manager {
 
     func logout() {
         do {
-            try dashKit.clear()
+            try kit.clear()
         } catch {
             print("WalletKit Clear Error: \(error)")
         }
@@ -39,12 +37,13 @@ class Manager {
         clearWords()
 
         kitInitializationCompleted.onNext(false)
-        dashKit = nil
+        kit = nil
     }
 
     private func initWalletKit(words: [String]) {
-        dashKit = DashKit(withWords: words, coin: self.coin, walletId: "SomeId", newWallet: true, confirmationsThreshold: 1)
-        dashKit.delegate = self
+        kit = try! DashKit(withWords: words, walletId: "SomeId", testMode: true, minLogLevel: .verbose)
+//        dashKit = DashKit(withWords: words, coin: self.coin, walletId: "SomeId", newWallet: true, confirmationsThreshold: 1)
+        kit.delegate = self
 
         kitInitializationCompleted.onNext(true)
     }
@@ -69,11 +68,11 @@ class Manager {
 }
 
 extension Manager: DashKitDelegate {
-    public func transactionsUpdated(BitcoinKit: BitcoinKit, inserted: [TransactionInfo], updated: [TransactionInfo]) {
+    public func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo]) {
         transactionsSubject.onNext(())
     }
 
-    public func balanceUpdated(BitcoinKit: BitcoinKit, balance: Int) {
+    public func balanceUpdated(balance: Int) {
         balanceSubject.onNext(balance)
     }
 
@@ -81,11 +80,11 @@ extension Manager: DashKitDelegate {
         // transactionsSubject.onNext(())
     }
 
-    public func lastBlockInfoUpdated(BitcoinKit: BitcoinKit, lastBlockInfo: BlockInfo) {
+    public func lastBlockInfoUpdated(lastBlockInfo: BlockInfo) {
         lastBlockInfoSubject.onNext(lastBlockInfo)
     }
 
-    public func kitStateUpdated(state: BitcoinKit.KitState) {
+    public func kitStateUpdated(state: BitcoinCore.KitState) {
         progressSubject.onNext(state)
     }
 

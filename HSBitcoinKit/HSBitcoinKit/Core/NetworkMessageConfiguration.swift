@@ -1,4 +1,4 @@
-class BitCoreConfigurator: IBitCoreConfigurator {
+class NetworkMessageConfiguration: IMessageParsersConfigurator {
     private let network: INetwork
 
     init(network: INetwork) {
@@ -31,6 +31,5 @@ class BitCoreConfigurator: IBitCoreConfigurator {
                 .append(element: TransactionMessageSerializer())
                 .append(element: FilterLoadMessageSerializer())
     }
-    let peerTaskHandler: IPeerTaskHandler? = nil
-    let inventoryItemsHandler: IInventoryItemsHandler? = nil
+
 }

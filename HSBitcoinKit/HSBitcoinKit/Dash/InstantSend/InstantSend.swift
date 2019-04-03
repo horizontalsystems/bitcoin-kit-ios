@@ -1,7 +1,4 @@
-struct PeerTaskData {
-    let peer: IPeer
-    let task: PeerTask
-}
+enum DashInventoryType: Int32 { case msgTxLockRequest = 4, msgTxLockVote = 5 }
 
 class InstantSend {
     var successor: IPeerTaskHandler?
@@ -15,31 +12,25 @@ class InstantSend {
 }
 
 extension InstantSend: IPeerTaskHandler {
-    @discardableResult func set(successor: IPeerTaskHandler) -> IPeerTaskHandler {
-        self.successor = successor
-        return self
-    }
 
-    @discardableResult func attach(to element: IPeerTaskHandler) -> IPeerTaskHandler {
-        return element.set(successor: self)
-    }
-
-    func handleCompletedTask(peer: IPeer, task: PeerTask) {
+    func handleCompletedTask(peer: IPeer, task: PeerTask) -> Bool {
         switch task {
         case let task as RequestTransactionLockRequestsTask:
-            print("handle RequestTransactionLock RequestsTask")
             instantTransactionManager.handle(transactions: task.transactions)
-        case let task as RequestTransactionLockVotesTask: task.transactionLockVotes.forEach {
-            print("handle RequestTransactionLockVotes Task")
-            try? instantTransactionManager.handle(lockVote: $0)
-            // что то надо делать
-            // ищем транзакцию среди наших, иначе игнор
-            // проверям что quore мастернода есть и он дуйствующий иначе игнор
-            // Нужен новый параметр
+            return true
 
-            print("AAAAAAA got tx votes : \($0.hash.reversedHex) \($0.outpoint.txHash.hex)-\($0.outpoint.vout)") 
-        }
-        default: successor?.handleCompletedTask(peer: peer, task: task)
+        case let task as RequestTransactionLockVotesTask: task.transactionLockVotes.forEach {
+                try? instantTransactionManager.handle(lockVote: $0)
+                // что то надо делать
+                // ищем транзакцию среди наших, иначе игнор
+                // проверям что quore мастернода есть и он дуйствующий иначе игнор
+                // Нужен новый параметр
+
+                print("AAAAAAA got tx votes : \($0.hash.reversedHex) \($0.outpoint.txHash.hex)-\($0.outpoint.vout)") 
+            }
+            return true
+
+        default: return false
         }
     }
 
@@ -53,21 +44,19 @@ extension InstantSend: IInventoryItemsHandler {
 
         inventoryItems.forEach { item in
             switch item.type {
-            case InventoryType.msgTxLockRequest.rawValue:
+            case DashInventoryType.msgTxLockRequest.rawValue:
                 transactionLockRequests.append(item.hash)
-            case InventoryType.msgTxLockVote.rawValue:
+
+            case DashInventoryType.msgTxLockVote.rawValue:
                 transactionLockVotes.append(item.hash)
+
             default: break
             }
         }
         if !transactionLockRequests.isEmpty {
-            print("add task RequestTransactionLock RequestsTask")
-
             peer.add(task: RequestTransactionLockRequestsTask(hashes: transactionLockRequests))
         }
         if !transactionLockVotes.isEmpty {
-            print("add task RequestTransactionLockVotes Task")
-
             peer.add(task: RequestTransactionLockVotesTask(hashes: transactionLockVotes))
         }
     }

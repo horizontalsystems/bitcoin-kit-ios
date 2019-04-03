@@ -1,9 +1,11 @@
 import Foundation
 
 class BitcoinCashTestNet: INetwork {
-    private let headerValidator: IBlockValidator
+//    private let headerValidator: IBlockValidator
 
     let name = "bitcoin-cash-test-net"
+
+    let maxBlockSize: UInt32 = 32 * 1024 * 1024
     let pubKeyHash: UInt8 = 0x6f
     let privateKey: UInt8 = 0xef
     let scriptHash: UInt8 = 0xc4
@@ -17,8 +19,6 @@ class BitcoinCashTestNet: INetwork {
     let coinType: UInt32 = 1
     let sigHash: SigHashType = .bitcoinCashAll
     var syncableFromApi: Bool = true
-
-    let merkleBlockValidator: IMerkleBlockValidator
 
     let dnsSeeds = [
         "testnet-seed.bitcoinabc.org",
@@ -52,14 +52,12 @@ class BitcoinCashTestNet: INetwork {
                 height: 1287761)
     }
 
-    required init(validatorFactory: IBlockValidatorFactory, merkleBranch: IMerkleBranch) {
-        headerValidator = validatorFactory.validator(for: .header)
-
-        merkleBlockValidator = MerkleBlockValidator(maxBlockSize: 32 * 1024 * 1024, merkleBranch: merkleBranch)
+    required init() {
+//        headerValidator = validatorFactory.validator(for: .header)
     }
 
     func validate(block: Block, previousBlock: Block) throws {
-        try headerValidator.validate(candidate: block, block: previousBlock, network: self)
+//        try headerValidator.validate(candidate: block, block: previousBlock, network: self)
     }
 
 }

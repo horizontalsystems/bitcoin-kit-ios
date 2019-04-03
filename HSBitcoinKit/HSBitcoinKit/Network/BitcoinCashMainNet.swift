@@ -1,16 +1,16 @@
 class BitcoinCashMainNet: INetwork {
     private static let diffDate = 1510600000 //  2017 November 3, 14:06 GMT
 
-    private let headerValidator: IBlockValidator
-    private let legacyDifficultyValidator: IBlockValidator
-    private let dAAValidator: IBlockValidator
-    private let eDAValidator: IBlockValidator
+//    private let headerValidator: IBlockValidator
+//    private let legacyDifficultyValidator: IBlockValidator
+//    private let dAAValidator: IBlockValidator
+//    private let eDAValidator: IBlockValidator
 
-    let merkleBlockValidator: IMerkleBlockValidator
-
-    private let blockHelper: IBlockHelper
+//    private let blockHelper: IBlockHelper
 
     let name = "bitcoin-cash-main-net"
+
+    let maxBlockSize: UInt32 = 32 * 1024 * 1024
     let pubKeyHash: UInt8 = 0x00
     let privateKey: UInt8 = 0x80
     let scriptHash: UInt8 = 0x05
@@ -59,30 +59,28 @@ class BitcoinCashMainNet: INetwork {
 
 //    var targetTimeSpan: Int { return 24 * 60 * 60 }                     // Seconds in Bitcoin cycle
 
-    required init(validatorFactory: IBlockValidatorFactory, blockHelper: IBlockHelper, merkleBranch: IMerkleBranch) {
-        self.blockHelper = blockHelper
-        headerValidator = validatorFactory.validator(for: .header)
-        legacyDifficultyValidator = validatorFactory.validator(for: .legacy)
-        dAAValidator = validatorFactory.validator(for: .DAA)
-        eDAValidator = validatorFactory.validator(for: .EDA)
-
-        merkleBlockValidator = MerkleBlockValidator(maxBlockSize: 32 * 1024 * 1024, merkleBranch: merkleBranch)
+    required init() {
+//        self.blockHelper = blockHelper
+//        headerValidator = validatorFactory.validator(for: .header)
+//        legacyDifficultyValidator = validatorFactory.validator(for: .legacy)
+//        dAAValidator = validatorFactory.validator(for: .DAA)
+//        eDAValidator = validatorFactory.validator(for: .EDA)
     }
 
     func validate(block: Block, previousBlock: Block) throws {
-        try headerValidator.validate(candidate: block, block: previousBlock, network: self)
-        if try blockHelper.medianTimePast(block: block) >= BitcoinCashMainNet.diffDate {            //TODO: change medianTime to number of needed block
-            if blockHelper.previous(for: previousBlock, index: 147) == nil {                        //TODO: Remove trust first 147 block (144 + 3) in bitcoin cash
-                return
-            }
-            try dAAValidator.validate(candidate: block, block: previousBlock, network: self)
-        } else {
-            if isDifficultyTransitionPoint(height: block.height) {
-                try legacyDifficultyValidator.validate(candidate: block, block: previousBlock, network: self)
-            } else {
-                try eDAValidator.validate(candidate: block, block: previousBlock, network: self)
-            }
-        }
+//        try headerValidator.validate(candidate: block, block: previousBlock, network: self)
+//        if try blockHelper.medianTimePast(block: block) >= BitcoinCashMainNet.diffDate {            //TODO: change medianTime to number of needed block
+//            if blockHelper.previous(for: previousBlock, index: 147) == nil {                        //TODO: Remove trust first 147 block (144 + 3) in bitcoin cash
+//                return
+//            }
+//            try dAAValidator.validate(candidate: block, block: previousBlock, network: self)
+//        } else {
+//            if isDifficultyTransitionPoint(height: block.height) {
+//                try legacyDifficultyValidator.validate(candidate: block, block: previousBlock, network: self)
+//            } else {
+//                try eDAValidator.validate(candidate: block, block: previousBlock, network: self)
+//            }
+//        }
     }
 
 }

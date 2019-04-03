@@ -36,7 +36,7 @@ class BalanceController: UIViewController {
     }
 
     func initializeBitcoinKit() {
-        let dashKit = Manager.shared.dashKit!
+        let dashKit = Manager.shared.kit!
 
         update(balance: dashKit.balance)
         update(state: dashKit.syncState)
@@ -73,7 +73,7 @@ class BalanceController: UIViewController {
     @objc func start() {
         DispatchQueue.global(qos: .userInitiated).async {
             do {
-                try Manager.shared.dashKit.start()
+                try Manager.shared.kit.start()
             } catch {
                 print("Start Error: \(error)")
             }
@@ -81,17 +81,17 @@ class BalanceController: UIViewController {
     }
 
     @IBAction func showRealmInfo() {
-        print(Manager.shared.dashKit.debugInfo)
+        print(Manager.shared.kit.debugInfo)
     }
 
     private func update(balance: Int) {
         balanceLabel?.text = "Balance: \(Double(balance) / 100_000_000)"
     }
 
-    private func update(state: BitcoinKit.KitState) {
+    private func update(state: BitcoinCore.KitState) {
         switch state {
         case .synced: progressLabel?.text = "Synced"
-        case let BitcoinKit.KitState.syncing(progress): progressLabel?.text = "Sync Progress: \(Int(progress * 100))%"
+        case let BitcoinCore.KitState.syncing(progress): progressLabel?.text = "Sync Progress: \(Int(progress * 100))%"
         case .notSynced: progressLabel?.text = "Not Synced"
         }
     }

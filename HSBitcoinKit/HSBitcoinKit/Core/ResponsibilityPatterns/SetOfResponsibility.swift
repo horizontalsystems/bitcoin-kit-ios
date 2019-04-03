@@ -1,13 +1,13 @@
 public class SetOfResponsibility<Request, Response> {
-    var list = Dictionary<String, ListElement<Request, Response>>()
+    private var list = Dictionary<String, ListElement<Request, Response>>()
 
     @discardableResult func append(element: ListElement<Request, Response>) -> SetOfResponsibility {
         list[element.id] = element
         return self
     }
 
-    @discardableResult func union(list: Dictionary<String, ListElement<Request, Response>>) -> SetOfResponsibility {
-        self.list.merge(list) { (_, new) in new }
+    @discardableResult func union(_ set: SetOfResponsibility) -> SetOfResponsibility {
+        self.list.merge(set.list) { (_, new) in new }
 
         return self
     }

@@ -26,7 +26,7 @@ class SendController: UIViewController {
         }
         let satoshis = Int(amount * 100_000_000)
 
-        let fee = (try? Manager.shared.dashKit.fee(for: satoshis, toAddress: address, senderPay: true)) ?? 0
+        let fee = (try? Manager.shared.kit.fee(for: satoshis, toAddress: address, senderPay: true)) ?? 0
         feeLabel.text = feePrefix + "\(fee)"
      }
     
@@ -48,7 +48,7 @@ class SendController: UIViewController {
         }
 
         do {
-            try Manager.shared.dashKit.send(to: address, value: Int(amount * 100000000))
+            try Manager.shared.kit.send(to: address, value: Int(amount * 100000000))
 
             addressTextField?.text = ""
             amountTextField?.text = ""

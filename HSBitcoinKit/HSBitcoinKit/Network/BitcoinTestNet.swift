@@ -3,12 +3,10 @@ import Foundation
 class BitcoinTestNet: INetwork {
     private static let testNetDiffDate = 1329264000 // February 16th 2012
 
-    private let headerValidator: IBlockValidator
-    private let bitsValidator: IBlockValidator
-    private let legacyDifficultyValidator: IBlockValidator
-    private let testNetDifficultyValidator: IBlockValidator
-
-    let merkleBlockValidator: IMerkleBlockValidator
+//    private let headerValidator: IBlockValidator
+//    private let bitsValidator: IBlockValidator
+//    private let legacyDifficultyValidator: IBlockValidator
+//    private let testNetDifficultyValidator: IBlockValidator
 
     let name = "bitcoin-test-net"
     let pubKeyHash: UInt8 = 0x6f
@@ -61,26 +59,24 @@ class BitcoinTestNet: INetwork {
                 height: 1479744)
     }
 
-    required init(validatorFactory: IBlockValidatorFactory, merkleBranch: IMerkleBranch) {
-        headerValidator = validatorFactory.validator(for: .header)
-        bitsValidator = validatorFactory.validator(for: .bits)
-        legacyDifficultyValidator = validatorFactory.validator(for: .legacy)
-        testNetDifficultyValidator = validatorFactory.validator(for: .testNet)
-
-        merkleBlockValidator = MerkleBlockValidator(maxBlockSize: 1_000_000, merkleBranch: merkleBranch)
+    required init() {
+//        headerValidator = validatorFactory.validator(for: .header)
+//        bitsValidator = validatorFactory.validator(for: .bits)
+//        legacyDifficultyValidator = validatorFactory.validator(for: .legacy)
+//        testNetDifficultyValidator = validatorFactory.validator(for: .testNet)
     }
 
     func validate(block: Block, previousBlock: Block) throws {
-        try headerValidator.validate(candidate: block, block: previousBlock, network: self)
-        if isDifficultyTransitionPoint(height: block.height) {
-            try legacyDifficultyValidator.validate(candidate: block, block: previousBlock, network: self)
-        } else {
-            if previousBlock.timestamp > BitcoinTestNet.testNetDiffDate {
-                try testNetDifficultyValidator.validate(candidate: block, block: previousBlock, network: self)
-            } else {
-                try bitsValidator.validate(candidate: block, block: previousBlock, network: self)
-            }
-        }
+//        try headerValidator.validate(candidate: block, block: previousBlock, network: self)
+//        if isDifficultyTransitionPoint(height: block.height) {
+//            try legacyDifficultyValidator.validate(candidate: block, block: previousBlock, network: self)
+//        } else {
+//            if previousBlock.timestamp > BitcoinTestNet.testNetDiffDate {
+//                try testNetDifficultyValidator.validate(candidate: block, block: previousBlock, network: self)
+//            } else {
+//                try bitsValidator.validate(candidate: block, block: previousBlock, network: self)
+//            }
+//        }
     }
 
 }

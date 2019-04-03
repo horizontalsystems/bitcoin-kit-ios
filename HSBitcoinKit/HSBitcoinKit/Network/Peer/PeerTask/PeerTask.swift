@@ -41,10 +41,6 @@ class PeerTask {
         return false
     }
 
-    func isRequestingInventory(hash: Data) -> Bool {
-        return false
-    }
-
     func checkTimeout() {
     }
 

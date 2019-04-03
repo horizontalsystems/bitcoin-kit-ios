@@ -8,13 +8,7 @@ class DataProvider {
     private let disposeBag = DisposeBag()
 
     private let storage: IStorage
-    private let addressManager: IAddressManager
-    private let addressConverter: IAddressConverter
-    private let paymentAddressParser: IPaymentAddressParser
     private let unspentOutputProvider: IUnspentOutputProvider
-    private let transactionCreator: ITransactionCreator
-    private let transactionBuilder: ITransactionBuilder
-    private let network: INetwork
 
     private let balanceUpdateSubject = PublishSubject<Void>()
 
@@ -29,15 +23,9 @@ class DataProvider {
 
     weak var delegate: IDataProviderDelegate?
 
-    init(storage: IStorage, addressManager: IAddressManager, addressConverter: IAddressConverter, paymentAddressParser: IPaymentAddressParser, unspentOutputProvider: IUnspentOutputProvider, transactionCreator: ITransactionCreator, transactionBuilder: ITransactionBuilder, network: INetwork, debounceTime: Double = 0.5) {
+    init(storage: IStorage, unspentOutputProvider: IUnspentOutputProvider, debounceTime: Double = 0.5) {
         self.storage = storage
-        self.addressManager = addressManager
-        self.addressConverter = addressConverter
-        self.paymentAddressParser = paymentAddressParser
         self.unspentOutputProvider = unspentOutputProvider
-        self.transactionCreator = transactionCreator
-        self.transactionBuilder = transactionBuilder
-        self.network = network
         self.balance = unspentOutputProvider.balance
         self.lastBlockInfo = storage.lastBlock.map { blockInfo(fromBlock: $0) }
 
@@ -100,7 +88,7 @@ class DataProvider {
         )
     }
 
-    private var feeRate: FeeRate {
+    var feeRate: FeeRate {
         return storage.feeRate ?? FeeRate.defaultFeeRate
     }
 
@@ -155,54 +143,37 @@ extension DataProvider: IDataProvider {
         }
     }
 
-    func send(to address: String, value: Int) throws {
-        try transactionCreator.create(to: address, value: value, feeRate: feeRate.medium, senderPay: true)
-    }
-
-    func parse(paymentAddress: String) -> BitcoinPaymentData {
-        return paymentAddressParser.parse(paymentAddress: paymentAddress)
-    }
-
-    func validate(address: String) throws {
-        _ = try addressConverter.convert(address: address)
-    }
-
-    func fee(for value: Int, toAddress: String? = nil, senderPay: Bool) throws -> Int {
-        return try transactionBuilder.fee(for: value, feeRate: feeRate.medium, senderPay: senderPay, address: toAddress)
-    }
-
-    var receiveAddress: String {
-        return (try? addressManager.receiveAddress()) ?? ""
-    }
-
     var debugInfo: String {
-        var lines = [String]()
-
-        let transactions = storage.transactions(sortedBy: Transaction.Columns.timestamp, secondSortedBy: Transaction.Columns.order, ascending: false)
-        let pubKeys = storage.publicKeys()
-
-        for pubKey in pubKeys {
-            var bechAddress: String?
-            if network is BitcoinCashMainNet || network is BitcoinCashTestNet {
-                bechAddress = try? addressConverter.convert(keyHash: pubKey.keyHash, type: .p2pkh).stringValue
-            } else {
-                bechAddress = try? addressConverter.convert(keyHash: OpCode.scriptWPKH(pubKey.keyHash), type: .p2wpkh).stringValue
-            }
-
-            lines.append("\(pubKey.account) --- \(pubKey.index) --- \(pubKey.external) --- hash: \(pubKey.keyHash.hex) --- p2wkph(SH) hash: \(pubKey.scriptHashForP2WPKH.hex)")
-            lines.append("legacy: \(addressConverter.convertToLegacy(keyHash: pubKey.keyHash, version: network.pubKeyHash, addressType: .pubKeyHash).stringValue) --- bech32: \(bechAddress ?? "none") --- SH(WPKH): \(addressConverter.convertToLegacy(keyHash: pubKey.scriptHashForP2WPKH, version: network.scriptHash, addressType: .scriptHash).stringValue) \n")
-        }
-        lines.append("PUBLIC KEYS COUNT: \(pubKeys.count)")
-        lines.append("TRANSACTIONS COUNT: \(transactions.count)")
-        lines.append("BLOCK COUNT: \(storage.blocksCount)")
-        if let block = storage.firstBlock {
-            lines.append("First Block: \(block.height) --- \(block.headerHashReversedHex)")
-        }
-        if let block = storage.lastBlock {
-            lines.append("Last Block: \(block.height) --- \(block.headerHashReversedHex)")
-        }
-
-        return lines.joined(separator: "\n")
+//        try? addressManager.fillGap()
+//
+//        var lines = [String]()
+//
+//        let transactions = storage.transactions(sortedBy: Transaction.Columns.timestamp, secondSortedBy: Transaction.Columns.order, ascending: false)
+//        let pubKeys = storage.publicKeys()
+//
+//        for pubKey in pubKeys {
+//            var bechAddress: String?
+//            if network is BitcoinCashMainNet || network is BitcoinCashTestNet {
+//                bechAddress = try? addressConverter.convert(keyHash: pubKey.keyHash, type: .p2pkh).stringValue
+//            } else {
+//                bechAddress = try? addressConverter.convert(keyHash: OpCode.scriptWPKH(pubKey.keyHash), type: .p2wpkh).stringValue
+//            }
+//
+//            lines.append("\(pubKey.account) --- \(pubKey.index) --- \(pubKey.external) --- hash: \(pubKey.keyHash.hex) --- p2wkph(SH) hash: \(pubKey.scriptHashForP2WPKH.hex)")
+//            lines.append("legacy: \(addressConverter.convertToLegacy(keyHash: pubKey.keyHash, version: network.pubKeyHash, addressType: .pubKeyHash).stringValue) --- bech32: \(bechAddress ?? "none") --- SH(WPKH): \(addressConverter.convertToLegacy(keyHash: pubKey.scriptHashForP2WPKH, version: network.scriptHash, addressType: .scriptHash).stringValue) \n")
+//        }
+//        lines.append("PUBLIC KEYS COUNT: \(pubKeys.count)")
+//        lines.append("TRANSACTIONS COUNT: \(transactions.count)")
+//        lines.append("BLOCK COUNT: \(storage.blocksCount)")
+//        if let block = storage.firstBlock {
+//            lines.append("First Block: \(block.height) --- \(block.headerHashReversedHex)")
+//        }
+//        if let block = storage.lastBlock {
+//            lines.append("Last Block: \(block.height) --- \(block.headerHashReversedHex)")
+//        }
+//
+//        return lines.joined(separator: "\n")
+        return "debug"
     }
 
 }

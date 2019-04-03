@@ -4,11 +4,14 @@ typealias MessageParsers = SetOfResponsibility<Data, IMessage>
 
 class NetworkMessageParser: INetworkMessageParser {
     private let magic: UInt32
-    var messageParsers: MessageParsers
+    var messageParsers = MessageParsers()
 
-    init(magic: UInt32, messageParsers: MessageParsers) {
+    init(magic: UInt32) {
         self.magic = magic
-        self.messageParsers = messageParsers
+    }
+
+    func add(chain element: MessageParsers) {
+        messageParsers.union(element)
     }
 
     func parse(data: Data) -> NetworkMessage? {

@@ -2,10 +2,6 @@ import Foundation
 
 class PeerManager: IPeerManager {
     private var peers: [IPeer] = []
-    var syncPeer: IPeer?
-
-    init() {
-    }
 
     func add(peer: IPeer) {
         self.peers.append(peer)
@@ -49,7 +45,4 @@ class PeerManager: IPeerManager {
         return peers.first(where: { $0.connected && !$0.synced })
     }
 
-    func syncPeerIs(peer: IPeer) -> Bool {
-        return peer.equalTo(syncPeer)
-    }
 }

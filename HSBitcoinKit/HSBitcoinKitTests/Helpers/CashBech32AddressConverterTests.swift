@@ -97,8 +97,8 @@ class CashBech32AddressConverterTests: XCTestCase {
         do {
             let _ = try cashBech32Converter.convert(prefix: prefix, address: address)
             XCTFail("No error found!")
-        } catch let error as AddressConverter.ConversionError {
-            XCTAssertEqual(error, AddressConverter.ConversionError.unknownAddressType)
+        } catch let error as AddressConverterChain.ConversionError {
+            XCTAssertEqual(error, AddressConverterChain.ConversionError.unknownAddressType)
         } catch {
             XCTFail("Wrong \(error) exception")
         }
@@ -109,7 +109,7 @@ class CashBech32AddressConverterTests: XCTestCase {
         //Encode
         let data = Data(hex: hex)!
         do {
-            let address = try cashBech32Converter.convert(prefix: prefix, keyData: data, scriptType: scriptType)
+            let address = try cashBech32Converter.convert(prefix: prefix, keyHash: data, type: scriptType)
             XCTAssertEqual(address.scriptType, scriptType)
             XCTAssertEqual(address.keyHash, data)
             XCTAssertEqual(address.stringValue, cashBech32)

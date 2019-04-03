@@ -2,14 +2,11 @@ import Foundation
 import HSCryptoX11
 
 class DashTestNet: INetwork {
-    private let headerValidator: IBlockValidator
-    private let difficultyValidator: IBlockValidator
-    private let blockHelper: IBlockHelper
-
-    let merkleBlockValidator: IMerkleBlockValidator
     let protocolVersion: Int32 = 70213
 
     let name = "dash-main-net"
+
+    let maxBlockSize: UInt32 = 1_000_000_000
     let pubKeyHash: UInt8 = 0x8c
     let privateKey: UInt8 = 0x80
     let scriptHash: UInt8 = 0x13
@@ -60,21 +57,19 @@ class DashTestNet: INetwork {
                 ),
                 height: 55032)
     }
-    required init(validatorFactory: IBlockValidatorFactory, blockHelper: IBlockHelper, merkleBranch: IMerkleBranch) {
-        self.blockHelper = blockHelper
-
-        headerValidator = validatorFactory.validator(for: .header)
-        difficultyValidator = validatorFactory.validator(for: .DGW)
-
-        merkleBlockValidator = MerkleBlockValidator(maxBlockSize: 1_000_000_000, merkleBranch: merkleBranch)
+    required init() {
+//        self.blockHelper = blockHelper
+//
+//        headerValidator = validatorFactory.validator(for: .header)
+//        difficultyValidator = validatorFactory.validator(for: .DGW)
     }
 
     func validate(block: Block, previousBlock: Block) throws {
-        try headerValidator.validate(candidate: block, block: previousBlock, network: self)
-        if blockHelper.previous(for: previousBlock, index: 24) == nil {                        //TODO: Remove trust first 24 block  in dash
-            return
-        }
-        try difficultyValidator.validate(candidate: block, block: previousBlock, network: self)
+//        try headerValidator.validate(candidate: block, block: previousBlock, network: self)
+//        if blockHelper.previous(for: previousBlock, index: 24) == nil {                        //TODO: Remove trust first 24 block  in dash
+//            return
+//        }
+//        try difficultyValidator.validate(candidate: block, block: previousBlock, network: self)
     }
 
     func generateBlockHeaderHash(from data: Data) -> Data {

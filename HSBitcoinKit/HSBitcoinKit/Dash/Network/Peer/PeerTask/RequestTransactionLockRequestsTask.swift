@@ -10,7 +10,7 @@ class RequestTransactionLockRequestsTask: PeerTask {
     }
 
     override func start() {
-        requester?.getData(items: hashes.map { hash in InventoryItem(type: InventoryType.msgTxLockRequest.rawValue, hash: hash) })
+        requester?.getData(items: hashes.map { hash in InventoryItem(type: DashInventoryType.msgTxLockRequest.rawValue, hash: hash) })
         resetTimer()
     }
 

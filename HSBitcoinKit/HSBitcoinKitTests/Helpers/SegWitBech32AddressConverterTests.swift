@@ -66,8 +66,8 @@ class SegWitBech32AddressConverterTests: XCTestCase {
     func checkError(prefix: String, address: String) {
         do {
             let _ = try segWitBech32Converter.convert(prefix: prefix, address: address)
-        } catch let error as AddressConverter.ConversionError {
-            XCTAssertEqual(error, AddressConverter.ConversionError.unknownAddressType)
+        } catch let error as AddressConverterChain.ConversionError {
+            XCTAssertEqual(error, AddressConverterChain.ConversionError.unknownAddressType)
         } catch {
             XCTFail("Wrong \(error) exception")
         }

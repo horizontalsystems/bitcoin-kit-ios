@@ -7,22 +7,10 @@ class IpfsApi {
     private let apiKey = "Qmd4Gv2YVPqs6dmSy1XEq7pQRSgLihqYKL2JjK7DMUFPVz"
 
     private let apiManager: ApiManager
+    private let resource: String
 
-    private var coinType: String
-    private let networkType: String
-
-    init(network: INetwork, apiProvider: IApiConfigProvider, logger: Logger? = nil) {
-        switch network {
-        case is BitcoinCashMainNet, is BitcoinCashTestNet: coinType = "BCH"
-        case is DashMainNet, is DashTestNet: coinType = "DASH"
-        default: coinType = "BTC"
-        }
-
-        switch network {
-        case is BitcoinTestNet, is BitcoinCashTestNet, is DashTestNet: networkType = "testnet"
-        default: networkType = ""
-        }
-
+    init(resource: String, apiProvider: IApiConfigProvider, logger: Logger? = nil) {
+        self.resource = resource
         apiManager = ApiManager(apiUrl: apiProvider.apiUrl + "/\(apiKey)", logger: logger)
     }
 
@@ -31,7 +19,7 @@ class IpfsApi {
 extension IpfsApi: IFeeRateApi {
 
     func getFeeRate() -> Observable<FeeRate> {
-        return apiManager.observable(forRequest: apiManager.request(withMethod: .get, path: "/io-hs/data/blockchain/\(coinType)/\(networkType)/estimatefee/index.json"))
+        return apiManager.observable(forRequest: apiManager.request(withMethod: .get, path: "/io-hs/data/blockchain/\(resource)/estimatefee/index.json"))
     }
 
 }

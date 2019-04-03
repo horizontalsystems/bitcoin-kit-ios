@@ -34,14 +34,14 @@ class MerkleBranch: IMerkleBranch {
         // Verify that all bits and hashes were consumed
         //
         if (bitsUsed + 7) / 8 != flags.count {
-            throw MerkleBlockValidator.ValidationError.unnecessaryBits
+            throw BitcoinCoreErrors.MerkleBlockValidation.unnecessaryBits
         }
         return (merkleRoot: merkleRoot, matchedHashes: matchedHashes)
     }
 
     private func parseBranch(height: Int, pos: Int, matchedHashes: inout [Data]) throws -> Data {
         if bitsUsed >= flags.count * 8 {
-            throw MerkleBlockValidator.ValidationError.notEnoughBits
+            throw BitcoinCoreErrors.MerkleBlockValidation.notEnoughBits
         }
         bitsUsed += 1
         let parentOfMatch = checkBitLE(data: flags, index: bitsUsed - 1)
@@ -52,7 +52,7 @@ class MerkleBranch: IMerkleBranch {
             //
             guard hashesUsed < hashes.count else {
                 // overflowed the hash array - failure
-                throw MerkleBlockValidator.ValidationError.notEnoughHashes
+                throw BitcoinCoreErrors.MerkleBlockValidation.notEnoughHashes
             }
             if height == 0, parentOfMatch {
                 matchedHashes.append(hashes[hashesUsed])

@@ -23,10 +23,13 @@ class Peer {
     private let queue: DispatchQueue
     private let network: INetwork
 
+    private let merkleBlockValidator: IMerkleBlockValidator
+
     private let logger: Logger?
 
     var announcedLastBlockHeight: Int32 = 0
     var localBestBlockHeight: Int32 = 0
+    // TODO seems like property connected is not needed. It is always true in PeerManager. Need to check it and remove
     var connected: Bool = false
     var blockHashesSynced: Bool = false
     var synced: Bool = false
@@ -43,12 +46,13 @@ class Peer {
         return connection.logName
     }
 
-    init(host: String, network: INetwork, connection: IPeerConnection, connectionTimeoutManager: IConnectionTimeoutManager, queue: DispatchQueue? = nil, logger: Logger? = nil) {
+    init(host: String, network: INetwork, connection: IPeerConnection, connectionTimeoutManager: IConnectionTimeoutManager, merkleBlockValidator: IMerkleBlockValidator, queue: DispatchQueue? = nil, logger: Logger? = nil) {
         self.protocolVersion = network.protocolVersion
         self.connection = connection
         self.connectionTimeoutManager = connectionTimeoutManager
         self.network = network
 
+        self.merkleBlockValidator = merkleBlockValidator
         self.logger = logger
 
         if let queue = queue {
@@ -192,7 +196,7 @@ class Peer {
     private func handle(message: MerkleBlockMessage) throws {
         log("<-- MERKLEBLOCK: \(CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: message.blockHeader)).reversedHex)")
 
-        let merkleBlock = try network.merkleBlockValidator.merkleBlock(from: message)
+        let merkleBlock = try merkleBlockValidator.merkleBlock(from: message)
 
         for task in tasks {
             if task.handle(merkleBlock: merkleBlock) {
@@ -260,15 +264,6 @@ extension Peer: IPeer {
         task.requester = self
 
         task.start()
-    }
-
-    func isRequestingInventory(hash: Data) -> Bool {
-        for task in tasks {
-            if task.isRequestingInventory(hash: hash) {
-                return true
-            }
-        }
-        return false
     }
 
     func filterLoad(bloomFilter: BloomFilter) {
@@ -362,10 +357,6 @@ extension Peer: IPeerTaskDelegate {
     func handle(failedTask task: PeerTask, error: Error) {
         log("Handling failed task: \(type(of: task))")
         disconnect(error: error)
-    }
-
-    func handle(merkleBlock: MerkleBlock) {
-        delegate?.handle(self, merkleBlock: merkleBlock)
     }
 
 }

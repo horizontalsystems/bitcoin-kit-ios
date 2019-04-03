@@ -9,7 +9,7 @@ class TransactionCell: UITableViewCell {
         super.awakeFromNib()
     }
 
-    func bind(transaction: TransactionInfo, lastBlockHeight: Int) {
+    func bind(transaction: TransactionInfo, lastBlockHeight: Int, index: Int) {
         let fromAddress = transaction.from
                 .map { from in
                     from.mine ? "\(from.address) (mine)" : from.address
@@ -25,6 +25,7 @@ class TransactionCell: UITableViewCell {
         let amount = Double(transaction.amount) / 100_000_000
 
         infoLabel?.text =
+                "Index: \(index)\n" +
                 "Amount: \(amount)\n" +
                 "Date: \(Date(timeIntervalSince1970: Double(transaction.timestamp)))\n" +
                 "Tx Hash: \(transaction.transactionHash.prefix(10))...\n" +

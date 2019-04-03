@@ -4,11 +4,14 @@ typealias MessageSerializers = SetOfResponsibility<IMessage, Data>
 
 class NetworkMessageSerializer: INetworkMessageSerializer {
     let magic: UInt32
-    var messageSerializers: MessageSerializers
+    var messageSerializers = MessageSerializers()
 
-    init(magic: UInt32, messageSerializers: MessageSerializers) {
+    init(magic: UInt32) {
         self.magic = magic
-        self.messageSerializers = messageSerializers
+    }
+
+    func add(chain element: MessageSerializers) {
+        messageSerializers.union(element)
     }
 
     func serialize(message: IMessage) -> Data? {

@@ -3,7 +3,7 @@ class BloomFilterManager {
 
     private let storage: IStorage
     private let factory: IFactory
-    weak var delegate: BloomFilterManagerDelegate?
+    weak var delegate: IBloomFilterManagerDelegate?
 
     var bloomFilter: BloomFilter?
 

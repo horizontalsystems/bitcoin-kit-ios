@@ -24,16 +24,7 @@ class MasternodeListSyncer: IMasternodeListSyncer {
 
 extension MasternodeListSyncer: IPeerTaskHandler {
 
-    @discardableResult func set(successor: IPeerTaskHandler) -> IPeerTaskHandler {
-        self.successor = successor
-        return self
-    }
-
-    @discardableResult func attach(to element: IPeerTaskHandler) -> IPeerTaskHandler {
-        return element.set(successor: self)
-    }
-
-    func handleCompletedTask(peer: IPeer, task: PeerTask) {
+    func handleCompletedTask(peer: IPeer, task: PeerTask) -> Bool {
         switch task {
         case let listDiffTask as RequestMasternodeListDiffTask:
             if let message = listDiffTask.masternodeListDiffMessage {
@@ -45,7 +36,8 @@ extension MasternodeListSyncer: IPeerTaskHandler {
                     addTask(baseBlockHash: message.baseBlockHash, blockHash: message.blockHash)
                 }
             }
-        default: successor?.handleCompletedTask(peer: peer, task: task)
+            return true
+        default: return false
         }
     }
 

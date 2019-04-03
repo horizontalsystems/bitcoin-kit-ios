@@ -5,12 +5,12 @@ class TransactionCreator {
 
     private let transactionBuilder: ITransactionBuilder
     private let transactionProcessor: ITransactionProcessor
-    private let peerGroup: IPeerGroup
+    private let transactionSender: ITransactionSender
 
-    init(transactionBuilder: ITransactionBuilder, transactionProcessor: ITransactionProcessor, peerGroup: IPeerGroup) {
+    init(transactionBuilder: ITransactionBuilder, transactionProcessor: ITransactionProcessor, transactionSender: ITransactionSender) {
         self.transactionBuilder = transactionBuilder
         self.transactionProcessor = transactionProcessor
-        self.peerGroup = peerGroup
+        self.transactionSender = transactionSender
     }
 
 }
@@ -18,12 +18,12 @@ class TransactionCreator {
 extension TransactionCreator: ITransactionCreator {
 
     func create(to address: String, value: Int, feeRate: Int, senderPay: Bool) throws {
-        try peerGroup.checkPeersSynced()
+        try transactionSender.canSendTransaction()
 
         let transaction = try transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: senderPay, toAddress: address)
 
         try transactionProcessor.processCreated(transaction: transaction)
-        try peerGroup.sendPendingTransactions()
+        transactionSender.sendPendingTransactions()
     }
 
 }

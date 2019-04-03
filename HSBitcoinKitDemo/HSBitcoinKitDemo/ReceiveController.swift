@@ -9,7 +9,7 @@ class ReceiveController: UIViewController {
 
         title = "Receive"
 
-        addressLabel?.text = Manager.shared.dashKit.receiveAddress
+        addressLabel?.text = Manager.shared.kit.receiveAddress
     }
 
     @IBAction func copyToClipboard() {

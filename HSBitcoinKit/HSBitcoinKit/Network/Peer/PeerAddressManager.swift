@@ -2,14 +2,14 @@ class PeerAddressManager {
     weak var delegate: IPeerAddressManagerDelegate?
 
     private let storage: IStorage
-    private let network: INetwork
+    private let dnsSeeds: [String]
     private var peerDiscovery: IPeerDiscovery
     private let state: PeerAddressManagerState
     private let logger: Logger?
 
-    init(storage: IStorage, network: INetwork, peerDiscovery: IPeerDiscovery, state: PeerAddressManagerState = PeerAddressManagerState(), logger: Logger? = nil) {
+    init(storage: IStorage, dnsSeeds: [String], peerDiscovery: IPeerDiscovery, state: PeerAddressManagerState = PeerAddressManagerState(), logger: Logger? = nil) {
         self.storage = storage
-        self.network = network
+        self.dnsSeeds = dnsSeeds
         self.peerDiscovery = peerDiscovery
         self.state = state
         self.logger = logger
@@ -21,7 +21,7 @@ extension PeerAddressManager: IPeerAddressManager {
 
     var ip: String? {
         guard let ip = storage.leastScorePeerAddress(excludingIps: state.usedIps)?.ip else {
-            for dnsSeed in network.dnsSeeds {
+            for dnsSeed in dnsSeeds {
                 peerDiscovery.lookup(dnsSeed: dnsSeed)
             }
 

@@ -1,9 +1,7 @@
 import Foundation
 
 class BitcoinRegTest: INetwork {
-    private let headerValidator: IBlockValidator
-
-    let merkleBlockValidator: IMerkleBlockValidator
+//    private let headerValidator: IBlockValidator
 
     let name = "bitcoin-reg-test"
     let pubKeyHash: UInt8 = 0x6f
@@ -55,14 +53,12 @@ class BitcoinRegTest: INetwork {
                 height: 0)
     }
 
-    required init(validatorFactory: IBlockValidatorFactory, merkleBranch: IMerkleBranch) {
-        headerValidator = validatorFactory.validator(for: .header)
-
-        merkleBlockValidator = MerkleBlockValidator(maxBlockSize: 1_000_000, merkleBranch: merkleBranch)
+    required init() {
+//        headerValidator = validatorFactory.validator(for: .header)
     }
 
     func validate(block: Block, previousBlock: Block) throws {
-        try headerValidator.validate(candidate: block, block: previousBlock, network: self)
+//        try headerValidator.validate(candidate: block, block: previousBlock, network: self)
     }
 
 }
