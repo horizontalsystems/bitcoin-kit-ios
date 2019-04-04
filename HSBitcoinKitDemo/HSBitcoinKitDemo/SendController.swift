@@ -1,5 +1,6 @@
 import UIKit
 import RxSwift
+import HSBitcoinKit
 
 class SendController: UIViewController {
     let feePrefix = "Fee: "
@@ -8,6 +9,9 @@ class SendController: UIViewController {
     @IBOutlet weak var addressTextField: UITextField?
     @IBOutlet weak var amountTextField: UITextField?
     @IBOutlet weak var feeLabel: UILabel!
+    @IBOutlet weak var feeRateTextField: UITextField!
+    
+    var priority = FeePriority.medium
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -15,21 +19,25 @@ class SendController: UIViewController {
         title = "Send"
         feeLabel.text = feePrefix
     }
-    
+
     @IBAction func amountTextFieldChanged(_ sender: Any) {
+        changeFee()
+    }
+
+    private func changeFee() {
         guard let address = addressTextField?.text, !address.isEmpty else {
             return
         }
-        
+
         guard let amountString = amountTextField?.text, let amount = Double(amountString) else {
             return
         }
         let satoshis = Int(amount * 100_000_000)
 
-        let fee = (try? Manager.shared.kit.fee(for: satoshis, toAddress: address, senderPay: true)) ?? 0
+        let fee = (try? Manager.shared.kit.fee(for: satoshis, toAddress: address, senderPay: true, feePriority: priority)) ?? 0
         feeLabel.text = feePrefix + "\(fee)"
-     }
-    
+    }
+
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesEnded(touches, with: event)
 
@@ -48,7 +56,7 @@ class SendController: UIViewController {
         }
 
         do {
-            try Manager.shared.kit.send(to: address, value: Int(amount * 100000000))
+            try Manager.shared.kit.send(to: address, value: Int(amount * 100000000), feePriority: priority)
 
             addressTextField?.text = ""
             amountTextField?.text = ""
@@ -58,6 +66,36 @@ class SendController: UIViewController {
             present(alert, animated: true)
         } catch {
             show(error: "\(error)")
+        }
+    }
+    
+    @IBAction func changePriority(_ sender: UISegmentedControl) {
+        feeRateTextField.isHidden = true
+        
+        switch sender.selectedSegmentIndex {
+        case 0: priority = .lowest
+        case 1: priority = .low
+        case 2: priority = .medium
+        case 3: priority = .high
+        case 4: priority = .highest
+        case 5:
+            feeRateTextField.isHidden = false
+            fillPriority(with: feeRateTextField.text)
+        default: priority = .medium
+        }
+        changeFee()
+    }
+    
+    @IBAction func changeFeeRate(_ sender: UITextField) {
+        fillPriority(with: sender.text)
+        changeFee()
+    }
+
+    func fillPriority(with text: String?) {
+        if let feeRate = Int(text ?? "") {
+            priority = .custom(feeRate: feeRate)
+        } else  {
+            priority = .medium
         }
     }
 

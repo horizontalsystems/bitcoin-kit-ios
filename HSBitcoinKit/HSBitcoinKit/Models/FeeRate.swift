@@ -2,44 +2,36 @@ import Foundation
 import GRDB
 import ObjectMapper
 
-class FeeRate: Record, ImmutableMappable {
-    static let defaultFeeRate = FeeRate(
-            lowPriority: Decimal(string: "0.00022145")!,
-            mediumPriority: Decimal(string: "0.00043533")!,
-            highPriority: Decimal(string: "0.00083319")!,
-            date: Date(timeIntervalSince1970: 1543211299660)
-    ) // real main-net feeRate for kB at 26 november
+public enum FeePriority {
+    case lowest
+    case low
+    case medium
+    case high
+    case highest
+    case custom(feeRate: Int)
+}
+
+class FeeRate: Record {
+    static let defaultFeeRate: FeeRate = FeeRate(low: 21, medium: 42, high: 81, date: Date(timeIntervalSince1970: 1543211299660))
 
     private static let primaryKey = "primaryKey"
 
     private let primaryKey: String = FeeRate.primaryKey
 
-    private let lowPriority: Decimal
-    private let mediumPriority: Decimal
-    private let highPriority: Decimal
-    private let date: Date
-
-    init(lowPriority: Decimal, mediumPriority: Decimal, highPriority: Decimal, date: Date) {
-        self.lowPriority = lowPriority
-        self.mediumPriority = mediumPriority
-        self.highPriority = highPriority
+    init(low: Int, medium: Int, high: Int, date: Date) {
+        self.low = low
+        self.medium = medium
+        self.high = high
         self.date = date
 
         super.init()
     }
 
-    var low: Int { return valueInSatoshi(value: lowPriority) }
-    var medium: Int { return valueInSatoshi(value: mediumPriority) }
-    var high: Int { return valueInSatoshi(value: highPriority) }
+    let low: Int
+    let medium: Int
+    let high: Int
 
-    private func valueInSatoshi(value: Decimal) -> Int {
-        let convertedValue = value * 100_000_000 / 1024
-
-        let handler = NSDecimalNumberHandler(roundingMode: .plain, scale: 0, raiseOnExactness: false, raiseOnOverflow: false, raiseOnUnderflow: false, raiseOnDivideByZero: false)
-        let intValue = NSDecimalNumber(decimal: convertedValue).rounding(accordingToBehavior: handler).intValue
-
-        return max(intValue, 1)
-    }
+    let date: Date
 
     override class var databaseTableName: String {
         return "feeRates"
@@ -54,9 +46,9 @@ class FeeRate: Record, ImmutableMappable {
     }
 
     required init(row: Row) {
-        lowPriority = Decimal(string: row[Columns.lowPriority]) ?? 0
-        mediumPriority = Decimal(string: row[Columns.mediumPriority]) ?? 0
-        highPriority = Decimal(string: row[Columns.highPriority]) ?? 0
+        low = row[Columns.lowPriority]
+        medium = row[Columns.mediumPriority]
+        high = row[Columns.highPriority]
         date = row[Columns.date]
 
         super.init(row: row)
@@ -64,25 +56,10 @@ class FeeRate: Record, ImmutableMappable {
 
     override func encode(to container: inout PersistenceContainer) {
         container[Columns.primaryKey] = primaryKey
-        container[Columns.lowPriority] = NSDecimalNumber(decimal: lowPriority).stringValue
-        container[Columns.mediumPriority] = NSDecimalNumber(decimal: mediumPriority).stringValue
-        container[Columns.highPriority] = NSDecimalNumber(decimal: highPriority).stringValue
+        container[Columns.lowPriority] = low
+        container[Columns.mediumPriority] = medium
+        container[Columns.highPriority] = high
         container[Columns.date] = date
     }
-
-    required init(map: Map) throws {
-        lowPriority = try map.value("low_priority", using: FeeRate.decimalTransform)
-        mediumPriority = try map.value("medium_priority", using: FeeRate.decimalTransform)
-        highPriority = try map.value("high_priority", using: FeeRate.decimalTransform)
-        date = try map.value("date", using: DateTransform(unit: .milliseconds))
-
-        super.init()
-    }
-
-    private static let decimalTransform = TransformOf<Decimal, String>(fromJSON: { (value: String?) -> Decimal? in
-        return value.flatMap { Decimal(string: $0) }
-    }, toJSON: { (value: Decimal?) -> String? in
-        return value.map { NSDecimalNumber(decimal: $0).stringValue }
-    })
 
 }
