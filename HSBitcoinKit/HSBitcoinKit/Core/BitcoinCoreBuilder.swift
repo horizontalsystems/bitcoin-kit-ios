@@ -131,7 +131,7 @@ class BitcoinCoreBuilder {
 
         let factory = Factory(network: network, networkMessageParser: networkMessageParser, networkMessageSerializer: networkMessageSerializer, merkleBlockValidator: merkleBlockValidator)
 
-        let addressManager = AddressManager(storage: storage, hdWallet: hdWallet, addressConverter: addressConverter)
+        let addressManager = AddressManager.instance(storage: storage, hdWallet: hdWallet, addressConverter: addressConverter)
 
         let transactionLinker = TransactionLinker(storage: storage)
         let scriptConverter = ScriptConverter()
