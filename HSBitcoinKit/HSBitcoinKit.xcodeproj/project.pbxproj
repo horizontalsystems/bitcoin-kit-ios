@@ -1879,7 +1879,6 @@
 				58AAAB436CF3BC02B5BE9222 /* BitcoinCore.swift in Sources */,
 				58AAAE3ED33146222CCB9503 /* BitcoinCoreBuilder.swift in Sources */,
 				58AAA3570F85F5A72E2377DB /* InventoryItemsHandlerChain.swift in Sources */,
-				58AAA00CD18131DDDAD8B9D8,
 				58AAA29706D539111A919497 /* AbstractKit.swift in Sources */,
 				58AAA6DBA7D2439C4D5808B6 /* Base58AddressConverter.swift in Sources */,
 				58AAA4863F1D253D7D690972 /* BitcoinCoreErrors.swift in Sources */,
