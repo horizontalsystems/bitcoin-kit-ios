@@ -90,6 +90,30 @@ class PeerManagerTests:XCTestCase {
         XCTAssertEqual(manager.syncPeerIs(peer: peer), false)
     }
 
+    func testHalfIsSynced() {
+        let _ = addPeer(host: "0", connected: true, synced: true)
+        let _ = addPeer(host: "1", connected: true, synced: true)
+        let _ = addPeer(host: "2", connected: false, synced: false)
+        let _ = addPeer(host: "3", connected: false, synced: true)
+
+        XCTAssertEqual(manager.halfIsSynced(), true)
+    }
+
+    func testHalfIsSynced_MoreThanHalf() {
+        let _ = addPeer(host: "0", connected: true, synced: true)
+
+        XCTAssertEqual(manager.halfIsSynced(), true)
+    }
+
+    func testHalfIsSynced_LessThanHalf() {
+        print("ere")
+        let _ = addPeer(host: "0", connected: true, synced: true)
+        let _ = addPeer(host: "1", connected: true, synced: false)
+        let _ = addPeer(host: "2", connected: false, synced: false)
+        let _ = addPeer(host: "3", connected: false, synced: true)
+
+        XCTAssertEqual(manager.halfIsSynced(), false)
+    }
 
     private func addPeer(host: String, ready: Bool = false, connected: Bool = false, synced: Bool = false) -> MockIPeer {
         let peer = MockIPeer()

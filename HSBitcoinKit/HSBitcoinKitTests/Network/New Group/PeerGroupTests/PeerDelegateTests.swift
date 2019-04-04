@@ -77,7 +77,7 @@ class PeerDelegateTests: PeerGroupTests {
         verify(mockBlockSyncer, never()).downloadCompleted()
     }
 
-    func testPeerReady_PeerIsSyncNotPeer() {
+    func testPeerReady_NoSyncPeer() {
         let peer = peers["0"]!
 
         stub(mockPeerManager) { mock in
@@ -87,8 +87,23 @@ class PeerDelegateTests: PeerGroupTests {
         delegate.peerReady(peer)
         waitForMainQueue()
 
-        verify(peer, never()).add(task: any())
-        verify(mockBlockSyncer, never()).downloadCompleted()
+        verifyNoMoreInteractions(mockBlockSyncer)
+    }
+
+    func testPeerReady_PeerIsNotSyncPeer() {
+        let peer = peers["0"]!
+
+        stub(mockPeerManager) { mock in
+            when(mock.syncPeer.get).thenReturn(peers["1"])
+        }
+        stub(peers["1"]!) { mock in
+            when(mock.ready.get).thenReturn(true)
+        }
+
+        delegate.peerReady(peer)
+        waitForMainQueue()
+
+        verifyNoMoreInteractions(mockBlockSyncer)
     }
 
     func testPeerReady_PeerNotReady() {
@@ -316,7 +331,7 @@ class PeerDelegateTests: PeerGroupTests {
         verify(mockTransactionSyncer, never()).pendingTransactions()
     }
 
-    func testPeerDidConnect_NoNonSyncPeer() {
+    func testPeerDidConnect_HalfOfPeersSynced() {
         let peer = peers["0"]!
 
         stub(mockBloomFilterManager) { mock in
@@ -326,7 +341,7 @@ class PeerDelegateTests: PeerGroupTests {
             when(mock.syncPeer.get).thenReturn(nil)
             when(mock.connected()).thenReturn([peer])
             when(mock.someReadyPeers()).thenReturn([peer])
-            when(mock.nonSyncedPeer()).thenReturn(nil)
+            when(mock.halfIsSynced()).thenReturn(true)
         }
 
         delegate.peerDidConnect(peer)

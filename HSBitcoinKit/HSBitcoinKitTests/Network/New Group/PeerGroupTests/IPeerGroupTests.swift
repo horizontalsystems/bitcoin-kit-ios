@@ -131,7 +131,7 @@ class IPeerGroupTests: PeerGroupTests {
         }
         stub(mockPeerManager) { mock in
             when(mock.connected()).thenReturn([peer])
-            when(mock.nonSyncedPeer()).thenReturn(nil)
+            when(mock.halfIsSynced()).thenReturn(true)
             when(mock.someReadyPeers()).thenReturn([peer])
         }
 
@@ -150,7 +150,7 @@ class IPeerGroupTests: PeerGroupTests {
         }
         stub(mockPeerManager) { mock in
             when(mock.connected()).thenReturn([])
-            when(mock.nonSyncedPeer()).thenReturn(nil)
+            when(mock.halfIsSynced()).thenReturn(true)
             when(mock.someReadyPeers()).thenReturn([peer])
         }
 
@@ -167,7 +167,7 @@ class IPeerGroupTests: PeerGroupTests {
         verify(peer, never()).add(task: any())
     }
 
-    func testSendPendingTransactions_PeersAreNotSynced() {
+    func testSendPendingTransactions_MajorityOfPeersAreNotSynced() {
         let transaction = TestData.p2pkTransaction
         let peer = peers["0"]!
 
@@ -176,7 +176,7 @@ class IPeerGroupTests: PeerGroupTests {
         }
         stub(mockPeerManager) { mock in
             when(mock.connected()).thenReturn([peer])
-            when(mock.nonSyncedPeer()).thenReturn(peer)
+            when(mock.halfIsSynced()).thenReturn(false)
             when(mock.someReadyPeers()).thenReturn([peer])
         }
 
@@ -202,7 +202,7 @@ class IPeerGroupTests: PeerGroupTests {
         }
         stub(mockPeerManager) { mock in
             when(mock.connected()).thenReturn([peer])
-            when(mock.nonSyncedPeer()).thenReturn(nil)
+            when(mock.halfIsSynced()).thenReturn(true)
             when(mock.someReadyPeers()).thenReturn([])
         }
 
@@ -221,7 +221,7 @@ class IPeerGroupTests: PeerGroupTests {
         }
         stub(mockPeerManager) { mock in
             when(mock.connected()).thenReturn([peer])
-            when(mock.nonSyncedPeer()).thenReturn(nil)
+            when(mock.halfIsSynced()).thenReturn(true)
             when(mock.someReadyPeers()).thenReturn([peer])
         }
 
@@ -237,7 +237,7 @@ class IPeerGroupTests: PeerGroupTests {
         }
         stub(mockPeerManager) { mock in
             when(mock.connected()).thenReturn([])
-            when(mock.nonSyncedPeer()).thenReturn(nil)
+            when(mock.halfIsSynced()).thenReturn(true)
             when(mock.someReadyPeers()).thenReturn([peer])
         }
 
@@ -261,7 +261,7 @@ class IPeerGroupTests: PeerGroupTests {
         }
         stub(mockPeerManager) { mock in
             when(mock.connected()).thenReturn([peer])
-            when(mock.nonSyncedPeer()).thenReturn(peer)
+            when(mock.halfIsSynced()).thenReturn(false)
             when(mock.someReadyPeers()).thenReturn([peer])
         }
 
