@@ -29,7 +29,7 @@ public class DashKit: AbstractKit {
 
         let paymentAddressParser = PaymentAddressParser(validScheme: "dash", removeScheme: true)
         let addressSelector = BitcoinAddressSelector()
-        let apiFeeRateResource = testMode ? "DASH/testnet" : "DASH"
+        let apiFeeRateResource = "DASH"
 
         let bitcoinCore = try BitcoinCoreBuilder()
                 .set(network: network)

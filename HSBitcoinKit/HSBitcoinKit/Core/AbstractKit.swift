@@ -37,8 +37,8 @@ extension AbstractKit {
         return bitcoinCore.transactions(fromHash: fromHash, limit: limit)
     }
 
-    public func send(to address: String, value: Int) throws {
-        try bitcoinCore.send(to: address, value: value)
+    public func send(to address: String, value: Int, feePriority: FeePriority = .medium) throws {
+        try bitcoinCore.send(to: address, value: value, feePriority: feePriority)
     }
 
     func validate(address: String) throws {
@@ -49,8 +49,8 @@ extension AbstractKit {
         return bitcoinCore.parse(paymentAddress: paymentAddress)
     }
 
-    public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool) throws -> Int {
-        return try bitcoinCore.fee(for: value, toAddress: toAddress, senderPay: senderPay)
+    public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feePriority: FeePriority = .medium) throws -> Int {
+        return try bitcoinCore.fee(for: value, toAddress: toAddress, senderPay: senderPay, feePriority: feePriority)
     }
 
     public var receiveAddress: String {

@@ -27,7 +27,7 @@ public class BitcoinKit: AbstractKit {
 
         let paymentAddressParser = PaymentAddressParser(validScheme: "bitcoin", removeScheme: true)
         let addressSelector = BitcoinAddressSelector()
-        let apiFeeRateResource = testMode ? "BTC/testnet" : "BTC"
+        let apiFeeRateResource = "BTC"
 
         let bitcoinCore = try BitcoinCoreBuilder()
                 .set(network: network)
@@ -52,49 +52,5 @@ public class BitcoinKit: AbstractKit {
 
         bitcoinCore.prepend(addressConverter: bech32)
     }
-
-}
-
-extension BitcoinKit {
-
-//    public var lastBlockInfo: BlockInfo? {
-//        return bitcoinCore.lastBlockInfo
-//    }
-//
-//    public var balance: Int {
-//        return bitcoinCore.balance
-//    }
-//
-//    public var syncState: BitcoinCore.KitState {
-//        return bitcoinCore.syncState
-//    }
-//
-//    public func transactions(fromHash: String? = nil, limit: Int? = nil) -> Single<[TransactionInfo]> {
-//        return bitcoinCore.transactions(fromHash: fromHash, limit: limit)
-//    }
-//
-//    public func send(to address: String, value: Int) throws {
-//        return try bitcoinCore.send(to: address, value: value)
-//    }
-//
-//    public func validate(address: String) throws {
-//        return try bitcoinCore.validate(address: address)
-//    }
-//
-//    public func parse(paymentAddress: String) -> BitcoinPaymentData {
-//        return bitcoinCore.parse(paymentAddress: paymentAddress)
-//    }
-//
-//    public func fee(for value: Int, toAddress: String?, senderPay: Bool) throws -> Int {
-//        return try bitcoinCore.fee(for: value, toAddress: toAddress, senderPay: senderPay)
-//    }
-//
-//    public var receiveAddress: String {
-//        return bitcoinCore.receiveAddress
-//    }
-//
-//    public var debugInfo: String {
-//        return bitcoinCore.debugInfo
-//    }
 
 }

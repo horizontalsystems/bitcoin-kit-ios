@@ -25,9 +25,9 @@ public class BitcoinCashKit: AbstractKit {
         let storage = GrdbStorage(databaseFileName: databaseFileName)
         self.storage = storage
 
-        let paymentAddressParser = PaymentAddressParser(validScheme: "bitcoincash", removeScheme: false)
+        let paymentAddressParser = PaymentAddressParser(validScheme: testMode ? "bchtest" : "bitcoincash", removeScheme: false)
         let addressSelector = BitcoinCashAddressSelector()
-        let apiFeeRateResource = testMode ? "BCH/testnet" : "BCH"
+        let apiFeeRateResource = "BCH"
 
         let bitcoinCore = try BitcoinCoreBuilder()
                 .set(network: network)

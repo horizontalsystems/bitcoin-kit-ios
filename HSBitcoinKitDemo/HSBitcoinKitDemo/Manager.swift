@@ -7,7 +7,7 @@ class Manager {
 
     private let keyWords = "mnemonic_words"
 
-    var kit: DashKit!
+    var kit: BitcoinKit!
 
     let kitInitializationCompleted = BehaviorSubject<Bool>(value: false)
 
@@ -41,8 +41,7 @@ class Manager {
     }
 
     private func initWalletKit(words: [String]) {
-        kit = try! DashKit(withWords: words, walletId: "SomeId", testMode: true, minLogLevel: .verbose)
-//        dashKit = DashKit(withWords: words, coin: self.coin, walletId: "SomeId", newWallet: true, confirmationsThreshold: 1)
+        kit = try! BitcoinKit(withWords: words, walletId: "SomeId", testMode: true, minLogLevel: .verbose)
         kit.delegate = self
 
         kitInitializationCompleted.onNext(true)
@@ -67,7 +66,7 @@ class Manager {
 
 }
 
-extension Manager: DashKitDelegate {
+extension Manager: BitcoinCoreDelegate {
     public func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo]) {
         transactionsSubject.onNext(())
     }
