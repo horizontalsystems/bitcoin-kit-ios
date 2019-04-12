@@ -1,0 +1,6 @@
+class LockVoteSignatureValidator {
+
+    func validate() {
+
+    }
+}

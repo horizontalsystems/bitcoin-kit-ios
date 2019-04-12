@@ -1,5 +1,5 @@
 // todo identical code with transactionMessageParser
-class TransactionLockMessageParser: ListElement<Data, IMessage> {
+class TransactionLockMessageParser: MessageParser {
     override var id: String { return "ix" }
 
     override func process(_ request: Data) -> IMessage? {

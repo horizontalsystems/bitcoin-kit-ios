@@ -9,6 +9,7 @@ class DashGrdbStorage: GrdbStorage {
             try db.create(table: Masternode.databaseTableName) { t in
                 t.column(Masternode.Columns.proRegTxHash.name, .text).notNull()
                 t.column(Masternode.Columns.confirmedHash.name, .text).notNull()
+                t.column(Masternode.Columns.confirmedHashWithProRegTxHash.name, .text).notNull()
                 t.column(Masternode.Columns.ipAddress.name, .text).notNull()
                 t.column(Masternode.Columns.port.name, .integer).notNull()
                 t.column(Masternode.Columns.pubKeyOperator.name, .date).notNull()

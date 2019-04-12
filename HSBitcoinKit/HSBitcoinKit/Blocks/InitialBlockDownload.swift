@@ -36,7 +36,7 @@ class InitialBlockDownload {
 
     private func downloadBlockchain() {
         peersQueue.async {
-            guard let syncPeer = self.syncPeer, let blockSyncer = self.blockSyncer, syncPeer.ready else {
+            guard let syncPeer = self.syncPeer, syncPeer.ready, let blockSyncer = self.blockSyncer, syncPeer.ready else {
                 return
             }
 

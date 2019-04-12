@@ -149,7 +149,7 @@ extension PeerGroup: IPeerGroup {
             throw BitcoinCoreErrors.PeerGroup.noConnectedPeers
         }
 
-        guard peerManager.nonSyncedPeer() == nil else {
+        guard peerManager.halfIsSynced() else {
             throw BitcoinCoreErrors.PeerGroup.peersNotSynced
         }
     }

@@ -1,4 +1,4 @@
-class GetMasternodeListDiffMessageSerializer: ListElement<IMessage, Data> {
+class GetMasternodeListDiffMessageSerializer: MessageSerializer {
     override var id: String { return "getmnlistd" }
 
     override func process(_ request: IMessage) -> Data? {

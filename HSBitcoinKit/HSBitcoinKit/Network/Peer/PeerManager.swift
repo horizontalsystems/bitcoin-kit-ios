@@ -45,4 +45,10 @@ class PeerManager: IPeerManager {
         return peers.first(where: { $0.connected && !$0.synced })
     }
 
+    func halfIsSynced() -> Bool {
+        let syncedPeersCount = peers.filter({ $0.connected && $0.synced }).count
+
+        return syncedPeersCount >= peers.count / 2
+    }
+
 }

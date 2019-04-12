@@ -12,7 +12,7 @@ public enum FeePriority {
 }
 
 class FeeRate: Record {
-    static let defaultFeeRate: FeeRate = FeeRate(low: 21, medium: 42, high: 81, date: Date(timeIntervalSince1970: 1543211299660))
+    static let defaultFeeRate: FeeRate = FeeRate(low: 21, medium: 42, high: 81, date: Date(timeIntervalSince1970: 1543211299))
 
     private static let primaryKey = "primaryKey"
 

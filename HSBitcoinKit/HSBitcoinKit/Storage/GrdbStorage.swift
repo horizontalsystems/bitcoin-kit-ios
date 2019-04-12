@@ -159,6 +159,19 @@ public class GrdbStorage {
             }
         }
 
+        migrator.registerMigration("changeTypesFeeRates") { db in
+            try db.drop(table: FeeRate.databaseTableName)
+            try db.create(table: FeeRate.databaseTableName) { t in
+                t.column(FeeRate.Columns.primaryKey.name, .text).notNull()
+                t.column(FeeRate.Columns.lowPriority.name, .integer).notNull()
+                t.column(FeeRate.Columns.mediumPriority.name, .integer).notNull()
+                t.column(FeeRate.Columns.highPriority.name, .integer).notNull()
+                t.column(FeeRate.Columns.date.name, .date).notNull()
+
+                t.primaryKey([FeeRate.Columns.primaryKey.name], onConflict: .replace)
+            }
+        }
+
         return migrator
     }
 
