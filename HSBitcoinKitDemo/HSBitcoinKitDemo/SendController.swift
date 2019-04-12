@@ -26,7 +26,7 @@ class SendController: UIViewController {
         }
         let satoshis = Int(amount * 100_000_000)
 
-        let fee = (try? Manager.shared.bitcoinKit.fee(for: satoshis, toAddress: address, senderPay: true)) ?? 0
+        let fee = (try? Manager.shared.bitcoinKit.fee(for: satoshis, toAddress: address, senderPay: true, feeRate: 100)) ?? 0
         feeLabel.text = feePrefix + "\(fee)"
      }
     
@@ -48,7 +48,7 @@ class SendController: UIViewController {
         }
 
         do {
-            try Manager.shared.bitcoinKit.send(to: address, value: Int(amount * 100000000))
+            try Manager.shared.bitcoinKit.send(to: address, value: Int(amount * 100000000), feeRate: 100)
 
             addressTextField?.text = ""
             amountTextField?.text = ""

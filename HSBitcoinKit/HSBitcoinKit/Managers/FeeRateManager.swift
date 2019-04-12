@@ -17,20 +17,20 @@ class FeeRateManager {
 
         self.syncer.delegate = self
 
-        Observable<Int>.timer(0, period: 3 * 60, scheduler: ConcurrentDispatchQueueScheduler(qos: .background)).observeOn(ConcurrentDispatchQueueScheduler(qos: .background)).subscribe(onNext: { [weak self] _ in
-            self?.updateFeeRate()
-        }).disposed(by: disposeBag)
-
-        var observable = reachabilityManager.reachabilitySignal.asObservable()
-
-        if async {
-            observable = observable.observeOn(ConcurrentDispatchQueueScheduler(qos: .background))
-        }
-        observable
-                .subscribe(onNext: { [weak self] in
-                    self?.updateFeeRate()
-                })
-                .disposed(by: disposeBag)
+//        Observable<Int>.timer(0, period: 3 * 60, scheduler: ConcurrentDispatchQueueScheduler(qos: .background)).observeOn(ConcurrentDispatchQueueScheduler(qos: .background)).subscribe(onNext: { [weak self] _ in
+//            self?.updateFeeRate()
+//        }).disposed(by: disposeBag)
+//
+//        var observable = reachabilityManager.reachabilitySignal.asObservable()
+//
+//        if async {
+//            observable = observable.observeOn(ConcurrentDispatchQueueScheduler(qos: .background))
+//        }
+//        observable
+//                .subscribe(onNext: { [weak self] in
+//                    self?.updateFeeRate()
+//                })
+//                .disposed(by: disposeBag)
     }
 
     private func updateFeeRate() {

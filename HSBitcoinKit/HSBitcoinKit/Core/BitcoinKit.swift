@@ -227,8 +227,8 @@ extension BitcoinKit {
         return dataProvider.transactions(fromHash: fromHash, limit: limit)
     }
 
-    public func send(to address: String, value: Int, feePriority: FeePriority = .medium) throws {
-        try dataProvider.send(to: address, value: value, feeRate: getFeeRate(priority: feePriority))
+    public func send(to address: String, value: Int, feeRate: Int) throws {
+        try dataProvider.send(to: address, value: value, feeRate: feeRate)
     }
 
     public func validate(address: String) throws {
@@ -239,8 +239,8 @@ extension BitcoinKit {
         return dataProvider.parse(paymentAddress: paymentAddress)
     }
 
-    public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feePriority: FeePriority = .medium) throws -> Int {
-        return try dataProvider.fee(for: value, feeRate: getFeeRate(priority: feePriority), toAddress: toAddress, senderPay: senderPay)
+    public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feeRate: Int) throws -> Int {
+        return try dataProvider.fee(for: value, feeRate: feeRate, toAddress: toAddress, senderPay: senderPay)
     }
 
     public var receiveAddress: String {
@@ -249,23 +249,6 @@ extension BitcoinKit {
 
     public var debugInfo: String {
         return dataProvider.debugInfo
-    }
-
-    private func getFeeRate(priority: FeePriority) -> Int {
-        switch priority {
-        case .lowest:
-            return feeRateManager.feeRate.low
-        case .low:
-            return (feeRateManager.feeRate.low + feeRateManager.feeRate.medium) / 2
-        case .medium:
-            return feeRateManager.feeRate.medium
-        case .high:
-            return (feeRateManager.feeRate.medium + feeRateManager.feeRate.high) / 2
-        case .highest:
-            return feeRateManager.feeRate.high
-        case .custom(let value):
-            return value
-        }
     }
 
 }
