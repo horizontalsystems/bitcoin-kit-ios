@@ -2,14 +2,17 @@ class InstantTransactionManager: IInstantTransactionManager {
     static let requiredVoteCount = 6
 
     enum InstantSendHandleError: Error { case instantTransactionNotExist }
+
     private var storage: IDashStorage
     private var instantSendFactory: IInstantSendFactory
     private let transactionSyncer: ITransactionSyncer
+    private let transactionLockVoteValidator: ITransactionLockVoteValidator
 
-    init(storage: IDashStorage, instantSendFactory: IInstantSendFactory, transactionSyncer: ITransactionSyncer) {
+    init(storage: IDashStorage, instantSendFactory: IInstantSendFactory, transactionSyncer: ITransactionSyncer, transactionLockVoteValidator: ITransactionLockVoteValidator) {
         self.storage = storage
         self.instantSendFactory = instantSendFactory
         self.transactionSyncer = transactionSyncer
+        self.transactionLockVoteValidator = transactionLockVoteValidator
     }
 
     func handle(transactions: [FullTransaction]) {
@@ -36,11 +39,14 @@ class InstantTransactionManager: IInstantTransactionManager {
     }
 
     func handle(lockVote: TransactionLockVoteMessage) throws {
-        try validate(lockVote: lockVote)
+        // validate masternode in top 10 masternodes for quorumModifier
+        try transactionLockVoteValidator.validate(quorumModifierHash: lockVote.quorumModifierHash, masternodeProTxHash: lockVote.masternodeProTxHash)
+
         // get all vote list for transaction and check if this tx approved
         var instantTransactionInputs = storage.instantTransactionInputs(for: lockVote.txHash)
 
         guard let inputIndex = instantTransactionInputs.firstIndex(where: { $0.inputTxHash == lockVote.outpoint.txHash }) else {
+            print("InstantSendHandleError.instantTransactionNotExist")
             throw InstantSendHandleError.instantTransactionNotExist
         }
         let input = instantTransactionInputs[inputIndex]

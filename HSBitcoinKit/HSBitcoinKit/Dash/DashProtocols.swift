@@ -65,3 +65,11 @@ protocol IInstantTransactionManager {
     func handle(transactions: [FullTransaction])
     func handle(lockVote: TransactionLockVoteMessage) throws
 }
+
+protocol IMasternodeParser {
+    func parse(byteStream: ByteStream) -> Masternode
+}
+
+protocol ITransactionLockVoteValidator {
+    func validate(quorumModifierHash: Data, masternodeProTxHash: Data) throws
+}

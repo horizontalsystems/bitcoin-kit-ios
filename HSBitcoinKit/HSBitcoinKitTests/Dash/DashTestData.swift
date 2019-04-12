@@ -5,7 +5,7 @@ class DashTestData {
     static let zeroHash = Data(repeating: 0, count: 32)
 
     static func masternode(proRegTxHash: Data, confirmedHash: Data = Data(), isValid: Bool = true) -> Masternode {
-        return Masternode(proRegTxHash: proRegTxHash, confirmedHash: confirmedHash, ipAddress: Data(), port: 0, pubKeyOperator: Data(), keyIDVoting: Data(), isValid: isValid)
+        return Masternode(proRegTxHash: proRegTxHash, confirmedHash: confirmedHash, confirmedHashWithProRegTxHash: Data(), ipAddress: Data(), port: 0, pubKeyOperator: Data(), keyIDVoting: Data(), isValid: isValid)
     }
 
     static func coinbaseTransaction(transaction: FullTransaction = TestData.p2pkhTransaction, size: UInt32 = 0, merkleRootMNList: Data = Data()) -> CoinbaseTransaction {

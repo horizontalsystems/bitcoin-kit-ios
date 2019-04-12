@@ -1,6 +1,7 @@
 import HSCryptoKit
 
 typealias MessageSerializers = SetOfResponsibility<IMessage, Data>
+typealias MessageSerializer = ListElement<IMessage, Data>
 
 class NetworkMessageSerializer: INetworkMessageSerializer {
     let magic: UInt32
@@ -36,7 +37,7 @@ class NetworkMessageSerializer: INetworkMessageSerializer {
 
 }
 
-class GetDataMessageSerializer: ListElement<IMessage, Data> {
+class GetDataMessageSerializer: MessageSerializer {
     override var id: String { return "getdata" }
 
     override func process(_ request: IMessage) -> Data? {
@@ -56,7 +57,7 @@ class GetDataMessageSerializer: ListElement<IMessage, Data> {
 
 }
 
-class GetBlocksMessageSerializer: ListElement<IMessage, Data> {
+class GetBlocksMessageSerializer: MessageSerializer {
     override var id: String { return "getblocks" }
 
     override func process(_ request: IMessage) -> Data? {
@@ -76,7 +77,7 @@ class GetBlocksMessageSerializer: ListElement<IMessage, Data> {
 
 }
 
-class InventoryMessageSerializer: ListElement<IMessage, Data> {
+class InventoryMessageSerializer: MessageSerializer {
     override var id: String { return "inv" }
 
     override func process(_ request: IMessage) -> Data? {
@@ -94,7 +95,7 @@ class InventoryMessageSerializer: ListElement<IMessage, Data> {
 
 }
 
-class PingMessageSerializer: ListElement<IMessage, Data> {
+class PingMessageSerializer: MessageSerializer {
     override var id: String { return "ping" }
 
     override func process(_ request: IMessage) -> Data? {
@@ -109,7 +110,7 @@ class PingMessageSerializer: ListElement<IMessage, Data> {
 
 }
 
-class PongMessageSerializer: ListElement<IMessage, Data> {
+class PongMessageSerializer: MessageSerializer {
     override var id: String { return "pong" }
 
     override func process(_ request: IMessage) -> Data? {
@@ -124,7 +125,7 @@ class PongMessageSerializer: ListElement<IMessage, Data> {
 
 }
 
-class VersionMessageSerializer: ListElement<IMessage, Data> {
+class VersionMessageSerializer: MessageSerializer {
     override var id: String { return "version" }
 
     override func process(_ request: IMessage) -> Data? {
@@ -147,7 +148,7 @@ class VersionMessageSerializer: ListElement<IMessage, Data> {
 
 }
 
-class VerackMessageSerializer: ListElement<IMessage, Data> {
+class VerackMessageSerializer: MessageSerializer {
     override var id: String { return "verack" }
 
     override func process(_ request: IMessage) -> Data? {
@@ -160,7 +161,7 @@ class VerackMessageSerializer: ListElement<IMessage, Data> {
 
 }
 
-class MempoolMessageSerializer: ListElement<IMessage, Data> {
+class MempoolMessageSerializer: MessageSerializer {
     override var id: String { return "mempool" }
 
     override func process(_ request: IMessage) -> Data? {
@@ -173,7 +174,7 @@ class MempoolMessageSerializer: ListElement<IMessage, Data> {
 
 }
 
-class TransactionMessageSerializer: ListElement<IMessage, Data> {
+class TransactionMessageSerializer: MessageSerializer {
     override var id: String { return "tx" }
 
     override func process(_ request: IMessage) -> Data? {
@@ -186,7 +187,7 @@ class TransactionMessageSerializer: ListElement<IMessage, Data> {
 
 }
 
-class FilterLoadMessageSerializer: ListElement<IMessage, Data> {
+class FilterLoadMessageSerializer: MessageSerializer {
     override var id: String { return "filterload" }
 
     override func process(_ request: IMessage) -> Data? {

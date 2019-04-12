@@ -20,11 +20,11 @@ extension InstantSend: IPeerTaskHandler {
             return true
 
         case let task as RequestTransactionLockVotesTask: task.transactionLockVotes.forEach {
-                try? instantTransactionManager.handle(lockVote: $0)
-                // что то надо делать
-                // ищем транзакцию среди наших, иначе игнор
-                // проверям что quore мастернода есть и он дуйствующий иначе игнор
-                // Нужен новый параметр
+                do {
+                    try instantTransactionManager.handle(lockVote: $0)
+                } catch {
+                    print(error)
+                }
 
                 print("AAAAAAA got tx votes : \($0.hash.reversedHex) \($0.outpoint.txHash.hex)-\($0.outpoint.vout)") 
             }

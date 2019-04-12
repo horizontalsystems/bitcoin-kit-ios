@@ -1,7 +1,13 @@
 import HSCryptoKit
 
-class MasternodeListDiffMessageParser: ListElement<Data, IMessage> {
+class MasternodeListDiffMessageParser: MessageParser {
+    private let masternodeParser: IMasternodeParser
+
     override var id: String { return "mnlistdiff" }
+
+    init(masternodeParser: IMasternodeParser) {
+        self.masternodeParser = masternodeParser
+    }
 
     override func process(_ request: Data) -> IMessage? {
         let byteStream = ByteStream(request)
@@ -29,7 +35,7 @@ class MasternodeListDiffMessageParser: ListElement<Data, IMessage> {
         let mnListCount = UInt32((byteStream.read(VarInt.self)).underlyingValue)
         var mnList = [Masternode]()
         for _ in 0..<mnListCount {
-            mnList.append(Masternode(byteStream: byteStream))
+            mnList.append(masternodeParser.parse(byteStream: byteStream))
         }
 
         return MasternodeListDiffMessage(baseBlockHash: baseBlockHash,

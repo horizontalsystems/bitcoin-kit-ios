@@ -1,6 +1,7 @@
 import HSCryptoKit
 
 typealias MessageParsers = SetOfResponsibility<Data, IMessage>
+typealias MessageParser = ListElement<Data, IMessage>
 
 class NetworkMessageParser: INetworkMessageParser {
     private let magic: UInt32
@@ -42,7 +43,7 @@ class NetworkMessageParser: INetworkMessageParser {
 
 }
 
-class AddressMessageParser: ListElement<Data, IMessage> {
+class AddressMessageParser: MessageParser {
     override var id: String { return "addr" }
 
     override func process(_ request: Data) -> IMessage? {
@@ -61,7 +62,7 @@ class AddressMessageParser: ListElement<Data, IMessage> {
 
 }
 
-class GetDataMessageParser: ListElement<Data, IMessage> {
+class GetDataMessageParser: MessageParser {
     override var id: String { return "getdata" }
 
     override func process(_ request: Data) -> IMessage? {
@@ -82,7 +83,7 @@ class GetDataMessageParser: ListElement<Data, IMessage> {
 
 }
 
-class InventoryMessageParser: ListElement<Data, IMessage> {
+class InventoryMessageParser: MessageParser {
     override var id: String { return "inv" }
 
     override func process(_ request: Data) -> IMessage? {
@@ -108,7 +109,7 @@ class InventoryMessageParser: ListElement<Data, IMessage> {
 
 }
 
-class PingMessageParser: ListElement<Data, IMessage> {
+class PingMessageParser: MessageParser {
     override var id: String { return "ping" }
 
     override func process(_ request: Data) -> IMessage? {
@@ -118,7 +119,7 @@ class PingMessageParser: ListElement<Data, IMessage> {
 
 }
 
-class PongMessageParser: ListElement<Data, IMessage> {
+class PongMessageParser: MessageParser {
     override var id: String { return "pong" }
 
     override func process(_ request: Data) -> IMessage? {
@@ -128,7 +129,7 @@ class PongMessageParser: ListElement<Data, IMessage> {
 
 }
 
-class VerackMessageParser: ListElement<Data, IMessage> {
+class VerackMessageParser: MessageParser {
     override var id: String { return "verack" }
 
     override func process(_ request: Data) -> IMessage? {
@@ -137,7 +138,7 @@ class VerackMessageParser: ListElement<Data, IMessage> {
 
 }
 
-class VersionMessageParser: ListElement<Data, IMessage> {
+class VersionMessageParser: MessageParser {
     override var id: String { return "version" }
 
     override func process(_ request: Data) -> IMessage? {
@@ -161,7 +162,7 @@ class VersionMessageParser: ListElement<Data, IMessage> {
 
 }
 
-class MemPoolMessageParser: ListElement<Data, IMessage> {
+class MemPoolMessageParser: MessageParser {
     override var id: String { return "mempool" }
 
     override func process(_ request: Data) -> IMessage? {
@@ -170,7 +171,7 @@ class MemPoolMessageParser: ListElement<Data, IMessage> {
 
 }
 
-class MerkleBlockMessageParser: ListElement<Data, IMessage> {
+class MerkleBlockMessageParser: MessageParser {
     override var id: String { return  "merkleblock" }
 
     private let network: INetwork
@@ -206,7 +207,7 @@ class MerkleBlockMessageParser: ListElement<Data, IMessage> {
 
 }
 
-class TransactionMessageParser: ListElement<Data, IMessage> {
+class TransactionMessageParser: MessageParser {
     override var id: String { return "tx" }
 
     override func process(_ request: Data) -> IMessage? {
@@ -215,7 +216,7 @@ class TransactionMessageParser: ListElement<Data, IMessage> {
 
 }
 
-class UnknownMessageParser: ListElement<Data, IMessage> {
+class UnknownMessageParser: MessageParser {
     override var id: String { return "unknown" }
 
     override func process(_ request: Data) -> IMessage? {

@@ -190,6 +190,7 @@ protocol IPeerManager: class {
     func someReadyPeers() -> [IPeer]
     func connected() -> [IPeer]
     func nonSyncedPeer() -> IPeer?
+    func halfIsSynced() -> Bool
 }
 
 protocol IPeer: class {

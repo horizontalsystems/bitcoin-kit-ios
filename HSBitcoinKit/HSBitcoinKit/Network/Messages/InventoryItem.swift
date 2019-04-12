@@ -34,8 +34,8 @@ struct InventoryItem {
             return .blockMessage
         case 3:
             return .filteredBlockMessage
-        case 4:
-            return .compactBlockMessage
+//        case 4:
+//            return .compactBlockMessage
         default:
             return .unknown
         }
@@ -52,9 +52,9 @@ struct InventoryItem {
         /// Indicates the reply should be a merkleblock message rather than a block message;
         /// this only works if a bloom filter has been set.
         case filteredBlockMessage = 3
-        /// Hash of a block header; identical to MSG_BLOCK. Only to be used in getdata message.
-        /// Indicates the reply should be a cmpctblock message. See BIP 152 for more info.
-        case compactBlockMessage = 4
+//        /// Hash of a block header; identical to MSG_BLOCK. Only to be used in getdata message.
+//        /// Indicates the reply should be a cmpctblock message. See BIP 152 for more info.
+//        case compactBlockMessage = 4
         case unknown
     }
 

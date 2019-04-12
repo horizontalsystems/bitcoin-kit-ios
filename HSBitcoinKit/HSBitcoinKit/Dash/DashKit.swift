@@ -38,7 +38,7 @@ public class DashKit: AbstractKit {
                 .set(addressSelector: addressSelector)
                 .set(feeRateApiResource: apiFeeRateResource)
                 .set(walletId: walletId)
-                .set(peerSize: 1)
+                .set(peerSize: 4)
                 .set(storage: storage)
                 .set(newWallet: true)
                 .build()
@@ -51,10 +51,14 @@ public class DashKit: AbstractKit {
     func extend(bitcoinCore: BitcoinCore) {
         bitcoinCore.add(delegate: self)
 
+        let singleHasher = SingleHasher() // Use single sha256 for hash
+        let hasher = MerkleRootHasher() // Use doubleSha256 for hash
+
+        let masternodeParser = MasternodeParser(hasher: singleHasher)
         let dashMessageParsers = SetOfResponsibility()
                 .append(element: TransactionLockMessageParser())
                 .append(element: TransactionLockVoteMessageParser())
-                .append(element: MasternodeListDiffMessageParser())
+                .append(element: MasternodeListDiffMessageParser(masternodeParser: masternodeParser))
 
         let dashMessageSerializers = SetOfResponsibility()
                 .append(element: GetMasternodeListDiffMessageSerializer())
@@ -62,7 +66,6 @@ public class DashKit: AbstractKit {
         bitcoinCore.add(messageParsers: dashMessageParsers)
         bitcoinCore.add(messageSerializers: dashMessageSerializers)
 
-        let hasher = MerkleRootHasher()
         let merkleBranch = MerkleBranch(hasher: hasher)
 
         let masternodeSerializer = MasternodeSerializer()
@@ -77,12 +80,15 @@ public class DashKit: AbstractKit {
 
         bitcoinCore.add(peerTaskHandler: masternodeSyncer)
 
+// --------------------------------------
+        let transactionLockVoteValidator = TransactionLockVoteValidator(storage: storage, hasher: singleHasher)
         let instantSendFactory = InstantSendFactory()
-        let instantTransactionManager = InstantTransactionManager(storage: storage, instantSendFactory: instantSendFactory, transactionSyncer: bitcoinCore.transactionSyncer)
+        let instantTransactionManager = InstantTransactionManager(storage: storage, instantSendFactory: instantSendFactory, transactionSyncer: bitcoinCore.transactionSyncer, transactionLockVoteValidator: transactionLockVoteValidator)
         let instantSend = InstantSend(instantTransactionManager: instantTransactionManager)
 
         bitcoinCore.add(peerTaskHandler: instantSend)
         bitcoinCore.add(inventoryItemsHandler: instantSend)
+// --------------------------------------
     }
 
 }
