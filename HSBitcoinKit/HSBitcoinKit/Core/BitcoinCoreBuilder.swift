@@ -214,7 +214,7 @@ class BitcoinCoreBuilder {
         bloomFilterManager.delegate = bloomFilterLoader
         bitcoinCore.add(peerGroupListener: bloomFilterLoader)
 
-        let blockchain = Blockchain(storage: storage, network: network, factory: factory, listener: dataProvider)
+        let blockchain = Blockchain(storage: storage, blockValidator: bitcoinCore.blockValidatorChain, factory: factory, listener: dataProvider)
         let blockSyncer = BlockSyncer.instance(storage: storage, network: network, factory: factory, listener: kitStateProvider, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager, logger: logger)
         let initialBlockDownload = InitialBlockDownload(blockSyncer: blockSyncer, peerManager: peerManager, syncStateListener: kitStateProvider, logger: logger)
 

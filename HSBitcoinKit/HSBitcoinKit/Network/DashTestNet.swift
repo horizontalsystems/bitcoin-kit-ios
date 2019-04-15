@@ -21,10 +21,6 @@ class DashTestNet: INetwork {
     let sigHash: SigHashType = .bitcoinAll
     var syncableFromApi: Bool = true
 
-    var maxTargetBits = 0x1e0fffff
-    var targetTimeSpan = 3600                          // 1 hour for 24 blocks
-    var targetSpacing = 150                           // 2.5 min. for mining 1 Block
-
     let dnsSeeds = [
         "testnet-seed.dashdot.io",
         "test.dnsseed.masternode.io"

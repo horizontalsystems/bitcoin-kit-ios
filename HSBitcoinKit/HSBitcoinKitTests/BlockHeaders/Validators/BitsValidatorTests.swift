@@ -31,7 +31,7 @@ class BitsValidatorTests: XCTestCase {
 
     func testValidate() {
         do {
-            try validator.validate(candidate: candidate, block: block, network: network)
+            try validator.validate(block: candidate, previousBlock: block)
         } catch let error {
             XCTFail("\(error) Exception Thrown")
         }
@@ -40,13 +40,45 @@ class BitsValidatorTests: XCTestCase {
     func testNotEqualBits() {
         candidate.bits = 3
         do {
-            try validator.validate(candidate: candidate, block: block, network: network)
+            try validator.validate(block: candidate, previousBlock: block)
             XCTFail("notEqualBits exception not thrown")
-        } catch let error as BlockValidatorError {
-            XCTAssertEqual(error, BlockValidatorError.notEqualBits)
+        } catch let error as BitcoinCoreErrors.BlockValidation {
+            XCTAssertEqual(error, BitcoinCoreErrors.BlockValidation.notEqualBits)
         } catch {
             XCTFail("Unknown exception thrown")
         }
     }
 
 }
+
+//
+//import Foundation
+//import XCTest
+//import Quick
+//import Nimble
+//import Cuckoo
+//@testable import HSBitcoinKit
+//
+//class BitsValidatorTests: QuickSpec {
+//
+//    override func spec() {
+//        var validator: BitsValidator!
+//
+//        beforeEach {
+//            validator = BitsValidator()
+//        }
+//
+//        afterEach {
+//            validator = nil
+//        }
+//
+//        describe("#validate") {
+//            beforeEach {
+//            }
+//
+//            it("success validate") {
+//            }
+//        }
+//    }
+//
+//}

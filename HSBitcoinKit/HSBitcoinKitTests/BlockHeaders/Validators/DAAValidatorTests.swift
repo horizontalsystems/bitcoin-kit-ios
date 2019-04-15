@@ -26,25 +26,16 @@ class DAAValidatorTests: XCTestCase {
                                   1534807636, 1534808886, 1534809025, 1534809060, 1534809128, 1534809700, 1534811600, 1534812360, 1534813513, 1534814559, 1534815216, 1534816810, 1534816866, 1534817055, 1534817207, 1534817720, 1534817840, 1534818838, 1534819474, 1534820021] // 544319
 
     private var validator: DAAValidator!
-    private var network: MockINetwork!
-    private var storage: MockIStorage!
+    private var mockBlockHelper: MockIBitcoinCashBlockValidatorHelper!
 
-    private var candidate: Block!
+    private var blocks = [Block]()
 
     override func setUp() {
         super.setUp()
 
-        network = MockINetwork()
-        storage = MockIStorage()
+        mockBlockHelper = MockIBitcoinCashBlockValidatorHelper()
 
-        stub(network) { mock in
-            when(mock.heightInterval.get).thenReturn(144)
-            when(mock.targetTimeSpan.get).thenReturn(86400)
-            when(mock.maxTargetBits.get).thenReturn(0x1d00ffff)
-            when(mock.targetSpacing.get).thenReturn(600)
-        }
-
-        candidate = Block(
+        blocks.append(Block(
             withHeader: BlockHeader(
                     version: 536870912,
                     headerHash: Data(),
@@ -55,44 +46,37 @@ class DAAValidatorTests: XCTestCase {
                     nonce: 1748283264
             ),
             height: 544320)
+        )
 
-        validator = DAAValidator(storage: storage, encoder: DifficultyEncoder(), blockHelper: BlockHelper(storage: storage))
+        for i in 0..<148 {
+            let block = Block(
+                    withHeader: BlockHeader(version: 536870912, headerHash: Data(), previousBlockHeaderHash: Data(from: i), merkleRoot: Data(), timestamp: timestampArray[timestampArray.count - i - 1], bits: bitsArray[bitsArray.count - i - 1], nonce: 0),
+                    height: blocks[0].height - i - 1
+            )
+            blocks.append(block)
+        }
+
+        validator = DAAValidator(encoder: DifficultyEncoder(), blockHelper: mockBlockHelper, targetSpacing: 600, heightInterval: 144, firstCheckpointHeight: 544120)
     }
 
     override func tearDown() {
         validator = nil
-        network = nil
-        storage = nil
+        mockBlockHelper = nil
 
-        candidate = nil
+        blocks.removeAll()
 
         super.tearDown()
     }
 
     // MAKE real test data from bitcoin cash mainnet
-    func makeBlocks() {
-        var lastBlock = candidate!
-        stub(storage) { mock in
-            for i in 0..<148 {
-                let block = Block(
-                        withHeader: BlockHeader(version: 536870912, headerHash: Data(), previousBlockHeaderHash: Data(from: i), merkleRoot: Data(), timestamp: timestampArray[timestampArray.count - i - 1], bits: bitsArray[bitsArray.count - i - 1], nonce: 0),
-                        height: candidate.height - i - 1
-                )
-
-                lastBlock.previousBlockHashReversedHex = block.headerHashReversedHex
-                when(mock.block(byHashHex: lastBlock.previousBlockHashReversedHex)).thenReturn(block)
-
-                lastBlock = block
-            }
-
-            when(mock.block(byHashHex: lastBlock.previousBlockHashReversedHex)).thenReturn(nil)
-        }
-    }
-
     func testValidate() {
-        makeBlocks()
+        stub(mockBlockHelper) { mock in
+            when(mock.suitableBlock(for: equal(to: blocks[1]))).thenReturn(blocks[2])
+            when(mock.previous(for: equal(to: blocks[1]), count: 144)).thenReturn(blocks[145])
+        }
+
         do {
-            try validator.validate(candidate: candidate, block: candidate.previousBlock(storage: storage)!, network: network)
+            try validator.validate(block: blocks[0], previousBlock: blocks[1])
         } catch let error {
             XCTFail("\(error) Exception Thrown")
         }

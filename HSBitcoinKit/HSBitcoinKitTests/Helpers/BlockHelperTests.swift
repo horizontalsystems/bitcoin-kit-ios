@@ -36,8 +36,8 @@ class BlockHelperTests: XCTestCase {
     func testPrevious() {
         let block = TestData.thirdBlock
 
-        XCTAssertEqual(blockHelper.previous(for: block, index: 1)?.headerHashReversedHex, TestData.secondBlock.headerHashReversedHex)
-        XCTAssertNil(blockHelper.previous(for: block, index: 4))
+        XCTAssertEqual(blockHelper.previous(for: block, count: 1)?.headerHashReversedHex, TestData.secondBlock.headerHashReversedHex)
+        XCTAssertNil(blockHelper.previous(for: block, count: 4))
     }
 
     func testPreviousWindow() {
@@ -50,7 +50,7 @@ class BlockHelperTests: XCTestCase {
     func testWrongPrevious() {
         let block = TestData.checkpointBlock
 
-        XCTAssertNil(blockHelper.previous(for: block, index: 1))
+        XCTAssertNil(blockHelper.previous(for: block, count: 1))
     }
 
     func testMedianTimePast() {

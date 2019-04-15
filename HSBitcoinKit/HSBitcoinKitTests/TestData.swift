@@ -9,7 +9,7 @@ class TestData {
         return Block(
                 withHeader: BlockHeader(
                         version: 1,
-                        headerHash: Data(),
+                        headerHash: "cec100cc".reversedData!,
                         previousBlockHeaderHash: "00000000864b744c5025331036aa4a16e9ed1cbb362908c625272150fa059b29".reversedData!,
                         merkleRoot: "70d6379650ac87eaa4ac1de27c21217b81a034a53abf156c422a538150bd80f4".reversedData!,
                         timestamp: 1337966314,
@@ -23,7 +23,7 @@ class TestData {
         return Block(
                 withHeader: BlockHeader(
                         version: 1,
-                        headerHash: Data(),
+                        headerHash: "11b10ccc".reversedData!,
                         previousBlockHeaderHash: checkpointBlock.headerHashReversedHex.reversedData!,
                         merkleRoot: "55de0864e0b96f0dff597b1c138de187dd8c40e859b01b4671f7a92ca1b7a9b9".reversedData!,
                         timestamp: 1337966314,
@@ -37,7 +37,7 @@ class TestData {
         return Block(
                 withHeader: BlockHeader(
                         version: 1,
-                        headerHash: Data(),
+                        headerHash: "22b10ccc".reversedData!,
                         previousBlockHeaderHash: firstBlock.headerHashReversedHex.reversedData!,
                         merkleRoot: "9a342c0615d0e5a3256f5b9a7818abecc1c8722ab3a8db8df5595c8635cc11e1".reversedData!,
                         timestamp: 1337966314,
@@ -51,7 +51,7 @@ class TestData {
         return Block(
                 withHeader: BlockHeader(
                         version: 1,
-                        headerHash: Data(),
+                        headerHash: "33b10ccc".reversedData!,
                         previousBlockHeaderHash: secondBlock.headerHashReversedHex.reversedData!,
                         merkleRoot: "4848ea1ec4f1838bc0a6a243b9350d76bfeda63532b6a1cc6bae0df27aba11b3".reversedData!,
                         timestamp: 1337966314,
@@ -65,7 +65,7 @@ class TestData {
         return Block(
                 withHeader: BlockHeader(
                         version: 1,
-                        headerHash: Data(),
+                        headerHash: "44b10ccc".reversedData!,
                         previousBlockHeaderHash: thirdBlock.headerHashReversedHex.reversedData!,
                         merkleRoot: "d45043107540b486cf2079a1d510bfe18053aac2446c5043a2b8eff01668426d".reversedData!,
                         timestamp: 1337966314,
@@ -79,7 +79,7 @@ class TestData {
         return Block(
                 withHeader: BlockHeader(
                         version: 1,
-                        headerHash: Data(),
+                        headerHash: "01db10cc".reversedData!,
                         previousBlockHeaderHash: "0000000036f7b90238ac6b6026be5e121ac3055f19fffd69f28310a76aa4a5bc".reversedData!,
                         merkleRoot: "3bf8c518a7a1187287516da67cb96733697b1d83eb937e68ae39bd4c08e563b7".reversedData!,
                         timestamp: 1337966144,
@@ -92,7 +92,7 @@ class TestData {
     static var preCheckpointBlockHeader: BlockHeader {
         let header = BlockHeader(
                 version: 536870912,
-                headerHash: Data(),
+                headerHash: "00b10ccc".reversedData!,
                 previousBlockHeaderHash: "00000000000003b0bfa9f11f946df6502b3fe5863cf4768dcf9e35b5fc94f9b7".reversedData!,
                 merkleRoot: "99344f97da778690e2af9729a7302c6f6bd2197a1b682ebc142f7de8236a85b9".reversedData!,
                 timestamp: 1530756271,
@@ -108,7 +108,7 @@ class TestData {
     static var checkpointBlockHeader: BlockHeader {
         let header = BlockHeader(
                 version: 536870912,
-                headerHash: Data(),
+                headerHash: "99b10ccc".reversedData!,
                 previousBlockHeaderHash: "00000000000002ac6d5c058c9932f350aeef84f6e334f4e01b40be4db537f8c2".reversedData!,
                 merkleRoot: "9e172a04fc387db6f273ee96b4ef50732bb4b06e494483d182c5722afd8770b3".reversedData!,
                 timestamp: 1530756778,
