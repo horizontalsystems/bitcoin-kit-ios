@@ -48,15 +48,20 @@ class DAAValidatorTests: XCTestCase {
             height: 544320)
         )
 
-        for i in 0..<148 {
+        for i in 0..<147 {
             let block = Block(
-                    withHeader: BlockHeader(version: 536870912, headerHash: Data(), previousBlockHeaderHash: Data(from: i), merkleRoot: Data(), timestamp: timestampArray[timestampArray.count - i - 1], bits: bitsArray[bitsArray.count - i - 1], nonce: 0),
+                    withHeader: BlockHeader(version: 536870912, headerHash: Data(from: i), previousBlockHeaderHash: Data(from: i), merkleRoot: Data(), timestamp: timestampArray[timestampArray.count - i - 1], bits: bitsArray[bitsArray.count - i - 1], nonce: 0),
                     height: blocks[0].height - i - 1
             )
             blocks.append(block)
         }
+        stub(mockBlockHelper) { mock in
+            when(mock.previousWindow(for: equal(to: blocks[1]), count: 146)).thenReturn(Array(blocks[2...147].reversed()))
+            when(mock.suitableBlockIndex(for: equal(to: [blocks[145], blocks[146], blocks[147]].reversed()))).thenReturn(1)
+            when(mock.suitableBlockIndex(for: equal(to: [blocks[1], blocks[2], blocks[3]].reversed()))).thenReturn(1)
+        }
 
-        validator = DAAValidator(encoder: DifficultyEncoder(), blockHelper: mockBlockHelper, targetSpacing: 600, heightInterval: 144, firstCheckpointHeight: 544120)
+        validator = DAAValidator(encoder: DifficultyEncoder(), blockHelper: mockBlockHelper, targetSpacing: 600, heightInterval: 144, firstCheckpointHeight: 544320 - 1 - 148) // previous block height - 148
     }
 
     override func tearDown() {
@@ -70,16 +75,66 @@ class DAAValidatorTests: XCTestCase {
 
     // MAKE real test data from bitcoin cash mainnet
     func testValidate() {
-        stub(mockBlockHelper) { mock in
-            when(mock.suitableBlock(for: equal(to: blocks[1]))).thenReturn(blocks[2])
-            when(mock.previous(for: equal(to: blocks[1]), count: 144)).thenReturn(blocks[145])
+        do {
+            try validator.validate(block: blocks[0], previousBlock: blocks[1])
+        } catch let error {
+            XCTFail("\(error) Exception Thrown")
         }
+    }
+
+    func testTrustFirstBlocks() {
+        blocks[1].height = 544320 - 1 - 1 // previous block nearly than 148 blocks to checkpoint height
 
         do {
             try validator.validate(block: blocks[0], previousBlock: blocks[1])
         } catch let error {
             XCTFail("\(error) Exception Thrown")
         }
+    }
+
+    func testNoPreviousBlock() {
+        stub(mockBlockHelper) { mock in
+            when(mock.previousWindow(for: equal(to: blocks[1]), count: 146)).thenReturn(nil)
+        }
+
+        do {
+            try validator.validate(block: blocks[0], previousBlock: blocks[1])
+        } catch let error as BitcoinCoreErrors.BlockValidation {
+            XCTAssertEqual(error, BitcoinCoreErrors.BlockValidation.noPreviousBlock)
+        } catch let error {
+            XCTFail("\(error) Exception Thrown")
+        }
+
+    }
+
+    func testNoPreviousBlock_FirstSuitable() {
+        stub(mockBlockHelper) { mock in
+            when(mock.suitableBlockIndex(for: equal(to: [blocks[145], blocks[146], blocks[147]].reversed()))).thenReturn(nil)
+        }
+
+        do {
+            try validator.validate(block: blocks[0], previousBlock: blocks[1])
+        } catch let error as BitcoinCoreErrors.BlockValidation {
+            XCTAssertEqual(error, BitcoinCoreErrors.BlockValidation.noPreviousBlock)
+        } catch let error {
+            XCTFail("\(error) Exception Thrown")
+        }
+
+    }
+
+    func testNoPreviousBlock_SecondSuitable() {
+        stub(mockBlockHelper) { mock in
+            when(mock.suitableBlockIndex(for: equal(to: [blocks[1], blocks[2], blocks[3]].reversed()))).thenReturn(nil)
+        }
+
+        do {
+            try validator.validate(block: blocks[0], previousBlock: blocks[1])
+        } catch let error as BitcoinCoreErrors.BlockValidation {
+            XCTAssertEqual(error, BitcoinCoreErrors.BlockValidation.noPreviousBlock)
+        } catch let error {
+            XCTFail("\(error) Exception Thrown")
+        }
+
     }
 
 }

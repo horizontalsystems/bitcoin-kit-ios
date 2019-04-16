@@ -5,6 +5,7 @@ import HSBitcoinKit
 class WordsController: UIViewController {
 
     @IBOutlet weak var textView: UITextView?
+    @IBOutlet weak var kitTypeSegmentedControl: UISegmentedControl!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,7 +32,7 @@ class WordsController: UIViewController {
         do {
             try Mnemonic.validate(words: words)
 
-            Manager.shared.login(words: words)
+            Manager.shared.login(words: words, kitType: Manager.KitType(rawValue: kitTypeSegmentedControl.selectedSegmentIndex) ?? Manager.KitType.bitcoin)
 
             if let window = UIApplication.shared.keyWindow {
                 UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve, animations: {

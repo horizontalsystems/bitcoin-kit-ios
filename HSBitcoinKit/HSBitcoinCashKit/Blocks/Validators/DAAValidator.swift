@@ -20,23 +20,27 @@ class DAAValidator: IBlockValidator {
     }
 
     func validate(block: Block, previousBlock: Block) throws {
-        guard previousBlock.height >= firstCheckpointHeight + self.heightInterval + 3 else {
+        guard previousBlock.height >= firstCheckpointHeight + self.heightInterval + 4 else {
             return                                                                              // we must trust first 147 blocks from checkpoint, because can't calculate it's bits
         }
 
-        let lastBlock = try blockHelper.suitableBlock(for: previousBlock)
-        guard let previousWindowBlock = blockHelper.previous(for: previousBlock, count: self.heightInterval) else {
-             throw BitcoinCoreErrors.BlockValidation.noPreviousBlock
-        }
-        let firstBlock = try blockHelper.suitableBlock(for: previousWindowBlock)
-        let heightInterval = lastBlock.height - firstBlock.height
+        var blocks = blockHelper.previousWindow(for: previousBlock, count: 146) ?? [Block]()                                        // get all blocks without previousBlock needed for found suitable and range window
 
-        guard var blocks = blockHelper.previousWindow(for: lastBlock, count: heightInterval - 1) else {
+        guard !blocks.isEmpty else {
             throw BitcoinCoreErrors.BlockValidation.noPreviousBlock
         }
-        blocks.append(lastBlock)
+        blocks.append(previousBlock)                                                                                                // add previous block to have all 147
 
-        var timeSpan = lastBlock.timestamp - lastBlock.timestamp
+        guard let newLastBlockShift = blockHelper.suitableBlockIndex(for: Array(blocks.suffix(from: blocks.count - 3))),            // get suitable index for last 3 blocks
+              let newFirstBlockShift = blockHelper.suitableBlockIndex(for: Array(blocks.prefix(3))) else {                          // get suitable index for first 3 blocks
+
+            throw BitcoinCoreErrors.BlockValidation.noPreviousBlock
+        }
+
+        let startIndex = newFirstBlockShift + 1
+        let finishIndex = blocks.count - 3 + newLastBlockShift
+
+        var timeSpan = blocks[finishIndex].timestamp - blocks[newFirstBlockShift].timestamp
         if timeSpan > 2 * heightInterval * targetSpacing {
             timeSpan = 2 * heightInterval * targetSpacing
         } else if timeSpan < heightInterval / 2 * targetSpacing {
@@ -44,7 +48,7 @@ class DAAValidator: IBlockValidator {
         }
 
         var chainWork = BigInt(0)
-        for i in 0..<blocks.count {
+        for i in startIndex...finishIndex {
             let target = difficultyEncoder.decodeCompact(bits: blocks[i].bits)
             chainWork += largestHash / (target + 1)
         }

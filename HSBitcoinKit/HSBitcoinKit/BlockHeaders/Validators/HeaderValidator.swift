@@ -11,7 +11,7 @@ class HeaderValidator: IBlockValidator {
     func validate(block: Block, previousBlock: Block) throws {
         guard let headerHashBigInt = BigInt(block.headerHashReversedHex, radix: 16),
               headerHashBigInt < difficultyEncoder.decodeCompact(bits: block.bits) else {
-            throw BlockValidatorError.invalidProofOfWork
+            throw BitcoinCoreErrors.BlockValidation.invalidProofOfWork
         }
     }
 

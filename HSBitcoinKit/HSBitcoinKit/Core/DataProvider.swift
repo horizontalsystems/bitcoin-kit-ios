@@ -29,7 +29,7 @@ class DataProvider {
         self.balance = unspentOutputProvider.balance
         self.lastBlockInfo = storage.lastBlock.map { blockInfo(fromBlock: $0) }
 
-        balanceUpdateSubject.debounce(debounceTime, scheduler: ConcurrentDispatchQueueScheduler(qos: .background)).subscribe(onNext: {
+        balanceUpdateSubject.throttle(debounceTime, scheduler: ConcurrentDispatchQueueScheduler(qos: .background)).subscribe(onNext: {
             self.balance = unspentOutputProvider.balance
         }).disposed(by: disposeBag)
     }

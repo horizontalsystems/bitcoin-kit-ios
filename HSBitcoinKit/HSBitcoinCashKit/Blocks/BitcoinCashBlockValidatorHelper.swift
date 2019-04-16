@@ -19,18 +19,13 @@ class BitcoinCashBlockValidatorHelper: BlockValidatorHelper, IBitcoinCashBlockVa
         return median[median.count / 2]
     }
 
-    func suitableBlock(for block: Block) throws -> Block {
-        var blockArray = [(timestamp: Int, block: Block)]()
-        var currentBlock = block
-        for _ in 0..<3 {
-            blockArray.append((timestamp: currentBlock.timestamp, block: currentBlock))
-            guard let prevBlock = previous(for: currentBlock, count: 1) else {
-                throw BitcoinCoreErrors.BlockValidation.noPreviousBlock
-            }
-            currentBlock = prevBlock
+    func suitableBlockIndex(for blocks: [Block]) -> Int? {         // works just for 3 blocks
+        guard blocks.count == 3 else {
+            return nil
         }
-        blockArray.sort { $0.timestamp <= $1.timestamp }
-        return blockArray[1].block
+        let suitableBlock = blocks.sorted(by: { $1.timestamp > $0.timestamp })[1]
+
+        return blocks.firstIndex(where: { $0.height == suitableBlock.height })
     }
 
 }
