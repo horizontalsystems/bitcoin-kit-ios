@@ -102,6 +102,7 @@ protocol IStorage {
     func add(block: Block) throws
     func update(block: Block) throws
     func delete(blocks: [Block]) throws
+    func unstaleAllBlocks() throws
 
 
     func transaction(byHashHex: String) -> Transaction?
@@ -136,7 +137,6 @@ protocol IStorage {
 
 
     func clear() throws
-    func inTransaction(_ block: (() throws -> Void)) throws
 }
 
 protocol IFeeRateSyncer {
@@ -368,7 +368,7 @@ protocol IBlockchain {
 
     func connect(merkleBlock: MerkleBlock) throws -> Block
     func forceAdd(merkleBlock: MerkleBlock, height: Int) throws -> Block
-    func handleFork()
+    func handleFork() throws
     func deleteBlocks(blocks: [Block]) throws
 }
 

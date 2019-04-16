@@ -11,9 +11,11 @@ class TransactionProcessor {
     weak var listener: IBlockchainDataListener?
 
     private let dateGenerator: () -> Date
+    private let queue: DispatchQueue
 
     init(storage: IStorage, outputExtractor: ITransactionExtractor, inputExtractor: ITransactionExtractor, linker: ITransactionLinker, outputAddressExtractor: ITransactionOutputAddressExtractor, addressManager: IAddressManager, listener: IBlockchainDataListener? = nil,
-         dateGenerator: @escaping () -> Date = Date.init) {
+         dateGenerator: @escaping () -> Date = Date.init, queue: DispatchQueue = DispatchQueue(label: "Transactions", qos: .background
+    )) {
         self.storage = storage
         self.outputExtractor = outputExtractor
         self.inputExtractor = inputExtractor
@@ -22,6 +24,7 @@ class TransactionProcessor {
         self.addressManager = addressManager
         self.listener = listener
         self.dateGenerator = dateGenerator
+        self.queue = queue
     }
 
     private func hasUnspentOutputs(transaction: FullTransaction) -> Bool {
@@ -61,24 +64,27 @@ extension TransactionProcessor: ITransactionProcessor {
 
         var updated = [Transaction]()
         var inserted = [Transaction]()
-        for (index, transaction) in transactions.inTopologicalOrder().enumerated() {
-            if let existingTransaction = storage.transaction(byHashHex: transaction.header.dataHashReversedHex) {
-                relay(transaction: existingTransaction, withOrder: index, inBlock: block)
-                try storage.update(transaction: existingTransaction)
-                updated.append(existingTransaction)
-                continue
-            }
 
-            process(transaction: transaction)
+        try queue.sync {
+            for (index, transaction) in transactions.inTopologicalOrder().enumerated() {
+                if let existingTransaction = self.storage.transaction(byHashHex: transaction.header.dataHashReversedHex) {
+                    self.relay(transaction: existingTransaction, withOrder: index, inBlock: block)
+                    try self.storage.update(transaction: existingTransaction)
+                    updated.append(existingTransaction)
+                    continue
+                }
 
-            if transaction.header.isMine {
-                relay(transaction: transaction.header, withOrder: index, inBlock: block)
-                try storage.add(transaction: transaction)
+                self.process(transaction: transaction)
 
-                inserted.append(transaction.header)
+                if transaction.header.isMine {
+                    self.relay(transaction: transaction.header, withOrder: index, inBlock: block)
+                    try self.storage.add(transaction: transaction)
 
-                if !skipCheckBloomFilter {
-                    needToUpdateBloomFilter = needToUpdateBloomFilter || self.addressManager.gapShifts() || self.hasUnspentOutputs(transaction: transaction)
+                    inserted.append(transaction.header)
+
+                    if !skipCheckBloomFilter {
+                        needToUpdateBloomFilter = needToUpdateBloomFilter || self.addressManager.gapShifts() || self.hasUnspentOutputs(transaction: transaction)
+                    }
                 }
             }
         }

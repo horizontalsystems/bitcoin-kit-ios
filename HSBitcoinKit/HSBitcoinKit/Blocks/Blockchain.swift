@@ -11,13 +11,6 @@ class Blockchain {
         self.listener = listener
     }
 
-    private func unstaleAllBlocks() throws {
-        for block in storage.blocks(stale: true) {
-            block.stale = false
-            try storage.update(block: block)
-        }
-    }
-
 }
 
 extension Blockchain: IBlockchain {
@@ -51,28 +44,26 @@ extension Blockchain: IBlockchain {
         return block
     }
 
-    func handleFork() {
+    func handleFork() throws {
         guard let firstStaleHeight = storage.block(stale: true, sortedHeight: "ASC")?.height else {
             return
         }
 
         let lastNotStaleHeight = storage.block(stale: false, sortedHeight: "DESC")?.height ?? 0
 
-        try? storage.inTransaction {
-            if (firstStaleHeight <= lastNotStaleHeight) {
-                let lastStaleHeight = storage.block(stale: true, sortedHeight: "DESC")?.height ?? firstStaleHeight
+        if (firstStaleHeight <= lastNotStaleHeight) {
+            let lastStaleHeight = storage.block(stale: true, sortedHeight: "DESC")?.height ?? firstStaleHeight
 
-                if (lastStaleHeight > lastNotStaleHeight) {
-                    let notStaleBlocks = storage.blocks(heightGreaterThanOrEqualTo: firstStaleHeight, stale: false)
-                    try deleteBlocks(blocks: notStaleBlocks)
-                    try unstaleAllBlocks()
-                } else {
-                    let staleBlocks = storage.blocks(stale: true)
-                    try deleteBlocks(blocks: staleBlocks)
-                }
+            if (lastStaleHeight > lastNotStaleHeight) {
+                let notStaleBlocks = storage.blocks(heightGreaterThanOrEqualTo: firstStaleHeight, stale: false)
+                try deleteBlocks(blocks: notStaleBlocks)
+                try storage.unstaleAllBlocks()
             } else {
-                try unstaleAllBlocks()
+                let staleBlocks = storage.blocks(stale: true)
+                try deleteBlocks(blocks: staleBlocks)
             }
+        } else {
+            try storage.unstaleAllBlocks()
         }
     }
 

@@ -44,8 +44,8 @@ class AddressManager {
 
     private func publicKey(external: Bool) throws -> PublicKey {
         guard let unusedKey = storage.publicKeys()
-                .filter({ $0.external == external && !$0.used(storage: self.storage) })
-                .sorted(by: { $0.account < $1.account || ( $0.account == $1.account && $0.index < $1.index ) })
+                .filter({ $0.external == external && $0.account == 0 && !$0.used(storage: self.storage) })
+                .sorted(by: { $0.index < $1.index })
                 .first else {
             throw AddressManagerError.noUnusedPublicKey
         }

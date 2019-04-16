@@ -23,7 +23,7 @@ public extension Error {
     }
 
     // Same typed Equality
-    public func isEqual(to: Self) -> Bool {
+    func isEqual(to: Self) -> Bool {
         return self.reflectedString == to.reflectedString
     }
 

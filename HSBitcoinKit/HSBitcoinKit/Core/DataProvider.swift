@@ -23,13 +23,13 @@ class DataProvider {
 
     weak var delegate: IDataProviderDelegate?
 
-    init(storage: IStorage, unspentOutputProvider: IUnspentOutputProvider, debounceTime: Double = 0.5) {
+    init(storage: IStorage, unspentOutputProvider: IUnspentOutputProvider, throttleTime: Double = 0.5) {
         self.storage = storage
         self.unspentOutputProvider = unspentOutputProvider
         self.balance = unspentOutputProvider.balance
         self.lastBlockInfo = storage.lastBlock.map { blockInfo(fromBlock: $0) }
 
-        balanceUpdateSubject.debounce(debounceTime, scheduler: ConcurrentDispatchQueueScheduler(qos: .background)).subscribe(onNext: {
+        balanceUpdateSubject.throttle(throttleTime, scheduler: ConcurrentDispatchQueueScheduler(qos: .background)).subscribe(onNext: {
             self.balance = unspentOutputProvider.balance
         }).disposed(by: disposeBag)
     }
