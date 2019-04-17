@@ -113,11 +113,12 @@ protocol IStorage {
     func relayedTransactionExists(byReversedHashHex: String) -> Bool
     func add(transaction: FullTransaction) throws
     func update(transaction: Transaction) throws
+    func fullInfo(forTransactions: [TransactionWithBlock]) -> [FullTransactionForInfo]
+    func fullTransactionsInfo(fromTimestamp: Int?, fromOrder: Int?, limit: Int?) -> [FullTransactionForInfo]
 
     func outputsWithPublicKeys() -> [OutputWithPublicKey]
     func unspentOutputs() -> [UnspentOutput]
     func inputs(ofTransaction: Transaction) -> [Input]
-    func inputsWithBlock(ofOutput: Output) -> [InputWithBlock]
     func outputs(ofTransaction: Transaction) -> [Output]
     func previousOutput(ofInput: Input) -> Output?
     func hasInputs(ofOutput: Output) -> Bool
@@ -134,6 +135,7 @@ protocol IStorage {
     func publicKey(byScriptHashForP2WPKH: Data) -> PublicKey?
     func publicKey(byRawOrKeyHash: Data) -> PublicKey?
     func add(publicKeys: [PublicKey])
+    func publicKeysWithUsedState() -> [PublicKeyWithUsedState]
 
 
     func clear() throws
@@ -373,7 +375,7 @@ protocol IBlockchain {
 }
 
 protocol IBlockchainDataListener: class {
-    func onUpdate(updated: [Transaction], inserted: [Transaction])
+    func onUpdate(updated: [Transaction], inserted: [Transaction], inBlock: Block?)
     func onDelete(transactionHashes: [String])
     func onInsert(block: Block)
 }

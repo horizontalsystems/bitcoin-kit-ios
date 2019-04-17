@@ -529,27 +529,114 @@ extension GrdbStorage: IStorage {
         }
     }
 
+    func fullInfo(forTransactions transactionsWithBlocks: [TransactionWithBlock]) -> [FullTransactionForInfo] {
+        let transactionHashes: [String] = transactionsWithBlocks.map({ $0.transaction.dataHashReversedHex })
+        var inputs = [InputWithPreviousOutput]()
+        var outputs = [Output]()
+
+        try! dbPool.read { db in
+            for transactionHashChunks in transactionHashes.chunked(into: 999) {
+                let inputC = Input.Columns.allCases.count
+                let outputC = Output.Columns.allCases.count
+
+                let adapter = ScopeAdapter([
+                    "input": RangeRowAdapter(0..<inputC),
+                    "output": RangeRowAdapter(inputC..<inputC + outputC)
+                ])
+
+                let sql = """
+                          SELECT inputs.*, outputs.*
+                          FROM inputs
+                          LEFT JOIN outputs ON inputs.previousOutputTxReversedHex = outputs.transactionHashReversedHex AND inputs.previousOutputIndex = outputs."index"
+                          WHERE inputs.transactionHashReversedHex IN (\(transactionHashChunks.map({ "'" + $0 + "'" }).joined(separator: ",")))
+                          """
+                let rows = try Row.fetchCursor(db, sql, adapter: adapter)
+
+                while let row = try rows.next() {
+                    inputs.append(InputWithPreviousOutput(input: row["input"], previousOutput: row["output"]))
+                }
+
+                outputs.append(contentsOf: try Output.filter(transactionHashChunks.contains(Output.Columns.transactionHashReversedHex)).fetchAll(db))
+            }
+        }
+
+        var inputsByTransaction: [String: [InputWithPreviousOutput]] = Dictionary(grouping: inputs, by: { $0.input.transactionHashReversedHex })
+        var outputsByTransaction: [String: [Output]] = Dictionary(grouping: outputs, by: { $0.transactionHashReversedHex })
+        var results = [FullTransactionForInfo]()
+
+        for transactionWithBlock in transactionsWithBlocks {
+            let fullTransaction = FullTransactionForInfo(
+                    transactionWithBlock: transactionWithBlock,
+                    inputsWithPreviousOutputs: inputsByTransaction[transactionWithBlock.transaction.dataHashReversedHex] ?? [],
+                    outputs: outputsByTransaction[transactionWithBlock.transaction.dataHashReversedHex] ?? []
+            )
+
+            results.append(fullTransaction)
+        }
+
+        return results
+    }
+
+    func fullTransactionsInfo(fromTimestamp: Int?, fromOrder: Int?, limit: Int?) -> [FullTransactionForInfo] {
+        var transactions = [TransactionWithBlock]()
+
+        try! dbPool.read { db in
+            let transactionC = Transaction.Columns.allCases.count
+
+            let adapter = ScopeAdapter([
+                "transaction": RangeRowAdapter(0..<transactionC)
+            ])
+
+            var sql = """
+                      SELECT transactions.*, blocks.height as blockHeight
+                      FROM transactions
+                      LEFT JOIN blocks ON transactions.blockHashReversedHex = blocks.headerHashReversedHex
+                      ORDER BY transactions.timestamp DESC, transactions."order" DESC
+                      """
+
+            if let fromTimestamp = fromTimestamp, let fromOrder = fromOrder {
+                sql = sql + "WHERE transactions.timestamp < \(fromTimestamp) OR (transactions.timestamp == \(fromTimestamp) AND transactions.\"order\" < \(fromOrder))"
+            }
+
+            let rows = try Row.fetchCursor(db, sql, adapter: adapter)
+
+            while let row = try rows.next() {
+                transactions.append(TransactionWithBlock(transaction: row["transaction"], blockHeight: row["blockHeight"]))
+            }
+
+        }
+
+        return fullInfo(forTransactions: transactions)
+    }
+
+
     // Inputs and Outputs
+
     func outputsWithPublicKeys() -> [OutputWithPublicKey] {
         return try! dbPool.read { db in
             let outputC = Output.Columns.allCases.count
             let publicKeyC = PublicKey.Columns.allCases.count
+            let inputC = Input.Columns.allCases.count
 
             let adapter = ScopeAdapter([
                 "output": RangeRowAdapter(0..<outputC),
-                "publicKey": RangeRowAdapter(outputC..<outputC + publicKeyC)
+                "publicKey": RangeRowAdapter(outputC..<outputC + publicKeyC),
+                "input": RangeRowAdapter(outputC + publicKeyC..<outputC + publicKeyC + inputC)
             ])
 
             let sql = """
-                      SELECT outputs.*, publicKeys.*
+                      SELECT outputs.*, publicKeys.*, inputs.*, blocks.height AS blockHeight
                       FROM outputs 
                       INNER JOIN publicKeys ON outputs.publicKeyPath = publicKeys.path
+                      LEFT JOIN inputs ON inputs.previousOutputTxReversedHex = outputs.transactionHashReversedHex AND inputs.previousOutputIndex = outputs."index"
+                      LEFT JOIN transactions ON inputs.transactionHashReversedHex = transactions.dataHashReversedHex
+                      LEFT JOIN blocks ON transactions.blockHashReversedHex = blocks.headerHashReversedHex
                       """
             let rows = try Row.fetchCursor(db, sql, adapter: adapter)
 
             var outputs = [OutputWithPublicKey]()
             while let row = try rows.next() {
-                outputs.append(OutputWithPublicKey(output: row["output"], publicKey: row["publicKey"]))
+                outputs.append(OutputWithPublicKey(output: row["output"], publicKey: row["publicKey"], spendingInput: row["input"], spendingBlockHeight: row["blockHeight"]))
             }
 
             return outputs
@@ -563,17 +650,15 @@ extension GrdbStorage: IStorage {
             let outputC = Output.Columns.allCases.count
             let publicKeyC = PublicKey.Columns.allCases.count
             let transactionC = Transaction.Columns.allCases.count
-            let blockC = Block.Columns.allCases.count
 
             let adapter = ScopeAdapter([
                 "output": RangeRowAdapter(0..<outputC),
                 "publicKey": RangeRowAdapter(outputC..<outputC + publicKeyC),
-                "transaction": RangeRowAdapter(outputC + publicKeyC..<outputC + publicKeyC + transactionC),
-                "block": RangeRowAdapter(outputC + publicKeyC + transactionC..<outputC + publicKeyC + transactionC + blockC),
+                "transaction": RangeRowAdapter(outputC + publicKeyC..<outputC + publicKeyC + transactionC)
             ])
 
             let sql = """
-                      SELECT outputs.*, publicKeys.*, transactions.*, blocks.* 
+                      SELECT outputs.*, publicKeys.*, transactions.*, blocks.height AS blockHeight
                       FROM outputs 
                       INNER JOIN publicKeys ON outputs.publicKeyPath = publicKeys.path
                       INNER JOIN transactions ON outputs.transactionHashReversedHex = transactions.dataHashReversedHex
@@ -587,7 +672,7 @@ extension GrdbStorage: IStorage {
                 let output: Output = row["output"]
 
                 if !inputs.contains(where: { $0.previousOutputTxReversedHex == output.transactionHashReversedHex && $0.previousOutputIndex == output.index }) {
-                    outputs.append(UnspentOutput(output: output, publicKey: row["publicKey"], transaction: row["transaction"], block: row["block"]))
+                    outputs.append(UnspentOutput(output: output, publicKey: row["publicKey"], transaction: row["transaction"], blockHeight: row["blockHeight"]))
                 }
             }
 
@@ -598,34 +683,6 @@ extension GrdbStorage: IStorage {
     func inputs(ofTransaction transaction: Transaction) -> [Input] {
         return try! dbPool.read { db in
             try Input.filter(Input.Columns.transactionHashReversedHex == transaction.dataHashReversedHex).fetchAll(db)
-        }
-    }
-
-    func inputsWithBlock(ofOutput output: Output) -> [InputWithBlock] {
-        return try! dbPool.read { db in
-            let inputC = Input.Columns.allCases.count
-            let blockC = Block.Columns.allCases.count
-
-            let adapter = ScopeAdapter([
-                "input": RangeRowAdapter(0..<inputC),
-                "block": RangeRowAdapter(inputC..<inputC + blockC),
-            ])
-
-            let sql = """
-                      SELECT inputs.*, blocks.* 
-                      FROM inputs 
-                      INNER JOIN transactions ON inputs.transactionHashReversedHex = transactions.dataHashReversedHex
-                      LEFT JOIN blocks ON transactions.blockHashReversedHex = blocks.headerHashReversedHex
-                      WHERE inputs.previousOutputTxReversedHex = \(output.transactionHashReversedHex) AND inputs.previousOutputIndex = \(output.index)
-                      """
-            let rows = try Row.fetchCursor(db, sql, adapter: adapter)
-
-            var inputs = [InputWithBlock]()
-            while let row = try rows.next() {
-                inputs.append(InputWithBlock(input: row["input"], block: row["block"]))
-            }
-
-            return inputs
         }
     }
 
@@ -708,6 +765,30 @@ extension GrdbStorage: IStorage {
             for publicKey in publicKeys {
                 try publicKey.insert(db)
             }
+        }
+    }
+
+    func publicKeysWithUsedState() -> [PublicKeyWithUsedState] {
+        return try! dbPool.read { db in
+            let publicKeyC = PublicKey.Columns.allCases.count
+
+            let adapter = ScopeAdapter([
+                "publicKey": RangeRowAdapter(0..<publicKeyC)
+            ])
+
+            let sql = """
+                      SELECT publicKeys.*, outputs.transactionHashReversedHex
+                      FROM publicKeys
+                      LEFT JOIN outputs ON publicKeys.path = outputs.publicKeyPath
+                      """
+
+            let rows = try Row.fetchCursor(db, sql, adapter: adapter)
+            var publicKeys = [PublicKeyWithUsedState]()
+            while let row = try rows.next() {
+                publicKeys.append(PublicKeyWithUsedState(publicKey: row["publicKey"], used: row["transactionHashReversedHex"] != nil))
+            }
+
+            return publicKeys
         }
     }
 

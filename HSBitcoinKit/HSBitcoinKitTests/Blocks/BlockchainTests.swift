@@ -21,7 +21,6 @@ class BlockchainTest: QuickSpec {
             }
 
             stub(mockBlockchainDataListener) { mock in
-                when(mock.onUpdate(updated: any(), inserted: any())).thenDoNothing()
                 when(mock.onDelete(transactionHashes: any())).thenDoNothing()
                 when(mock.onInsert(block: any())).thenDoNothing()
             }

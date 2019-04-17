@@ -29,7 +29,7 @@ class TransactionProcessor {
 
     private func hasUnspentOutputs(transaction: FullTransaction) -> Bool {
         for output in transaction.outputs {
-            if output.publicKey(storage: storage) != nil, (output.scriptType == .p2wpkh || output.scriptType == .p2pk)  {
+            if output.publicKeyPath != nil, (output.scriptType == .p2wpkh || output.scriptType == .p2pk)  {
                 return true
             }
         }
@@ -90,7 +90,7 @@ extension TransactionProcessor: ITransactionProcessor {
         }
 
         if !updated.isEmpty || !inserted.isEmpty {
-            listener?.onUpdate(updated: updated, inserted: inserted)
+            listener?.onUpdate(updated: updated, inserted: inserted, inBlock: block)
         }
 
         if needToUpdateBloomFilter {
@@ -105,7 +105,7 @@ extension TransactionProcessor: ITransactionProcessor {
 
         process(transaction: transaction)
         try storage.add(transaction: transaction)
-        listener?.onUpdate(updated: [], inserted: [transaction.header])
+        listener?.onUpdate(updated: [], inserted: [transaction.header], inBlock: nil)
     }
 
 }

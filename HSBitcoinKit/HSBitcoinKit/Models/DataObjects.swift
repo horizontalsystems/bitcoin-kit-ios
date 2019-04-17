@@ -43,10 +43,26 @@ struct InputToSign {
 
 }
 
-struct InputWithBlock {
+struct OutputWithPublicKey {
+
+    let output: Output
+    let publicKey: PublicKey
+    let spendingInput: Input?
+    let spendingBlockHeight: Int?
+
+}
+
+struct InputWithPreviousOutput {
 
     let input: Input
-    let block: Block?
+    let previousOutput: Output?
+
+}
+
+struct TransactionWithBlock {
+
+    let transaction: Transaction
+    let blockHeight: Int?
 
 }
 
@@ -55,13 +71,21 @@ struct UnspentOutput {
     let output: Output
     let publicKey: PublicKey
     let transaction: Transaction
-    let block: Block?
+    let blockHeight: Int?
 
 }
 
-struct OutputWithPublicKey {
+struct FullTransactionForInfo {
 
-    let output: Output
+    let transactionWithBlock: TransactionWithBlock
+    let inputsWithPreviousOutputs: [InputWithPreviousOutput]
+    let outputs: [Output]
+
+}
+
+struct PublicKeyWithUsedState {
+
     let publicKey: PublicKey
+    let used: Bool
 
 }
