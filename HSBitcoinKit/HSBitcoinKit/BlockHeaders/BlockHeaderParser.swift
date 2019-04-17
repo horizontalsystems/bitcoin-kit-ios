@@ -1,20 +1,11 @@
-import Foundation
-import HSCryptoKit
+class BlockHeaderParser: IBlockHeaderParser {
+    private let hasher: IHasher
 
-class BlockHeaderSerializer {
-
-    static func serialize(header: BlockHeader) -> Data {
-        var data = Data()
-        data += Int32(header.version)
-        data += header.previousBlockHeaderHash
-        data += header.merkleRoot
-        data += UInt32(header.timestamp)
-        data += UInt32(header.bits)
-        data += UInt32(header.nonce)
-        return data
+    init(hasher: IHasher) {
+        self.hasher = hasher
     }
 
-    static func deserialize(byteStream: ByteStream, network: INetwork) -> BlockHeader {
+    func parse(byteStream: ByteStream) -> BlockHeader {
         let version = Int(byteStream.read(Int32.self))
         let previousBlockHeaderHash = byteStream.read(Data.self, count: 32)
         let merkleRoot = byteStream.read(Data.self, count: 32)
@@ -23,7 +14,7 @@ class BlockHeaderSerializer {
         let nonce = Int(byteStream.read(UInt32.self))
 
         let headerData = byteStream.data.prefix(80)
-        let headerHash = network.generateBlockHeaderHash(from: headerData)
+        let headerHash = hasher.hash(data: headerData)
 
         return BlockHeader(
                 version: version, headerHash: headerHash, previousBlockHeaderHash: previousBlockHeaderHash, merkleRoot: merkleRoot,

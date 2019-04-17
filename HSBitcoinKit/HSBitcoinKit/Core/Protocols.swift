@@ -465,8 +465,6 @@ protocol INetwork: class {
     var coinType: UInt32 { get }
     var sigHash: SigHashType { get }
     var syncableFromApi: Bool { get }
-
-    func generateBlockHeaderHash(from data: Data) -> Data
 }
 
 protocol IMerkleBlockValidator: class {
@@ -485,14 +483,14 @@ extension INetwork {
     var serviceFullNode: UInt64 { return 1 }
     var bloomFilter: Int32 { return 70000 }
 
-    func generateBlockHeaderHash(from data: Data) -> Data {
-        return CryptoKit.sha256sha256(data)
-    }
-
 }
 
 protocol INetworkMessageParser {
     func parse(data: Data) -> NetworkMessage?
+}
+
+protocol IBlockHeaderParser {
+    func parse(byteStream: ByteStream) -> BlockHeader
 }
 
 protocol INetworkMessageSerializer {
