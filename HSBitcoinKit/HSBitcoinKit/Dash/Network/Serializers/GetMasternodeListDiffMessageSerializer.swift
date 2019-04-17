@@ -1,9 +1,9 @@
-class GetMasternodeListDiffMessageSerializer: MessageSerializer {
-    override var id: String { return "getmnlistd" }
+class GetMasternodeListDiffMessageSerializer: IMessageSerializer {
+    var id: String { return "getmnlistd" }
 
-    override func process(_ request: IMessage) -> Data? {
-        guard let message = request as? GetMasternodeListDiffMessage else {
-            return nil
+    func serialize(message: IMessage) throws -> Data {
+        guard let message = message as? GetMasternodeListDiffMessage else {
+            throw BitcoinCoreErrors.MessageSerialization.wrongMessageSerializer
         }
 
         return message.baseBlockHash + message.blockHash

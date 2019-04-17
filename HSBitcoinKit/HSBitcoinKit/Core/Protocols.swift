@@ -489,17 +489,22 @@ protocol INetworkMessageParser {
     func parse(data: Data) -> NetworkMessage?
 }
 
+protocol IMessageParser {
+    var id: String { get }
+    func parse(data: Data) -> IMessage
+}
+
 protocol IBlockHeaderParser {
     func parse(byteStream: ByteStream) -> BlockHeader
 }
 
 protocol INetworkMessageSerializer {
-    func serialize(message: IMessage) -> Data?
+    func serialize(message: IMessage) throws -> Data
 }
 
-protocol IMessageParsersConfigurator {
-    var networkMessageParsers: MessageParsers { get }
-    var networkMessageSerializers: MessageSerializers { get }
+protocol IMessageSerializer {
+    var id: String { get }
+    func serialize(message: IMessage) throws -> Data
 }
 
 protocol IInventoryItemsHandler {

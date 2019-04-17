@@ -45,12 +45,14 @@ public class BitcoinCore {
         peerTaskHandlerChain.add(handler: peerTaskHandler)
     }
 
-    func add(messageParsers: MessageParsers) {
-        networkMessageParser.add(chain: messageParsers)
+    @discardableResult func add(messageParser: IMessageParser) -> Self {
+        networkMessageParser.add(parser: messageParser)
+        return self
     }
 
-    func add(messageSerializers: MessageSerializers) {
-        networkMessageSerializer.add(chain: messageSerializers)
+    @discardableResult func add(messageSerializer: IMessageSerializer) -> Self {
+        networkMessageSerializer.add(serializer: messageSerializer)
+        return self
     }
 
     func add(peerGroupListener: IPeerGroupListener) {

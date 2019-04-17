@@ -141,9 +141,13 @@ extension PeerConnection: IPeerConnection {
     }
 
     func send(message: IMessage) {
-        let data = networkMessageSerializer.serialize(message: message) ?? Data() //todo catch error when try send message not registered in serializers
-        _ = data.withUnsafeBytes {
-            outputStream?.write($0, maxLength: data.count)
+        do {
+            let data = try networkMessageSerializer.serialize(message: message)
+            _ = data.withUnsafeBytes {
+                outputStream?.write($0, maxLength: data.count)
+            }
+        } catch {
+            log("Connection can't send message \(message) with error \(error)", level: .error) //todo catch error when try send message not registered in serializers
         }
     }
 
