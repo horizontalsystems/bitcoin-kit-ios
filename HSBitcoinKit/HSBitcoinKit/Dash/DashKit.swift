@@ -65,16 +65,11 @@ public class DashKit: AbstractKit {
 
         let masternodeParser = MasternodeParser(hasher: singleHasher)
 
-        let dashMessageParsers = SetOfResponsibility()
-                .append(element: TransactionLockMessageParser())
-                .append(element: TransactionLockVoteMessageParser())
-                .append(element: MasternodeListDiffMessageParser(masternodeParser: masternodeParser))
+        bitcoinCore.add(messageParser: TransactionLockMessageParser())
+                .add(messageParser: TransactionLockVoteMessageParser())
+                .add(messageParser: MasternodeListDiffMessageParser(masternodeParser: masternodeParser))
 
-        let dashMessageSerializers = SetOfResponsibility()
-                .append(element: GetMasternodeListDiffMessageSerializer())
-
-        bitcoinCore.add(messageParsers: dashMessageParsers)
-        bitcoinCore.add(messageSerializers: dashMessageSerializers)
+        bitcoinCore.add(messageSerializer: GetMasternodeListDiffMessageSerializer())
 
         let blockHelper = BitcoinCashBlockValidatorHelper(storage: storage)
         let difficultyEncoder = DifficultyEncoder()
