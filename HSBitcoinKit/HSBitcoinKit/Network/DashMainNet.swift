@@ -55,8 +55,4 @@ class DashMainNet: INetwork {
                 height: 1030968)
     }
 
-    func generateBlockHeaderHash(from data: Data) -> Data {
-        return CryptoX11.x11(from: data)
-    }
-
 }

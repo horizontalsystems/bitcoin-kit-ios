@@ -174,10 +174,10 @@ class MemPoolMessageParser: MessageParser {
 class MerkleBlockMessageParser: MessageParser {
     override var id: String { return  "merkleblock" }
 
-    private let network: INetwork
+    private let blockHeaderParser: IBlockHeaderParser
 
-    init(network: INetwork) {
-        self.network = network
+    init(blockHeaderParser: IBlockHeaderParser) {
+        self.blockHeaderParser = blockHeaderParser
 
         super.init()
     }
@@ -185,7 +185,7 @@ class MerkleBlockMessageParser: MessageParser {
     override func process(_ request: Data) -> IMessage? {
         let byteStream = ByteStream(request)
 
-        let blockHeader = BlockHeaderSerializer.deserialize(byteStream: byteStream, network: network)
+        let blockHeader = blockHeaderParser.parse(byteStream: byteStream)
 
         let totalTransactions = byteStream.read(UInt32.self)
         let numberOfHashes = byteStream.read(VarInt.self)

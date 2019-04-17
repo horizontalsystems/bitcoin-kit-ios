@@ -1,8 +1,8 @@
 class NetworkMessageConfiguration: IMessageParsersConfigurator {
-    private let network: INetwork
+    private let blockHeaderParser: IBlockHeaderParser
 
-    init(network: INetwork) {
-        self.network = network
+    init(blockHeaderParser: IBlockHeaderParser) {
+        self.blockHeaderParser = blockHeaderParser
     }
 
     public var networkMessageParsers: MessageParsers {
@@ -15,7 +15,7 @@ class NetworkMessageConfiguration: IMessageParsersConfigurator {
                 .append(element: VerackMessageParser())
                 .append(element: VersionMessageParser())
                 .append(element: MemPoolMessageParser())
-                .append(element: MerkleBlockMessageParser(network: network))
+                .append(element: MerkleBlockMessageParser(blockHeaderParser: blockHeaderParser))
                 .append(element: TransactionMessageParser())
     }
     public var networkMessageSerializers: MessageSerializers {

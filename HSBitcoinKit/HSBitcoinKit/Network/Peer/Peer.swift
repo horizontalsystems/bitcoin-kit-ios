@@ -155,7 +155,7 @@ class Peer {
     }
 
     private func handle(message: AddressMessage) {
-        log("<-- ADDR: \(message.count) address(es)")
+        log("<-- ADDR: \(message.addressList.count) address(es)")
         delegate?.peer(self, didReceiveAddresses: message.addressList)
     }
 
@@ -194,7 +194,7 @@ class Peer {
     }
 
     private func handle(message: MerkleBlockMessage) throws {
-        log("<-- MERKLEBLOCK: \(CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: message.blockHeader)).reversedHex)")
+        log("<-- MERKLEBLOCK: \(message.blockHeader.headerHash.reversedHex)")
 
         let merkleBlock = try merkleBlockValidator.merkleBlock(from: message)
 
