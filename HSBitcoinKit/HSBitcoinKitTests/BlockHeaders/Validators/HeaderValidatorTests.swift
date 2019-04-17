@@ -6,58 +6,43 @@ import BigInt
 class HeaderValidatorTests: XCTestCase {
 
     private var validator: HeaderValidator!
-    private var network: MockINetwork!
 
+    private var previousBlock: Block!
     private var block: Block!
-    private var candidate: Block!
 
     override func setUp() {
         super.setUp()
 
         validator = HeaderValidator(encoder: DifficultyEncoder())
-        network = MockINetwork()
 
-        block = TestData.firstBlock
-        candidate = TestData.secondBlock
+        previousBlock = TestData.firstBlock
+        block = TestData.secondBlock
     }
 
     override func tearDown() {
         validator = nil
-        network = nil
 
+        previousBlock = nil
         block = nil
-        candidate = nil
 
         super.tearDown()
     }
 
     func testValidate() {
         do {
-            try validator.validate(candidate: candidate, block: block, network: network)
+            try validator.validate(block: block, previousBlock: previousBlock)
         } catch let error {
             XCTFail("\(error) Exception Thrown")
         }
     }
 
-    func testWrongPreviousHeaderHash() {
-        candidate.previousBlockHashReversedHex = Data(hex: "da1a")!.reversedHex
-        do {
-            try validator.validate(candidate: candidate, block: block, network: network)
-            XCTFail("wrongPreviousHeaderHash exception not thrown")
-        } catch let error as BlockValidatorError {
-            XCTAssertEqual(error, BlockValidatorError.wrongPreviousHeaderHash)
-        } catch {
-            XCTFail("Unknown exception thrown")
-        }
-    }
-
     func testWrongProofOfWork_nBitsLessThanHeaderHash() {
-        candidate.bits = DifficultyEncoder().encodeCompact(from: BigInt(candidate.headerHashReversedHex, radix: 16)! - 1)
+        block.bits = DifficultyEncoder().encodeCompact(from: BigInt(block.headerHashReversedHex, radix: 16)! - 1)
         do {
-            try validator.validate(candidate: candidate, block: block, network: network)
+            try validator.validate(block: block, previousBlock: previousBlock)
             XCTFail("invalidProveOfWork exception not thrown")
-        } catch let error as BlockValidatorError {
-            XCTAssertEqual(error, BlockValidatorError.invalidProofOfWork)
+        } catch let error as BitcoinCoreErrors.BlockValidation {
+            XCTAssertEqual(error, BitcoinCoreErrors.BlockValidation.invalidProofOfWork)
         } catch {
             XCTFail("Unknown exception thrown")
         }

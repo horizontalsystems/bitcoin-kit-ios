@@ -1,9 +1,6 @@
 import Foundation
 
 class BitcoinMainNet: INetwork {
-//    private let headerValidator: IBlockValidator
-//    private let bitsValidator: IBlockValidator
-//    private let difficultyValidator: IBlockValidator
 
     let name = "bitcoin-main-net"
     let pubKeyHash: UInt8 = 0x00
@@ -55,21 +52,6 @@ class BitcoinMainNet: INetwork {
                         nonce: 1427093839
                 ),
                 height: 564480)
-    }
-
-    required init() {
-//        headerValidator = validatorFactory.validator(for: .header)
-//        bitsValidator = validatorFactory.validator(for: .bits)
-//        difficultyValidator = validatorFactory.validator(for: .legacy)
-    }
-
-    func validate(block: Block, previousBlock: Block) throws {
-//        try headerValidator.validate(candidate: block, block: previousBlock, network: self)
-//        if isDifficultyTransitionPoint(height: block.height) {
-//            try difficultyValidator.validate(candidate: block, block: previousBlock, network: self)
-//        } else {
-//            try bitsValidator.validate(candidate: block, block: previousBlock, network: self)
-//        }
     }
 
 }

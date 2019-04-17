@@ -1,14 +1,15 @@
 import Foundation
 import BigInt
 
-class HeaderValidator: IBlockValidator {
-    let difficultyEncoder: IDifficultyEncoder
+class ProofOfWorkValidator: IBlockValidator {
+    private let difficultyEncoder: IDifficultyEncoder
 
-    init(encoder: IDifficultyEncoder) {
-        difficultyEncoder = encoder
+    init(difficultyEncoder: IDifficultyEncoder) {
+        self.difficultyEncoder = difficultyEncoder
     }
 
     func validate(block: Block, previousBlock: Block) throws {
+
         guard let headerHashBigInt = BigInt(block.headerHashReversedHex, radix: 16),
               headerHashBigInt < difficultyEncoder.decodeCompact(bits: block.bits) else {
             throw BitcoinCoreErrors.BlockValidation.invalidProofOfWork

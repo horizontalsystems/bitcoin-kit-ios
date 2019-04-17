@@ -5,6 +5,7 @@ import HSCryptoKit
 import RxSwift
 
 public class BitcoinKit: AbstractKit {
+    public enum NetworkType { case mainNet, testNet, regTest }
 
     public weak var delegate: BitcoinCoreDelegate? {
         didSet {
@@ -17,10 +18,15 @@ public class BitcoinKit: AbstractKit {
 
     private let storage: IStorage
 
-    public init(withWords words: [String], walletId: String, testMode: Bool = false, minLogLevel: Logger.Level = .verbose) throws {
-        let network: INetwork = testMode ? BitcoinTestNet() : BitcoinMainNet()
+    public init(withWords words: [String], walletId: String, networkType: NetworkType = .mainNet, minLogLevel: Logger.Level = .verbose) throws {
+        let network: INetwork
+        switch networkType {
+            case .mainNet: network = BitcoinMainNet()
+            case .testNet: network = BitcoinTestNet()
+            case .regTest: network = BitcoinRegTest()
+        }
 
-        let databaseFileName = "\(walletId)-bitcoin-\(testMode ? "test" : "")"
+        let databaseFileName = "\(walletId)-bitcoin-\(networkType)"
 
         let storage = GrdbStorage(databaseFileName: databaseFileName)
         self.storage = storage
@@ -43,14 +49,23 @@ public class BitcoinKit: AbstractKit {
 
         super.init(bitcoinCore: bitcoinCore, network: network)
 
-        extend(bitcoinCore: bitcoinCore)
-    }
-
-    func extend(bitcoinCore: BitcoinCore) {
+        // extending BitcoinCore
         let scriptConverter = ScriptConverter()
         let bech32 = SegWitBech32AddressConverter(prefix: network.bech32PrefixPattern, scriptConverter: scriptConverter)
 
         bitcoinCore.prepend(addressConverter: bech32)
+
+        let blockHelper = BlockValidatorHelper(storage: storage)
+        let difficultyEncoder = DifficultyEncoder()
+
+        switch networkType {
+        case .mainNet:
+            bitcoinCore.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: blockHelper, heightInterval: BitcoinCore.heightInterval, targetTimespan: BitcoinCore.heightInterval * BitcoinCore.targetSpacing, maxTargetBits: BitcoinCore.maxTargetBits))
+            bitcoinCore.add(blockValidator: BitsValidator())
+        case .regTest, .testNet:
+            bitcoinCore.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: blockHelper, heightInterval: BitcoinCore.heightInterval, targetTimespan: BitcoinCore.heightInterval * BitcoinCore.targetSpacing, maxTargetBits: BitcoinCore.maxTargetBits))
+            bitcoinCore.add(blockValidator: LegacyTestNetDifficultyValidator(blockHelper: blockHelper, heightInterval: BitcoinCore.heightInterval, targetSpacing: BitcoinCore.targetSpacing, maxTargetBits: BitcoinCore.maxTargetBits))
+        }
     }
 
 }

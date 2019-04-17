@@ -29,7 +29,7 @@ class DataProvider {
         self.balance = unspentOutputProvider.balance
         self.lastBlockInfo = storage.lastBlock.map { blockInfo(fromBlock: $0) }
 
-        balanceUpdateSubject.debounce(debounceTime, scheduler: ConcurrentDispatchQueueScheduler(qos: .background)).subscribe(onNext: {
+        balanceUpdateSubject.throttle(debounceTime, scheduler: ConcurrentDispatchQueueScheduler(qos: .background)).subscribe(onNext: {
             self.balance = unspentOutputProvider.balance
         }).disposed(by: disposeBag)
     }
@@ -98,7 +98,9 @@ extension DataProvider: IBlockchainDataListener {
 
     func onUpdate(updated: [Transaction], inserted: [Transaction]) {
         delegate?.transactionsUpdated(inserted: inserted.map { transactionInfo(fromTransaction: $0) },
-                updated: updated.map { transactionInfo(fromTransaction: $0) })
+                updated: updated.map {
+                    transactionInfo(fromTransaction: $0)
+                })
 
         balanceUpdateSubject.onNext(())
     }
@@ -144,25 +146,17 @@ extension DataProvider: IDataProvider {
     }
 
     var debugInfo: String {
-//        try? addressManager.fillGap()
-//
-//        var lines = [String]()
-//
+        var lines = [String]()
+
 //        let transactions = storage.transactions(sortedBy: Transaction.Columns.timestamp, secondSortedBy: Transaction.Columns.order, ascending: false)
-//        let pubKeys = storage.publicKeys()
-//
-//        for pubKey in pubKeys {
-//            var bechAddress: String?
-//            if network is BitcoinCashMainNet || network is BitcoinCashTestNet {
-//                bechAddress = try? addressConverter.convert(keyHash: pubKey.keyHash, type: .p2pkh).stringValue
-//            } else {
-//                bechAddress = try? addressConverter.convert(keyHash: OpCode.scriptWPKH(pubKey.keyHash), type: .p2wpkh).stringValue
-//            }
-//
+        let pubKeys = storage.publicKeys()
+
+        for pubKey in pubKeys {
+
 //            lines.append("\(pubKey.account) --- \(pubKey.index) --- \(pubKey.external) --- hash: \(pubKey.keyHash.hex) --- p2wkph(SH) hash: \(pubKey.scriptHashForP2WPKH.hex)")
-//            lines.append("legacy: \(addressConverter.convertToLegacy(keyHash: pubKey.keyHash, version: network.pubKeyHash, addressType: .pubKeyHash).stringValue) --- bech32: \(bechAddress ?? "none") --- SH(WPKH): \(addressConverter.convertToLegacy(keyHash: pubKey.scriptHashForP2WPKH, version: network.scriptHash, addressType: .scriptHash).stringValue) \n")
-//        }
-//        lines.append("PUBLIC KEYS COUNT: \(pubKeys.count)")
+            lines.append("acc: \(pubKey.account) - inx: \(pubKey.index) - ext: \(pubKey.external) : \((try! Base58AddressConverter(addressVersion: 0x6f, addressScriptVersion: 0xc4).convert(keyHash: pubKey.keyHash, type: .p2pkh)).stringValue)")
+        }
+        lines.append("PUBLIC KEYS COUNT: \(pubKeys.count)")
 //        lines.append("TRANSACTIONS COUNT: \(transactions.count)")
 //        lines.append("BLOCK COUNT: \(storage.blocksCount)")
 //        if let block = storage.firstBlock {
@@ -172,8 +166,7 @@ extension DataProvider: IDataProvider {
 //            lines.append("Last Block: \(block.height) --- \(block.headerHashReversedHex)")
 //        }
 //
-//        return lines.joined(separator: "\n")
-        return "debug"
+        return lines.joined(separator: "\n")
     }
 
 }

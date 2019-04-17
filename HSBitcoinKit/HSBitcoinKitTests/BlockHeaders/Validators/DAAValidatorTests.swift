@@ -26,25 +26,16 @@ class DAAValidatorTests: XCTestCase {
                                   1534807636, 1534808886, 1534809025, 1534809060, 1534809128, 1534809700, 1534811600, 1534812360, 1534813513, 1534814559, 1534815216, 1534816810, 1534816866, 1534817055, 1534817207, 1534817720, 1534817840, 1534818838, 1534819474, 1534820021] // 544319
 
     private var validator: DAAValidator!
-    private var network: MockINetwork!
-    private var storage: MockIStorage!
+    private var mockBlockHelper: MockIBitcoinCashBlockValidatorHelper!
 
-    private var candidate: Block!
+    private var blocks = [Block]()
 
     override func setUp() {
         super.setUp()
 
-        network = MockINetwork()
-        storage = MockIStorage()
+        mockBlockHelper = MockIBitcoinCashBlockValidatorHelper()
 
-        stub(network) { mock in
-            when(mock.heightInterval.get).thenReturn(144)
-            when(mock.targetTimeSpan.get).thenReturn(86400)
-            when(mock.maxTargetBits.get).thenReturn(0x1d00ffff)
-            when(mock.targetSpacing.get).thenReturn(600)
-        }
-
-        candidate = Block(
+        blocks.append(Block(
             withHeader: BlockHeader(
                     version: 536870912,
                     headerHash: Data(),
@@ -55,47 +46,95 @@ class DAAValidatorTests: XCTestCase {
                     nonce: 1748283264
             ),
             height: 544320)
+        )
 
-        validator = DAAValidator(storage: storage, encoder: DifficultyEncoder(), blockHelper: BlockHelper(storage: storage))
+        for i in 0..<147 {
+            let block = Block(
+                    withHeader: BlockHeader(version: 536870912, headerHash: Data(from: i), previousBlockHeaderHash: Data(from: i), merkleRoot: Data(), timestamp: timestampArray[timestampArray.count - i - 1], bits: bitsArray[bitsArray.count - i - 1], nonce: 0),
+                    height: blocks[0].height - i - 1
+            )
+            blocks.append(block)
+        }
+        stub(mockBlockHelper) { mock in
+            when(mock.previousWindow(for: equal(to: blocks[1]), count: 146)).thenReturn(Array(blocks[2...147].reversed()))
+            when(mock.suitableBlockIndex(for: equal(to: [blocks[145], blocks[146], blocks[147]].reversed()))).thenReturn(1)
+            when(mock.suitableBlockIndex(for: equal(to: [blocks[1], blocks[2], blocks[3]].reversed()))).thenReturn(1)
+        }
+
+        validator = DAAValidator(encoder: DifficultyEncoder(), blockHelper: mockBlockHelper, targetSpacing: 600, heightInterval: 144, firstCheckpointHeight: 544320 - 1 - 148) // previous block height - 148
     }
 
     override func tearDown() {
         validator = nil
-        network = nil
-        storage = nil
+        mockBlockHelper = nil
 
-        candidate = nil
+        blocks.removeAll()
 
         super.tearDown()
     }
 
     // MAKE real test data from bitcoin cash mainnet
-    func makeBlocks() {
-        var lastBlock = candidate!
-        stub(storage) { mock in
-            for i in 0..<148 {
-                let block = Block(
-                        withHeader: BlockHeader(version: 536870912, headerHash: Data(), previousBlockHeaderHash: Data(from: i), merkleRoot: Data(), timestamp: timestampArray[timestampArray.count - i - 1], bits: bitsArray[bitsArray.count - i - 1], nonce: 0),
-                        height: candidate.height - i - 1
-                )
-
-                lastBlock.previousBlockHashReversedHex = block.headerHashReversedHex
-                when(mock.block(byHashHex: lastBlock.previousBlockHashReversedHex)).thenReturn(block)
-
-                lastBlock = block
-            }
-
-            when(mock.block(byHashHex: lastBlock.previousBlockHashReversedHex)).thenReturn(nil)
-        }
-    }
-
     func testValidate() {
-        makeBlocks()
         do {
-            try validator.validate(candidate: candidate, block: candidate.previousBlock(storage: storage)!, network: network)
+            try validator.validate(block: blocks[0], previousBlock: blocks[1])
         } catch let error {
             XCTFail("\(error) Exception Thrown")
         }
+    }
+
+    func testTrustFirstBlocks() {
+        blocks[1].height = 544320 - 1 - 1 // previous block nearly than 148 blocks to checkpoint height
+
+        do {
+            try validator.validate(block: blocks[0], previousBlock: blocks[1])
+        } catch let error {
+            XCTFail("\(error) Exception Thrown")
+        }
+    }
+
+    func testNoPreviousBlock() {
+        stub(mockBlockHelper) { mock in
+            when(mock.previousWindow(for: equal(to: blocks[1]), count: 146)).thenReturn(nil)
+        }
+
+        do {
+            try validator.validate(block: blocks[0], previousBlock: blocks[1])
+        } catch let error as BitcoinCoreErrors.BlockValidation {
+            XCTAssertEqual(error, BitcoinCoreErrors.BlockValidation.noPreviousBlock)
+        } catch let error {
+            XCTFail("\(error) Exception Thrown")
+        }
+
+    }
+
+    func testNoPreviousBlock_FirstSuitable() {
+        stub(mockBlockHelper) { mock in
+            when(mock.suitableBlockIndex(for: equal(to: [blocks[145], blocks[146], blocks[147]].reversed()))).thenReturn(nil)
+        }
+
+        do {
+            try validator.validate(block: blocks[0], previousBlock: blocks[1])
+        } catch let error as BitcoinCoreErrors.BlockValidation {
+            XCTAssertEqual(error, BitcoinCoreErrors.BlockValidation.noPreviousBlock)
+        } catch let error {
+            XCTFail("\(error) Exception Thrown")
+        }
+
+    }
+
+    func testNoPreviousBlock_SecondSuitable() {
+        stub(mockBlockHelper) { mock in
+            when(mock.suitableBlockIndex(for: equal(to: [blocks[1], blocks[2], blocks[3]].reversed()))).thenReturn(nil)
+        }
+
+        do {
+            try validator.validate(block: blocks[0], previousBlock: blocks[1])
+        } catch let error as BitcoinCoreErrors.BlockValidation {
+            XCTAssertEqual(error, BitcoinCoreErrors.BlockValidation.noPreviousBlock)
+        } catch let error {
+            XCTFail("\(error) Exception Thrown")
+        }
+
     }
 
 }

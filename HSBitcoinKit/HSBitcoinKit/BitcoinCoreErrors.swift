@@ -27,4 +27,14 @@ public class BitcoinCoreErrors {
         case duplicatedLeftOrRightBranches
     }
 
+    enum BlockValidation: Error {
+        case noHeader
+        case noCheckpointBlock
+        case noPreviousBlock
+        case wrongPreviousHeader
+        case notEqualBits
+        case notDifficultyTransitionEqualBits
+        case invalidProofOfWork
+    }
+
 }

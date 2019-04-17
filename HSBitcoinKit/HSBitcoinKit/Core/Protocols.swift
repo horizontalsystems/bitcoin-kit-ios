@@ -10,14 +10,14 @@ protocol IDifficultyEncoder {
     func encodeCompact(from bigInt: BigInt) -> Int
 }
 
-protocol IBlockHelper {
-    func previous(for block: Block, index: Int) -> Block?
+protocol IBlockValidatorHelper {
+    func previous(for block: Block, count: Int) -> Block?
     func previousWindow(for block: Block, count: Int) -> [Block]?
-    func medianTimePast(block: Block) throws -> Int
 }
 
 protocol IBlockValidator: class {
-    func validate(candidate: Block, block: Block, network: INetwork) throws
+    func validate(block: Block, previousBlock: Block) throws
+    func isBlockValidatable(block: Block, previousBlock: Block) -> Bool
 }
 
 protocol IBlockValidatorFactory {
@@ -466,14 +466,6 @@ protocol INetwork: class {
     var sigHash: SigHashType { get }
     var syncableFromApi: Bool { get }
 
-    // difficulty adjustment params
-    var maxTargetBits: Int { get }                                      // Maximum difficulty.
-
-    var targetTimeSpan: Int { get }                                     // seconds per difficulty cycle, on average.
-    var targetSpacing: Int { get }                                      // minutes per block.
-    var heightInterval: Int { get }                                     // Blocks in cycle
-
-    func validate(block: Block, previousBlock: Block) throws
     func generateBlockHeaderHash(from data: Data) -> Data
 }
 
@@ -492,16 +484,6 @@ extension INetwork {
     var maxBlockSize: UInt32 { return 1_000_000 }
     var serviceFullNode: UInt64 { return 1 }
     var bloomFilter: Int32 { return 70000 }
-    var maxTargetBits: Int { return 0x1d00ffff }
-
-    var targetTimeSpan: Int { return 14 * 24 * 60 * 60 }                // Seconds in Bitcoin cycle
-    var targetSpacing: Int { return 10 * 60 }                           // 10 min. for mining 1 Block (Bitcoin)
-
-    var heightInterval: Int { return targetTimeSpan / targetSpacing }   // 2016 Blocks in Bitcoin cycle
-
-    func isDifficultyTransitionPoint(height: Int) -> Bool {
-        return height % heightInterval == 0
-    }
 
     func generateBlockHeaderHash(from data: Data) -> Data {
         return CryptoKit.sha256sha256(data)

@@ -9,76 +9,67 @@ class LegacyTestNetDifficultyValidatorTests: XCTestCase {
     let heightInterval = 2016
 
     private var validator: LegacyTestNetDifficultyValidator!
-    private var mockNetwork: MockINetwork!
-    private var mockStorage: MockIStorage!
+    private var mockBlockHelper: MockIBlockValidatorHelper!
 
     private var checkPointBlock: Block!
+    private var previousBlock: Block!
     private var block: Block!
-    private var candidate: Block!
 
     override func setUp() {
         super.setUp()
 
-        mockNetwork = MockINetwork()
-        mockStorage = MockIStorage()
+        mockBlockHelper = MockIBlockValidatorHelper()
 
-        candidate = TestData.secondBlock
-        candidate.height = 40320 + heightInterval
-        candidate.bits = 474199013
-        candidate.timestamp = 1266979264
+        block = TestData.secondBlock
+        block.height = 40320 + heightInterval
+        block.bits = 474199013
+        block.timestamp = 1266979264
 
-        block = TestData.firstBlock
-        block.height = 40320 + heightInterval - 1
-        block.bits = 476399191
-        block.timestamp = 1266978603
+        previousBlock = TestData.firstBlock
+        previousBlock.height = 40320 + heightInterval - 1
+        previousBlock.bits = 476399191
+        previousBlock.timestamp = 1266978603
 
         checkPointBlock = TestData.checkpointBlock
         checkPointBlock.height = 40320
         checkPointBlock.bits = 476399191
         checkPointBlock.timestamp = 1266169979
 
-        stub(mockNetwork) { mock in
-            when(mock.heightInterval.get).thenReturn(heightInterval)
-            when(mock.targetTimeSpan.get).thenReturn(targetSpacing * heightInterval)
-            when(mock.maxTargetBits.get).thenReturn(maxDifficulty)
-            when(mock.targetSpacing.get).thenReturn(targetSpacing)
-        }
-        stub(mockStorage) { mock in
-            when(mock.block(byHashHex: candidate.previousBlockHashReversedHex)).thenReturn(block)
+        stub(mockBlockHelper) { mock in
+            when(mock.previous(for: equal(to: block), count: 1)).thenReturn(previousBlock)
         }
 
-        validator = LegacyTestNetDifficultyValidator(storage: mockStorage)
+        validator = LegacyTestNetDifficultyValidator(blockHelper: mockBlockHelper, heightInterval: heightInterval, targetSpacing: targetSpacing, maxTargetBits: maxDifficulty)
     }
 
     override func tearDown() {
         validator = nil
-        mockNetwork = nil
-        mockStorage = nil
+        mockBlockHelper = nil
 
         checkPointBlock = nil
+        previousBlock = nil
         block = nil
-        candidate = nil
 
         super.tearDown()
     }
 
     func testValidate() {
-        block.bits = 474199013
-        block.timestamp = candidate.timestamp - targetSpacing
+        previousBlock.bits = 474199013
+        previousBlock.timestamp = block.timestamp - targetSpacing
 
         do {
-            try validator.validate(candidate: candidate, block: block, network: mockNetwork)
+            try validator.validate(block: block, previousBlock: previousBlock)
         } catch let error {
             XCTFail("\(error) Exception Thrown")
         }
     }
 
     func testValidateBigGap() {
-        block.bits = 17
-        block.timestamp = candidate.timestamp - targetSpacing * 3
+        previousBlock.bits = 17
+        previousBlock.timestamp = block.timestamp - targetSpacing * 3
 
         do {
-            try validator.validate(candidate: candidate, block: block, network: mockNetwork)
+            try validator.validate(block: block, previousBlock: previousBlock)
         } catch let error {
             XCTFail("\(error) Exception Thrown")
         }
@@ -86,47 +77,47 @@ class LegacyTestNetDifficultyValidatorTests: XCTestCase {
 
     func testValidateCheckpointDifficulty() {
         // check skip blocks with maximum difficulty and stop on checkpoint block. EqualVerify bits from checkpoint
-        stub(mockStorage) { mock in
-            when(mock.block(byHashHex: block.previousBlockHashReversedHex)).thenReturn(checkPointBlock)
+        stub(mockBlockHelper) { mock in
+            when(mock.previous(for: equal(to: previousBlock), count: 1)).thenReturn(checkPointBlock)
         }
 
         checkPointBlock.bits = maxDifficulty
+        previousBlock.bits = maxDifficulty
         block.bits = maxDifficulty
-        candidate.bits = maxDifficulty
 
-        block.height = checkPointBlock.height + 1
-        candidate.height = block.height + 1
+        previousBlock.height = checkPointBlock.height + 1
+        block.height = previousBlock.height + 1
 
-        checkPointBlock.timestamp = candidate.timestamp - targetSpacing * 2
-        block.timestamp = candidate.timestamp - targetSpacing
+        checkPointBlock.timestamp = block.timestamp - targetSpacing * 2
+        previousBlock.timestamp = block.timestamp - targetSpacing
 
         do {
-            try validator.validate(candidate: candidate, block: block, network: mockNetwork)
+            try validator.validate(block: block, previousBlock: previousBlock)
         } catch let error {
             XCTFail("\(error) Exception Thrown")
         }
 
         checkPointBlock.bits = 17
-        candidate.bits = 17
+        block.bits = 17
 
         do {
-            try validator.validate(candidate: candidate, block: block, network: mockNetwork)
+            try validator.validate(block: block, previousBlock: previousBlock)
         } catch let error {
             XCTFail("\(error) Exception Thrown")
         }
     }
 
     func testNoPreviousBlock() {
-        block.bits = maxDifficulty
-        stub(mockStorage) { mock in
-            when(mock.block(byHashHex: block.previousBlockHashReversedHex)).thenReturn(nil)
+        previousBlock.bits = maxDifficulty
+        stub(mockBlockHelper) { mock in
+            when(mock.previous(for: equal(to: previousBlock), count: 1)).thenReturn(nil)
         }
 
         do {
-            try validator.validate(candidate: candidate, block: block, network: mockNetwork)
+            try validator.validate(block: block, previousBlock: previousBlock)
             XCTFail("noHeader exception not thrown")
-        } catch let error as BlockValidatorError {
-            XCTAssertEqual(error, BlockValidatorError.noPreviousBlock)
+        } catch let error as BitcoinCoreErrors.BlockValidation {
+            XCTAssertEqual(error, BitcoinCoreErrors.BlockValidation.noPreviousBlock)
         } catch {
             XCTFail("Unknown exception thrown")
         }
@@ -134,10 +125,10 @@ class LegacyTestNetDifficultyValidatorTests: XCTestCase {
 
     func testNotDifficultyTransitionEqualBits() {
         do {
-            try validator.validate(candidate: candidate, block: block, network: mockNetwork)
+            try validator.validate(block: block, previousBlock: previousBlock)
             XCTFail("noHeader exception not thrown")
-        } catch let error as BlockValidatorError {
-            XCTAssertEqual(error, BlockValidatorError.notEqualBits)
+        } catch let error as BitcoinCoreErrors.BlockValidation {
+            XCTAssertEqual(error, BitcoinCoreErrors.BlockValidation.notEqualBits)
         } catch {
             XCTFail("Unknown exception thrown")
         }

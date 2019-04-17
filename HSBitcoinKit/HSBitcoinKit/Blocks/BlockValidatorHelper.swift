@@ -1,6 +1,5 @@
-class BlockHelper: IBlockValidatorHelper {
-    private let medianTimeSpan = 11
-    private let storage: IStorage
+class BlockValidatorHelper: IBlockValidatorHelper {
+    let storage: IStorage
 
     init(storage: IStorage) {
         self.storage = storage
@@ -25,24 +24,6 @@ class BlockHelper: IBlockValidatorHelper {
             }
         }
         return blocks
-    }
-
-    func medianTimePast(block: Block) throws -> Int {
-        var median = [Int]()
-        var currentBlock = block
-        for _ in 0..<medianTimeSpan {
-            median.append(currentBlock.timestamp)
-            if let prevBlock = currentBlock.previousBlock(storage: storage) {
-                currentBlock = prevBlock
-            } else {
-                break
-            }
-        }
-        median.sort()
-        guard !median.isEmpty else {
-            return block.timestamp
-        }
-        return median[median.count / 2]
     }
 
 }

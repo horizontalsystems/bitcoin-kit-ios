@@ -1,12 +1,4 @@
 class BitcoinCashMainNet: INetwork {
-    private static let diffDate = 1510600000 //  2017 November 3, 14:06 GMT
-
-//    private let headerValidator: IBlockValidator
-//    private let legacyDifficultyValidator: IBlockValidator
-//    private let dAAValidator: IBlockValidator
-//    private let eDAValidator: IBlockValidator
-
-//    private let blockHelper: IBlockHelper
 
     let name = "bitcoin-cash-main-net"
 

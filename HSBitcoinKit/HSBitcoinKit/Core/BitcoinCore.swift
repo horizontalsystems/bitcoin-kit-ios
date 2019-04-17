@@ -5,6 +5,10 @@ import HSCryptoKit
 import RxSwift
 
 public class BitcoinCore {
+    static let heightInterval = 2016                                    // Default block count in difficulty change circle ( Bitcoin )
+    static let targetSpacing = 10 * 60                                  // Time to mining one block ( 10 min. Bitcoin )
+    static let maxTargetBits = 0x1d00ffff                               // Initially and max. target difficulty for blocks
+
 
     private let storage: IStorage
     private var dataProvider: IDataProvider & IBlockchainDataListener
@@ -25,8 +29,13 @@ public class BitcoinCore {
     var peerGroup: IPeerGroup
     var transactionSyncer: ITransactionSyncer
 
+    let blockValidatorChain = BlockValidatorChain(proofOfWorkValidator: ProofOfWorkValidator(difficultyEncoder: DifficultyEncoder()))
     let inventoryItemsHandlerChain = InventoryItemsHandlerChain()
     let peerTaskHandlerChain = PeerTaskHandlerChain()
+
+    func add(blockValidator: IBlockValidator) {
+        blockValidatorChain.add(blockValidator: blockValidator)
+    }
 
     func add(inventoryItemsHandler: IInventoryItemsHandler) {
         inventoryItemsHandlerChain.add(handler: inventoryItemsHandler)

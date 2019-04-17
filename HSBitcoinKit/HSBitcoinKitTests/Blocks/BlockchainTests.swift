@@ -7,7 +7,7 @@ import Cuckoo
 class BlockchainTest: QuickSpec {
     override func spec() {
         let mockStorage = MockIStorage()
-        let mockNetwork = MockINetwork()
+        let mockBlockValidator = MockIBlockValidator()
         let mockFactory = MockIFactory()
         let mockBlockchainDataListener = MockIBlockchainDataListener()
         var blockchain: Blockchain!
@@ -26,11 +26,11 @@ class BlockchainTest: QuickSpec {
                 when(mock.onInsert(block: any())).thenDoNothing()
             }
 
-            blockchain = Blockchain(storage: mockStorage, network: mockNetwork, factory: mockFactory, listener: mockBlockchainDataListener)
+            blockchain = Blockchain(storage: mockStorage, blockValidator: mockBlockValidator, factory: mockFactory, listener: mockBlockchainDataListener)
         }
 
         afterEach {
-            reset(mockStorage, mockNetwork, mockFactory, mockBlockchainDataListener)
+            reset(mockStorage, mockBlockValidator, mockFactory, mockBlockchainDataListener)
             blockchain = nil
         }
 
@@ -104,7 +104,7 @@ class BlockchainTest: QuickSpec {
 
                     context("when block is invalid") {
                         it("doesn't add a block to storage") {
-                            stub(mockNetwork) { mock in
+                            stub(mockBlockValidator) { mock in
                                 when(mock.validate(block: equal(to: newBlock), previousBlock: equal(to: previousBlock))).thenThrow(BlockValidatorError.wrongPreviousHeaderHash)
                             }
 
@@ -126,7 +126,7 @@ class BlockchainTest: QuickSpec {
                         var connectedBlock: Block!
 
                         beforeEach {
-                            stub(mockNetwork) { mock in
+                            stub(mockBlockValidator) { mock in
                                 when(mock.validate(block: equal(to: newBlock), previousBlock: equal(to: previousBlock))).thenDoNothing()
                             }
 
@@ -134,7 +134,7 @@ class BlockchainTest: QuickSpec {
                         }
 
                         it("adds block to database") {
-                            verify(mockNetwork).validate(block: equal(to: newBlock), previousBlock: equal(to: previousBlock))
+                            verify(mockBlockValidator).validate(block: equal(to: newBlock), previousBlock: equal(to: previousBlock))
                             verify(mockFactory).block(withHeader: equal(to: merkleBlock.header), previousBlock: equal(to: previousBlock))
                             verify(mockBlockchainDataListener).onInsert(block: equal(to: newBlock))
                             verify(mockStorage).add(block: equal(to: newBlock))
@@ -165,7 +165,7 @@ class BlockchainTest: QuickSpec {
             }
 
             it("doesn't validate block") {
-                verify(mockNetwork, never()).validate(block: any(), previousBlock: any())
+                verify(mockBlockValidator, never()).validate(block: any(), previousBlock: any())
             }
 
             it("adds block to database") {

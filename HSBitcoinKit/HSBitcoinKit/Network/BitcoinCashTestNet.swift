@@ -1,7 +1,6 @@
 import Foundation
 
 class BitcoinCashTestNet: INetwork {
-//    private let headerValidator: IBlockValidator
 
     let name = "bitcoin-cash-test-net"
 
@@ -50,14 +49,6 @@ class BitcoinCashTestNet: INetwork {
                         nonce: 1684221831
                 ),
                 height: 1287761)
-    }
-
-    required init() {
-//        headerValidator = validatorFactory.validator(for: .header)
-    }
-
-    func validate(block: Block, previousBlock: Block) throws {
-//        try headerValidator.validate(candidate: block, block: previousBlock, network: self)
     }
 
 }

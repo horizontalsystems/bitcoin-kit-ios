@@ -2,10 +2,7 @@ import Foundation
 import HSCryptoX11
 
 class DashMainNet: INetwork {
-//    private let headerValidator: IBlockValidator
-//    private let difficultyValidator: IBlockValidator
-//    private let blockHelper: IBlockHelper
-//
+
     let protocolVersion: Int32 = 70213
 
     let name = "dash-main-net"
@@ -24,10 +21,6 @@ class DashMainNet: INetwork {
     let coinType: UInt32 = 5
     let sigHash: SigHashType = .bitcoinAll
     var syncableFromApi: Bool = true
-
-    var maxTargetBits: Int { return 0x1e0fffff }
-    var targetTimeSpan = 3600                          // 1 hour for 24 blocks
-    var targetSpacing = 150                           // 2.5 min. for mining 1 Block
 
     let dnsSeeds = [
         "dnsseed.dash.org",
@@ -60,21 +53,6 @@ class DashMainNet: INetwork {
                         nonce: 2813674015
                 ),
                 height: 1030968)
-    }
-
-    required init() {
-//        self.blockHelper = blockHelper
-//        headerValidator = validatorFactory.validator(for: .header)
-//        difficultyValidator = validatorFactory.validator(for: .DGW)
-//
-    }
-
-    func validate(block: Block, previousBlock: Block) throws {
-//        try headerValidator.validate(candidate: block, block: previousBlock, network: self)
-//        if blockHelper.previous(for: previousBlock, index: 24) == nil {                        //TODO: Remove trust first 24 block  in dash
-//            return
-//        }
-//        try difficultyValidator.validate(candidate: block, block: previousBlock, network: self)
     }
 
     func generateBlockHeaderHash(from data: Data) -> Data {
