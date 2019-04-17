@@ -13,6 +13,8 @@ class BitcoinCoreBuilder {
     private var feeRateApiResource: String?
     private var walletId: String?
 
+    private var blockHeaderHasher: IHasher?
+
     // parameters with default values
     private var confirmationsThreshold = 6
     private var newWallet = false
@@ -75,6 +77,11 @@ class BitcoinCoreBuilder {
         return self
     }
 
+    func set(blockHeaderHasher: IHasher) -> BitcoinCoreBuilder {
+        self.blockHeaderHasher = blockHeaderHasher
+        return self
+    }
+
     func build() throws -> BitcoinCore {
         let seed: Data
         if let selfSeed = self.seed {
@@ -125,8 +132,8 @@ class BitcoinCoreBuilder {
         let networkMessageParser = NetworkMessageParser(magic: network.magic)
         let networkMessageSerializer = NetworkMessageSerializer(magic: network.magic)
 
-        let hasher = MerkleRootHasher()
-        let merkleBranch = MerkleBranch(hasher: hasher)
+        let doubleShaHasher = MerkleRootHasher()
+        let merkleBranch = MerkleBranch(hasher: doubleShaHasher)
         let merkleBlockValidator = MerkleBlockValidator(maxBlockSize: network.maxBlockSize, merkleBranch: merkleBranch)
 
         let factory = Factory(network: network, networkMessageParser: networkMessageParser, networkMessageSerializer: networkMessageSerializer, merkleBlockValidator: merkleBlockValidator)
@@ -206,7 +213,8 @@ class BitcoinCoreBuilder {
 
         // this part can be moved to another place
 
-        let messageParsersConfigurator = NetworkMessageConfiguration(network: network)
+        let blockHeaderParser = BlockHeaderParser(hasher: blockHeaderHasher ?? doubleShaHasher)
+        let messageParsersConfigurator = NetworkMessageConfiguration(blockHeaderParser: blockHeaderParser)
         bitcoinCore.add(messageParsers: messageParsersConfigurator.networkMessageParsers)
         bitcoinCore.add(messageSerializers: messageParsersConfigurator.networkMessageSerializers)
 

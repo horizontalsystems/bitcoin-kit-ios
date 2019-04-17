@@ -40,6 +40,10 @@ public class DashKit: AbstractKit {
         let addressSelector = BitcoinAddressSelector()
         let apiFeeRateResource = "DASH"
 
+        let singleHasher = SingleHasher()   // Use single sha256 for hash
+        let doubleShaHasher = MerkleRootHasher()     // Use doubleSha256 for hash
+        let x11Hasher = X11Hasher()         // Use for block header hash
+
         let bitcoinCore = try BitcoinCoreBuilder()
                 .set(network: network)
                 .set(words: words)
@@ -50,6 +54,7 @@ public class DashKit: AbstractKit {
                 .set(peerSize: 4)
                 .set(storage: storage)
                 .set(newWallet: true)
+                .set(blockHeaderHasher: x11Hasher)
                 .build()
 
         super.init(bitcoinCore: bitcoinCore, network: network)
@@ -58,10 +63,8 @@ public class DashKit: AbstractKit {
 
         bitcoinCore.add(delegate: self)
 
-        let singleHasher = SingleHasher() // Use single sha256 for hash
-        let hasher = MerkleRootHasher() // Use doubleSha256 for hash
-
         let masternodeParser = MasternodeParser(hasher: singleHasher)
+
         let dashMessageParsers = SetOfResponsibility()
                 .append(element: TransactionLockMessageParser())
                 .append(element: TransactionLockVoteMessageParser())
@@ -85,14 +88,14 @@ public class DashKit: AbstractKit {
             bitcoinCore.add(blockValidator: DarkGravityWaveValidator(encoder: difficultyEncoder, blockHelper: blockHelper, heightInterval: DashKit.heightInterval, targetTimeSpan: targetTimespan, maxTargetBits: DashKit.maxTargetBits, firstCheckpointHeight: network.checkpointBlock.height))
         }
 
-        let merkleBranch = MerkleBranch(hasher: hasher)
+        let merkleBranch = MerkleBranch(hasher: doubleShaHasher)
 
         let masternodeSerializer = MasternodeSerializer()
         let coinbaseTransactionSerializer = CoinbaseTransactionSerializer()
-        let masternodeCbTxHasher = MasternodeCbTxHasher(coinbaseTransactionSerializer: coinbaseTransactionSerializer, hasher: hasher)
-        let masternodeMerkleRootCreator = MerkleRootCreator(hasher: hasher)
+        let masternodeCbTxHasher = MasternodeCbTxHasher(coinbaseTransactionSerializer: coinbaseTransactionSerializer, hasher: doubleShaHasher)
+        let masternodeMerkleRootCreator = MerkleRootCreator(hasher: doubleShaHasher)
 
-        let masternodeListMerkleRootCalculator = MasternodeListMerkleRootCalculator(masternodeSerializer: masternodeSerializer, masternodeHasher: hasher, masternodeMerkleRootCreator: masternodeMerkleRootCreator)
+        let masternodeListMerkleRootCalculator = MasternodeListMerkleRootCalculator(masternodeSerializer: masternodeSerializer, masternodeHasher: doubleShaHasher, masternodeMerkleRootCreator: masternodeMerkleRootCreator)
         let masternodeListManager = MasternodeListManager(storage: storage, masternodeListMerkleRootCalculator: masternodeListMerkleRootCalculator, masternodeCbTxHasher: masternodeCbTxHasher, merkleBranch: merkleBranch)
         let masternodeSyncer = MasternodeListSyncer(peerGroup: bitcoinCore.peerGroup, peerTaskFactory: PeerTaskFactory(), masternodeListManager: masternodeListManager)
         self.masternodeSyncer = masternodeSyncer

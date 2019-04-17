@@ -68,8 +68,4 @@ class DashTestNet: INetwork {
 //        try difficultyValidator.validate(candidate: block, block: previousBlock, network: self)
     }
 
-    func generateBlockHeaderHash(from data: Data) -> Data {
-        return CryptoX11.x11(from: data)
-    }
-
 }
