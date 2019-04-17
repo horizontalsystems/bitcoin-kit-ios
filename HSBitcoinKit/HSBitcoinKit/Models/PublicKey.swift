@@ -18,10 +18,6 @@ class PublicKey: Record {
     let scriptHashForP2WPKH: Data
     let keyHashHex: String
 
-    func used(storage: IStorage) -> Bool {
-        return storage.hasOutputs(ofPublicKey: self)
-    }
-
     init(withAccount account: Int, index: Int, external: Bool, hdPublicKeyData data: Data) {
         self.account = account
         self.index = index

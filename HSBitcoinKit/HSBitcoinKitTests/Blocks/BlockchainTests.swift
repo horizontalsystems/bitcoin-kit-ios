@@ -16,7 +16,6 @@ class BlockchainTest: QuickSpec {
             stub(mockStorage) { mock in
                 when(mock.unstaleAllBlocks()).thenDoNothing()
                 when(mock.add(block: any())).thenDoNothing()
-                when(mock.update(block: any())).thenDoNothing()
                 when(mock.delete(blocks: any())).thenDoNothing()
             }
 
@@ -260,7 +259,6 @@ class BlockchainTest: QuickSpec {
                     try! blockchain.handleFork()
 
                     verify(mockStorage, never()).delete(blocks: any())
-                    verify(mockStorage, never()).update(block: any())
                     verify(mockBlockchainDataListener, never()).onDelete(transactionHashes: any())
                 }
             }

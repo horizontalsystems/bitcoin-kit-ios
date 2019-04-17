@@ -12,11 +12,6 @@ class Input: Record {
     var address: String? = nil
     var witnessData = [Data]()
 
-    func transaction(storage: IStorage) -> Transaction? {
-        return storage.transaction(byHashHex: transactionHashReversedHex)
-    }
-
-
     init(withPreviousOutputTxReversedHex previousOutputTxReversedHex: String, previousOutputIndex: Int, script: Data, sequence: Int) {
         self.previousOutputTxReversedHex = previousOutputTxReversedHex
         self.previousOutputIndex = previousOutputIndex
@@ -25,7 +20,6 @@ class Input: Record {
 
         super.init()
     }
-
 
 
     override class var databaseTableName: String {

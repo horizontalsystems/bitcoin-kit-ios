@@ -17,14 +17,6 @@ class Transaction: Record {
     var status: TransactionStatus = .relayed
     var segWit: Bool = false
 
-    func block(storage: IStorage) -> Block? {
-        guard let blockHash = self.blockHashReversedHex else {
-            return nil
-        }
-
-        return storage.block(byHashHex: blockHash)
-    }
-
     init(version: Int = 0, lockTime: Int = 0, timestamp: Int? = nil) {
         self.version = version
         self.lockTime = lockTime

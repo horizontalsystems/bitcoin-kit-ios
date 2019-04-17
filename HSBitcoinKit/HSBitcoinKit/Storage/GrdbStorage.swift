@@ -15,7 +15,9 @@ public class GrdbStorage {
                 .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
                 .appendingPathComponent("\(databaseName).sqlite")
 
-        dbPool = try! DatabasePool(path: databaseURL.path)
+        var configuration = Configuration()
+//        configuration.trace = { print($0) }
+        dbPool = try! DatabasePool(path: databaseURL.path, configuration: configuration)
 
         try? migrator.migrate(dbPool)
     }
@@ -311,19 +313,6 @@ extension GrdbStorage: IStorage {
         }
     }
 
-    func blockHashes(filters: [(fieldName: BlockHash.Columns, value: Any, equal: Bool)], orders: [(fieldName: BlockHash.Columns, ascending: Bool)]) -> [BlockHash] {
-        return try! dbPool.read { db in
-            var request = BlockHash.all()
-
-            for (fieldName, value, equal) in filters {
-                let predicate = equal ? fieldName == DatabaseValue(value: value) : fieldName != DatabaseValue(value: value)
-                request = request.filter(predicate)
-            }
-
-            return try request.fetchAll(db)
-        }
-    }
-
     func blockHashesSortedBySequenceAndHeight(limit: Int) -> [BlockHash] {
         return try! dbPool.read { db in
             try BlockHash.order(BlockHash.Columns.sequence.asc).order(BlockHash.Columns.height.asc).limit(limit).fetchAll(db)
@@ -355,12 +344,6 @@ extension GrdbStorage: IStorage {
     var blocksCount: Int {
         return try! dbPool.read { db in
             try Block.fetchCount(db)
-        }
-    }
-
-    var firstBlock: Block? {
-        return try! dbPool.read { db in
-            try Block.order(Block.Columns.height.asc).fetchOne(db)
         }
     }
 
@@ -431,12 +414,6 @@ extension GrdbStorage: IStorage {
         }
     }
 
-    func update(block: Block) throws {
-        _ = try! dbPool.write { db in
-            try block.update(db)
-        }
-    }
-
     func delete(blocks: [Block]) throws {
         _ = try! dbPool.write { db in
             for block in blocks {
@@ -462,20 +439,6 @@ extension GrdbStorage: IStorage {
     func transaction(byHashHex hex: String) -> Transaction? {
         return try! dbPool.read { db in
             try Transaction.filter(Transaction.Columns.dataHashReversedHex == hex).fetchOne(db)
-        }
-    }
-
-    func transactions(sortedBy: Transaction.Columns, secondSortedBy: Transaction.Columns, ascending: Bool) -> [Transaction] {
-        return try! dbPool.read { db in
-            var sortItems = [SQLOrderingTerm]()
-
-            if ascending {
-                sortItems.append(contentsOf: [sortedBy.asc, secondSortedBy.asc])
-            } else {
-                sortItems.append(contentsOf: [sortedBy.desc, secondSortedBy.desc])
-            }
-
-            return try Transaction.order(sortItems).fetchAll(db)
         }
     }
 
@@ -701,20 +664,6 @@ extension GrdbStorage: IStorage {
         }
     }
 
-    func hasInputs(ofOutput output: Output) -> Bool {
-        return try! dbPool.read { db in
-            try Input
-                    .filter(Input.Columns.previousOutputTxReversedHex == output.transactionHashReversedHex)
-                    .filter(Input.Columns.previousOutputIndex == output.index)
-                    .fetchCount(db) > 1
-        }
-    }
-
-    func hasOutputs(ofPublicKey publicKey: PublicKey) -> Bool {
-        return try! dbPool.read { db in
-            try Output.filter(Output.Columns.publicKeyPath == publicKey.path).fetchCount(db) > 0
-        }
-    }
 
     // SentTransaction
     func sentTransaction(byReversedHashHex hex: String) -> SentTransaction? {

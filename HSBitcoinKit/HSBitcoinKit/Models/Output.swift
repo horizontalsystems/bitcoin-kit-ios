@@ -52,22 +52,6 @@ class Output: Record {
     var keyHash: Data? = nil
     var address: String? = nil
 
-    func transaction(storage: IStorage) -> Transaction? {
-        return storage.transaction(byHashHex: transactionHashReversedHex)
-    }
-
-    func publicKey(storage: IStorage) -> PublicKey? {
-        guard let publicKeyPath = self.publicKeyPath else {
-            return nil
-        }
-
-        return storage.publicKey(byPath: publicKeyPath)
-    }
-
-    func used(storage: IStorage) -> Bool {
-        return storage.hasInputs(ofOutput: self)
-    }
-
     init(withValue value: Int, index: Int, lockingScript script: Data, type: ScriptType = .unknown, address: String? = nil, keyHash: Data? = nil, publicKey: PublicKey? = nil) {
         self.value = value
         self.lockingScript = script
