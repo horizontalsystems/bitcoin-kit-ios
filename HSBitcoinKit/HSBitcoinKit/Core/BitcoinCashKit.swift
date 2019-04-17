@@ -50,7 +50,7 @@ public class BitcoinCashKit: AbstractKit {
                 .set(addressSelector: addressSelector)
                 .set(feeRateApiResource: apiFeeRateResource)
                 .set(walletId: walletId)
-                .set(peerSize: 2)
+                .set(peerSize: 4)
                 .set(newWallet: false)
                 .set(storage: storage)
                 .build()

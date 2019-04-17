@@ -130,6 +130,7 @@
 		58AAA1E4DEA7C5A4CD1DFFC0 /* LegacyTestNetDifficultyValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAB31CA6F582F89A1BA14 /* LegacyTestNetDifficultyValidatorTests.swift */; };
 		58AAA1E87B62806CD5891D43 /* Chunk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA3BE8FA350BD415CD5B3 /* Chunk.swift */; };
 		58AAA23384287398D79F14A6 /* TransactionPublicKeySetterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA97B8114B3CE27A6D32C /* TransactionPublicKeySetterTests.swift */; };
+		58AAA23C11EE046A20AD1340 /* BitcoinCashValidatorHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAABBFB45E5177623CD7A6 /* BitcoinCashValidatorHelperTests.swift */; };
 		58AAA295F8ED172253AE5A5F /* DashExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA259ACB2112D37CEDD10 /* DashExtensions.swift */; };
 		58AAA29706D539111A919497 /* AbstractKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA087C2B107DA9ABFF5DD /* AbstractKit.swift */; };
 		58AAA2A11E9FFB217530A47D /* InstantSendTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAED41598B02B3D1E90F5 /* InstantSendTests.swift */; };
@@ -146,6 +147,7 @@
 		58AAA3570F85F5A72E2377DB /* InventoryItemsHandlerChain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAB4C41058C7E06D10BFB /* InventoryItemsHandlerChain.swift */; };
 		58AAA3655F97C36233F755BF /* MasternodeSortedList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAB1D6A97B37E472A0A05 /* MasternodeSortedList.swift */; };
 		58AAA36E48DB45B72112973B /* TransactionCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAC66042A881E2F74AFD6 /* TransactionCreator.swift */; };
+		58AAA38464F53E04554572C5 /* DarkGravityWaveTestNetValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA027BD7C498F68027C9B /* DarkGravityWaveTestNetValidatorTests.swift */; };
 		58AAA39FBD94E9D1C7F0EFAF /* CoinbaseTransactionSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA08DDFB396EF5A2F051A /* CoinbaseTransactionSerializer.swift */; };
 		58AAA3A0474719B721A0E877 /* PaymentAddressParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA3FBA5C8CE3D9C678F5D /* PaymentAddressParserTests.swift */; };
 		58AAA3B243D1EE084C7B0FC8 /* NetworkMessageParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA5D8E61487D82ACFD9A6 /* NetworkMessageParser.swift */; };
@@ -417,6 +419,7 @@
 		3C7B9EBABAFF96958CFB2CB7 /* TransactionInputExtractorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionInputExtractorTests.swift; sourceTree = "<group>"; };
 		5718FF6FEB058540D331F8AA /* Pods-HSBitcoinKit.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HSBitcoinKit.release.xcconfig"; path = "../Pods/Target Support Files/Pods-HSBitcoinKit/Pods-HSBitcoinKit.release.xcconfig"; sourceTree = "<group>"; };
 		58AAA0125762CC01D08AB167 /* BitcoinPaymentData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinPaymentData.swift; sourceTree = "<group>"; };
+		58AAA027BD7C498F68027C9B /* DarkGravityWaveTestNetValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DarkGravityWaveTestNetValidatorTests.swift; sourceTree = "<group>"; };
 		58AAA03C460AC1CF08FEAD13 /* DashProtocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashProtocols.swift; sourceTree = "<group>"; };
 		58AAA0616D186C35DC0F3367 /* BlockHelperTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockHelperTests.swift; sourceTree = "<group>"; };
 		58AAA078A7C546673B2CB6B5 /* TransactionLockMessageParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionLockMessageParser.swift; sourceTree = "<group>"; };
@@ -487,7 +490,6 @@
 		58AAA7903061E05B9698EF80 /* SegWitBech32AddressConverter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegWitBech32AddressConverter.swift; sourceTree = "<group>"; };
 		58AAA791FAE75CECFFEB758E /* MerkleRootCreatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MerkleRootCreatorTests.swift; sourceTree = "<group>"; };
 		58AAA7A558CE79813F82840A /* CoinbaseTransaction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoinbaseTransaction.swift; sourceTree = "<group>"; };
-		58AAA7B3935DA210265716DF /* DarkGravityWaveValidator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DarkGravityWaveValidator.swift; path = ../../Dash/Blocks/Validators/DarkGravityWaveValidator.swift; sourceTree = "<group>"; };
 		58AAA7B8F141FBC32B735966 /* TransactionOutputAddressExtractorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionOutputAddressExtractorTests.swift; sourceTree = "<group>"; };
 		58AAA802FEC6665E48786D37 /* RequestTransactionLockVotesTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestTransactionLockVotesTask.swift; sourceTree = "<group>"; };
 		58AAA83A08FA97C685C8E640 /* BloomFilterLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BloomFilterLoader.swift; sourceTree = "<group>"; };
@@ -526,6 +528,7 @@
 		58AAAB709C58E0E9DC3F074B /* DataListSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataListSerializer.swift; sourceTree = "<group>"; };
 		58AAAB994FBA1E42999E4968 /* BitsValidator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitsValidator.swift; sourceTree = "<group>"; };
 		58AAABB3D5ADE294A982242A /* MasternodeListSyncer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeListSyncer.swift; sourceTree = "<group>"; };
+		58AAABBFB45E5177623CD7A6 /* BitcoinCashValidatorHelperTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinCashValidatorHelperTests.swift; sourceTree = "<group>"; };
 		58AAABDF62BBC64C9A3363A6 /* ScriptConverterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScriptConverterTests.swift; sourceTree = "<group>"; };
 		58AAAC136573542B0D16C283 /* BlockHashFetcherHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockHashFetcherHelper.swift; sourceTree = "<group>"; };
 		58AAAC2509D14580B4A36FAC /* DAAValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DAAValidatorTests.swift; sourceTree = "<group>"; };
@@ -868,6 +871,7 @@
 				11B352A955F667DC0C23CE1C /* BlockSyncerTests.swift */,
 				2FA5D82EFF381CE6233790A9 /* KitStateProviderTests.swift */,
 				58AAA5EE018C74544938121F /* MerkleBlockValidatorTests.swift */,
+				58AAABBFB45E5177623CD7A6 /* BitcoinCashValidatorHelperTests.swift */,
 			);
 			path = Blocks;
 			sourceTree = "<group>";
@@ -1083,6 +1087,7 @@
 				58AAA925AA61EB0BA46B7EAC /* LegacyDifficultyAdjustmentValidatorTests.swift */,
 				58AAAB31CA6F582F89A1BA14 /* LegacyTestNetDifficultyValidatorTests.swift */,
 				58AAA72900BAA32079D43749 /* DarkGravityWaveValidatorTests.swift */,
+				58AAA027BD7C498F68027C9B /* DarkGravityWaveTestNetValidatorTests.swift */,
 			);
 			path = Validators;
 			sourceTree = "<group>";
@@ -1197,7 +1202,6 @@
 				58AAA287F4FED7ECEA0C7A6F /* EDAValidator.swift */,
 				58AAA902722CF6B773724894 /* HeaderValidator.swift */,
 				58AAAB4878F15C91F08E0C15 /* BlockValidatorError.swift */,
-				58AAA7B3935DA210265716DF /* DarkGravityWaveValidator.swift */,
 			);
 			path = Validators;
 			sourceTree = "<group>";
@@ -1780,6 +1784,8 @@
 				58AAA2A11E9FFB217530A47D /* InstantSendTests.swift in Sources */,
 				58AAA10C4F6C724DD75542AE /* InstantTransactionManagerTests.swift in Sources */,
 				58AAA5F757D1F6C31931BD17 /* TransactionLockVoteValidatorTests.swift in Sources */,
+				58AAA23C11EE046A20AD1340 /* BitcoinCashValidatorHelperTests.swift in Sources */,
+				58AAA38464F53E04554572C5 /* DarkGravityWaveTestNetValidatorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
