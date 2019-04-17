@@ -160,7 +160,6 @@ class BitcoinCoreBuilder {
 
         let peerManager = PeerManager()
 
-
         let peerGroup = PeerGroup(factory: factory, reachabilityManager: reachabilityManager,
                 peerAddressManager: peerAddressManager, peerCount: peerCount, peerManager: peerManager, logger: logger)
 
@@ -214,9 +213,27 @@ class BitcoinCoreBuilder {
         // this part can be moved to another place
 
         let blockHeaderParser = BlockHeaderParser(hasher: blockHeaderHasher ?? doubleShaHasher)
-        let messageParsersConfigurator = NetworkMessageConfiguration(blockHeaderParser: blockHeaderParser)
-        bitcoinCore.add(messageParsers: messageParsersConfigurator.networkMessageParsers)
-        bitcoinCore.add(messageSerializers: messageParsersConfigurator.networkMessageSerializers)
+        bitcoinCore.add(messageParser: AddressMessageParser())
+                .add(messageParser: GetDataMessageParser())
+                .add(messageParser: InventoryMessageParser())
+                .add(messageParser: PingMessageParser())
+                .add(messageParser: PongMessageParser())
+                .add(messageParser: VerackMessageParser())
+                .add(messageParser: VersionMessageParser())
+                .add(messageParser: MemPoolMessageParser())
+                .add(messageParser: MerkleBlockMessageParser(blockHeaderParser: blockHeaderParser))
+                .add(messageParser: TransactionMessageParser())
+
+        bitcoinCore.add(messageSerializer: GetDataMessageSerializer())
+                .add(messageSerializer: GetBlocksMessageSerializer())
+                .add(messageSerializer: InventoryMessageSerializer())
+                .add(messageSerializer: PingMessageSerializer())
+                .add(messageSerializer: PongMessageSerializer())
+                .add(messageSerializer: VerackMessageSerializer())
+                .add(messageSerializer: MempoolMessageSerializer())
+                .add(messageSerializer: VersionMessageSerializer())
+                .add(messageSerializer: TransactionMessageSerializer())
+                .add(messageSerializer: FilterLoadMessageSerializer())
 
         let bloomFilterLoader = BloomFilterLoader(bloomFilterManager: bloomFilterManager)
         bloomFilterManager.delegate = bloomFilterLoader

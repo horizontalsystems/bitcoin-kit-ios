@@ -37,4 +37,9 @@ public class BitcoinCoreErrors {
         case invalidProofOfWork
     }
 
+    enum MessageSerialization: Error {
+        case noMessageSerializer
+        case wrongMessageSerializer
+    }
+
 }

@@ -1,24 +1,21 @@
 import HSCryptoKit
 
-typealias MessageSerializers = SetOfResponsibility<IMessage, Data>
-typealias MessageSerializer = ListElement<IMessage, Data>
-
 class NetworkMessageSerializer: INetworkMessageSerializer {
     let magic: UInt32
-    var messageSerializers = MessageSerializers()
+    var messageSerializers = [String: IMessageSerializer]()
 
     init(magic: UInt32) {
         self.magic = magic
     }
 
-    func add(chain element: MessageSerializers) {
-        messageSerializers.union(element)
+    func add(serializer: IMessageSerializer) {
+        messageSerializers[serializer.id] = serializer
     }
 
-    func serialize(message: IMessage) -> Data? {
-        guard let messageData = messageSerializers.process(id: message.command, message) else {
-            print("Can't serialize \(String(describing: message))")
-            return nil
+    func serialize(message: IMessage) throws -> Data {
+        guard let messageData = try messageSerializers[message.command]?.serialize(message: message) else {
+            print("Can't find serializer for \(message.command)")
+            throw BitcoinCoreErrors.MessageSerialization.noMessageSerializer
         }
         let checksum = Data(CryptoKit.sha256sha256(messageData).prefix(4))
         let length = UInt32(messageData.count)
@@ -37,12 +34,12 @@ class NetworkMessageSerializer: INetworkMessageSerializer {
 
 }
 
-class GetDataMessageSerializer: MessageSerializer {
-    override var id: String { return "getdata" }
+class GetDataMessageSerializer: IMessageSerializer {
+    var id: String { return "getdata" }
 
-    override func process(_ request: IMessage) -> Data? {
-        guard let message = request as? GetDataMessage else {
-            return nil
+    func serialize(message: IMessage) throws -> Data {
+        guard let message = message as? GetDataMessage else {
+            throw BitcoinCoreErrors.MessageSerialization.wrongMessageSerializer
         }
 
         var data = Data()
@@ -57,12 +54,12 @@ class GetDataMessageSerializer: MessageSerializer {
 
 }
 
-class GetBlocksMessageSerializer: MessageSerializer {
-    override var id: String { return "getblocks" }
+class GetBlocksMessageSerializer: IMessageSerializer {
+    var id: String { return "getblocks" }
 
-    override func process(_ request: IMessage) -> Data? {
-        guard let message = request as? GetBlocksMessage else {
-            return nil
+    func serialize(message: IMessage) throws -> Data {
+        guard let message = message as? GetBlocksMessage else {
+            throw BitcoinCoreErrors.MessageSerialization.wrongMessageSerializer
         }
 
         var data = Data()
@@ -77,12 +74,12 @@ class GetBlocksMessageSerializer: MessageSerializer {
 
 }
 
-class InventoryMessageSerializer: MessageSerializer {
-    override var id: String { return "inv" }
+class InventoryMessageSerializer: IMessageSerializer {
+    var id: String { return "inv" }
 
-    override func process(_ request: IMessage) -> Data? {
-        guard let message = request as? InventoryMessage else {
-            return nil
+    func serialize(message: IMessage) throws -> Data {
+        guard let message = message as? InventoryMessage else {
+            throw BitcoinCoreErrors.MessageSerialization.wrongMessageSerializer
         }
 
         var data = Data()
@@ -95,12 +92,12 @@ class InventoryMessageSerializer: MessageSerializer {
 
 }
 
-class PingMessageSerializer: MessageSerializer {
-    override var id: String { return "ping" }
+class PingMessageSerializer: IMessageSerializer {
+    var id: String { return "ping" }
 
-    override func process(_ request: IMessage) -> Data? {
-        guard let message = request as? PingMessage else {
-            return nil
+    func serialize(message: IMessage) throws -> Data {
+        guard let message = message as? PingMessage else {
+            throw BitcoinCoreErrors.MessageSerialization.wrongMessageSerializer
         }
 
         var data = Data()
@@ -110,12 +107,12 @@ class PingMessageSerializer: MessageSerializer {
 
 }
 
-class PongMessageSerializer: MessageSerializer {
-    override var id: String { return "pong" }
+class PongMessageSerializer: IMessageSerializer {
+    var id: String { return "pong" }
 
-    override func process(_ request: IMessage) -> Data? {
-        guard let message = request as? PongMessage else {
-            return nil
+    func serialize(message: IMessage) throws -> Data {
+        guard let message = message as? PongMessage else {
+            throw BitcoinCoreErrors.MessageSerialization.wrongMessageSerializer
         }
 
         var data = Data()
@@ -125,12 +122,12 @@ class PongMessageSerializer: MessageSerializer {
 
 }
 
-class VersionMessageSerializer: MessageSerializer {
-    override var id: String { return "version" }
+class VersionMessageSerializer: IMessageSerializer {
+    var id: String { return "version" }
 
-    override func process(_ request: IMessage) -> Data? {
-        guard let message = request as? VersionMessage else {
-            return nil
+    func serialize(message: IMessage) throws -> Data {
+        guard let message = message as? VersionMessage else {
+            throw BitcoinCoreErrors.MessageSerialization.wrongMessageSerializer
         }
 
         var data = Data()
@@ -148,12 +145,12 @@ class VersionMessageSerializer: MessageSerializer {
 
 }
 
-class VerackMessageSerializer: MessageSerializer {
-    override var id: String { return "verack" }
+class VerackMessageSerializer: IMessageSerializer {
+    var id: String { return "verack" }
 
-    override func process(_ request: IMessage) -> Data? {
-        guard request is VerackMessage else {
-            return nil
+    func serialize(message: IMessage) throws -> Data {
+        guard message is VerackMessage else {
+            throw BitcoinCoreErrors.MessageSerialization.wrongMessageSerializer
         }
 
         return Data()
@@ -161,12 +158,12 @@ class VerackMessageSerializer: MessageSerializer {
 
 }
 
-class MempoolMessageSerializer: MessageSerializer {
-    override var id: String { return "mempool" }
+class MempoolMessageSerializer: IMessageSerializer {
+    var id: String { return "mempool" }
 
-    override func process(_ request: IMessage) -> Data? {
-        guard request is MemPoolMessage else {
-            return nil
+    func serialize(message: IMessage) throws -> Data {
+        guard message is MemPoolMessage else {
+            throw BitcoinCoreErrors.MessageSerialization.wrongMessageSerializer
         }
 
         return Data()
@@ -174,12 +171,12 @@ class MempoolMessageSerializer: MessageSerializer {
 
 }
 
-class TransactionMessageSerializer: MessageSerializer {
-    override var id: String { return "tx" }
+class TransactionMessageSerializer: IMessageSerializer {
+    var id: String { return "tx" }
 
-    override func process(_ request: IMessage) -> Data? {
-        guard let message = request as? TransactionMessage else {
-            return nil
+    func serialize(message: IMessage) throws -> Data {
+        guard let message = message as? TransactionMessage else {
+            throw BitcoinCoreErrors.MessageSerialization.wrongMessageSerializer
         }
 
         return TransactionSerializer.serialize(transaction: message.transaction)
@@ -187,12 +184,12 @@ class TransactionMessageSerializer: MessageSerializer {
 
 }
 
-class FilterLoadMessageSerializer: MessageSerializer {
-    override var id: String { return "filterload" }
+class FilterLoadMessageSerializer: IMessageSerializer {
+    var id: String { return "filterload" }
 
-    override func process(_ request: IMessage) -> Data? {
-        guard let message = request as? FilterLoadMessage else {
-            return nil
+    func serialize(message: IMessage) throws -> Data {
+        guard let message = message as? FilterLoadMessage else {
+            throw BitcoinCoreErrors.MessageSerialization.wrongMessageSerializer
         }
 
         let bloomFilter = message.bloomFilter
