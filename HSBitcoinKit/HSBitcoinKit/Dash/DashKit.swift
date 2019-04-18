@@ -71,7 +71,7 @@ public class DashKit: AbstractKit {
 
         bitcoinCore.add(messageSerializer: GetMasternodeListDiffMessageSerializer())
 
-        let blockHelper = BitcoinCashBlockValidatorHelper(storage: storage)
+        let blockHelper = BlockValidatorHelper(storage: storage)
         let difficultyEncoder = DifficultyEncoder()
 
         let targetTimespan = DashKit.heightInterval * DashKit.targetSpacing                 // Time to mining all 24 blocks in circle

@@ -20,7 +20,7 @@ public class BitcoinCashKit: AbstractKit {
         }
     }
 
-    private let storage: IStorage
+    private let storage: IBitcoinCashStorage
 
     public init(withWords words: [String], walletId: String, networkType: NetworkType = .mainNet, minLogLevel: Logger.Level = .verbose) throws {
         let network: INetwork
@@ -36,7 +36,7 @@ public class BitcoinCashKit: AbstractKit {
 
         let databaseFileName = "\(walletId)-bitcoincash-\(networkType)"
 
-        let storage = GrdbStorage(databaseFileName: databaseFileName)
+        let storage = BitcoinCashGrdbStorage(databaseFileName: databaseFileName)
         self.storage = storage
 
         let paymentAddressParser = PaymentAddressParser(validScheme: validScheme, removeScheme: false)

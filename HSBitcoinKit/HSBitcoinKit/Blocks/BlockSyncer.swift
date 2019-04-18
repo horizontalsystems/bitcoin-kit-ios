@@ -112,7 +112,7 @@ extension BlockSyncer: IBlockSyncer {
             }
         }
 
-        if let peerLastBlock = storage.block(byHeight: peerLastBlockHeight) {
+        if let peerLastBlock = storage.block(byHeight: Int(peerLastBlockHeight)) {
             if !blockLocatorHashes.contains(peerLastBlock.headerHash) {
                 blockLocatorHashes.append(peerLastBlock.headerHash)
             }

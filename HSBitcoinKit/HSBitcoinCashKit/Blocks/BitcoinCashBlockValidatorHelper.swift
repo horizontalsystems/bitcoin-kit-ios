@@ -1,21 +1,20 @@
 class BitcoinCashBlockValidatorHelper: BlockValidatorHelper, IBitcoinCashBlockValidatorHelper {
     private let medianTimeSpan = 11
+    private let bitcoinCashStorage: IBitcoinCashStorage
 
-    func medianTimePast(block: Block) throws -> Int {
-        var median = [Int]()
-        var currentBlock = block
-        for _ in 0..<medianTimeSpan {
-            median.append(currentBlock.timestamp)
-            if let prevBlock = storage.block(byHashHex: currentBlock.previousBlockHashReversedHex) {
-                currentBlock = prevBlock
-            } else {
-                break
-            }
-        }
-        median.sort()
+    init(storage: IBitcoinCashStorage) {
+        bitcoinCashStorage = storage
+
+        super.init(storage: storage)
+    }
+
+    func medianTimePast(block: Block) -> Int {
+        let startIndex = block.height - medianTimeSpan + 1
+        var median = bitcoinCashStorage.timestamps(from: startIndex, to: block.height, ascending: true)
         guard !median.isEmpty else {
             return block.timestamp
         }
+
         return median[median.count / 2]
     }
 

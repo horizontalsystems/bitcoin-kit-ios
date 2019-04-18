@@ -4,9 +4,9 @@ class MerkleRootCreator: IMerkleRootCreator {
         let last: Data
     }
 
-    let hasher: IMerkleHasher
+    let hasher: IHasher
 
-    init(hasher: IMerkleHasher) {
+    init(hasher: IHasher) {
         self.hasher = hasher
     }
 
@@ -26,7 +26,7 @@ class MerkleRootCreator: IMerkleRootCreator {
         let chunks = chunked(data: hashes, into: 2)
 
         return chunks.map {
-            hasher.hash(left: $0.first, right: $0.last)
+            hasher.hash(data: $0.first + $0.last)
         }
     }
 

@@ -1,7 +1,7 @@
 class MerkleBranch: IMerkleBranch {
     static let bitMask: [UInt8] = [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80]
 
-    private let hasher: IMerkleHasher
+    private let hasher: IHasher
     private var txCount: Int = 0
     private var hashes = [Data]()
     private var flags = [UInt8]()
@@ -9,7 +9,7 @@ class MerkleBranch: IMerkleBranch {
     private var bitsUsed = 0
     private var hashesUsed = 0
 
-    init(hasher: IMerkleHasher) {
+    init(hasher: IHasher) {
         self.hasher = hasher
     }
 
@@ -71,7 +71,7 @@ class MerkleBranch: IMerkleBranch {
             right = left
         }
 
-        return hasher.hash(left: left, right: right)
+        return hasher.hash(data: left + right)
     }
 
 

@@ -28,7 +28,6 @@ public class BitcoinCoreErrors {
     }
 
     enum BlockValidation: Error {
-        case noHeader
         case noCheckpointBlock
         case noPreviousBlock
         case wrongPreviousHeader
