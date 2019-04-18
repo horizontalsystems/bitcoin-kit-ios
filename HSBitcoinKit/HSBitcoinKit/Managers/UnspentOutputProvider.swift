@@ -24,11 +24,11 @@ extension UnspentOutputProvider: IUnspentOutputProvider {
 
                     // If a transaction is an incoming transaction, then it can be used
                     // only if it's included in a block and has enough number of confirmations
-                    guard let block = unspentOutput.block else {
+                    guard let blockHeight = unspentOutput.blockHeight else {
                         return false
                     }
 
-                    return block.height <= lastBlockHeight - confirmationsThreshold + 1
+                    return blockHeight <= lastBlockHeight - confirmationsThreshold + 1
                 })
     }
 

@@ -16,14 +16,14 @@ class AddressManager {
         self.hdWallet = hdWallet
     }
 
-    private func fillGap(account: Int, external: Bool) throws {
-        let publicKeys = storage.publicKeys().filter({ $0.account == account && $0.external == external })
+    private func fillGap(publicKeysWithUsedStates: [PublicKeyWithUsedState], account: Int, external: Bool) throws {
+        let publicKeys = publicKeysWithUsedStates.filter({ $0.publicKey.account == account && $0.publicKey.external == external })
         let gapKeysCount = self.gapKeysCount(publicKeyResults: publicKeys)
         var keys = [PublicKey]()
 
         if gapKeysCount < hdWallet.gapLimit {
-            let allKeys = publicKeys.sorted(by: { $0.index < $1.index })
-            let lastIndex = allKeys.last?.index ?? -1
+            let allKeys = publicKeys.sorted(by: { $0.publicKey.index < $1.publicKey.index })
+            let lastIndex = allKeys.last?.publicKey.index ?? -1
 
             for i in 1..<(hdWallet.gapLimit - gapKeysCount + 1) {
                 let publicKey = try hdWallet.publicKey(account: account, index: lastIndex + i, external: external)
@@ -34,23 +34,23 @@ class AddressManager {
         try addKeys(keys: keys)
     }
 
-    private func gapKeysCount(publicKeyResults publicKeys: [PublicKey]) -> Int {
-        if let lastUsedKey = publicKeys.filter({ $0.used(storage: self.storage) }).sorted(by: { $0.index < $1.index }).last {
-            return publicKeys.filter({ $0.index > lastUsedKey.index }).count
+    private func gapKeysCount(publicKeyResults publicKeysWithUsedStates: [PublicKeyWithUsedState]) -> Int {
+        if let lastUsedKey = publicKeysWithUsedStates.filter({ $0.used }).sorted(by: { $0.publicKey.index < $1.publicKey.index }).last {
+            return publicKeysWithUsedStates.filter({ $0.publicKey.index > lastUsedKey.publicKey.index }).count
         } else {
-            return publicKeys.count
+            return publicKeysWithUsedStates.count
         }
     }
 
     private func publicKey(external: Bool) throws -> PublicKey {
-        guard let unusedKey = storage.publicKeys()
-                .filter({ $0.external == external && !$0.used(storage: self.storage) })
-                .sorted(by: { $0.account < $1.account || ( $0.account == $1.account && $0.index < $1.index ) })
+        guard let unusedKey = storage.publicKeysWithUsedState()
+                .filter({ $0.publicKey.external == external && $0.publicKey.account == 0 && !$0.used })
+                .sorted(by: { $0.publicKey.index < $1.publicKey.index })
                 .first else {
             throw AddressManagerError.noUnusedPublicKey
         }
 
-        return unusedKey
+        return unusedKey.publicKey
     }
 }
 
@@ -65,17 +65,18 @@ extension AddressManager: IAddressManager {
     }
 
     func fillGap() throws {
+        let publicKeysWithUsedStates = storage.publicKeysWithUsedState()
         let requiredAccountsCount: Int!
 
-        if let lastUsedAccount = storage.publicKeys().filter({ $0.used(storage: storage) }).sorted(by: { $0.account < $1.account }).last?.account {
+        if let lastUsedAccount = publicKeysWithUsedStates.filter({ $0.used }).sorted(by: { $0.publicKey.account < $1.publicKey.account }).last?.publicKey.account {
             requiredAccountsCount = lastUsedAccount + 1 + 1 // One because account starts from 0, One because we must have n+1 accounts
         } else {
             requiredAccountsCount = 1
         }
 
         for i in 0..<requiredAccountsCount {
-            try fillGap(account: i, external: true)
-            try fillGap(account: i, external: false)
+            try fillGap(publicKeysWithUsedStates: publicKeysWithUsedStates, account: i, external: true)
+            try fillGap(publicKeysWithUsedStates: publicKeysWithUsedStates, account: i, external: false)
         }
     }
 
@@ -88,18 +89,18 @@ extension AddressManager: IAddressManager {
     }
 
     func gapShifts() -> Bool {
-        guard let lastAccount = storage.publicKeys().sorted(by: { $0.account < $1.account }).last?.account else {
+        let publicKeysWithUsedStates = storage.publicKeysWithUsedState()
+
+        guard let lastAccount = publicKeysWithUsedStates.sorted(by: { $0.publicKey.account < $1.publicKey.account }).last?.publicKey.account else {
             return false
         }
 
-        let publicKeys = storage.publicKeys()
-
         for i in 0..<(lastAccount + 1) {
-            if gapKeysCount(publicKeyResults: publicKeys.filter{ $0.account == i && $0.external }) < hdWallet.gapLimit {
+            if gapKeysCount(publicKeyResults: publicKeysWithUsedStates.filter{ $0.publicKey.account == i && $0.publicKey.external }) < hdWallet.gapLimit {
                 return true
             }
 
-            if gapKeysCount(publicKeyResults: publicKeys.filter{ $0.account == i && !$0.external }) < hdWallet.gapLimit {
+            if gapKeysCount(publicKeyResults: publicKeysWithUsedStates.filter{ $0.publicKey.account == i && !$0.publicKey.external }) < hdWallet.gapLimit {
                 return true
             }
         }

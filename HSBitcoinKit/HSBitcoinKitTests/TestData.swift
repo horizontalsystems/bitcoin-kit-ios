@@ -198,7 +198,7 @@ class TestData {
     }
 
     static func unspentOutput(output: Output) -> UnspentOutput {
-        return UnspentOutput(output: output, publicKey: pubKey(), transaction: Transaction(), block: nil)
+        return UnspentOutput(output: output, publicKey: pubKey(), transaction: Transaction(), blockHeight: nil)
     }
 
     private class func setRandomHash(to transaction: Transaction) {

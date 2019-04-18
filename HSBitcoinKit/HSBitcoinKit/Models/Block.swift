@@ -15,10 +15,6 @@ class Block: Record {
     var height: Int
     var stale: Bool = false
 
-    func previousBlock(storage: IStorage) -> Block? {
-        return storage.block(byHashHex: self.previousBlockHashReversedHex)
-    }
-
     init(withHeader header: BlockHeader, height: Int) {
         version = header.version
         previousBlockHashReversedHex = header.previousBlockHeaderHash.reversedHex

@@ -18,7 +18,6 @@ class TransactionSyncerTests: QuickSpec {
 
         beforeEach {
             stub(mockStorage) { mock in
-                when(mock.inTransaction(_: any())).then({ try? $0() })
                 when(mock.add(sentTransaction: any())).thenDoNothing()
                 when(mock.update(sentTransaction: any())).thenDoNothing()
             }
@@ -189,7 +188,7 @@ class TransactionSyncerTests: QuickSpec {
                 }
             }
 
-            xcontext("when not empty array is given") {
+            context("when not empty array is given") {
                 let transactions = [TestData.p2pkhTransaction]
 
                 context("when need to update bloom filter") {

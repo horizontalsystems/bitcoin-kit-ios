@@ -87,8 +87,8 @@ class PeerGroup {
 
         _started = true
 
-        connectPeersIfRequired()
         peerGroupListeners.forEach { $0.onStart() } // potential broke order of call functions
+        connectPeersIfRequired()
     }
 
     private func _stop() {

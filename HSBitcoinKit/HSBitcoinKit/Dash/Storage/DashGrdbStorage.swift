@@ -45,14 +45,12 @@ class DashGrdbStorage: GrdbStorage {
     }
 
     override func clearGrdb() throws {
-        try inTransaction {
-            _ = try write { db in
-                try Masternode.deleteAll(db)
-                try MasternodeListState.deleteAll(db)
-                try InstantTransactionInput.deleteAll(db)
-            }
-            try super.clearGrdb()
+        _ = try! dbPool.write { db in
+            try Masternode.deleteAll(db)
+            try MasternodeListState.deleteAll(db)
+            try InstantTransactionInput.deleteAll(db)
         }
+        try super.clearGrdb()
     }
 }
 

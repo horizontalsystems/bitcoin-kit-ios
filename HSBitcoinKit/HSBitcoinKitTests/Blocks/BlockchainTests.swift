@@ -14,14 +14,12 @@ class BlockchainTest: QuickSpec {
 
         beforeEach {
             stub(mockStorage) { mock in
-                when(mock.inTransaction(_: any())).then({ try? $0() })
+                when(mock.unstaleAllBlocks()).thenDoNothing()
                 when(mock.add(block: any())).thenDoNothing()
-                when(mock.update(block: any())).thenDoNothing()
                 when(mock.delete(blocks: any())).thenDoNothing()
             }
 
             stub(mockBlockchainDataListener) { mock in
-                when(mock.onUpdate(updated: any(), inserted: any())).thenDoNothing()
                 when(mock.onDelete(transactionHashes: any())).thenDoNothing()
                 when(mock.onInsert(block: any())).thenDoNothing()
             }
@@ -180,7 +178,7 @@ class BlockchainTest: QuickSpec {
             }
         }
 
-        xdescribe("#handleFork") {
+        describe("#handleFork") {
             var mockedBlocks: MockedBlocks!
             var inChainBlocksAfterFork: [Block]!
             var inChainBlocksAfterForkTransactionHexes: [String]!
@@ -191,14 +189,9 @@ class BlockchainTest: QuickSpec {
 
                 it("makes new blocks not stale") {
                     mockedBlocks = self.mockBlocks(blocksInChain: blocksInChain, newBlocks: newBlocks, mockStorage: mockStorage)
-                    blockchain.handleFork()
+                    try! blockchain.handleFork()
 
-                    let captor = ArgumentCaptor<Block>()
-                    verify(mockStorage, times(3)).update(block: captor.capture())
-                    for (ind, block) in mockedBlocks.newBlocks.enumerated() {
-                        XCTAssertEqual(captor.allValues[ind].stale, false)
-                        XCTAssertEqual(captor.allValues[ind].headerHash, block.headerHash)
-                    }
+                    verify(mockStorage).unstaleAllBlocks()
                 }
             }
 
@@ -213,7 +206,7 @@ class BlockchainTest: QuickSpec {
                 }
 
                 it("deletes old blocks in chain after the fork") {
-                    blockchain.handleFork()
+                    try! blockchain.handleFork()
 
                     verify(mockStorage).delete(blocks: equal(to: inChainBlocksAfterFork))
                     verify(mockStorage, never()).delete(blocks: equal(to: mockedBlocks.newBlocks))
@@ -221,14 +214,9 @@ class BlockchainTest: QuickSpec {
                 }
 
                 it("makes new blocks not stale") {
-                    blockchain.handleFork()
+                    try! blockchain.handleFork()
 
-                    let captor = ArgumentCaptor<Block>()
-                    verify(mockStorage, times(3)).update(block: captor.capture())
-                    for (ind, block) in mockedBlocks.newBlocks.enumerated() {
-                        XCTAssertEqual(captor.allValues[ind].stale, false)
-                        XCTAssertEqual(captor.allValues[ind].headerHash, block.headerHash)
-                    }
+                    verify(mockStorage).unstaleAllBlocks()
                 }
             }
 
@@ -239,7 +227,7 @@ class BlockchainTest: QuickSpec {
                 it("deletes new blocks") {
                     mockedBlocks = self.mockBlocks(blocksInChain: blocksInChain, newBlocks: newBlocks, mockStorage: mockStorage)
                     inChainBlocksAfterFork = Array(mockedBlocks.blocksInChain.suffix(from: 2))
-                    blockchain.handleFork()
+                    try! blockchain.handleFork()
 
                     verify(mockStorage).delete(blocks: equal(to: mockedBlocks.newBlocks))
                     verify(mockStorage, never()).delete(blocks: equal(to: inChainBlocksAfterFork))
@@ -254,7 +242,7 @@ class BlockchainTest: QuickSpec {
                 it("deletes new blocks") {
                     mockedBlocks = self.mockBlocks(blocksInChain: blocksInChain, newBlocks: newBlocks, mockStorage: mockStorage)
                     inChainBlocksAfterFork = Array(mockedBlocks.blocksInChain.suffix(from: 1))
-                    blockchain.handleFork()
+                    try! blockchain.handleFork()
 
                     verify(mockStorage).delete(blocks: equal(to: mockedBlocks.newBlocks))
                     verify(mockStorage, never()).delete(blocks: equal(to: inChainBlocksAfterFork))
@@ -268,10 +256,9 @@ class BlockchainTest: QuickSpec {
 
                 it("doesn't do nothing") {
                     _ = self.mockBlocks(blocksInChain: blocksInChain, newBlocks: newBlocks, mockStorage: mockStorage)
-                    blockchain.handleFork()
+                    try! blockchain.handleFork()
 
                     verify(mockStorage, never()).delete(blocks: any())
-                    verify(mockStorage, never()).update(block: any())
                     verify(mockBlockchainDataListener, never()).onDelete(transactionHashes: any())
                 }
             }
@@ -282,15 +269,10 @@ class BlockchainTest: QuickSpec {
 
                 it("makes new blocks not stale") {
                     mockedBlocks = self.mockBlocks(blocksInChain: blocksInChain, newBlocks: newBlocks, mockStorage: mockStorage)
-                    blockchain.handleFork()
+                    try! blockchain.handleFork()
 
                     verify(mockStorage, never()).delete(blocks: any())
-                    let captor = ArgumentCaptor<Block>()
-                    verify(mockStorage, times(3)).update(block: captor.capture())
-                    for (ind, block) in mockedBlocks.newBlocks.enumerated() {
-                        XCTAssertEqual(captor.allValues[ind].stale, false)
-                        XCTAssertEqual(captor.allValues[ind].headerHash, block.headerHash)
-                    }
+                    verify(mockStorage).unstaleAllBlocks()
                 }
             }
         }

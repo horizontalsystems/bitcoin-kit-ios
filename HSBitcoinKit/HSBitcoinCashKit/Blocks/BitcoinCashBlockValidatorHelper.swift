@@ -6,7 +6,7 @@ class BitcoinCashBlockValidatorHelper: BlockValidatorHelper, IBitcoinCashBlockVa
         var currentBlock = block
         for _ in 0..<medianTimeSpan {
             median.append(currentBlock.timestamp)
-            if let prevBlock = currentBlock.previousBlock(storage: storage) {
+            if let prevBlock = storage.block(byHashHex: currentBlock.previousBlockHashReversedHex) {
                 currentBlock = prevBlock
             } else {
                 break

@@ -22,7 +22,12 @@ extension TransactionOutputAddressExtractor: ITransactionOutputAddressExtractor 
             let keyHash: Data
 
             switch output.scriptType {
-            case .p2pk: keyHash = output.publicKey(storage: storage)?.keyHash ?? CryptoKit.sha256ripemd160(key)
+            case .p2pk:
+                if let publicKeyPath = output.publicKeyPath, let publicKey = storage.publicKey(byPath: publicKeyPath) {
+                    keyHash = publicKey.keyHash
+                } else {
+                    keyHash = CryptoKit.sha256ripemd160(key)
+                }
             default: keyHash = key
             }
 

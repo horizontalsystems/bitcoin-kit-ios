@@ -82,13 +82,11 @@ protocol IStorage {
 
     var blockHashHeaderHashes: [Data] { get }
     var lastBlockHash: BlockHash? { get }
-    func blockHashes(filters: [(fieldName: BlockHash.Columns, value: Any, equal: Bool)], orders: [(fieldName: BlockHash.Columns, ascending: Bool)]) -> [BlockHash]
     func blockHashesSortedBySequenceAndHeight(limit: Int) -> [BlockHash]
     func add(blockHashes: [BlockHash])
     func deleteBlockHash(byHashHex: String)
 
     var blocksCount: Int { get }
-    var firstBlock: Block? { get }
     var lastBlock: Block? { get }
     func blocksCount(reversedHeaderHashHexes: [String]) -> Int
     func save(block: Block)
@@ -100,43 +98,38 @@ protocol IStorage {
     func block(byHashHex: String) -> Block?
     func block(stale: Bool, sortedHeight: String) -> Block?
     func add(block: Block) throws
-    func update(block: Block) throws
     func delete(blocks: [Block]) throws
+    func unstaleAllBlocks() throws
 
 
     func transaction(byHashHex: String) -> Transaction?
-    func transactions(sortedBy: Transaction.Columns, secondSortedBy: Transaction.Columns, ascending: Bool) -> [Transaction]
     func transactions(ofBlock: Block) -> [Transaction]
     func newTransactions() -> [Transaction]
     func newTransaction(byReversedHashHex: String) -> Transaction?
     func relayedTransactionExists(byReversedHashHex: String) -> Bool
     func add(transaction: FullTransaction) throws
     func update(transaction: Transaction) throws
+    func fullInfo(forTransactions: [TransactionWithBlock]) -> [FullTransactionForInfo]
+    func fullTransactionsInfo(fromTimestamp: Int?, fromOrder: Int?, limit: Int?) -> [FullTransactionForInfo]
 
     func outputsWithPublicKeys() -> [OutputWithPublicKey]
     func unspentOutputs() -> [UnspentOutput]
     func inputs(ofTransaction: Transaction) -> [Input]
-    func inputsWithBlock(ofOutput: Output) -> [InputWithBlock]
     func outputs(ofTransaction: Transaction) -> [Output]
     func previousOutput(ofInput: Input) -> Output?
-    func hasInputs(ofOutput: Output) -> Bool
-    func hasOutputs(ofPublicKey: PublicKey) -> Bool
-
 
     func sentTransaction(byReversedHashHex: String) -> SentTransaction?
     func update(sentTransaction: SentTransaction)
     func add(sentTransaction: SentTransaction)
-
 
     func publicKeys() -> [PublicKey]
     func publicKey(byPath: String) -> PublicKey?
     func publicKey(byScriptHashForP2WPKH: Data) -> PublicKey?
     func publicKey(byRawOrKeyHash: Data) -> PublicKey?
     func add(publicKeys: [PublicKey])
-
+    func publicKeysWithUsedState() -> [PublicKeyWithUsedState]
 
     func clear() throws
-    func inTransaction(_ block: (() throws -> Void)) throws
 }
 
 protocol IFeeRateSyncer {
@@ -368,12 +361,12 @@ protocol IBlockchain {
 
     func connect(merkleBlock: MerkleBlock) throws -> Block
     func forceAdd(merkleBlock: MerkleBlock, height: Int) throws -> Block
-    func handleFork()
+    func handleFork() throws
     func deleteBlocks(blocks: [Block]) throws
 }
 
 protocol IBlockchainDataListener: class {
-    func onUpdate(updated: [Transaction], inserted: [Transaction])
+    func onUpdate(updated: [Transaction], inserted: [Transaction], inBlock: Block?)
     func onDelete(transactionHashes: [String])
     func onInsert(block: Block)
 }

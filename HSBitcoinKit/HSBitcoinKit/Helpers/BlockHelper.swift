@@ -17,7 +17,7 @@ class BlockHelper: IBlockValidatorHelper {
         var blocks = [Block]()
         var block = block
         for _ in 0..<count {
-            if let prevBlock = block.previousBlock(storage: storage) {
+            if let prevBlock = storage.block(byHashHex: block.previousBlockHashReversedHex) {
                 block = prevBlock
                 blocks.insert(block, at: 0)
             } else {
@@ -32,7 +32,7 @@ class BlockHelper: IBlockValidatorHelper {
         var currentBlock = block
         for _ in 0..<medianTimeSpan {
             median.append(currentBlock.timestamp)
-            if let prevBlock = currentBlock.previousBlock(storage: storage) {
+            if let prevBlock = storage.block(byHashHex: currentBlock.previousBlockHashReversedHex) {
                 currentBlock = prevBlock
             } else {
                 break

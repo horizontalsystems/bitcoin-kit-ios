@@ -8,7 +8,7 @@ class TransactionLinker: ITransactionLinker {
 
     func handle(transaction: FullTransaction) {
         for input in transaction.inputs {
-            guard let previousOutput = storage.previousOutput(ofInput: input), let _ = previousOutput.publicKey(storage: storage) else {
+            guard let previousOutput = storage.previousOutput(ofInput: input), previousOutput.publicKeyPath != nil else {
                 continue
             }
 
