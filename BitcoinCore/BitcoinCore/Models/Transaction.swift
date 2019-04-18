@@ -2,20 +2,20 @@ import Foundation
 import HSCryptoKit
 import GRDB
 
-enum TransactionStatus: Int, DatabaseValueConvertible { case new, relayed, invalid }
+public enum TransactionStatus: Int, DatabaseValueConvertible { case new, relayed, invalid }
 
-class Transaction: Record {
-    var dataHashReversedHex: String
-    var dataHash: Data
-    var version: Int
-    var lockTime: Int
-    var timestamp: Int
-    var order: Int
-    var blockHashReversedHex: String? = nil
-    var isMine: Bool = false
-    var isOutgoing: Bool = false
-    var status: TransactionStatus = .relayed
-    var segWit: Bool = false
+public class Transaction: Record {
+    public var dataHashReversedHex: String
+    public var dataHash: Data
+    public var version: Int
+    public var lockTime: Int
+    public var timestamp: Int
+    public var order: Int
+    public var blockHashReversedHex: String? = nil
+    public var isMine: Bool = false
+    public var isOutgoing: Bool = false
+    public var status: TransactionStatus = .relayed
+    public var segWit: Bool = false
 
     init(version: Int = 0, lockTime: Int = 0, timestamp: Int? = nil) {
         self.version = version
@@ -29,7 +29,7 @@ class Transaction: Record {
     }
 
 
-    override class var databaseTableName: String {
+    override open class var databaseTableName: String {
         return "transactions"
     }
 
@@ -63,7 +63,7 @@ class Transaction: Record {
         super.init(row: row)
     }
 
-    override func encode(to container: inout PersistenceContainer) {
+    override open func encode(to container: inout PersistenceContainer) {
         container[Columns.dataHashReversedHex] = dataHashReversedHex
         container[Columns.dataHash] = dataHash
         container[Columns.version] = version

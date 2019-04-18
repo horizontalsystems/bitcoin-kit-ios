@@ -1,6 +1,8 @@
-class ScriptConverter {
+public class ScriptConverter {
 
-    func encode(script: Script) -> Data {
+    public init() {}
+
+    public func encode(script: Script) -> Data {
         var scriptData = Data()
         script.chunks.forEach { chunk in
             if let data = chunk.data {
@@ -55,7 +57,7 @@ class ScriptConverter {
 
 extension ScriptConverter: IScriptConverter {
 
-    func decode(data: Data) throws -> Script {
+    public func decode(data: Data) throws -> Script {
         var chunks = [Chunk]()
         var it = 0
         while it < data.count {

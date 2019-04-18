@@ -21,7 +21,7 @@ extension Blockchain: IBlockchain {
         }
 
         guard let previousBlock = storage.block(byHashHex: merkleBlock.header.previousBlockHeaderHash.reversedHex) else {
-            throw BlockValidatorError.noPreviousBlock
+            throw BitcoinCoreErrors.BlockValidation.noPreviousBlock
         }
 
         // Validate and chain new blocks

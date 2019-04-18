@@ -1,6 +1,6 @@
 import BigInt
 
-class DifficultyEncoder: IDifficultyEncoder {
+public class DifficultyEncoder: IDifficultyEncoder {
 
     /**
      * <p>The "compact" format is a representation of a whole number N using an unsigned 32 bit number similar to a
@@ -15,8 +15,9 @@ class DifficultyEncoder: IDifficultyEncoder {
      * <p>Bitcoin only uses this "compact" format for encoding difficulty targets, which are unsigned 256bit quantities.
      * Thus, all the complexities of the sign bit and using base 256 are probably an implementation accident.</p>
  */
+    public init() {}
 
-    func decodeCompact(bits: Int) -> BigInt {
+    public func decodeCompact(bits: Int) -> BigInt {
         let size = (bits >> 24) & 0xFF
 
         let negativeSign = (bits >> 23) & 0x0001 == 1
@@ -30,7 +31,7 @@ class DifficultyEncoder: IDifficultyEncoder {
         return bigInt
     }
 
-    func encodeCompact(from bigInt: BigInt) -> Int {
+    public func encodeCompact(from bigInt: BigInt) -> Int {
         var result: Int = 0
 
         // make unsigned big int for get array of bytes

@@ -1,7 +1,7 @@
 import Foundation
 import HSCryptoKit
 
-class OpCode {
+public class OpCode {
     static let p2pkhStart = Data(bytes: [OpCode.dup, OpCode.hash160])
     static let p2pkhFinish = Data(bytes: [OpCode.equalVerify, OpCode.checkSig])
 
@@ -25,7 +25,7 @@ class OpCode {
     static let checkMultiSigVerify: UInt8 = 0xAF
     static let endIf: UInt8 = 0x68
 
-    static func value(fromPush code: UInt8) -> UInt8? {
+    public static func value(fromPush code: UInt8) -> UInt8? {
         if code == 0 {
             return 0
         }

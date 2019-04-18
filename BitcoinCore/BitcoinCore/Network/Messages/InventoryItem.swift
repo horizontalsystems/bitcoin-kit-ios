@@ -1,30 +1,30 @@
 import Foundation
 import HSCryptoKit
 
-struct InventoryItem {
+public struct InventoryItem {
     /// Identifies the object type linked to this inventory
-    let type: Int32
+    public let type: Int32
     /// Hash of the object
-    let hash: Data
+    public let hash: Data
 
-    init(type: Int32, hash: Data) {
+    public init(type: Int32, hash: Data) {
         self.type = type
         self.hash = hash
     }
 
-    init(byteStream: ByteStream) {
+    public init(byteStream: ByteStream) {
         type = byteStream.read(Int32.self)
         hash = byteStream.read(Data.self, count: 32)
     }
 
-    func serialized() -> Data {
+    public func serialized() -> Data {
         var data = Data()
         data += type
         data += hash
         return data
     }
 
-    var objectType: ObjectType {
+    public var objectType: ObjectType {
         switch type {
         case 0:
             return .error
@@ -41,7 +41,7 @@ struct InventoryItem {
         }
     }
 
-    enum ObjectType: Int32 {
+    public enum ObjectType: Int32 {
         /// Any data of with this number may be ignored
         case error = 0
         /// Hash is related to a transaction

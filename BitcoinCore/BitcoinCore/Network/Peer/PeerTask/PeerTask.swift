@@ -1,50 +1,50 @@
 import Foundation
 
-class PeerTask {
+open class PeerTask {
     class TimeoutError: Error {
     }
 
     internal let dateGenerator: () -> Date
     internal var lastActiveTime: Double? = nil
 
-    weak var requester: IPeerTaskRequester?
-    weak var delegate: IPeerTaskDelegate?
+    weak public var requester: IPeerTaskRequester?
+    weak public var delegate: IPeerTaskDelegate?
 
-    init(dateGenerator: @escaping () -> Date = Date.init) {
+    public init(dateGenerator: @escaping () -> Date = Date.init) {
         self.dateGenerator = dateGenerator
     }
 
-    func start() {
+    open func start() {
     }
 
-    func handle(blockHeaders: [BlockHeader]) -> Bool {
+    open func handle(blockHeaders: [BlockHeader]) -> Bool {
         return false
     }
 
-    func handle(merkleBlock: MerkleBlock) -> Bool {
+    open func handle(merkleBlock: MerkleBlock) -> Bool {
         return false
     }
 
-    func handle(transaction: FullTransaction) -> Bool {
+    open func handle(transaction: FullTransaction) -> Bool {
         return false
     }
 
-    func handle(getDataInventoryItem item: InventoryItem) -> Bool {
+    open func handle(getDataInventoryItem item: InventoryItem) -> Bool {
         return false
     }
 
-    func handle(items: [InventoryItem]) -> Bool {
+    open func handle(items: [InventoryItem]) -> Bool {
         return false
     }
 
-    func handle(message: IMessage) -> Bool {
+    open func handle(message: IMessage) -> Bool {
         return false
     }
 
-    func checkTimeout() {
+    open func checkTimeout() {
     }
 
-    func resetTimer() {
+    open func resetTimer() {
         lastActiveTime = dateGenerator().timeIntervalSince1970
     }
 
@@ -52,7 +52,7 @@ class PeerTask {
 
 extension PeerTask: Equatable {
 
-    static func ==(lhs: PeerTask, rhs: PeerTask) -> Bool {
+    public static func ==(lhs: PeerTask, rhs: PeerTask) -> Bool {
         switch lhs {
         case let t as GetBlockHashesTask: return t.equalTo(rhs as? GetBlockHashesTask)
         case let t as GetMerkleBlocksTask: return t.equalTo(rhs as? GetMerkleBlocksTask)

@@ -1,9 +1,9 @@
 import Foundation
 import GRDB
 
-class Input: Record {
+public class Input: Record {
 
-    var previousOutputTxReversedHex: String
+    public var previousOutputTxReversedHex: String
     var previousOutputIndex: Int
     var signatureScript: Data
     var sequence: Int
@@ -22,7 +22,7 @@ class Input: Record {
     }
 
 
-    override class var databaseTableName: String {
+    override open class var databaseTableName: String {
         return "inputs"
     }
 
@@ -50,7 +50,7 @@ class Input: Record {
         super.init(row: row)
     }
 
-    override func encode(to container: inout PersistenceContainer) {
+    override open func encode(to container: inout PersistenceContainer) {
         container[Columns.previousOutputTxReversedHex] = previousOutputTxReversedHex
         container[Columns.previousOutputIndex] = previousOutputIndex
         container[Columns.signatureScript] = signatureScript

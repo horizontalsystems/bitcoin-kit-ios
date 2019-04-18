@@ -1,21 +1,21 @@
 import HSCryptoKit
 import GRDB
 
-class Block: Record {
+public class Block: Record {
 
     var version: Int
     var previousBlockHashReversedHex: String
-    var merkleRoot: Data
-    var timestamp: Int
-    var bits: Int
+    public var merkleRoot: Data
+    public var timestamp: Int
+    public var bits: Int
     var nonce: Int
 
     var headerHashReversedHex: String
     var headerHash: Data
-    var height: Int
+    public var height: Int
     var stale: Bool = false
 
-    init(withHeader header: BlockHeader, height: Int) {
+    public init(withHeader header: BlockHeader, height: Int) {
         version = header.version
         previousBlockHashReversedHex = header.previousBlockHeaderHash.reversedHex
         merkleRoot = header.merkleRoot
@@ -33,11 +33,11 @@ class Block: Record {
         self.init(withHeader: header, height: previousBlock.height + 1)
     }
 
-    override class var databaseTableName: String {
+    override open class var databaseTableName: String {
         return "blocks"
     }
 
-    enum Columns: String, ColumnExpression, CaseIterable {
+    public enum Columns: String, ColumnExpression, CaseIterable {
         case version
         case previousBlockHashReversedHex
         case merkleRoot
@@ -65,7 +65,7 @@ class Block: Record {
         super.init(row: row)
     }
 
-    override func encode(to container: inout PersistenceContainer) {
+    override open func encode(to container: inout PersistenceContainer) {
         container[Columns.version] = version
         container[Columns.previousBlockHashReversedHex] = previousBlockHashReversedHex
         container[Columns.merkleRoot] = merkleRoot

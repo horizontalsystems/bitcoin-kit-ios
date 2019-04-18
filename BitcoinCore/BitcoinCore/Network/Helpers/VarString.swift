@@ -2,12 +2,12 @@ import Foundation
 import HSCryptoKit
 
 /// Variable length string can be stored using a variable length integer followed by the string itself.
-struct VarString : ExpressibleByStringLiteral {
-    typealias StringLiteralType = String
+public struct VarString : ExpressibleByStringLiteral {
+    public typealias StringLiteralType = String
     let length: VarInt
     let value: String
 
-    init(stringLiteral value: String) {
+    public init(stringLiteral value: String) {
         self.init(value)
     }
 
@@ -25,7 +25,7 @@ struct VarString : ExpressibleByStringLiteral {
 }
 
 extension VarString : CustomStringConvertible {
-    var description: String {
+    public var description: String {
         return "\(value)"
     }
 }

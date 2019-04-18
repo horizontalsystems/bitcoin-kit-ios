@@ -54,6 +54,8 @@ end
 target :Demo do
     project 'Demo/Demo'
     kit_pods
+
+    pod 'HSCryptoX11', git: 'https://github.com/horizontalsystems/crypto-x11-ios'
 end
 
 def test_pods

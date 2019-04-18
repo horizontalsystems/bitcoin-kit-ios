@@ -1,6 +1,6 @@
 import Foundation
 
-enum SigHashType {
+public enum SigHashType {
     case bitcoinAll
     case bitcoinCashAll
 

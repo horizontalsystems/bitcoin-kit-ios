@@ -1,8 +1,8 @@
 import Foundation
 
-class Script {
+public class Script {
     let scriptData: Data
-    private (set) var chunks: [Chunk]
+    public let chunks: [Chunk]
 
     var length: Int { return scriptData.count }
 

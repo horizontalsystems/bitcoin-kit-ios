@@ -1,20 +1,20 @@
 import Foundation
 
-extension Data {
-    init<T>(from value: T) {
+public extension Data {
+    public init<T>(from value: T) {
         var value = value
         self.init(buffer: UnsafeBufferPointer(start: &value, count: 1))
     }
 
-    func to<T>(type: T.Type) -> T {
+    public func to<T>(type: T.Type) -> T {
         return self.withUnsafeBytes { $0.pointee }
     }
 
-    func to(type: String.Type) -> String {
+    public func to(type: String.Type) -> String {
         return String(bytes: self, encoding: .ascii)!.replacingOccurrences(of: "\0", with: "")
     }
 
-    func to(type: VarInt.Type) -> VarInt {
+    public func to(type: VarInt.Type) -> VarInt {
         let value: UInt64
         let length = self[0..<1].to(type: UInt8.self)
         switch length {
@@ -34,7 +34,7 @@ extension Data {
 }
 
 extension Data {
-    init?(hex: String) {
+    public init?(hex: String) {
         let len = hex.count / 2
         var data = Data(capacity: len)
         for i in 0..<len {
@@ -50,11 +50,11 @@ extension Data {
         self = data
     }
 
-    var hex: String {
+    public var hex: String {
         return reduce("") { $0 + String(format: "%02x", $1) }
     }
 
-    var reversedHex: String {
+    public var reversedHex: String {
         return Data(self.reversed()).hex
     }
 }

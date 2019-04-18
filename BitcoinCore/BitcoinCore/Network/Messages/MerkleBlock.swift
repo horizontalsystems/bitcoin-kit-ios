@@ -1,7 +1,7 @@
 import Foundation
 import HSCryptoKit
 
-class MerkleBlock {
+public class MerkleBlock {
     let header: BlockHeader
     let transactionHashes: [Data]
     var height: Int? = nil

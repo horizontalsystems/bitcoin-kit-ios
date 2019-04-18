@@ -1,17 +1,17 @@
 import GRDB
 
-class PeerAddress: Record {
+public class PeerAddress: Record {
     let ip: String
     var score: Int
 
-    init(ip: String, score: Int) {
+    public init(ip: String, score: Int) {
         self.ip = ip
         self.score = score
 
         super.init()
     }
 
-    override class var databaseTableName: String {
+    override open class var databaseTableName: String {
         return "peerAddresses"
     }
 
@@ -27,7 +27,7 @@ class PeerAddress: Record {
         super.init(row: row)
     }
 
-    override func encode(to container: inout PersistenceContainer) {
+    override open func encode(to container: inout PersistenceContainer) {
         container[Columns.ip] = ip
         container[Columns.score] = score
     }

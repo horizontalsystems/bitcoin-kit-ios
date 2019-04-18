@@ -5,17 +5,17 @@ import HSCryptoKit
 
 enum BlockValidatorType { case header, bits, legacy, testNet, EDA, DAA, DGW }
 
-protocol IDifficultyEncoder {
+public protocol IDifficultyEncoder {
     func decodeCompact(bits: Int) -> BigInt
     func encodeCompact(from bigInt: BigInt) -> Int
 }
 
-protocol IBlockValidatorHelper {
+public protocol IBlockValidatorHelper {
     func previous(for block: Block, count: Int) -> Block?
     func previousWindow(for block: Block, count: Int) -> [Block]?
 }
 
-protocol IBlockValidator: class {
+public protocol IBlockValidator: class {
     func validate(block: Block, previousBlock: Block) throws
     func isBlockValidatable(block: Block, previousBlock: Block) -> Bool
 }
@@ -60,7 +60,7 @@ protocol IFeeRateApi {
     func getFeeRate() -> Observable<FeeRate>
 }
 
-protocol IStorage {
+public protocol IStorage {
     var feeRate: FeeRate? { get }
     func set(feeRate: FeeRate)
 
@@ -137,7 +137,7 @@ protocol IFeeRateSyncer {
     func sync()
 }
 
-protocol IAddressSelector {
+public protocol IAddressSelector {
     func getAddressVariants(addressConverter: IAddressConverter, publicKey: PublicKey) -> [String]
 }
 
@@ -160,7 +160,7 @@ protocol IBloomFilterManager {
 }
 
 
-protocol IPeerGroup: class {
+public protocol IPeerGroup: class {
     var inventoryItemsHandler: IInventoryItemsHandler? { get set }
     var peerTaskHandler: IPeerTaskHandler? { get set }
 
@@ -187,7 +187,7 @@ protocol IPeerManager: class {
     func halfIsSynced() -> Bool
 }
 
-protocol IPeer: class {
+public protocol IPeer: class {
     var delegate: PeerDelegate? { get set }
     var localBestBlockHeight: Int32 { get set }
     var announcedLastBlockHeight: Int32 { get }
@@ -206,7 +206,7 @@ protocol IPeer: class {
     func equalTo(_ peer: IPeer?) -> Bool
 }
 
-protocol PeerDelegate: class {
+public protocol PeerDelegate: class {
     func peerReady(_ peer: IPeer)
     func peerDidConnect(_ peer: IPeer)
     func peerDidDisconnect(_ peer: IPeer, withError error: Error?)
@@ -216,7 +216,7 @@ protocol PeerDelegate: class {
     func peer(_ peer: IPeer, didReceiveInventoryItems items: [InventoryItem])
 }
 
-protocol IPeerTaskRequester: class {
+public protocol IPeerTaskRequester: class {
     func getBlocks(hashes: [Data])
     func getData(items: [InventoryItem])
     func sendTransactionInventory(hash: Data)
@@ -225,7 +225,7 @@ protocol IPeerTaskRequester: class {
     func ping(nonce: UInt64)
 }
 
-protocol IPeerTaskDelegate: class {
+public protocol IPeerTaskDelegate: class {
     func handle(completedTask task: PeerTask)
     func handle(failedTask task: PeerTask, error: Error)
 }
@@ -288,7 +288,7 @@ protocol IInitialSyncer {
     func stop()
 }
 
-protocol IHasher {
+public protocol IHasher {
     func hash(data: Data) -> Data
 }
 
@@ -308,12 +308,12 @@ protocol IPaymentAddressParser {
     func parse(paymentAddress: String) -> BitcoinPaymentData
 }
 
-protocol IAddressConverter {
+public protocol IAddressConverter {
     func convert(address: String) throws -> Address
     func convert(keyHash: Data, type: ScriptType) throws -> Address
 }
 
-protocol IScriptConverter {
+public protocol IScriptConverter {
     func decode(data: Data) throws -> Script
 }
 
@@ -345,7 +345,7 @@ protocol ITransactionPublicKeySetter {
     func set(output: Output) -> Bool
 }
 
-protocol ITransactionSyncer: class {
+public protocol ITransactionSyncer: class {
     func pendingTransactions() -> [FullTransaction]
     func handle(transactions: [FullTransaction])
     func handle(sentTransaction transaction: FullTransaction)
@@ -402,7 +402,7 @@ protocol IUnspentOutputProvider {
     var balance: Int { get }
 }
 
-protocol IBlockSyncer: class {
+public protocol IBlockSyncer: class {
     var localDownloadedBestBlockHeight: Int32 { get }
     var localKnownBestBlockHeight: Int32 { get }
     func prepareForDownload()
@@ -443,7 +443,7 @@ protocol IDataProviderDelegate: class {
     func lastBlockInfoUpdated(lastBlockInfo: BlockInfo)
 }
 
-protocol INetwork: class {
+public protocol INetwork: class {
     var maxBlockSize: UInt32 { get }
     var protocolVersion: Int32 { get }
     var name: String { get }
@@ -470,11 +470,11 @@ protocol IMerkleBlockValidator: class {
     func merkleBlock(from message: MerkleBlockMessage) throws -> MerkleBlock
 }
 
-protocol IMerkleBranch: class {
+public protocol IMerkleBranch: class {
     func calculateMerkleRoot(txCount: Int, hashes: [Data], flags: [UInt8]) throws -> (merkleRoot: Data, matchedHashes: [Data])
 }
 
-extension INetwork {
+public extension INetwork {
     var protocolVersion: Int32 { return 70015 }
 
     var maxBlockSize: UInt32 { return 1_000_000 }
@@ -487,7 +487,7 @@ protocol INetworkMessageParser {
     func parse(data: Data) -> NetworkMessage?
 }
 
-protocol IMessageParser {
+public protocol IMessageParser {
     var id: String { get }
     func parse(data: Data) -> IMessage
 }
@@ -500,16 +500,16 @@ protocol INetworkMessageSerializer {
     func serialize(message: IMessage) throws -> Data
 }
 
-protocol IMessageSerializer {
+public protocol IMessageSerializer {
     var id: String { get }
     func serialize(message: IMessage) throws -> Data
 }
 
-protocol IInventoryItemsHandler {
+public protocol IInventoryItemsHandler {
     func handleInventoryItems(peer: IPeer, inventoryItems: [InventoryItem])
 }
 
-protocol IPeerTaskHandler {
+public protocol IPeerTaskHandler {
     func handleCompletedTask(peer: IPeer, task: PeerTask) -> Bool
 }
 
@@ -522,7 +522,7 @@ protocol ITransactionSender {
     func canSendTransaction() throws
 }
 
-protocol IPeerGroupListener {
+public protocol IPeerGroupListener {
     func onStart()
     func onStop()
     func onPeerCreate(peer: IPeer)

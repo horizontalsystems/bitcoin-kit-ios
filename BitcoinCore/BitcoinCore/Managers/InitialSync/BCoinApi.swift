@@ -2,18 +2,9 @@ import RxSwift
 import ObjectMapper
 
 class BCoinApi {
-    private let url: String
     private let apiManager: ApiManager
 
-    init(network: INetwork, logger: Logger? = nil) {
-        switch network {
-        case is BitcoinMainNet: url = "https://btc.horizontalsystems.xyz/apg"
-        case is BitcoinTestNet: url = "http://btc-testnet.horizontalsystems.xyz/apg"
-        case is BitcoinCashMainNet: url = "https://bch.horizontalsystems.xyz/apg"
-        case is BitcoinCashTestNet: url = "http://bch-testnet.horizontalsystems.xyz/apg"
-        default: url = "http://btc-testnet.horizontalsystems.xyz/apg"
-        }
-
+    init(url: String, logger: Logger? = nil) {
         apiManager = ApiManager(apiUrl: url, logger: logger)
     }
 

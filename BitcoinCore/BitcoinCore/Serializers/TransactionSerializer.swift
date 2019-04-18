@@ -1,9 +1,9 @@
 import Foundation
 import HSCryptoKit
 
-class TransactionSerializer {
+public class TransactionSerializer {
 
-    static func serialize(transaction: FullTransaction, withoutWitness: Bool = false) -> Data {
+    static public func serialize(transaction: FullTransaction, withoutWitness: Bool = false) -> Data {
         let header = transaction.header
         var data = Data()
 
@@ -26,7 +26,7 @@ class TransactionSerializer {
         return data
     }
 
-    static func serializedForSignature(transaction: Transaction, inputsToSign: [InputToSign], outputs: [Output], inputIndex: Int, forked: Bool = false) throws -> Data {
+    static public func serializedForSignature(transaction: Transaction, inputsToSign: [InputToSign], outputs: [Output], inputIndex: Int, forked: Bool = false) throws -> Data {
         var data = Data()
 
         if forked {     // use bip143 for new transaction digest algorithm
@@ -67,11 +67,11 @@ class TransactionSerializer {
         return data
     }
 
-    static func deserialize(data: Data) -> FullTransaction {
+    static public func deserialize(data: Data) -> FullTransaction {
         return deserialize(byteStream: ByteStream(data))
     }
 
-    static func deserialize(byteStream: ByteStream) -> FullTransaction {
+    static public func deserialize(byteStream: ByteStream) -> FullTransaction {
         let transaction = Transaction()
         var inputs = [Input]()
         var outputs = [Output]()

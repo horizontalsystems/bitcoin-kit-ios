@@ -76,8 +76,8 @@ class BlockchainTest: QuickSpec {
                         do {
                             _ = try blockchain.connect(merkleBlock: merkleBlock)
                             XCTFail("Should throw exception")
-                        } catch let error as BlockValidatorError {
-                            XCTAssertEqual(error, BlockValidatorError.noPreviousBlock)
+                        } catch let error as BitcoinCoreErrors.BlockValidation {
+                            XCTAssertEqual(error, BitcoinCoreErrors.BlockValidation.noPreviousBlock)
                         } catch {
                             XCTFail("Unexpected exception thrown")
                         }
@@ -103,14 +103,14 @@ class BlockchainTest: QuickSpec {
                     context("when block is invalid") {
                         it("doesn't add a block to storage") {
                             stub(mockBlockValidator) { mock in
-                                when(mock.validate(block: equal(to: newBlock), previousBlock: equal(to: previousBlock))).thenThrow(BlockValidatorError.wrongPreviousHeaderHash)
+                                when(mock.validate(block: equal(to: newBlock), previousBlock: equal(to: previousBlock))).thenThrow(BitcoinCoreErrors.BlockValidation.wrongPreviousHeaderHash)
                             }
 
                             do {
                                 _ = try blockchain.connect(merkleBlock: merkleBlock)
                                 XCTFail("Should throw exception")
-                            } catch let error as BlockValidatorError {
-                                XCTAssertEqual(error, BlockValidatorError.wrongPreviousHeaderHash)
+                            } catch let error as BitcoinCoreErrors.BlockValidation {
+                                XCTAssertEqual(error, BitcoinCoreErrors.BlockValidation.wrongPreviousHeaderHash)
                             } catch {
                                 XCTFail("Unexpected exception thrown")
                             }

@@ -1,11 +1,11 @@
-class BlockValidatorHelper: IBlockValidatorHelper {
+open class BlockValidatorHelper: IBlockValidatorHelper {
     let storage: IStorage
 
-    init(storage: IStorage) {
+    public init(storage: IStorage) {
         self.storage = storage
     }
 
-    func previous(for block: Block, count: Int) -> Block? {
+    public func previous(for block: Block, count: Int) -> Block? {
         let previousHeight = block.height - count
         guard let previousBlock = storage.block(byHeight: previousHeight) else {
             return nil
@@ -13,7 +13,7 @@ class BlockValidatorHelper: IBlockValidatorHelper {
         return previousBlock
     }
 
-    func previousWindow(for block: Block, count: Int) -> [Block]? {
+    public func previousWindow(for block: Block, count: Int) -> [Block]? {
         let firstIndex = block.height - count
         let blocks = storage.blocks(from: firstIndex, to: block.height - 1, ascending: true)
         guard blocks.count == count else {

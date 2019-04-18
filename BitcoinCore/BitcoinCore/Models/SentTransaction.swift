@@ -1,6 +1,6 @@
 import GRDB
 
-class SentTransaction: Record {
+public class SentTransaction: Record {
     let hashReversedHex: String
     var firstSendTime: Double
     var lastSendTime: Double
@@ -15,7 +15,7 @@ class SentTransaction: Record {
         super.init()
     }
 
-    override class var databaseTableName: String {
+    override open class var databaseTableName: String {
         return "sentTransactions"
     }
 
@@ -39,7 +39,7 @@ class SentTransaction: Record {
         super.init(row: row)
     }
 
-    override func encode(to container: inout PersistenceContainer) {
+    override open func encode(to container: inout PersistenceContainer) {
         container[Columns.hashReversedHex] = hashReversedHex
         container[Columns.firstSendTime] = firstSendTime
         container[Columns.lastSendTime] = lastSendTime

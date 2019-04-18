@@ -5,9 +5,9 @@ import HSCryptoKit
 import RxSwift
 
 public class BitcoinCore {
-    static let heightInterval = 2016                                    // Default block count in difficulty change circle ( Bitcoin )
-    static let targetSpacing = 10 * 60                                  // Time to mining one block ( 10 min. Bitcoin )
-    static let maxTargetBits = 0x1d00ffff                               // Initially and max. target difficulty for blocks
+    public static let heightInterval = 2016                                    // Default block count in difficulty change circle ( Bitcoin )
+    public static let targetSpacing = 10 * 60                                  // Time to mining one block ( 10 min. Bitcoin )
+    public static let maxTargetBits = 0x1d00ffff                               // Initially and max. target difficulty for blocks
 
 
     private let storage: IStorage
@@ -26,40 +26,40 @@ public class BitcoinCore {
 
     // START: Extending
 
-    var peerGroup: IPeerGroup
-    var transactionSyncer: ITransactionSyncer
+    public var peerGroup: IPeerGroup
+    public var transactionSyncer: ITransactionSyncer
 
     let blockValidatorChain = BlockValidatorChain(proofOfWorkValidator: ProofOfWorkValidator(difficultyEncoder: DifficultyEncoder()))
     let inventoryItemsHandlerChain = InventoryItemsHandlerChain()
     let peerTaskHandlerChain = PeerTaskHandlerChain()
 
-    func add(blockValidator: IBlockValidator) {
+    public func add(blockValidator: IBlockValidator) {
         blockValidatorChain.add(blockValidator: blockValidator)
     }
 
-    func add(inventoryItemsHandler: IInventoryItemsHandler) {
+    public func add(inventoryItemsHandler: IInventoryItemsHandler) {
         inventoryItemsHandlerChain.add(handler: inventoryItemsHandler)
     }
 
-    func add(peerTaskHandler: IPeerTaskHandler) {
+    public func add(peerTaskHandler: IPeerTaskHandler) {
         peerTaskHandlerChain.add(handler: peerTaskHandler)
     }
 
-    @discardableResult func add(messageParser: IMessageParser) -> Self {
+    @discardableResult public func add(messageParser: IMessageParser) -> Self {
         networkMessageParser.add(parser: messageParser)
         return self
     }
 
-    @discardableResult func add(messageSerializer: IMessageSerializer) -> Self {
+    @discardableResult public func add(messageSerializer: IMessageSerializer) -> Self {
         networkMessageSerializer.add(serializer: messageSerializer)
         return self
     }
 
-    func add(peerGroupListener: IPeerGroupListener) {
+    public func add(peerGroupListener: IPeerGroupListener) {
         peerGroup.add(peerGroupListener: peerGroupListener)
     }
 
-    func prepend(addressConverter: IAddressConverter) {
+    public func prepend(addressConverter: IAddressConverter) {
         self.addressConverter.prepend(addressConverter: addressConverter)
     }
 
@@ -68,7 +68,7 @@ public class BitcoinCore {
     public var delegateQueue = DispatchQueue(label: "bitcoin_delegate_queue")
     var delegates = [BitcoinCoreDelegate]()
 
-    func add(delegate: BitcoinCoreDelegate) {
+    public func add(delegate: BitcoinCoreDelegate) {
         delegates.append(delegate)
     }
 

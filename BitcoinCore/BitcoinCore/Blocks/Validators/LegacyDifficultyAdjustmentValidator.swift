@@ -1,6 +1,6 @@
 import BigInt
 
-class LegacyDifficultyAdjustmentValidator: IBlockValidator {
+public class LegacyDifficultyAdjustmentValidator: IBlockValidator {
     private let heightInterval: Int
     private let targetTimespan: Int
     private let maxTargetBits: Int
@@ -8,7 +8,7 @@ class LegacyDifficultyAdjustmentValidator: IBlockValidator {
     let difficultyEncoder: IDifficultyEncoder
     let blockValidatorHelper: IBlockValidatorHelper
 
-    init(encoder: IDifficultyEncoder, blockValidatorHelper: IBlockValidatorHelper, heightInterval: Int, targetTimespan: Int, maxTargetBits: Int) {
+    public init(encoder: IDifficultyEncoder, blockValidatorHelper: IBlockValidatorHelper, heightInterval: Int, targetTimespan: Int, maxTargetBits: Int) {
         difficultyEncoder = encoder
         self.blockValidatorHelper = blockValidatorHelper
 
@@ -17,7 +17,7 @@ class LegacyDifficultyAdjustmentValidator: IBlockValidator {
         self.maxTargetBits = maxTargetBits
     }
 
-    func validate(block: Block, previousBlock: Block) throws {
+    public func validate(block: Block, previousBlock: Block) throws {
         guard let firstBlock = blockValidatorHelper.previous(for: previousBlock, count: heightInterval - 1) else {
             throw BitcoinCoreErrors.BlockValidation.noPreviousBlock
         }
@@ -43,7 +43,7 @@ class LegacyDifficultyAdjustmentValidator: IBlockValidator {
         }
     }
 
-    func isBlockValidatable(block: Block, previousBlock: Block) -> Bool {
+    public func isBlockValidatable(block: Block, previousBlock: Block) -> Bool {
         return block.height % heightInterval == 0
     }
 

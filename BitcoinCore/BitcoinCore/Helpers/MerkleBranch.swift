@@ -1,4 +1,4 @@
-class MerkleBranch: IMerkleBranch {
+public class MerkleBranch: IMerkleBranch {
     static let bitMask: [UInt8] = [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80]
 
     private let hasher: IHasher
@@ -9,11 +9,11 @@ class MerkleBranch: IMerkleBranch {
     private var bitsUsed = 0
     private var hashesUsed = 0
 
-    init(hasher: IHasher) {
+    public init(hasher: IHasher) {
         self.hasher = hasher
     }
 
-    func calculateMerkleRoot(txCount: Int, hashes: [Data], flags: [UInt8]) throws -> (merkleRoot: Data, matchedHashes: [Data]) {
+    public func calculateMerkleRoot(txCount: Int, hashes: [Data], flags: [UInt8]) throws -> (merkleRoot: Data, matchedHashes: [Data]) {
         self.txCount = txCount
         self.hashes = hashes
         self.flags = flags

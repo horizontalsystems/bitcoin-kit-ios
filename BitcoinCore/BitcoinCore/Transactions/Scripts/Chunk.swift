@@ -1,12 +1,12 @@
 import Foundation
 
-class Chunk: Equatable {
+public class Chunk: Equatable {
     let scriptData: Data
     let index: Int
     let payloadRange: Range<Int>?
 
-    var opCode: UInt8 { return scriptData[index] }
-    var data: Data? {
+    public var opCode: UInt8 { return scriptData[index] }
+    public var data: Data? {
         guard let payloadRange = payloadRange, scriptData.count >= payloadRange.upperBound else {
             return nil
         }
@@ -19,7 +19,7 @@ class Chunk: Equatable {
         self.payloadRange = payloadRange
     }
 
-    static func ==(lhs: Chunk, rhs: Chunk) -> Bool {
+    static public func ==(lhs: Chunk, rhs: Chunk) -> Bool {
         return lhs.scriptData == rhs.scriptData && lhs.opCode == rhs.opCode && lhs.payloadRange == rhs.payloadRange
     }
 

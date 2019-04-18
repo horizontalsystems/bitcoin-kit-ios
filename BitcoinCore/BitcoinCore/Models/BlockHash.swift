@@ -1,12 +1,12 @@
 import GRDB
 
-class BlockHash: Record {
+public class BlockHash: Record {
     let headerHashReversedHex: String
     let headerHash: Data
     let height: Int
     let sequence: Int
 
-    init(headerHash: Data, height: Int, order: Int) {
+    public init(headerHash: Data, height: Int, order: Int) {
         self.headerHash = headerHash
         self.headerHashReversedHex = headerHash.reversedHex
         self.height = height
@@ -28,7 +28,7 @@ class BlockHash: Record {
         super.init()
     }
 
-    override class var databaseTableName: String {
+    override open class var databaseTableName: String {
         return "blockHashes"
     }
 
@@ -48,7 +48,7 @@ class BlockHash: Record {
         super.init(row: row)
     }
 
-    override func encode(to container: inout PersistenceContainer) {
+    override open func encode(to container: inout PersistenceContainer) {
         container[Columns.headerHashReversedHex] = headerHashReversedHex
         container[Columns.headerHash] = headerHash
         container[Columns.height] = height
@@ -67,11 +67,11 @@ extension BlockHash: Equatable {
 
 extension BlockHash: Hashable {
 
-    var hashValue: Int {
+    public var hashValue: Int {
         return headerHash.hashValue ^ height.hashValue
     }
 
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(headerHash)
         hasher.combine(height)
     }

@@ -1,7 +1,7 @@
 import Foundation
 import BigInt
 
-class LegacyTestNetDifficultyValidator: IBlockValidator {
+public class LegacyTestNetDifficultyValidator: IBlockValidator {
     private let diffDate = 1329264000 // February 16th 2012
 
     private let heightInterval: Int
@@ -10,7 +10,7 @@ class LegacyTestNetDifficultyValidator: IBlockValidator {
 
     private let blockHelper: IBlockValidatorHelper
 
-    init(blockHelper: IBlockValidatorHelper, heightInterval: Int, targetSpacing: Int, maxTargetBits: Int) {
+    public init(blockHelper: IBlockValidatorHelper, heightInterval: Int, targetSpacing: Int, maxTargetBits: Int) {
         self.blockHelper = blockHelper
 
         self.heightInterval = heightInterval
@@ -18,7 +18,7 @@ class LegacyTestNetDifficultyValidator: IBlockValidator {
         self.maxTargetBits = maxTargetBits
     }
 
-    func validate(block: Block, previousBlock: Block) throws {
+    public func validate(block: Block, previousBlock: Block) throws {
         let timeDelta = block.timestamp - previousBlock.timestamp
         if timeDelta >= 0, timeDelta <= targetSpacing * 2 {
             var cursorBlock = previousBlock
@@ -35,7 +35,7 @@ class LegacyTestNetDifficultyValidator: IBlockValidator {
         }
     }
 
-    func isBlockValidatable(block: Block, previousBlock: Block) -> Bool {
+    public func isBlockValidatable(block: Block, previousBlock: Block) -> Bool {
         return previousBlock.timestamp > diffDate
     }
 

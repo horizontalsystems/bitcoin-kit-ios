@@ -1,11 +1,11 @@
 import Foundation
 import RxSwift
 
-public class AbstractKit {
-    var bitcoinCore: BitcoinCore
-    var network: INetwork
+open class AbstractKit {
+    public var bitcoinCore: BitcoinCore
+    public var network: INetwork
 
-    init(bitcoinCore: BitcoinCore, network: INetwork) {
+    public init(bitcoinCore: BitcoinCore, network: INetwork) {
         self.bitcoinCore = bitcoinCore
         self.network = network
     }

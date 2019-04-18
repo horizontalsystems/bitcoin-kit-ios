@@ -1,6 +1,6 @@
 import Foundation
 
-class PaymentAddressParser: IPaymentAddressParser {
+public class PaymentAddressParser: IPaymentAddressParser {
     fileprivate static let parameterVersion = "version"
     fileprivate static let parameterAmount = "amount"
     fileprivate static let parameterLabel = "label"
@@ -9,7 +9,7 @@ class PaymentAddressParser: IPaymentAddressParser {
     private let validScheme: String
     private let removeScheme: Bool
 
-    init(validScheme: String, removeScheme: Bool) {
+    public init(validScheme: String, removeScheme: Bool) {
         self.validScheme = validScheme
         self.removeScheme = removeScheme
     }

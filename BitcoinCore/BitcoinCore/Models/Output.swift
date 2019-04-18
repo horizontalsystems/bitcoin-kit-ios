@@ -1,7 +1,7 @@
 import Foundation
 import GRDB
 
-enum ScriptType: Int, DatabaseValueConvertible {
+public enum ScriptType: Int, DatabaseValueConvertible {
     case unknown, p2pkh, p2pk, p2multi, p2sh, p2wsh, p2wpkh, p2wpkhSh
 
     var size: Int {
@@ -41,7 +41,7 @@ enum ScriptType: Int, DatabaseValueConvertible {
 
 }
 
-class Output: Record {
+public class Output: Record {
 
     var value: Int
     var lockingScript: Data
@@ -64,7 +64,7 @@ class Output: Record {
         super.init()
     }
 
-    override class var databaseTableName: String {
+    override open class var databaseTableName: String {
         return "outputs"
     }
 
@@ -92,7 +92,7 @@ class Output: Record {
         super.init(row: row)
     }
 
-    override func encode(to container: inout PersistenceContainer) {
+    override open func encode(to container: inout PersistenceContainer) {
         container[Columns.value] = value
         container[Columns.lockingScript] = lockingScript
         container[Columns.index] = index

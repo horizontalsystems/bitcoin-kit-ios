@@ -11,14 +11,14 @@ public enum FeePriority {
     case custom(feeRate: Int)
 }
 
-class FeeRate: Record {
+public class FeeRate: Record {
     static let defaultFeeRate: FeeRate = FeeRate(low: 21, medium: 42, high: 81, date: Date(timeIntervalSince1970: 1543211299))
 
     private static let primaryKey = "primaryKey"
 
     private let primaryKey: String = FeeRate.primaryKey
 
-    init(low: Int, medium: Int, high: Int, date: Date) {
+    public init(low: Int, medium: Int, high: Int, date: Date) {
         self.low = low
         self.medium = medium
         self.high = high
@@ -33,7 +33,7 @@ class FeeRate: Record {
 
     let date: Date
 
-    override class var databaseTableName: String {
+    override open class var databaseTableName: String {
         return "feeRates"
     }
 
@@ -54,7 +54,7 @@ class FeeRate: Record {
         super.init(row: row)
     }
 
-    override func encode(to container: inout PersistenceContainer) {
+    override open func encode(to container: inout PersistenceContainer) {
         container[Columns.primaryKey] = primaryKey
         container[Columns.lowPriority] = low
         container[Columns.mediumPriority] = medium

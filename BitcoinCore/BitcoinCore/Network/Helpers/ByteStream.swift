@@ -8,30 +8,30 @@
 
 import Foundation
 
-class ByteStream {
-    let data: Data
+public class ByteStream {
+    public let data: Data
     private var offset = 0
 
-    var availableBytes: Int {
+    public var availableBytes: Int {
         return data.count - offset
     }
 
-    var last: UInt8? {
+    public var last: UInt8? {
         return data[offset]
     }
 
-    init(_ data: Data) {
+    public init(_ data: Data) {
         self.data = data
     }
 
-    func read<T>(_ type: T.Type) -> T {
+    public func read<T>(_ type: T.Type) -> T {
         let size = MemoryLayout<T>.size
         let value = data[offset..<(offset + size)].to(type: type)
         offset += size
         return value
     }
 
-    func read(_ type: VarInt.Type) -> VarInt {
+    public func read(_ type: VarInt.Type) -> VarInt {
         let len = data[offset..<(offset + 1)].to(type: UInt8.self)
         let length: UInt64
         switch len {
@@ -58,7 +58,7 @@ class ByteStream {
         return VarInt(length)
     }
 
-    func read(_ type: VarString.Type) -> VarString {
+    public func read(_ type: VarString.Type) -> VarString {
         let length = read(VarInt.self).underlyingValue
         let size = Int(length)
         let value = data[offset..<(offset + size)].to(type: String.self)
@@ -66,7 +66,7 @@ class ByteStream {
         return VarString(value)
     }
 
-    func read(_ type: Data.Type, count: Int) -> Data {
+    public func read(_ type: Data.Type, count: Int) -> Data {
         let value = data[offset..<(offset + count)]
         offset += count
         return Data(value)

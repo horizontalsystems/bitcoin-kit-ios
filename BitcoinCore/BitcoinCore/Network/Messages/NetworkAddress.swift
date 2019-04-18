@@ -3,7 +3,7 @@ import HSCryptoKit
 
 /// When a network address is needed somewhere,
 /// this structure is used. Network addresses are not prefixed with a timestamp in the version message.
-struct NetworkAddress {
+public struct NetworkAddress {
     let services: UInt64
     let address: String
     let port: UInt16
@@ -40,7 +40,7 @@ struct NetworkAddress {
 }
 
 extension NetworkAddress: CustomStringConvertible {
-    var description: String {
+    public var description: String {
         return "[\(address)]:\(port.bigEndian) \(ServiceFlags(rawValue: services))"
     }
 }

@@ -1,13 +1,13 @@
 import Foundation
 
-class CashBech32AddressConverter: IAddressConverter {
+public class CashBech32AddressConverter: IAddressConverter {
     private let prefix: String
 
-    init(prefix: String) {
+    public init(prefix: String) {
         self.prefix = prefix
     }
 
-    func convert(address: String) throws -> Address {
+    public func convert(address: String) throws -> Address {
         var correctedAddress = address
         if address.firstIndex(of: ":") == nil {
             correctedAddress = "\(prefix):\(address)"
@@ -35,7 +35,7 @@ class CashBech32AddressConverter: IAddressConverter {
         throw BitcoinCoreErrors.AddressConversion.unknownAddressType
     }
 
-    func convert(keyHash: Data, type: ScriptType) throws -> Address {
+    public func convert(keyHash: Data, type: ScriptType) throws -> Address {
         let addressType: AddressType
         switch type {
             case .p2pkh, .p2pk:

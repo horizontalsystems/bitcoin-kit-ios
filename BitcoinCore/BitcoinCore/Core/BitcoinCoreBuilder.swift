@@ -1,8 +1,8 @@
 import Foundation
 import HSHDWalletKit
 
-class BitcoinCoreBuilder {
-    enum BuildError: Error { case noSeedData, noWalletId, noNetwork, noPaymentAddressParser, noAddressSelector, noFeeRateApiResource, noStorage }
+public class BitcoinCoreBuilder {
+    public enum BuildError: Error { case noSeedData, noWalletId, noNetwork, noPaymentAddressParser, noAddressSelector, noFeeRateApiResource, noStorage }
 
     // required parameters
     private var seed: Data?
@@ -12,6 +12,7 @@ class BitcoinCoreBuilder {
     private var addressSelector: IAddressSelector?
     private var feeRateApiResource: String?
     private var walletId: String?
+    private var initialSyncApiUrl: String?
 
     private var blockHeaderHasher: IHasher?
 
@@ -22,67 +23,74 @@ class BitcoinCoreBuilder {
 
     private var storage: IStorage?
 
-    func set(seed: Data) -> BitcoinCoreBuilder {
+    public func set(seed: Data) -> BitcoinCoreBuilder {
         self.seed = seed
         return self
     }
 
-    func set(words: [String]) -> BitcoinCoreBuilder {
+    public func set(words: [String]) -> BitcoinCoreBuilder {
         self.words = words
         return self
     }
 
-    func set(network: INetwork) -> BitcoinCoreBuilder {
+    public func set(network: INetwork) -> BitcoinCoreBuilder {
         self.network = network
         return self
     }
 
-    func set(paymentAddressParser: PaymentAddressParser) -> BitcoinCoreBuilder {
+    public func set(paymentAddressParser: PaymentAddressParser) -> BitcoinCoreBuilder {
         self.paymentAddressParser = paymentAddressParser
         return self
     }
 
-    func set(addressSelector: IAddressSelector) -> BitcoinCoreBuilder {
+    public func set(addressSelector: IAddressSelector) -> BitcoinCoreBuilder {
         self.addressSelector = addressSelector
         return self
     }
 
-    func set(feeRateApiResource: String) -> BitcoinCoreBuilder {
+    public func set(feeRateApiResource: String) -> BitcoinCoreBuilder {
         self.feeRateApiResource = feeRateApiResource
         return self
     }
 
-    func set(walletId: String) -> BitcoinCoreBuilder {
+    public func set(walletId: String) -> BitcoinCoreBuilder {
         self.walletId = walletId
         return self
     }
 
-    func set(confirmationsThreshold: Int) -> BitcoinCoreBuilder {
+    public func set(confirmationsThreshold: Int) -> BitcoinCoreBuilder {
         self.confirmationsThreshold = confirmationsThreshold
         return self
     }
 
-    func set(newWallet: Bool) -> BitcoinCoreBuilder {
+    public func set(newWallet: Bool) -> BitcoinCoreBuilder {
         self.newWallet = newWallet
         return self
     }
 
-    func set(peerSize: Int) -> BitcoinCoreBuilder {
+    public func set(peerSize: Int) -> BitcoinCoreBuilder {
         self.peerCount = peerSize
         return self
     }
 
-    func set(storage: IStorage) -> BitcoinCoreBuilder {
+    public func set(storage: IStorage) -> BitcoinCoreBuilder {
         self.storage = storage
         return self
     }
 
-    func set(blockHeaderHasher: IHasher) -> BitcoinCoreBuilder {
+    public func set(blockHeaderHasher: IHasher) -> BitcoinCoreBuilder {
         self.blockHeaderHasher = blockHeaderHasher
         return self
     }
 
-    func build() throws -> BitcoinCore {
+    public func set(initialSyncApiUrl: String?) -> BitcoinCoreBuilder {
+        self.initialSyncApiUrl = initialSyncApiUrl
+        return self
+    }
+
+    public init() {}
+
+    public func build() throws -> BitcoinCore {
         let seed: Data
         if let selfSeed = self.seed {
            seed = selfSeed
@@ -132,7 +140,7 @@ class BitcoinCoreBuilder {
         let networkMessageParser = NetworkMessageParser(magic: network.magic)
         let networkMessageSerializer = NetworkMessageSerializer(magic: network.magic)
 
-        let doubleShaHasher = MerkleRootHasher()
+        let doubleShaHasher = DoubleShaHasher()
         let merkleBranch = MerkleBranch(hasher: doubleShaHasher)
         let merkleBlockValidator = MerkleBlockValidator(maxBlockSize: network.maxBlockSize, merkleBranch: merkleBranch)
 
@@ -175,7 +183,10 @@ class BitcoinCoreBuilder {
         let transactionBuilder = TransactionBuilder(unspentOutputSelector: unspentOutputSelector, unspentOutputProvider: unspentOutputProvider, addressManager: addressManager, addressConverter: addressConverter, inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory)
         let transactionCreator = TransactionCreator(transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, transactionSender: transactionSender)
 
-        let blockHashFetcher = BlockHashFetcher(addressSelector: addressSelector, apiManager: BCoinApi(network: network), addressConverter: addressConverter, helper: BlockHashFetcherHelper())
+        let initialSyncApiUrl = self.initialSyncApiUrl ?? "http://btc-testnet.horizontalsystems.xyz/apg"//todo dash can't initial sync blocks. Must avoid creation of blockDiscovery
+        let bcoinApi = BCoinApi(url: initialSyncApiUrl)
+
+        let blockHashFetcher = BlockHashFetcher(addressSelector: addressSelector, apiManager: bcoinApi, addressConverter: addressConverter, helper: BlockHashFetcherHelper())
         let blockDiscovery = BlockDiscoveryBatch(network: network, wallet: hdWallet, blockHashFetcher: blockHashFetcher, logger: logger)
 
         let stateManager = StateManager(storage: storage, network: network, newWallet: newWallet)

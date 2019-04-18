@@ -4,17 +4,17 @@ import HSCryptoKit
 /// Integer can be encoded depending on the represented value to save space.
 /// Variable length integers always precede an array/vector of a type of data that may vary in length.
 /// Longer numbers are encoded in little endian.
-struct VarInt : ExpressibleByIntegerLiteral {
-    typealias IntegerLiteralType = UInt64
-    let underlyingValue: UInt64
-    let length: UInt8
-    let data: Data
+public struct VarInt : ExpressibleByIntegerLiteral {
+    public typealias IntegerLiteralType = UInt64
+    public let underlyingValue: UInt64
+    public let length: UInt8
+    public let data: Data
 
-    init(integerLiteral value: UInt64) {
+    public init(integerLiteral value: UInt64) {
         self.init(value)
     }
 
-    init(_ value: UInt64) {
+    public init(_ value: UInt64) {
         underlyingValue = value
 
         switch value {
@@ -35,21 +35,21 @@ struct VarInt : ExpressibleByIntegerLiteral {
         }
     }
 
-    init(_ value: Int) {
+    public init(_ value: Int) {
         self.init(UInt64(value))
     }
 
-    func serialized() -> Data {
+    public func serialized() -> Data {
         return data
     }
 
-    static func deserialize(_ data: Data) -> VarInt {
+    static public func deserialize(_ data: Data) -> VarInt {
         return data.to(type: self)
     }
 }
 
 extension VarInt : CustomStringConvertible {
-    var description: String {
+    public var description: String {
         return "\(underlyingValue)"
     }
 }
