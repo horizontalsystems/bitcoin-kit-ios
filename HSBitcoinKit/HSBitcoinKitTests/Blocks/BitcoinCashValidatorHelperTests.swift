@@ -9,7 +9,7 @@ class BitcoinCashValidatorHelperTests: QuickSpec {
 
     override func spec() {
         var helper: BitcoinCashBlockValidatorHelper!
-        let mockStorage = MockIStorage()
+        let mockStorage = MockIBitcoinCashStorage()
 
         beforeEach {
             helper = BitcoinCashBlockValidatorHelper(storage: mockStorage)
@@ -59,6 +59,23 @@ class BitcoinCashValidatorHelperTests: QuickSpec {
 
                 let blockIndex = helper.suitableBlockIndex(for: [block1, block2, block3])
                 expect(blockIndex).to(equal(0))
+            }
+        }
+        describe("#medianTimePast") {
+            it("checks valid median time past") {
+                let block = TestData.firstBlock
+                block.height = 1000
+
+                var timestamps = [Int]()
+                for i in 0..<11 {
+                    timestamps.append(100 * (i + 1))
+                }
+                stub(mockStorage) { mock in
+                    when(mock.timestamps(from: 990, to: 1000, ascending: true)).thenReturn(timestamps)
+                }
+
+                let medianTime = helper.medianTimePast(block: block)
+                expect(medianTime).to(equal(600))
             }
         }
     }

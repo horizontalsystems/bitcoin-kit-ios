@@ -324,7 +324,7 @@ class BlockSyncerTests: QuickSpec {
                     stub(mockStorage) { mock in
                         when(mock.lastBlockchainBlockHash.get).thenReturn(nil)
                         when(mock.blocks(heightGreaterThan: equal(to: checkpointBlock.height), sortedBy: equal(to: Block.Columns.height), limit: equal(to: 10))).thenReturn([Block]())
-                        when(mock.block(byHeight: equal(to: peerLastBlockHeight))).thenReturn(nil)
+                        when(mock.block(byHeight: Int(peerLastBlockHeight))).thenReturn(nil)
                     }
                 }
 
@@ -363,7 +363,7 @@ class BlockSyncerTests: QuickSpec {
                 context("when the peers last block is already in storage") {
                     it("returns peers last block's headerHash instead of checkpointBlocks'") {
                         stub(mockStorage) { mock in
-                            when(mock.block(byHeight: equal(to: peerLastBlockHeight))).thenReturn(firstBlock)
+                            when(mock.block(byHeight: Int(peerLastBlockHeight))).thenReturn(firstBlock)
                         }
 
                         expect(syncer.getBlockLocatorHashes(peerLastBlockHeight: peerLastBlockHeight)).to(equal([firstBlock.headerHash]))

@@ -8,13 +8,3 @@ class MerkleRootHasher: IHasher {
     }
 
 }
-
-extension MerkleRootHasher: IMerkleHasher {
-
-    func hash(left: Data, right: Data) -> Data {
-        let concatedData = Data(left) + Data(right)
-
-        return Data(CryptoKit.sha256sha256(concatedData))
-    }
-
-}

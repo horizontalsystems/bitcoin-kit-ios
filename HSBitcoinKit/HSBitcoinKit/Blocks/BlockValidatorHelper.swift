@@ -6,22 +6,18 @@ class BlockValidatorHelper: IBlockValidatorHelper {
     }
 
     func previous(for block: Block, count: Int) -> Block? {
-        return previousWindow(for: block, count: count)?.first
+        let previousHeight = block.height - count
+        guard let previousBlock = storage.block(byHeight: previousHeight) else {
+            return nil
+        }
+        return previousBlock
     }
 
     func previousWindow(for block: Block, count: Int) -> [Block]? {
-        guard count > 0 else {
+        let firstIndex = block.height - count
+        let blocks = storage.blocks(from: firstIndex, to: block.height - 1, ascending: true)
+        guard blocks.count == count else {
             return nil
-        }
-        var blocks = [Block]()
-        var block = block
-        for _ in 0..<count {
-            if let prevBlock = storage.block(byHashHex: block.previousBlockHashReversedHex) {
-                block = prevBlock
-                blocks.insert(block, at: 0)
-            } else {
-                return nil
-            }
         }
         return blocks
     }

@@ -53,14 +53,6 @@ protocol IMerkleRootCreator {
     func create(hashes: [Data]) -> Data?
 }
 
-protocol IHasher {
-    func hash(data: Data) -> Data
-}
-
-protocol IMerkleHasher {
-    func hash(left: Data, right: Data) -> Data
-}
-
 protocol IInstantTransactionManager {
     func handle(transactions: [FullTransaction])
     func handle(lockVote: TransactionLockVoteMessage) throws

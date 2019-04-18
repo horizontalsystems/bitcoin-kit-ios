@@ -107,6 +107,7 @@ public class GrdbStorage {
 
                 t.primaryKey([Block.Columns.headerHashReversedHex.name], onConflict: .replace)
             }
+            try db.create(index: "by\(Block.Columns.height.name)", on: Block.databaseTableName, columns: [Block.Columns.height.name], unique: true)
         }
 
         migrator.registerMigration("createTransactions") { db in
@@ -371,6 +372,12 @@ extension GrdbStorage: IStorage {
         }
     }
 
+    func blocks(from startHeight: Int, to endHeight: Int, ascending: Bool) -> [Block] {
+        return try! dbPool.read { db in
+            try Block.filter(Block.Columns.height >= startHeight).filter(Block.Columns.height <= endHeight).order(ascending ? Block.Columns.height.asc : Block.Columns.height.desc).fetchAll(db)
+        }
+    }
+
     func blocks(byHexes hexes: [String]) -> [Block] {
         return try! dbPool.read { db in
             try Block.filter(hexes.contains(Block.Columns.headerHashReversedHex)).fetchAll(db)
@@ -389,7 +396,7 @@ extension GrdbStorage: IStorage {
         }
     }
 
-    func block(byHeight height: Int32) -> Block? {
+    func block(byHeight height: Int) -> Block? {
         return try! dbPool.read { db in
             try Block.filter(Block.Columns.height == height).fetchOne(db)
         }

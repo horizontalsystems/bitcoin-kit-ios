@@ -91,10 +91,11 @@ protocol IStorage {
     func blocksCount(reversedHeaderHashHexes: [String]) -> Int
     func save(block: Block)
     func blocks(heightGreaterThan: Int, sortedBy: Block.Columns, limit: Int) -> [Block]
+    func blocks(from startHeight: Int, to endHeight: Int, ascending: Bool) -> [Block]
     func blocks(byHexes: [String]) -> [Block]
     func blocks(heightGreaterThanOrEqualTo: Int, stale: Bool) -> [Block]
     func blocks(stale: Bool) -> [Block]
-    func block(byHeight: Int32) -> Block?
+    func block(byHeight: Int) -> Block?
     func block(byHashHex: String) -> Block?
     func block(stale: Bool, sortedHeight: String) -> Block?
     func add(block: Block) throws
@@ -285,6 +286,10 @@ protocol IInitialSyncer {
     var delegate: IInitialSyncerDelegate? { get set }
     func sync()
     func stop()
+}
+
+protocol IHasher {
+    func hash(data: Data) -> Data
 }
 
 protocol IBlockHashFetcher {
