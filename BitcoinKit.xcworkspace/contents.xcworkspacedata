@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:BitcoinCore/BitcoinCore.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:BitcoinKit/BitcoinKit.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:BitcoinCashKit/BitcoinCashKit.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:DashKit/DashKit.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Demo/Demo.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Pods/Pods.xcodeproj">
+   </FileRef>
+</Workspace>
