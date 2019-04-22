@@ -1,11 +1,12 @@
 import XCTest
 import Cuckoo
+@testable import BitcoinCashKit
 @testable import BitcoinCore
 
 class EDAValidatorTests: XCTestCase {
 
     private var validator: EDAValidator!
-    private var mockDifficultyEncoder: MockIDifficultyEncoder!
+    private var mockDifficultyEncoder: MockIBitcoinCashDifficultyEncoder!
     private var mockBlockHelper: MockIBitcoinCashBlockValidatorHelper!
 
     private var block: Block!
@@ -14,7 +15,7 @@ class EDAValidatorTests: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        mockDifficultyEncoder = MockIDifficultyEncoder()
+        mockDifficultyEncoder = MockIBitcoinCashDifficultyEncoder()
         mockBlockHelper = MockIBitcoinCashBlockValidatorHelper()
 
         validator = EDAValidator(encoder: mockDifficultyEncoder, blockHelper: mockBlockHelper, maxTargetBits: 0x1d00ffff)

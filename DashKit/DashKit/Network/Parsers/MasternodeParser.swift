@@ -2,9 +2,9 @@ import HSCryptoKit
 import BitcoinCore
 
 class MasternodeParser: IMasternodeParser {
-    let hasher: IHasher
+    let hasher: IDashHasher
 
-    init(hasher: IHasher) {
+    init(hasher: IDashHasher) {
         self.hasher = hasher
     }
 

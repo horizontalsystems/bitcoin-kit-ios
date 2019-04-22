@@ -66,12 +66,13 @@ public class BitcoinCashKit: AbstractKit {
         let bech32 = CashBech32AddressConverter(prefix: network.bech32PrefixPattern)
         bitcoinCore.prepend(addressConverter: bech32)
 
-        let blockHelper = BitcoinCashBlockValidatorHelper(storage: storage)
+        let coreBlockHelper = BlockValidatorHelper(storage: storage)
+        let blockHelper = BitcoinCashBlockValidatorHelper(storage: storage, coreBlockValidatorHelper: coreBlockHelper)
         let difficultyEncoder = DifficultyEncoder()
 
         switch networkType {
         case .mainNet:
-            bitcoinCore.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: blockHelper, heightInterval: BitcoinCore.heightInterval, targetTimespan: BitcoinCore.targetSpacing * BitcoinCore.heightInterval, maxTargetBits: BitcoinCore.maxTargetBits))
+            bitcoinCore.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: coreBlockHelper, heightInterval: BitcoinCore.heightInterval, targetTimespan: BitcoinCore.targetSpacing * BitcoinCore.heightInterval, maxTargetBits: BitcoinCore.maxTargetBits))
             bitcoinCore.add(blockValidator: DAAValidator(encoder: difficultyEncoder, blockHelper: blockHelper, targetSpacing: BitcoinCashKit.targetSpacing, heightInterval: BitcoinCashKit.heightInterval, firstCheckpointHeight: network.checkpointBlock.height))
             bitcoinCore.add(blockValidator: EDAValidator(encoder: difficultyEncoder, blockHelper: blockHelper, maxTargetBits: BitcoinCore.maxTargetBits))
         case .testNet: ()

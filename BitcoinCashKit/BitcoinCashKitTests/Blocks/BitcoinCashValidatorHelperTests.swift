@@ -4,6 +4,7 @@ import Quick
 import Nimble
 import Cuckoo
 @testable import BitcoinCore
+@testable import BitcoinCashKit
 
 class BitcoinCashValidatorHelperTests: QuickSpec {
 
@@ -12,7 +13,7 @@ class BitcoinCashValidatorHelperTests: QuickSpec {
         let mockStorage = MockIBitcoinCashStorage()
 
         beforeEach {
-            helper = BitcoinCashBlockValidatorHelper(storage: mockStorage)
+            helper = BitcoinCashBlockValidatorHelper(storage: mockStorage, coreBlockValidatorHelper: MockIBlockValidatorHelperWrapper())
         }
 
         afterEach {

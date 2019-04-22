@@ -3,13 +3,13 @@ import XCTest
 import Quick
 import Nimble
 import Cuckoo
-@testable import BitcoinCore
+@testable import DashKit
 
 class MasternodeCbTxHashCalculatorTests: QuickSpec {
 
     override func spec() {
         let mockSerializer = MockICoinbaseTransactionSerializer()
-        let mockHasher = MockIHasher()
+        let mockHasher = MockIDashHasher()
 
         var calculator: MasternodeCbTxHasher!
 

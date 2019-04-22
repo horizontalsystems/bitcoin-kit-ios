@@ -5,9 +5,9 @@ class TransactionLockVoteValidator: ITransactionLockVoteValidator {
     private static let totalSignatures = 10
 
     private let storage: IDashStorage
-    private let hasher: IHasher
+    private let hasher: IDashHasher
 
-    init(storage: IDashStorage, hasher: IHasher) {
+    init(storage: IDashStorage, hasher: IDashHasher) {
         self.storage = storage
         self.hasher = hasher
     }

@@ -10,8 +10,8 @@ public class Block: Record {
     public var bits: Int
     var nonce: Int
 
-    var headerHashReversedHex: String
-    var headerHash: Data
+    public var headerHashReversedHex: String
+    public var headerHash: Data
     public var height: Int
     var stale: Bool = false
 
@@ -29,7 +29,7 @@ public class Block: Record {
         super.init()
     }
 
-    convenience init(withHeader header: BlockHeader, previousBlock: Block) {
+    public convenience init(withHeader header: BlockHeader, previousBlock: Block) {
         self.init(withHeader: header, height: previousBlock.height + 1)
     }
 

@@ -2,9 +2,9 @@ import BitcoinCore
 
 class SegWitBech32AddressConverter: IAddressConverter {
     private let prefix: String
-    private let scriptConverter: IScriptConverter
+    private let scriptConverter: IBitcoinScriptConverter
 
-    init(prefix: String, scriptConverter: IScriptConverter) {
+    init(prefix: String, scriptConverter: IBitcoinScriptConverter) {
         self.prefix = prefix
         self.scriptConverter = scriptConverter
     }

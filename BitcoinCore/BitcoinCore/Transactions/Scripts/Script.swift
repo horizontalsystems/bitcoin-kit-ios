@@ -1,12 +1,12 @@
 import Foundation
 
 public class Script {
-    let scriptData: Data
+    public let scriptData: Data
     public let chunks: [Chunk]
 
-    var length: Int { return scriptData.count }
+    public var length: Int { return scriptData.count }
 
-    func validate(opCodes: Data) throws {
+    public func validate(opCodes: Data) throws {
         guard opCodes.count == chunks.count else {
             throw ScriptError.wrongScriptLength
         }

@@ -1,4 +1,5 @@
 import Foundation
+@testable import DashKit
 @testable import BitcoinCore
 
 class DashTestData {
@@ -8,7 +9,7 @@ class DashTestData {
         return Masternode(proRegTxHash: proRegTxHash, confirmedHash: confirmedHash, confirmedHashWithProRegTxHash: Data(), ipAddress: Data(), port: 0, pubKeyOperator: Data(), keyIDVoting: Data(), isValid: isValid)
     }
 
-    static func coinbaseTransaction(transaction: FullTransaction = TestData.p2pkhTransaction, size: UInt32 = 0, merkleRootMNList: Data = Data()) -> CoinbaseTransaction {
+    static func coinbaseTransaction(transaction: FullTransaction = DashTestData.transaction, size: UInt32 = 0, merkleRootMNList: Data = Data()) -> CoinbaseTransaction {
         return CoinbaseTransaction(transaction: transaction, coinbaseTransactionSize: Data(from: size), version: 0, height: 0, merkleRootMNList: merkleRootMNList)
     }
 
@@ -27,6 +28,27 @@ class DashTestData {
         return TransactionLockVoteMessage(txHash: txHash, outpoint: Outpoint(txHash: inputTxHash, vout: 0),
                 outpointMasternode: Outpoint(txHash: txHash, vout: 0), quorumModifierHash: Data(),
                 masternodeProTxHash: Data(), vchMasternodeSignature: Data(), hash: Data())
+    }
+
+    static var transaction: FullTransaction {
+        let transaction = Transaction(version: 1, lockTime: 0)
+
+        for _ in 0..<32 { transaction.dataHash.append(UInt8.random(in: 0...255)) }
+        transaction.dataHashReversedHex = transaction.dataHash.reversedHex
+
+        let inputs = [
+            Input(
+                    withPreviousOutputTxReversedHex: Data(hex: "a6d1ce683f38a84cfd88a9d48b0ba2d7a8def00f8517e3da02c86fce6c7863d7")!.reversedHex, previousOutputIndex: 0,
+                    script: Data(hex: "4730440220302e597d74aebcb0bf7f372be156252017af190bd586466104b079fba4b7efa7022037ebbf84e096ef3d966123a93a83586012353c1d2c11c967d21acf1c94c45df001210347235e12207d21b6093d9fd93a0df4d589a0d44252b98b2e934a8da5ab1d1654")!,
+                    sequence: 4294967295
+            )
+        ]
+        let outputs = [
+            Output(withValue: 10792000, index: 0 , lockingScript: Data(hex: "76a9141ec865abcb88cec71c484d4dadec3d7dc0271a7b88ac")!, type: .p2pkh, keyHash: Data()),
+            Output(withValue: 0, index: 0, lockingScript: Data(hex: "6a4c500000b919000189658af37cd16dbd16e4186ea13c5d8e1f40c5b5a0958326067dd923b8fc8f0767f62eb9a7fd57df4f3e775a96ca5b5eabf5057dff98997a3bbd011366703f5e45075f397f7f3c8465da")!, type: .p2pk, keyHash: Data()),
+        ]
+
+        return FullTransaction(header: transaction, inputs: inputs, outputs: outputs)
     }
 
 }

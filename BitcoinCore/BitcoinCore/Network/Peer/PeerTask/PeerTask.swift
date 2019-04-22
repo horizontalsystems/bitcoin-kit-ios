@@ -4,8 +4,8 @@ open class PeerTask {
     class TimeoutError: Error {
     }
 
-    internal let dateGenerator: () -> Date
-    internal var lastActiveTime: Double? = nil
+    public let dateGenerator: () -> Date
+    public var lastActiveTime: Double? = nil
 
     weak public var requester: IPeerTaskRequester?
     weak public var delegate: IPeerTaskDelegate?

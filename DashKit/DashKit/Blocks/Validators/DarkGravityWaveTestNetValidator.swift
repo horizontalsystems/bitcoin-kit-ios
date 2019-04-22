@@ -1,13 +1,13 @@
 import BitcoinCore
 
 class DarkGravityWaveTestNetValidator: IBlockValidator {
-    private let difficultyEncoder: IDifficultyEncoder
+    private let difficultyEncoder: IDashDifficultyEncoder
 
     private let targetSpacing: Int
     private let targetTimeSpan: Int
     private let maxTargetBits: Int
 
-    init(difficultyEncoder: IDifficultyEncoder, targetSpacing: Int, targetTimeSpan: Int, maxTargetBits: Int) {
+    init(difficultyEncoder: IDashDifficultyEncoder, targetSpacing: Int, targetTimeSpan: Int, maxTargetBits: Int) {
         self.difficultyEncoder = difficultyEncoder
 
         self.targetSpacing = targetSpacing

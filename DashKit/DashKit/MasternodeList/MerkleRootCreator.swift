@@ -1,14 +1,14 @@
 import BitcoinCore
 
-public class MerkleRootCreator: IMerkleRootCreator {
+class MerkleRootCreator: IMerkleRootCreator {
     private struct MerkleChunk {
         let first: Data
         let last: Data
     }
 
-    let hasher: IHasher
+    let hasher: IDashHasher
 
-    public init(hasher: IHasher) {
+    public init(hasher: IDashHasher) {
         self.hasher = hasher
     }
 

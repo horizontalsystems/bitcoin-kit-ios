@@ -9,13 +9,16 @@
 /* Begin PBXBuildFile section */
 		04150B364C51651E10E22534 /* Pods_BitcoinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8070C4F00BDE4AE3C085080B /* Pods_BitcoinKit.framework */; };
 		3A7A7D1F226842B10063D6AD /* BitcoinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D15226842B00063D6AD /* BitcoinKit.framework */; };
-		3A7A7D24226842B10063D6AD /* BitcoinKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A7A7D23226842B10063D6AD /* BitcoinKitTests.swift */; };
 		3A7A7D26226842B10063D6AD /* BitcoinKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 3A7A7D18226842B00063D6AD /* BitcoinKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3A7A7D79226842FE0063D6AD /* BitcoinCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D78226842FE0063D6AD /* BitcoinCore.framework */; };
+		58AAA0CFE31FD40385CDF506 /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAFAAC6AABE2400485238 /* Protocols.swift */; };
 		58AAA117188974008B5F563E /* BitcoinKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA5CDCF8B52BC912CC0E2 /* BitcoinKit.swift */; };
+		58AAA3098471BB324159712D /* GeneratedMocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA8AA13E5099C73B8E79C /* GeneratedMocks.swift */; };
 		58AAA49B8012402356C135CE /* TestNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA6A33CBF3D1A0782C365 /* TestNet.swift */; };
+		58AAA4F949AA4261158F54B1 /* SegWitBech32AddressConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA5A526DD240851A5115F /* SegWitBech32AddressConverterTests.swift */; };
 		58AAA63A4D5CB80B7D260F71 /* MainNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA5DC79D60B7733E52BEC /* MainNet.swift */; };
 		58AAA64BD96CE9A79484D42E /* SegWitBech32AddressConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA79DC50FFF8761BAFD89 /* SegWitBech32AddressConverter.swift */; };
+		58AAA8268F45036A886ECECF /* BitcoinCoreCompatibility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAACDBF9DF3DCB75EE0BA6 /* BitcoinCoreCompatibility.swift */; };
 		58AAA9FF45FDE9548830D54F /* RegTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAACD1AA455F909A7E4378 /* RegTest.swift */; };
 		58AAACDD4F0F73E5CD9E82A4 /* SegWitBech32.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAC5F67BD7DA7392C6D82 /* SegWitBech32.swift */; };
 		87CF6AFD0A939977303D4F38 /* Pods_BitcoinKitTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37709BCA1C4277BCD57A6208 /* Pods_BitcoinKitTests.framework */; };
@@ -39,15 +42,18 @@
 		3A7A7D18226842B00063D6AD /* BitcoinKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BitcoinKit.h; sourceTree = "<group>"; };
 		3A7A7D19226842B00063D6AD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3A7A7D1E226842B10063D6AD /* BitcoinKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BitcoinKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		3A7A7D23226842B10063D6AD /* BitcoinKitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BitcoinKitTests.swift; sourceTree = "<group>"; };
 		3A7A7D25226842B10063D6AD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3A7A7D78226842FE0063D6AD /* BitcoinCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = BitcoinCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		58AAA5A526DD240851A5115F /* SegWitBech32AddressConverterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegWitBech32AddressConverterTests.swift; sourceTree = "<group>"; };
 		58AAA5CDCF8B52BC912CC0E2 /* BitcoinKit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinKit.swift; sourceTree = "<group>"; };
 		58AAA5DC79D60B7733E52BEC /* MainNet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainNet.swift; sourceTree = "<group>"; };
 		58AAA6A33CBF3D1A0782C365 /* TestNet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestNet.swift; sourceTree = "<group>"; };
 		58AAA79DC50FFF8761BAFD89 /* SegWitBech32AddressConverter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegWitBech32AddressConverter.swift; sourceTree = "<group>"; };
+		58AAA8AA13E5099C73B8E79C /* GeneratedMocks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratedMocks.swift; sourceTree = "<group>"; };
 		58AAAC5F67BD7DA7392C6D82 /* SegWitBech32.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegWitBech32.swift; sourceTree = "<group>"; };
 		58AAACD1AA455F909A7E4378 /* RegTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegTest.swift; sourceTree = "<group>"; };
+		58AAACDBF9DF3DCB75EE0BA6 /* BitcoinCoreCompatibility.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinCoreCompatibility.swift; sourceTree = "<group>"; };
+		58AAAFAAC6AABE2400485238 /* Protocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Protocols.swift; sourceTree = "<group>"; };
 		66A9A33F4AB6913B8F8FEDF1 /* Pods-BitcoinKitTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BitcoinKitTests.debug.xcconfig"; path = "../Pods/Target Support Files/Pods-BitcoinKitTests/Pods-BitcoinKitTests.debug.xcconfig"; sourceTree = "<group>"; };
 		8070C4F00BDE4AE3C085080B /* Pods_BitcoinKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BitcoinKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA30715685070B6D052BA4C7 /* Pods-BitcoinKit.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BitcoinKit.release.xcconfig"; path = "../Pods/Target Support Files/Pods-BitcoinKit/Pods-BitcoinKit.release.xcconfig"; sourceTree = "<group>"; };
@@ -110,8 +116,9 @@
 		3A7A7D22226842B10063D6AD /* BitcoinKitTests */ = {
 			isa = PBXGroup;
 			children = (
-				3A7A7D23226842B10063D6AD /* BitcoinKitTests.swift */,
 				3A7A7D25226842B10063D6AD /* Info.plist */,
+				58AAA1DDEE3D8654083DF2B6 /* SegWit */,
+				58AAA8AA13E5099C73B8E79C /* GeneratedMocks.swift */,
 			);
 			path = BitcoinKitTests;
 			sourceTree = "<group>";
@@ -137,6 +144,14 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
+		58AAA1DDEE3D8654083DF2B6 /* SegWit */ = {
+			isa = PBXGroup;
+			children = (
+				58AAA5A526DD240851A5115F /* SegWitBech32AddressConverterTests.swift */,
+			);
+			path = SegWit;
+			sourceTree = "<group>";
+		};
 		58AAA74DE2AA0162A3856513 /* Network */ = {
 			isa = PBXGroup;
 			children = (
@@ -160,6 +175,8 @@
 			isa = PBXGroup;
 			children = (
 				58AAA5CDCF8B52BC912CC0E2 /* BitcoinKit.swift */,
+				58AAACDBF9DF3DCB75EE0BA6 /* BitcoinCoreCompatibility.swift */,
+				58AAAFAAC6AABE2400485238 /* Protocols.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -202,6 +219,7 @@
 			buildConfigurationList = 3A7A7D2C226842B10063D6AD /* Build configuration list for PBXNativeTarget "BitcoinKitTests" */;
 			buildPhases = (
 				567C9F8044A6D7B7512F860C /* [CP] Check Pods Manifest.lock */,
+				3A5B1465226D7D4C00DF70E2 /* Cuckoo */,
 				3A7A7D1A226842B10063D6AD /* Sources */,
 				3A7A7D1B226842B10063D6AD /* Frameworks */,
 				3A7A7D1C226842B10063D6AD /* Resources */,
@@ -271,6 +289,25 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		3A5B1465226D7D4C00DF70E2 /* Cuckoo */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/${PROJECT_NAME}/Core/Protocols.swift",
+			);
+			name = Cuckoo;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Define output file. Change \"$PROJECT_DIR/${PROJECT_NAME}Tests\" to your test's root source folder, if it's not the default name.\nOUTPUT_FILE=\"$PROJECT_DIR/${PROJECT_NAME}Tests/GeneratedMocks.swift\"\necho \"Generated Mocks File = $OUTPUT_FILE\"\n\n# Define input directory. Change \"${PROJECT_DIR}/${PROJECT_NAME}\" to your project's root source folder, if it's not the default name.\nINPUT_DIR=\"${PROJECT_DIR}/${PROJECT_NAME}\"\necho \"Mocks Input Directory = $INPUT_DIR\"\n\n# Generate mock files, include as many input files as you'd like to create mocks for.\n\"${PODS_ROOT}/Cuckoo/run\" generate --testable \"$PROJECT_NAME\" \\\n--output \"${OUTPUT_FILE}\"\n";
+		};
 		567C9F8044A6D7B7512F860C /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -362,6 +399,8 @@
 				58AAA9FF45FDE9548830D54F /* RegTest.swift in Sources */,
 				58AAA64BD96CE9A79484D42E /* SegWitBech32AddressConverter.swift in Sources */,
 				58AAACDD4F0F73E5CD9E82A4 /* SegWitBech32.swift in Sources */,
+				58AAA8268F45036A886ECECF /* BitcoinCoreCompatibility.swift in Sources */,
+				58AAA0CFE31FD40385CDF506 /* Protocols.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -369,7 +408,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3A7A7D24226842B10063D6AD /* BitcoinKitTests.swift in Sources */,
+				58AAA4F949AA4261158F54B1 /* SegWitBech32AddressConverterTests.swift in Sources */,
+				58AAA3098471BB324159712D /* GeneratedMocks.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

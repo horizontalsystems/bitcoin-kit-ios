@@ -3,6 +3,7 @@ import XCTest
 import Quick
 import Nimble
 import Cuckoo
+@testable import DashKit
 @testable import BitcoinCore
 
 class MasternodeListMerkleRootCalculatorTests: QuickSpec {
@@ -10,9 +11,8 @@ class MasternodeListMerkleRootCalculatorTests: QuickSpec {
     override func spec() {
         let mockSerializer = MockIMasternodeSerializer()
         let mockCreator = MockIMerkleRootCreator()
-        let mockHasher = MockIHasher()
+        let mockHasher = MockIDashHasher()
         var calculator: MasternodeListMerkleRootCalculator!
-
         beforeEach {
             calculator = MasternodeListMerkleRootCalculator(masternodeSerializer: mockSerializer, masternodeHasher: mockHasher, masternodeMerkleRootCreator: mockCreator)
         }

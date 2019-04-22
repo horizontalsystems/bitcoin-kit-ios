@@ -3,7 +3,7 @@ import XCTest
 import Quick
 import Nimble
 import Cuckoo
-@testable import BitcoinCore
+@testable import DashKit
 
 class MasternodeSortedListTests: QuickSpec {
 

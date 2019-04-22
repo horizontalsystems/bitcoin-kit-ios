@@ -2,10 +2,10 @@ import BitcoinCore
 
 class MasternodeCbTxHasher: IMasternodeCbTxHasher {
     private let coinbaseTransactionSerializer: ICoinbaseTransactionSerializer
-    private let hasher: IHasher
+    private let hasher: IDashHasher
 
 
-    init(coinbaseTransactionSerializer: ICoinbaseTransactionSerializer, hasher: IHasher) {
+    init(coinbaseTransactionSerializer: ICoinbaseTransactionSerializer, hasher: IDashHasher) {
         self.coinbaseTransactionSerializer = coinbaseTransactionSerializer
         self.hasher = hasher
     }

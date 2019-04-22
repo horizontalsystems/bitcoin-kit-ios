@@ -2,15 +2,15 @@ import BitcoinCore
 import BigInt
 
 class DarkGravityWaveValidator: IBlockValidator {
-    private let difficultyEncoder: IDifficultyEncoder
-    private let blockHelper: IBlockValidatorHelper
+    private let difficultyEncoder: IDashDifficultyEncoder
+    private let blockHelper: IDashBlockValidatorHelper
 
     private let heightInterval: Int
     private let targetTimeSpan: Int
     private let maxTargetBits: Int
     private let firstCheckpointHeight: Int
 
-    init(encoder: IDifficultyEncoder, blockHelper: IBlockValidatorHelper, heightInterval: Int, targetTimeSpan: Int, maxTargetBits: Int, firstCheckpointHeight: Int) {
+    init(encoder: IDashDifficultyEncoder, blockHelper: IDashBlockValidatorHelper, heightInterval: Int, targetTimeSpan: Int, maxTargetBits: Int, firstCheckpointHeight: Int) {
         self.difficultyEncoder = encoder
         self.blockHelper = blockHelper
 

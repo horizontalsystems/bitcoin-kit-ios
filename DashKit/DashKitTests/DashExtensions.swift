@@ -1,5 +1,5 @@
 import XCTest
-@testable import BitcoinCore
+@testable import DashKit
 
 extension MasternodeListDiffMessage: Equatable {
 

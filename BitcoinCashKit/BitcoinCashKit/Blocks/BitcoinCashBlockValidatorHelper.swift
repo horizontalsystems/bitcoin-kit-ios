@@ -1,13 +1,13 @@
 import BitcoinCore
 
-class BitcoinCashBlockValidatorHelper: BlockValidatorHelper, IBitcoinCashBlockValidatorHelper {
+class BitcoinCashBlockValidatorHelper: IBitcoinCashBlockValidatorHelper {
     private let medianTimeSpan = 11
     private let bitcoinCashStorage: IBitcoinCashStorage
+    private let coreBlockValidatorHelper: IBlockValidatorHelperWrapper
 
-    init(storage: IBitcoinCashStorage) {
+    init(storage: IBitcoinCashStorage, coreBlockValidatorHelper: IBlockValidatorHelperWrapper) {
         bitcoinCashStorage = storage
-
-        super.init(storage: storage)
+        self.coreBlockValidatorHelper = coreBlockValidatorHelper
     }
 
     func medianTimePast(block: Block) -> Int {
@@ -27,6 +27,14 @@ class BitcoinCashBlockValidatorHelper: BlockValidatorHelper, IBitcoinCashBlockVa
         let suitableBlock = blocks.sorted(by: { $1.timestamp > $0.timestamp })[1]
 
         return blocks.firstIndex(where: { $0.height == suitableBlock.height })
+    }
+
+    func previous(for block: Block, count: Int) -> Block? {
+        return coreBlockValidatorHelper.previous(for: block, count: count)
+    }
+
+    func previousWindow(for block: Block, count: Int) -> [Block]? {
+        return coreBlockValidatorHelper.previousWindow(for: block, count: count)
     }
 
 }

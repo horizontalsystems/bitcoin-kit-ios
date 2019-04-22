@@ -1,5 +1,6 @@
 import XCTest
 import Cuckoo
+@testable import DashKit
 @testable import BitcoinCore
 
 class DarkGravityWaveValidatorTests: XCTestCase {
@@ -12,13 +13,13 @@ class DarkGravityWaveValidatorTests: XCTestCase {
                                   1408731256, 1408732229, 1408732257, 1408732489] // 123433 - 123456
 
     private var validator: DarkGravityWaveValidator!
-    private var mockBlockHelper: MockIBlockValidatorHelper!
+    private var mockBlockHelper: MockIDashBlockValidatorHelper!
 
     private var blocks = [Block]()
 
     override func setUp() {
         super.setUp()
-        mockBlockHelper = MockIBlockValidatorHelper()
+        mockBlockHelper = MockIDashBlockValidatorHelper()
 
         validator = DarkGravityWaveValidator(encoder: DifficultyEncoder(), blockHelper: mockBlockHelper, heightInterval: 24, targetTimeSpan: 3600, maxTargetBits: 0x1e0fffff, firstCheckpointHeight: 123432)
 

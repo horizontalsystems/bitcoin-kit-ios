@@ -3,12 +3,13 @@ import XCTest
 import Quick
 import Nimble
 import Cuckoo
+@testable import DashKit
 @testable import BitcoinCore
 
 class MerkleRootCreatorTests: QuickSpec {
 
     override func spec() {
-        let mockHasher = MockIMerkleHasher()
+        let mockHasher = MockIDashHasher()
 
         var creator: MerkleRootCreator!
 
@@ -36,11 +37,11 @@ class MerkleRootCreatorTests: QuickSpec {
             it("calculates for 1 value") {
                 let result = Data(repeating: 5, count: 4)
                 stub(mockHasher) { mock in
-                    when(mock.hash(left: equal(to: hash1), right: equal(to: hash1))).thenReturn(result)
+                    when(mock.hash(data: equal(to: hash1 + hash1))).thenReturn(result)
                 }
                 let merkle = creator.create(hashes: [hash1])
 
-                verify(mockHasher).hash(left: equal(to: hash1), right: equal(to: hash1))
+                verify(mockHasher).hash(data: equal(to: hash1 + hash1))
                 expect(merkle).to(equal(result))
             }
 
@@ -51,20 +52,20 @@ class MerkleRootCreatorTests: QuickSpec {
                 let result2 = Data(repeating: 7, count: 4)
 
                 stub(mockHasher) { mock in
-                    when(mock.hash(left: equal(to: hash1), right: equal(to: hash2))).thenReturn(result1)
-                    when(mock.hash(left: equal(to: hash3), right: equal(to: hash3))).thenReturn(result2)
-                    when(mock.hash(left: equal(to: result1), right: equal(to: result2))).thenReturn(result)
+                    when(mock.hash(data: equal(to: hash1 + hash2))).thenReturn(result1)
+                    when(mock.hash(data: equal(to: hash3 + hash3))).thenReturn(result2)
+                    when(mock.hash(data: equal(to: result1 + result2))).thenReturn(result)
                 }
 
                 let merkle = creator.create(hashes: [hash1, hash2, hash3])
 
-                verify(mockHasher).hash(left: equal(to: hash1), right: equal(to: hash2))
-                verify(mockHasher).hash(left: equal(to: hash3), right: equal(to: hash3))
-                verify(mockHasher).hash(left: equal(to: result1), right: equal(to: result2))
+                verify(mockHasher).hash(data: equal(to: hash1 + hash2))
+                verify(mockHasher).hash(data: equal(to: hash3 + hash3))
+                verify(mockHasher).hash(data: equal(to: result1 + result2))
                 expect(merkle).to(equal(result))
             }
             it("calculates with real data and real creator!") {
-                let realCreator = MerkleRootCreator(hasher: MerkleRootHasher())
+                let realCreator = MerkleRootCreator(hasher: DoubleShaHasher())
 
                 let hashes = [
                     "f170489c8719a85b783615f43bbe5c9c748ac5d7047b4db0f7d880639f543b37",

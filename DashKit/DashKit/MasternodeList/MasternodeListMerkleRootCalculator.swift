@@ -14,10 +14,9 @@ import BitcoinCore
 class MasternodeListMerkleRootCalculator: IMasternodeListMerkleRootCalculator {
     private let masternodeSerializer: IMasternodeSerializer
     private let masternodeMerkleRootCreator: IMerkleRootCreator
-    private let masternodeHasher: IHasher
+    private let masternodeHasher: IDashHasher
 
-
-    init(masternodeSerializer: IMasternodeSerializer, masternodeHasher: IHasher, masternodeMerkleRootCreator: IMerkleRootCreator) {
+    init(masternodeSerializer: IMasternodeSerializer, masternodeHasher: IDashHasher, masternodeMerkleRootCreator: IMerkleRootCreator) {
         self.masternodeSerializer = masternodeSerializer
         self.masternodeHasher = masternodeHasher
         self.masternodeMerkleRootCreator = masternodeMerkleRootCreator

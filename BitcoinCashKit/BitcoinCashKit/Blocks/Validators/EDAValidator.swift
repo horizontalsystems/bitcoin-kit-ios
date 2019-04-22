@@ -2,11 +2,11 @@ import BitcoinCore
 import BigInt
 
 class EDAValidator: IBlockValidator {
-    private let difficultyEncoder: IDifficultyEncoder
+    private let difficultyEncoder: IBitcoinCashDifficultyEncoder
     private let blockHelper: IBitcoinCashBlockValidatorHelper
     private let maxTargetBits: Int
 
-    init(encoder: IDifficultyEncoder, blockHelper: IBitcoinCashBlockValidatorHelper, maxTargetBits: Int) {
+    init(encoder: IBitcoinCashDifficultyEncoder, blockHelper: IBitcoinCashBlockValidatorHelper, maxTargetBits: Int) {
         difficultyEncoder = encoder
         self.blockHelper = blockHelper
 

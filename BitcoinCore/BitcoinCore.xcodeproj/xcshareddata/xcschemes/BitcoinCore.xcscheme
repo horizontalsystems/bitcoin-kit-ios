@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1000"
+   LastUpgradeVersion = "1010"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "D380FD5A20FCC04400276993"
-               BuildableName = "BitcoinCoreTests.xctest"
-               BlueprintName = "BitcoinCoreTests"
+               BlueprintIdentifier = "D3FD450420F354EF00F472B9"
+               BuildableName = "BitcoinCore.framework"
+               BlueprintName = "BitcoinCore"
                ReferencedContainer = "container:BitcoinCore.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -28,16 +28,6 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "D380FD5A20FCC04400276993"
-               BuildableName = "BitcoinCoreTests.xctest"
-               BlueprintName = "BitcoinCoreTests"
-               ReferencedContainer = "container:BitcoinCore.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
       <AdditionalOptions>
       </AdditionalOptions>
@@ -55,9 +45,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D380FD5A20FCC04400276993"
-            BuildableName = "BitcoinCoreTests.xctest"
-            BlueprintName = "BitcoinCoreTests"
+            BlueprintIdentifier = "D3FD450420F354EF00F472B9"
+            BuildableName = "BitcoinCore.framework"
+            BlueprintName = "BitcoinCore"
             ReferencedContainer = "container:BitcoinCore.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -70,6 +60,15 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "D3FD450420F354EF00F472B9"
+            BuildableName = "BitcoinCore.framework"
+            BlueprintName = "BitcoinCore"
+            ReferencedContainer = "container:BitcoinCore.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

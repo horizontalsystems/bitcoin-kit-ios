@@ -1,4 +1,22 @@
+import BigInt
 import BitcoinCore
+
+// BitcoinCore Compatibility
+
+protocol IDashDifficultyEncoder {
+    func decodeCompact(bits: Int) -> BigInt
+    func encodeCompact(from bigInt: BigInt) -> Int
+}
+
+protocol IDashHasher {
+    func hash(data: Data) -> Data
+}
+
+protocol IDashBlockValidatorHelper {
+    func previous(for block: Block, count: Int) -> Block?
+}
+
+// ###############################
 
 protocol IPeerTaskFactory {
     func createRequestMasternodeListDiffTask(baseBlockHash: Data, blockHash: Data) -> PeerTask
@@ -13,13 +31,15 @@ protocol IMasternodeListSyncer {
     func sync(blockHash: Data)
 }
 
-protocol IDashStorage: IStorage {
+protocol IDashStorage {
     var masternodes: [Masternode] { get set }
     var masternodeListState: MasternodeListState? { get set }
 
     func instantTransactionInput(for inputTxHash: Data) -> InstantTransactionInput?
     func instantTransactionInputs(for txHash: Data) -> [InstantTransactionInput]
     func add(instantTransactionInput: InstantTransactionInput)
+
+    func block(byHashHex: String) -> Block?
 }
 
 protocol IInstantSendFactory {
