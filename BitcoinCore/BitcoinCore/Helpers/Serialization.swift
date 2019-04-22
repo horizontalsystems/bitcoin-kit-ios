@@ -1,20 +1,20 @@
 import Foundation
 
 public extension Data {
-    public init<T>(from value: T) {
+    init<T>(from value: T) {
         var value = value
         self.init(buffer: UnsafeBufferPointer(start: &value, count: 1))
     }
 
-    public func to<T>(type: T.Type) -> T {
+    func to<T>(type: T.Type) -> T {
         return self.withUnsafeBytes { $0.pointee }
     }
 
-    public func to(type: String.Type) -> String {
+    func to(type: String.Type) -> String {
         return String(bytes: self, encoding: .ascii)!.replacingOccurrences(of: "\0", with: "")
     }
 
-    public func to(type: VarInt.Type) -> VarInt {
+    func to(type: VarInt.Type) -> VarInt {
         let value: UInt64
         let length = self[0..<1].to(type: UInt8.self)
         switch length {
