@@ -16,7 +16,7 @@ extension Array where Element == FullTransaction {
     }
 
     private func visit(transactionWithIndex transactionIndex: Int, picked: inout [FullTransaction], visited: inout [Bool]) {
-        guard !picked.contains(where: { self[transactionIndex].header.dataHashReversedHex == $0.header.dataHashReversedHex }) else {
+        guard !picked.contains(where: { self[transactionIndex].header.dataHash == $0.header.dataHash }) else {
             return
         }
 
@@ -28,7 +28,7 @@ extension Array where Element == FullTransaction {
 
         for candidateTransactionIndex in 0..<self.count {
             for input in self[transactionIndex].inputs {
-                if input.previousOutputTxReversedHex == self[candidateTransactionIndex].header.dataHashReversedHex,
+                if input.previousOutputTxHash == self[candidateTransactionIndex].header.dataHash,
                    self[candidateTransactionIndex].outputs.count > input.previousOutputIndex {
                     visit(transactionWithIndex: candidateTransactionIndex, picked: &picked, visited: &visited)
                 }

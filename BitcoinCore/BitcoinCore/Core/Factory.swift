@@ -25,7 +25,7 @@ class Factory: IFactory {
 
     func inputToSign(withPreviousOutput previousOutput: UnspentOutput, script: Data, sequence: Int) -> InputToSign {
         let input = Input(
-                withPreviousOutputTxReversedHex: previousOutput.output.transactionHashReversedHex, previousOutputIndex: previousOutput.output.index,
+                withPreviousOutputTxHash: previousOutput.output.transactionHash, previousOutputIndex: previousOutput.output.index,
                 script: script, sequence: sequence
         )
 

@@ -33,7 +33,7 @@ class TransactionProcessorTests: XCTestCase {
         mockBlockchainDataListener = MockIBlockchainDataListener()
 
         stub(mockStorage) { mock in
-            when(mock.transaction(byHashHex: any())).thenReturn(nil)
+            when(mock.transaction(byHash: any())).thenReturn(nil)
             when(mock.add(transaction: any())).thenDoNothing()
             when(mock.update(transaction: any())).thenDoNothing()
         }
@@ -107,7 +107,7 @@ class TransactionProcessorTests: XCTestCase {
         transaction.header.isMine = true
 
         stub(mockStorage) { mock in
-            when(mock.transaction(byHashHex: equal(to: transaction.header.dataHashReversedHex))).thenReturn(transaction.header)
+            when(mock.transaction(byHash: equal(to: transaction.header.dataHash))).thenReturn(transaction.header)
         }
 
         do {
@@ -132,7 +132,7 @@ class TransactionProcessorTests: XCTestCase {
         transaction.header.status = .new
 
         stub(mockStorage) { mock in
-            when(mock.transaction(byHashHex: equal(to: transaction.header.dataHashReversedHex))).thenReturn(transaction.header)
+            when(mock.transaction(byHash: equal(to: transaction.header.dataHash))).thenReturn(transaction.header)
         }
 
         try! transactionProcessor.processReceived(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false)
@@ -143,7 +143,7 @@ class TransactionProcessorTests: XCTestCase {
         verify(mockStorage).update(transaction: equal(to: transaction.header))
 
         XCTAssertEqual(transaction.header.status, TransactionStatus.relayed)
-        XCTAssertEqual(transaction.header.blockHashReversedHex, nil)
+        XCTAssertEqual(transaction.header.blockHash, nil)
         XCTAssertEqual(transaction.header.order, 0)
     }
 
@@ -157,8 +157,8 @@ class TransactionProcessorTests: XCTestCase {
         transactions[1].header.status = .new
 
         stub(mockStorage) { mock in
-            when(mock.transaction(byHashHex: equal(to: transactions[1].header.dataHashReversedHex))).thenReturn(transactions[1].header)
-            when(mock.transaction(byHashHex: equal(to: transactions[3].header.dataHashReversedHex))).thenReturn(transactions[3].header)
+            when(mock.transaction(byHash: equal(to: transactions[1].header.dataHash))).thenReturn(transactions[1].header)
+            when(mock.transaction(byHash: equal(to: transactions[3].header.dataHash))).thenReturn(transactions[3].header)
         }
 
         try! transactionProcessor.processReceived(transactions: [transactions[3], transactions[1], transactions[2], transactions[0]], inBlock: nil, skipCheckBloomFilter: false)
@@ -170,7 +170,7 @@ class TransactionProcessorTests: XCTestCase {
         verify(mockBlockchainDataListener).onUpdate(updated: equal(to: [transactions[1].header, transactions[3].header]), inserted: equal(to: [transactions[0].header, transactions[2].header]), inBlock: equal(to: nil))
 
         for (i, transaction) in transactions.enumerated() {
-            XCTAssertEqual(transaction.header.blockHashReversedHex, nil)
+            XCTAssertEqual(transaction.header.blockHash, nil)
             XCTAssertEqual(transaction.header.status, .relayed)
             XCTAssertEqual(transaction.header.order, i)
             XCTAssertEqual(transaction.header.timestamp, Int(generatedDate.timeIntervalSince1970))
@@ -189,8 +189,8 @@ class TransactionProcessorTests: XCTestCase {
         transactions[1].header.status = .new
 
         stub(mockStorage) { mock in
-            when(mock.transaction(byHashHex: equal(to: transactions[1].header.dataHashReversedHex))).thenReturn(transactions[1].header)
-            when(mock.transaction(byHashHex: equal(to: transactions[3].header.dataHashReversedHex))).thenReturn(transactions[3].header)
+            when(mock.transaction(byHash: equal(to: transactions[1].header.dataHash))).thenReturn(transactions[1].header)
+            when(mock.transaction(byHash: equal(to: transactions[3].header.dataHash))).thenReturn(transactions[3].header)
         }
 
         try! transactionProcessor.processReceived(transactions: [transactions[3], transactions[1], transactions[2], transactions[0]], inBlock: block, skipCheckBloomFilter: false)
@@ -202,7 +202,7 @@ class TransactionProcessorTests: XCTestCase {
         verify(mockBlockchainDataListener).onUpdate(updated: equal(to: [transactions[1].header, transactions[3].header]), inserted: equal(to: [transactions[0].header, transactions[2].header]), inBlock: equal(to: block))
 
         for (i, transaction) in transactions.enumerated() {
-            XCTAssertEqual(transaction.header.blockHashReversedHex, block.headerHashReversedHex)
+            XCTAssertEqual(transaction.header.blockHash, block.headerHash)
             XCTAssertEqual(transaction.header.status, .relayed)
             XCTAssertEqual(transaction.header.order, i)
             XCTAssertEqual(transaction.header.timestamp, block.header.timestamp)
@@ -223,7 +223,7 @@ class TransactionProcessorTests: XCTestCase {
         verify(mockInputExtractor).extract(transaction: equal(to: transaction))
 
         XCTAssertEqual(transaction.header.status, TransactionStatus.relayed)
-        XCTAssertEqual(transaction.header.blockHashReversedHex, nil)
+        XCTAssertEqual(transaction.header.blockHash, nil)
     }
 
     func testProcessReceived_TransactionNotExists_NotMine() {
@@ -264,7 +264,7 @@ class TransactionProcessorTests: XCTestCase {
         verify(mockInputExtractor).extract(transaction: equal(to: transaction))
 
         XCTAssertEqual(transaction.header.status, TransactionStatus.relayed)
-        XCTAssertEqual(transaction.header.blockHashReversedHex, nil)
+        XCTAssertEqual(transaction.header.blockHash, nil)
     }
 
     func testProcessReceived_TransactionNotExists_Mine_HasUnspentOutputs() {
@@ -293,7 +293,7 @@ class TransactionProcessorTests: XCTestCase {
         verify(mockInputExtractor).extract(transaction: equal(to: transaction))
 
         XCTAssertEqual(transaction.header.status, TransactionStatus.relayed)
-        XCTAssertEqual(transaction.header.blockHashReversedHex, nil)
+        XCTAssertEqual(transaction.header.blockHash, nil)
     }
 
     func testProcessReceived_TransactionNotExists_Mine_GapShifts_CheckBloomFilterFalse() {
@@ -320,7 +320,7 @@ class TransactionProcessorTests: XCTestCase {
         verify(mockInputExtractor).extract(transaction: equal(to: transaction))
 
         XCTAssertEqual(transaction.header.status, TransactionStatus.relayed)
-        XCTAssertEqual(transaction.header.blockHashReversedHex, nil)
+        XCTAssertEqual(transaction.header.blockHash, nil)
     }
 
     func testProcessReceived_TransactionNotExists_NotMine_GapShifts() {
@@ -370,7 +370,7 @@ class TransactionProcessorTests: XCTestCase {
                         verifyNoMoreInteractions(mockBlockchainDataListener)
 
                         for (m, transaction) in calledTransactions.enumerated() {
-                            XCTAssertEqual(transaction.header.dataHashReversedHex, transactions[m].header.dataHashReversedHex)
+                            XCTAssertEqual(transaction.header.dataHash, transactions[m].header.dataHash)
                         }
                     }
                 }
@@ -384,7 +384,7 @@ class TransactionProcessorTests: XCTestCase {
                 header: Transaction(version: 0, lockTime: 0),
                 inputs: [
                     Input(
-                            withPreviousOutputTxReversedHex: Data(from: 1).hex,
+                            withPreviousOutputTxHash: Data(from: 1),
                             previousOutputIndex: 0,
                             script: Data(from: 999999999999),
                             sequence: 0
@@ -399,7 +399,7 @@ class TransactionProcessorTests: XCTestCase {
                 header: Transaction(version: 0, lockTime: 0),
                 inputs: [
                     Input(
-                            withPreviousOutputTxReversedHex: transaction.header.dataHashReversedHex,
+                            withPreviousOutputTxHash: transaction.header.dataHash,
                             previousOutputIndex: 0,
                             script: Data(from: 999999999999),
                             sequence: 0
@@ -415,7 +415,7 @@ class TransactionProcessorTests: XCTestCase {
                 header: Transaction(version: 0, lockTime: 0),
                 inputs: [
                     Input(
-                            withPreviousOutputTxReversedHex: transaction2.header.dataHashReversedHex,
+                            withPreviousOutputTxHash: transaction2.header.dataHash,
                             previousOutputIndex: 0,
                             script: Data(from: 999999999999),
                             sequence: 0
@@ -430,13 +430,13 @@ class TransactionProcessorTests: XCTestCase {
                 header: Transaction(version: 0, lockTime: 0),
                 inputs: [
                     Input(
-                            withPreviousOutputTxReversedHex: transaction2.header.dataHashReversedHex,
+                            withPreviousOutputTxHash: transaction2.header.dataHash,
                             previousOutputIndex: 1,
                             script: Data(from: 999999999999),
                             sequence: 0
                     ),
                     Input(
-                            withPreviousOutputTxReversedHex: transaction3.header.dataHashReversedHex,
+                            withPreviousOutputTxHash: transaction3.header.dataHash,
                             previousOutputIndex: 0,
                             script: Data(from: 999999999999),
                             sequence: 0

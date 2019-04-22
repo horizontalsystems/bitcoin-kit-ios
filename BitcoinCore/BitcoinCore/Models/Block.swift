@@ -4,26 +4,24 @@ import GRDB
 public class Block: Record {
 
     var version: Int
-    var previousBlockHashReversedHex: String
+    var previousBlockHash: Data
     public var merkleRoot: Data
     public var timestamp: Int
     public var bits: Int
     var nonce: Int
 
-    public var headerHashReversedHex: String
     public var headerHash: Data
     public var height: Int
     var stale: Bool = false
 
     public init(withHeader header: BlockHeader, height: Int) {
         version = header.version
-        previousBlockHashReversedHex = header.previousBlockHeaderHash.reversedHex
+        previousBlockHash = header.previousBlockHeaderHash
         merkleRoot = header.merkleRoot
         timestamp = header.timestamp
         bits = header.bits
         nonce = header.nonce
         headerHash = header.headerHash
-        headerHashReversedHex = headerHash.reversedHex
         self.height = height
 
         super.init()
@@ -39,12 +37,11 @@ public class Block: Record {
 
     public enum Columns: String, ColumnExpression, CaseIterable {
         case version
-        case previousBlockHashReversedHex
+        case previousBlockHash
         case merkleRoot
         case timestamp
         case bits
         case nonce
-        case headerHashReversedHex
         case headerHash
         case height
         case stale
@@ -52,12 +49,11 @@ public class Block: Record {
 
     required init(row: Row) {
         version = row[Columns.version]
-        previousBlockHashReversedHex = row[Columns.previousBlockHashReversedHex]
+        previousBlockHash = row[Columns.previousBlockHash]
         merkleRoot = row[Columns.merkleRoot]
         timestamp = row[Columns.timestamp]
         bits = row[Columns.bits]
         nonce = row[Columns.nonce]
-        headerHashReversedHex = row[Columns.headerHashReversedHex]
         headerHash = row[Columns.headerHash]
         height = row[Columns.height]
         stale = row[Columns.stale]
@@ -67,12 +63,11 @@ public class Block: Record {
 
     override open func encode(to container: inout PersistenceContainer) {
         container[Columns.version] = version
-        container[Columns.previousBlockHashReversedHex] = previousBlockHashReversedHex
+        container[Columns.previousBlockHash] = previousBlockHash
         container[Columns.merkleRoot] = merkleRoot
         container[Columns.timestamp] = timestamp
         container[Columns.bits] = bits
         container[Columns.nonce] = nonce
-        container[Columns.headerHashReversedHex] = headerHashReversedHex
         container[Columns.headerHash] = headerHash
         container[Columns.height] = height
         container[Columns.stale] = stale

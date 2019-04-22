@@ -27,7 +27,7 @@ extension TransactionSyncer: ITransactionSyncer {
     func pendingTransactions() -> [FullTransaction] {
         return storage.newTransactions()
                 .filter { transaction in
-                    if let sentTransaction = storage.sentTransaction(byReversedHashHex: transaction.dataHashReversedHex) {
+                    if let sentTransaction = storage.sentTransaction(byHash: transaction.dataHash) {
                         return sentTransaction.retriesCount < self.maxRetriesCount &&
                                 sentTransaction.lastSendTime < CACurrentMediaTime() - self.retriesPeriod &&
                                 sentTransaction.firstSendTime > CACurrentMediaTime() - self.totalRetriesPeriod
@@ -39,16 +39,16 @@ extension TransactionSyncer: ITransactionSyncer {
     }
 
     func handle(sentTransaction transaction: FullTransaction) {
-        guard let transaction = storage.newTransaction(byReversedHashHex: transaction.header.dataHashReversedHex) else {
+        guard let transaction = storage.newTransaction(byHash: transaction.header.dataHash) else {
             return
         }
 
-        if let sentTransaction = storage.sentTransaction(byReversedHashHex: transaction.dataHashReversedHex) {
+        if let sentTransaction = storage.sentTransaction(byHash: transaction.dataHash) {
             sentTransaction.lastSendTime = CACurrentMediaTime()
             sentTransaction.retriesCount = sentTransaction.retriesCount + 1
             storage.update(sentTransaction: sentTransaction)
         } else {
-            storage.add(sentTransaction: SentTransaction(hashReversedHex: transaction.dataHashReversedHex))
+            storage.add(sentTransaction: SentTransaction(dataHash: transaction.dataHash))
         }
     }
 
@@ -73,7 +73,7 @@ extension TransactionSyncer: ITransactionSyncer {
     }
 
     func shouldRequestTransaction(hash: Data) -> Bool {
-        return !storage.relayedTransactionExists(byReversedHashHex: hash.reversedHex)
+        return !storage.relayedTransactionExists(byHash: hash)
     }
 
 }

@@ -49,7 +49,7 @@ class TransactionProcessor {
     }
 
     private func relay(transaction: Transaction, withOrder order: Int, inBlock block: Block?) {
-        transaction.blockHashReversedHex = block?.headerHashReversedHex
+        transaction.blockHash = block?.headerHash
         transaction.status = .relayed
         transaction.timestamp = block?.timestamp ?? Int(dateGenerator().timeIntervalSince1970)
         transaction.order = order
@@ -67,7 +67,7 @@ extension TransactionProcessor: ITransactionProcessor {
 
         try queue.sync {
             for (index, transaction) in transactions.inTopologicalOrder().enumerated() {
-                if let existingTransaction = self.storage.transaction(byHashHex: transaction.header.dataHashReversedHex) {
+                if let existingTransaction = self.storage.transaction(byHash: transaction.header.dataHash) {
                     self.relay(transaction: existingTransaction, withOrder: index, inBlock: block)
                     try self.storage.update(transaction: existingTransaction)
                     updated.append(existingTransaction)
@@ -99,7 +99,7 @@ extension TransactionProcessor: ITransactionProcessor {
     }
 
     func processCreated(transaction: FullTransaction) throws {
-        guard storage.transaction(byHashHex: transaction.header.dataHashReversedHex) == nil else {
+        guard storage.transaction(byHash: transaction.header.dataHash) == nil else {
             throw TransactionCreator.CreationError.transactionAlreadyExists
         }
 

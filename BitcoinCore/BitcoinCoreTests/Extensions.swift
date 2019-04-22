@@ -33,14 +33,13 @@ extension Block {
 
     var header: BlockHeader {
         return BlockHeader(
-                version: version, headerHash: headerHash, previousBlockHeaderHash: previousBlockHashReversedHex.reversedData!, merkleRoot: merkleRoot,
+                version: version, headerHash: headerHash, previousBlockHeaderHash: previousBlockHash, merkleRoot: merkleRoot,
                 timestamp: timestamp, bits: bits, nonce: nonce
         )
     }
 
     func setHeaderHash(hash: Data) {
         headerHash = hash
-        headerHashReversedHex = hash.reversedHex
     }
 
 }
@@ -116,7 +115,7 @@ extension Block: Equatable {
 extension Transaction: Equatable {
 
     public static func ==(lhs: Transaction, rhs: Transaction) -> Bool {
-        return lhs.dataHashReversedHex == rhs.dataHashReversedHex
+        return lhs.dataHash == rhs.dataHash
     }
 
 }

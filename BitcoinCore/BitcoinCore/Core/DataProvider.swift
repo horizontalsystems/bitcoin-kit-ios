@@ -71,7 +71,7 @@ class DataProvider {
         let amount = totalMineOutput - totalMineInput
 
         return TransactionInfo(
-                transactionHash: transactionForInfo.transactionWithBlock.transaction.dataHashReversedHex,
+                transactionHash: transactionForInfo.transactionWithBlock.transaction.dataHash.reversedHex,
                 from: fromAddresses,
                 to: toAddresses,
                 amount: amount,
@@ -82,7 +82,7 @@ class DataProvider {
 
     private func blockInfo(fromBlock block: Block) -> BlockInfo {
         return BlockInfo(
-                headerHash: block.headerHashReversedHex,
+                headerHash: block.headerHash.reversedHex,
                 height: block.height,
                 timestamp: block.timestamp
         )
@@ -136,7 +136,7 @@ extension DataProvider: IDataProvider {
             var fromTimestamp: Int? = nil
             var fromOrder: Int? = nil
 
-            if let fromHash = fromHash, let fromTransaction = self.storage.transaction(byHashHex: fromHash) {
+            if let fromHash = fromHash, let fromHashData = Data(hex: fromHash), let fromTransaction = self.storage.transaction(byHash: Data(fromHashData.reversed())) {
                 fromTimestamp = fromTransaction.timestamp
                 fromOrder = fromTransaction.order
             }

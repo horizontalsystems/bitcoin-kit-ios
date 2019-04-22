@@ -39,7 +39,7 @@ class BlockchainTest: QuickSpec {
 
                 beforeEach {
                     stub(mockStorage) { mock in
-                        when(mock.block(byHashHex: merkleBlock.headerHashReversedHex)).thenReturn(block)
+                        when(mock.block(byHash: equal(to: merkleBlock.headerHash))).thenReturn(block)
                     }
                 }
 
@@ -61,14 +61,14 @@ class BlockchainTest: QuickSpec {
 
                 beforeEach {
                     stub(mockStorage) { mock in
-                        when(mock.block(byHashHex: merkleBlock.headerHashReversedHex)).thenReturn(nil)
+                        when(mock.block(byHash: equal(to: merkleBlock.headerHash))).thenReturn(nil)
                     }
                 }
 
                 context("when block is not in chain") {
                     beforeEach {
                         stub(mockStorage) { mock in
-                            when(mock.block(byHashHex: merkleBlock.header.previousBlockHeaderHash.reversedHex)).thenReturn(nil)
+                            when(mock.block(byHash: equal(to: merkleBlock.header.previousBlockHeaderHash))).thenReturn(nil)
                         }
                     }
 
@@ -93,7 +93,7 @@ class BlockchainTest: QuickSpec {
                 context("when block is in chain") {
                     beforeEach {
                         stub(mockStorage) { mock in
-                            when(mock.block(byHashHex: merkleBlock.header.previousBlockHeaderHash.reversedHex)).thenReturn(previousBlock)
+                            when(mock.block(byHash: equal(to: merkleBlock.header.previousBlockHeaderHash))).thenReturn(previousBlock)
                         }
                         stub(mockFactory) { mock in
                             when(mock.block(withHeader: equal(to: merkleBlock.header), previousBlock: equal(to: previousBlock))).thenReturn(newBlock)
@@ -181,7 +181,7 @@ class BlockchainTest: QuickSpec {
         describe("#handleFork") {
             var mockedBlocks: MockedBlocks!
             var inChainBlocksAfterFork: [Block]!
-            var inChainBlocksAfterForkTransactionHexes: [String]!
+            var inChainBlocksAfterForkTransactionHexes: [Data]!
 
             context("when no fork found") {
                 let blocksInChain = [1: "00000001", 2: "00000002", 3: "00000003"]
@@ -202,7 +202,7 @@ class BlockchainTest: QuickSpec {
                 beforeEach {
                     mockedBlocks = self.mockBlocks(blocksInChain: blocksInChain, newBlocks: newBlocks, mockStorage: mockStorage)
                     inChainBlocksAfterFork = Array(mockedBlocks.blocksInChain.suffix(from: 1))
-                    inChainBlocksAfterForkTransactionHexes = Array(mockedBlocks.blocksInChainTransactionHexes.suffix(from: 1))
+                    inChainBlocksAfterForkTransactionHexes = Array(mockedBlocks.blocksInChainTransactionHashes.suffix(from: 1))
                 }
 
                 it("deletes old blocks in chain after the fork") {
@@ -210,7 +210,7 @@ class BlockchainTest: QuickSpec {
 
                     verify(mockStorage).delete(blocks: equal(to: inChainBlocksAfterFork))
                     verify(mockStorage, never()).delete(blocks: equal(to: mockedBlocks.newBlocks))
-                    verify(mockBlockchainDataListener).onDelete(transactionHashes: equal(to: inChainBlocksAfterForkTransactionHexes))
+                    verify(mockBlockchainDataListener).onDelete(transactionHashes: equal(to: inChainBlocksAfterForkTransactionHexes.map { $0.reversedHex }))
                 }
 
                 it("makes new blocks not stale") {
@@ -231,7 +231,7 @@ class BlockchainTest: QuickSpec {
 
                     verify(mockStorage).delete(blocks: equal(to: mockedBlocks.newBlocks))
                     verify(mockStorage, never()).delete(blocks: equal(to: inChainBlocksAfterFork))
-                    verify(mockBlockchainDataListener).onDelete(transactionHashes: equal(to: mockedBlocks.newBlocksTransactionHexes))
+                    verify(mockBlockchainDataListener).onDelete(transactionHashes: equal(to: mockedBlocks.newBlocksTransactionHashes.map { $0.reversedHex }))
                 }
             }
 
@@ -246,7 +246,7 @@ class BlockchainTest: QuickSpec {
 
                     verify(mockStorage).delete(blocks: equal(to: mockedBlocks.newBlocks))
                     verify(mockStorage, never()).delete(blocks: equal(to: inChainBlocksAfterFork))
-                    verify(mockBlockchainDataListener).onDelete(transactionHashes: equal(to: mockedBlocks.newBlocksTransactionHexes))
+                    verify(mockBlockchainDataListener).onDelete(transactionHashes: equal(to: mockedBlocks.newBlocksTransactionHashes.map { $0.reversedHex }))
                 }
             }
 
@@ -291,7 +291,7 @@ class BlockchainTest: QuickSpec {
             }
 
             it("notifies listener that transactions deleted") {
-                verify(mockBlockchainDataListener).onDelete(transactionHashes: equal(to: mockedBlocks.newBlocksTransactionHexes))
+                verify(mockBlockchainDataListener).onDelete(transactionHashes: equal(to: mockedBlocks.newBlocksTransactionHashes.map { $0.reversedHex }))
             }
         }
     }
@@ -311,10 +311,9 @@ class BlockchainTest: QuickSpec {
 
                 let transaction = TestData.p2pkTransaction
                 transaction.header.dataHash = block.headerHash
-                transaction.header.dataHashReversedHex = block.headerHash.reversedHex
 
                 when(mock.transactions(ofBlock: equal(to: block))).thenReturn([transaction.header])
-                mockedBlocks.blocksInChainTransactionHexes.append(transaction.header.dataHashReversedHex)
+                mockedBlocks.blocksInChainTransactionHashes.append(transaction.header.dataHash)
             }
 
             for (height, id) in newBlocks.sorted(by: { $0.key < $1.key }) {
@@ -328,10 +327,9 @@ class BlockchainTest: QuickSpec {
 
                 let transaction = TestData.p2pkTransaction
                 transaction.header.dataHash = block.headerHash
-                transaction.header.dataHashReversedHex = block.headerHash.reversedHex
 
                 when(mock.transactions(ofBlock: equal(to: block))).thenReturn([transaction.header])
-                mockedBlocks.newBlocksTransactionHexes.append(transaction.header.dataHashReversedHex)
+                mockedBlocks.newBlocksTransactionHashes.append(transaction.header.dataHash)
             }
 
             when(mock.blocks(stale: true)).thenReturn(mockedBlocks.newBlocks)
@@ -362,8 +360,8 @@ class BlockchainTest: QuickSpec {
     struct MockedBlocks {
         var newBlocks = [Block]()
         var blocksInChain = [Block]()
-        var newBlocksTransactionHexes = [String]()
-        var blocksInChainTransactionHexes = [String]()
+        var newBlocksTransactionHashes = [Data]()
+        var blocksInChainTransactionHashes = [Data]()
     }
 
 }

@@ -55,23 +55,22 @@ open class GrdbStorage {
 
         migrator.registerMigration("createBlockHashes") { db in
             try db.create(table: BlockHash.databaseTableName) { t in
-                t.column(BlockHash.Columns.headerHashReversedHex.name, .text).notNull()
-                t.column(BlockHash.Columns.headerHash.name, .blob).notNull()
+                t.column(BlockHash.Columns.headerHash.name, .text).notNull()
                 t.column(BlockHash.Columns.height.name, .integer).notNull()
                 t.column(BlockHash.Columns.sequence.name, .integer).notNull()
 
-                t.primaryKey([BlockHash.Columns.headerHashReversedHex.name], onConflict: .replace)
+                t.primaryKey([BlockHash.Columns.headerHash.name], onConflict: .replace)
             }
         }
 
         migrator.registerMigration("createSentTransactions") { db in
             try db.create(table: SentTransaction.databaseTableName) { t in
-                t.column(SentTransaction.Columns.hashReversedHex.name, .text).notNull()
+                t.column(SentTransaction.Columns.dataHash.name, .text).notNull()
                 t.column(SentTransaction.Columns.firstSendTime.name, .double).notNull()
                 t.column(SentTransaction.Columns.lastSendTime.name, .double).notNull()
                 t.column(SentTransaction.Columns.retriesCount.name, .integer).notNull()
 
-                t.primaryKey([SentTransaction.Columns.hashReversedHex.name], onConflict: .replace)
+                t.primaryKey([SentTransaction.Columns.dataHash.name], onConflict: .replace)
             }
         }
 
@@ -93,53 +92,51 @@ open class GrdbStorage {
         migrator.registerMigration("createBlocks") { db in
             try db.create(table: Block.databaseTableName) { t in
                 t.column(Block.Columns.version.name, .integer).notNull()
-                t.column(Block.Columns.previousBlockHashReversedHex.name, .text).notNull()
+                t.column(Block.Columns.previousBlockHash.name, .text).notNull()
                 t.column(Block.Columns.merkleRoot.name, .blob).notNull()
                 t.column(Block.Columns.timestamp.name, .integer).notNull()
                 t.column(Block.Columns.bits.name, .integer).notNull()
                 t.column(Block.Columns.nonce.name, .integer).notNull()
-                t.column(Block.Columns.headerHashReversedHex.name, .text).notNull()
-                t.column(Block.Columns.headerHash.name, .blob).notNull()
+                t.column(Block.Columns.headerHash.name, .text).notNull()
                 t.column(Block.Columns.height.name, .integer).notNull()
                 t.column(Block.Columns.stale.name, .boolean)
 
-                t.primaryKey([Block.Columns.headerHashReversedHex.name], onConflict: .replace)
+                t.primaryKey([Block.Columns.headerHash.name], onConflict: .replace)
             }
             try db.create(index: "by\(Block.Columns.height.name)", on: Block.databaseTableName, columns: [Block.Columns.height.name], unique: true)
         }
 
         migrator.registerMigration("createTransactions") { db in
             try db.create(table: Transaction.databaseTableName) { t in
-                t.column(Transaction.Columns.dataHashReversedHex.name, .text).notNull()
-                t.column(Transaction.Columns.dataHash.name, .blob).notNull()
+                t.column(Transaction.Columns.dataHash.name, .text).notNull()
                 t.column(Transaction.Columns.version.name, .integer).notNull()
                 t.column(Transaction.Columns.lockTime.name, .integer).notNull()
                 t.column(Transaction.Columns.timestamp.name, .integer).notNull()
                 t.column(Transaction.Columns.order.name, .integer).notNull()
-                t.column(Transaction.Columns.blockHashReversedHex.name, .text)
+                t.column(Transaction.Columns.blockHash.name, .text)
                 t.column(Transaction.Columns.isMine.name, .boolean)
                 t.column(Transaction.Columns.isOutgoing.name, .boolean)
                 t.column(Transaction.Columns.status.name, .integer)
                 t.column(Transaction.Columns.segWit.name, .boolean)
 
-                t.primaryKey([Transaction.Columns.dataHashReversedHex.name], onConflict: .replace)
-                t.foreignKey([Transaction.Columns.blockHashReversedHex.name], references: Block.databaseTableName, columns: [Block.Columns.headerHashReversedHex.name], onDelete: .cascade, onUpdate: .cascade)
+                t.primaryKey([Transaction.Columns.dataHash.name], onConflict: .replace)
+                t.foreignKey([Transaction.Columns.blockHash.name], references: Block.databaseTableName, columns: [Block.Columns.headerHash.name], onDelete: .cascade, onUpdate: .cascade)
             }
         }
 
         migrator.registerMigration("createInputs") { db in
             try db.create(table: Input.databaseTableName) { t in
-                t.column(Input.Columns.previousOutputTxReversedHex.name, .text).notNull()
+                t.column(Input.Columns.previousOutputTxHash.name, .text).notNull()
                 t.column(Input.Columns.previousOutputIndex.name, .integer).notNull()
                 t.column(Input.Columns.signatureScript.name, .blob).notNull()
                 t.column(Input.Columns.sequence.name, .integer).notNull()
-                t.column(Input.Columns.transactionHashReversedHex.name, .text).notNull()
+                t.column(Input.Columns.transactionHash.name, .text).notNull()
                 t.column(Input.Columns.keyHash.name, .blob)
                 t.column(Input.Columns.address.name, .text)
                 t.column(Input.Columns.witnessData.name, .blob)
 
-                t.primaryKey([Input.Columns.previousOutputTxReversedHex.name, Input.Columns.previousOutputIndex.name], onConflict: .replace)
-                t.foreignKey([Input.Columns.transactionHashReversedHex.name], references: Transaction.databaseTableName, columns: [Transaction.Columns.dataHashReversedHex.name], onDelete: .cascade, onUpdate: .cascade, deferred: true)
+                t.primaryKey([Input.Columns.previousOutputTxHash.name, Input.Columns.previousOutputIndex.name], onConflict: .replace)
+                t.foreignKey([Input.Columns.transactionHash.name], references: Transaction.databaseTableName, columns: [Transaction.Columns.dataHash.name], onDelete: .cascade, onUpdate: .cascade, deferred: true)
             }
         }
 
@@ -148,14 +145,14 @@ open class GrdbStorage {
                 t.column(Output.Columns.value.name, .integer).notNull()
                 t.column(Output.Columns.lockingScript.name, .blob).notNull()
                 t.column(Output.Columns.index.name, .integer).notNull()
-                t.column(Output.Columns.transactionHashReversedHex.name, .text).notNull()
+                t.column(Output.Columns.transactionHash.name, .text).notNull()
                 t.column(Output.Columns.publicKeyPath.name, .text)
                 t.column(Output.Columns.scriptType.name, .integer)
                 t.column(Output.Columns.keyHash.name, .blob)
                 t.column(Output.Columns.address.name, .text)
 
-                t.primaryKey([Output.Columns.transactionHashReversedHex.name, Output.Columns.index.name], onConflict: .replace)
-                t.foreignKey([Output.Columns.transactionHashReversedHex.name], references: Transaction.databaseTableName, columns: [Transaction.Columns.dataHashReversedHex.name], onDelete: .cascade, onUpdate: .cascade, deferred: true)
+                t.primaryKey([Output.Columns.transactionHash.name, Output.Columns.index.name], onConflict: .replace)
+                t.foreignKey([Output.Columns.transactionHash.name], references: Transaction.databaseTableName, columns: [Transaction.Columns.dataHash.name], onDelete: .cascade, onUpdate: .cascade, deferred: true)
                 t.foreignKey([Output.Columns.publicKeyPath.name], references: PublicKey.databaseTableName, columns: [PublicKey.Columns.path.name], onDelete: .setNull, onUpdate: .setNull)
             }
         }
@@ -299,9 +296,9 @@ extension GrdbStorage: IStorage {
         }
     }
 
-    public func blockHashHeaderHashHexes(except excludedHash: String) -> [String] {
+    public func blockHashHeaderHashes(except excludedHash: Data) -> [String] {
         return try! dbPool.read { db in
-            let rows = try Row.fetchCursor(db, "SELECT headerHashReversedHex from blockHashes WHERE headerHashReversedHex != ?", arguments: [excludedHash])
+            let rows = try Row.fetchCursor(db, "SELECT headerHash from blockHashes WHERE headerHash != ?", arguments: [excludedHash])
             var hexes = [String]()
 
             while let row = try rows.next() {
@@ -326,9 +323,9 @@ extension GrdbStorage: IStorage {
         }
     }
 
-    public func deleteBlockHash(byHashHex hashHex: String) {
+    public func deleteBlockHash(byHash hash: Data) {
         _ = try! dbPool.write { db in
-            try BlockHash.filter(BlockHash.Columns.headerHashReversedHex == hashHex).deleteAll(db)
+            try BlockHash.filter(BlockHash.Columns.headerHash == hash).deleteAll(db)
         }
     }
 
@@ -352,9 +349,9 @@ extension GrdbStorage: IStorage {
         }
     }
 
-    public func blocksCount(reversedHeaderHashHexes: [String]) -> Int {
+    public func blocksCount(headerHashes: [Data]) -> Int {
         return try! dbPool.read { db in
-            try Block.filter(reversedHeaderHashHexes.contains(Block.Columns.headerHashReversedHex)).fetchCount(db)
+            try Block.filter(headerHashes.contains(Block.Columns.headerHash)).fetchCount(db)
         }
     }
 
@@ -378,7 +375,7 @@ extension GrdbStorage: IStorage {
 
     public func blocks(byHexes hexes: [String]) -> [Block] {
         return try! dbPool.read { db in
-            try Block.filter(hexes.contains(Block.Columns.headerHashReversedHex)).fetchAll(db)
+            try Block.filter(hexes.contains(Block.Columns.headerHash)).fetchAll(db)
         }
     }
 
@@ -400,9 +397,9 @@ extension GrdbStorage: IStorage {
         }
     }
 
-    public func block(byHashHex hex: String) -> Block? {
+    public func block(byHash hash: Data) -> Block? {
         return try! dbPool.read { db in
-            try Block.filter(Block.Columns.headerHashReversedHex == hex).fetchOne(db)
+            return try Block.filter(Block.Columns.headerHash == hash).fetchOne(db)
         }
     }
 
@@ -423,14 +420,14 @@ extension GrdbStorage: IStorage {
         _ = try! dbPool.write { db in
             for block in blocks {
                 for transaction in transactions(ofBlock: block) {
-                    try Input.filter(Input.Columns.transactionHashReversedHex == transaction.dataHashReversedHex).deleteAll(db)
-                    try Output.filter(Output.Columns.transactionHashReversedHex == transaction.dataHashReversedHex).deleteAll(db)
+                    try Input.filter(Input.Columns.transactionHash == transaction.dataHash).deleteAll(db)
+                    try Output.filter(Output.Columns.transactionHash == transaction.dataHash).deleteAll(db)
                 }
 
-                try Transaction.filter(Transaction.Columns.blockHashReversedHex == block.headerHashReversedHex).deleteAll(db)
+                try Transaction.filter(Transaction.Columns.blockHash == block.headerHash).deleteAll(db)
             }
 
-            try Block.filter(blocks.map{$0.headerHashReversedHex}.contains(Block.Columns.headerHashReversedHex)).deleteAll(db)
+            try Block.filter(blocks.map{$0.headerHash}.contains(Block.Columns.headerHash)).deleteAll(db)
         }
     }
 
@@ -441,15 +438,15 @@ extension GrdbStorage: IStorage {
     }
 
     // Transaction
-    public func transaction(byHashHex hex: String) -> Transaction? {
+    public func transaction(byHash hash: Data) -> Transaction? {
         return try! dbPool.read { db in
-            try Transaction.filter(Transaction.Columns.dataHashReversedHex == hex).fetchOne(db)
+            try Transaction.filter(Transaction.Columns.dataHash == hash).fetchOne(db)
         }
     }
 
     public func transactions(ofBlock block: Block) -> [Transaction] {
         return try! dbPool.read { db in
-            try Transaction.filter(Transaction.Columns.blockHashReversedHex == block.headerHashReversedHex).fetchAll(db)
+            try Transaction.filter(Transaction.Columns.blockHash == block.headerHash).fetchAll(db)
         }
     }
 
@@ -459,20 +456,20 @@ extension GrdbStorage: IStorage {
         }
     }
 
-    public func newTransaction(byReversedHashHex hex: String) -> Transaction? {
+    public func newTransaction(byHash hash: Data) -> Transaction? {
         return try! dbPool.read { db in
             try Transaction
                     .filter(Transaction.Columns.status == TransactionStatus.new)
-                    .filter(Transaction.Columns.dataHashReversedHex == hex)
+                    .filter(Transaction.Columns.dataHash == hash)
                     .fetchOne(db)
         }
     }
 
-    public func relayedTransactionExists(byReversedHashHex hex: String) -> Bool {
+    public func relayedTransactionExists(byHash hash: Data) -> Bool {
         return try! dbPool.read { db in
             try Transaction
                     .filter(Transaction.Columns.status == TransactionStatus.relayed)
-                    .filter(Transaction.Columns.dataHashReversedHex == hex)
+                    .filter(Transaction.Columns.dataHash == hash)
                     .fetchCount(db) > 1
         }
     }
@@ -498,7 +495,7 @@ extension GrdbStorage: IStorage {
     }
 
     public func fullInfo(forTransactions transactionsWithBlocks: [TransactionWithBlock]) -> [FullTransactionForInfo] {
-        let transactionHashes: [String] = transactionsWithBlocks.map({ $0.transaction.dataHashReversedHex })
+        let transactionHashes: [Data] = transactionsWithBlocks.map({ $0.transaction.dataHash })
         var inputs = [InputWithPreviousOutput]()
         var outputs = [Output]()
 
@@ -515,28 +512,28 @@ extension GrdbStorage: IStorage {
                 let sql = """
                           SELECT inputs.*, outputs.*
                           FROM inputs
-                          LEFT JOIN outputs ON inputs.previousOutputTxReversedHex = outputs.transactionHashReversedHex AND inputs.previousOutputIndex = outputs."index"
-                          WHERE inputs.transactionHashReversedHex IN (\(transactionHashChunks.map({ "'" + $0 + "'" }).joined(separator: ",")))
+                          LEFT JOIN outputs ON inputs.previousOutputTxHash = outputs.transactionHash AND inputs.previousOutputIndex = outputs."index"
                           """
+//                          WHERE inputs.transactionHash IN (\(transactionHashChunks.map({ $0 }).joined(separator: ",")))
                 let rows = try Row.fetchCursor(db, sql, adapter: adapter)
 
                 while let row = try rows.next() {
                     inputs.append(InputWithPreviousOutput(input: row["input"], previousOutput: row["output"]))
                 }
 
-                outputs.append(contentsOf: try Output.filter(transactionHashChunks.contains(Output.Columns.transactionHashReversedHex)).fetchAll(db))
+                outputs.append(contentsOf: try Output.filter(transactionHashChunks.contains(Output.Columns.transactionHash)).fetchAll(db))
             }
         }
 
-        var inputsByTransaction: [String: [InputWithPreviousOutput]] = Dictionary(grouping: inputs, by: { $0.input.transactionHashReversedHex })
-        var outputsByTransaction: [String: [Output]] = Dictionary(grouping: outputs, by: { $0.transactionHashReversedHex })
+        var inputsByTransaction: [Data: [InputWithPreviousOutput]] = Dictionary(grouping: inputs, by: { $0.input.transactionHash })
+        var outputsByTransaction: [Data: [Output]] = Dictionary(grouping: outputs, by: { $0.transactionHash })
         var results = [FullTransactionForInfo]()
 
         for transactionWithBlock in transactionsWithBlocks {
             let fullTransaction = FullTransactionForInfo(
                     transactionWithBlock: transactionWithBlock,
-                    inputsWithPreviousOutputs: inputsByTransaction[transactionWithBlock.transaction.dataHashReversedHex] ?? [],
-                    outputs: outputsByTransaction[transactionWithBlock.transaction.dataHashReversedHex] ?? []
+                    inputsWithPreviousOutputs: inputsByTransaction[transactionWithBlock.transaction.dataHash] ?? [],
+                    outputs: outputsByTransaction[transactionWithBlock.transaction.dataHash] ?? []
             )
 
             results.append(fullTransaction)
@@ -558,7 +555,7 @@ extension GrdbStorage: IStorage {
             var sql = """
                       SELECT transactions.*, blocks.height as blockHeight
                       FROM transactions
-                      LEFT JOIN blocks ON transactions.blockHashReversedHex = blocks.headerHashReversedHex
+                      LEFT JOIN blocks ON transactions.blockHash = blocks.headerHash
                       ORDER BY transactions.timestamp DESC, transactions."order" DESC
                       """
 
@@ -596,9 +593,9 @@ extension GrdbStorage: IStorage {
                       SELECT outputs.*, publicKeys.*, inputs.*, blocks.height AS blockHeight
                       FROM outputs 
                       INNER JOIN publicKeys ON outputs.publicKeyPath = publicKeys.path
-                      LEFT JOIN inputs ON inputs.previousOutputTxReversedHex = outputs.transactionHashReversedHex AND inputs.previousOutputIndex = outputs."index"
-                      LEFT JOIN transactions ON inputs.transactionHashReversedHex = transactions.dataHashReversedHex
-                      LEFT JOIN blocks ON transactions.blockHashReversedHex = blocks.headerHashReversedHex
+                      LEFT JOIN inputs ON inputs.previousOutputTxHash = outputs.transactionHash AND inputs.previousOutputIndex = outputs."index"
+                      LEFT JOIN transactions ON inputs.transactionHash = transactions.dataHash
+                      LEFT JOIN blocks ON transactions.blockHash = blocks.headerHash
                       """
             let rows = try Row.fetchCursor(db, sql, adapter: adapter)
 
@@ -629,8 +626,8 @@ extension GrdbStorage: IStorage {
                       SELECT outputs.*, publicKeys.*, transactions.*, blocks.height AS blockHeight
                       FROM outputs 
                       INNER JOIN publicKeys ON outputs.publicKeyPath = publicKeys.path
-                      INNER JOIN transactions ON outputs.transactionHashReversedHex = transactions.dataHashReversedHex
-                      LEFT JOIN blocks ON transactions.blockHashReversedHex = blocks.headerHashReversedHex
+                      INNER JOIN transactions ON outputs.transactionHash = transactions.dataHash
+                      LEFT JOIN blocks ON transactions.blockHash = blocks.headerHash
                       WHERE outputs.scriptType != \(ScriptType.unknown.rawValue)
                       """
             let rows = try Row.fetchCursor(db, sql, adapter: adapter)
@@ -639,7 +636,7 @@ extension GrdbStorage: IStorage {
             while let row = try rows.next() {
                 let output: Output = row["output"]
 
-                if !inputs.contains(where: { $0.previousOutputTxReversedHex == output.transactionHashReversedHex && $0.previousOutputIndex == output.index }) {
+                if !inputs.contains(where: { $0.previousOutputTxHash == output.transactionHash && $0.previousOutputIndex == output.index }) {
                     outputs.append(UnspentOutput(output: output, publicKey: row["publicKey"], transaction: row["transaction"], blockHeight: row["blockHeight"]))
                 }
             }
@@ -650,20 +647,20 @@ extension GrdbStorage: IStorage {
 
     public func inputs(ofTransaction transaction: Transaction) -> [Input] {
         return try! dbPool.read { db in
-            try Input.filter(Input.Columns.transactionHashReversedHex == transaction.dataHashReversedHex).fetchAll(db)
+            try Input.filter(Input.Columns.transactionHash == transaction.dataHash).fetchAll(db)
         }
     }
 
     public func outputs(ofTransaction transaction: Transaction) -> [Output] {
         return try! dbPool.read { db in
-            try Output.filter(Output.Columns.transactionHashReversedHex == transaction.dataHashReversedHex).fetchAll(db)
+            try Output.filter(Output.Columns.transactionHash == transaction.dataHash).fetchAll(db)
         }
     }
 
     public func previousOutput(ofInput input: Input) -> Output? {
         return try! dbPool.read { db in
             try Output
-                    .filter(Output.Columns.transactionHashReversedHex == input.previousOutputTxReversedHex)
+                    .filter(Output.Columns.transactionHash == input.previousOutputTxHash)
                     .filter(Output.Columns.index == input.previousOutputIndex)
                     .fetchOne(db)
         }
@@ -671,9 +668,9 @@ extension GrdbStorage: IStorage {
 
 
     // SentTransaction
-    public func sentTransaction(byReversedHashHex hex: String) -> SentTransaction? {
+    public func sentTransaction(byHash hash: Data) -> SentTransaction? {
         return try! dbPool.read { db in
-            try SentTransaction.filter(SentTransaction.Columns.hashReversedHex == hex).fetchOne(db)
+            try SentTransaction.filter(SentTransaction.Columns.dataHash == hash).fetchOne(db)
         }
     }
 
@@ -731,7 +728,7 @@ extension GrdbStorage: IStorage {
             ])
 
             let sql = """
-                      SELECT publicKeys.*, outputs.transactionHashReversedHex
+                      SELECT publicKeys.*, outputs.transactionHash
                       FROM publicKeys
                       LEFT JOIN outputs ON publicKeys.path = outputs.publicKeyPath
                       """
@@ -739,7 +736,7 @@ extension GrdbStorage: IStorage {
             let rows = try Row.fetchCursor(db, sql, adapter: adapter)
             var publicKeys = [PublicKeyWithUsedState]()
             while let row = try rows.next() {
-                publicKeys.append(PublicKeyWithUsedState(publicKey: row["publicKey"], used: row["transactionHashReversedHex"] != nil))
+                publicKeys.append(PublicKeyWithUsedState(publicKey: row["publicKey"], used: row["transactionHash"] != nil))
             }
 
             return publicKeys

@@ -3,17 +3,17 @@ import GRDB
 
 public class Input: Record {
 
-    public var previousOutputTxReversedHex: String
+    public var previousOutputTxHash: Data
     var previousOutputIndex: Int
     var signatureScript: Data
     var sequence: Int
-    var transactionHashReversedHex = ""
+    var transactionHash = Data()
     var keyHash: Data? = nil
     var address: String? = nil
     var witnessData = [Data]()
 
-    init(withPreviousOutputTxReversedHex previousOutputTxReversedHex: String, previousOutputIndex: Int, script: Data, sequence: Int) {
-        self.previousOutputTxReversedHex = previousOutputTxReversedHex
+    init(withPreviousOutputTxHash previousOutputTxHash: Data, previousOutputIndex: Int, script: Data, sequence: Int) {
+        self.previousOutputTxHash = previousOutputTxHash
         self.previousOutputIndex = previousOutputIndex
         self.signatureScript = script
         self.sequence = sequence
@@ -27,22 +27,22 @@ public class Input: Record {
     }
 
     enum Columns: String, ColumnExpression, CaseIterable {
-        case previousOutputTxReversedHex
+        case previousOutputTxHash
         case previousOutputIndex
         case signatureScript
         case sequence
-        case transactionHashReversedHex
+        case transactionHash
         case keyHash
         case address
         case witnessData
     }
 
     required init(row: Row) {
-        previousOutputTxReversedHex = row[Columns.previousOutputTxReversedHex]
+        previousOutputTxHash = row[Columns.previousOutputTxHash]
         previousOutputIndex = row[Columns.previousOutputIndex]
         signatureScript = row[Columns.signatureScript]
         sequence = row[Columns.sequence]
-        transactionHashReversedHex = row[Columns.transactionHashReversedHex]
+        transactionHash = row[Columns.transactionHash]
         keyHash = row[Columns.keyHash]
         address = row[Columns.address]
         witnessData = row[Columns.witnessData]
@@ -51,11 +51,11 @@ public class Input: Record {
     }
 
     override open func encode(to container: inout PersistenceContainer) {
-        container[Columns.previousOutputTxReversedHex] = previousOutputTxReversedHex
+        container[Columns.previousOutputTxHash] = previousOutputTxHash
         container[Columns.previousOutputIndex] = previousOutputIndex
         container[Columns.signatureScript] = signatureScript
         container[Columns.sequence] = sequence
-        container[Columns.transactionHashReversedHex] = transactionHashReversedHex
+        container[Columns.transactionHash] = transactionHash
         container[Columns.keyHash] = keyHash
         container[Columns.address] = address
         container[Columns.witnessData] = witnessData

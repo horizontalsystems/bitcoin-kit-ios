@@ -29,7 +29,7 @@ class TransactionLinkerTests: XCTestCase {
 
     func testHandle_HasPreviousOutput() {
         previousOutput.publicKeyPath = TestData.pubKey().path
-        let input = Input(withPreviousOutputTxReversedHex: previousOutput.transactionHashReversedHex, previousOutputIndex: previousOutput.index, script: Data(), sequence: 100)
+        let input = Input(withPreviousOutputTxHash: previousOutput.transactionHash, previousOutputIndex: previousOutput.index, script: Data(), sequence: 100)
         let fullTransaction = FullTransaction(header: Transaction(), inputs: [input], outputs: [])
 
         stub(mockStorage) { mock in
@@ -44,7 +44,7 @@ class TransactionLinkerTests: XCTestCase {
     }
 
     func testHandle_HasPreviousOutputWhichIsNotMine() {
-        let input = Input(withPreviousOutputTxReversedHex: previousOutput.transactionHashReversedHex, previousOutputIndex: previousOutput.index, script: Data(), sequence: 100)
+        let input = Input(withPreviousOutputTxHash: previousOutput.transactionHash, previousOutputIndex: previousOutput.index, script: Data(), sequence: 100)
         let fullTransaction = FullTransaction(header: Transaction(), inputs: [input], outputs: [])
 
         stub(mockStorage) { mock in
@@ -58,7 +58,7 @@ class TransactionLinkerTests: XCTestCase {
     }
 
     func testHandle_HasNotPreviousOutput() {
-        let input = Input(withPreviousOutputTxReversedHex: previousOutput.transactionHashReversedHex, previousOutputIndex: previousOutput.index, script: Data(), sequence: 100)
+        let input = Input(withPreviousOutputTxHash: previousOutput.transactionHash, previousOutputIndex: previousOutput.index, script: Data(), sequence: 100)
         let fullTransaction = FullTransaction(header: Transaction(), inputs: [input], outputs: [])
 
         stub(mockStorage) { mock in

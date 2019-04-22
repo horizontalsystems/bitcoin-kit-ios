@@ -45,7 +45,7 @@ class EDAValidatorTests: XCTestCase {
 
     func testNotEqualBits() {
         candidate = Block(withHeader: BlockHeader(version: candidate.version, headerHash: candidate.headerHash,
-                previousBlockHeaderHash: candidate.previousBlockHashReversedHex.reversedData!,
+                previousBlockHeaderHash: candidate.previousBlockHash,
                 merkleRoot: candidate.merkleRoot, timestamp: candidate.timestamp, bits: 3, nonce: 0),
                 height: candidate.height)
         do {

@@ -69,7 +69,7 @@ class BloomFilterManagerTests: QuickSpec {
 
             context("when has outputs with publicKeys") {
                 let output1 = TestData.p2wpkhTransaction.outputs[0]
-                output1.transactionHashReversedHex = Data(repeating: 0, count: 32).reversedHex
+                output1.transactionHash = Data(repeating: 0, count: 32)
 
                 beforeEach {
                     stub(mockStorage) { mock in
@@ -87,7 +87,7 @@ class BloomFilterManagerTests: QuickSpec {
                     it("adds outputs to bloom filter") {
                         manager.regenerateBloomFilter()
 
-                        let expectedElements = [output1.transactionHashReversedHex.reversedData! + self.byteArrayLittleEndian(int: output1.index)]
+                        let expectedElements = [output1.transactionHash + self.byteArrayLittleEndian(int: output1.index)]
 
                         verify(mockFactory).bloomFilter(withElements: equal(to: expectedElements))
                         verify(mockBloomFilterManagerDelegate).bloomFilterUpdated(bloomFilter: equal(to: bloomFilter, equalWhen: { $0.filter == $1.filter }))
@@ -96,7 +96,7 @@ class BloomFilterManagerTests: QuickSpec {
 
                 context("when output is spent") {
                     let input = TestData.p2pkhTransaction.inputs[0]
-                    input.previousOutputTxReversedHex = output1.transactionHashReversedHex
+                    input.previousOutputTxHash = output1.transactionHash
                     input.previousOutputIndex = output1.index
 
                     context("when spending transaction is in mempool") {
@@ -109,7 +109,7 @@ class BloomFilterManagerTests: QuickSpec {
                         it("adds output to bloom filter") {
                             manager.regenerateBloomFilter()
 
-                            let expectedElements = [output1.transactionHashReversedHex.reversedData! + self.byteArrayLittleEndian(int: output1.index)]
+                            let expectedElements = [output1.transactionHash + self.byteArrayLittleEndian(int: output1.index)]
 
                             verify(mockFactory).bloomFilter(withElements: equal(to: expectedElements))
                             verify(mockBloomFilterManagerDelegate).bloomFilterUpdated(bloomFilter: equal(to: bloomFilter, equalWhen: { $0.filter == $1.filter }))
@@ -127,7 +127,7 @@ class BloomFilterManagerTests: QuickSpec {
                             it("adds output to bloom filter") {
                                 manager.regenerateBloomFilter()
 
-                                let expectedElements = [output1.transactionHashReversedHex.reversedData! + self.byteArrayLittleEndian(int: output1.index)]
+                                let expectedElements = [output1.transactionHash + self.byteArrayLittleEndian(int: output1.index)]
 
                                 verify(mockFactory).bloomFilter(withElements: equal(to: expectedElements))
                                 verify(mockBloomFilterManagerDelegate).bloomFilterUpdated(bloomFilter: equal(to: bloomFilter, equalWhen: { $0.filter == $1.filter }))
