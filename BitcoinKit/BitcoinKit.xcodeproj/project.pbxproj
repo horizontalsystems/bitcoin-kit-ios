@@ -105,10 +105,10 @@
 			isa = PBXGroup;
 			children = (
 				58AAAE0C7049B36BF673EDC6 /* Core */,
-				3A7A7D18226842B00063D6AD /* BitcoinKit.h */,
-				3A7A7D19226842B00063D6AD /* Info.plist */,
 				58AAA74DE2AA0162A3856513 /* Network */,
 				58AAAC302AE9A97C4EE20005 /* SegWit */,
+				3A7A7D18226842B00063D6AD /* BitcoinKit.h */,
+				3A7A7D19226842B00063D6AD /* Info.plist */,
 			);
 			path = BitcoinKit;
 			sourceTree = "<group>";
@@ -116,8 +116,8 @@
 		3A7A7D22226842B10063D6AD /* BitcoinKitTests */ = {
 			isa = PBXGroup;
 			children = (
-				3A7A7D25226842B10063D6AD /* Info.plist */,
 				58AAA1DDEE3D8654083DF2B6 /* SegWit */,
+				3A7A7D25226842B10063D6AD /* Info.plist */,
 				58AAA8AA13E5099C73B8E79C /* GeneratedMocks.swift */,
 			);
 			path = BitcoinKitTests;
@@ -165,8 +165,8 @@
 		58AAAC302AE9A97C4EE20005 /* SegWit */ = {
 			isa = PBXGroup;
 			children = (
-				58AAA79DC50FFF8761BAFD89 /* SegWitBech32AddressConverter.swift */,
 				58AAAC5F67BD7DA7392C6D82 /* SegWitBech32.swift */,
+				58AAA79DC50FFF8761BAFD89 /* SegWitBech32AddressConverter.swift */,
 			);
 			path = SegWit;
 			sourceTree = "<group>";

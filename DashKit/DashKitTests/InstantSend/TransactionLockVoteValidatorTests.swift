@@ -25,11 +25,11 @@ class TransactionLockVoteValidatorTests: QuickSpec {
                     port: 0, pubKeyOperator: Data(),
                     keyIDVoting: Data(), isValid: true),
         ]
-        let scores = [
-            Data(hex: "bb72dd43e55a7e38864112a835bc52dab87a9c0e8c4c7feb2fcf53acfc015fc5")!,
-            Data(hex: "cf18a3a9f3504bb334744658f41d660088ae465db98165a554748e38b7577d7d")!,
-            Data(hex: "3f07de79bd32824b684388eaa35c06b8ad49df3990bb3bd82293f820e04de1d3")!,
-        ]
+//        let scores = [
+//            Data(hex: "bb72dd43e55a7e38864112a835bc52dab87a9c0e8c4c7feb2fcf53acfc015fc5")!,
+//            Data(hex: "cf18a3a9f3504bb334744658f41d660088ae465db98165a554748e38b7577d7d")!,
+//            Data(hex: "3f07de79bd32824b684388eaa35c06b8ad49df3990bb3bd82293f820e04de1d3")!,
+//        ]
         stub(mockStorage) { mock in
             when(mock.masternodes.get).thenReturn(masternodes)
         }

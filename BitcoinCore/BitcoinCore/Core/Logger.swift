@@ -113,7 +113,7 @@ public class Logger {
 
     private func functionName(_ function: String) -> String {
         if let index = function.firstIndex(of: "(") {
-            return String(function.prefix(index.encodedOffset))
+            return String(function.prefix(index.utf16Offset(in: function)))
         } else {
             return function
         }

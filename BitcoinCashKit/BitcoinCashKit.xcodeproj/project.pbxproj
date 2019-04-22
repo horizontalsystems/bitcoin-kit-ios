@@ -132,12 +132,12 @@
 		3A7A7D46226842CB0063D6AD /* BitcoinCashKitTests */ = {
 			isa = PBXGroup;
 			children = (
-				3A7A7D47226842CB0063D6AD /* BitcoinCashKitTests.swift */,
-				3A7A7D49226842CB0063D6AD /* Info.plist */,
 				58AAA5AC9CFF60A6BF7F0486 /* Blocks */,
+				3A7A7D47226842CB0063D6AD /* BitcoinCashKitTests.swift */,
+				58AAA915B9A7B2CC60DFE579 /* Extensions.swift */,
+				3A7A7D49226842CB0063D6AD /* Info.plist */,
 				58AAA883AFCED343A6A93A4D /* GeneratedMocks.swift */,
 				58AAA52A0C026AFF6327EF38 /* TestData.swift */,
-				58AAA915B9A7B2CC60DFE579 /* Extensions.swift */,
 			);
 			path = BitcoinCashKitTests;
 			sourceTree = "<group>";

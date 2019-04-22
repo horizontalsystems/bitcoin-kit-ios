@@ -10,7 +10,7 @@ class CashAddrBech32 {
         let combined: Data = payload + checksum // Data of [UInt5]
         var base32 = ""
         for b in combined {
-            base32 += String(base32Alphabets[String.Index(encodedOffset: Int(b))])
+            base32 += String(base32Alphabets[String.Index(utf16Offset: Int(b), in: base32Alphabets)])
         }
 
         return prefix + ":" + base32
@@ -34,7 +34,7 @@ class CashAddrBech32 {
         var decodedIn5bit: [UInt8] = [UInt8]()
         for c in base32.lowercased() {
             // We can't have characters other than base32 alphabets.
-            guard let baseIndex = base32Alphabets.index(of: c)?.encodedOffset else {
+            guard let baseIndex = base32Alphabets.index(of: c)?.utf16Offset(in: base32Alphabets) else {
                 return nil
             }
             decodedIn5bit.append(UInt8(baseIndex))
