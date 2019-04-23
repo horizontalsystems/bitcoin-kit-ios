@@ -1,4 +1,4 @@
-import Foundation
+import BitcoinCore
 
 public class CashBech32AddressConverter: IAddressConverter {
     private let prefix: String
