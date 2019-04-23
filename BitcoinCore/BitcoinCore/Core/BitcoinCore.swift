@@ -15,7 +15,10 @@ public class BitcoinCore {
     private let addressManager: IAddressManager
     private let addressConverter: AddressConverterChain
     private let kitStateProvider: IKitStateProvider & ISyncStateListener
+
+    private let scriptBuilder: ScriptBuilderChain
     private let transactionBuilder: ITransactionBuilder
+
     private let transactionCreator: ITransactionCreator
     private let paymentAddressParser: IPaymentAddressParser
 
@@ -59,6 +62,10 @@ public class BitcoinCore {
         peerGroup.add(peerGroupListener: peerGroupListener)
     }
 
+    public func prepend(scriptBuilder: IScriptBuilder) {
+        self.scriptBuilder.prepend(scriptBuilder: scriptBuilder)
+    }
+
     public func prepend(addressConverter: IAddressConverter) {
         self.addressConverter.prepend(addressConverter: addressConverter)
     }
@@ -76,8 +83,8 @@ public class BitcoinCore {
     init(storage: IStorage, dataProvider: IDataProvider & IBlockchainDataListener,
                 peerGroup: IPeerGroup, transactionSyncer: ITransactionSyncer,
                 addressManager: IAddressManager, addressConverter: AddressConverterChain, kitStateProvider: IKitStateProvider & ISyncStateListener,
-                transactionBuilder: ITransactionBuilder, transactionCreator: ITransactionCreator, paymentAddressParser: IPaymentAddressParser,
-                networkMessageParser: NetworkMessageParser, networkMessageSerializer: NetworkMessageSerializer,
+                scriptBuilder: ScriptBuilderChain, transactionBuilder: ITransactionBuilder, transactionCreator: ITransactionCreator,
+                paymentAddressParser: IPaymentAddressParser, networkMessageParser: NetworkMessageParser, networkMessageSerializer: NetworkMessageSerializer,
                 syncManager: SyncManager) {
         self.storage = storage
         self.dataProvider = dataProvider
@@ -86,6 +93,7 @@ public class BitcoinCore {
         self.addressManager = addressManager
         self.addressConverter = addressConverter
         self.kitStateProvider = kitStateProvider
+        self.scriptBuilder = scriptBuilder
         self.transactionBuilder = transactionBuilder
         self.transactionCreator = transactionCreator
         self.paymentAddressParser = paymentAddressParser

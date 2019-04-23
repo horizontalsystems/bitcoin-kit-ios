@@ -11,8 +11,9 @@ class TransactionBuilder {
     private let addressManager: IAddressManager
     private let addressConverter: IAddressConverter
     private let inputSigner: IInputSigner
-    private let scriptBuilder: IScriptBuilder
     private let factory: IFactory
+
+    var scriptBuilder: IScriptBuilder
 
     init(unspentOutputSelector: IUnspentOutputSelector, unspentOutputProvider: IUnspentOutputProvider, addressManager: IAddressManager, addressConverter: IAddressConverter, inputSigner: IInputSigner, scriptBuilder: IScriptBuilder, factory: IFactory) {
         self.unspentOutputSelector = unspentOutputSelector
@@ -96,19 +97,21 @@ extension TransactionBuilder: ITransactionBuilder {
         // Sign inputs
         for i in 0..<inputsToSign.count {
             let previousUnspentOutput = selectedOutputsInfo.unspentOutputs[i]
-
             let sigScriptData = try inputSigner.sigScriptData(transaction: transaction, inputsToSign: inputsToSign, outputs: outputs, index: i)
+
+            var params = [Data]()
             switch previousUnspentOutput.output.scriptType {
             case .p2wpkh:
                 transaction.segWit = true
                 inputsToSign[i].input.witnessData.append(contentsOf: sigScriptData)
             case .p2wpkhSh:
                 transaction.segWit = true
-                let witnessProgram = OpCode.scriptWPKH(previousUnspentOutput.publicKey.keyHash)
-                inputsToSign[i].input.signatureScript = scriptBuilder.unlockingScript(params: [witnessProgram])
                 inputsToSign[i].input.witnessData.append(contentsOf: sigScriptData)
-            default: inputsToSign[i].input.signatureScript = scriptBuilder.unlockingScript(params: sigScriptData)
+                params.append(OpCode.scriptWPKH(previousUnspentOutput.publicKey.keyHash))
+            default: params.append(contentsOf: sigScriptData)
             }
+
+            inputsToSign[i].input.signatureScript = params.reduce(Data()) { $0 + OpCode.push($1) }
         }
 
         transaction.status = .new
