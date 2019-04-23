@@ -41,4 +41,13 @@ public class BitcoinCoreErrors {
         case wrongMessageSerializer
     }
 
+    public enum ScriptBuild: Error {
+        case wrongType
+        case unknownType
+    }
+
+    public struct AddressConversionErrors: Error {
+        let errors: [Error]
+    }
+
 }

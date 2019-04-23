@@ -60,6 +60,7 @@ public class BitcoinKit: AbstractKit {
         let scriptConverter = ScriptConverter()
         let bech32 = SegWitBech32AddressConverter(prefix: network.bech32PrefixPattern, scriptConverter: scriptConverter)
 
+        bitcoinCore.prepend(scriptBuilder: SegWitScriptBuilder())
         bitcoinCore.prepend(addressConverter: bech32)
 
         let blockHelper = BlockValidatorHelper(storage: storage)

@@ -177,8 +177,9 @@ public class BitcoinCoreBuilder {
 
         let transactionSender = TransactionSender(transactionSyncer: transactionSyncer, peerGroup: peerGroup, logger: logger)
 
-        let scriptBuilder = ScriptBuilder()
         let inputSigner = InputSigner(hdWallet: hdWallet, network: network)
+
+        let scriptBuilder = ScriptBuilderChain()
 
         let transactionBuilder = TransactionBuilder(unspentOutputSelector: unspentOutputSelector, unspentOutputProvider: unspentOutputProvider, addressManager: addressManager, addressConverter: addressConverter, inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory)
         let transactionCreator = TransactionCreator(transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, transactionSender: transactionSender)
@@ -203,6 +204,7 @@ public class BitcoinCoreBuilder {
                 addressManager: addressManager,
                 addressConverter: addressConverter,
                 kitStateProvider: kitStateProvider,
+                scriptBuilder: scriptBuilder,
                 transactionBuilder: transactionBuilder,
                 transactionCreator: transactionCreator,
                 paymentAddressParser: paymentAddressParser,
@@ -219,6 +221,7 @@ public class BitcoinCoreBuilder {
         peerGroup.peerTaskHandler = bitcoinCore.peerTaskHandlerChain
         peerGroup.inventoryItemsHandler = bitcoinCore.inventoryItemsHandlerChain
 
+        bitcoinCore.prepend(scriptBuilder: ScriptBuilder())
         bitcoinCore.prepend(addressConverter: Base58AddressConverter(addressVersion: network.pubKeyHash, addressScriptVersion: network.scriptHash))
 
         // this part can be moved to another place

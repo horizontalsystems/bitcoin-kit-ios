@@ -161,9 +161,6 @@ protocol IBloomFilterManager {
 
 
 public protocol IPeerGroup: class {
-    var inventoryItemsHandler: IInventoryItemsHandler? { get set }
-    var peerTaskHandler: IPeerTaskHandler? { get set }
-
     var blockSyncer: IBlockSyncer? { get set }
     var transactionSyncer: ITransactionSyncer? { get set }
     var someReadyPeers: [IPeer] { get }
@@ -381,9 +378,8 @@ protocol IInputSigner {
     func sigScriptData(transaction: Transaction, inputsToSign: [InputToSign], outputs: [Output], index: Int) throws -> [Data]
 }
 
-protocol IScriptBuilder {
+public protocol IScriptBuilder {
     func lockingScript(for address: Address) throws -> Data
-    func unlockingScript(params: [Data]) -> Data
 }
 
 protocol ITransactionSizeCalculator {
