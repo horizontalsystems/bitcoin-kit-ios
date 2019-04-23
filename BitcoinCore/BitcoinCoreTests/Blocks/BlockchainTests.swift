@@ -149,32 +149,56 @@ class BlockchainTest: QuickSpec {
         }
 
         describe("#forceAdd") {
-            let merkleBlock = MerkleBlock(header: TestData.firstBlock.header, transactionHashes: [Data](), transactions: [FullTransaction]())
+            let merkleBlock = MerkleBlock(header: TestData.checkpointBlock.header, transactionHashes: [Data](), transactions: [FullTransaction]())
             let height = 1
-            let newBlock = Block(withHeader: merkleBlock.header, height: height)
-            var connectedBlock: Block!
+            let block = Block(withHeader: TestData.checkpointBlock.header, height: height)
 
-            beforeEach {
-                stub(mockFactory) { mock in
-                    when(mock.block(withHeader: equal(to: merkleBlock.header), height: equal(to: 1))).thenReturn(newBlock)
+            context("when block exists") {
+                beforeEach {
+                    stub(mockStorage) { mock in
+                        when(mock.block(byHash: equal(to: merkleBlock.headerHash))).thenReturn(block)
+                    }
                 }
 
-                connectedBlock = try! blockchain.forceAdd(merkleBlock: merkleBlock, height: height)
+                it("returns existing block") {
+                    expect(try! blockchain.forceAdd(merkleBlock: merkleBlock, height: height)).to(equal(block))
+                }
+
+                it("doesn't add a block to storage") {
+                    verify(mockStorage, never()).add(block: any())
+                    verifyNoMoreInteractions(mockBlockchainDataListener)
+                    verifyNoMoreInteractions(mockStorage)
+                }
             }
 
-            it("doesn't validate block") {
-                verify(mockBlockValidator, never()).validate(block: any(), previousBlock: any())
-            }
+            context("when block doesn't exist") {
+                var connectedBlock: Block!
 
-            it("adds block to database") {
-                verify(mockFactory).block(withHeader: equal(to: merkleBlock.header), height: equal(to: height))
-                verify(mockBlockchainDataListener).onInsert(block: equal(to: newBlock))
-                verify(mockStorage).add(block: equal(to: newBlock))
-            }
+                beforeEach {
+                    stub(mockStorage) { mock in
+                        when(mock.block(byHash: equal(to: merkleBlock.headerHash))).thenReturn(nil)
+                    }
+                    stub(mockFactory) { mock in
+                        when(mock.block(withHeader: equal(to: merkleBlock.header), height: equal(to: 1))).thenReturn(block)
+                    }
 
-            it("sets 'stale' true") {
-                XCTAssertEqual(connectedBlock.headerHash, newBlock.headerHash)
-                XCTAssertEqual(connectedBlock.stale, false)
+                    connectedBlock = try! blockchain.forceAdd(merkleBlock: merkleBlock, height: height)
+                }
+
+                it("doesn't validate block") {
+                    verify(mockBlockValidator, never()).validate(block: any(), previousBlock: any())
+                }
+
+                it("adds block to database") {
+                    verify(mockFactory).block(withHeader: equal(to: merkleBlock.header), height: equal(to: height))
+                    verify(mockBlockchainDataListener).onInsert(block: equal(to: block))
+                    verify(mockStorage).add(block: equal(to: block))
+                }
+
+                it("sets 'stale' true") {
+                    XCTAssertEqual(connectedBlock.headerHash, block.headerHash)
+                    XCTAssertEqual(connectedBlock.stale, false)
+                }
             }
         }
 

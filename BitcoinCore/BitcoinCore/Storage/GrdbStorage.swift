@@ -101,9 +101,9 @@ open class GrdbStorage {
                 t.column(Block.Columns.height.name, .integer).notNull()
                 t.column(Block.Columns.stale.name, .boolean)
 
-                t.primaryKey([Block.Columns.headerHash.name], onConflict: .replace)
+                t.primaryKey([Block.Columns.headerHash.name], onConflict: .abort)
             }
-            try db.create(index: "by\(Block.Columns.height.name)", on: Block.databaseTableName, columns: [Block.Columns.height.name], unique: true)
+            try db.create(index: "by\(Block.Columns.height.name)", on: Block.databaseTableName, columns: [Block.Columns.height.name])
         }
 
         migrator.registerMigration("createTransactions") { db in
@@ -513,8 +513,8 @@ extension GrdbStorage: IStorage {
                           SELECT inputs.*, outputs.*
                           FROM inputs
                           LEFT JOIN outputs ON inputs.previousOutputTxHash = outputs.transactionHash AND inputs.previousOutputIndex = outputs."index"
+                          WHERE inputs.transactionHash IN (\(transactionHashChunks.map({ "x'" + $0.hex + "'" }).joined(separator: ",")))
                           """
-//                          WHERE inputs.transactionHash IN (\(transactionHashChunks.map({ $0 }).joined(separator: ",")))
                 let rows = try Row.fetchCursor(db, sql, adapter: adapter)
 
                 while let row = try rows.next() {

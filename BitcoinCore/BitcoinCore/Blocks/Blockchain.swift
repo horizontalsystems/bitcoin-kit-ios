@@ -36,6 +36,10 @@ extension Blockchain: IBlockchain {
     }
 
     func forceAdd(merkleBlock: MerkleBlock, height: Int) throws -> Block {
+        if let existingBlock = storage.block(byHash: merkleBlock.headerHash) {
+            return existingBlock
+        }
+
         let block = factory.block(withHeader: merkleBlock.header, height: height)
         try storage.add(block: block)
 
