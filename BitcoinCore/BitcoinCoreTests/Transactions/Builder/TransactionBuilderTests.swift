@@ -95,7 +95,7 @@ class TransactionBuilderTests: XCTestCase {
 
         transaction = Transaction(version: 1, timestamp: 0)
         inputToSign = InputToSign(
-                input: Input(withPreviousOutputTxReversedHex: previousTransaction.header.dataHashReversedHex, previousOutputIndex: unspentOutputs.unspentOutputs[0].output.index, script: Data(), sequence: 0),
+                input: Input(withPreviousOutputTxHash: previousTransaction.header.dataHash, previousOutputIndex: unspentOutputs.unspentOutputs[0].output.index, script: Data(), sequence: 0),
                 previousOutput: previousTransaction.outputs[0], previousOutputPublicKey: TestData.pubKey()
         )
         toOutputPKH = Output(withValue: value - fee, index: 0, lockingScript: Data(), type: .p2pkh, address: toAddressPKH, keyHash: nil)
@@ -187,14 +187,14 @@ class TransactionBuilderTests: XCTestCase {
     func testBuildTransaction_P2PKH() {
         let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressPKH)
 
-        XCTAssertNotEqual(resultTx.header.dataHashReversedHex, "")
+        XCTAssertNotEqual(resultTx.header.dataHash, Data())
         XCTAssertEqual(resultTx.header.status, .new)
         XCTAssertEqual(resultTx.header.isMine, true)
         XCTAssertEqual(resultTx.header.segWit, false)
         XCTAssertEqual(resultTx.inputs.count, 1)
         XCTAssertEqual(resultTx.inputs[0].signatureScript, signatureScript)
         XCTAssertEqual(resultTx.inputs[0].witnessData.count, 0)
-        XCTAssertEqual(resultTx.inputs[0].previousOutputTxReversedHex, unspentOutputs.unspentOutputs[0].output.transactionHashReversedHex)
+        XCTAssertEqual(resultTx.inputs[0].previousOutputTxHash, unspentOutputs.unspentOutputs[0].output.transactionHash)
         XCTAssertEqual(resultTx.inputs[0].previousOutputIndex, unspentOutputs.unspentOutputs[0].output.index)
         XCTAssertEqual(resultTx.outputs.count, 2)
         XCTAssertEqual(resultTx.outputs[0].address, toAddressPKH)
@@ -244,7 +244,7 @@ class TransactionBuilderTests: XCTestCase {
 //        XCTAssertEqual(resultTx.inputs[0].signatureScript.count, 0)
 //        XCTAssertEqual(resultTx.inputs[0].witnessData.count, 1)
 //        XCTAssertEqual(resultTx.inputs[0].witnessData[0], signature)
-//        XCTAssertEqual(resultTx.inputs[0].previousOutputTxReversedHex, unspentOutputs.unspentOutputs[0].output.transactionHashReversedHex)
+//        XCTAssertEqual(resultTx.inputs[0].previousOutputTxReversedHex, unspentOutputs.unspentOutputs[0].output.transactionHash)
 //        XCTAssertEqual(resultTx.inputs[0].previousOutputIndex, unspentOutputs.unspentOutputs[0].output.index)
 //        XCTAssertEqual(resultTx.outputs.count, 2)
 //        XCTAssertEqual(resultTx.outputs[0].address, toAddressWPKH)
@@ -258,11 +258,11 @@ class TransactionBuilderTests: XCTestCase {
     func testBuildTransaction_P2SH() {
         let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressSH)
 
-        XCTAssertNotEqual(resultTx.header.dataHashReversedHex, "")
+        XCTAssertNotEqual(resultTx.header.dataHash, Data())
         XCTAssertEqual(resultTx.header.status, .new)
         XCTAssertEqual(resultTx.header.isMine, true)
         XCTAssertEqual(resultTx.inputs.count, 1)
-        XCTAssertEqual(resultTx.inputs[0].previousOutputTxReversedHex, unspentOutputs.unspentOutputs[0].output.transactionHashReversedHex)
+        XCTAssertEqual(resultTx.inputs[0].previousOutputTxHash, unspentOutputs.unspentOutputs[0].output.transactionHash)
         XCTAssertEqual(resultTx.inputs[0].previousOutputIndex, unspentOutputs.unspentOutputs[0].output.index)
         XCTAssertEqual(resultTx.outputs.count, 2)
         XCTAssertEqual(resultTx.outputs[0].address, toAddressSH)
@@ -290,7 +290,7 @@ class TransactionBuilderTests: XCTestCase {
         let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressPKH)
 
         XCTAssertEqual(resultTx.inputs.count, 1)
-        XCTAssertEqual(resultTx.inputs[0].previousOutputTxReversedHex, unspentOutputs.unspentOutputs[0].output.transactionHashReversedHex)
+        XCTAssertEqual(resultTx.inputs[0].previousOutputTxHash, unspentOutputs.unspentOutputs[0].output.transactionHash)
         XCTAssertEqual(resultTx.inputs[0].previousOutputIndex, unspentOutputs.unspentOutputs[0].output.index)
         XCTAssertEqual(resultTx.outputs.count, 1)
         XCTAssertEqual(resultTx.outputs[0].address, toAddressPKH)
@@ -307,7 +307,7 @@ class TransactionBuilderTests: XCTestCase {
         let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressPKH)
 
         XCTAssertEqual(resultTx.inputs.count, 1)
-        XCTAssertEqual(resultTx.inputs[0].previousOutputTxReversedHex, unspentOutputs.unspentOutputs[0].output.transactionHashReversedHex)
+        XCTAssertEqual(resultTx.inputs[0].previousOutputTxHash, unspentOutputs.unspentOutputs[0].output.transactionHash)
         XCTAssertEqual(resultTx.inputs[0].previousOutputIndex, unspentOutputs.unspentOutputs[0].output.index)
         XCTAssertEqual(resultTx.outputs.count, 1)
         XCTAssertEqual(resultTx.outputs[0].address, toAddressPKH)

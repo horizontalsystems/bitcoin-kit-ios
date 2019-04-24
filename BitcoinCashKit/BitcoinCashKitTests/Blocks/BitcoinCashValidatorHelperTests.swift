@@ -28,8 +28,8 @@ class BitcoinCashValidatorHelperTests: QuickSpec {
                 let block3 = Block(withHeader: BlockHeader(version: 0, headerHash: Data(hex: "33")!, previousBlockHeaderHash: Data(hex: "22")!, merkleRoot: Data(), timestamp: 30, bits: 0, nonce: 0), height: 3)
 
                 stub(mockStorage) { mock in
-                    when(mock.block(byHashHex: (block3.previousBlockHashReversedHex))).thenReturn(block2)
-                    when(mock.block(byHashHex: (block2.previousBlockHashReversedHex))).thenReturn(block1)
+                    when(mock.block(byHash: equal(to: block3.previousBlockHash))).thenReturn(block2)
+                    when(mock.block(byHash: equal(to: block2.previousBlockHash))).thenReturn(block1)
                 }
 
                 let blockIndex = helper.suitableBlockIndex(for: [block1, block2, block3])
@@ -41,8 +41,8 @@ class BitcoinCashValidatorHelperTests: QuickSpec {
                 let block3 = Block(withHeader: BlockHeader(version: 0, headerHash: Data(hex: "33")!, previousBlockHeaderHash: Data(hex: "22")!, merkleRoot: Data(), timestamp: 20, bits: 0, nonce: 0), height: 3)
 
                 stub(mockStorage) { mock in
-                    when(mock.block(byHashHex: (block3.previousBlockHashReversedHex))).thenReturn(block2)
-                    when(mock.block(byHashHex: (block2.previousBlockHashReversedHex))).thenReturn(block1)
+                    when(mock.block(byHash: equal(to: block3.previousBlockHash))).thenReturn(block2)
+                    when(mock.block(byHash: equal(to: block2.previousBlockHash))).thenReturn(block1)
                 }
 
                 let blockIndex = helper.suitableBlockIndex(for: [block1, block2, block3])
@@ -54,8 +54,8 @@ class BitcoinCashValidatorHelperTests: QuickSpec {
                 let block3 = Block(withHeader: BlockHeader(version: 0, headerHash: Data(hex: "33")!, previousBlockHeaderHash: Data(hex: "22")!, merkleRoot: Data(), timestamp: 20, bits: 0, nonce: 0), height: 3)
 
                 stub(mockStorage) { mock in
-                    when(mock.block(byHashHex: (block3.previousBlockHashReversedHex))).thenReturn(block2)
-                    when(mock.block(byHashHex: (block2.previousBlockHashReversedHex))).thenReturn(block1)
+                    when(mock.block(byHash: equal(to: block3.previousBlockHash))).thenReturn(block2)
+                    when(mock.block(byHash: equal(to: block2.previousBlockHash))).thenReturn(block1)
                 }
 
                 let blockIndex = helper.suitableBlockIndex(for: [block1, block2, block3])

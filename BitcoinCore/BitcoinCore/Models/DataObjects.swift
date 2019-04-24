@@ -34,12 +34,11 @@ public struct FullTransaction {
         self.outputs = outputs
 
         self.header.dataHash = CryptoKit.sha256sha256(TransactionSerializer.serialize(transaction: self, withoutWitness: true))
-        self.header.dataHashReversedHex = self.header.dataHash.reversedHex
         for input in self.inputs {
-            input.transactionHashReversedHex = self.header.dataHashReversedHex
+            input.transactionHash = self.header.dataHash
         }
         for output in self.outputs {
-            output.transactionHashReversedHex = self.header.dataHashReversedHex
+            output.transactionHash = self.header.dataHash
         }
     }
 

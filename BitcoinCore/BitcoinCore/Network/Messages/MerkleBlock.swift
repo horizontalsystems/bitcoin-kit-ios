@@ -11,10 +11,6 @@ public class MerkleBlock {
         return self.header.headerHash
     }()
 
-    lazy var headerHashReversedHex: String = {
-        return self.headerHash.reversedHex
-    }()
-
     var complete: Bool {
         return transactionHashes.count == transactions.count
     }

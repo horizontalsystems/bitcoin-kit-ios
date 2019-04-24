@@ -58,7 +58,7 @@ class MasternodeListManager: IMasternodeListManager {
             throw ValidationError.wrongCoinbaseHash
         }
 
-        guard let block = storage.block(byHashHex: masternodeListDiffMessage.blockHash.reversedHex) else {
+        guard let block = storage.block(byHash: masternodeListDiffMessage.blockHash) else {
             throw ValidationError.noMerkleBlockHeader
         }
 

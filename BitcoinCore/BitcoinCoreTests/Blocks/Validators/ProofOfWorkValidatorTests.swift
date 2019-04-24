@@ -3,9 +3,9 @@ import Cuckoo
 @testable import BitcoinCore
 import BigInt
 
-class HeaderValidatorTests: XCTestCase {
+class ProofOfWorkValidatorTests: XCTestCase {
 
-    private var validator: HeaderValidator!
+    private var validator: ProofOfWorkValidator!
 
     private var previousBlock: Block!
     private var block: Block!
@@ -13,7 +13,7 @@ class HeaderValidatorTests: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        validator = HeaderValidator(encoder: DifficultyEncoder())
+        validator = ProofOfWorkValidator(difficultyEncoder: DifficultyEncoder())
 
         previousBlock = TestData.firstBlock
         block = TestData.secondBlock
@@ -37,7 +37,7 @@ class HeaderValidatorTests: XCTestCase {
     }
 
     func testWrongProofOfWork_nBitsLessThanHeaderHash() {
-        block.bits = DifficultyEncoder().encodeCompact(from: BigInt(block.headerHashReversedHex, radix: 16)! - 1)
+        block.bits = DifficultyEncoder().encodeCompact(from: BigInt(block.headerHash.reversedHex, radix: 16)! - 1)
         do {
             try validator.validate(block: block, previousBlock: previousBlock)
             XCTFail("invalidProveOfWork exception not thrown")

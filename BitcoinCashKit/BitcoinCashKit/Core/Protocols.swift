@@ -25,7 +25,7 @@ protocol IBitcoinCashBlockValidatorHelper {
 protocol IBitcoinCashStorage {
     func timestamps(from startHeight: Int, to endHeight: Int, ascending: Bool) -> [Int]
 
-    func block(byHashHex: String) -> Block?
+    func block(byHash: Data) -> Block?
 }
 
 protocol IBlockValidatorHelperWrapper {

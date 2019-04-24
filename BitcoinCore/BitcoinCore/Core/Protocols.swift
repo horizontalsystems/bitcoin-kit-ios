@@ -77,18 +77,17 @@ public protocol IStorage {
 
     var blockchainBlockHashes: [BlockHash] { get }
     var lastBlockchainBlockHash: BlockHash? { get }
-    func blockHashHeaderHashHexes(except: String) -> [String]
-    func deleteBlockchainBlockHashes()
-
+    func blockHashHeaderHashes(except: Data) -> [String]
     var blockHashHeaderHashes: [Data] { get }
     var lastBlockHash: BlockHash? { get }
     func blockHashesSortedBySequenceAndHeight(limit: Int) -> [BlockHash]
     func add(blockHashes: [BlockHash])
-    func deleteBlockHash(byHashHex: String)
+    func deleteBlockHash(byHash: Data)
+    func deleteBlockchainBlockHashes()
 
     var blocksCount: Int { get }
     var lastBlock: Block? { get }
-    func blocksCount(reversedHeaderHashHexes: [String]) -> Int
+    func blocksCount(headerHashes: [Data]) -> Int
     func save(block: Block)
     func blocks(heightGreaterThan: Int, sortedBy: Block.Columns, limit: Int) -> [Block]
     func blocks(from startHeight: Int, to endHeight: Int, ascending: Bool) -> [Block]
@@ -96,18 +95,18 @@ public protocol IStorage {
     func blocks(heightGreaterThanOrEqualTo: Int, stale: Bool) -> [Block]
     func blocks(stale: Bool) -> [Block]
     func block(byHeight: Int) -> Block?
-    func block(byHashHex: String) -> Block?
+    func block(byHash: Data) -> Block?
     func block(stale: Bool, sortedHeight: String) -> Block?
     func add(block: Block) throws
     func delete(blocks: [Block]) throws
     func unstaleAllBlocks() throws
 
 
-    func transaction(byHashHex: String) -> Transaction?
+    func transaction(byHash: Data) -> Transaction?
     func transactions(ofBlock: Block) -> [Transaction]
     func newTransactions() -> [Transaction]
-    func newTransaction(byReversedHashHex: String) -> Transaction?
-    func relayedTransactionExists(byReversedHashHex: String) -> Bool
+    func newTransaction(byHash: Data) -> Transaction?
+    func relayedTransactionExists(byHash: Data) -> Bool
     func add(transaction: FullTransaction) throws
     func update(transaction: Transaction) throws
     func fullInfo(forTransactions: [TransactionWithBlock]) -> [FullTransactionForInfo]
@@ -119,7 +118,7 @@ public protocol IStorage {
     func outputs(ofTransaction: Transaction) -> [Output]
     func previousOutput(ofInput: Input) -> Output?
 
-    func sentTransaction(byReversedHashHex: String) -> SentTransaction?
+    func sentTransaction(byHash: Data) -> SentTransaction?
     func update(sentTransaction: SentTransaction)
     func add(sentTransaction: SentTransaction)
 

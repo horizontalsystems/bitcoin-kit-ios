@@ -21,7 +21,7 @@ class TestData {
                 withHeader: BlockHeader(
                         version: 1,
                         headerHash: "11b10ccc".reversedData!,
-                        previousBlockHeaderHash: checkpointBlock.headerHashReversedHex.reversedData!,
+                        previousBlockHeaderHash: checkpointBlock.headerHash,
                         merkleRoot: "55de0864e0b96f0dff597b1c138de187dd8c40e859b01b4671f7a92ca1b7a9b9".reversedData!,
                         timestamp: 1337966314,
                         bits: 486604799,
@@ -35,7 +35,7 @@ class TestData {
                 withHeader: BlockHeader(
                         version: 1,
                         headerHash: "22b10ccc".reversedData!,
-                        previousBlockHeaderHash: firstBlock.headerHashReversedHex.reversedData!,
+                        previousBlockHeaderHash: firstBlock.headerHash,
                         merkleRoot: "9a342c0615d0e5a3256f5b9a7818abecc1c8722ab3a8db8df5595c8635cc11e1".reversedData!,
                         timestamp: 1337966314,
                         bits: 486604799,

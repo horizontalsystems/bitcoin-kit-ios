@@ -36,7 +36,7 @@ class BlockValidatorHelperTests: XCTestCase {
     func testPrevious() {
         let block = TestData.thirdBlock
 
-        XCTAssertEqual(blockHelper.previous(for: block, count: 1)?.headerHashReversedHex, TestData.secondBlock.headerHashReversedHex)
+        XCTAssertEqual(blockHelper.previous(for: block, count: 1)?.headerHash, TestData.secondBlock.headerHash)
     }
 
     func testNoPrevious() {
@@ -53,7 +53,7 @@ class BlockValidatorHelperTests: XCTestCase {
         let window = blockHelper.previousWindow(for: block, count: 2)
 
         verify(mockStorage).blocks(from: 2016, to: 2017, ascending: true)
-        XCTAssertEqual(window?.map { $0.headerHashReversedHex }, [TestData.checkpointBlock.headerHashReversedHex, TestData.firstBlock.headerHashReversedHex])
+        XCTAssertEqual(window?.map { $0.headerHash }, [TestData.checkpointBlock.headerHash, TestData.firstBlock.headerHash])
     }
 
     func testNoPreviousWindow() {

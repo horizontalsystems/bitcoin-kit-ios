@@ -28,7 +28,7 @@ class SendTransactionTask: PeerTask {
             return false
         }
 
-        return transaction.header.dataHashReversedHex == task.transaction.header.dataHashReversedHex
+        return transaction.header.dataHash == task.transaction.header.dataHash
     }
 
 }

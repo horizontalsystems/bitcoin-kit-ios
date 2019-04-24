@@ -10,7 +10,7 @@ class ProofOfWorkValidator: IBlockValidator {
 
     func validate(block: Block, previousBlock: Block) throws {
 
-        guard let headerHashBigInt = BigInt(block.headerHashReversedHex, radix: 16),
+        guard let headerHashBigInt = BigInt(block.headerHash.reversedHex, radix: 16),
               headerHashBigInt < difficultyEncoder.decodeCompact(bits: block.bits) else {
             throw BitcoinCoreErrors.BlockValidation.invalidProofOfWork
         }

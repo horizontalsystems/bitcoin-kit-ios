@@ -24,7 +24,7 @@ class TestData {
                 withHeader: BlockHeader(
                         version: 1,
                         headerHash: "11b10ccc".reversedData!,
-                        previousBlockHeaderHash: checkpointBlock.headerHashReversedHex.reversedData!,
+                        previousBlockHeaderHash: checkpointBlock.headerHash,
                         merkleRoot: "55de0864e0b96f0dff597b1c138de187dd8c40e859b01b4671f7a92ca1b7a9b9".reversedData!,
                         timestamp: 1337966314,
                         bits: 486604799,
@@ -38,7 +38,7 @@ class TestData {
                 withHeader: BlockHeader(
                         version: 1,
                         headerHash: "22b10ccc".reversedData!,
-                        previousBlockHeaderHash: firstBlock.headerHashReversedHex.reversedData!,
+                        previousBlockHeaderHash: firstBlock.headerHash,
                         merkleRoot: "9a342c0615d0e5a3256f5b9a7818abecc1c8722ab3a8db8df5595c8635cc11e1".reversedData!,
                         timestamp: 1337966314,
                         bits: 486604799,
@@ -52,7 +52,7 @@ class TestData {
                 withHeader: BlockHeader(
                         version: 1,
                         headerHash: "33b10ccc".reversedData!,
-                        previousBlockHeaderHash: secondBlock.headerHashReversedHex.reversedData!,
+                        previousBlockHeaderHash: secondBlock.headerHash,
                         merkleRoot: "4848ea1ec4f1838bc0a6a243b9350d76bfeda63532b6a1cc6bae0df27aba11b3".reversedData!,
                         timestamp: 1337966314,
                         bits: 486604799,
@@ -66,7 +66,7 @@ class TestData {
                 withHeader: BlockHeader(
                         version: 1,
                         headerHash: "44b10ccc".reversedData!,
-                        previousBlockHeaderHash: thirdBlock.headerHashReversedHex.reversedData!,
+                        previousBlockHeaderHash: thirdBlock.headerHash,
                         merkleRoot: "d45043107540b486cf2079a1d510bfe18053aac2446c5043a2b8eff01668426d".reversedData!,
                         timestamp: 1337966314,
                         bits: 486604799,
@@ -99,7 +99,7 @@ class TestData {
                 bits: 436469756,
                 nonce: 1373357969
         )
-//        header.headerHash = CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: header))
+        //        header.headerHash = CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: header))
         return header
     }
 
@@ -115,7 +115,7 @@ class TestData {
                 bits: 436273151,
                 nonce: 4053884125
         )
-//        header.headerHash = CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: header))
+        //        header.headerHash = CryptoKit.sha256sha256(BlockHeaderSerializer.serialize(header: header))
         return header
     }
 
@@ -124,7 +124,7 @@ class TestData {
         setRandomHash(to: transaction)
         let inputs = [
             Input(
-                    withPreviousOutputTxReversedHex: Data(hex: "a6d1ce683f38a84cfd88a9d48b0ba2d7a8def00f8517e3da02c86fce6c7863d7")!.reversedHex, previousOutputIndex: 0,
+                    withPreviousOutputTxHash: Data(hex: "a6d1ce683f38a84cfd88a9d48b0ba2d7a8def00f8517e3da02c86fce6c7863d7")!, previousOutputIndex: 0,
                     script: Data(hex: "4730440220302e597d74aebcb0bf7f372be156252017af190bd586466104b079fba4b7efa7022037ebbf84e096ef3d966123a93a83586012353c1d2c11c967d21acf1c94c45df001210347235e12207d21b6093d9fd93a0df4d589a0d44252b98b2e934a8da5ab1d1654")!,
                     sequence: 4294967295
             )
@@ -142,7 +142,7 @@ class TestData {
         setRandomHash(to: transaction)
         let inputs = [
             Input(
-                    withPreviousOutputTxReversedHex: Data(hex: "a6d1ce683f38a84cfd88a9d48b0ba2d7a8def00f8517e3da02c86fce6c7863d7")!.reversedHex, previousOutputIndex: 0,
+                    withPreviousOutputTxHash: Data(hex: "a6d1ce683f38a84cfd88a9d48b0ba2d7a8def00f8517e3da02c86fce6c7863d7")!, previousOutputIndex: 0,
                     script: Data(hex: "4730440220302e597d74aebcb0bf7f372be156252017af190bd586466104b079fba4b7efa7022037ebbf84e096ef3d966123a93a83586012353c1d2c11c967d21acf1c94c45df001210347235e12207d21b6093d9fd93a0df4d589a0d44252b98b2e934a8da5ab1d1654")!,
                     sequence: 4294967295
             )
@@ -160,7 +160,7 @@ class TestData {
         setRandomHash(to: transaction)
         let inputs = [
             Input(
-                    withPreviousOutputTxReversedHex: Data(hex: "a6d1ce683f38a84cfd88a9d48b0ba2d7a8def00f8517e3da02c86fce6c7863d7")!.reversedHex, previousOutputIndex: 0,
+                    withPreviousOutputTxHash: Data(hex: "a6d1ce683f38a84cfd88a9d48b0ba2d7a8def00f8517e3da02c86fce6c7863d7")!, previousOutputIndex: 0,
                     script: Data(hex: "4730440220302e597d74aebcb0bf7f372be156252017af190bd586466104b079fba4b7efa7022037ebbf84e096ef3d966123a93a83586012353c1d2c11c967d21acf1c94c45df001210347235e12207d21b6093d9fd93a0df4d589a0d44252b98b2e934a8da5ab1d1654")!,
                     sequence: 4294967295
             )
@@ -177,7 +177,7 @@ class TestData {
         setRandomHash(to: transaction)
         let inputs = [
             Input(
-                    withPreviousOutputTxReversedHex: Data(hex: "a6d1ce683f38a84cfd88a9d48b0ba2d7a8def00f8517e3da02c86fce6c7863d7")!.reversedHex, previousOutputIndex: 0,
+                    withPreviousOutputTxHash: Data(hex: "a6d1ce683f38a84cfd88a9d48b0ba2d7a8def00f8517e3da02c86fce6c7863d7")!, previousOutputIndex: 0,
                     script: Data(hex: "4730440220302e597d74aebcb0bf7f372be156252017af190bd586466104b079fba4b7efa7022037ebbf84e096ef3d966123a93a83586012353c1d2c11c967d21acf1c94c45df001210347235e12207d21b6093d9fd93a0df4d589a0d44252b98b2e934a8da5ab1d1654")!,
                     sequence: 4294967295
             )
@@ -194,7 +194,7 @@ class TestData {
     }
 
     static func input(previousTransaction: Transaction, previousOutput: Output, script: Data, sequence: Int) -> Input {
-        return Input(withPreviousOutputTxReversedHex: previousTransaction.dataHashReversedHex, previousOutputIndex: previousOutput.index, script: script, sequence: sequence)
+        return Input(withPreviousOutputTxHash: previousTransaction.dataHash, previousOutputIndex: previousOutput.index, script: script, sequence: sequence)
     }
 
     static func unspentOutput(output: Output) -> UnspentOutput {
@@ -209,7 +209,6 @@ class TestData {
         }
 
         transaction.dataHash = bytes
-        transaction.dataHashReversedHex = transaction.dataHash.reversedHex
     }
 
 }

@@ -39,7 +39,7 @@ protocol IDashStorage {
     func instantTransactionInputs(for txHash: Data) -> [InstantTransactionInput]
     func add(instantTransactionInput: InstantTransactionInput)
 
-    func block(byHashHex: String) -> Block?
+    func block(byHash: Data) -> Block?
 }
 
 protocol IInstantSendFactory {

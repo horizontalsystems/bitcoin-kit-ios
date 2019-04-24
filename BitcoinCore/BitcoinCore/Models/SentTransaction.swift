@@ -1,13 +1,13 @@
 import GRDB
 
 public class SentTransaction: Record {
-    let hashReversedHex: String
+    let dataHash: Data
     var firstSendTime: Double
     var lastSendTime: Double
     var retriesCount: Int
 
-    init(hashReversedHex: String, firstSendTime: Double, lastSendTime: Double, retriesCount: Int) {
-        self.hashReversedHex = hashReversedHex
+    init(dataHash: Data, firstSendTime: Double, lastSendTime: Double, retriesCount: Int) {
+        self.dataHash = dataHash
         self.firstSendTime = firstSendTime
         self.lastSendTime = lastSendTime
         self.retriesCount = retriesCount
@@ -19,19 +19,19 @@ public class SentTransaction: Record {
         return "sentTransactions"
     }
 
-    convenience init(hashReversedHex: String) {
-        self.init(hashReversedHex: hashReversedHex, firstSendTime: CACurrentMediaTime(), lastSendTime: CACurrentMediaTime(), retriesCount: 0)
+    convenience init(dataHash: Data) {
+        self.init(dataHash: dataHash, firstSendTime: CACurrentMediaTime(), lastSendTime: CACurrentMediaTime(), retriesCount: 0)
     }
 
     enum Columns: String, ColumnExpression {
-        case hashReversedHex
+        case dataHash
         case firstSendTime
         case lastSendTime
         case retriesCount
     }
 
     required init(row: Row) {
-        hashReversedHex = row[Columns.hashReversedHex]
+        dataHash = row[Columns.dataHash]
         firstSendTime = row[Columns.firstSendTime]
         lastSendTime = row[Columns.lastSendTime]
         retriesCount = row[Columns.retriesCount]
@@ -40,7 +40,7 @@ public class SentTransaction: Record {
     }
 
     override open func encode(to container: inout PersistenceContainer) {
-        container[Columns.hashReversedHex] = hashReversedHex
+        container[Columns.dataHash] = dataHash
         container[Columns.firstSendTime] = firstSendTime
         container[Columns.lastSendTime] = lastSendTime
         container[Columns.retriesCount] = retriesCount

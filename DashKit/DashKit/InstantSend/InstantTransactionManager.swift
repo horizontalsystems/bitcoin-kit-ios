@@ -30,11 +30,8 @@ class InstantTransactionManager: IInstantTransactionManager {
 
     private func updateInputs(for transaction: FullTransaction) {
         for i in 0..<transaction.inputs.count {
-            let previousOutputTxReversedHex = transaction.inputs[i].previousOutputTxReversedHex // todo: need to use data from new grdb database
-            guard let previousOutputTxReversedHash = Data(hex: previousOutputTxReversedHex) else {
-                continue
-            }
-            let input = instantSendFactory.instantTransactionInput(txHash: transaction.header.dataHash, inputTxHash: Data(previousOutputTxReversedHash.reversed()), voteCount: 0, blockHeight: nil)
+            let previousOutputTxHash = transaction.inputs[i].previousOutputTxHash
+            let input = instantSendFactory.instantTransactionInput(txHash: transaction.header.dataHash, inputTxHash: previousOutputTxHash, voteCount: 0, blockHeight: nil)
 
             storage.add(instantTransactionInput: input)
         }

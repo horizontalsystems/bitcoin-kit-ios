@@ -40,7 +40,7 @@ class BlockSyncer {
 
     var localKnownBestBlockHeight: Int32 {
         let blockchainHashes = storage.blockchainBlockHashes
-        let existingHashesCount = storage.blocksCount(reversedHeaderHashHexes: blockchainHashes.map { $0.headerHashReversedHex })
+        let existingHashesCount = storage.blocksCount(headerHashes: blockchainHashes.map { $0.headerHash })
         return localDownloadedBestBlockHeight + Int32(blockchainHashes.count - existingHashesCount)
     }
 
@@ -50,7 +50,7 @@ class BlockSyncer {
     }
 
     private func clearPartialBlocks() throws {
-        let blockReversedHashes = storage.blockHashHeaderHashHexes(except: network.checkpointBlock.headerHashReversedHex)
+        let blockReversedHashes = storage.blockHashHeaderHashes(except: network.checkpointBlock.headerHash)
 
         let blocksToDelete = storage.blocks(byHexes: blockReversedHashes)
         try blockchain.deleteBlocks(blocks: blocksToDelete)
@@ -154,14 +154,14 @@ extension BlockSyncer: IBlockSyncer {
         }
 
         if !state.iterationHasPartialBlocks {
-            storage.deleteBlockHash(byHashHex: block.headerHashReversedHex)
+            storage.deleteBlockHash(byHash: block.headerHash)
         }
 
         listener.currentBestBlockHeightUpdated(height: Int32(block.height), maxBlockHeight: maxBlockHeight)
     }
 
     func shouldRequestBlock(withHash hash: Data) -> Bool {
-        return storage.block(byHashHex: hash.reversedHex) == nil
+        return storage.block(byHash: hash) == nil
     }
 
 }

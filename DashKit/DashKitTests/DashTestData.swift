@@ -34,11 +34,10 @@ class DashTestData {
         let transaction = Transaction(version: 1, lockTime: 0)
 
         for _ in 0..<32 { transaction.dataHash.append(UInt8.random(in: 0...255)) }
-        transaction.dataHashReversedHex = transaction.dataHash.reversedHex
 
         let inputs = [
             Input(
-                    withPreviousOutputTxReversedHex: Data(hex: "a6d1ce683f38a84cfd88a9d48b0ba2d7a8def00f8517e3da02c86fce6c7863d7")!.reversedHex, previousOutputIndex: 0,
+                    withPreviousOutputTxHash: Data(hex: "a6d1ce683f38a84cfd88a9d48b0ba2d7a8def00f8517e3da02c86fce6c7863d7")!, previousOutputIndex: 0,
                     script: Data(hex: "4730440220302e597d74aebcb0bf7f372be156252017af190bd586466104b079fba4b7efa7022037ebbf84e096ef3d966123a93a83586012353c1d2c11c967d21acf1c94c45df001210347235e12207d21b6093d9fd93a0df4d589a0d44252b98b2e934a8da5ab1d1654")!,
                     sequence: 4294967295
             )

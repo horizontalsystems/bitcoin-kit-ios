@@ -16,11 +16,11 @@ class Blockchain {
 extension Blockchain: IBlockchain {
 
     func connect(merkleBlock: MerkleBlock) throws -> Block {
-        if let existingBlock = storage.block(byHashHex: merkleBlock.headerHashReversedHex) {
+        if let existingBlock = storage.block(byHash: merkleBlock.headerHash) {
             return existingBlock
         }
 
-        guard let previousBlock = storage.block(byHashHex: merkleBlock.header.previousBlockHeaderHash.reversedHex) else {
+        guard let previousBlock = storage.block(byHash: merkleBlock.header.previousBlockHeaderHash) else {
             throw BitcoinCoreErrors.BlockValidation.noPreviousBlock
         }
 
@@ -36,6 +36,10 @@ extension Blockchain: IBlockchain {
     }
 
     func forceAdd(merkleBlock: MerkleBlock, height: Int) throws -> Block {
+        if let existingBlock = storage.block(byHash: merkleBlock.headerHash) {
+            return existingBlock
+        }
+
         let block = factory.block(withHeader: merkleBlock.header, height: height)
         try storage.add(block: block)
 
@@ -69,7 +73,7 @@ extension Blockchain: IBlockchain {
 
     func deleteBlocks(blocks: [Block]) throws {
         let hashes =  blocks.reduce(into: [String](), { acc, block in
-            acc.append(contentsOf: storage.transactions(ofBlock: block).map { $0.dataHashReversedHex })
+            acc.append(contentsOf: storage.transactions(ofBlock: block).map { $0.dataHash.reversedHex })
         })
 
         try storage.delete(blocks: blocks)

@@ -1,14 +1,12 @@
 import GRDB
 
 public class BlockHash: Record {
-    let headerHashReversedHex: String
     let headerHash: Data
     let height: Int
     let sequence: Int
 
     public init(headerHash: Data, height: Int, order: Int) {
         self.headerHash = headerHash
-        self.headerHashReversedHex = headerHash.reversedHex
         self.height = height
         self.sequence = order
 
@@ -20,7 +18,6 @@ public class BlockHash: Record {
             return nil
         }
 
-        self.headerHashReversedHex = headerHashReversedHex
         self.headerHash = Data(headerHash.reversed())
         self.height = height
         self.sequence = sequence
@@ -33,14 +30,12 @@ public class BlockHash: Record {
     }
 
     enum Columns: String, ColumnExpression {
-        case headerHashReversedHex
         case headerHash
         case height
         case sequence
     }
 
     required init(row: Row) {
-        headerHashReversedHex = row[Columns.headerHashReversedHex]
         headerHash = row[Columns.headerHash]
         height = row[Columns.height]
         sequence = row[Columns.sequence]
@@ -49,7 +44,6 @@ public class BlockHash: Record {
     }
 
     override open func encode(to container: inout PersistenceContainer) {
-        container[Columns.headerHashReversedHex] = headerHashReversedHex
         container[Columns.headerHash] = headerHash
         container[Columns.height] = height
         container[Columns.sequence] = sequence
@@ -60,7 +54,7 @@ public class BlockHash: Record {
 extension BlockHash: Equatable {
 
     public static func ==(lhs: BlockHash, rhs: BlockHash) -> Bool {
-        return lhs.headerHashReversedHex == rhs.headerHashReversedHex
+        return lhs.headerHash == rhs.headerHash
     }
 
 }

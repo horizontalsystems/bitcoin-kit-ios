@@ -61,10 +61,8 @@ extension BloomFilterManager: IBloomFilterManager {
         }
 
         for outputWithPublicKey in outputs {
-            if let transactionHash = outputWithPublicKey.output.transactionHashReversedHex.reversedData {
-                let outpoint = transactionHash + byteArrayLittleEndian(int: outputWithPublicKey.output.index)
-                elements.append(outpoint)
-            }
+            let outpoint = outputWithPublicKey.output.transactionHash + byteArrayLittleEndian(int: outputWithPublicKey.output.index)
+            elements.append(outpoint)
         }
 
         if !elements.isEmpty {

@@ -46,7 +46,7 @@ public class Output: Record {
     var value: Int
     var lockingScript: Data
     var index: Int
-    var transactionHashReversedHex: String = ""
+    var transactionHash = Data()
     var publicKeyPath: String? = nil
     var scriptType: ScriptType = .unknown
     var keyHash: Data? = nil
@@ -72,7 +72,7 @@ public class Output: Record {
         case value
         case lockingScript
         case index
-        case transactionHashReversedHex
+        case transactionHash
         case publicKeyPath
         case scriptType
         case keyHash
@@ -83,7 +83,7 @@ public class Output: Record {
         value = row[Columns.value]
         lockingScript = row[Columns.lockingScript]
         index = row[Columns.index]
-        transactionHashReversedHex = row[Columns.transactionHashReversedHex]
+        transactionHash = row[Columns.transactionHash]
         publicKeyPath = row[Columns.publicKeyPath]
         scriptType = row[Columns.scriptType]
         keyHash = row[Columns.keyHash]
@@ -96,7 +96,7 @@ public class Output: Record {
         container[Columns.value] = value
         container[Columns.lockingScript] = lockingScript
         container[Columns.index] = index
-        container[Columns.transactionHashReversedHex] = transactionHashReversedHex
+        container[Columns.transactionHash] = transactionHash
         container[Columns.publicKeyPath] = publicKeyPath
         container[Columns.scriptType] = scriptType
         container[Columns.keyHash] = keyHash
