@@ -10,8 +10,8 @@ class Peer {
     }
 
     private let protocolVersion: Int32
-    private var sentVersion: Bool = false
-    private var sentVerack: Bool = false
+    private var remotePeerValidated: Bool = false
+    private var versionSent: Bool = false
     private var mempoolSent: Bool = false
 
     weak var delegate: PeerDelegate?
@@ -116,6 +116,7 @@ class Peer {
         log("<-- VERSION: \(message.version) --- \(message.userAgent?.value ?? "") --- \(ServiceFlags(rawValue: message.services)) -- \(String(describing: message.startHeight ?? 0))")
         do {
             try validatePeerVersion(message: message)
+            remotePeerValidated = true
         } catch {
             disconnect(error: error)
             return
@@ -123,10 +124,9 @@ class Peer {
 
         self.announcedLastBlockHeight = message.startHeight ?? 0
 
-        if !sentVerack {
-            sendVerack()
-            sentVerack = true
-        }
+        sendVerack()
+        connected = true
+        delegate?.peerDidConnect(self)
     }
 
     private func validatePeerVersion(message: VersionMessage) throws {
@@ -149,8 +149,12 @@ class Peer {
 
     private func handleVerackMessage() {
         log("<-- VERACK")
-        connected = true
 
+        guard remotePeerValidated else {
+            return
+        }
+
+        connected = true
         delegate?.peerDidConnect(self)
     }
 
@@ -311,9 +315,9 @@ extension Peer: PeerConnectionDelegate {
     }
 
     func connectionReadyForWrite() {
-        if !sentVersion {
+        if !versionSent {
             sendVersion()
-            sentVersion = true
+            versionSent = true
         }
     }
 
