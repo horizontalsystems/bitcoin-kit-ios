@@ -152,7 +152,7 @@ extension DataProvider: IDataProvider {
         var lines = [String]()
 
 //        let transactions = storage.transactions(sortedBy: Transaction.Columns.timestamp, secondSortedBy: Transaction.Columns.order, ascending: false)
-        let pubKeys = storage.publicKeys()
+        let pubKeys = storage.publicKeys().sorted(by: { $0.index < $1.index })
 
         for pubKey in pubKeys {
 

@@ -26,6 +26,13 @@ class TransactionBuilder {
     }
 
     private func input(fromUnspentOutput unspentOutput: UnspentOutput) throws -> InputToSign {
+        if unspentOutput.output.scriptType == .p2wpkh {
+            // todo: refactoring version byte!
+            // witness key hashes stored with program byte and push code to determine
+            // version (current only 0), but for sign we need only public kee hash
+            unspentOutput.output.keyHash?.removeFirst(2)
+        }
+
         return factory.inputToSign(withPreviousOutput: unspentOutput, script: Data(), sequence: 0xFFFFFFFF)
     }
 
