@@ -10,13 +10,13 @@ public class PublicKey: Record {
     }
 
     let path: String
-    let account: Int
-    let index: Int
-    let external: Bool
-    let raw: Data
+    public let account: Int
+    public let index: Int
+    public let external: Bool
+    public let raw: Data
     public let keyHash: Data
-    let scriptHashForP2WPKH: Data
-    let keyHashHex: String
+    public let scriptHashForP2WPKH: Data
+    public let keyHashHex: String
 
     init(withAccount account: Int, index: Int, external: Bool, hdPublicKeyData data: Data) {
         self.account = account

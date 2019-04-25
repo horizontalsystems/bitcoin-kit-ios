@@ -17,6 +17,7 @@ public class BitcoinKit: AbstractKit {
     }
 
     private let storage: IStorage
+    private let bech32AddressConverter: IAddressConverter
 
     public init(withWords words: [String], walletId: String, networkType: NetworkType = .mainNet, minLogLevel: Logger.Level = .verbose) throws {
         let network: INetwork
@@ -54,14 +55,15 @@ public class BitcoinKit: AbstractKit {
                 .set(storage: storage)
                 .build()
 
+        let scriptConverter = ScriptConverter()
+        bech32AddressConverter = SegWitBech32AddressConverter(prefix: network.bech32PrefixPattern, scriptConverter: scriptConverter)
+
         super.init(bitcoinCore: bitcoinCore, network: network)
 
         // extending BitcoinCore
-        let scriptConverter = ScriptConverter()
-        let bech32 = SegWitBech32AddressConverter(prefix: network.bech32PrefixPattern, scriptConverter: scriptConverter)
 
         bitcoinCore.prepend(scriptBuilder: SegWitScriptBuilder())
-        bitcoinCore.prepend(addressConverter: bech32)
+        bitcoinCore.prepend(addressConverter: bech32AddressConverter)
 
         let blockHelper = BlockValidatorHelper(storage: storage)
         let difficultyEncoder = DifficultyEncoder()
@@ -74,6 +76,18 @@ public class BitcoinKit: AbstractKit {
             bitcoinCore.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: blockHelper, heightInterval: BitcoinCore.heightInterval, targetTimespan: BitcoinCore.heightInterval * BitcoinCore.targetSpacing, maxTargetBits: BitcoinCore.maxTargetBits))
             bitcoinCore.add(blockValidator: LegacyTestNetDifficultyValidator(blockHelper: blockHelper, heightInterval: BitcoinCore.heightInterval, targetSpacing: BitcoinCore.targetSpacing, maxTargetBits: BitcoinCore.maxTargetBits))
         }
+    }
+
+    override open var debugInfo: String {
+        var lines = [String](arrayLiteral: bitcoinCore.debugInfo)
+        let pubKeys = storage.publicKeys().sorted(by: { $0.index < $1.index })
+
+        lines.append("--------------- Bitcoin Segwit (zero program) addresses --------------------")
+        for pubKey in pubKeys {
+            lines.append("acc: \(pubKey.account) - inx: \(pubKey.index) - ext: \(pubKey.external) : \(try! bech32AddressConverter.convert(keyHash: Data(bytes: [0x00, 0x14]) + pubKey.keyHash, type: .p2wpkh).stringValue)") 
+        }
+
+        return lines.joined(separator: "\n")
     }
 
 }

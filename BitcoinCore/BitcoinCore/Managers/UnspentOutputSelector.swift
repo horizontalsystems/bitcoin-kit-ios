@@ -81,7 +81,6 @@ extension UnspentOutputSelector: IUnspentOutputSelector {
         } else if senderPay {
             lastCalculatedFee = totalValue - value
         }
-        print("Unspent selected outputs: \(selectedOutputs.count)")
         return SelectedUnspentOutputInfo(unspentOutputs: selectedOutputs, totalValue: totalValue, fee: lastCalculatedFee, addChangeOutput: addChangeOutput)
     }
 

@@ -394,6 +394,8 @@ extension Peer: IPeerTaskRequester {
     }
 
     func send(message: IMessage) {
+
+        log("--> message: \(message.command)")
         connection.send(message: message)
     }
 

@@ -9,55 +9,52 @@ open class AbstractKit {
         self.bitcoinCore = bitcoinCore
         self.network = network
     }
-}
 
-extension AbstractKit {
-
-    public func start() throws {
+    open func start() throws {
         try bitcoinCore.start()
     }
 
-    public func clear() throws {
+    open func clear() throws {
         try bitcoinCore.clear()
     }
 
-    public var lastBlockInfo: BlockInfo? {
+    open var lastBlockInfo: BlockInfo? {
         return bitcoinCore.lastBlockInfo
     }
 
-    public var balance: Int {
+    open var balance: Int {
         return bitcoinCore.balance
     }
 
-    public var syncState: BitcoinCore.KitState {
+    open var syncState: BitcoinCore.KitState {
         return bitcoinCore.syncState
     }
 
-    public func transactions(fromHash: String? = nil, limit: Int? = nil) -> Single<[TransactionInfo]> {
+    open func transactions(fromHash: String? = nil, limit: Int? = nil) -> Single<[TransactionInfo]> {
         return bitcoinCore.transactions(fromHash: fromHash, limit: limit)
     }
 
-    public func send(to address: String, value: Int, feePriority: FeePriority = .medium) throws {
+    open func send(to address: String, value: Int, feePriority: FeePriority = .medium) throws {
         try bitcoinCore.send(to: address, value: value, feePriority: feePriority)
     }
 
-    func validate(address: String) throws {
+    open func validate(address: String) throws {
         try bitcoinCore.validate(address: address)
     }
 
-    func parse(paymentAddress: String) -> BitcoinPaymentData {
+    open func parse(paymentAddress: String) -> BitcoinPaymentData {
         return bitcoinCore.parse(paymentAddress: paymentAddress)
     }
 
-    public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feePriority: FeePriority = .medium) throws -> Int {
+    open func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feePriority: FeePriority = .medium) throws -> Int {
         return try bitcoinCore.fee(for: value, toAddress: toAddress, senderPay: senderPay, feePriority: feePriority)
     }
 
-    public var receiveAddress: String {
+    open var receiveAddress: String {
         return bitcoinCore.receiveAddress
     }
 
-    public var debugInfo: String {
+    open var debugInfo: String {
         return bitcoinCore.debugInfo
     }
 
