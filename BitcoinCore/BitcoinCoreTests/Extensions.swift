@@ -120,6 +120,14 @@ extension Transaction: Equatable {
 
 }
 
+extension Input: Equatable {
+
+    public static func ==(lhs: Input, rhs: Input) -> Bool {
+        return lhs.previousOutputIndex == rhs.previousOutputIndex && lhs.previousOutputTxHash == rhs.previousOutputTxHash
+    }
+
+}
+
 extension BlockHeader: Equatable {
 
     public static func ==(lhs: BlockHeader, rhs: BlockHeader) -> Bool {

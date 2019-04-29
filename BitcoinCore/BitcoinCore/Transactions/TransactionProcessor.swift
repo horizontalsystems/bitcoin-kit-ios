@@ -5,7 +5,7 @@ class TransactionProcessor {
     private let outputExtractor: ITransactionExtractor
     private let inputExtractor: ITransactionExtractor
     private let outputAddressExtractor: ITransactionOutputAddressExtractor
-    private let linker: ITransactionLinker
+    private let outputsCache: IOutputsCache
     private let addressManager: IAddressManager
 
     weak var listener: IBlockchainDataListener?
@@ -13,14 +13,14 @@ class TransactionProcessor {
     private let dateGenerator: () -> Date
     private let queue: DispatchQueue
 
-    init(storage: IStorage, outputExtractor: ITransactionExtractor, inputExtractor: ITransactionExtractor, linker: ITransactionLinker, outputAddressExtractor: ITransactionOutputAddressExtractor, addressManager: IAddressManager, listener: IBlockchainDataListener? = nil,
+    init(storage: IStorage, outputExtractor: ITransactionExtractor, inputExtractor: ITransactionExtractor, outputsCache: IOutputsCache, outputAddressExtractor: ITransactionOutputAddressExtractor, addressManager: IAddressManager, listener: IBlockchainDataListener? = nil,
          dateGenerator: @escaping () -> Date = Date.init, queue: DispatchQueue = DispatchQueue(label: "Transactions", qos: .background
     )) {
         self.storage = storage
         self.outputExtractor = outputExtractor
         self.inputExtractor = inputExtractor
         self.outputAddressExtractor = outputAddressExtractor
-        self.linker = linker
+        self.outputsCache = outputsCache
         self.addressManager = addressManager
         self.listener = listener
         self.dateGenerator = dateGenerator
@@ -39,11 +39,15 @@ class TransactionProcessor {
 
     private func process(transaction: FullTransaction) {
         outputExtractor.extract(transaction: transaction)
-        linker.handle(transaction: transaction)
+        if outputsCache.hasOutputs(forInputs: transaction.inputs) {
+            transaction.header.isMine = true
+            transaction.header.isOutgoing = true
+        }
 
         guard transaction.header.isMine else {
             return
         }
+        outputsCache.add(fromOutputs: transaction.outputs)
         outputAddressExtractor.extractOutputAddresses(transaction: transaction)
         inputExtractor.extract(transaction: transaction)
     }

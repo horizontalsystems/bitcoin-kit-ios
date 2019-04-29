@@ -148,7 +148,7 @@ public class BitcoinCoreBuilder {
 
         let addressManager = AddressManager.instance(storage: storage, hdWallet: hdWallet, addressConverter: addressConverter)
 
-        let transactionLinker = TransactionLinker(storage: storage)
+        let myOutputsCache = OutputsCache.instance(storage: storage)
         let scriptConverter = ScriptConverter()
         let transactionInputExtractor = TransactionInputExtractor(storage: storage, scriptConverter: scriptConverter, addressConverter: addressConverter, logger: logger)
         let transactionKeySetter = TransactionPublicKeySetter(storage: storage)
@@ -156,7 +156,7 @@ public class BitcoinCoreBuilder {
         let transactionAddressExtractor = TransactionOutputAddressExtractor(storage: storage, addressConverter: addressConverter)
         let transactionProcessor = TransactionProcessor(storage: storage,
                 outputExtractor: transactionOutputExtractor, inputExtractor: transactionInputExtractor,
-                linker: transactionLinker, outputAddressExtractor: transactionAddressExtractor,
+                outputsCache: myOutputsCache, outputAddressExtractor: transactionAddressExtractor,
                 addressManager: addressManager, listener: dataProvider)
 
         let kitStateProvider = KitStateProvider()
@@ -198,6 +198,7 @@ public class BitcoinCoreBuilder {
         initialSyncer.delegate = syncManager
 
         let bitcoinCore = BitcoinCore(storage: storage,
+                cache: myOutputsCache,
                 dataProvider: dataProvider,
                 peerGroup: peerGroup,
                 transactionSyncer: transactionSyncer,

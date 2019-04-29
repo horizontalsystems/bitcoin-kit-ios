@@ -83,10 +83,13 @@ open class GrdbStorage {
                 t.column(PublicKey.Columns.raw.name, .blob).notNull()
                 t.column(PublicKey.Columns.keyHash.name, .blob).notNull()
                 t.column(PublicKey.Columns.scriptHashForP2WPKH.name, .blob).notNull()
-                t.column(PublicKey.Columns.keyHashHex.name, .text).notNull()
 
                 t.primaryKey([PublicKey.Columns.path.name], onConflict: .replace)
             }
+
+            try db.create(index: "by\(PublicKey.Columns.raw.name)", on: PublicKey.databaseTableName, columns: [PublicKey.Columns.raw.name])
+            try db.create(index: "by\(PublicKey.Columns.keyHash.name)", on: PublicKey.databaseTableName, columns: [PublicKey.Columns.keyHash.name])
+            try db.create(index: "by\(PublicKey.Columns.scriptHashForP2WPKH.name)", on: PublicKey.databaseTableName, columns: [PublicKey.Columns.scriptHashForP2WPKH.name])
         }
 
         migrator.registerMigration("createBlocks") { db in
@@ -103,6 +106,7 @@ open class GrdbStorage {
 
                 t.primaryKey([Block.Columns.headerHash.name], onConflict: .abort)
             }
+
             try db.create(index: "by\(Block.Columns.height.name)", on: Block.databaseTableName, columns: [Block.Columns.height.name])
         }
 
@@ -135,7 +139,7 @@ open class GrdbStorage {
                 t.column(Input.Columns.address.name, .text)
                 t.column(Input.Columns.witnessData.name, .blob)
 
-                t.primaryKey([Input.Columns.previousOutputTxHash.name, Input.Columns.previousOutputIndex.name], onConflict: .replace)
+                t.primaryKey([Input.Columns.previousOutputTxHash.name, Input.Columns.previousOutputIndex.name], onConflict: .abort)
                 t.foreignKey([Input.Columns.transactionHash.name], references: Transaction.databaseTableName, columns: [Transaction.Columns.dataHash.name], onDelete: .cascade, onUpdate: .cascade, deferred: true)
             }
         }
@@ -151,7 +155,7 @@ open class GrdbStorage {
                 t.column(Output.Columns.keyHash.name, .blob)
                 t.column(Output.Columns.address.name, .text)
 
-                t.primaryKey([Output.Columns.transactionHash.name, Output.Columns.index.name], onConflict: .replace)
+                t.primaryKey([Output.Columns.transactionHash.name, Output.Columns.index.name], onConflict: .abort)
                 t.foreignKey([Output.Columns.transactionHash.name], references: Transaction.databaseTableName, columns: [Transaction.Columns.dataHash.name], onDelete: .cascade, onUpdate: .cascade, deferred: true)
                 t.foreignKey([Output.Columns.publicKeyPath.name], references: PublicKey.databaseTableName, columns: [PublicKey.Columns.path.name], onDelete: .setNull, onUpdate: .setNull)
             }
@@ -433,7 +437,7 @@ extension GrdbStorage: IStorage {
 
     public func unstaleAllBlocks() throws {
         _ = try! dbPool.write { db in
-            try db.execute("UPDATE \(Block.databaseTableName) SET stale = true WHERE stale = false")
+            try db.execute("UPDATE \(Block.databaseTableName) SET stale = ? WHERE stale = ?", arguments: [true, false])
         }
     }
 
@@ -690,12 +694,6 @@ extension GrdbStorage: IStorage {
     public func publicKeys() -> [PublicKey] {
         return try! dbPool.read { db in
             try PublicKey.fetchAll(db)
-        }
-    }
-
-    public func publicKey(byPath path: String) -> PublicKey? {
-        return try! dbPool.read { db in
-            try PublicKey.filter(PublicKey.Columns.path == path).fetchOne(db)
         }
     }
 

@@ -16,18 +16,15 @@ public class PublicKey: Record {
     public let raw: Data
     public let keyHash: Data
     public let scriptHashForP2WPKH: Data
-    public let keyHashHex: String
 
     init(withAccount account: Int, index: Int, external: Bool, hdPublicKeyData data: Data) {
         self.account = account
         self.index = index
         self.external = external
-        path = "\(account)/\(index)/\(external ? 1 : 0)"
+        path = "\(account)/\(external ? 1 : 0)/\(index)"
         raw = data
         keyHash = CryptoKit.sha256ripemd160(data)
-
         scriptHashForP2WPKH = CryptoKit.sha256ripemd160(OpCode.scriptWPKH(keyHash))
-        keyHashHex = keyHash.hex
 
         super.init()
     }
@@ -44,7 +41,6 @@ public class PublicKey: Record {
         case raw
         case keyHash
         case scriptHashForP2WPKH
-        case keyHashHex
     }
 
     required init(row: Row) {
@@ -55,7 +51,6 @@ public class PublicKey: Record {
         raw = row[Columns.raw]
         keyHash = row[Columns.keyHash]
         scriptHashForP2WPKH = row[Columns.scriptHashForP2WPKH]
-        keyHashHex = row[Columns.keyHashHex]
 
         super.init(row: row)
     }
@@ -68,7 +63,6 @@ public class PublicKey: Record {
         container[Columns.raw] = raw
         container[Columns.keyHash] = keyHash
         container[Columns.scriptHashForP2WPKH] = scriptHashForP2WPKH
-        container[Columns.keyHashHex] = keyHashHex
     }
 
 }

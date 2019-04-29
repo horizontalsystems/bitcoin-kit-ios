@@ -3,6 +3,7 @@ class Blockchain {
     private let blockValidator: IBlockValidator
     private let factory: IFactory
     weak var listener: IBlockchainDataListener?
+    private var previousBlock: Block?
 
     init(storage: IStorage, blockValidator: IBlockValidator, factory: IFactory, listener: IBlockchainDataListener? = nil) {
         self.storage = storage
@@ -20,7 +21,8 @@ extension Blockchain: IBlockchain {
             return existingBlock
         }
 
-        guard let previousBlock = storage.block(byHash: merkleBlock.header.previousBlockHeaderHash) else {
+        guard let previousBlock = self.previousBlock ?? storage.block(byHash: merkleBlock.header.previousBlockHeaderHash),
+              previousBlock.headerHash == merkleBlock.header.previousBlockHeaderHash else {
             throw BitcoinCoreErrors.BlockValidation.noPreviousBlock
         }
 

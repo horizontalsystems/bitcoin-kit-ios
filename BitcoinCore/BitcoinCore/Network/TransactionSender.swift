@@ -11,7 +11,7 @@ class TransactionSender: ITransactionSender {
 
     func sendPendingTransactions() {
         do {
-            try peerGroup?.checkPeersSynced()
+            try canSendTransaction()
 
             peerGroup?.someReadyPeers.forEach { peer in
                 transactionSyncer?.pendingTransactions().forEach { transaction in

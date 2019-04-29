@@ -11,6 +11,7 @@ public class BitcoinCore {
 
 
     private let storage: IStorage
+    private let cache: OutputsCache
     private var dataProvider: IDataProvider & IBlockchainDataListener
     private let addressManager: IAddressManager
     private let addressConverter: AddressConverterChain
@@ -80,13 +81,14 @@ public class BitcoinCore {
     }
 
 
-    init(storage: IStorage, dataProvider: IDataProvider & IBlockchainDataListener,
+    init(storage: IStorage, cache: OutputsCache, dataProvider: IDataProvider & IBlockchainDataListener,
                 peerGroup: IPeerGroup, transactionSyncer: ITransactionSyncer,
                 addressManager: IAddressManager, addressConverter: AddressConverterChain, kitStateProvider: IKitStateProvider & ISyncStateListener,
                 scriptBuilder: ScriptBuilderChain, transactionBuilder: ITransactionBuilder, transactionCreator: ITransactionCreator,
                 paymentAddressParser: IPaymentAddressParser, networkMessageParser: NetworkMessageParser, networkMessageSerializer: NetworkMessageSerializer,
                 syncManager: SyncManager) {
         self.storage = storage
+        self.cache = cache
         self.dataProvider = dataProvider
         self.peerGroup = peerGroup
         self.transactionSyncer = transactionSyncer
@@ -115,6 +117,7 @@ extension BitcoinCore {
     public func clear() throws {
         syncManager.stop()
         try storage.clear()
+        cache.clear()
     }
 
 }

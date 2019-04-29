@@ -123,7 +123,6 @@ public protocol IStorage {
     func add(sentTransaction: SentTransaction)
 
     func publicKeys() -> [PublicKey]
-    func publicKey(byPath: String) -> PublicKey?
     func publicKey(byScriptHashForP2WPKH: Data) -> PublicKey?
     func publicKey(byRawOrKeyHash: Data) -> PublicKey?
     func add(publicKeys: [PublicKey])
@@ -316,6 +315,12 @@ public protocol IScriptConverter {
 protocol IScriptExtractor: class {
     var type: ScriptType { get }
     func extract(from data: Data, converter: IScriptConverter) throws -> Data?
+}
+
+protocol IOutputsCache: class {
+    func add(fromOutputs outputs: [Output])
+    func hasOutputs(forInputs inputs: [Input]) -> Bool
+    func clear()
 }
 
 protocol ITransactionProcessor: class {
