@@ -24,7 +24,6 @@ class TransactionsController: UITableViewController {
 
         Manager.shared.lastBlockInfoSubject.observeOn(MainScheduler.instance).subscribe(onNext: { [weak self] info in
             self?.lastBlockInfo = info
-            self?.update()
         }).disposed(by: disposeBag)
     }
 
