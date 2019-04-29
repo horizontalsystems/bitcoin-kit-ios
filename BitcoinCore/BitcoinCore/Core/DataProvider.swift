@@ -72,6 +72,7 @@ class DataProvider {
 
         return TransactionInfo(
                 transactionHash: transactionForInfo.transactionWithBlock.transaction.dataHash.reversedHex,
+                transactionIndex: transactionForInfo.transactionWithBlock.transaction.order,
                 from: fromAddresses,
                 to: toAddresses,
                 amount: amount,
