@@ -23,18 +23,6 @@ open class GrdbStorage {
     open var migrator: DatabaseMigrator {
         var migrator = DatabaseMigrator()
 
-        migrator.registerMigration("createFeeRates") { db in
-            try db.create(table: FeeRate.databaseTableName) { t in
-                t.column(FeeRate.Columns.primaryKey.name, .text).notNull()
-                t.column(FeeRate.Columns.lowPriority.name, .text).notNull()
-                t.column(FeeRate.Columns.mediumPriority.name, .text).notNull()
-                t.column(FeeRate.Columns.highPriority.name, .text).notNull()
-                t.column(FeeRate.Columns.date.name, .date).notNull()
-
-                t.primaryKey([FeeRate.Columns.primaryKey.name], onConflict: .replace)
-            }
-        }
-
         migrator.registerMigration("createBlockchainStates") { db in
             try db.create(table: BlockchainState.databaseTableName) { t in
                 t.column(BlockchainState.Columns.primaryKey.name, .text).notNull()
@@ -161,25 +149,11 @@ open class GrdbStorage {
             }
         }
 
-        migrator.registerMigration("changeTypesFeeRates") { db in
-            try db.drop(table: FeeRate.databaseTableName)
-            try db.create(table: FeeRate.databaseTableName) { t in
-                t.column(FeeRate.Columns.primaryKey.name, .text).notNull()
-                t.column(FeeRate.Columns.lowPriority.name, .integer).notNull()
-                t.column(FeeRate.Columns.mediumPriority.name, .integer).notNull()
-                t.column(FeeRate.Columns.highPriority.name, .integer).notNull()
-                t.column(FeeRate.Columns.date.name, .date).notNull()
-
-                t.primaryKey([FeeRate.Columns.primaryKey.name], onConflict: .replace)
-            }
-        }
-
         return migrator
     }
 
     open func clearGrdb() throws {
         _ = try! dbPool.write { db in
-            try FeeRate.deleteAll(db)
             try BlockchainState.deleteAll(db)
             try PeerAddress.deleteAll(db)
             try BlockHash.deleteAll(db)
@@ -195,20 +169,6 @@ open class GrdbStorage {
 }
 
 extension GrdbStorage: IStorage {
-    // FeeRate
-
-    public var feeRate: FeeRate? {
-        return try! dbPool.read { db in
-            try FeeRate.fetchOne(db)
-        }
-    }
-
-    public func set(feeRate: FeeRate) {
-        _ = try! dbPool.write { db in
-            try feeRate.insert(db)
-        }
-    }
-
     // BlockchainState
 
     public var initialRestored: Bool? {

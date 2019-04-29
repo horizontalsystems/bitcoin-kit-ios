@@ -89,10 +89,6 @@ class DataProvider {
         )
     }
 
-    var feeRate: FeeRate {
-        return storage.feeRate ?? FeeRate.defaultFeeRate
-    }
-
 }
 
 extension DataProvider: IBlockchainDataListener {

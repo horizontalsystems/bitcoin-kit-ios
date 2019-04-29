@@ -1,9 +1,9 @@
 import Foundation
+
+import BitcoinCore
 import BitcoinKit
 import BitcoinCashKit
 import DashKit
-
-import BitcoinCore
 
 import RxSwift
 
@@ -53,15 +53,15 @@ class Manager {
     private func initWalletKit(words: [String], kitType: KitType) {
         switch kitType {
         case .bitcoin:
-            let kit = try! BitcoinKit(withWords: words, walletId: "SomeId", networkType: BitcoinKit.NetworkType.testNet, minLogLevel: .verbose)
+            let kit = try! BitcoinKit(withWords: words, walletId: "SomeId", newWallet: false, networkType: BitcoinKit.NetworkType.testNet, minLogLevel: .verbose)
             self.kit = kit
             kit.delegate = self
         case .bitcoinCash:
-            let kit = try! BitcoinCashKit(withWords: words, walletId: "SomeId", networkType: BitcoinCashKit.NetworkType.mainNet, minLogLevel: .verbose)
+            let kit = try! BitcoinCashKit(withWords: words, walletId: "SomeId", newWallet: false, networkType: BitcoinCashKit.NetworkType.mainNet, minLogLevel: .verbose)
             self.kit = kit
             kit.delegate = self
         case .dash:
-            let kit = try! DashKit(withWords: words, walletId: "SomeId", networkType: DashKit.NetworkType.testNet, minLogLevel: .verbose)
+            let kit = try! DashKit(withWords: words, walletId: "SomeId", newWallet: true, networkType: DashKit.NetworkType.testNet, minLogLevel: .verbose)
             self.kit = kit
             kit.delegate = self
         }

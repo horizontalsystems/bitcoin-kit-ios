@@ -22,7 +22,7 @@ public class BitcoinCashKit: AbstractKit {
 
     private let storage: IBitcoinCashStorage
 
-    public init(withWords words: [String], walletId: String, networkType: NetworkType = .mainNet, minLogLevel: Logger.Level = .verbose) throws {
+    public init(withWords words: [String], walletId: String, newWallet: Bool = false, networkType: NetworkType = .mainNet, minLogLevel: Logger.Level = .verbose) throws {
         let network: INetwork
         let initialSyncApiUrl: String
 
@@ -45,18 +45,16 @@ public class BitcoinCashKit: AbstractKit {
 
         let paymentAddressParser = PaymentAddressParser(validScheme: validScheme, removeScheme: false)
         let addressSelector = BitcoinCashAddressSelector()
-        let apiFeeRateResource = "BCH"
 
-        let bitcoinCore = try BitcoinCoreBuilder()
+        let bitcoinCore = try BitcoinCoreBuilder(minLogLevel: minLogLevel)
                 .set(network: network)
                 .set(initialSyncApiUrl: initialSyncApiUrl)
                 .set(words: words)
                 .set(paymentAddressParser: paymentAddressParser)
                 .set(addressSelector: addressSelector)
-                .set(feeRateApiResource: apiFeeRateResource)
                 .set(walletId: walletId)
                 .set(peerSize: 4)
-                .set(newWallet: false)
+                .set(newWallet: newWallet)
                 .set(storage: storage)
                 .build()
 

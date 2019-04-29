@@ -24,7 +24,7 @@ public class DashKit: AbstractKit {
 
     private var masternodeSyncer: MasternodeListSyncer?
 
-    public init(withWords words: [String], walletId: String, networkType: NetworkType = .mainNet, minLogLevel: Logger.Level = .verbose) throws {
+    public init(withWords words: [String], walletId: String, newWallet: Bool = false, networkType: NetworkType = .mainNet, minLogLevel: Logger.Level = .verbose) throws {
         let network: INetwork
         switch networkType {
             case .mainNet: network = MainNet()
@@ -38,22 +38,20 @@ public class DashKit: AbstractKit {
 
         let paymentAddressParser = PaymentAddressParser(validScheme: "dash", removeScheme: true)
         let addressSelector = BitcoinAddressSelector()
-        let apiFeeRateResource = "DASH"
 
         let singleHasher = SingleHasher()   // Use single sha256 for hash
         let doubleShaHasher = DoubleShaHasher()     // Use doubleSha256 for hash
         let x11Hasher = X11Hasher()         // Use for block header hash
 
-        let bitcoinCore = try BitcoinCoreBuilder()
+        let bitcoinCore = try BitcoinCoreBuilder(minLogLevel: minLogLevel)
                 .set(network: network)
                 .set(words: words)
                 .set(paymentAddressParser: paymentAddressParser)
                 .set(addressSelector: addressSelector)
-                .set(feeRateApiResource: apiFeeRateResource)
                 .set(walletId: walletId)
                 .set(peerSize: 4)
                 .set(storage: storage)
-                .set(newWallet: true)
+                .set(newWallet: newWallet)
                 .set(blockHeaderHasher: x11Hasher)
                 .build()
 
