@@ -7,7 +7,7 @@ class TransactionProcessorTests: XCTestCase {
     private var mockOutputExtractor: MockITransactionExtractor!
     private var mockOutputAddressExtractor: MockITransactionOutputAddressExtractor!
     private var mockInputExtractor: MockITransactionExtractor!
-    private var mockLinker: MockITransactionLinker!
+    private var mockOutputsCache: MockIOutputsCache!
     private var mockAddressManager: MockIAddressManager!
     private var mockBlockchainDataListener: MockIBlockchainDataListener!
 
@@ -28,7 +28,7 @@ class TransactionProcessorTests: XCTestCase {
         mockOutputExtractor = MockITransactionExtractor()
         mockOutputAddressExtractor = MockITransactionOutputAddressExtractor()
         mockInputExtractor = MockITransactionExtractor()
-        mockLinker = MockITransactionLinker()
+        mockOutputsCache = MockIOutputsCache()
         mockAddressManager = MockIAddressManager()
         mockBlockchainDataListener = MockIBlockchainDataListener()
 
@@ -37,8 +37,9 @@ class TransactionProcessorTests: XCTestCase {
             when(mock.add(transaction: any())).thenDoNothing()
             when(mock.update(transaction: any())).thenDoNothing()
         }
-        stub(mockLinker) { mock in
-            when(mock.handle(transaction: any())).thenDoNothing()
+        stub(mockOutputsCache) { mock in
+            when(mock.add(fromOutputs: any())).thenDoNothing()
+            when(mock.hasOutputs(forInputs: any())).thenReturn(false)
         }
         stub(mockOutputExtractor) { mock in
             when(mock.extract(transaction: any())).thenDoNothing()
@@ -58,14 +59,14 @@ class TransactionProcessorTests: XCTestCase {
             when(mock.onInsert(block: any())).thenDoNothing()
         }
 
-        transactionProcessor = TransactionProcessor(storage: mockStorage, outputExtractor: mockOutputExtractor, inputExtractor: mockInputExtractor, linker: mockLinker, outputAddressExtractor: mockOutputAddressExtractor, addressManager: mockAddressManager, listener: mockBlockchainDataListener, dateGenerator: dateGenerator)
+        transactionProcessor = TransactionProcessor(storage: mockStorage, outputExtractor: mockOutputExtractor, inputExtractor: mockInputExtractor, outputsCache: mockOutputsCache, outputAddressExtractor: mockOutputAddressExtractor, addressManager: mockAddressManager, listener: mockBlockchainDataListener, dateGenerator: dateGenerator)
     }
 
     override func tearDown() {
         mockStorage = nil
         mockOutputExtractor = nil
         mockInputExtractor = nil
-        mockLinker = nil
+        mockOutputsCache = nil
         transactionProcessor = nil
         mockBlockchainDataListener = nil
 
@@ -81,7 +82,7 @@ class TransactionProcessorTests: XCTestCase {
         try! transactionProcessor.processCreated(transaction: transaction)
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
-        verify(mockLinker).handle(transaction: equal(to: transaction))
+        verify(mockOutputsCache).hasOutputs(forInputs: equal(to: transaction.inputs))
         verify(mockBlockchainDataListener).onUpdate(updated: equal(to: [Transaction]()), inserted: equal(to: [transaction.header]), inBlock: equal(to: nil))
         verify(mockStorage).add(transaction: equal(to: transaction))
         verifyNoMoreInteractions(mockOutputAddressExtractor)
@@ -95,7 +96,7 @@ class TransactionProcessorTests: XCTestCase {
         try! transactionProcessor.processCreated(transaction: transaction)
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
-        verify(mockLinker).handle(transaction: equal(to: transaction))
+        verify(mockOutputsCache).hasOutputs(forInputs: equal(to: transaction.inputs))
         verify(mockBlockchainDataListener).onUpdate(updated: equal(to: []), inserted: equal(to: [transaction.header]), inBlock: equal(to: nil))
         verify(mockStorage).add(transaction: equal(to: transaction))
         verify(mockOutputAddressExtractor).extractOutputAddresses(transaction: equal(to: transaction))
@@ -120,7 +121,7 @@ class TransactionProcessorTests: XCTestCase {
         }
 
         verify(mockOutputExtractor, never()).extract(transaction: any())
-        verify(mockLinker, never()).handle(transaction: any())
+        verify(mockOutputsCache, never()).hasOutputs(forInputs: any())
         verify(mockBlockchainDataListener, never()).onUpdate(updated: any(), inserted: any(), inBlock: any())
         verify(mockStorage, never()).add(transaction: any())
         verify(mockOutputAddressExtractor, never()).extractOutputAddresses(transaction: any())
@@ -138,7 +139,7 @@ class TransactionProcessorTests: XCTestCase {
         try! transactionProcessor.processReceived(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false)
 
         verify(mockOutputExtractor, never()).extract(transaction: equal(to: transaction))
-        verify(mockLinker, never()).handle(transaction: equal(to: transaction))
+        verify(mockOutputsCache, never()).hasOutputs(forInputs: any())
         verify(mockBlockchainDataListener).onUpdate(updated: equal(to: [transaction.header]), inserted: equal(to: []), inBlock: equal(to: nil))
         verify(mockStorage).update(transaction: equal(to: transaction.header))
 
@@ -216,7 +217,7 @@ class TransactionProcessorTests: XCTestCase {
         try! transactionProcessor.processReceived(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false)
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
-        verify(mockLinker).handle(transaction: equal(to: transaction))
+        verify(mockOutputsCache).hasOutputs(forInputs: equal(to: transaction.inputs))
         verify(mockBlockchainDataListener).onUpdate(updated: equal(to: []), inserted: equal(to: [transaction.header]), inBlock: equal(to: nil))
         verify(mockStorage).add(transaction: equal(to: transaction))
         verify(mockOutputAddressExtractor).extractOutputAddresses(transaction: equal(to: transaction))
@@ -233,7 +234,7 @@ class TransactionProcessorTests: XCTestCase {
         try! transactionProcessor.processReceived(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false)
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
-        verify(mockLinker).handle(transaction: equal(to: transaction))
+        verify(mockOutputsCache).hasOutputs(forInputs: equal(to: transaction.inputs))
         verify(mockStorage, never()).add(transaction: any())
         verifyNoMoreInteractions(mockBlockchainDataListener)
         verifyNoMoreInteractions(mockOutputAddressExtractor)
@@ -257,7 +258,7 @@ class TransactionProcessorTests: XCTestCase {
         }
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
-        verify(mockLinker).handle(transaction: equal(to: transaction))
+        verify(mockOutputsCache).hasOutputs(forInputs: equal(to: transaction.inputs))
         verify(mockBlockchainDataListener).onUpdate(updated: equal(to: []), inserted: equal(to: [transaction.header]), inBlock: equal(to: nil))
         verify(mockStorage).add(transaction: equal(to: transaction))
         verify(mockOutputAddressExtractor).extractOutputAddresses(transaction: equal(to: transaction))
@@ -268,14 +269,9 @@ class TransactionProcessorTests: XCTestCase {
     }
 
     func testProcessReceived_TransactionNotExists_Mine_HasUnspentOutputs() {
-        let publicKey = TestData.pubKey()
         let transaction = TestData.p2wpkhTransaction
         transaction.header.isMine = true
-        transaction.outputs[0].publicKeyPath = publicKey.path
-
-        stub(mockStorage) { mock in
-            when(mock.publicKey(byPath: publicKey.path)).thenReturn(publicKey)
-        }
+        transaction.outputs[0].publicKeyPath = TestData.pubKey().path
 
         do {
             try transactionProcessor.processReceived(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false)
@@ -286,7 +282,7 @@ class TransactionProcessorTests: XCTestCase {
         }
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
-        verify(mockLinker).handle(transaction: equal(to: transaction))
+        verify(mockOutputsCache).hasOutputs(forInputs: equal(to: transaction.inputs))
         verify(mockBlockchainDataListener).onUpdate(updated: equal(to: []), inserted: equal(to: [transaction.header]), inBlock: equal(to: nil))
         verify(mockStorage).add(transaction: equal(to: transaction))
         verify(mockOutputAddressExtractor).extractOutputAddresses(transaction: equal(to: transaction))
@@ -297,14 +293,9 @@ class TransactionProcessorTests: XCTestCase {
     }
 
     func testProcessReceived_TransactionNotExists_Mine_GapShifts_CheckBloomFilterFalse() {
-        let publicKey = TestData.pubKey()
         let transaction = TestData.p2wpkhTransaction
         transaction.header.isMine = true
-        transaction.outputs[0].publicKeyPath = publicKey.path
-
-        stub(mockStorage) { mock in
-            when(mock.publicKey(byPath: publicKey.path)).thenReturn(publicKey)
-        }
+        transaction.outputs[0].publicKeyPath = TestData.pubKey().path
 
         do {
             try transactionProcessor.processReceived(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: true)
@@ -313,7 +304,7 @@ class TransactionProcessorTests: XCTestCase {
         }
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
-        verify(mockLinker).handle(transaction: equal(to: transaction))
+        verify(mockOutputsCache).hasOutputs(forInputs: equal(to: transaction.inputs))
         verify(mockBlockchainDataListener).onUpdate(updated: equal(to: []), inserted: equal(to: [transaction.header]), inBlock: equal(to: nil))
         verify(mockStorage).add(transaction: equal(to: transaction))
         verify(mockOutputAddressExtractor).extractOutputAddresses(transaction: equal(to: transaction))
@@ -338,7 +329,7 @@ class TransactionProcessorTests: XCTestCase {
         }
 
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
-        verify(mockLinker).handle(transaction: equal(to: transaction))
+        verify(mockOutputsCache).hasOutputs(forInputs: equal(to: transaction.inputs))
         verify(mockStorage, never()).add(transaction: any())
         verifyNoMoreInteractions(mockBlockchainDataListener)
         verifyNoMoreInteractions(mockOutputAddressExtractor)
