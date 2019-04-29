@@ -2,6 +2,7 @@ import Foundation
 
 public struct TransactionInfo {
     public let transactionHash: String
+    public let transactionIndex: Int
     public let from: [TransactionAddressInfo]
     public let to: [TransactionAddressInfo]
     public let amount: Int
