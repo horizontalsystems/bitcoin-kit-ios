@@ -524,7 +524,7 @@ extension GrdbStorage: IStorage {
                       """
 
             if let fromTimestamp = fromTimestamp, let fromOrder = fromOrder {
-                sql = sql + "WHERE transactions.timestamp < \(fromTimestamp) OR (transactions.timestamp == \(fromTimestamp) AND transactions.\"order\" < \(fromOrder))"
+                sql = sql + " WHERE transactions.timestamp < \(fromTimestamp) OR (transactions.timestamp == \(fromTimestamp) AND transactions.\"order\" < \(fromOrder))"
             }
 
             let rows = try Row.fetchCursor(db, sql, adapter: adapter)
