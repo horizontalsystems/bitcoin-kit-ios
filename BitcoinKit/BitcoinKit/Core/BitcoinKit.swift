@@ -19,7 +19,7 @@ public class BitcoinKit: AbstractKit {
     private let storage: IStorage
     private let bech32AddressConverter: IAddressConverter
 
-    public init(withWords words: [String], walletId: String, networkType: NetworkType = .mainNet, minLogLevel: Logger.Level = .verbose) throws {
+    public init(withWords words: [String], walletId: String, newWallet: Bool = false, networkType: NetworkType = .mainNet, minLogLevel: Logger.Level = .verbose) throws {
         let network: INetwork
         var initialSyncApiUrl: String? = nil
 
@@ -40,18 +40,16 @@ public class BitcoinKit: AbstractKit {
 
         let paymentAddressParser = PaymentAddressParser(validScheme: "bitcoin", removeScheme: true)
         let addressSelector = BitcoinAddressSelector()
-        let apiFeeRateResource = "BTC"
 
-        let bitcoinCore = try BitcoinCoreBuilder()
+        let bitcoinCore = try BitcoinCoreBuilder(minLogLevel: minLogLevel)
                 .set(network: network)
                 .set(initialSyncApiUrl: initialSyncApiUrl)
                 .set(words: words)
                 .set(paymentAddressParser: paymentAddressParser)
                 .set(addressSelector: addressSelector)
-                .set(feeRateApiResource: apiFeeRateResource)
                 .set(walletId: walletId)
                 .set(peerSize: 10)
-                .set(newWallet: false)
+                .set(newWallet: newWallet)
                 .set(storage: storage)
                 .build()
 

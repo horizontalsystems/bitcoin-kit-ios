@@ -34,8 +34,8 @@ open class AbstractKit {
         return bitcoinCore.transactions(fromHash: fromHash, limit: limit)
     }
 
-    open func send(to address: String, value: Int, feePriority: FeePriority = .medium) throws {
-        try bitcoinCore.send(to: address, value: value, feePriority: feePriority)
+    open func send(to address: String, value: Int, feeRate: Int) throws {
+        try bitcoinCore.send(to: address, value: value, feeRate: feeRate)
     }
 
     open func validate(address: String) throws {
@@ -46,8 +46,8 @@ open class AbstractKit {
         return bitcoinCore.parse(paymentAddress: paymentAddress)
     }
 
-    open func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feePriority: FeePriority = .medium) throws -> Int {
-        return try bitcoinCore.fee(for: value, toAddress: toAddress, senderPay: senderPay, feePriority: feePriority)
+    open func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feeRate: Int) throws -> Int {
+        return try bitcoinCore.fee(for: value, toAddress: toAddress, senderPay: senderPay, feeRate: feeRate)
     }
 
     open var receiveAddress: String {

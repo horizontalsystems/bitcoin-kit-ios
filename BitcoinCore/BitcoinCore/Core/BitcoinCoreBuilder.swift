@@ -2,7 +2,7 @@ import Foundation
 import HSHDWalletKit
 
 public class BitcoinCoreBuilder {
-    public enum BuildError: Error { case noSeedData, noWalletId, noNetwork, noPaymentAddressParser, noAddressSelector, noFeeRateApiResource, noStorage }
+    public enum BuildError: Error { case noSeedData, noWalletId, noNetwork, noPaymentAddressParser, noAddressSelector, noStorage }
 
     // required parameters
     private var seed: Data?
@@ -10,9 +10,9 @@ public class BitcoinCoreBuilder {
     private var network: INetwork?
     private var paymentAddressParser: IPaymentAddressParser?
     private var addressSelector: IAddressSelector?
-    private var feeRateApiResource: String?
     private var walletId: String?
     private var initialSyncApiUrl: String?
+    private var logger: Logger
 
     private var blockHeaderHasher: IHasher?
 
@@ -45,11 +45,6 @@ public class BitcoinCoreBuilder {
 
     public func set(addressSelector: IAddressSelector) -> BitcoinCoreBuilder {
         self.addressSelector = addressSelector
-        return self
-    }
-
-    public func set(feeRateApiResource: String) -> BitcoinCoreBuilder {
-        self.feeRateApiResource = feeRateApiResource
         return self
     }
 
@@ -88,7 +83,9 @@ public class BitcoinCoreBuilder {
         return self
     }
 
-    public init() {}
+    public init(minLogLevel: Logger.Level = .verbose) {
+        self.logger = Logger(network: network, minLogLevel: minLogLevel)
+    }
 
     public func build() throws -> BitcoinCore {
         let seed: Data
@@ -111,17 +108,9 @@ public class BitcoinCoreBuilder {
         guard let addressSelector = self.addressSelector else {
             throw BuildError.noAddressSelector
         }
-        guard let feeRateApiResource = self.feeRateApiResource else {
-            throw BuildError.noFeeRateApiResource
-        }
         guard let storage = self.storage else {
             throw BuildError.noStorage
         }
-
-        let logger = Logger(network: network, minLogLevel: .verbose)
-
-        let apiFeeRate = IpfsApi(resource: feeRateApiResource, apiProvider: FeeRateApiProvider(), logger: logger)
-        let feeRateSyncer = FeeRateSyncer(api: apiFeeRate, storage: storage)
 
         let addressConverter = AddressConverterChain()
 
@@ -194,7 +183,7 @@ public class BitcoinCoreBuilder {
 
         let initialSyncer = InitialSyncer(storage: storage, listener: kitStateProvider, stateManager: stateManager, blockDiscovery: blockDiscovery, addressManager: addressManager, logger: logger)
 
-        let syncManager = SyncManager(reachabilityManager: reachabilityManager, feeRateSyncer: feeRateSyncer, initialSyncer: initialSyncer, peerGroup: peerGroup)
+        let syncManager = SyncManager(reachabilityManager: reachabilityManager, initialSyncer: initialSyncer, peerGroup: peerGroup)
         initialSyncer.delegate = syncManager
 
         let bitcoinCore = BitcoinCore(storage: storage,

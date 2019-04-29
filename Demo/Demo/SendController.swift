@@ -5,14 +5,14 @@ import BitcoinCore
 class SendController: UIViewController {
     let feePrefix = "Fee: "
     let disposeBag = DisposeBag()
-    
+
     @IBOutlet weak var addressTextField: UITextField?
     @IBOutlet weak var amountTextField: UITextField?
     @IBOutlet weak var feeLabel: UILabel!
     @IBOutlet weak var feeRateTextField: UITextField!
-    
+
     var priority = FeePriority.medium
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -34,7 +34,7 @@ class SendController: UIViewController {
         }
         let satoshis = Int(amount * 100_000_000)
 
-        let fee = (try? Manager.shared.kit.fee(for: satoshis, toAddress: address, senderPay: true, feePriority: priority)) ?? 0
+        let fee = (try? Manager.shared.kit.fee(for: satoshis, toAddress: address, senderPay: true, feeRate: priorityToInt(priority))) ?? 0
         feeLabel.text = feePrefix + "\(fee)"
     }
 
@@ -56,7 +56,7 @@ class SendController: UIViewController {
         }
 
         do {
-            try Manager.shared.kit.send(to: address, value: Int(amount * 100000000), feePriority: priority)
+            try Manager.shared.kit.send(to: address, value: Int(amount * 100000000), feeRate: priorityToInt(priority))
 
             addressTextField?.text = ""
             amountTextField?.text = ""
@@ -68,10 +68,10 @@ class SendController: UIViewController {
             show(error: "\(error)")
         }
     }
-    
+
     @IBAction func changePriority(_ sender: UISegmentedControl) {
         feeRateTextField.isHidden = true
-        
+
         switch sender.selectedSegmentIndex {
         case 0: priority = .lowest
         case 1: priority = .low
@@ -85,7 +85,7 @@ class SendController: UIViewController {
         }
         changeFee()
     }
-    
+
     @IBAction func changeFeeRate(_ sender: UITextField) {
         fillPriority(with: sender.text)
         changeFee()
@@ -94,7 +94,7 @@ class SendController: UIViewController {
     func fillPriority(with text: String?) {
         if let feeRate = Int(text ?? "") {
             priority = .custom(feeRate: feeRate)
-        } else  {
+        } else {
             priority = .medium
         }
     }
@@ -105,4 +105,24 @@ class SendController: UIViewController {
         present(alert, animated: true)
     }
 
+}
+
+public enum FeePriority {
+    case lowest
+    case low
+    case medium
+    case high
+    case highest
+    case custom(feeRate: Int)
+}
+
+func priorityToInt(_ priority: FeePriority) -> Int {
+    switch priority {
+    case .lowest: return 1
+    case .low: return 5
+    case .medium: return 10
+    case .high: return 20
+    case .highest: return 30
+    case .custom(let feeRate): return feeRate
+    }
 }

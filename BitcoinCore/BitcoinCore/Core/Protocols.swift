@@ -56,14 +56,7 @@ protocol IBlockDiscovery {
     func discoverBlockHashes(account: Int, external: Bool) -> Observable<([PublicKey], [BlockHash])>
 }
 
-protocol IFeeRateApi {
-    func getFeeRate() -> Observable<FeeRate>
-}
-
 public protocol IStorage {
-    var feeRate: FeeRate? { get }
-    func set(feeRate: FeeRate)
-
     var initialRestored: Bool? { get }
     func set(initialRestored: Bool)
 
@@ -129,10 +122,6 @@ public protocol IStorage {
     func publicKeysWithUsedState() -> [PublicKeyWithUsedState]
 
     func clear() throws
-}
-
-protocol IFeeRateSyncer {
-    func sync()
 }
 
 public protocol IAddressSelector {
@@ -431,7 +420,6 @@ protocol IDataProvider {
 
     var lastBlockInfo: BlockInfo? { get }
     var balance: Int { get }
-    var feeRate: FeeRate { get }
     func transactions(fromHash: String?, limit: Int?) -> Single<[TransactionInfo]>
     var debugInfo: String { get }
 }
