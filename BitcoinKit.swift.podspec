@@ -1,5 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name = 'BitcoinKit.swift'
+  spec.module_name = 'BitcoinKit'
   spec.version = '0.4.1'
   spec.summary = 'Bitcoin library for Swift'
   spec.description = <<-DESC
