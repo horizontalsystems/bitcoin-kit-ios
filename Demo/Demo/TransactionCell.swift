@@ -29,6 +29,7 @@ class TransactionCell: UITableViewCell {
                 "Amount: \(amount)\n" +
                 "Date: \(Date(timeIntervalSince1970: Double(transaction.timestamp)))\n" +
                 "Tx Hash: \(transaction.transactionHash.prefix(10))...\n" +
+                "Tx Index: \(transaction.transactionIndex)\n" +
                 "From: \(fromAddress)\n" +
                 "To: \(toAddress)\n" +
                 "Block Height: \(transaction.blockHeight.map { String(describing: $0) } ?? "n/a")\n" +
