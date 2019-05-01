@@ -1,6 +1,6 @@
 import Foundation
 
-class TransactionSyncer {
+public class TransactionSyncer {
     private let storage: IStorage
     private let transactionProcessor: ITransactionProcessor
     private let addressManager: IAddressManager
@@ -24,7 +24,7 @@ class TransactionSyncer {
 
 extension TransactionSyncer: ITransactionSyncer {
 
-    func pendingTransactions() -> [FullTransaction] {
+    public func pendingTransactions() -> [FullTransaction] {
         return storage.newTransactions()
                 .filter { transaction in
                     if let sentTransaction = storage.sentTransaction(byHash: transaction.dataHash) {
@@ -35,10 +35,10 @@ extension TransactionSyncer: ITransactionSyncer {
                         return true
                     }
                 }
-                .map { FullTransaction(header: $0, inputs: self.storage.inputs(ofTransaction: $0), outputs: self.storage.outputs(ofTransaction: $0)) }
+                .map { FullTransaction(header: $0, inputs: self.storage.inputs(transactionHash: $0.dataHash), outputs: self.storage.outputs(transactionHash: $0.dataHash)) }
     }
 
-    func handle(sentTransaction transaction: FullTransaction) {
+    public func handle(sentTransaction transaction: FullTransaction) {
         guard let transaction = storage.newTransaction(byHash: transaction.header.dataHash) else {
             return
         }
@@ -52,7 +52,7 @@ extension TransactionSyncer: ITransactionSyncer {
         }
     }
 
-    func handle(transactions: [FullTransaction]) {
+    public func handle(transactions: [FullTransaction]) {
         guard !transactions.isEmpty else {
             return
         }
@@ -72,7 +72,7 @@ extension TransactionSyncer: ITransactionSyncer {
         }
     }
 
-    func shouldRequestTransaction(hash: Data) -> Bool {
+    public func shouldRequestTransaction(hash: Data) -> Bool {
         return !storage.relayedTransactionExists(byHash: hash)
     }
 

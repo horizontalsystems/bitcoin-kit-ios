@@ -24,10 +24,10 @@ class DashTestData {
                 deletedMNs: deletedMNs, mnListCount: mnListCount, mnList: mnList)
     }
 
-    static func transactionLockVote(txHash: Data, inputTxHash: Data = Data()) -> TransactionLockVoteMessage {
+    static func transactionLockVote(txHash: Data, inputTxHash: Data = Data(), hash: Data = Data()) -> TransactionLockVoteMessage {
         return TransactionLockVoteMessage(txHash: txHash, outpoint: Outpoint(txHash: inputTxHash, vout: 0),
                 outpointMasternode: Outpoint(txHash: txHash, vout: 0), quorumModifierHash: Data(),
-                masternodeProTxHash: Data(), vchMasternodeSignature: Data(), hash: Data())
+                masternodeProTxHash: Data(), vchMasternodeSignature: Data(), hash: hash)
     }
 
     static var transaction: FullTransaction {
@@ -48,6 +48,10 @@ class DashTestData {
         ]
 
         return FullTransaction(header: transaction, inputs: inputs, outputs: outputs)
+    }
+
+    static func unspentOutput(output: Output) -> UnspentOutput {
+        return UnspentOutput(output: output, publicKey: PublicKey(withAccount: 0, index: 0, external: false, hdPublicKeyData: Data()), transaction: Transaction(), blockHeight: nil)
     }
 
 }

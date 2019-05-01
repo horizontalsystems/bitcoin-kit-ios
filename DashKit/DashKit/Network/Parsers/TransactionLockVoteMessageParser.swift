@@ -12,7 +12,8 @@ class TransactionLockVoteMessageParser: IMessageParser {
         let outpointMasternode = Outpoint(byteStream: byteStream)
         let quorumModifierHash = byteStream.read(Data.self, count: 32)
         let masternodeProTxHash = byteStream.read(Data.self, count: 32)
-        let vchMasternodeSignature = byteStream.read(Data.self, count: 96)
+        let signatureLength = byteStream.read(VarInt.self)
+        let vchMasternodeSignature = byteStream.read(Data.self, count: Int(signatureLength.underlyingValue))
 
         let hash = CryptoKit.sha256sha256(data.prefix(168))
 

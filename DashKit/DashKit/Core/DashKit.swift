@@ -34,6 +34,9 @@ public class DashKit: AbstractKit {
         let doubleShaHasher = DoubleShaHasher()     // Use doubleSha256 for hash
         let x11Hasher = X11Hasher()         // Use for block header hash
 
+        let transactionSizeCalculator = TransactionSizeCalculator()
+        let unspentOutputSelector = DashUnspentOutputSelector(calculator: transactionSizeCalculator)
+
         let bitcoinCore = try BitcoinCoreBuilder(minLogLevel: minLogLevel)
                 .set(network: network)
                 .set(words: words)
@@ -44,6 +47,7 @@ public class DashKit: AbstractKit {
                 .set(storage: storage)
                 .set(newWallet: newWallet)
                 .set(blockHeaderHasher: x11Hasher)
+                .set(unspentOutputSelector: unspentOutputSelector)
                 .build()
 
         super.init(bitcoinCore: bitcoinCore, network: network)
@@ -89,13 +93,20 @@ public class DashKit: AbstractKit {
 // --------------------------------------
         let transactionLockVoteValidator = TransactionLockVoteValidator(storage: storage, hasher: singleHasher)
         let instantSendFactory = InstantSendFactory()
-        let instantTransactionManager = InstantTransactionManager(storage: storage, instantSendFactory: instantSendFactory, transactionSyncer: bitcoinCore.transactionSyncer, transactionLockVoteValidator: transactionLockVoteValidator)
-        let instantSend = InstantSend(instantTransactionManager: instantTransactionManager)
+        let instantTransactionSyncer = InstantTransactionSyncer(transactionSyncer: bitcoinCore.transactionSyncer)
+        let lockVoteManager = TransactionLockVoteManager(transactionLockVoteValidator: transactionLockVoteValidator)
+        let instantTransactionManager = InstantTransactionManager(storage: storage, instantSendFactory: instantSendFactory, transactionLockVoteValidator: transactionLockVoteValidator)
+
+        let instantSend = InstantSend(transactionSyncer: instantTransactionSyncer, lockVoteManager: lockVoteManager, instantTransactionManager: instantTransactionManager)
 
         bitcoinCore.add(peerTaskHandler: instantSend)
         bitcoinCore.add(inventoryItemsHandler: instantSend)
 // --------------------------------------
 
+    }
+
+    public override func send(to address: String, value: Int, feeRate: Int) throws {
+        try super.send(to: address, value: value, feeRate: 1)
     }
 
 }

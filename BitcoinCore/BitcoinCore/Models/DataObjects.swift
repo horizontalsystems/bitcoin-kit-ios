@@ -77,10 +77,10 @@ public struct TransactionWithBlock {
 
 public struct UnspentOutput {
 
-    let output: Output
-    let publicKey: PublicKey
-    let transaction: Transaction
-    let blockHeight: Int?
+    public let output: Output
+    public let publicKey: PublicKey
+    public let transaction: Transaction
+    public let blockHeight: Int?
 
 }
 

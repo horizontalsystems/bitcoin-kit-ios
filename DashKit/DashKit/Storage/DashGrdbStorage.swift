@@ -91,15 +91,15 @@ extension DashGrdbStorage: IDashStorage {
         }
     }
 
-    func instantTransactionInput(for inputTxHash: Data) -> InstantTransactionInput? {
-        return try! dbPool.read { db in
-            try InstantTransactionInput.filter(InstantTransactionInput.Columns.inputTxHash == inputTxHash).fetchOne(db)
-        }
-    }
-
     func instantTransactionInputs(for txHash: Data) -> [InstantTransactionInput] {
         return try! dbPool.read { db in
             try InstantTransactionInput.filter(InstantTransactionInput.Columns.txHash == txHash).fetchAll(db)
+        }
+    }
+
+    func instantTransactionInput(for inputTxHash: Data) -> InstantTransactionInput? {
+        return try! dbPool.read { db in
+            try InstantTransactionInput.filter(InstantTransactionInput.Columns.inputTxHash == inputTxHash).fetchOne(db)
         }
     }
 

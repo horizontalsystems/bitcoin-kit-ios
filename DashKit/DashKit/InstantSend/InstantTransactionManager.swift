@@ -1,82 +1,69 @@
 import BitcoinCore
 
-class InstantTransactionManager: IInstantTransactionManager {
-    static let requiredVoteCount = 6
+class InstantTransactionManager {
 
-    enum InstantSendHandleError: Error { case instantTransactionNotExist }
+    enum InstantSendHandleError: Error {
+        case instantTransactionNotExist
+    }
 
     private var storage: IDashStorage
     private var instantSendFactory: IInstantSendFactory
-    private let transactionSyncer: ITransactionSyncer
     private let transactionLockVoteValidator: ITransactionLockVoteValidator
 
-    init(storage: IDashStorage, instantSendFactory: IInstantSendFactory, transactionSyncer: ITransactionSyncer, transactionLockVoteValidator: ITransactionLockVoteValidator) {
+    init(storage: IDashStorage, instantSendFactory: IInstantSendFactory, transactionLockVoteValidator: ITransactionLockVoteValidator) {
         self.storage = storage
         self.instantSendFactory = instantSendFactory
-        self.transactionSyncer = transactionSyncer
         self.transactionLockVoteValidator = transactionLockVoteValidator
     }
 
-    func handle(transactions: [FullTransaction]) {
-        guard !transactions.isEmpty else {
-            return
-        }
-        transactions.forEach { transaction in
-            updateInputs(for: transaction)
-        }
+    private func makeInputs(for txHash: Data, inputs: [Input]) -> [InstantTransactionInput] {
+        var instantInputs = [InstantTransactionInput]()
+        for input in inputs {
+            let instantInput = instantSendFactory.instantTransactionInput(txHash: txHash, inputTxHash: input.previousOutputTxHash, voteCount: 0, blockHeight: nil)
 
-        transactionSyncer.handle(transactions: transactions)
+            storage.add(instantTransactionInput: instantInput)
+            instantInputs.append(instantInput)
+        }
+        return instantInputs
     }
 
-    private func updateInputs(for transaction: FullTransaction) {
-        for i in 0..<transaction.inputs.count {
-            let previousOutputTxHash = transaction.inputs[i].previousOutputTxHash
-            let input = instantSendFactory.instantTransactionInput(txHash: transaction.header.dataHash, inputTxHash: previousOutputTxHash, voteCount: 0, blockHeight: nil)
+}
 
-            storage.add(instantTransactionInput: input)
+extension InstantTransactionManager: IInstantTransactionManager {
+
+    func instantTransactionInputs(for txHash: Data, instantTransaction: FullTransaction?) -> [InstantTransactionInput] {
+        // check if inputs already created
+        let inputs = storage.instantTransactionInputs(for: txHash)
+        if !inputs.isEmpty {
+            return inputs
         }
+
+        // if not check coming ix
+        if let transaction = instantTransaction {
+            return makeInputs(for: txHash, inputs: transaction.inputs)
+        }
+
+        // if we can't get inputs and ix is null, try get tx inputs from db
+        return makeInputs(for: txHash, inputs: storage.inputs(transactionHash: txHash))
     }
 
-    func handle(lockVote: TransactionLockVoteMessage) throws {
-        // validate masternode in top 10 masternodes for quorumModifier
-        try transactionLockVoteValidator.validate(quorumModifierHash: lockVote.quorumModifierHash, masternodeProTxHash: lockVote.masternodeProTxHash)
-
-        // get all vote list for transaction and check if this tx approved
-        var instantTransactionInputs = storage.instantTransactionInputs(for: lockVote.txHash)
-
-        guard let inputIndex = instantTransactionInputs.firstIndex(where: { $0.inputTxHash == lockVote.outpoint.txHash }) else {
-            print("InstantSendHandleError.instantTransactionNotExist")
-            throw InstantSendHandleError.instantTransactionNotExist
-        }
-        let input = instantTransactionInputs[inputIndex]
-        if input.voteCount < InstantTransactionManager.requiredVoteCount - 1 {
-            // increment vote count for unspent output
-            let newInput = instantSendFactory.instantTransactionInput(txHash: input.txHash, inputTxHash: input.inputTxHash, voteCount: input.voteCount + 1, blockHeight: input.blockHeight)
-            storage.add(instantTransactionInput: newInput)
-
+    func increaseVoteCount(for inputTxHash: Data) {
+        guard let input = storage.instantTransactionInput(for: inputTxHash) else {
+            // can't find input for this vote. Ignore it
             return
         }
+        let increasedInput = instantSendFactory.instantTransactionInput(txHash: input.txHash, inputTxHash: input.inputTxHash, voteCount: input.voteCount + 1, blockHeight: input.blockHeight)
 
-        // remove approved input
-        instantTransactionInputs.remove(at: inputIndex)
-
-        // check all inputs is approved( has 6+ lockVote)
-        var approved = true
-        instantTransactionInputs.forEach { input in
-            if input.voteCount < InstantTransactionManager.requiredVoteCount {
-                approved = false
-            }
-        }
-
-        guard approved else {
-            return
-        }
-
-        //notify that transaction is Approved Instant Send!
-        print("INSTANT SEND APPROVED")
+        storage.add(instantTransactionInput: increasedInput)
     }
 
-    func validate(lockVote: TransactionLockVoteMessage) throws {
+    func isTransactionInstant(txHash: Data) -> Bool {
+        let inputs = storage.instantTransactionInputs(for: txHash)
+        guard !inputs.isEmpty else {
+            return false
+        }
+
+        return inputs.filter { $0.voteCount < InstantSend.requiredVoteCount }.isEmpty
     }
 
 }

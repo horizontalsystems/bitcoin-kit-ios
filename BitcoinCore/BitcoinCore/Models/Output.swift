@@ -43,12 +43,12 @@ public enum ScriptType: Int, DatabaseValueConvertible {
 
 public class Output: Record {
 
-    var value: Int
+    public var value: Int
     var lockingScript: Data
     var index: Int
     var transactionHash = Data()
     var publicKeyPath: String? = nil
-    var scriptType: ScriptType = .unknown
+    public var scriptType: ScriptType = .unknown
     var keyHash: Data? = nil
     var address: String? = nil
 

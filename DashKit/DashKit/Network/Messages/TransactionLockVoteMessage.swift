@@ -19,3 +19,15 @@ struct TransactionLockVoteMessage: IMessage {
     let hash: Data
 
 }
+
+extension TransactionLockVoteMessage: Hashable {
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(hash)
+    }
+
+    public static func ==(lhs: TransactionLockVoteMessage, rhs: TransactionLockVoteMessage) -> Bool {
+        return lhs.hash == rhs.hash
+    }
+
+}
