@@ -122,6 +122,10 @@ extension BitcoinCore {
         syncManager.start()
     }
 
+    func stop() {
+        syncManager.stop()
+    }
+
     public func clear() throws {
         syncManager.stop()
         try storage.clear()

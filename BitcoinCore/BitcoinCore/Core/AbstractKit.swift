@@ -23,6 +23,10 @@ open class AbstractKit {
         try bitcoinCore.start()
     }
 
+    open func stop() {
+        bitcoinCore.stop()
+    }
+
     open func clear() throws {
         try bitcoinCore.clear()
     }

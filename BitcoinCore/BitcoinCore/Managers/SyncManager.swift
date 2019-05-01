@@ -1,9 +1,7 @@
 import RxSwift
 
 class SyncManager {
-    private let syncPeriod: TimeInterval = 3 * 60
-
-    private let disposeBag = DisposeBag()
+    private var disposeBag = DisposeBag()
 
     private let reachabilityManager: IReachabilityManager
     private let initialSyncer: IInitialSyncer
@@ -15,9 +13,22 @@ class SyncManager {
         self.peerGroup = peerGroup
     }
 
-    private func sync() {
+    private func startSync() {
         if reachabilityManager.isReachable {
             initialSyncer.sync()
+        }
+    }
+
+    private func stopSync() {
+        initialSyncer.stop()
+        peerGroup.stop()
+    }
+
+    private func onReachabilityChanged() {
+        if reachabilityManager.isReachable {
+            startSync()
+        } else {
+            stopSync()
         }
     }
 
@@ -29,22 +40,16 @@ extension SyncManager: ISyncManager {
         reachabilityManager.reachabilitySignal
                 .observeOn(ConcurrentDispatchQueueScheduler(qos: .background))
                 .subscribe(onNext: { [weak self] in
-                    self?.sync()
+                    self?.onReachabilityChanged()
                 })
                 .disposed(by: disposeBag)
-
-        Observable<Int>.timer(0, period: syncPeriod, scheduler: ConcurrentDispatchQueueScheduler(qos: .background))
-                .observeOn(ConcurrentDispatchQueueScheduler(qos: .background))
-                .subscribe(onNext: { [weak self] _ in
-                    self?.sync()
-                }).disposed(by: disposeBag)
 
         initialSyncer.sync()
     }
 
     func stop() {
-        initialSyncer.stop()
-        peerGroup.stop()
+        disposeBag = DisposeBag()
+        stopSync()
     }
 
 }

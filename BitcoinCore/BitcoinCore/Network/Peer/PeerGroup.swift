@@ -2,8 +2,6 @@ import Foundation
 import RxSwift
 
 class PeerGroup {
-    private var disposable: Disposable?
-
     private let factory: IFactory
 
     private let reachabilityManager: IReachabilityManager
@@ -49,14 +47,6 @@ class PeerGroup {
         self.peerAddressManager.delegate = self
     }
 
-    deinit {
-        disposable?.dispose()
-    }
-
-    func add(listener: IPeerGroupListener) {
-        peerGroupListeners.append(listener)
-    }
-
     private func connectPeersIfRequired() {
         peersQueue.async {
             guard self.started, self.reachabilityManager.isReachable else {
@@ -78,24 +68,6 @@ class PeerGroup {
         }
     }
 
-    private func _start() {
-        guard started, _started == false else {
-            return
-        }
-
-        _started = true
-
-        peerGroupListeners.forEach { $0.onStart() } // potential broke order of call functions
-        connectPeersIfRequired()
-    }
-
-    private func _stop() {
-        _started = false
-
-        peerManager.disconnectAll()
-        peerGroupListeners.forEach { $0.onStop() }
-    }
-
 }
 
 extension PeerGroup: IPeerGroup {
@@ -109,37 +81,21 @@ extension PeerGroup: IPeerGroup {
     }
 
     func start() {
-        guard started == false else {
+        guard started == false, reachabilityManager.isReachable else {
             return
         }
 
         started = true
 
-        // Subscribe to ReachabilityManager
-        disposable = reachabilityManager.reachabilitySignal.subscribe(onNext: { [weak self] in
-            self?.onChangeConnection()
-        })
-
-        if reachabilityManager.isReachable {
-            _start()
-        }
-    }
-
-    private func onChangeConnection() {
-        if reachabilityManager.isReachable {
-            _start()
-        } else {
-            _stop()
-        }
+        peerGroupListeners.forEach { $0.onStart() } // potential broke order of call functions
+        connectPeersIfRequired()
     }
 
     func stop() {
         started = false
 
-        // Unsubscribe to ReachabilityManager
-        disposable?.dispose()
-
-        _stop()
+        peerManager.disconnectAll()
+        peerGroupListeners.forEach { $0.onStop() }
     }
 
     func checkPeersSynced() throws {

@@ -61,7 +61,9 @@ class BalanceController: UIViewController {
     }
 
     @objc func logout() {
-        Manager.shared.logout()
+        DispatchQueue.global(qos: .userInitiated).async {
+            Manager.shared.logout()
+        }
 
         if let window = UIApplication.shared.keyWindow {
             UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve, animations: {
@@ -77,6 +79,12 @@ class BalanceController: UIViewController {
             } catch {
                 print("Start Error: \(error)")
             }
+        }
+    }
+
+    @IBAction func stopKit(_ sender: Any) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            Manager.shared.kit.stop()
         }
     }
 
