@@ -11,15 +11,6 @@ public class DashKit: AbstractKit {
 
     public enum NetworkType { case mainNet, testNet }
 
-    public weak var delegate: BitcoinCoreDelegate? {
-        didSet {
-            guard let delegate = delegate else {
-                return
-            }
-            bitcoinCore.add(delegate: delegate)
-        }
-    }
-
     private let storage: IDashStorage
 
     private var masternodeSyncer: MasternodeListSyncer?
@@ -59,8 +50,6 @@ public class DashKit: AbstractKit {
 
         // extending BitcoinCore
 
-        bitcoinCore.add(delegate: self)
-
         let masternodeParser = MasternodeParser(hasher: singleHasher)
 
         bitcoinCore.add(messageParser: TransactionLockMessageParser())
@@ -90,10 +79,12 @@ public class DashKit: AbstractKit {
 
         let masternodeListMerkleRootCalculator = MasternodeListMerkleRootCalculator(masternodeSerializer: masternodeSerializer, masternodeHasher: doubleShaHasher, masternodeMerkleRootCreator: masternodeMerkleRootCreator)
         let masternodeListManager = MasternodeListManager(storage: storage, masternodeListMerkleRootCalculator: masternodeListMerkleRootCalculator, masternodeCbTxHasher: masternodeCbTxHasher, merkleBranch: merkleBranch)
-        let masternodeSyncer = MasternodeListSyncer(peerGroup: bitcoinCore.peerGroup, peerTaskFactory: PeerTaskFactory(), masternodeListManager: masternodeListManager)
-        self.masternodeSyncer = masternodeSyncer
+        let masternodeSyncer = MasternodeListSyncer(bitcoinCore: bitcoinCore, initialBlockDownload: bitcoinCore.initialBlockDownload, peerTaskFactory: PeerTaskFactory(), masternodeListManager: masternodeListManager)
 
         bitcoinCore.add(peerTaskHandler: masternodeSyncer)
+        bitcoinCore.add(peerSyncListener: masternodeSyncer)
+        bitcoinCore.add(peerGroupListener: masternodeSyncer)
+        self.masternodeSyncer = masternodeSyncer
 
 // --------------------------------------
         let transactionLockVoteValidator = TransactionLockVoteValidator(storage: storage, hasher: singleHasher)
@@ -108,26 +99,3 @@ public class DashKit: AbstractKit {
     }
 
 }
-
-extension DashKit: BitcoinCoreDelegate {
-
-    public func lastBlockInfoUpdated(lastBlockInfo: BlockInfo) {
-        if (bitcoinCore.syncState == BitcoinCore.KitState.synced) {
-            if let hash = lastBlockInfo.headerHash.reversedData {
-                masternodeSyncer?.sync(blockHash: hash)
-            }
-        }
-
-    }
-
-    public func kitStateUpdated(state: BitcoinCore.KitState) {
-        if (state == BitcoinCore.KitState.synced) {
-            if let blockInfo = bitcoinCore.lastBlockInfo, let hash = blockInfo.headerHash.reversedData {
-                masternodeSyncer?.sync(blockHash: hash)
-            }
-        }
-    }
-
-}
-
-public protocol DashKitDelegate: BitcoinCoreDelegate {}

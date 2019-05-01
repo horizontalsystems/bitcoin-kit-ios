@@ -5,6 +5,15 @@ open class AbstractKit {
     public var bitcoinCore: BitcoinCore
     public var network: INetwork
 
+    public weak var delegate: BitcoinCoreDelegate? {
+        didSet {
+            guard let delegate = delegate else {
+                return
+            }
+            bitcoinCore.add(delegate: delegate)
+        }
+    }
+
     public init(bitcoinCore: BitcoinCore, network: INetwork) {
         self.bitcoinCore = bitcoinCore
         self.network = network

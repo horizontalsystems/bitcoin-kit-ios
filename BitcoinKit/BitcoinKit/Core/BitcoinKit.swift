@@ -7,15 +7,6 @@ import RxSwift
 public class BitcoinKit: AbstractKit {
     public enum NetworkType { case mainNet, testNet, regTest }
 
-    public weak var delegate: BitcoinCoreDelegate? {
-        didSet {
-            guard let delegate = delegate else {
-                return
-            }
-            bitcoinCore.add(delegate: delegate)
-        }
-    }
-
     private let storage: IStorage
     private let bech32AddressConverter: IAddressConverter
 
