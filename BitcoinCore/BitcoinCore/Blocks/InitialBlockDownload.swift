@@ -1,13 +1,14 @@
-class InitialBlockDownload {
+public class InitialBlockDownload {
     private var blockSyncer: IBlockSyncer?
     private let peerManager: IPeerManager
     private let syncStateListener: ISyncStateListener
-
-    var peerSyncedDelegate: IAllPeersSyncedDelegate?
+    private var peerSyncListeners = [IPeerSyncListener]()
 
     private var syncPeer: IPeer?
     private let peersQueue: DispatchQueue
     private let logger: Logger?
+
+    public var syncedPeers = [IPeer]()
 
     init(blockSyncer: IBlockSyncer?, peerManager: IPeerManager, syncStateListener: ISyncStateListener, peersQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Local Queue", qos: .userInitiated), logger: Logger? = nil) {
         self.blockSyncer = blockSyncer
@@ -23,13 +24,16 @@ class InitialBlockDownload {
                 return
             }
 
-            if let nonSyncedPeer = self.peerManager.nonSyncedPeer() {
-                self.logger?.debug("Setting sync peer to \(nonSyncedPeer.logName)")
-                self.syncPeer = nonSyncedPeer
+            let nonSyncedPeers = self.peerManager.connected().filter { !$0.synced }
+            if nonSyncedPeers.isEmpty {
+                self.peerSyncListeners.forEach { $0.onAllPeersSynced() }
+            }
+
+            if let peer = nonSyncedPeers.first(where: { $0.ready }) {
+                self.logger?.debug("Setting sync peer to \(peer.logName)")
+                self.syncPeer = peer
                 self.blockSyncer?.downloadStarted()
                 self.downloadBlockchain()
-            } else {
-                self.peerSyncedDelegate?.onAllPeersSynced()
             }
         }
     }
@@ -55,10 +59,12 @@ class InitialBlockDownload {
             }
 
             if syncPeer.synced {
+                self.syncedPeers.append(syncPeer)
                 blockSyncer.downloadCompleted()
                 self.syncStateListener.syncFinished()
                 syncPeer.sendMempoolMessage()
                 self.syncPeer = nil
+                self.peerSyncListeners.forEach { $0.onPeerSynced(peer: syncPeer) }
                 self.assignNextSyncPeer()
             }
         }
@@ -66,12 +72,23 @@ class InitialBlockDownload {
 
 }
 
+extension InitialBlockDownload: IInitialBlockDownload {
+
+    public func add(peerSyncListener: IPeerSyncListener) {
+        peerSyncListeners.append(peerSyncListener)
+    }
+
+}
+
 extension InitialBlockDownload: IInventoryItemsHandler {
 
-    func handleInventoryItems(peer: IPeer, inventoryItems: [InventoryItem]) {
+    public func handleInventoryItems(peer: IPeer, inventoryItems: [InventoryItem]) {
         if peer.synced, inventoryItems.first(where: { $0.type == InventoryItem.ObjectType.blockMessage.rawValue }) != nil {
             peer.synced = false
             peer.blockHashesSynced = false
+            if let index = syncedPeers.index(where: { $0.equalTo(peer) }) {
+                syncedPeers.remove(at: index)
+            }
             assignNextSyncPeer()
         }
     }
@@ -80,7 +97,7 @@ extension InitialBlockDownload: IInventoryItemsHandler {
 
 extension InitialBlockDownload: IPeerTaskHandler {
 
-    func handleCompletedTask(peer: IPeer, task: PeerTask) -> Bool {
+    public func handleCompletedTask(peer: IPeer, task: PeerTask) -> Bool {
         switch task {
         case let t as GetBlockHashesTask:
             if t.blockHashes.isEmpty {
@@ -100,27 +117,31 @@ extension InitialBlockDownload: IPeerTaskHandler {
 
 extension InitialBlockDownload: IPeerGroupListener {
 
-    func onStart() {
+    public func onStart() {
         syncStateListener.syncStarted()
         blockSyncer?.prepareForDownload()
     }
 
-    func onStop() {
+    public func onStop() {
         syncStateListener.syncStopped()
         // set blockSyncer to null to make sure that there won't be any further interaction with blockSyncer
         // todo: check it's valid
         blockSyncer = nil
     }
 
-    func onPeerCreate(peer: IPeer) {
+    public func onPeerCreate(peer: IPeer) {
         peer.localBestBlockHeight = blockSyncer?.localDownloadedBestBlockHeight ?? 0
     }
 
-    func onPeerConnect(peer: IPeer) {
+    public func onPeerConnect(peer: IPeer) {
         assignNextSyncPeer()
     }
 
-    func onPeerDisconnect(peer: IPeer, error: Error?) {
+    public func onPeerDisconnect(peer: IPeer, error: Error?) {
+        if let index = syncedPeers.index(where: { $0.equalTo(peer) }) {
+            syncedPeers.remove(at: index)
+        }
+
         if peer.equalTo(syncPeer) {
             syncPeer = nil
             blockSyncer?.downloadFailed()
@@ -128,7 +149,7 @@ extension InitialBlockDownload: IPeerGroupListener {
         }
     }
 
-    func onPeerReady(peer: IPeer) {
+    public func onPeerReady(peer: IPeer) {
         if peer.equalTo(syncPeer) {
             downloadBlockchain()
         }

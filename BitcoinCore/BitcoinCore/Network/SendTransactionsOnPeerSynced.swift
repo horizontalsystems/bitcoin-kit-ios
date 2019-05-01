@@ -1,6 +1,6 @@
 import Foundation
 
-class SendTransactionsOnPeerSynced: IAllPeersSyncedDelegate {
+class SendTransactionsOnPeerSynced: IPeerSyncListener {
     private var transactionSender: ITransactionSender?
 
     init(transactionSender: ITransactionSender?) {

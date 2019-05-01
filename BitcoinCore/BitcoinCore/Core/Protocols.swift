@@ -156,7 +156,6 @@ public protocol IPeerGroup: class {
     func stop()
     func checkPeersSynced() throws
 
-    func addTask(peerTask: PeerTask)
     func add(peerGroupListener: IPeerGroupListener)
 }
 
@@ -167,7 +166,6 @@ protocol IPeerManager: class {
     func totalPeersCount() -> Int
     func someReadyPeers() -> [IPeer]
     func connected() -> [IPeer]
-    func nonSyncedPeer() -> IPeer?
     func halfIsSynced() -> Bool
 }
 
@@ -493,6 +491,11 @@ public protocol IMessageSerializer {
     func serialize(message: IMessage) throws -> Data
 }
 
+public protocol IInitialBlockDownload {
+    var syncedPeers: [IPeer] { get }
+    func add(peerSyncListener: IPeerSyncListener)
+}
+
 public protocol IInventoryItemsHandler {
     func handleInventoryItems(peer: IPeer, inventoryItems: [InventoryItem])
 }
@@ -501,8 +504,14 @@ public protocol IPeerTaskHandler {
     func handleCompletedTask(peer: IPeer, task: PeerTask) -> Bool
 }
 
-protocol IAllPeersSyncedDelegate {
+public protocol IPeerSyncListener {
     func onAllPeersSynced()
+    func onPeerSynced(peer: IPeer)
+}
+
+public extension IPeerSyncListener {
+    func onAllPeersSynced() {}
+    func onPeerSynced(peer: IPeer) {}
 }
 
 protocol ITransactionSender {
@@ -519,7 +528,7 @@ public protocol IPeerGroupListener {
     func onPeerReady(peer: IPeer)
 }
 
-extension IPeerGroupListener {
+public extension IPeerGroupListener {
     func onStart() {}
     func onStop() {}
     func onPeerCreate(peer: IPeer) {}

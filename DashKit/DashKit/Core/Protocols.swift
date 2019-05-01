@@ -58,7 +58,6 @@ protocol IMasternodeListManager {
 }
 
 protocol IMasternodeListSyncer {
-    func sync(blockHash: Data)
 }
 
 protocol IDashStorage {

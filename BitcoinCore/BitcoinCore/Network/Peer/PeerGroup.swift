@@ -27,8 +27,6 @@ class PeerGroup {
     var inventoryItemsHandler: IInventoryItemsHandler? = nil
     var peerTaskHandler: IPeerTaskHandler? = nil
 
-    var taskQueue = SynchronizedArray<PeerTask>()
-
     private var peerGroupListeners = [IPeerGroupListener]()
 
     init(factory: IFactory, reachabilityManager: IReachabilityManager,
@@ -159,15 +157,7 @@ extension PeerGroup: IPeerGroup {
 extension PeerGroup: PeerDelegate {
 
     func peerReady(_ peer: IPeer) {
-        peersQueue.async {
-            self.peerGroupListeners.forEach { $0.onPeerReady(peer: peer) }
-
-            // todo check if peer is not syncPeer
-            if let task = self.taskQueue.first {
-                peer.add(task: task)
-                self.taskQueue.remove(at: 0)
-            }
-        }
+        self.peerGroupListeners.forEach { $0.onPeerReady(peer: peer) }
     }
 
     func peerDidConnect(_ peer: IPeer) {
@@ -175,6 +165,10 @@ extension PeerGroup: PeerDelegate {
     }
 
     func peerDidDisconnect(_ peer: IPeer, withError error: Error?) {
+        peersQueue.async {
+            self.peerManager.peerDisconnected(peer: peer)
+        }
+
         if let error = error {
             logger?.warning("Peer \(peer.logName)(\(peer.host)) disconnected. Network reachable: \(reachabilityManager.isReachable). Error: \(error)")
         }
@@ -185,12 +179,7 @@ extension PeerGroup: PeerDelegate {
             peerAddressManager.markSuccess(ip: peer.host)
         }
 
-        peersQueue.async {
-            self.peerManager.peerDisconnected(peer: peer)
-
-            self.peerGroupListeners.forEach { $0.onPeerDisconnect(peer: peer, error: error) }
-        }
-
+        self.peerGroupListeners.forEach { $0.onPeerDisconnect(peer: peer, error: error) }
         connectPeersIfRequired()
     }
 
@@ -207,15 +196,6 @@ extension PeerGroup: PeerDelegate {
     func peer(_ peer: IPeer, didReceiveInventoryItems items: [InventoryItem]) {
         inventoryQueue.async {
             self.inventoryItemsHandler?.handleInventoryItems(peer: peer, inventoryItems: items)
-        }
-    }
-
-    func addTask(peerTask: PeerTask) {
-        // todo find better solution
-        if let peer = peerManager.someReadyPeers().first {
-            peer.add(task: peerTask)
-        } else {
-            taskQueue.append(peerTask)
         }
     }
 
