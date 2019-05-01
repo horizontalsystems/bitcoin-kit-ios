@@ -11,15 +11,6 @@ public class BitcoinCashKit: AbstractKit {
 
     public enum NetworkType { case mainNet, testNet }
 
-    public weak var delegate: BitcoinCoreDelegate? {
-        didSet {
-            guard let delegate = delegate else {
-                return
-            }
-            bitcoinCore.add(delegate: delegate)
-        }
-    }
-
     private let storage: IBitcoinCashStorage
 
     public init(withWords words: [String], walletId: String, newWallet: Bool = false, networkType: NetworkType = .mainNet, minLogLevel: Logger.Level = .verbose) throws {

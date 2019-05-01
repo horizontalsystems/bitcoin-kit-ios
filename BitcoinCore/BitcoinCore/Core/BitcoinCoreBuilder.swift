@@ -163,13 +163,11 @@ public class BitcoinCoreBuilder {
         let transactionSizeCalculator = TransactionSizeCalculator()
         let unspentOutputSelector = UnspentOutputSelector(calculator: transactionSizeCalculator)
         let transactionSyncer = TransactionSyncer(storage: storage, processor: transactionProcessor, addressManager: addressManager, bloomFilterManager: bloomFilterManager)
+        let mempoolTransactions = MempoolTransactions(transactionSyncer: transactionSyncer)
 
         let transactionSender = TransactionSender(transactionSyncer: transactionSyncer, peerGroup: peerGroup, logger: logger)
-
         let inputSigner = InputSigner(hdWallet: hdWallet, network: network)
-
         let scriptBuilder = ScriptBuilderChain()
-
         let transactionBuilder = TransactionBuilder(unspentOutputSelector: unspentOutputSelector, unspentOutputProvider: unspentOutputProvider, addressManager: addressManager, addressConverter: addressConverter, inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory)
         let transactionCreator = TransactionCreator(transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, transactionSender: transactionSender)
 
@@ -184,13 +182,22 @@ public class BitcoinCoreBuilder {
         let initialSyncer = InitialSyncer(storage: storage, listener: kitStateProvider, stateManager: stateManager, blockDiscovery: blockDiscovery, addressManager: addressManager, logger: logger)
 
         let syncManager = SyncManager(reachabilityManager: reachabilityManager, initialSyncer: initialSyncer, peerGroup: peerGroup)
-        initialSyncer.delegate = syncManager
+
+        let bloomFilterLoader = BloomFilterLoader(bloomFilterManager: bloomFilterManager)
+
+        let blockValidatorChain = BlockValidatorChain(proofOfWorkValidator: ProofOfWorkValidator(difficultyEncoder: DifficultyEncoder()))
+        let blockchain = Blockchain(storage: storage, blockValidator: blockValidatorChain, factory: factory, listener: dataProvider)
+        let blockSyncer = BlockSyncer.instance(storage: storage, network: network, factory: factory, listener: kitStateProvider, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager, logger: logger)
+        let initialBlockDownload = InitialBlockDownload(blockSyncer: blockSyncer, peerManager: peerManager, syncStateListener: kitStateProvider, logger: logger)
+
 
         let bitcoinCore = BitcoinCore(storage: storage,
                 cache: myOutputsCache,
                 dataProvider: dataProvider,
                 peerGroup: peerGroup,
+                initialBlockDownload: initialBlockDownload,
                 transactionSyncer: transactionSyncer,
+                blockValidatorChain: blockValidatorChain,
                 addressManager: addressManager,
                 addressConverter: addressConverter,
                 kitStateProvider: kitStateProvider,
@@ -202,6 +209,8 @@ public class BitcoinCoreBuilder {
                 networkMessageSerializer: networkMessageSerializer,
                 syncManager: syncManager)
 
+        initialSyncer.delegate = syncManager
+        bloomFilterManager.delegate = bloomFilterLoader
         dataProvider.delegate = bitcoinCore
         kitStateProvider.delegate = bitcoinCore
 
@@ -239,21 +248,11 @@ public class BitcoinCoreBuilder {
                 .add(messageSerializer: TransactionMessageSerializer())
                 .add(messageSerializer: FilterLoadMessageSerializer())
 
-        let bloomFilterLoader = BloomFilterLoader(bloomFilterManager: bloomFilterManager)
-        bloomFilterManager.delegate = bloomFilterLoader
         bitcoinCore.add(peerGroupListener: bloomFilterLoader)
-
-        let blockchain = Blockchain(storage: storage, blockValidator: bitcoinCore.blockValidatorChain, factory: factory, listener: dataProvider)
-        let blockSyncer = BlockSyncer.instance(storage: storage, network: network, factory: factory, listener: kitStateProvider, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager, logger: logger)
-        let initialBlockDownload = InitialBlockDownload(blockSyncer: blockSyncer, peerManager: peerManager, syncStateListener: kitStateProvider, logger: logger)
-
         bitcoinCore.add(peerTaskHandler: initialBlockDownload)
         bitcoinCore.add(inventoryItemsHandler: initialBlockDownload)
         bitcoinCore.add(peerGroupListener: initialBlockDownload)
-        initialBlockDownload.peerSyncedDelegate = SendTransactionsOnPeerSynced(transactionSender: transactionSender)
-
-        let mempoolTransactions = MempoolTransactions(transactionSyncer: transactionSyncer)
-
+        bitcoinCore.add(peerSyncListener: SendTransactionsOnPeerSynced(transactionSender: transactionSender))
         bitcoinCore.add(peerTaskHandler: mempoolTransactions)
         bitcoinCore.add(inventoryItemsHandler: mempoolTransactions)
         bitcoinCore.add(peerGroupListener: mempoolTransactions)

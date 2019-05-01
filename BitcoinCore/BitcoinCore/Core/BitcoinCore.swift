@@ -31,9 +31,11 @@ public class BitcoinCore {
     // START: Extending
 
     public var peerGroup: IPeerGroup
+    public var initialBlockDownload: IInitialBlockDownload
     public var transactionSyncer: ITransactionSyncer
 
-    let blockValidatorChain = BlockValidatorChain(proofOfWorkValidator: ProofOfWorkValidator(difficultyEncoder: DifficultyEncoder()))
+    let blockValidatorChain: BlockValidatorChain
+
     let inventoryItemsHandlerChain = InventoryItemsHandlerChain()
     let peerTaskHandlerChain = PeerTaskHandlerChain()
 
@@ -47,6 +49,10 @@ public class BitcoinCore {
 
     public func add(peerTaskHandler: IPeerTaskHandler) {
         peerTaskHandlerChain.add(handler: peerTaskHandler)
+    }
+
+    public func add(peerSyncListener: IPeerSyncListener) {
+        initialBlockDownload.add(peerSyncListener: peerSyncListener)
     }
 
     @discardableResult public func add(messageParser: IMessageParser) -> Self {
@@ -82,8 +88,8 @@ public class BitcoinCore {
 
 
     init(storage: IStorage, cache: OutputsCache, dataProvider: IDataProvider & IBlockchainDataListener,
-                peerGroup: IPeerGroup, transactionSyncer: ITransactionSyncer,
-                addressManager: IAddressManager, addressConverter: AddressConverterChain, kitStateProvider: IKitStateProvider & ISyncStateListener,
+                peerGroup: IPeerGroup, initialBlockDownload: IInitialBlockDownload, transactionSyncer: ITransactionSyncer,
+                blockValidatorChain: BlockValidatorChain, addressManager: IAddressManager, addressConverter: AddressConverterChain, kitStateProvider: IKitStateProvider & ISyncStateListener,
                 scriptBuilder: ScriptBuilderChain, transactionBuilder: ITransactionBuilder, transactionCreator: ITransactionCreator,
                 paymentAddressParser: IPaymentAddressParser, networkMessageParser: NetworkMessageParser, networkMessageSerializer: NetworkMessageSerializer,
                 syncManager: SyncManager) {
@@ -91,7 +97,9 @@ public class BitcoinCore {
         self.cache = cache
         self.dataProvider = dataProvider
         self.peerGroup = peerGroup
+        self.initialBlockDownload = initialBlockDownload
         self.transactionSyncer = transactionSyncer
+        self.blockValidatorChain = blockValidatorChain
         self.addressManager = addressManager
         self.addressConverter = addressConverter
         self.kitStateProvider = kitStateProvider
