@@ -16,6 +16,36 @@ protocol IDashBlockValidatorHelper {
     func previous(for block: Block, count: Int) -> Block?
 }
 
+protocol IDashTransactionSizeCalculator {
+    func transactionSize(inputs: [ScriptType], outputScriptTypes: [ScriptType]) -> Int
+    func outputSize(type: ScriptType) -> Int
+    func inputSize(type: ScriptType) -> Int
+    func toBytes(fee: Int) -> Int
+}
+
+protocol IDashTransactionSyncer {
+    func handle(transactions: [FullTransaction])
+}
+
+protocol IDashPeer: IPeer {
+    var delegate: PeerDelegate? { get set }
+    var localBestBlockHeight: Int32 { get set }
+    var announcedLastBlockHeight: Int32 { get }
+    var host: String { get }
+    var logName: String { get }
+    var ready: Bool { get }
+    var connected: Bool { get }
+    var synced: Bool { get set }
+    var blockHashesSynced: Bool { get set }
+    func connect()
+    func disconnect(error: Error?)
+    func add(task: PeerTask)
+    func filterLoad(bloomFilter: BloomFilter)
+    func sendMempoolMessage()
+    func sendPing(nonce: UInt64)
+    func equalTo(_ peer: IPeer?) -> Bool
+}
+
 // ###############################
 
 protocol IPeerTaskFactory {
@@ -35,8 +65,10 @@ protocol IDashStorage {
     var masternodes: [Masternode] { get set }
     var masternodeListState: MasternodeListState? { get set }
 
-    func instantTransactionInput(for inputTxHash: Data) -> InstantTransactionInput?
+    func inputs(transactionHash: Data) -> [Input]
+
     func instantTransactionInputs(for txHash: Data) -> [InstantTransactionInput]
+    func instantTransactionInput(for inputTxHash: Data) -> InstantTransactionInput?
     func add(instantTransactionInput: InstantTransactionInput)
 
     func block(byHash: Data) -> Block?
@@ -76,8 +108,9 @@ protocol IMerkleRootCreator {
 }
 
 protocol IInstantTransactionManager {
-    func handle(transactions: [FullTransaction])
-    func handle(lockVote: TransactionLockVoteMessage) throws
+    func instantTransactionInputs(for txHash: Data, instantTransaction: FullTransaction?) -> [InstantTransactionInput]
+    func increaseVoteCount(for inputTxHash: Data)
+    func isTransactionInstant(txHash: Data) -> Bool
 }
 
 protocol IMasternodeParser {
@@ -87,3 +120,16 @@ protocol IMasternodeParser {
 protocol ITransactionLockVoteValidator {
     func validate(quorumModifierHash: Data, masternodeProTxHash: Data) throws
 }
+
+protocol ITransactionLockVoteManager {
+    func takeRelayedLockVotes(for txHash: Data) -> [TransactionLockVoteMessage]
+    func add(relayed: TransactionLockVoteMessage)
+    func inRelayed(lvHash: Data) -> Bool
+
+    func add(checked: TransactionLockVoteMessage)
+    func removeCheckedLockVotes(for txHash: Data)
+    func inChecked(lvHash: Data) -> Bool
+
+    func validate(lockVote: TransactionLockVoteMessage) throws
+}
+

@@ -614,15 +614,15 @@ extension GrdbStorage: IStorage {
         }
     }
 
-    public func inputs(ofTransaction transaction: Transaction) -> [Input] {
+    public func inputs(transactionHash: Data) -> [Input] {
         return try! dbPool.read { db in
-            try Input.filter(Input.Columns.transactionHash == transaction.dataHash).fetchAll(db)
+            try Input.filter(Input.Columns.transactionHash == transactionHash).fetchAll(db)
         }
     }
 
-    public func outputs(ofTransaction transaction: Transaction) -> [Output] {
+    public func outputs(transactionHash: Data) -> [Output] {
         return try! dbPool.read { db in
-            try Output.filter(Output.Columns.transactionHash == transaction.dataHash).fetchAll(db)
+            try Output.filter(Output.Columns.transactionHash == transactionHash).fetchAll(db)
         }
     }
 

@@ -61,7 +61,7 @@ class Manager {
             self.kit = kit
             kit.delegate = self
         case .dash:
-            let kit = try! DashKit(withWords: words, walletId: "SomeId", newWallet: true, networkType: DashKit.NetworkType.testNet, minLogLevel: .verbose)
+            let kit = try! DashKit(withWords: words, walletId: "SomeId", newWallet: true, networkType: DashKit.NetworkType.mainNet, minLogLevel: .verbose)
             self.kit = kit
             kit.delegate = self
         }

@@ -143,3 +143,11 @@ extension FullTransaction: Equatable {
     }
 
 }
+
+extension UnspentOutput: Equatable {
+
+    public static func ==(lhs: UnspentOutput, rhs: UnspentOutput) -> Bool {
+        return lhs.output.value == rhs.output.value
+    }
+
+}

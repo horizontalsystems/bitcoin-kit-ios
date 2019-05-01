@@ -3,36 +3,96 @@ import BitcoinCore
 enum DashInventoryType: Int32 { case msgTxLockRequest = 4, msgTxLockVote = 5 }
 
 class InstantSend {
-    var successor: IPeerTaskHandler?
+    static let requiredVoteCount = 6
+    let dispatchQueue: DispatchQueue
 
+    private let transactionSyncer: IDashTransactionSyncer
     private let instantTransactionManager: IInstantTransactionManager
+    private let lockVoteManager: ITransactionLockVoteManager
 
-    init(instantTransactionManager: IInstantTransactionManager) {
+    private let logger: Logger?
+
+    init(transactionSyncer: IDashTransactionSyncer, lockVoteManager: ITransactionLockVoteManager, instantTransactionManager: IInstantTransactionManager, dispatchQueue: DispatchQueue = DispatchQueue(label: "DashInstantSend", qos: .userInitiated), logger: Logger? = nil) {
+        self.transactionSyncer = transactionSyncer
+        self.lockVoteManager = lockVoteManager
         self.instantTransactionManager = instantTransactionManager
+        self.dispatchQueue = dispatchQueue
+
+        self.logger = logger
     }
 
 }
 
 extension InstantSend: IPeerTaskHandler {
 
-    func handleCompletedTask(peer: IPeer, task: PeerTask) -> Bool {
+    public func handleCompletedTask(peer: IPeer, task: PeerTask) -> Bool {
         switch task {
         case let task as RequestTransactionLockRequestsTask:
-            instantTransactionManager.handle(transactions: task.transactions)
+            dispatchQueue.async {
+                self.handle(transactions: task.transactions)
+            }
             return true
 
-        case let task as RequestTransactionLockVotesTask: task.transactionLockVotes.forEach {
-                do {
-                    try instantTransactionManager.handle(lockVote: $0)
-                } catch {
-                    print(error)
-                }
-
-                print("AAAAAAA got tx votes : \($0.hash.reversedHex) \($0.outpoint.txHash.hex)-\($0.outpoint.vout)") 
+        case let task as RequestTransactionLockVotesTask:
+            dispatchQueue.async {
+                self.handle(transactionLockVotes: task.transactionLockVotes)
             }
             return true
 
         default: return false
+        }
+    }
+
+    private func handle(transactions: [FullTransaction]) {
+        transactionSyncer.handle(transactions: transactions)
+
+        transactions.forEach { transaction in
+            // prepare instant inputs for ix
+            let inputs = instantTransactionManager.instantTransactionInputs(for: transaction.header.dataHash, instantTransaction: transaction)
+
+            // poll relayed lock votes to update inputs
+            let relayedVotes = lockVoteManager.takeRelayedLockVotes(for: transaction.header.dataHash)
+            relayedVotes.forEach { vote in
+                handle(lockVote: vote, instantInputs: inputs)
+            }
+        }
+    }
+
+    private func handle(transactionLockVotes: [TransactionLockVoteMessage]) {
+        for vote in transactionLockVotes {
+            guard !lockVoteManager.inChecked(lvHash: vote.hash) else {
+                continue
+            }
+            guard !lockVoteManager.inRelayed(lvHash: vote.hash) else {
+                continue
+            }
+            let inputs = instantTransactionManager.instantTransactionInputs(for: vote.txHash, instantTransaction: nil)
+            guard !inputs.isEmpty else {
+                lockVoteManager.add(relayed: vote)
+                continue
+            }
+            handle(lockVote: vote, instantInputs: inputs)
+        }
+    }
+
+    private func handle(lockVote: TransactionLockVoteMessage, instantInputs: [InstantTransactionInput]) {
+        lockVoteManager.add(checked: lockVote)
+
+
+        // ignore votes for inputs which already has 6 votes
+        guard let input = instantInputs.first(where: { $0.inputTxHash == lockVote.outpoint.txHash }), input.voteCount < InstantSend.requiredVoteCount else {
+            return
+        }
+
+        do {
+            try lockVoteManager.validate(lockVote: lockVote)
+            instantTransactionManager.increaseVoteCount(for: lockVote.outpoint.txHash)
+            let instant = instantTransactionManager.isTransactionInstant(txHash: lockVote.txHash)
+            if instant {
+                print("WE GOT INSTANT TRANSACTION!!!")
+            }
+        } catch {
+            print("WE GOT ERROR: \(error)")
         }
     }
 

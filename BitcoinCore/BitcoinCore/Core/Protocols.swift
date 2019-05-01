@@ -107,8 +107,8 @@ public protocol IStorage {
 
     func outputsWithPublicKeys() -> [OutputWithPublicKey]
     func unspentOutputs() -> [UnspentOutput]
-    func inputs(ofTransaction: Transaction) -> [Input]
-    func outputs(ofTransaction: Transaction) -> [Output]
+    func inputs(transactionHash: Data) -> [Input]
+    func outputs(transactionHash: Data) -> [Output]
     func previousOutput(ofInput: Input) -> Output?
 
     func sentTransaction(byHash: Data) -> SentTransaction?
@@ -128,7 +128,7 @@ public protocol IAddressSelector {
     func getAddressVariants(addressConverter: IAddressConverter, publicKey: PublicKey) -> [String]
 }
 
-protocol IAddressManager {
+public protocol IAddressManager {
     func changePublicKey() throws -> PublicKey
     func receiveAddress() throws -> String
     func fillGap() throws
@@ -136,11 +136,11 @@ protocol IAddressManager {
     func gapShifts() -> Bool
 }
 
-protocol IBloomFilterManagerDelegate: class {
+public protocol IBloomFilterManagerDelegate: class {
     func bloomFilterUpdated(bloomFilter: BloomFilter)
 }
 
-protocol IBloomFilterManager {
+public protocol IBloomFilterManager {
     var delegate: IBloomFilterManagerDelegate? { get set }
     var bloomFilter: BloomFilter? { get }
     func regenerateBloomFilter()
@@ -312,7 +312,7 @@ protocol IOutputsCache: class {
     func clear()
 }
 
-protocol ITransactionProcessor: class {
+public protocol ITransactionProcessor: class {
     var listener: IBlockchainDataListener? { get set }
 
     func processReceived(transactions: [FullTransaction], inBlock block: Block?, skipCheckBloomFilter: Bool) throws
@@ -342,7 +342,7 @@ public protocol ITransactionSyncer: class {
     func shouldRequestTransaction(hash: Data) -> Bool
 }
 
-protocol ITransactionCreator {
+public protocol ITransactionCreator {
     func create(to address: String, value: Int, feeRate: Int, senderPay: Bool) throws
 }
 
@@ -360,7 +360,7 @@ protocol IBlockchain {
     func deleteBlocks(blocks: [Block]) throws
 }
 
-protocol IBlockchainDataListener: class {
+public protocol IBlockchainDataListener: class {
     func onUpdate(updated: [Transaction], inserted: [Transaction], inBlock: Block?)
     func onDelete(transactionHashes: [String])
     func onInsert(block: Block)
@@ -382,7 +382,7 @@ protocol ITransactionSizeCalculator {
     func toBytes(fee: Int) -> Int
 }
 
-protocol IUnspentOutputSelector {
+public protocol IUnspentOutputSelector {
     func select(value: Int, feeRate: Int, outputScriptType: ScriptType, changeType: ScriptType, senderPay: Bool, unspentOutputs: [UnspentOutput]) throws -> SelectedUnspentOutputInfo
 }
 

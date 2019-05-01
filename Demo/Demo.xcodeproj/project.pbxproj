@@ -9,6 +9,14 @@
 /* Begin PBXBuildFile section */
 		11B356ED28D5D63CBEEA1553 /* Manager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B358E4D5FBAB8DAC6ECA15 /* Manager.swift */; };
 		2B7BE31E1EBFEEE6755917EA /* Pods_Demo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6F2F56080A484B29F9FEC2F /* Pods_Demo.framework */; };
+		3A1D92742272BF0400616DB7 /* BitcoinCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D09226841530063D6AD /* BitcoinCore.framework */; };
+		3A1D92752272BF0400616DB7 /* BitcoinCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D09226841530063D6AD /* BitcoinCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		3A1D92762272BF0400616DB7 /* BitcoinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D822268431F0063D6AD /* BitcoinKit.framework */; };
+		3A1D92772272BF0400616DB7 /* BitcoinKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D822268431F0063D6AD /* BitcoinKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		3A1D92782272BF0400616DB7 /* BitcoinCashKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D802268431F0063D6AD /* BitcoinCashKit.framework */; };
+		3A1D92792272BF0400616DB7 /* BitcoinCashKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D802268431F0063D6AD /* BitcoinCashKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		3A1D927A2272BF0400616DB7 /* DashKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D842268431F0063D6AD /* DashKit.framework */; };
+		3A1D927B2272BF0400616DB7 /* DashKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D842268431F0063D6AD /* DashKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		3A7A7D812268431F0063D6AD /* BitcoinCashKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D802268431F0063D6AD /* BitcoinCashKit.framework */; };
 		3A7A7D832268431F0063D6AD /* BitcoinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D822268431F0063D6AD /* BitcoinKit.framework */; };
 		3A7A7D852268431F0063D6AD /* DashKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D842268431F0063D6AD /* DashKit.framework */; };

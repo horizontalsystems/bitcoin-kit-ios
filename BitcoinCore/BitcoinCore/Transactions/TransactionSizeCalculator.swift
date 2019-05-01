@@ -1,4 +1,4 @@
-class TransactionSizeCalculator: ITransactionSizeCalculator {
+public class TransactionSizeCalculator: ITransactionSizeCalculator {
     static let legacyTx = 16 + 4 + 4 + 16          //40 Version + number of inputs + number of outputs + locktime
     static let legacyWitnessData = 1               //1 Only 0x00 for legacy input
     static let witnessData = 1 + signatureLength + pubKeyLength   //108 Number of stack items for input + Size of stack item 0 + Stack item 0, signature + Size of stack item 1 + Stack item 1, pubkey
@@ -8,7 +8,9 @@ class TransactionSizeCalculator: ITransactionSizeCalculator {
     static let pubKeyLength = 33 + 1         // pubKey length plus pushByte
     static let p2wpkhShLength = 22 + 1          // 0014<20byte-scriptHash> plus pushByte
 
-    func transactionSize(inputs: [ScriptType], outputScriptTypes: [ScriptType]) -> Int {      // in real bytes upped to int
+    public init() {}
+
+    public func transactionSize(inputs: [ScriptType], outputScriptTypes: [ScriptType]) -> Int {      // in real bytes upped to int
         var segWit = false
         var inputWeight = 0
 
@@ -32,12 +34,12 @@ class TransactionSizeCalculator: ITransactionSizeCalculator {
         return toBytes(fee: txWeight + inputWeight + outputWeight)
     }
 
-    func outputSize(type: ScriptType) -> Int {              // in real bytes
+    public func outputSize(type: ScriptType) -> Int {              // in real bytes
         let outputTxSize: Int = 8 + 1 + Int(type.size) // spentValue + scriptLength + script
         return outputTxSize
     }
 
-    func  inputSize(type: ScriptType) -> Int {              // in real bytes
+    public func  inputSize(type: ScriptType) -> Int {              // in real bytes
         let sigScriptLength: Int
         switch type {
         case .p2pkh: sigScriptLength = TransactionSizeCalculator.signatureLength + TransactionSizeCalculator.pubKeyLength
@@ -49,14 +51,14 @@ class TransactionSizeCalculator: ITransactionSizeCalculator {
         return inputTxSize
     }
 
-    func witnessSize(type: ScriptType) -> Int {             // in vbytes
+    public func witnessSize(type: ScriptType) -> Int {             // in vbytes
         if type.witness {
             return TransactionSizeCalculator.witnessData
         }
         return TransactionSizeCalculator.legacyWitnessData
     }
 
-    func toBytes(fee: Int) -> Int {
+    public func toBytes(fee: Int) -> Int {
         return fee / 4 + (fee % 4 == 0 ? 0 : 1)
     }
 
