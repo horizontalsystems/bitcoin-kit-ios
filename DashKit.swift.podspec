@@ -21,7 +21,7 @@ Pod::Spec.new do |spec|
   spec.dependency 'BitcoinCore.swift', '~> 0.4.1'
   spec.dependency 'HSCryptoKit', '~> 1.0'
   spec.dependency 'HSHDWalletKit', '~> 1.0'
-  spec.dependency 'HSCryptoX11', '~> 0.0.1'
+  spec.dependency 'HSCryptoX11', '~> 1.0'
   spec.dependency 'Alamofire', '~> 4.0'
   spec.dependency 'ObjectMapper', '~> 3.0'
   spec.dependency 'RxSwift', '~> 4.0'
