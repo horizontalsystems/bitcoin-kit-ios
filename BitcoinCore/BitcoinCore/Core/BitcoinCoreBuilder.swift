@@ -15,6 +15,7 @@ public class BitcoinCoreBuilder {
     private var logger: Logger
 
     private var blockHeaderHasher: IHasher?
+    private var unspentOutputSelector: IUnspentOutputSelector?
 
     // parameters with default values
     private var confirmationsThreshold = 6
@@ -75,6 +76,11 @@ public class BitcoinCoreBuilder {
 
     public func set(blockHeaderHasher: IHasher) -> BitcoinCoreBuilder {
         self.blockHeaderHasher = blockHeaderHasher
+        return self
+    }
+
+    public func set(unspentOutputSelector: IUnspentOutputSelector) -> BitcoinCoreBuilder {
+        self.unspentOutputSelector = unspentOutputSelector
         return self
     }
 
@@ -160,8 +166,14 @@ public class BitcoinCoreBuilder {
         let peerGroup = PeerGroup(factory: factory, reachabilityManager: reachabilityManager,
                 peerAddressManager: peerAddressManager, peerCount: peerCount, peerManager: peerManager, logger: logger)
 
-        let transactionSizeCalculator = TransactionSizeCalculator()
-        let unspentOutputSelector = UnspentOutputSelector(calculator: transactionSizeCalculator)
+        let unspentOutputSelector: IUnspentOutputSelector
+        if let selector = self.unspentOutputSelector {
+            unspentOutputSelector = selector
+        } else {
+            let transactionSizeCalculator = TransactionSizeCalculator()
+            unspentOutputSelector = UnspentOutputSelector(calculator: transactionSizeCalculator)
+        }
+
         let transactionSyncer = TransactionSyncer(storage: storage, processor: transactionProcessor, addressManager: addressManager, bloomFilterManager: bloomFilterManager)
         let mempoolTransactions = MempoolTransactions(transactionSyncer: transactionSyncer)
 

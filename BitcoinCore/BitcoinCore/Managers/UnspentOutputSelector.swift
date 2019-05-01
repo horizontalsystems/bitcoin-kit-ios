@@ -1,10 +1,17 @@
 import Foundation
 
-struct SelectedUnspentOutputInfo {
-    let unspentOutputs: [UnspentOutput]
-    let totalValue: Int                 // summary value on selected unspent unspentOutputs
-    let fee: Int                        // fee for transaction with output(and maybe change output) and all selected inputs(unspent unspentOutputs) + maybe dust
-    let addChangeOutput: Bool           // need to add changeOutput. Fee was calculated with change output
+public struct SelectedUnspentOutputInfo {
+    public let unspentOutputs: [UnspentOutput]
+    public let totalValue: Int                 // summary value on selected unspent unspentOutputs
+    public let fee: Int                        // fee for transaction with output(and maybe change output) and all selected inputs(unspent unspentOutputs) + maybe dust
+    public let addChangeOutput: Bool           // need to add changeOutput. Fee was calculated with change output
+
+    public init(unspentOutputs: [UnspentOutput], totalValue: Int, fee: Int, addChangeOutput: Bool) {
+        self.unspentOutputs = unspentOutputs
+        self.totalValue = totalValue
+        self.fee = fee
+        self.addChangeOutput = addChangeOutput
+    }
 }
 
 public enum SelectorError: Error {
