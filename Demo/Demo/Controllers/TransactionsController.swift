@@ -70,6 +70,7 @@ class TransactionsController: UITableViewController {
 
     @objc func onSegmentChanged() {
         transactions = []
+
         loading = false
         loadNext()
     }
@@ -87,7 +88,7 @@ class TransactionsController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        guard let currentAdapter = currentAdapter else {
+        guard let currentAdapter = currentAdapter, indexPath.row < transactions.count else {
             return
         }
 

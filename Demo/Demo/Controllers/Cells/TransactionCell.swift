@@ -42,8 +42,8 @@ class TransactionCell: UITableViewCell {
                     Amount:
                     Block:
                     Confirmations:
-                    From:\((0..<from.count - 1).map { _ in "\n" }.joined())
-                    To:\((0..<to.count - 1).map { _ in  "\n" }.joined())
+                    \(from.map { _ in "From:" }.joined(separator: "\n"))
+                    \(to.map { _ in "To:" }.joined(separator: "\n"))
                     """, alignment: .left, label: titleLabel)
 
         set(string: """

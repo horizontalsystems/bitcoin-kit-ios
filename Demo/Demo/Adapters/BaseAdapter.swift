@@ -71,11 +71,15 @@ extension BaseAdapter {
     }
 
     func start() {
-        abstractKit.start()
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.abstractKit.start()
+        }
     }
 
     func clear() {
-        try! abstractKit.clear()
+        DispatchQueue.global(qos: .userInitiated).async {
+            try! self.abstractKit.clear()
+        }
     }
 
     var balance: Decimal {

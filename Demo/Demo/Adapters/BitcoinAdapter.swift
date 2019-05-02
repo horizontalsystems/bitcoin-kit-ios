@@ -6,7 +6,7 @@ class BitcoinAdapter: BaseAdapter {
 
     init(words: [String], testMode: Bool) {
         let networkType: BitcoinKit.NetworkType = testMode ? .testNet : .mainNet
-        bitcoinKit = try! BitcoinKit(withWords: words, walletId: "walletId", networkType: networkType, minLogLevel: .error)
+        bitcoinKit = try! BitcoinKit(withWords: words, walletId: "walletId", networkType: networkType, minLogLevel: Configuration.shared.minLogLevel)
 
         super.init(name: "Bitcoin", coinCode: "BTC", abstractKit: bitcoinKit)
     }
