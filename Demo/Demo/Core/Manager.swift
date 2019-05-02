@@ -5,24 +5,30 @@ class Manager {
 
     private let keyWords = "mnemonic_words"
 
-    var adapters: [BaseAdapter]!
+    let adapterSignal = Signal()
+    var adapters = [BaseAdapter]()
 
     init() {
         if let words = savedWords {
-            initAdapters(words: words)
+            DispatchQueue.global(qos: .userInitiated).async {
+                self.initAdapters(words: words)
+            }
         }
     }
 
     func login(words: [String]) {
         save(words: words)
-        initAdapters(words: words)
+
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.initAdapters(words: words)
+        }
     }
 
     func logout() {
         clearWords()
 
         adapters.forEach { $0.clear() }
-        adapters = nil
+        adapters = []
     }
 
     private func initAdapters(words: [String]) {
@@ -33,9 +39,11 @@ class Manager {
             BitcoinCashAdapter(words: words, testMode: configuration.testNet),
             DashAdapter(words: words, testMode: configuration.testNet),
         ]
+
+        adapterSignal.notify()
     }
 
-    private var savedWords: [String]? {
+    var savedWords: [String]? {
         if let wordsString = UserDefaults.standard.value(forKey: keyWords) as? String {
             return wordsString.split(separator: " ").map(String.init)
         }

@@ -14,13 +14,27 @@ class SendController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        adapters.append(contentsOf: Manager.shared.adapters)
+        segmentedControl.addTarget(self, action: #selector(onSegmentChanged), for: .valueChanged)
+
+        Manager.shared.adapterSignal
+                .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
+                .observeOn(MainScheduler.instance)
+                .subscribe(onNext: { [weak self] in
+                    self?.updateAdapters()
+                })
+                .disposed(by: disposeBag)
+
+        updateAdapters()
+    }
+
+    private func updateAdapters() {
+        segmentedControl.removeAllSegments()
+
+        adapters = Manager.shared.adapters
 
         for (index, adapter) in adapters.enumerated() {
             segmentedControl.insertSegment(withTitle: adapter.coinCode, at: index, animated: false)
         }
-
-        segmentedControl.addTarget(self, action: #selector(onSegmentChanged), for: .valueChanged)
 
         navigationItem.titleView = segmentedControl
 
@@ -35,7 +49,7 @@ class SendController: UIViewController {
     }
 
     @objc func onSegmentChanged() {
-        coinLabel?.text = currentAdapter.coinCode
+        coinLabel?.text = currentAdapter?.coinCode
     }
 
     @IBAction func send() {
@@ -44,7 +58,7 @@ class SendController: UIViewController {
         }
 
         do {
-            try currentAdapter.validate(address: address)
+            try currentAdapter?.validate(address: address)
         } catch {
             show(error: "Invalid address")
             return
@@ -55,7 +69,7 @@ class SendController: UIViewController {
             return
         }
 
-        currentAdapter.sendSingle(to: address, amount: amount)
+        currentAdapter?.sendSingle(to: address, amount: amount)
                 .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .userInitiated))
                 .observeOn(MainScheduler.instance)
                 .subscribe(onSuccess: { [weak self] _ in
@@ -81,7 +95,11 @@ class SendController: UIViewController {
         present(alert, animated: true)
     }
 
-    private var currentAdapter: BaseAdapter {
+    private var currentAdapter: BaseAdapter? {
+        guard segmentedControl.selectedSegmentIndex != -1, adapters.count > segmentedControl.selectedSegmentIndex else {
+            return nil
+        }
+
         return adapters[segmentedControl.selectedSegmentIndex]
     }
 

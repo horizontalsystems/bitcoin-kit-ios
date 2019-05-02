@@ -31,11 +31,33 @@
 		D3285F4620BD158E00644076 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3285F4520BD158E00644076 /* AppDelegate.swift */; };
 		D3373DB220C52F640082BC4A /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = D3373DB120C52F640082BC4A /* LaunchScreen.xib */; };
 		D34BDCBA213E8CD5009D0AAC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D34BDCB9213E8CD5009D0AAC /* Assets.xcassets */; };
-		D3927BA4227AB3C9005094C4 /* BitcoinCashKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3927BA3227AB3C9005094C4 /* BitcoinCashKit.framework */; };
-		D3927BA6227AB3C9005094C4 /* BitcoinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3927BA5227AB3C9005094C4 /* BitcoinKit.framework */; };
-		D3927BA8227AB3C9005094C4 /* DashKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3927BA7227AB3C9005094C4 /* DashKit.framework */; };
 		D3927BAA227AB3C9005094C4 /* Pods_Demo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3927BA9227AB3C9005094C4 /* Pods_Demo.framework */; };
+		D3927BAB227AE928005094C4 /* BitcoinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3927BA5227AB3C9005094C4 /* BitcoinKit.framework */; };
+		D3927BAC227AE928005094C4 /* BitcoinKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D3927BA5227AB3C9005094C4 /* BitcoinKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		D3927BAD227AE928005094C4 /* BitcoinCashKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3927BA3227AB3C9005094C4 /* BitcoinCashKit.framework */; };
+		D3927BAE227AE928005094C4 /* BitcoinCashKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D3927BA3227AB3C9005094C4 /* BitcoinCashKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		D3927BAF227AE928005094C4 /* DashKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3927BA7227AB3C9005094C4 /* DashKit.framework */; };
+		D3927BB0227AE928005094C4 /* DashKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D3927BA7227AB3C9005094C4 /* DashKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		D3927BB6227AE94E005094C4 /* BitcoinCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3927BB5227AE94E005094C4 /* BitcoinCore.framework */; };
+		D3927BB7227AE94E005094C4 /* BitcoinCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D3927BB5227AE94E005094C4 /* BitcoinCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		D3927BB1227AE928005094C4 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				D3927BAC227AE928005094C4 /* BitcoinKit.framework in Embed Frameworks */,
+				D3927BAE227AE928005094C4 /* BitcoinCashKit.framework in Embed Frameworks */,
+				D3927BB7227AE94E005094C4 /* BitcoinCore.framework in Embed Frameworks */,
+				D3927BB0227AE928005094C4 /* DashKit.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		11B3505C6F38384F4F2FD2B4 /* BitcoinAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinAdapter.swift; sourceTree = "<group>"; };
@@ -70,6 +92,7 @@
 		D3927BA5227AB3C9005094C4 /* BitcoinKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = BitcoinKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3927BA7227AB3C9005094C4 /* DashKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = DashKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3927BA9227AB3C9005094C4 /* Pods_Demo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Pods_Demo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D3927BB5227AE94E005094C4 /* BitcoinCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = BitcoinCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,9 +100,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D3927BA4227AB3C9005094C4 /* BitcoinCashKit.framework in Frameworks */,
-				D3927BA6227AB3C9005094C4 /* BitcoinKit.framework in Frameworks */,
-				D3927BA8227AB3C9005094C4 /* DashKit.framework in Frameworks */,
+				D3927BAB227AE928005094C4 /* BitcoinKit.framework in Frameworks */,
+				D3927BAF227AE928005094C4 /* DashKit.framework in Frameworks */,
+				D3927BAD227AE928005094C4 /* BitcoinCashKit.framework in Frameworks */,
+				D3927BB6227AE94E005094C4 /* BitcoinCore.framework in Frameworks */,
 				D3927BAA227AB3C9005094C4 /* Pods_Demo.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -159,6 +183,7 @@
 		D3285F3920BD158E00644076 = {
 			isa = PBXGroup;
 			children = (
+				D3927BB5227AE94E005094C4 /* BitcoinCore.framework */,
 				D3285F4420BD158E00644076 /* Demo */,
 				D3285F4320BD158E00644076 /* Products */,
 				95AD93BB0A2D5F5C4A435252 /* Frameworks */,
@@ -201,6 +226,7 @@
 				D3285F3F20BD158E00644076 /* Frameworks */,
 				D3285F4020BD158E00644076 /* Resources */,
 				47C39EA1800EB6F68E049C4E /* [CP] Embed Pods Frameworks */,
+				D3927BB1227AE928005094C4 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
