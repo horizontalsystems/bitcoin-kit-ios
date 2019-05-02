@@ -19,8 +19,8 @@ open class AbstractKit {
         self.network = network
     }
 
-    open func start() throws {
-        try bitcoinCore.start()
+    open func start() {
+        bitcoinCore.start()
     }
 
     open func stop() {
