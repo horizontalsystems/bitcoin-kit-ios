@@ -1,6 +1,8 @@
 import UIKit
+import RxSwift
 
 class ReceiveController: UIViewController {
+    private let disposeBag = DisposeBag()
 
     @IBOutlet weak var addressLabel: UILabel?
 
@@ -15,13 +17,27 @@ class ReceiveController: UIViewController {
         addressLabel?.layer.cornerRadius = 8
         addressLabel?.clipsToBounds = true
 
-        adapters.append(contentsOf: Manager.shared.adapters)
+        segmentedControl.addTarget(self, action: #selector(onSegmentChanged), for: .valueChanged)
+
+        Manager.shared.adapterSignal
+                .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
+                .observeOn(MainScheduler.instance)
+                .subscribe(onNext: { [weak self] in
+                    self?.updateAdapters()
+                })
+                .disposed(by: disposeBag)
+
+        updateAdapters()
+    }
+
+    private func updateAdapters() {
+        segmentedControl.removeAllSegments()
+
+        adapters = Manager.shared.adapters
 
         for (index, adapter) in adapters.enumerated() {
             segmentedControl.insertSegment(withTitle: adapter.coinCode, at: index, animated: false)
         }
-
-        segmentedControl.addTarget(self, action: #selector(onSegmentChanged), for: .valueChanged)
 
         navigationItem.titleView = segmentedControl
 
@@ -36,7 +52,7 @@ class ReceiveController: UIViewController {
     }
 
     @objc func onSegmentChanged() {
-        addressLabel?.text = "  \(currentAdapter.receiveAddress)  "
+        addressLabel?.text = "  \(currentAdapter?.receiveAddress ?? "")  "
     }
 
     @IBAction func copyToClipboard() {
@@ -49,7 +65,11 @@ class ReceiveController: UIViewController {
         }
     }
 
-    private var currentAdapter: BaseAdapter {
+    private var currentAdapter: BaseAdapter? {
+        guard segmentedControl.selectedSegmentIndex != -1, adapters.count > segmentedControl.selectedSegmentIndex else {
+            return nil
+        }
+
         return adapters[segmentedControl.selectedSegmentIndex]
     }
 

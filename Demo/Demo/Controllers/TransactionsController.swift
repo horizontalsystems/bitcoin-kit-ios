@@ -3,6 +3,7 @@ import RxSwift
 
 class TransactionsController: UITableViewController {
     private let disposeBag = DisposeBag()
+    private var adapterDisposeBag = DisposeBag()
 
     private var adapters = [BaseAdapter]()
     private var transactions = [TransactionRecord]()
@@ -19,7 +20,25 @@ class TransactionsController: UITableViewController {
         tableView.tableFooterView = UIView()
         tableView.separatorInset = .zero
 
-        adapters.append(contentsOf: Manager.shared.adapters)
+        segmentedControl.addTarget(self, action: #selector(onSegmentChanged), for: .valueChanged)
+
+        Manager.shared.adapterSignal
+                .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
+                .observeOn(MainScheduler.instance)
+                .subscribe(onNext: { [weak self] in
+                    self?.updateAdapters()
+                })
+                .disposed(by: disposeBag)
+
+        updateAdapters()
+    }
+
+    private func updateAdapters() {
+        segmentedControl.removeAllSegments()
+
+        adapters = Manager.shared.adapters
+
+        adapterDisposeBag = DisposeBag()
 
         for (index, adapter) in adapters.enumerated() {
             segmentedControl.insertSegment(withTitle: adapter.coinCode, at: index, animated: false)
@@ -30,7 +49,7 @@ class TransactionsController: UITableViewController {
                     .subscribe(onNext: { [weak self] in
                         self?.onLastBlockHeightUpdated(index: index)
                     })
-                    .disposed(by: disposeBag)
+                    .disposed(by: adapterDisposeBag)
 
             adapter.transactionsObservable
                     .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
@@ -38,10 +57,8 @@ class TransactionsController: UITableViewController {
                     .subscribe(onNext: { [weak self] in
                         self?.onTransactionsUpdated(index: index)
                     })
-                    .disposed(by: disposeBag)
+                    .disposed(by: adapterDisposeBag)
         }
-
-        segmentedControl.addTarget(self, action: #selector(onSegmentChanged), for: .valueChanged)
 
         navigationItem.titleView = segmentedControl
 
@@ -68,6 +85,10 @@ class TransactionsController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        guard let currentAdapter = currentAdapter else {
+            return
+        }
+
         if let cell = cell as? TransactionCell {
             cell.bind(transaction: transactions[indexPath.row], coinCode: currentAdapter.coinCode, lastBlockHeight: currentAdapter.lastBlockInfo?.height)
         }
@@ -87,7 +108,11 @@ class TransactionsController: UITableViewController {
         tableView.deselectRow(at: indexPath, animated: true)
     }
 
-    private var currentAdapter: BaseAdapter {
+    private var currentAdapter: BaseAdapter? {
+        guard segmentedControl.selectedSegmentIndex != -1, adapters.count > segmentedControl.selectedSegmentIndex else {
+            return nil
+        }
+
         return adapters[segmentedControl.selectedSegmentIndex]
     }
 
@@ -100,7 +125,7 @@ class TransactionsController: UITableViewController {
 
         let fromHash = transactions.last?.transactionHash
 
-        currentAdapter.transactionsSingle(fromHash: fromHash, limit: limit)
+        currentAdapter?.transactionsSingle(fromHash: fromHash, limit: limit)
                 .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
                 .observeOn(MainScheduler.instance)
                 .subscribe(onSuccess: { [weak self] transactions in

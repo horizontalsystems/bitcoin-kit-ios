@@ -2,9 +2,10 @@ import UIKit
 import RxSwift
 
 class BalanceController: UITableViewController {
-    let disposeBag = DisposeBag()
+    private let disposeBag = DisposeBag()
+    private var adapterDisposeBag = DisposeBag()
 
-    var adapters = [BaseAdapter]()
+    private var adapters = [BaseAdapter]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -16,7 +17,22 @@ class BalanceController: UITableViewController {
         tableView.tableFooterView = UIView()
         tableView.separatorInset = .zero
 
-        adapters.append(contentsOf: Manager.shared.adapters)
+        Manager.shared.adapterSignal
+                .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
+                .observeOn(MainScheduler.instance)
+                .subscribe(onNext: { [weak self] in
+                    self?.updateAdapters()
+                })
+                .disposed(by: disposeBag)
+
+        updateAdapters()
+    }
+
+    private func updateAdapters() {
+        adapters = Manager.shared.adapters
+        tableView.reloadData()
+
+        adapterDisposeBag = DisposeBag()
 
         for (index, adapter) in adapters.enumerated() {
             Observable.merge([adapter.lastBlockObservable, adapter.syncStateObservable, adapter.balanceObservable])
@@ -25,7 +41,7 @@ class BalanceController: UITableViewController {
                     .subscribe(onNext: { [weak self] in
                         self?.update(index: index)
                     })
-                    .disposed(by: disposeBag)
+                    .disposed(by: adapterDisposeBag)
         }
     }
 
