@@ -7,93 +7,69 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		11B356ED28D5D63CBEEA1553 /* Manager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B358E4D5FBAB8DAC6ECA15 /* Manager.swift */; };
-		2B7BE31E1EBFEEE6755917EA /* Pods_Demo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6F2F56080A484B29F9FEC2F /* Pods_Demo.framework */; };
-		3A1D92742272BF0400616DB7 /* BitcoinCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D09226841530063D6AD /* BitcoinCore.framework */; };
-		3A1D92752272BF0400616DB7 /* BitcoinCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D09226841530063D6AD /* BitcoinCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		3A1D92762272BF0400616DB7 /* BitcoinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D822268431F0063D6AD /* BitcoinKit.framework */; };
-		3A1D92772272BF0400616DB7 /* BitcoinKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D822268431F0063D6AD /* BitcoinKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		3A1D92782272BF0400616DB7 /* BitcoinCashKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D802268431F0063D6AD /* BitcoinCashKit.framework */; };
-		3A1D92792272BF0400616DB7 /* BitcoinCashKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D802268431F0063D6AD /* BitcoinCashKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		3A1D927A2272BF0400616DB7 /* DashKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D842268431F0063D6AD /* DashKit.framework */; };
-		3A1D927B2272BF0400616DB7 /* DashKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D842268431F0063D6AD /* DashKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		3A7A7D812268431F0063D6AD /* BitcoinCashKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D802268431F0063D6AD /* BitcoinCashKit.framework */; };
-		3A7A7D832268431F0063D6AD /* BitcoinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D822268431F0063D6AD /* BitcoinKit.framework */; };
-		3A7A7D852268431F0063D6AD /* DashKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D842268431F0063D6AD /* DashKit.framework */; };
-		D01FCEA62272C01A0024799A /* BitcoinCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D01FCEA52272C01A0024799A /* BitcoinCore.framework */; };
-		D01FCEA72272C01A0024799A /* BitcoinCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D01FCEA52272C01A0024799A /* BitcoinCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		D01FCEA92272C01A0024799A /* BitcoinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D01FCEA82272C01A0024799A /* BitcoinKit.framework */; };
-		D01FCEAA2272C01A0024799A /* BitcoinKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D01FCEA82272C01A0024799A /* BitcoinKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		D01FCEAC2272C01A0024799A /* BitcoinCashKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D01FCEAB2272C01A0024799A /* BitcoinCashKit.framework */; };
-		D01FCEAD2272C01A0024799A /* BitcoinCashKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D01FCEAB2272C01A0024799A /* BitcoinCashKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		D01FCEAF2272C01A0024799A /* DashKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D01FCEAE2272C01A0024799A /* DashKit.framework */; };
-		D01FCEB02272C01A0024799A /* DashKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D01FCEAE2272C01A0024799A /* DashKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		11B350DE67C4CEC69C29479B /* SendController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 11B35C941C13998329F0AA0D /* SendController.xib */; };
+		11B3510EF645DF798D9D2FA0 /* BitcoinAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B3505C6F38384F4F2FD2B4 /* BitcoinAdapter.swift */; };
+		11B35180ECF8EAD0B8120131 /* WordsController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 11B35443946C6294AB6583F9 /* WordsController.xib */; };
+		11B352CA92725B1EBB64DF15 /* BalanceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B3543A6EEC0E9AB3FFB77B /* BalanceCell.swift */; };
+		11B352F9D77DA876E485F52F /* TransactionCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 11B35AEEAA717AE99DA6335E /* TransactionCell.xib */; };
+		11B3542A2F5C149B4C13C406 /* TransactionRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35D7C401FF37990688882 /* TransactionRecord.swift */; };
+		11B35595F5817B675ADF904B /* BaseAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35FF4A84349CC48FD0E25 /* BaseAdapter.swift */; };
+		11B35620585B19DAB2270920 /* BitcoinCashAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B354B50AB3D75876ED77D2 /* BitcoinCashAdapter.swift */; };
+		11B3563C0A6AC13C0BA2397B /* Signal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B3547BDD5913989BF964B6 /* Signal.swift */; };
+		11B357558CF6B339F1E538F0 /* WordsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B350888FB2882A1BE736F2 /* WordsController.swift */; };
+		11B3577C1321BF736D0365D3 /* Manager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35EDAC6FA494A2EAAF8A6 /* Manager.swift */; };
+		11B3581C287ED1A82A7F877B /* BalanceCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 11B35B7251CBDF40D2AEAAEA /* BalanceCell.xib */; };
+		11B358489B9BE7705B93B7A7 /* MainController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35A4740CD0C67BE8A5D65 /* MainController.swift */; };
+		11B3587F6407CF3E3592A8CE /* TransactionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35DA8993F32EC0310B8CD /* TransactionCell.swift */; };
+		11B3595A55A9C05DFB163726 /* DashAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B3519FEDDCB5416C900040 /* DashAdapter.swift */; };
+		11B35BDCDD502878CD175475 /* TransactionsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35D1E24456F624461933B /* TransactionsController.swift */; };
+		11B35C871CB1AF4786C269FF /* BalanceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35FB21D99F485E98E7AEE /* BalanceController.swift */; };
+		11B35D7F57E14D63AA095514 /* SendController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35E1DAF3C9EEEBE02F7C5 /* SendController.swift */; };
+		11B35E1839CAFDB222A0C0F9 /* ReceiveController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 11B358E91CF03C12866AD4AE /* ReceiveController.xib */; };
+		11B35F8D7C73F41FD9794117 /* ReceiveController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B353F536D54E9ACBB7D575 /* ReceiveController.swift */; };
+		11B35FF483B731F3ECFCB582 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B355861438272F37EB7213 /* Configuration.swift */; };
 		D3285F4620BD158E00644076 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3285F4520BD158E00644076 /* AppDelegate.swift */; };
-		D3373D9520BEC7B30082BC4A /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3373D9420BEC7B30082BC4A /* AVFoundation.framework */; };
 		D3373DB220C52F640082BC4A /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = D3373DB120C52F640082BC4A /* LaunchScreen.xib */; };
-		D34BDCA12137F7A7009D0AAC /* WordsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D34BDC9F2137F7A7009D0AAC /* WordsController.swift */; };
-		D34BDCA22137F7A7009D0AAC /* WordsController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D34BDCA02137F7A7009D0AAC /* WordsController.xib */; };
-		D34BDCA4213E4B2C009D0AAC /* MainController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D34BDCA3213E4B2C009D0AAC /* MainController.swift */; };
-		D34BDCA7213E4B53009D0AAC /* BalanceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D34BDCA5213E4B53009D0AAC /* BalanceController.swift */; };
-		D34BDCA8213E4B53009D0AAC /* BalanceController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D34BDCA6213E4B53009D0AAC /* BalanceController.xib */; };
-		D34BDCAB213E4C28009D0AAC /* TransactionsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D34BDCA9213E4C28009D0AAC /* TransactionsController.swift */; };
-		D34BDCAF213E4C37009D0AAC /* SendController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D34BDCAD213E4C37009D0AAC /* SendController.swift */; };
-		D34BDCB0213E4C37009D0AAC /* SendController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D34BDCAE213E4C37009D0AAC /* SendController.xib */; };
-		D34BDCB3213E4C62009D0AAC /* ReceiveController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D34BDCB1213E4C62009D0AAC /* ReceiveController.swift */; };
-		D34BDCB4213E4C62009D0AAC /* ReceiveController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D34BDCB2213E4C62009D0AAC /* ReceiveController.xib */; };
-		D34BDCB7213E74B8009D0AAC /* TransactionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D34BDCB5213E74B8009D0AAC /* TransactionCell.swift */; };
-		D34BDCB8213E74B8009D0AAC /* TransactionCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = D34BDCB6213E74B8009D0AAC /* TransactionCell.xib */; };
 		D34BDCBA213E8CD5009D0AAC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D34BDCB9213E8CD5009D0AAC /* Assets.xcassets */; };
+		D3927BA4227AB3C9005094C4 /* BitcoinCashKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3927BA3227AB3C9005094C4 /* BitcoinCashKit.framework */; };
+		D3927BA6227AB3C9005094C4 /* BitcoinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3927BA5227AB3C9005094C4 /* BitcoinKit.framework */; };
+		D3927BA8227AB3C9005094C4 /* DashKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3927BA7227AB3C9005094C4 /* DashKit.framework */; };
+		D3927BAA227AB3C9005094C4 /* Pods_Demo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3927BA9227AB3C9005094C4 /* Pods_Demo.framework */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		D01FCEB12272C01B0024799A /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				D01FCEAA2272C01A0024799A /* BitcoinKit.framework in Embed Frameworks */,
-				D01FCEB02272C01A0024799A /* DashKit.framework in Embed Frameworks */,
-				D01FCEAD2272C01A0024799A /* BitcoinCashKit.framework in Embed Frameworks */,
-				D01FCEA72272C01A0024799A /* BitcoinCore.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
-		11B358E4D5FBAB8DAC6ECA15 /* Manager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Manager.swift; sourceTree = "<group>"; };
-		3A7A7D09226841530063D6AD /* BitcoinCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = BitcoinCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		3A7A7D802268431F0063D6AD /* BitcoinCashKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = BitcoinCashKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		3A7A7D822268431F0063D6AD /* BitcoinKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = BitcoinKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		3A7A7D842268431F0063D6AD /* DashKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = DashKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		11B3505C6F38384F4F2FD2B4 /* BitcoinAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinAdapter.swift; sourceTree = "<group>"; };
+		11B350888FB2882A1BE736F2 /* WordsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WordsController.swift; sourceTree = "<group>"; };
+		11B3519FEDDCB5416C900040 /* DashAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashAdapter.swift; sourceTree = "<group>"; };
+		11B353F536D54E9ACBB7D575 /* ReceiveController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReceiveController.swift; sourceTree = "<group>"; };
+		11B3543A6EEC0E9AB3FFB77B /* BalanceCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BalanceCell.swift; sourceTree = "<group>"; };
+		11B35443946C6294AB6583F9 /* WordsController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = WordsController.xib; sourceTree = "<group>"; };
+		11B3547BDD5913989BF964B6 /* Signal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Signal.swift; sourceTree = "<group>"; };
+		11B354B50AB3D75876ED77D2 /* BitcoinCashAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinCashAdapter.swift; sourceTree = "<group>"; };
+		11B355861438272F37EB7213 /* Configuration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
+		11B358E91CF03C12866AD4AE /* ReceiveController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ReceiveController.xib; sourceTree = "<group>"; };
+		11B35A4740CD0C67BE8A5D65 /* MainController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainController.swift; sourceTree = "<group>"; };
+		11B35AEEAA717AE99DA6335E /* TransactionCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TransactionCell.xib; sourceTree = "<group>"; };
+		11B35B7251CBDF40D2AEAAEA /* BalanceCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BalanceCell.xib; sourceTree = "<group>"; };
+		11B35C941C13998329F0AA0D /* SendController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SendController.xib; sourceTree = "<group>"; };
+		11B35D1E24456F624461933B /* TransactionsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionsController.swift; sourceTree = "<group>"; };
+		11B35D7C401FF37990688882 /* TransactionRecord.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionRecord.swift; sourceTree = "<group>"; };
+		11B35DA8993F32EC0310B8CD /* TransactionCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionCell.swift; sourceTree = "<group>"; };
+		11B35E1DAF3C9EEEBE02F7C5 /* SendController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SendController.swift; sourceTree = "<group>"; };
+		11B35EDAC6FA494A2EAAF8A6 /* Manager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Manager.swift; sourceTree = "<group>"; };
+		11B35FB21D99F485E98E7AEE /* BalanceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BalanceController.swift; sourceTree = "<group>"; };
+		11B35FF4A84349CC48FD0E25 /* BaseAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseAdapter.swift; sourceTree = "<group>"; };
 		74FB4D641711D9479B8D4823 /* Pods-Demo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Demo.debug.xcconfig"; path = "../Pods/Target Support Files/Pods-Demo/Pods-Demo.debug.xcconfig"; sourceTree = "<group>"; };
 		9C192BE97FB56FE2283F4EA9 /* Pods-Demo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Demo.release.xcconfig"; path = "../Pods/Target Support Files/Pods-Demo/Pods-Demo.release.xcconfig"; sourceTree = "<group>"; };
-		A6F2F56080A484B29F9FEC2F /* Pods_Demo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Demo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		D01FCEA52272C01A0024799A /* BitcoinCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = BitcoinCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		D01FCEA82272C01A0024799A /* BitcoinKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = BitcoinKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		D01FCEAB2272C01A0024799A /* BitcoinCashKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = BitcoinCashKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		D01FCEAE2272C01A0024799A /* DashKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = DashKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3285F4220BD158E00644076 /* Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Demo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3285F4520BD158E00644076 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D3285F5120BD158F00644076 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.info; path = Info.plist; sourceTree = "<group>"; };
-		D3373D9420BEC7B30082BC4A /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		D3373DB120C52F640082BC4A /* LaunchScreen.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LaunchScreen.xib; sourceTree = "<group>"; };
-		D34BDC9F2137F7A7009D0AAC /* WordsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordsController.swift; sourceTree = "<group>"; };
-		D34BDCA02137F7A7009D0AAC /* WordsController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = WordsController.xib; sourceTree = "<group>"; };
-		D34BDCA3213E4B2C009D0AAC /* MainController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainController.swift; sourceTree = "<group>"; };
-		D34BDCA5213E4B53009D0AAC /* BalanceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceController.swift; sourceTree = "<group>"; };
-		D34BDCA6213E4B53009D0AAC /* BalanceController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BalanceController.xib; sourceTree = "<group>"; };
-		D34BDCA9213E4C28009D0AAC /* TransactionsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsController.swift; sourceTree = "<group>"; };
-		D34BDCAD213E4C37009D0AAC /* SendController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendController.swift; sourceTree = "<group>"; };
-		D34BDCAE213E4C37009D0AAC /* SendController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SendController.xib; sourceTree = "<group>"; };
-		D34BDCB1213E4C62009D0AAC /* ReceiveController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiveController.swift; sourceTree = "<group>"; };
-		D34BDCB2213E4C62009D0AAC /* ReceiveController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ReceiveController.xib; sourceTree = "<group>"; };
-		D34BDCB5213E74B8009D0AAC /* TransactionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCell.swift; sourceTree = "<group>"; };
-		D34BDCB6213E74B8009D0AAC /* TransactionCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TransactionCell.xib; sourceTree = "<group>"; };
 		D34BDCB9213E8CD5009D0AAC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D3927BA3227AB3C9005094C4 /* BitcoinCashKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = BitcoinCashKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D3927BA5227AB3C9005094C4 /* BitcoinKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = BitcoinKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D3927BA7227AB3C9005094C4 /* DashKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = DashKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D3927BA9227AB3C9005094C4 /* Pods_Demo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Pods_Demo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,21 +77,65 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3A7A7D812268431F0063D6AD /* BitcoinCashKit.framework in Frameworks */,
-				3A7A7D832268431F0063D6AD /* BitcoinKit.framework in Frameworks */,
-				3A7A7D852268431F0063D6AD /* DashKit.framework in Frameworks */,
-				D01FCEAC2272C01A0024799A /* BitcoinCashKit.framework in Frameworks */,
-				D3373D9520BEC7B30082BC4A /* AVFoundation.framework in Frameworks */,
-				D01FCEAF2272C01A0024799A /* DashKit.framework in Frameworks */,
-				D01FCEA92272C01A0024799A /* BitcoinKit.framework in Frameworks */,
-				D01FCEA62272C01A0024799A /* BitcoinCore.framework in Frameworks */,
-				2B7BE31E1EBFEEE6755917EA /* Pods_Demo.framework in Frameworks */,
+				D3927BA4227AB3C9005094C4 /* BitcoinCashKit.framework in Frameworks */,
+				D3927BA6227AB3C9005094C4 /* BitcoinKit.framework in Frameworks */,
+				D3927BA8227AB3C9005094C4 /* DashKit.framework in Frameworks */,
+				D3927BAA227AB3C9005094C4 /* Pods_Demo.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		11B351C7581E81C500EA5DA6 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				11B359F3FE00A979544283F0 /* Cells */,
+				11B350888FB2882A1BE736F2 /* WordsController.swift */,
+				11B35443946C6294AB6583F9 /* WordsController.xib */,
+				11B35A4740CD0C67BE8A5D65 /* MainController.swift */,
+				11B35FB21D99F485E98E7AEE /* BalanceController.swift */,
+				11B35D1E24456F624461933B /* TransactionsController.swift */,
+				11B35E1DAF3C9EEEBE02F7C5 /* SendController.swift */,
+				11B35C941C13998329F0AA0D /* SendController.xib */,
+				11B353F536D54E9ACBB7D575 /* ReceiveController.swift */,
+				11B358E91CF03C12866AD4AE /* ReceiveController.xib */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		11B359F3FE00A979544283F0 /* Cells */ = {
+			isa = PBXGroup;
+			children = (
+				11B3543A6EEC0E9AB3FFB77B /* BalanceCell.swift */,
+				11B35B7251CBDF40D2AEAAEA /* BalanceCell.xib */,
+				11B35DA8993F32EC0310B8CD /* TransactionCell.swift */,
+				11B35AEEAA717AE99DA6335E /* TransactionCell.xib */,
+			);
+			path = Cells;
+			sourceTree = "<group>";
+		};
+		11B35E1CAA06B03B838B9D25 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				11B35EDAC6FA494A2EAAF8A6 /* Manager.swift */,
+				11B35D7C401FF37990688882 /* TransactionRecord.swift */,
+				11B3547BDD5913989BF964B6 /* Signal.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		11B35F658D316568E84D0896 /* Adapters */ = {
+			isa = PBXGroup;
+			children = (
+				11B35FF4A84349CC48FD0E25 /* BaseAdapter.swift */,
+				11B3505C6F38384F4F2FD2B4 /* BitcoinAdapter.swift */,
+				11B354B50AB3D75876ED77D2 /* BitcoinCashAdapter.swift */,
+				11B3519FEDDCB5416C900040 /* DashAdapter.swift */,
+			);
+			path = Adapters;
+			sourceTree = "<group>";
+		};
 		5758CFFC60270FA8C9931CD7 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
@@ -128,12 +148,10 @@
 		95AD93BB0A2D5F5C4A435252 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				3A7A7D802268431F0063D6AD /* BitcoinCashKit.framework */,
-				3A7A7D822268431F0063D6AD /* BitcoinKit.framework */,
-				3A7A7D842268431F0063D6AD /* DashKit.framework */,
-				3A7A7D09226841530063D6AD /* BitcoinCore.framework */,
-				D3373D9420BEC7B30082BC4A /* AVFoundation.framework */,
-				A6F2F56080A484B29F9FEC2F /* Pods_Demo.framework */,
+				D3927BA3227AB3C9005094C4 /* BitcoinCashKit.framework */,
+				D3927BA5227AB3C9005094C4 /* BitcoinKit.framework */,
+				D3927BA7227AB3C9005094C4 /* DashKit.framework */,
+				D3927BA9227AB3C9005094C4 /* Pods_Demo.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -141,10 +159,6 @@
 		D3285F3920BD158E00644076 = {
 			isa = PBXGroup;
 			children = (
-				D01FCEAE2272C01A0024799A /* DashKit.framework */,
-				D01FCEAB2272C01A0024799A /* BitcoinCashKit.framework */,
-				D01FCEA82272C01A0024799A /* BitcoinKit.framework */,
-				D01FCEA52272C01A0024799A /* BitcoinCore.framework */,
 				D3285F4420BD158E00644076 /* Demo */,
 				D3285F4320BD158E00644076 /* Products */,
 				95AD93BB0A2D5F5C4A435252 /* Frameworks */,
@@ -163,23 +177,14 @@
 		D3285F4420BD158E00644076 /* Demo */ = {
 			isa = PBXGroup;
 			children = (
+				11B35E1CAA06B03B838B9D25 /* Core */,
+				11B35F658D316568E84D0896 /* Adapters */,
+				11B351C7581E81C500EA5DA6 /* Controllers */,
 				D34BDCB9213E8CD5009D0AAC /* Assets.xcassets */,
 				D3285F4520BD158E00644076 /* AppDelegate.swift */,
+				11B355861438272F37EB7213 /* Configuration.swift */,
 				D3373DB120C52F640082BC4A /* LaunchScreen.xib */,
 				D3285F5120BD158F00644076 /* Info.plist */,
-				D34BDC9F2137F7A7009D0AAC /* WordsController.swift */,
-				D34BDCA02137F7A7009D0AAC /* WordsController.xib */,
-				D34BDCA3213E4B2C009D0AAC /* MainController.swift */,
-				D34BDCA5213E4B53009D0AAC /* BalanceController.swift */,
-				D34BDCA6213E4B53009D0AAC /* BalanceController.xib */,
-				D34BDCA9213E4C28009D0AAC /* TransactionsController.swift */,
-				D34BDCAD213E4C37009D0AAC /* SendController.swift */,
-				D34BDCAE213E4C37009D0AAC /* SendController.xib */,
-				D34BDCB1213E4C62009D0AAC /* ReceiveController.swift */,
-				D34BDCB2213E4C62009D0AAC /* ReceiveController.xib */,
-				11B358E4D5FBAB8DAC6ECA15 /* Manager.swift */,
-				D34BDCB5213E74B8009D0AAC /* TransactionCell.swift */,
-				D34BDCB6213E74B8009D0AAC /* TransactionCell.xib */,
 			);
 			path = Demo;
 			sourceTree = "<group>";
@@ -196,7 +201,6 @@
 				D3285F3F20BD158E00644076 /* Frameworks */,
 				D3285F4020BD158E00644076 /* Resources */,
 				47C39EA1800EB6F68E049C4E /* [CP] Embed Pods Frameworks */,
-				D01FCEB12272C01B0024799A /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -246,13 +250,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D34BDCA8213E4B53009D0AAC /* BalanceController.xib in Resources */,
-				D34BDCA22137F7A7009D0AAC /* WordsController.xib in Resources */,
-				D34BDCB8213E74B8009D0AAC /* TransactionCell.xib in Resources */,
 				D3373DB220C52F640082BC4A /* LaunchScreen.xib in Resources */,
 				D34BDCBA213E8CD5009D0AAC /* Assets.xcassets in Resources */,
-				D34BDCB0213E4C37009D0AAC /* SendController.xib in Resources */,
-				D34BDCB4213E4C62009D0AAC /* ReceiveController.xib in Resources */,
+				11B3581C287ED1A82A7F877B /* BalanceCell.xib in Resources */,
+				11B352F9D77DA876E485F52F /* TransactionCell.xib in Resources */,
+				11B35E1839CAFDB222A0C0F9 /* ReceiveController.xib in Resources */,
+				11B350DE67C4CEC69C29479B /* SendController.xib in Resources */,
+				11B35180ECF8EAD0B8120131 /* WordsController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -318,15 +322,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D34BDCA7213E4B53009D0AAC /* BalanceController.swift in Sources */,
-				D34BDCAB213E4C28009D0AAC /* TransactionsController.swift in Sources */,
-				D34BDCA12137F7A7009D0AAC /* WordsController.swift in Sources */,
-				D34BDCAF213E4C37009D0AAC /* SendController.swift in Sources */,
-				D34BDCB3213E4C62009D0AAC /* ReceiveController.swift in Sources */,
-				D34BDCB7213E74B8009D0AAC /* TransactionCell.swift in Sources */,
-				D34BDCA4213E4B2C009D0AAC /* MainController.swift in Sources */,
 				D3285F4620BD158E00644076 /* AppDelegate.swift in Sources */,
-				11B356ED28D5D63CBEEA1553 /* Manager.swift in Sources */,
+				11B35FF483B731F3ECFCB582 /* Configuration.swift in Sources */,
+				11B35C871CB1AF4786C269FF /* BalanceController.swift in Sources */,
+				11B35BDCDD502878CD175475 /* TransactionsController.swift in Sources */,
+				11B358489B9BE7705B93B7A7 /* MainController.swift in Sources */,
+				11B3577C1321BF736D0365D3 /* Manager.swift in Sources */,
+				11B35595F5817B675ADF904B /* BaseAdapter.swift in Sources */,
+				11B3542A2F5C149B4C13C406 /* TransactionRecord.swift in Sources */,
+				11B3510EF645DF798D9D2FA0 /* BitcoinAdapter.swift in Sources */,
+				11B3563C0A6AC13C0BA2397B /* Signal.swift in Sources */,
+				11B352CA92725B1EBB64DF15 /* BalanceCell.swift in Sources */,
+				11B3587F6407CF3E3592A8CE /* TransactionCell.swift in Sources */,
+				11B35F8D7C73F41FD9794117 /* ReceiveController.swift in Sources */,
+				11B35D7F57E14D63AA095514 /* SendController.swift in Sources */,
+				11B35620585B19DAB2270920 /* BitcoinCashAdapter.swift in Sources */,
+				11B357558CF6B339F1E538F0 /* WordsController.swift in Sources */,
+				11B3595A55A9C05DFB163726 /* DashAdapter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

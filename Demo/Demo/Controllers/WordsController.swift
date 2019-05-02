@@ -1,17 +1,19 @@
 import UIKit
 import HSHDWalletKit
-import BitcoinCore
 
 class WordsController: UIViewController {
 
     @IBOutlet weak var textView: UITextView?
-    @IBOutlet weak var kitTypeSegmentedControl: UISegmentedControl!
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = "WalletKit Demo"
-        textView?.text = "used ugly meat glad balance divorce inner artwork hire invest already piano"
+        title = "BitcoinKit Demo"
+
+        textView?.textContainerInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+        textView?.layer.cornerRadius = 8
+
+        textView?.text = Configuration.shared.defaultWords
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -32,7 +34,7 @@ class WordsController: UIViewController {
         do {
             try Mnemonic.validate(words: words)
 
-            Manager.shared.login(words: words, kitType: Manager.KitType(rawValue: kitTypeSegmentedControl.selectedSegmentIndex) ?? Manager.KitType.bitcoin)
+            Manager.shared.login(words: words)
 
             if let window = UIApplication.shared.keyWindow {
                 UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve, animations: {

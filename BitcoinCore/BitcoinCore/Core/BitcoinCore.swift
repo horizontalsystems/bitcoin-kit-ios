@@ -118,7 +118,7 @@ public class BitcoinCore {
 
 extension BitcoinCore {
 
-    public func start() throws {
+    public func start() {
         syncManager.start()
     }
 
