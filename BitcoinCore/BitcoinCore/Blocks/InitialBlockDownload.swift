@@ -124,9 +124,6 @@ extension InitialBlockDownload: IPeerGroupListener {
 
     public func onStop() {
         syncStateListener.syncStopped()
-        // set blockSyncer to null to make sure that there won't be any further interaction with blockSyncer
-        // todo: check it's valid
-        blockSyncer = nil
     }
 
     public func onPeerCreate(peer: IPeer) {

@@ -56,8 +56,8 @@ class TransactionSyncerTests: QuickSpec {
                     it("returns transaction") {
                         stub(mockStorage) { mock in
                             when(mock.sentTransaction(byHash: equal(to: fullTransaction.header.dataHash))).thenReturn(nil)
-                            when(mock.inputs(ofTransaction: equal(to: fullTransaction.header))).thenReturn(fullTransaction.inputs)
-                            when(mock.outputs(ofTransaction: equal(to: fullTransaction.header))).thenReturn(fullTransaction.outputs)
+                            when(mock.inputs(transactionHash: equal(to: fullTransaction.header.dataHash))).thenReturn(fullTransaction.inputs)
+                            when(mock.outputs(transactionHash: equal(to: fullTransaction.header.dataHash))).thenReturn(fullTransaction.outputs)
                         }
                         let transactions = syncer.pendingTransactions()
 
@@ -79,8 +79,8 @@ class TransactionSyncerTests: QuickSpec {
                     context("when sent not too many times or too frequently") {
                         it("returns transaction") {
                             stub(mockStorage) { mock in
-                                when(mock.inputs(ofTransaction: equal(to: fullTransaction.header))).thenReturn(fullTransaction.inputs)
-                                when(mock.outputs(ofTransaction: equal(to: fullTransaction.header))).thenReturn(fullTransaction.outputs)
+                                when(mock.inputs(transactionHash: equal(to: fullTransaction.header.dataHash))).thenReturn(fullTransaction.inputs)
+                                when(mock.outputs(transactionHash: equal(to: fullTransaction.header.dataHash))).thenReturn(fullTransaction.outputs)
                             }
 
                             let transactions = syncer.pendingTransactions()

@@ -150,7 +150,7 @@ class Peer {
     private func handleVerackMessage() {
         log("<-- VERACK")
 
-        guard remotePeerValidated else {
+        guard remotePeerValidated && !connected else {
             return
         }
 
