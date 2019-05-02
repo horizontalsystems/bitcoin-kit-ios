@@ -20,6 +20,8 @@ class TransactionsController: UITableViewController {
         tableView.tableFooterView = UIView()
         tableView.separatorInset = .zero
 
+        tableView.estimatedRowHeight = 0
+
         segmentedControl.addTarget(self, action: #selector(onSegmentChanged), for: .valueChanged)
 
         Manager.shared.adapterSignal
