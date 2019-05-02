@@ -17,6 +17,8 @@ class BalanceController: UITableViewController {
         tableView.tableFooterView = UIView()
         tableView.separatorInset = .zero
 
+        tableView.estimatedRowHeight = 0
+
         Manager.shared.adapterSignal
                 .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
                 .observeOn(MainScheduler.instance)
