@@ -9,7 +9,7 @@ public class BitcoinCoreErrors {
         case wrongAddressPrefix
     }
 
-    public enum PeerGroup: Error {
+    public enum TransactionSendError: Error {
         case noConnectedPeers
         case peersNotSynced
     }

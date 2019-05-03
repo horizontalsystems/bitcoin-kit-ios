@@ -82,6 +82,7 @@
 		2FA5DA409AB91D54163250D7 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D9929AB239235F9B6895 /* Logger.swift */; };
 		2FA5DB74D510BA9F6D9525A4 /* BloomFilterManagerDelegateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D0A6A8C6C5A4E2AAFB74 /* BloomFilterManagerDelegateTests.swift */; };
 		2FA5DB7F5BD8E25DCAF9AC83 /* PeerAddressManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DF9ADB516A45C797889D /* PeerAddressManagerTests.swift */; };
+		2FA5DB9C8D95B29271961EBC /* SyncedReadyPeerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D4D1E3641CEC38D0BA61 /* SyncedReadyPeerManager.swift */; };
 		2FA5DBABD18D15E003686989 /* BlockSyncerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D2DDF60A9C5DA3776D8A /* BlockSyncerState.swift */; };
 		2FA5DBF35EDF66F6977BA032 /* ConnectionTimeoutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DEC11B1DA4DA336DBB28 /* ConnectionTimeoutManager.swift */; };
 		2FA5DC1C403D74796F4131EC /* InputSignerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DA9D7F78A26107F7209C /* InputSignerTests.swift */; };
@@ -118,7 +119,6 @@
 		58AAA2C85BFE1C624D1A1997 /* SigHashType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAA63CA9758D7D97E1416 /* SigHashType.swift */; };
 		58AAA2EC7A7825B8E4408AA7 /* ProofOfWorkValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAACDCDC4B51B6E2C9C07D /* ProofOfWorkValidatorTests.swift */; };
 		58AAA2F4990F1DAC17DE958D /* ScriptBuilderChain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA4F887DF0F5E9527C761 /* ScriptBuilderChain.swift */; };
-		58AAA310F3F3E245BC3999E1 /* SendTransactionsOnPeerSynced.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAF2029685F8157DD85BF /* SendTransactionsOnPeerSynced.swift */; };
 		58AAA317128E10EE72E0D0B1 /* BlockHashFetcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAD725CB287055DC7CCE5 /* BlockHashFetcherTests.swift */; };
 		58AAA321A8780859892D0C73 /* TransactionOutputExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAE28D740FD1FCF9DC1B2 /* TransactionOutputExtractorTests.swift */; };
 		58AAA32402EFCE6218A9D082 /* Signal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA6603AEA2159F6126D10 /* Signal.swift */; };
@@ -270,6 +270,7 @@
 		2FA5D3968E6E11AF76368CA5 /* PeerManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerManager.swift; sourceTree = "<group>"; };
 		2FA5D3F63860A15B55DC196E /* UnknownMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnknownMessage.swift; sourceTree = "<group>"; };
 		2FA5D4A92FB8C2376A9A0090 /* RequestTransactionTaskTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestTransactionTaskTests.swift; sourceTree = "<group>"; };
+		2FA5D4D1E3641CEC38D0BA61 /* SyncedReadyPeerManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SyncedReadyPeerManager.swift; sourceTree = "<group>"; };
 		2FA5D4E64129FF62BED7ADE7 /* BloomFilterManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BloomFilterManagerTests.swift; sourceTree = "<group>"; };
 		2FA5D50922572F91F966DD4A /* DataObjects.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataObjects.swift; sourceTree = "<group>"; };
 		2FA5D5A744085AD28EFBB868 /* Peer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Peer.swift; sourceTree = "<group>"; };
@@ -385,7 +386,6 @@
 		58AAAECE6429C4CBD7FD2394 /* UnspentOutputProviderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnspentOutputProviderTests.swift; sourceTree = "<group>"; };
 		58AAAED5E10009C0720D949E /* TransactionSizeCalculatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionSizeCalculatorTests.swift; sourceTree = "<group>"; };
 		58AAAEDC9D0D7BAE56C71DE0 /* BitcoinTestNetTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinTestNetTests.swift; sourceTree = "<group>"; };
-		58AAAF2029685F8157DD85BF /* SendTransactionsOnPeerSynced.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SendTransactionsOnPeerSynced.swift; sourceTree = "<group>"; };
 		58AAAF2482982ED7215EEBF9 /* ScriptBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScriptBuilder.swift; sourceTree = "<group>"; };
 		58AAAF2AC5C1330DFE1FAAD3 /* BitcoinCoreErrors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinCoreErrors.swift; sourceTree = "<group>"; };
 		58AAAF92B98343622D7D4964 /* Base58AddressConverter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Base58AddressConverter.swift; sourceTree = "<group>"; };
@@ -534,7 +534,6 @@
 				11B358F2406C382875DA91A2 /* Messages */,
 				D096D109219E95B800E8103F /* Peer */,
 				58AAAFDF237EA32A0C25548D /* Parsers */,
-				58AAAF2029685F8157DD85BF /* SendTransactionsOnPeerSynced.swift */,
 				58AAAAACEC07FF47326D89AD /* TransactionSender.swift */,
 			);
 			path = Network;
@@ -688,6 +687,7 @@
 				58AAA684704A912E02B1138B /* SyncManager.swift */,
 				58AAA983B426801C46003567 /* UnspentOutputSelector.swift */,
 				58AAA481A82D05C914AB0CCA /* UnspentOutputProvider.swift */,
+				2FA5D4D1E3641CEC38D0BA61 /* SyncedReadyPeerManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -1154,10 +1154,9 @@
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/../Pods/Target Support Files/Pods-BitcoinCoreTests/Pods-BitcoinCoreTests-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-BitcoinCoreTests/Pods-BitcoinCoreTests-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/HSCryptoKit/HSCryptoKit.framework",
 				"${BUILT_PRODUCTS_DIR}/HSHDWalletKit/HSHDWalletKit.framework",
-				"${BUILT_PRODUCTS_DIR}/RxAtomic/RxAtomic.framework",
 				"${BUILT_PRODUCTS_DIR}/RxSwift/RxSwift.framework",
 				"${BUILT_PRODUCTS_DIR}/Cuckoo/Cuckoo.framework",
 				"${BUILT_PRODUCTS_DIR}/Nimble/Nimble.framework",
@@ -1172,7 +1171,6 @@
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/HSCryptoKit.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/HSHDWalletKit.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxAtomic.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxSwift.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Cuckoo.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Nimble.framework",
@@ -1185,7 +1183,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/../Pods/Target Support Files/Pods-BitcoinCoreTests/Pods-BitcoinCoreTests-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BitcoinCoreTests/Pods-BitcoinCoreTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		D380FD6620FCC1C800276993 /* Cuckoo */ = {
@@ -1415,7 +1413,6 @@
 				58AAA3570F85F5A72E2377DB /* InventoryItemsHandlerChain.swift in Sources */,
 				58AAA29706D539111A919497 /* AbstractKit.swift in Sources */,
 				58AAA6DBA7D2439C4D5808B6 /* Base58AddressConverter.swift in Sources */,
-				58AAA310F3F3E245BC3999E1 /* SendTransactionsOnPeerSynced.swift in Sources */,
 				58AAAB857FAD14D8B361A248 /* TransactionSender.swift in Sources */,
 				58AAA789081293EB75B29A78 /* MempoolTransactions.swift in Sources */,
 				58AAAB219A1E5FFB2A1F37D1 /* AddressConverterChain.swift in Sources */,
@@ -1432,6 +1429,7 @@
 				58AAA74E89561DE6CCDC5EC3 /* BitcoinCoreErrors.swift in Sources */,
 				58AAA2F4990F1DAC17DE958D /* ScriptBuilderChain.swift in Sources */,
 				2FA5D15733A45ACBD4C5B3A6 /* OutputsCache.swift in Sources */,
+				2FA5DB9C8D95B29271961EBC /* SyncedReadyPeerManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

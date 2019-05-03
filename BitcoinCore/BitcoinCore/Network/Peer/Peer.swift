@@ -31,8 +31,6 @@ class Peer {
     var localBestBlockHeight: Int32 = 0
     // TODO seems like property connected is not needed. It is always true in PeerManager. Need to check it and remove
     var connected: Bool = false
-    var blockHashesSynced: Bool = false
-    var synced: Bool = false
 
     var ready: Bool {
         return connected && tasks.isEmpty
@@ -263,6 +261,9 @@ extension Peer: IPeer {
 
     func add(task: PeerTask) {
         tasks.append(task)
+        if tasks.count == 1 {
+            delegate?.peerBusy(self)
+        }
 
         task.delegate = self
         task.requester = self
