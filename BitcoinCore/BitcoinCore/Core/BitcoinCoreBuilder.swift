@@ -16,6 +16,7 @@ public class BitcoinCoreBuilder {
 
     private var blockHeaderHasher: IHasher?
     private var unspentOutputSelector: IUnspentOutputSelector?
+    private var transactionInfoConverter: ITransactionInfoConverter?
 
     // parameters with default values
     private var confirmationsThreshold = 6
@@ -84,6 +85,11 @@ public class BitcoinCoreBuilder {
         return self
     }
 
+    public func set(transactionInfoConverter: ITransactionInfoConverter) -> BitcoinCoreBuilder {
+        self.transactionInfoConverter = transactionInfoConverter
+        return self
+    }
+
     public func set(initialSyncApiUrl: String?) -> BitcoinCoreBuilder {
         self.initialSyncApiUrl = initialSyncApiUrl
         return self
@@ -126,7 +132,8 @@ public class BitcoinCoreBuilder {
 //        let storage = Storage(database, realmFactory)
 //
         let unspentOutputProvider = UnspentOutputProvider(storage: storage, confirmationsThreshold: confirmationsThreshold)
-        let dataProvider = DataProvider(storage: storage, unspentOutputProvider: unspentOutputProvider)
+        let transactionInfoConverter = self.transactionInfoConverter ?? TransactionInfoConverter(baseTransactionInfoConverter: BaseTransactionInfoConverter())
+        let dataProvider = DataProvider(storage: storage, unspentOutputProvider: unspentOutputProvider, transactionInfoConverter: transactionInfoConverter)
 
         let reachabilityManager = ReachabilityManager()
 

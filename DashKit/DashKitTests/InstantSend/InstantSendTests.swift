@@ -38,7 +38,6 @@ class InstantSendTests: QuickSpec {
                 }
             }
 
-
             describe("when task is transaction ix") {
                 let task = RequestTransactionLockRequestsTask(hashes: [])
                 let transactions = [DashTestData.transaction]
@@ -81,8 +80,9 @@ class InstantSendTests: QuickSpec {
                     beforeEach {
                         stub(mockInstantTransactionManager) { mock in
                             when(mock.instantTransactionInputs(for: any(), instantTransaction: any())).thenReturn(instantInputs)
-                            when(mock.increaseVoteCount(for: any())).thenDoNothing()
                             when(mock.isTransactionInstant(txHash: equal(to: txHash))).thenReturn(true)
+                            when(mock.updateInput(for: equal(to: inputTxHash), transactionInputs: equal(to: instantInputs))).thenDoNothing()
+
                         }
                         stub(mockLockVoteManager) { mock in
                             when(mock.add(checked: equal(to: lockVotes[0]))).thenDoNothing()
@@ -100,6 +100,7 @@ class InstantSendTests: QuickSpec {
 
                         verify(mockLockVoteManager).add(checked: equal(to: lockVotes[0]))
                         verify(mockLockVoteManager).validate(lockVote: equal(to: lockVotes[0]))
+                        verify(mockInstantTransactionManager).updateInput(for: equal(to: inputTxHash), transactionInputs: equal(to: instantInputs))
                         expect(handled).to(equal(true))
                     }
 
@@ -128,7 +129,7 @@ class InstantSendTests: QuickSpec {
                             let _ = instantSend.handleCompletedTask(peer: mockPeer, task: task)
                             self.waitForMainQueue()
 
-                            verify(mockInstantTransactionManager).increaseVoteCount(for: equal(to: inputTxHash))
+                            verify(mockInstantTransactionManager).updateInput(for: equal(to: inputTxHash), transactionInputs: equal(to: instantInputs))
                             verify(mockInstantTransactionManager).isTransactionInstant(txHash: equal(to: txHash))
                         }
                     }
@@ -142,7 +143,6 @@ class InstantSendTests: QuickSpec {
                             let _ = instantSend.handleCompletedTask(peer: mockPeer, task: task)
                             self.waitForMainQueue()
 
-                            verify(mockInstantTransactionManager, never()).increaseVoteCount(for: any())
                             verify(mockInstantTransactionManager, never()).isTransactionInstant(txHash: any())
                         }
                     }
@@ -162,111 +162,88 @@ class InstantSendTests: QuickSpec {
 
                 beforeEach {
                     stub(mockLockVoteManager) { mock in
-                        when(mock.inChecked(lvHash: equal(to: lvHash))).thenReturn(false)
-                        when(mock.inRelayed(lvHash: equal(to: lvHash))).thenReturn(false)
+                        when(mock.processed(lvHash: equal(to: lvHash))).thenReturn(false)
                     }
 
                 }
-                describe("when lockVote in checked") {
+                describe("when lockVote in processed") {
                     it("stops working and returns true") {
                         stub(mockLockVoteManager) { mock in
-                            when(mock.inChecked(lvHash: equal(to: lvHash))).thenReturn(true)
+                            when(mock.processed(lvHash: equal(to: lvHash))).thenReturn(true)
                         }
                         let handled = instantSend.handleCompletedTask(peer: mockPeer, task: task)
                         self.waitForMainQueue()
 
-                        verify(mockLockVoteManager).inChecked(lvHash: equal(to: lvHash))
-                        verify(mockLockVoteManager, never()).inRelayed(lvHash: equal(to: lvHash))
+                        verify(mockLockVoteManager).processed(lvHash: equal(to: lvHash))
                         expect(handled).to(equal(true))
                     }
                 }
-                describe("when lockVote is not in checked") {
+                describe("when lockVote is not processed") {
                     beforeEach {
                         stub(mockLockVoteManager) { mock in
-                            when(mock.inChecked(lvHash: equal(to: lvHash))).thenReturn(false)
+                            when(mock.processed(lvHash: equal(to: lvHash))).thenReturn(false)
                         }
                     }
-                    describe("when lockVote in relayed") {
-                        it("stops working and returns true") {
+                    describe("when it can't get instant inputs for lockvote") {
+                        it("adds lockVote to relayed and returns true") {
                             stub(mockLockVoteManager) { mock in
-                                when(mock.inRelayed(lvHash: equal(to: lvHash))).thenReturn(true)
+                                when(mock.add(relayed: equal(to: lockVotes[0]))).thenDoNothing()
+                            }
+                            stub(mockInstantTransactionManager) { mock in
+                                when(mock.instantTransactionInputs(for: equal(to: txHash), instantTransaction: equal(to: nil))).thenReturn([])
                             }
                             let handled = instantSend.handleCompletedTask(peer: mockPeer, task: task)
                             self.waitForMainQueue()
 
-                            verify(mockLockVoteManager).inRelayed(lvHash: equal(to: lvHash))
-                            verify(mockInstantTransactionManager, never()).instantTransactionInputs(for: any(), instantTransaction: any())
+                            verify(mockInstantTransactionManager).instantTransactionInputs(for: equal(to: txHash), instantTransaction: equal(to: nil))
+                            verify(mockLockVoteManager).add(relayed: equal(to: lockVotes[0]))
+                            verify(mockLockVoteManager, never()).add(checked: equal(to: lockVotes[0]))
                             expect(handled).to(equal(true))
                         }
                     }
-                    describe("when lockVote is not in relayed") {
+                    describe("when get inputs for lockvote") {
                         beforeEach {
+                            stub(mockInstantTransactionManager) { mock in
+                                when(mock.instantTransactionInputs(for: equal(to: txHash), instantTransaction: equal(to: nil))).thenReturn(instantInputs)
+                            }
                             stub(mockLockVoteManager) { mock in
-                                when(mock.inRelayed(lvHash: equal(to: lvHash))).thenReturn(false)
+                                when(mock.add(checked: equal(to: lockVotes[0]))).thenDoNothing()
+                                when(mock.validate(lockVote: equal(to: lockVotes[0]))).thenDoNothing()
                             }
                         }
-                        describe("when it can't get instant inputs for lockvote") {
-                            it("adds lockVote to relayed and returns true") {
+                        describe("when lockVote not validated") {
+                            it("adds to checked and stops work") {
                                 stub(mockLockVoteManager) { mock in
-                                    when(mock.add(relayed: equal(to: lockVotes[0]))).thenDoNothing()
+                                    when(mock.validate(lockVote: equal(to: lockVotes[0]))).thenThrow(DashKitErrors.LockVoteValidation.masternodeNotFound)
                                 }
-                                stub(mockInstantTransactionManager) { mock in
-                                    when(mock.instantTransactionInputs(for: equal(to: txHash), instantTransaction: equal(to: nil))).thenReturn([])
-                                }
-                                let handled = instantSend.handleCompletedTask(peer: mockPeer, task: task)
+                                let _ = instantSend.handleCompletedTask(peer: mockPeer, task: task)
                                 self.waitForMainQueue()
 
-                                verify(mockInstantTransactionManager).instantTransactionInputs(for: equal(to: txHash), instantTransaction: equal(to: nil))
-                                verify(mockLockVoteManager).add(relayed: equal(to: lockVotes[0]))
-                                verify(mockLockVoteManager, never()).add(checked: equal(to: lockVotes[0]))
-                                expect(handled).to(equal(true))
+                                verify(mockLockVoteManager).add(checked: equal(to: lockVotes[0]))
+                                verify(mockLockVoteManager).validate(lockVote: equal(to: lockVotes[0]))
+
+                                verify(mockInstantTransactionManager, never()).isTransactionInstant(txHash: equal(to: txHash))
                             }
-                        }
-                        describe("when get inputs for lockvote") {
-                            beforeEach {
-                                stub(mockInstantTransactionManager) { mock in
-                                    when(mock.instantTransactionInputs(for: equal(to: txHash), instantTransaction: equal(to: nil))).thenReturn(instantInputs)
-                                }
-                                stub(mockLockVoteManager) { mock in
-                                    when(mock.add(checked: equal(to: lockVotes[0]))).thenDoNothing()
-                                    when(mock.validate(lockVote: equal(to: lockVotes[0]))).thenDoNothing()
-                                }
-                            }
-                            describe("when lockVote not validated") {
-                                it("adds to checked and stops work") {
+                            describe("when lockVote is validated") {
+                                beforeEach {
                                     stub(mockLockVoteManager) { mock in
-                                        when(mock.validate(lockVote: equal(to: lockVotes[0]))).thenThrow(DashKitErrors.LockVoteValidation.masternodeNotFound)
+                                        when(mock.validate(lockVote: equal(to: lockVotes[0]))).thenDoNothing()
                                     }
-                                    let _ = instantSend.handleCompletedTask(peer: mockPeer, task: task)
+                                    stub(mockInstantTransactionManager) { mock in
+                                        when(mock.isTransactionInstant(txHash: equal(to: txHash))).thenReturn(true)
+                                        when(mock.updateInput(for: equal(to: inputTxHash), transactionInputs: equal(to: instantInputs))).thenDoNothing()
+                                    }
+                                }
+                                it("increases vote count and checks transaction is instant") {
+                                    let handled = instantSend.handleCompletedTask(peer: mockPeer, task: task)
                                     self.waitForMainQueue()
 
                                     verify(mockLockVoteManager).add(checked: equal(to: lockVotes[0]))
                                     verify(mockLockVoteManager).validate(lockVote: equal(to: lockVotes[0]))
 
-                                    verify(mockInstantTransactionManager, never()).increaseVoteCount(for: equal(to: inputTxHash))
-                                    verify(mockInstantTransactionManager, never()).isTransactionInstant(txHash: equal(to: txHash))
-                                }
-                                describe("when lockVote is validated") {
-                                    beforeEach {
-                                        stub(mockLockVoteManager) { mock in
-                                            when(mock.validate(lockVote: equal(to: lockVotes[0]))).thenDoNothing()
-                                        }
-                                        stub(mockInstantTransactionManager) { mock in
-                                            when(mock.increaseVoteCount(for: equal(to: inputTxHash))).thenDoNothing()
-                                            when(mock.isTransactionInstant(txHash: equal(to: txHash))).thenReturn(true)
-                                        }
-                                    }
-                                    it("increases vote count and checks transaction is instant") {
-                                        let handled = instantSend.handleCompletedTask(peer: mockPeer, task: task)
-                                        self.waitForMainQueue()
-
-                                        verify(mockLockVoteManager).add(checked: equal(to: lockVotes[0]))
-                                        verify(mockLockVoteManager).validate(lockVote: equal(to: lockVotes[0]))
-
-                                        verify(mockInstantTransactionManager).increaseVoteCount(for: equal(to: inputTxHash))
-                                        verify(mockInstantTransactionManager).isTransactionInstant(txHash: equal(to: txHash))
-                                        expect(handled).to(equal(true))
-                                    }
+                                    verify(mockInstantTransactionManager).updateInput(for: equal(to: inputTxHash), transactionInputs: equal(to: instantInputs))
+                                    verify(mockInstantTransactionManager).isTransactionInstant(txHash: equal(to: txHash))
+                                    expect(handled).to(equal(true))
                                 }
                             }
                         }

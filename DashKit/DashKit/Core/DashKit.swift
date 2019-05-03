@@ -36,6 +36,7 @@ public class DashKit: AbstractKit {
 
         let transactionSizeCalculator = TransactionSizeCalculator()
         let unspentOutputSelector = DashUnspentOutputSelector(calculator: transactionSizeCalculator)
+        let dashTransactionInfoConverter = DashTransactionInfoConverter(baseTransactionInfoConverter: BaseTransactionInfoConverter())
 
         let bitcoinCore = try BitcoinCoreBuilder(minLogLevel: minLogLevel)
                 .set(network: network)
@@ -48,6 +49,7 @@ public class DashKit: AbstractKit {
                 .set(newWallet: newWallet)
                 .set(blockHeaderHasher: x11Hasher)
                 .set(unspentOutputSelector: unspentOutputSelector)
+                .set(transactionInfoConverter: dashTransactionInfoConverter)
                 .build()
 
         super.init(bitcoinCore: bitcoinCore, network: network)
@@ -95,7 +97,8 @@ public class DashKit: AbstractKit {
         let instantSendFactory = InstantSendFactory()
         let instantTransactionSyncer = InstantTransactionSyncer(transactionSyncer: bitcoinCore.transactionSyncer)
         let lockVoteManager = TransactionLockVoteManager(transactionLockVoteValidator: transactionLockVoteValidator)
-        let instantTransactionManager = InstantTransactionManager(storage: storage, instantSendFactory: instantSendFactory, transactionLockVoteValidator: transactionLockVoteValidator)
+        let instantTransactionState = InstantTransactionState()
+        let instantTransactionManager = InstantTransactionManager(storage: storage, instantSendFactory: instantSendFactory, instantTransactionState: instantTransactionState)
 
         let instantSend = InstantSend(transactionSyncer: instantTransactionSyncer, lockVoteManager: lockVoteManager, instantTransactionManager: instantTransactionManager)
 
@@ -107,6 +110,18 @@ public class DashKit: AbstractKit {
 
     public override func send(to address: String, value: Int, feeRate: Int) throws {
         try super.send(to: address, value: value, feeRate: 1)
+    }
+
+    public func transactions(fromHash: String?, limit: Int?) -> Single<[DashTransactionInfo]> {
+        return super.transactions(fromHash: fromHash, limit: limit).map { $0.compactMap { $0 as? DashTransactionInfo } }
+    }
+}
+
+public class DashTransactionInfo: TransactionInfo {
+    public var instantTx: Bool = false
+
+    public required init(transactionHash: String, transactionIndex: Int, from: [TransactionAddressInfo], to: [TransactionAddressInfo], amount: Int, blockHeight: Int?, timestamp: Int) {
+        super.init(transactionHash: transactionHash, transactionIndex: transactionIndex, from: from, to: to, amount: amount, blockHeight: blockHeight, timestamp: timestamp)
     }
 
 }

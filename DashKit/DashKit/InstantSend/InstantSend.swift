@@ -60,10 +60,7 @@ extension InstantSend: IPeerTaskHandler {
 
     private func handle(transactionLockVotes: [TransactionLockVoteMessage]) {
         for vote in transactionLockVotes {
-            guard !lockVoteManager.inChecked(lvHash: vote.hash) else {
-                continue
-            }
-            guard !lockVoteManager.inRelayed(lvHash: vote.hash) else {
+            guard !lockVoteManager.processed(lvHash: vote.hash) else {
                 continue
             }
             let inputs = instantTransactionManager.instantTransactionInputs(for: vote.txHash, instantTransaction: nil)
@@ -77,8 +74,6 @@ extension InstantSend: IPeerTaskHandler {
 
     private func handle(lockVote: TransactionLockVoteMessage, instantInputs: [InstantTransactionInput]) {
         lockVoteManager.add(checked: lockVote)
-
-
         // ignore votes for inputs which already has 6 votes
         guard let input = instantInputs.first(where: { $0.inputTxHash == lockVote.outpoint.txHash }), input.voteCount < InstantSend.requiredVoteCount else {
             return
@@ -86,7 +81,8 @@ extension InstantSend: IPeerTaskHandler {
 
         do {
             try lockVoteManager.validate(lockVote: lockVote)
-            instantTransactionManager.increaseVoteCount(for: lockVote.outpoint.txHash)
+            try instantTransactionManager.updateInput(for: lockVote.outpoint.txHash, transactionInputs: instantInputs)
+
             let instant = instantTransactionManager.isTransactionInstant(txHash: lockVote.txHash)
             if instant {
                 print("WE GOT INSTANT TRANSACTION!!!")

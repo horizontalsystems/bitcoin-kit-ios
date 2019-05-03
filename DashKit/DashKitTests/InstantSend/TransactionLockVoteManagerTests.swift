@@ -28,23 +28,19 @@ class TransactionLockVoteManagerTests: QuickSpec {
 
         describe("#add(relayed: TransactionLockVoteMessage)") {
             it("has initially empty set") {
-                let relayed = manager.takeRelayedLockVotes(for: lockVotes[0].txHash)
-
-                expect(relayed).to(equal([]))
+                expect(manager.checkedLockVotes).to(equal([]))
             }
             it("adds same lockVotes") {
                 manager.add(relayed: lockVotes[0])
                 manager.add(relayed: lockVotes[0])
 
-                let relayed = manager.takeRelayedLockVotes(for: lockVotes[0].txHash)
-                expect(relayed).to(equal([lockVotes[0]]))
+                expect(manager.relayedLockVotes.contains(lockVotes[0])).to(equal(true))
             }
             it("adds different lockVotes") {
                 manager.add(relayed: lockVotes[0])
                 manager.add(relayed: lockVotes[1])
 
-                let relayed = manager.takeRelayedLockVotes(for: lockVotes[0].txHash)
-                expect(relayed).to(equal([lockVotes[0], lockVotes[1]]))
+                expect(manager.relayedLockVotes).to(equal([lockVotes[0], lockVotes[1]]))
             }
         }
         describe("#takeRelayedLockVotes(for txHash: Data)") {
@@ -61,31 +57,35 @@ class TransactionLockVoteManagerTests: QuickSpec {
                 expect(votes).to(equal([]))
             }
             it("returns one element and remove it") {
-                let txHash = Data(repeating: 3, count: 2)
+                let txHash = Data(repeating: 0, count: 2)
                 let votes = manager.takeRelayedLockVotes(for: txHash)
 
-                expect(votes).to(equal([lockVotes[3]]))
-                expect(manager.inRelayed(lvHash: lockVotes[3].hash)).to(equal(false))
+                expect(votes).to(equal([lockVotes[0], lockVotes[1]]))
             }
             // sorting and return for same elements checked in #add method
         }
-        describe("#inRelayed(lvHash: Data) -> Bool") {
+        describe("#processed(lvHash: Data) -> Bool") {
+            let relayed = [lockVotes[0], lockVotes[1]]
+            let checked = [lockVotes[2], lockVotes[3]]
             beforeEach {
-                lockVotes.forEach {
+                relayed.forEach {
                     manager.add(relayed: $0)
+                }
+                checked.forEach {
+                    manager.add(checked: $0)
                 }
             }
 
-            it("checks relayed") {
-                let lvHash = Data(repeating: 5, count: 2)
-
-                let votes = manager.inRelayed(lvHash: lvHash)
-                expect(votes).to(equal(true))
+            it("checks processed") {
+                lockVotes.forEach {
+                    let votes = manager.processed(lvHash: $0.hash)
+                    expect(votes).to(equal(true))
+                }
             }
-            it("checks not relayed") {
+            it("checks not processed") {
                 let lvHash = Data(repeating: 4, count: 2)
 
-                let votes = manager.inRelayed(lvHash: lvHash)
+                let votes = manager.processed(lvHash: lvHash)
                 expect(votes).to(equal(false))
             }
         }
@@ -94,32 +94,17 @@ class TransactionLockVoteManagerTests: QuickSpec {
                 manager.add(checked: lockVotes[0])
                 manager.add(checked: lockVotes[0])
 
-                expect(manager.inChecked(lvHash: lockVotes[0].hash)).to(equal(true))
+                expect(manager.checkedLockVotes.contains(lockVotes[0])).to(equal(true))
             }
             it("adds different lockVotes") {
                 manager.add(checked: lockVotes[0])
                 manager.add(checked: lockVotes[1])
 
-                expect(manager.inChecked(lvHash: lockVotes[0].hash)).to(equal(true))
-                expect(manager.inChecked(lvHash: lockVotes[1].hash)).to(equal(true))
+                expect(manager.checkedLockVotes.contains(lockVotes[0])).to(equal(true))
+                expect(manager.checkedLockVotes.contains(lockVotes[1])).to(equal(true))
             }
         }
 
-        describe("#inChecked(lvHash: Data) -> Bool") {
-            beforeEach {
-                lockVotes.forEach {
-                    manager.add(checked: $0)
-                }
-            }
-            it("checks relayed") {
-                let lvHash = Data(repeating: 5, count: 2)
-                expect(manager.inChecked(lvHash: lvHash)).to(equal(true))
-            }
-            it("checks not relayed") {
-                let lvHash = Data(repeating: 4, count: 2)
-                expect(manager.inChecked(lvHash: lvHash)).to(equal(false))
-            }
-        }
         describe("#removeCheckedLockVotes(for txHash: Data)") {
             beforeEach {
                 lockVotes.forEach {
@@ -128,13 +113,13 @@ class TransactionLockVoteManagerTests: QuickSpec {
             }
             it("returns remove all elements for txHash but leave others") {
                 let txHashForRemoving = lockVotes[0].txHash
-                expect(manager.inChecked(lvHash: lockVotes[0].hash)).to(equal(true))
-                expect(manager.inChecked(lvHash: lockVotes[1].hash)).to(equal(true))
+                expect(manager.checkedLockVotes.contains(lockVotes[0])).to(equal(true))
+                expect(manager.checkedLockVotes.contains(lockVotes[1])).to(equal(true))
 
                 manager.removeCheckedLockVotes(for: txHashForRemoving)
 
-                expect(manager.inChecked(lvHash: lockVotes[0].hash)).to(equal(false))
-                expect(manager.inChecked(lvHash: lockVotes[1].hash)).to(equal(false))
+                expect(manager.checkedLockVotes.contains(lockVotes[0])).to(equal(false))
+                expect(manager.checkedLockVotes.contains(lockVotes[1])).to(equal(false))
             }
         }
 

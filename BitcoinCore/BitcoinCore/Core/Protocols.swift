@@ -413,13 +413,25 @@ protocol IKitStateProviderDelegate: class {
     func handleKitStateUpdate(state: BitcoinCore.KitState)
 }
 
+public protocol ITransactionInfo: class {
+    init(transactionHash: String, transactionIndex: Int, from: [TransactionAddressInfo], to: [TransactionAddressInfo], amount: Int, blockHeight: Int?, timestamp: Int)
+}
+
+public protocol IBaseTransactionInfoConverter {
+    func transactionInfo<T: TransactionInfo>(fromTransaction transactionForInfo: FullTransactionForInfo) -> T
+}
+
+public protocol ITransactionInfoConverter {
+    func transactionInfo(fromTransaction transactionForInfo: FullTransactionForInfo) -> TransactionInfo
+}
+
 protocol IDataProvider {
     var delegate: IDataProviderDelegate? { get set }
 
     var lastBlockInfo: BlockInfo? { get }
     var balance: Int { get }
-    func transactions(fromHash: String?, limit: Int?) -> Single<[TransactionInfo]>
     var debugInfo: String { get }
+    func transactions(fromHash: String?, limit: Int?) -> Single<[TransactionInfo]>
 }
 
 protocol IDataProviderDelegate: class {

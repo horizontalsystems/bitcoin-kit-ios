@@ -10,7 +10,7 @@ class InstantTransactionManagerTests: QuickSpec {
     override func spec() {
         let mockStorage = MockIDashStorage()
         let mockInstantSendFactory = MockIInstantSendFactory()
-        let mockTransactionValidator = MockITransactionLockVoteValidator()
+        let mockState = MockIInstantTransactionState()
 
         var manager: InstantTransactionManager!
 
@@ -19,26 +19,38 @@ class InstantTransactionManagerTests: QuickSpec {
         let inputTxHash = Data(transaction.inputs[0].previousOutputTxHash)
 
         let instantInputs = [InstantTransactionInput(txHash: txHash, inputTxHash: inputTxHash, timeCreated: 0, voteCount: 0, blockHeight: nil)]
+        let hashes = [Data(repeating: 1, count: 2), Data(repeating: 2, count: 2)]
 
         beforeEach {
             stub(mockStorage) { mock in
                 when(mock.add(instantTransactionInput: any())).thenDoNothing()
+                when(mock.instantTransactionHashes()).thenReturn(hashes)
             }
-            stub(mockTransactionValidator) { mock in
-                when(mock.validate(quorumModifierHash: any(), masternodeProTxHash: any())).thenDoNothing()
+            stub(mockState) { mock in
+                when(mock.instantTransactionHashes.set(any())).thenDoNothing()
             }
             stub(mockInstantSendFactory) { mock in
                 when(mock.instantTransactionInput(txHash: equal(to: txHash), inputTxHash: equal(to: inputTxHash), voteCount: 0, blockHeight: equal(to: nil))).thenReturn(instantInputs[0])
             }
-            manager = InstantTransactionManager(storage: mockStorage, instantSendFactory: mockInstantSendFactory, transactionLockVoteValidator: mockTransactionValidator)
+            manager = InstantTransactionManager(storage: mockStorage, instantSendFactory: mockInstantSendFactory, instantTransactionState: mockState)
         }
 
         afterEach {
-            reset(mockStorage, mockInstantSendFactory, mockTransactionValidator)
+            reset(mockStorage, mockState, mockInstantSendFactory)
             manager = nil
         }
-
+        describe("#init") {
+            it("puts tx hashes to state from storage") {
+                verify(mockStorage).instantTransactionHashes()
+                verify(mockState).instantTransactionHashes.set(equal(to: hashes))
+            }
+        }
         describe("#instantTransactionInputs(for txHash: Data, instantTransaction: FullTransaction?)") {
+            beforeEach {
+                stub(mockStorage) { mock in
+                    when(mock.instantTransactionHashes()).thenReturn([])
+                }
+            }
             it("returns inputs from storage") {
                 stub(mockStorage) { mock in
                     when(mock.instantTransactionInputs(for: equal(to: txHash))).thenReturn(instantInputs)
@@ -48,7 +60,6 @@ class InstantTransactionManagerTests: QuickSpec {
                 expect(inputs).to(equal(instantInputs))
                 verify(mockStorage).instantTransactionInputs(for: equal(to: txHash))
                 verifyNoMoreInteractions(mockInstantSendFactory)
-                verifyNoMoreInteractions(mockTransactionValidator)
             }
             it("returns inputs from instant transaction") {
                 stub(mockStorage) { mock in
@@ -60,8 +71,6 @@ class InstantTransactionManagerTests: QuickSpec {
                 verify(mockStorage).instantTransactionInputs(for: equal(to: txHash))
                 verify(mockInstantSendFactory).instantTransactionInput(txHash: equal(to: txHash), inputTxHash: equal(to: inputTxHash), voteCount: 0, blockHeight: equal(to: nil))
                 verify(mockStorage).add(instantTransactionInput: equal(to: instantInputs[0]))
-
-                verifyNoMoreInteractions(mockTransactionValidator)
             }
             it("returns inputs from instant transaction") {
                 stub(mockStorage) { mock in
@@ -75,76 +84,85 @@ class InstantTransactionManagerTests: QuickSpec {
                 verify(mockStorage).inputs(transactionHash: equal(to: txHash))
                 verify(mockInstantSendFactory).instantTransactionInput(txHash: equal(to: txHash), inputTxHash: equal(to: inputTxHash), voteCount: 0, blockHeight: equal(to: nil))
                 verify(mockStorage).add(instantTransactionInput: equal(to: instantInputs[0]))
-
-                verifyNoMoreInteractions(mockTransactionValidator)
             }
         }
+        describe("#updateInput(for inputTxHash: Data, transactionInputs: [InstantTransactionInput])") {
+            it("stops work if can't find input for vote") {
+                let lockVote = DashTestData.transactionLockVote(txHash: txHash, inputTxHash: Data(repeating: 9, count: 9))
 
-        describe("#increaseVoteCount(for input: InstantTransactionInput)") {
-            it("ignores increase if can't get input from storage") {
-                stub(mockStorage) { mock in
-                    when(mock.instantTransactionInput(for: equal(to: inputTxHash))).thenReturn(nil)
+                do {
+                    try manager.updateInput(for: lockVote.outpoint.txHash, transactionInputs: instantInputs)
+                } catch let error as DashKitErrors.LockVoteValidation {
+                    expect(error).to(equal(DashKitErrors.LockVoteValidation.txInputNotFound))
+                } catch {
+                    XCTFail("Wrong Error!")
                 }
-
-                manager.increaseVoteCount(for: instantInputs[0].inputTxHash)
-
-                verify(mockInstantSendFactory, never()).instantTransactionInput(txHash: any(), inputTxHash: any(), voteCount: any(), blockHeight: any())
-                verify(mockStorage, never()).add(instantTransactionInput: any())
             }
-            it("adds 1 for input and save to storage") {
-                let expectedInput = InstantTransactionInput(txHash: txHash, inputTxHash: inputTxHash, timeCreated: 0, voteCount: 1, blockHeight: nil)
-                stub(mockStorage) { mock in
-                    when(mock.instantTransactionInput(for: equal(to: inputTxHash))).thenReturn(instantInputs[0])
+            describe("when found input") {
+                let lockVote = DashTestData.transactionLockVote(txHash: txHash, inputTxHash: inputTxHash)
+                let updatedInput = InstantTransactionInput(txHash: txHash, inputTxHash: inputTxHash, timeCreated: 0, voteCount: 1, blockHeight: nil)
+                beforeEach {
+                    stub(mockStorage) { mock in
+                        when(mock.add(instantTransactionInput: equal(to: instantInputs[0]))).thenDoNothing()
+                    }
+                    stub(mockInstantSendFactory) { mock in
+                        when(mock.instantTransactionInput(txHash: equal(to: txHash), inputTxHash: equal(to: inputTxHash), voteCount: 1, blockHeight: equal(to: nil))).thenReturn(updatedInput)
+                    }
                 }
-                stub(mockInstantSendFactory) { mock in
-                    when(mock.instantTransactionInput(txHash: equal(to: txHash), inputTxHash: equal(to: inputTxHash), voteCount: 1, blockHeight: equal(to: nil))).thenReturn(expectedInput)
+                it("increases input and saves to storage") {
+                    try! manager.updateInput(for: lockVote.outpoint.txHash, transactionInputs: instantInputs)
+                    verify(mockInstantSendFactory).instantTransactionInput(txHash: equal(to: txHash), inputTxHash: equal(to: inputTxHash), voteCount: 1, blockHeight: equal(to: nil))
+                    verify(mockStorage).add(instantTransactionInput: equal(to: instantInputs[0]))
                 }
-
-                manager.increaseVoteCount(for: instantInputs[0].inputTxHash)
-
-                verify(mockInstantSendFactory).instantTransactionInput(txHash: equal(to: expectedInput.txHash), inputTxHash: equal(to: expectedInput.inputTxHash), voteCount: 1, blockHeight: equal(to: nil))
-                verify(mockStorage).add(instantTransactionInput: equal(to: expectedInput))
+                it("stops work if not all inputs has expected voteCount") {
+                    try! manager.updateInput(for: lockVote.outpoint.txHash, transactionInputs: instantInputs)
+                    verify(mockState, never()).append(equal(to: txHash))
+                    verify(mockStorage, never()).add(instantTransactionHash: equal(to: txHash))
+                }
+                describe("when all inputs has expected voteCount") {
+                    let inputs = [InstantTransactionInput(txHash: txHash, inputTxHash: inputTxHash, timeCreated: 0, voteCount: 5, blockHeight: nil),
+                                         InstantTransactionInput(txHash: txHash, inputTxHash: Data(repeating: 8, count: 2), timeCreated: 0, voteCount: 6, blockHeight: nil)
+                    ]
+                    let updatedInput = InstantTransactionInput(txHash: txHash, inputTxHash: inputTxHash, timeCreated: 0, voteCount: 6, blockHeight: nil)
+                    beforeEach {
+                        stub(mockStorage) { mock in
+                            when(mock.add(instantTransactionHash: equal(to: txHash))).thenDoNothing()
+                        }
+                        stub(mockInstantSendFactory) { mock in
+                            when(mock.instantTransactionInput(txHash: equal(to: txHash), inputTxHash: equal(to: inputTxHash), voteCount: 6, blockHeight: equal(to: nil))).thenReturn(updatedInput)
+                        }
+                        stub(mockState) { mock in
+                            when(mock.append(equal(to: txHash))).thenDoNothing()
+                        }
+                    }
+                    it("appends txHash to state and storage") {
+                        try! manager.updateInput(for: lockVote.outpoint.txHash, transactionInputs: inputs)
+                        verify(mockState).append(equal(to: txHash))
+                        verify(mockStorage).add(instantTransactionHash: equal(to: txHash))
+                    }
+                }
             }
         }
         describe("#isTransactionInstant(txHash: Data)") {
-            it("returns false when can't find inputs") {
-                stub(mockStorage) { mock in
-                    when(mock.instantTransactionInputs(for: equal(to: txHash))).thenReturn([])
+            beforeEach {
+                stub(mockState) {mock in
+                    when(mock.instantTransactionHashes.get).thenReturn([])
                 }
+            }
+            it("returns false when can't find txHash") {
                 let instant = manager.isTransactionInstant(txHash: txHash)
 
                 expect(instant).to(equal(false))
-                verify(mockStorage).instantTransactionInputs(for: equal(to: txHash))
+                verify(mockState).instantTransactionHashes.get()
             }
-            it("returns false when some inputs has less than 6 votes") {
-                let instantInputs = [
-                    InstantTransactionInput(txHash: txHash, inputTxHash: inputTxHash, timeCreated: 0, voteCount: 6, blockHeight: nil),
-                    InstantTransactionInput(txHash: txHash, inputTxHash: inputTxHash, timeCreated: 0, voteCount: 5, blockHeight: nil),
-                    InstantTransactionInput(txHash: txHash, inputTxHash: inputTxHash, timeCreated: 0, voteCount: 6, blockHeight: nil),
-                ]
-
-                stub(mockStorage) { mock in
-                    when(mock.instantTransactionInputs(for: equal(to: txHash))).thenReturn(instantInputs)
-                }
-                let instant = manager.isTransactionInstant(txHash: txHash)
-
-                expect(instant).to(equal(false))
-                verify(mockStorage).instantTransactionInputs(for: equal(to: txHash))
-            }
-            it("returns true when all inputs has more 5 votes") {
-                let instantInputs = [
-                    InstantTransactionInput(txHash: txHash, inputTxHash: inputTxHash, timeCreated: 0, voteCount: 6, blockHeight: nil),
-                    InstantTransactionInput(txHash: txHash, inputTxHash: inputTxHash, timeCreated: 0, voteCount: 7, blockHeight: nil),
-                    InstantTransactionInput(txHash: txHash, inputTxHash: inputTxHash, timeCreated: 0, voteCount: 6, blockHeight: nil),
-                ]
-
-                stub(mockStorage) { mock in
-                    when(mock.instantTransactionInputs(for: equal(to: txHash))).thenReturn(instantInputs)
+            it("returns true when hashes contains txHash") {
+                stub(mockState) { mock in
+                    when(mock.instantTransactionHashes.get).thenReturn([txHash])
                 }
                 let instant = manager.isTransactionInstant(txHash: txHash)
 
                 expect(instant).to(equal(true))
-                verify(mockStorage).instantTransactionInputs(for: equal(to: txHash))
+                verify(mockState).instantTransactionHashes.get()
             }
         }
     }

@@ -42,6 +42,14 @@ class DashGrdbStorage: GrdbStorage {
             }
         }
 
+        migrator.registerMigration("createInstantTransactionHashes") { db in
+            try db.create(table: InstantTransactionHash.databaseTableName) { t in
+                t.column(InstantTransactionHash.Columns.txHash.name, .text).notNull()
+
+                t.primaryKey([InstantTransactionHash.Columns.txHash.name], onConflict: .ignore)
+            }
+        }
+
         return migrator
     }
 
@@ -50,6 +58,7 @@ class DashGrdbStorage: GrdbStorage {
             try Masternode.deleteAll(db)
             try MasternodeListState.deleteAll(db)
             try InstantTransactionInput.deleteAll(db)
+            try InstantTransactionHash.deleteAll(db)
         }
         try super.clearGrdb()
     }
@@ -88,6 +97,18 @@ extension DashGrdbStorage: IDashStorage {
             _ = try? dbPool.write { db in
                 try newValue.insert(db)
             }
+        }
+    }
+
+    func instantTransactionHashes() -> [Data] {
+        return try! dbPool.read { db in
+            try InstantTransactionHash.fetchAll(db).map { $0.txHash }
+        }
+    }
+
+    func add(instantTransactionHash: Data) {
+        _ = try? dbPool.write { db in
+            try InstantTransactionHash(txHash: instantTransactionHash).insert(db)
         }
     }
 
