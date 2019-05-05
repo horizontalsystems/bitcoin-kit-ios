@@ -48,6 +48,9 @@ extension MasternodeListSyncer: IPeerSyncListener {
         assignNextSyncPeer()
     }
 
+    public func onPeerNotSynced(peer: IPeer) {
+    }
+
 }
 
 extension MasternodeListSyncer: IPeerGroupListener {

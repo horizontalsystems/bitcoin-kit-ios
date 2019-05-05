@@ -32,6 +32,7 @@ public class BitcoinCore {
 
     public var peerGroup: IPeerGroup
     public var initialBlockDownload: IInitialBlockDownload
+    public var syncedReadyPeerManager: ISyncedReadyPeerManager
     public var transactionSyncer: ITransactionSyncer
 
     let blockValidatorChain: BlockValidatorChain
@@ -53,6 +54,10 @@ public class BitcoinCore {
 
     public func add(peerSyncListener: IPeerSyncListener) {
         initialBlockDownload.add(peerSyncListener: peerSyncListener)
+    }
+
+    public func add(peerSyncAndReadyListeners: IPeerSyncAndReadyListeners) {
+        syncedReadyPeerManager.add(listener: peerSyncAndReadyListeners)
     }
 
     @discardableResult public func add(messageParser: IMessageParser) -> Self {
@@ -83,7 +88,7 @@ public class BitcoinCore {
     public weak var delegate: BitcoinCoreDelegate?
 
     init(storage: IStorage, cache: OutputsCache, dataProvider: IDataProvider & IBlockchainDataListener,
-                peerGroup: IPeerGroup, initialBlockDownload: IInitialBlockDownload, transactionSyncer: ITransactionSyncer,
+                peerGroup: IPeerGroup, initialBlockDownload: IInitialBlockDownload, syncedReadyPeerManager: ISyncedReadyPeerManager, transactionSyncer: ITransactionSyncer,
                 blockValidatorChain: BlockValidatorChain, addressManager: IAddressManager, addressConverter: AddressConverterChain, kitStateProvider: IKitStateProvider & ISyncStateListener,
                 scriptBuilder: ScriptBuilderChain, transactionBuilder: ITransactionBuilder, transactionCreator: ITransactionCreator,
                 paymentAddressParser: IPaymentAddressParser, networkMessageParser: NetworkMessageParser, networkMessageSerializer: NetworkMessageSerializer,
@@ -93,6 +98,7 @@ public class BitcoinCore {
         self.dataProvider = dataProvider
         self.peerGroup = peerGroup
         self.initialBlockDownload = initialBlockDownload
+        self.syncedReadyPeerManager = syncedReadyPeerManager
         self.transactionSyncer = transactionSyncer
         self.blockValidatorChain = blockValidatorChain
         self.addressManager = addressManager

@@ -184,12 +184,6 @@ public class BitcoinCoreBuilder {
         let transactionSyncer = TransactionSyncer(storage: storage, processor: transactionProcessor, addressManager: addressManager, bloomFilterManager: bloomFilterManager)
         let mempoolTransactions = MempoolTransactions(transactionSyncer: transactionSyncer)
 
-        let transactionSender = TransactionSender(transactionSyncer: transactionSyncer, peerGroup: peerGroup, logger: logger)
-        let inputSigner = InputSigner(hdWallet: hdWallet, network: network)
-        let scriptBuilder = ScriptBuilderChain()
-        let transactionBuilder = TransactionBuilder(unspentOutputSelector: unspentOutputSelector, unspentOutputProvider: unspentOutputProvider, addressManager: addressManager, addressConverter: addressConverter, inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory)
-        let transactionCreator = TransactionCreator(transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, transactionSender: transactionSender)
-
         let initialSyncApiUrl = self.initialSyncApiUrl ?? "http://btc-testnet.horizontalsystems.xyz/apg"//todo dash can't initial sync blocks. Must avoid creation of blockDiscovery
         let bcoinApi = BCoinApi(url: initialSyncApiUrl)
 
@@ -208,6 +202,13 @@ public class BitcoinCoreBuilder {
         let blockchain = Blockchain(storage: storage, blockValidator: blockValidatorChain, factory: factory, listener: dataProvider)
         let blockSyncer = BlockSyncer.instance(storage: storage, network: network, factory: factory, listener: kitStateProvider, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager, logger: logger)
         let initialBlockDownload = InitialBlockDownload(blockSyncer: blockSyncer, peerManager: peerManager, syncStateListener: kitStateProvider, logger: logger)
+        let syncedReadyPeerManager = SyncedReadyPeerManager(peerGroup: peerGroup, initialBlockDownload: initialBlockDownload)
+
+        let inputSigner = InputSigner(hdWallet: hdWallet, network: network)
+        let scriptBuilder = ScriptBuilderChain()
+        let transactionBuilder = TransactionBuilder(unspentOutputSelector: unspentOutputSelector, unspentOutputProvider: unspentOutputProvider, addressManager: addressManager, addressConverter: addressConverter, inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory)
+        let transactionSender = TransactionSender(transactionSyncer: transactionSyncer, peerManager: peerManager, initialBlockDownload: initialBlockDownload, syncedReadyPeerManager: syncedReadyPeerManager, logger: logger)
+        let transactionCreator = TransactionCreator(transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, transactionSender: transactionSender)
 
 
         let bitcoinCore = BitcoinCore(storage: storage,
@@ -215,6 +216,7 @@ public class BitcoinCoreBuilder {
                 dataProvider: dataProvider,
                 peerGroup: peerGroup,
                 initialBlockDownload: initialBlockDownload,
+                syncedReadyPeerManager: syncedReadyPeerManager,
                 transactionSyncer: transactionSyncer,
                 blockValidatorChain: blockValidatorChain,
                 addressManager: addressManager,
@@ -271,7 +273,9 @@ public class BitcoinCoreBuilder {
         bitcoinCore.add(peerTaskHandler: initialBlockDownload)
         bitcoinCore.add(inventoryItemsHandler: initialBlockDownload)
         bitcoinCore.add(peerGroupListener: initialBlockDownload)
-        bitcoinCore.add(peerSyncListener: SendTransactionsOnPeerSynced(transactionSender: transactionSender))
+        bitcoinCore.add(peerGroupListener: syncedReadyPeerManager)
+        bitcoinCore.add(peerSyncListener: syncedReadyPeerManager)
+        bitcoinCore.add(peerSyncAndReadyListeners: transactionSender)
         bitcoinCore.add(peerTaskHandler: mempoolTransactions)
         bitcoinCore.add(inventoryItemsHandler: mempoolTransactions)
         bitcoinCore.add(peerGroupListener: mempoolTransactions)

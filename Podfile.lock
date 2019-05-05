@@ -1,21 +1,18 @@
 PODS:
-  - Alamofire (4.8.1)
+  - Alamofire (4.8.2)
   - BigInt (4.0.0)
   - Cuckoo (0.12.1)
-  - GRDB.swift (3.6.2)
+  - GRDB.swift (3.7.0)
   - HSCryptoKit (1.3.0)
   - HSCryptoX11 (1.0.0)
   - HSHDWalletKit (1.0.4):
     - HSCryptoKit (~> 1.3.0)
-  - Nimble (7.3.4)
+  - Nimble (8.0.1)
   - ObjectMapper (3.4.2)
-  - Quick (1.3.4)
-  - RxAtomic (4.4.1)
-  - RxBlocking (4.4.1):
-    - RxAtomic (~> 4.4)
-    - RxSwift (~> 4.0)
-  - RxSwift (4.4.1):
-    - RxAtomic (~> 4.4)
+  - Quick (2.1.0)
+  - RxBlocking (4.5.0):
+    - RxSwift (>= 4.4.2, ~> 4.4)
+  - RxSwift (4.5.0)
 
 DEPENDENCIES:
   - Alamofire (~> 4.0)
@@ -42,7 +39,6 @@ SPEC REPOS:
     - Nimble
     - ObjectMapper
     - Quick
-    - RxAtomic
     - RxBlocking
     - RxSwift
 
@@ -56,20 +52,19 @@ CHECKOUT OPTIONS:
     :git: https://github.com/horizontalsystems/crypto-x11-ios
 
 SPEC CHECKSUMS:
-  Alamofire: 16ce2c353fb72865124ddae8a57c5942388f4f11
+  Alamofire: ae5c501addb7afdbb13687d7f2f722c78734c2d3
   BigInt: 2aad1a9942dc932ec8b84290d2c564a3d76f97ab
   Cuckoo: 2f10364798baa4b0d4aacabfa475249cf29977bc
-  GRDB.swift: e10787d857b6b8135354b9e08fb23b4bb8e2fab7
+  GRDB.swift: 51cc9e57ae8ff7083a9d674c97925aa1de06aac5
   HSCryptoKit: 564a3888691658cba58aa60f7d037654fd3c6fb0
   HSCryptoX11: 9619fbffb53e9de913d77a531c5ef35cd0402dfe
   HSHDWalletKit: e09162c2bb121c9db9b0cf203bd93b40965aad74
-  Nimble: 051e3d8912d40138fa5591c78594f95fb172af37
+  Nimble: 45f786ae66faa9a709624227fae502db55a8bdd0
   ObjectMapper: 0d4402610f4e468903ae64629eec4784531e5c51
-  Quick: f4f7f063c524394c73ed93ac70983c609805d481
-  RxAtomic: f8d6adc1ccb87a767811269e4875887bc74dbf19
-  RxBlocking: 5508e90d36ca2304632dc9378ece4e9b5d4bf656
-  RxSwift: 92fcf68dfef21f3e2ab1965363d9e7b3d787597e
+  Quick: 4be43f6634acfa727dd106bdf3929ce125ffa79d
+  RxBlocking: 79413e4d916f44bb3e113c5b2cc059e36fe58910
+  RxSwift: f172070dfd1a93d70a9ab97a5a01166206e1c575
 
 PODFILE CHECKSUM: fafe0cef7a51f144b29d436794f5b37f1c31bfae
 
-COCOAPODS: 1.5.3
+COCOAPODS: 1.6.1
