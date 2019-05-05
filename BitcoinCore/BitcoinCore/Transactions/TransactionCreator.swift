@@ -18,12 +18,12 @@ class TransactionCreator {
 extension TransactionCreator: ITransactionCreator {
 
     func create(to address: String, value: Int, feeRate: Int, senderPay: Bool) throws {
-        try transactionSender.canSendTransaction()
+        try transactionSender.verifyCanSend()
 
         let transaction = try transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: senderPay, toAddress: address)
-
         try transactionProcessor.processCreated(transaction: transaction)
-        transactionSender.sendPendingTransactions()
+
+        try transactionSender.send(pendingTransaction: transaction)
     }
 
 }

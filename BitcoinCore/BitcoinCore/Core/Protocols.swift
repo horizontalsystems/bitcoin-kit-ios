@@ -148,15 +148,12 @@ public protocol IBloomFilterManager {
 
 
 public protocol IPeerGroup: class {
-    var blockSyncer: IBlockSyncer? { get set }
-    var transactionSyncer: ITransactionSyncer? { get set }
-    var someReadyPeers: [IPeer] { get }
+    func add(peerGroupListener: IPeerGroupListener)
 
     func start()
     func stop()
-    func checkPeersSynced() throws
 
-    func add(peerGroupListener: IPeerGroupListener)
+    func isReady(peer: IPeer) -> Bool
 }
 
 protocol IPeerManager: class {
@@ -164,9 +161,7 @@ protocol IPeerManager: class {
     func peerDisconnected(peer: IPeer)
     func disconnectAll()
     func totalPeersCount() -> Int
-    func someReadyPeers() -> [IPeer]
     func connected() -> [IPeer]
-    func halfIsSynced() -> Bool
 }
 
 public protocol IPeer: class {
@@ -177,8 +172,6 @@ public protocol IPeer: class {
     var logName: String { get }
     var ready: Bool { get }
     var connected: Bool { get }
-    var synced: Bool { get set }
-    var blockHashesSynced: Bool { get set }
     func connect()
     func disconnect(error: Error?)
     func add(task: PeerTask)
@@ -190,6 +183,7 @@ public protocol IPeer: class {
 
 public protocol PeerDelegate: class {
     func peerReady(_ peer: IPeer)
+    func peerBusy(_ peer: IPeer)
     func peerDidConnect(_ peer: IPeer)
     func peerDidDisconnect(_ peer: IPeer, withError error: Error?)
 
@@ -493,7 +487,13 @@ public protocol IMessageSerializer {
 
 public protocol IInitialBlockDownload {
     var syncedPeers: [IPeer] { get }
+    func isSynced(peer: IPeer) -> Bool
     func add(peerSyncListener: IPeerSyncListener)
+}
+
+public protocol ISyncedReadyPeerManager {
+    var peers: [IPeer] { get }
+    func add(listener: IPeerSyncAndReadyListeners)
 }
 
 public protocol IInventoryItemsHandler {
@@ -505,18 +505,17 @@ public protocol IPeerTaskHandler {
 }
 
 public protocol IPeerSyncListener {
-    func onAllPeersSynced()
     func onPeerSynced(peer: IPeer)
+    func onPeerNotSynced(peer: IPeer)
 }
 
-public extension IPeerSyncListener {
-    func onAllPeersSynced() {}
-    func onPeerSynced(peer: IPeer) {}
+public protocol IPeerSyncAndReadyListeners {
+    func onPeerSyncedAndReady(peer: IPeer)
 }
 
 protocol ITransactionSender {
-    func sendPendingTransactions()
-    func canSendTransaction() throws
+    func verifyCanSend() throws
+    func send(pendingTransaction: FullTransaction) throws
 }
 
 public protocol IPeerGroupListener {
@@ -526,6 +525,7 @@ public protocol IPeerGroupListener {
     func onPeerConnect(peer: IPeer)
     func onPeerDisconnect(peer: IPeer, error: Error?)
     func onPeerReady(peer: IPeer)
+    func onPeerBusy(peer: IPeer)
 }
 
 public extension IPeerGroupListener {
@@ -535,6 +535,7 @@ public extension IPeerGroupListener {
     func onPeerConnect(peer: IPeer) {}
     func onPeerDisconnect(peer: IPeer, error: Error?) {}
     func onPeerReady(peer: IPeer) {}
+    func onPeerBusy(peer: IPeer) {}
 }
 
 protocol IMerkleBlockHandler {

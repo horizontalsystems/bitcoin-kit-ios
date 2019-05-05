@@ -17,9 +17,6 @@ class PeerGroup {
     private let peersQueue: DispatchQueue
     private let inventoryQueue: DispatchQueue
 
-    var blockSyncer: IBlockSyncer?
-    var transactionSyncer: ITransactionSyncer?
-
     private let logger: Logger?
 
     var inventoryItemsHandler: IInventoryItemsHandler? = nil
@@ -76,10 +73,6 @@ extension PeerGroup: IPeerGroup {
         peerGroupListeners.append(peerGroupListener)
     }
 
-    var someReadyPeers: [IPeer] {
-        return peerManager.someReadyPeers()
-    }
-
     func start() {
         guard started == false, reachabilityManager.isReachable else {
             return
@@ -98,14 +91,8 @@ extension PeerGroup: IPeerGroup {
         peerGroupListeners.forEach { $0.onStop() }
     }
 
-    func checkPeersSynced() throws {
-        guard peerManager.connected().count > 0 else {
-            throw BitcoinCoreErrors.PeerGroup.noConnectedPeers
-        }
-
-        guard peerManager.halfIsSynced() else {
-            throw BitcoinCoreErrors.PeerGroup.peersNotSynced
-        }
+    func isReady(peer: IPeer) -> Bool {
+        return peer.ready
     }
 
 }
@@ -114,6 +101,10 @@ extension PeerGroup: PeerDelegate {
 
     func peerReady(_ peer: IPeer) {
         self.peerGroupListeners.forEach { $0.onPeerReady(peer: peer) }
+    }
+
+    func peerBusy(_ peer: IPeer) {
+        self.peerGroupListeners.forEach { $0.onPeerBusy(peer: peer) }
     }
 
     func peerDidConnect(_ peer: IPeer) {
