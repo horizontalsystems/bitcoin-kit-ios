@@ -30,13 +30,11 @@ class TransactionLockVoteValidator: ITransactionLockVoteValidator {
 
         // 3. Find index for masternode
         guard let index = quorumMasternodes.firstIndex(where: { $0.masternode.proRegTxHash == masternodeProTxHash }) else {
-            print("DashKitErrors.LockVoteValidation.masternodeNotFound")
             throw DashKitErrors.LockVoteValidation.masternodeNotFound
         }
 
         // 4. Check masternode in first 10 scores
         guard (index + 1) < TransactionLockVoteValidator.totalSignatures else {
-            print("DashKitErrors.LockVoteValidation.masternodeNotInTop")
             throw DashKitErrors.LockVoteValidation.masternodeNotInTop
         }
 

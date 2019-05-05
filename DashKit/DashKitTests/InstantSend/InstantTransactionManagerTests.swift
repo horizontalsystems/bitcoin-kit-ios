@@ -127,6 +127,7 @@ class InstantTransactionManagerTests: QuickSpec {
                     beforeEach {
                         stub(mockStorage) { mock in
                             when(mock.add(instantTransactionHash: equal(to: txHash))).thenDoNothing()
+                            when(mock.removeInstantTransactionInputs(for: equal(to: txHash))).thenDoNothing()
                         }
                         stub(mockInstantSendFactory) { mock in
                             when(mock.instantTransactionInput(txHash: equal(to: txHash), inputTxHash: equal(to: inputTxHash), voteCount: 6, blockHeight: equal(to: nil))).thenReturn(updatedInput)
@@ -135,10 +136,11 @@ class InstantTransactionManagerTests: QuickSpec {
                             when(mock.append(equal(to: txHash))).thenDoNothing()
                         }
                     }
-                    it("appends txHash to state and storage") {
+                    it("appends txHash to state and storage, delete instantTransactionInputs") {
                         try! manager.updateInput(for: lockVote.outpoint.txHash, transactionInputs: inputs)
                         verify(mockState).append(equal(to: txHash))
                         verify(mockStorage).add(instantTransactionHash: equal(to: txHash))
+                        verify(mockStorage).removeInstantTransactionInputs(for: equal(to: txHash))
                     }
                 }
             }

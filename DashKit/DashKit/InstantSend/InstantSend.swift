@@ -10,6 +10,8 @@ class InstantSend {
     private let instantTransactionManager: IInstantTransactionManager
     private let lockVoteManager: ITransactionLockVoteManager
 
+    public weak var delegate: IInstantTransactionDelegate?
+
     private let logger: Logger?
 
     init(transactionSyncer: IDashTransactionSyncer, lockVoteManager: ITransactionLockVoteManager, instantTransactionManager: IInstantTransactionManager, dispatchQueue: DispatchQueue = DispatchQueue(label: "DashInstantSend", qos: .userInitiated), logger: Logger? = nil) {
@@ -46,7 +48,11 @@ extension InstantSend: IPeerTaskHandler {
     private func handle(transactions: [FullTransaction]) {
         transactionSyncer.handle(transactions: transactions)
 
-        transactions.forEach { transaction in
+        for transaction in transactions {
+            // check transaction already not in instant
+            guard !instantTransactionManager.isTransactionInstant(txHash: transaction.header.dataHash) else {
+                continue
+            }
             // prepare instant inputs for ix
             let inputs = instantTransactionManager.instantTransactionInputs(for: transaction.header.dataHash, instantTransaction: transaction)
 
@@ -60,6 +66,10 @@ extension InstantSend: IPeerTaskHandler {
 
     private func handle(transactionLockVotes: [TransactionLockVoteMessage]) {
         for vote in transactionLockVotes {
+            // check transaction already not in instant
+            guard !instantTransactionManager.isTransactionInstant(txHash: vote.txHash) else {
+                continue
+            }
             guard !lockVoteManager.processed(lvHash: vote.hash) else {
                 continue
             }
@@ -85,10 +95,10 @@ extension InstantSend: IPeerTaskHandler {
 
             let instant = instantTransactionManager.isTransactionInstant(txHash: lockVote.txHash)
             if instant {
-                print("WE GOT INSTANT TRANSACTION!!!")
+                delegate?.onUpdateInstant(transactionHash: lockVote.txHash)
             }
         } catch {
-            print("WE GOT ERROR: \(error)")
+            logger?.error(error)
         }
     }
 

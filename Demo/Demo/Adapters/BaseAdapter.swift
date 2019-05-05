@@ -10,20 +10,18 @@ class BaseAdapter {
 
     private let abstractKit: AbstractKit
 
-    private let lastBlockSignal = Signal()
-    private let syncStateSignal = Signal()
-    private let balanceSignal = Signal()
-    private let transactionsSignal = Signal()
+    let lastBlockSignal = Signal()
+    let syncStateSignal = Signal()
+    let balanceSignal = Signal()
+    let transactionsSignal = Signal()
 
     init(name: String, coinCode: String, abstractKit: AbstractKit) {
         self.name = name
         self.coinCode = coinCode
         self.abstractKit = abstractKit
-
-        abstractKit.delegate = self
     }
 
-    private func transactionRecord(fromTransaction transaction: TransactionInfo) -> TransactionRecord {
+    func transactionRecord(fromTransaction transaction: TransactionInfo) -> TransactionRecord {
         let fromAddresses = transaction.from.map {
             TransactionAddress(address: $0.address, mine: $0.mine)
         }
@@ -39,7 +37,8 @@ class BaseAdapter {
                 timestamp: Double(transaction.timestamp),
                 from: fromAddresses,
                 to: toAddresses,
-                blockHeight: transaction.blockHeight
+                blockHeight: transaction.blockHeight,
+                transactionExtraType: nil
         )
     }
 
@@ -48,6 +47,15 @@ class BaseAdapter {
 
         let handler = NSDecimalNumberHandler(roundingMode: .plain, scale: 0, raiseOnExactness: false, raiseOnOverflow: false, raiseOnUnderflow: false, raiseOnDivideByZero: false)
         return NSDecimalNumber(decimal: coinValue).rounding(accordingToBehavior: handler).intValue
+    }
+
+    func transactionsSingle(fromHash: String?, limit: Int) -> Single<[TransactionRecord]> {
+        return abstractKit.transactions(fromHash: fromHash, limit: limit)
+                .map { [weak self] transactions -> [TransactionRecord] in
+                    return transactions.compactMap {
+                        self?.transactionRecord(fromTransaction: $0)
+                    }
+                }
     }
 
 }
@@ -137,39 +145,6 @@ extension BaseAdapter {
         } catch {
             return 0
         }
-    }
-
-    func transactionsSingle(fromHash: String?, limit: Int) -> Single<[TransactionRecord]> {
-        return abstractKit.transactions(fromHash: fromHash, limit: limit)
-                .map { [weak self] transactions -> [TransactionRecord] in
-                    return transactions.compactMap {
-                        self?.transactionRecord(fromTransaction: $0)
-                    }
-                }
-    }
-
-}
-
-extension BaseAdapter: BitcoinCoreDelegate {
-
-    func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo]) {
-        transactionsSignal.notify()
-    }
-
-    func transactionsDeleted(hashes: [String]) {
-        transactionsSignal.notify()
-    }
-
-    func balanceUpdated(balance: Int) {
-        balanceSignal.notify()
-    }
-
-    func lastBlockInfoUpdated(lastBlockInfo: BlockInfo) {
-        lastBlockSignal.notify()
-    }
-
-    public func kitStateUpdated(state: BitcoinCore.KitState) {
-        syncStateSignal.notify()
     }
 
 }

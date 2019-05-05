@@ -80,12 +80,7 @@ public class BitcoinCore {
     // END: Extending
 
     public var delegateQueue = DispatchQueue(label: "bitcoin_delegate_queue")
-    var delegates = [BitcoinCoreDelegate]()
-
-    public func add(delegate: BitcoinCoreDelegate) {
-        delegates.append(delegate)
-    }
-
+    public weak var delegate: BitcoinCoreDelegate?
 
     init(storage: IStorage, cache: OutputsCache, dataProvider: IDataProvider & IBlockchainDataListener,
                 peerGroup: IPeerGroup, initialBlockDownload: IInitialBlockDownload, transactionSyncer: ITransactionSyncer,
@@ -183,21 +178,21 @@ extension BitcoinCore: IDataProviderDelegate {
     func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo]) {
         delegateQueue.async { [weak self] in
             if let kit = self {
-                kit.delegates.forEach { $0.transactionsUpdated(inserted: inserted, updated: updated) }
+                kit.delegate?.transactionsUpdated(inserted: inserted, updated: updated)
             }
         }
     }
 
     func transactionsDeleted(hashes: [String]) {
         delegateQueue.async { [weak self] in
-            self?.delegates.forEach { $0.transactionsDeleted(hashes: hashes) }
+            self?.delegate?.transactionsDeleted(hashes: hashes)
         }
     }
 
     func balanceUpdated(balance: Int) {
         delegateQueue.async { [weak self] in
             if let kit = self {
-                kit.delegates.forEach { $0.balanceUpdated(balance: balance) }
+                kit.delegate?.balanceUpdated(balance: balance)
             }
         }
     }
@@ -205,7 +200,7 @@ extension BitcoinCore: IDataProviderDelegate {
     func lastBlockInfoUpdated(lastBlockInfo: BlockInfo) {
         delegateQueue.async { [weak self] in
             if let kit = self {
-                kit.delegates.forEach { $0.lastBlockInfoUpdated(lastBlockInfo: lastBlockInfo) }
+                kit.delegate?.lastBlockInfoUpdated(lastBlockInfo: lastBlockInfo)
             }
         }
     }
@@ -215,7 +210,7 @@ extension BitcoinCore: IDataProviderDelegate {
 extension BitcoinCore: IKitStateProviderDelegate {
     func handleKitStateUpdate(state: KitState) {
         delegateQueue.async { [weak self] in
-            self?.delegates.forEach { $0.kitStateUpdated(state: state) }
+            self?.delegate?.kitStateUpdated(state: state)
         }
     }
 }

@@ -506,6 +506,37 @@ extension GrdbStorage: IStorage {
         return results
     }
 
+    public func fullTransactionInfo(byHash hash: Data) -> FullTransactionForInfo? {
+        var transaction: TransactionWithBlock? = nil
+
+        try! dbPool.read { db in
+            let transactionC = Transaction.Columns.allCases.count
+
+            let adapter = ScopeAdapter([
+                "transaction": RangeRowAdapter(0..<transactionC)
+            ])
+
+            let sql = """
+                      SELECT transactions.*, blocks.height as blockHeight
+                      FROM transactions
+                      LEFT JOIN blocks ON transactions.blockHash = blocks.headerHash
+                      WHERE transactions.dataHash = \("x'" + hash.hex + "'")                    
+                      """
+
+            let rows = try Row.fetchCursor(db, sql, adapter: adapter)
+
+            if let row = try rows.next() {
+                transaction = TransactionWithBlock(transaction: row["transaction"], blockHeight: row["blockHeight"])
+            }
+
+        }
+
+        guard let transactionWithBlock = transaction else {
+            return nil
+        }
+        return fullInfo(forTransactions: [transactionWithBlock]).first
+    }
+
     public func fullTransactionsInfo(fromTimestamp: Int?, fromOrder: Int?, limit: Int?) -> [FullTransactionForInfo] {
         var transactions = [TransactionWithBlock]()
 

@@ -18,6 +18,7 @@
 		58AAA104320FC00205E999D2 /* InstantSendFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAACB2B535583527AD9294 /* InstantSendFactory.swift */; };
 		58AAA13627CA1604C0F59C99 /* MasternodeListManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA0C1F67271207DA77330 /* MasternodeListManager.swift */; };
 		58AAA15491096368AD69A2D5 /* Masternode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAEB5DE9557F4E41A7907 /* Masternode.swift */; };
+		58AAA1992857F107D48947E9 /* DashTransactionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA6FCD2841CF6180EBFB0 /* DashTransactionInfo.swift */; };
 		58AAA1A73CE6C5571C937A8E /* QorumMasternode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA8311749C93B64394A62 /* QorumMasternode.swift */; };
 		58AAA1D98DEB1F6230E4EB27 /* TransactionLockVoteValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAACFBF2C153954A53AE70 /* TransactionLockVoteValidatorTests.swift */; };
 		58AAA1FC05748154358748CE /* InstantTransactionInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAF60A1E9BD745D645A7D /* InstantTransactionInput.swift */; };
@@ -126,6 +127,7 @@
 		58AAA6C2797950C38AA3F125 /* X11Hasher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = X11Hasher.swift; sourceTree = "<group>"; };
 		58AAA6EB559F918C1B3BB71F /* MasternodeSortedList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeSortedList.swift; sourceTree = "<group>"; };
 		58AAA6F46B5CED8D35657996 /* RequestTransactionLockVotesTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestTransactionLockVotesTask.swift; sourceTree = "<group>"; };
+		58AAA6FCD2841CF6180EBFB0 /* DashTransactionInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashTransactionInfo.swift; sourceTree = "<group>"; };
 		58AAA71B32E48969A3E1E52B /* MasternodeCbTxHashCalculator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeCbTxHashCalculator.swift; sourceTree = "<group>"; };
 		58AAA7CBEEC5D08B11A7C6DB /* GeneratedMocks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratedMocks.swift; sourceTree = "<group>"; };
 		58AAA7CEBD06DD533915741E /* DashGrdbStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashGrdbStorage.swift; sourceTree = "<group>"; };
@@ -450,6 +452,7 @@
 				58AAA0605DA659EF9FE6A8EA /* MasternodeListState.swift */,
 				58AAAE8C1DD28970F1631067 /* InstantTransactionHash.swift */,
 				58AAA25F98854859029BE603 /* InstantTransactionState.swift */,
+				58AAA6FCD2841CF6180EBFB0 /* DashTransactionInfo.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -747,6 +750,7 @@
 				58AAA8A7E766E534A92D1A42 /* DashTransactionInfoConverter.swift in Sources */,
 				58AAA5F7AF7CF8E3A909BD56 /* InstantTransactionHash.swift in Sources */,
 				58AAAE9A737EE5D91AD2884A /* InstantTransactionState.swift in Sources */,
+				58AAA1992857F107D48947E9 /* DashTransactionInfo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

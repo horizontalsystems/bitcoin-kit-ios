@@ -63,6 +63,7 @@ extension InstantTransactionManager: IInstantTransactionManager {
         if (updatedInputs.filter { $0.voteCount < InstantSend.requiredVoteCount }).isEmpty {
             state.append(input.txHash)
             storage.add(instantTransactionHash: input.txHash)
+            storage.removeInstantTransactionInputs(for: input.txHash)
         }
     }
 

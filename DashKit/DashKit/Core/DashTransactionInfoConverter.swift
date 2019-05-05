@@ -1,16 +1,18 @@
 import BitcoinCore
 
-public class DashTransactionInfoConverter: ITransactionInfoConverter {
+class DashTransactionInfoConverter: ITransactionInfoConverter {
     private let baseTransactionInfoConverter: IBaseTransactionInfoConverter
+    private let instantTransactionManager: IInstantTransactionManager
 
-    public init(baseTransactionInfoConverter: IBaseTransactionInfoConverter) {
+    init(baseTransactionInfoConverter: IBaseTransactionInfoConverter, instantTransactionManager: IInstantTransactionManager) {
         self.baseTransactionInfoConverter = baseTransactionInfoConverter
+        self.instantTransactionManager = instantTransactionManager
     }
 
 
-    public func transactionInfo(fromTransaction transactionForInfo: FullTransactionForInfo) -> TransactionInfo {
+    func transactionInfo(fromTransaction transactionForInfo: FullTransactionForInfo) -> TransactionInfo {
         let txInfo: DashTransactionInfo = baseTransactionInfoConverter.transactionInfo(fromTransaction: transactionForInfo)
-
+        txInfo.instantTx = instantTransactionManager.isTransactionInstant(txHash: transactionForInfo.transactionWithBlock.transaction.dataHash)
         return txInfo
     }
 

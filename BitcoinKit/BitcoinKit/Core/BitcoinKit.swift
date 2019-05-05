@@ -10,6 +10,12 @@ public class BitcoinKit: AbstractKit {
     private let storage: IStorage
     private let bech32AddressConverter: IAddressConverter
 
+    public weak var delegate: BitcoinCoreDelegate? {
+        didSet {
+            bitcoinCore.delegate = delegate
+        }
+    }
+
     public init(withWords words: [String], walletId: String, newWallet: Bool = false, networkType: NetworkType = .mainNet, minLogLevel: Logger.Level = .verbose) throws {
         let network: INetwork
         var initialSyncApiUrl: String? = nil

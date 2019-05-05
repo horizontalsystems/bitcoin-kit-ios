@@ -48,6 +48,14 @@ protocol IDashPeer: IPeer {
 
 // ###############################
 
+public protocol DashKitDelegate: class {
+    func transactionsUpdated(inserted: [DashTransactionInfo], updated: [DashTransactionInfo])
+    func transactionsDeleted(hashes: [String])
+    func balanceUpdated(balance: Int)
+    func lastBlockInfoUpdated(lastBlockInfo: BlockInfo)
+    func kitStateUpdated(state: BitcoinCore.KitState)
+}
+
 protocol IPeerTaskFactory {
     func createRequestMasternodeListDiffTask(baseBlockHash: Data, blockHash: Data) -> PeerTask
 }
@@ -69,11 +77,13 @@ protocol IDashStorage {
     func instantTransactionHashes() -> [Data]
     func add(instantTransactionHash: Data)
 
+    func add(instantTransactionInput: InstantTransactionInput)
+    func removeInstantTransactionInputs(for txHash: Data)
     func instantTransactionInputs(for txHash: Data) -> [InstantTransactionInput]
     func instantTransactionInput(for inputTxHash: Data) -> InstantTransactionInput?
-    func add(instantTransactionInput: InstantTransactionInput)
 
     func block(byHash: Data) -> Block?
+    func fullTransactionInfo(byHash hash: Data) -> FullTransactionForInfo?
 }
 
 protocol IInstantSendFactory {
@@ -113,6 +123,10 @@ protocol IInstantTransactionManager {
     func instantTransactionInputs(for txHash: Data, instantTransaction: FullTransaction?) -> [InstantTransactionInput]
     func updateInput(for inputTxHash: Data, transactionInputs: [InstantTransactionInput]) throws
     func isTransactionInstant(txHash: Data) -> Bool
+}
+
+public protocol IInstantTransactionDelegate: class {
+    func onUpdateInstant(transactionHash: Data)
 }
 
 protocol IInstantTransactionState {

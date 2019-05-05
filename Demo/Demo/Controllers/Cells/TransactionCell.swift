@@ -11,6 +11,7 @@ class TransactionCell: UITableViewCell {
 
     @IBOutlet weak var titleLabel: UILabel?
     @IBOutlet weak var valueLabel: UILabel?
+    @IBOutlet weak var transactionTypeLabel: UILabel?
 
     func bind(transaction: TransactionRecord, coinCode: String, lastBlockHeight: Int?) {
         var confirmations = "n/a"
@@ -56,6 +57,9 @@ class TransactionCell: UITableViewCell {
                     \(from.joined(separator: "\n"))
                     \(to.joined(separator: "\n"))
                     """, alignment: .right, label: valueLabel)
+        
+        transactionTypeLabel?.isHidden = transaction.transactionExtraType == nil
+        transactionTypeLabel?.text = transaction.transactionExtraType
     }
 
     private func set(string: String, alignment: NSTextAlignment, label: UILabel?) {

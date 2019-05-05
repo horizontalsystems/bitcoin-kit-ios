@@ -66,7 +66,6 @@ class DashGrdbStorage: GrdbStorage {
 
 extension DashGrdbStorage: IDashStorage {
 
-
     var masternodes: [Masternode] {
         get {
             return try! dbPool.read { db in
@@ -112,6 +111,18 @@ extension DashGrdbStorage: IDashStorage {
         }
     }
 
+    func add(instantTransactionInput: InstantTransactionInput) {
+        _ = try? dbPool.write { db in
+            try instantTransactionInput.insert(db)
+        }
+    }
+
+    func removeInstantTransactionInputs(for txHash: Data) {
+        _ = try! dbPool.write { db in
+            try InstantTransactionInput.filter(InstantTransactionInput.Columns.txHash == txHash).deleteAll(db)
+        }
+    }
+
     func instantTransactionInputs(for txHash: Data) -> [InstantTransactionInput] {
         return try! dbPool.read { db in
             try InstantTransactionInput.filter(InstantTransactionInput.Columns.txHash == txHash).fetchAll(db)
@@ -121,12 +132,6 @@ extension DashGrdbStorage: IDashStorage {
     func instantTransactionInput(for inputTxHash: Data) -> InstantTransactionInput? {
         return try! dbPool.read { db in
             try InstantTransactionInput.filter(InstantTransactionInput.Columns.inputTxHash == inputTxHash).fetchOne(db)
-        }
-    }
-
-    func add(instantTransactionInput: InstantTransactionInput) {
-        _ = try? dbPool.write { db in
-            try instantTransactionInput.insert(db)
         }
     }
 
