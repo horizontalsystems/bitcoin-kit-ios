@@ -37,7 +37,7 @@ class Manager {
         adapters = [
             BitcoinAdapter(words: words, testMode: configuration.testNet),
             BitcoinCashAdapter(words: words, testMode: configuration.testNet),
-            DashAdapter(words: words, testMode: false),
+            DashAdapter(words: words, testMode: configuration.testNet),
         ]
 
         adapterSignal.notify()

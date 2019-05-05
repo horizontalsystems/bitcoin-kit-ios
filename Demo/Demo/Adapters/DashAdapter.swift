@@ -8,7 +8,7 @@ class DashAdapter: BaseAdapter {
 
     init(words: [String], testMode: Bool) {
         let networkType: DashKit.NetworkType = testMode ? .testNet : .mainNet
-        dashKit = try! DashKit(withWords: words, walletId: "walletId", newWallet: true, networkType: networkType, minLogLevel: Configuration.shared.minLogLevel)
+        dashKit = try! DashKit(withWords: words, walletId: "walletId", newWallet: false, networkType: networkType, minLogLevel: Configuration.shared.minLogLevel)
 
         super.init(name: "Dash", coinCode: "DASH", abstractKit: dashKit)
         dashKit.delegate = self
