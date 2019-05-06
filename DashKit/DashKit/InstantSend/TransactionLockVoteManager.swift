@@ -4,8 +4,8 @@ import BitcoinCore
 class TransactionLockVoteManager: ITransactionLockVoteManager {
     private let transactionLockVoteValidator: ITransactionLockVoteValidator
 
-    private var relayedLockVotes = Set<TransactionLockVoteMessage>()
-    private var checkedLockVotes = Set<TransactionLockVoteMessage>()
+    private(set) var relayedLockVotes = Set<TransactionLockVoteMessage>()
+    private(set) var checkedLockVotes = Set<TransactionLockVoteMessage>()
 
     init(transactionLockVoteValidator: ITransactionLockVoteValidator) {
         self.transactionLockVoteValidator = transactionLockVoteValidator
@@ -23,10 +23,6 @@ class TransactionLockVoteManager: ITransactionLockVoteManager {
         relayedLockVotes.insert(relayed)
     }
 
-    func inRelayed(lvHash: Data) -> Bool {
-        return !relayedLockVotes.filter { $0.hash == lvHash }.isEmpty
-    }
-
     func add(checked: TransactionLockVoteMessage) {
         checkedLockVotes.insert(checked)
     }
@@ -40,8 +36,8 @@ class TransactionLockVoteManager: ITransactionLockVoteManager {
         relayedLockVotes.removeAll()
     }
 
-    func inChecked(lvHash: Data) -> Bool {
-        return !checkedLockVotes.filter { $0.hash == lvHash }.isEmpty
+    func processed(lvHash: Data) -> Bool {
+        return relayedLockVotes.first(where: { $0.hash == lvHash }) != nil || checkedLockVotes.first(where: { $0.hash == lvHash }) != nil
     }
 
     private func remove(from set: inout Set<TransactionLockVoteMessage>, txHash: Data) {

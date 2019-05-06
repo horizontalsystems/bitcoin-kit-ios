@@ -70,7 +70,7 @@ struct InputWithPreviousOutput {
 
 public struct TransactionWithBlock {
 
-    let transaction: Transaction
+    public let transaction: Transaction
     let blockHeight: Int?
 
 }
@@ -86,7 +86,7 @@ public struct UnspentOutput {
 
 public struct FullTransactionForInfo {
 
-    let transactionWithBlock: TransactionWithBlock
+    public let transactionWithBlock: TransactionWithBlock
     let inputsWithPreviousOutputs: [InputWithPreviousOutput]
     let outputs: [Output]
 

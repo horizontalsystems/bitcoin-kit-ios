@@ -9,6 +9,7 @@ class DataProvider {
 
     private let storage: IStorage
     private let unspentOutputProvider: IUnspentOutputProvider
+    private let transactionInfoConverter: ITransactionInfoConverter
 
     private let balanceUpdateSubject = PublishSubject<Void>()
 
@@ -23,62 +24,16 @@ class DataProvider {
 
     weak var delegate: IDataProviderDelegate?
 
-    init(storage: IStorage, unspentOutputProvider: IUnspentOutputProvider, throttleTime: Double = 0.5) {
+    init(storage: IStorage, unspentOutputProvider: IUnspentOutputProvider, transactionInfoConverter: ITransactionInfoConverter, throttleTime: Double = 0.5) {
         self.storage = storage
         self.unspentOutputProvider = unspentOutputProvider
+        self.transactionInfoConverter = transactionInfoConverter
         self.balance = unspentOutputProvider.balance
         self.lastBlockInfo = storage.lastBlock.map { blockInfo(fromBlock: $0) }
 
         balanceUpdateSubject.throttle(throttleTime, scheduler: ConcurrentDispatchQueueScheduler(qos: .background)).subscribe(onNext: {
             self.balance = unspentOutputProvider.balance
         }).disposed(by: disposeBag)
-    }
-
-    private func transactionInfo(fromTransaction transactionForInfo: FullTransactionForInfo) -> TransactionInfo {
-        var totalMineInput: Int = 0
-        var totalMineOutput: Int = 0
-        var fromAddresses = [TransactionAddressInfo]()
-        var toAddresses = [TransactionAddressInfo]()
-
-        for inputWithPreviousOutput in transactionForInfo.inputsWithPreviousOutputs {
-            var mine = false
-
-            if let previousOutput = inputWithPreviousOutput.previousOutput {
-                if previousOutput.publicKeyPath != nil {
-                    totalMineInput += previousOutput.value
-                    mine = true
-                }
-            }
-
-            if let address = inputWithPreviousOutput.input.address {
-                fromAddresses.append(TransactionAddressInfo(address: address, mine: mine))
-            }
-        }
-
-        for output in transactionForInfo.outputs {
-            var mine = false
-
-            if output.publicKeyPath != nil {
-                totalMineOutput += output.value
-                mine = true
-            }
-
-            if let address = output.address {
-                toAddresses.append(TransactionAddressInfo(address: address, mine: mine))
-            }
-        }
-
-        let amount = totalMineOutput - totalMineInput
-
-        return TransactionInfo(
-                transactionHash: transactionForInfo.transactionWithBlock.transaction.dataHash.reversedHex,
-                transactionIndex: transactionForInfo.transactionWithBlock.transaction.order,
-                from: fromAddresses,
-                to: toAddresses,
-                amount: amount,
-                blockHeight: transactionForInfo.transactionWithBlock.blockHeight,
-                timestamp: transactionForInfo.transactionWithBlock.transaction.timestamp
-        )
     }
 
     private func blockInfo(fromBlock block: Block) -> BlockInfo {
@@ -101,8 +56,8 @@ extension DataProvider: IBlockchainDataListener {
         }
 
         delegate?.transactionsUpdated(
-                inserted: storage.fullInfo(forTransactions: inserted.map { TransactionWithBlock(transaction: $0, blockHeight: block?.height) }).map { transactionInfo(fromTransaction: $0) },
-                updated: storage.fullInfo(forTransactions: updated.map { TransactionWithBlock(transaction: $0, blockHeight: block?.height) }).map { transactionInfo(fromTransaction: $0) }
+                inserted: storage.fullInfo(forTransactions: inserted.map { TransactionWithBlock(transaction: $0, blockHeight: block?.height) }).map { transactionInfoConverter.transactionInfo(fromTransaction: $0) },
+                updated: storage.fullInfo(forTransactions: updated.map { TransactionWithBlock(transaction: $0, blockHeight: block?.height) }).map { transactionInfoConverter.transactionInfo(fromTransaction: $0) }
         )
 
         balanceUpdateSubject.onNext(())
@@ -140,7 +95,7 @@ extension DataProvider: IDataProvider {
 
             let transactions = self.storage.fullTransactionsInfo(fromTimestamp: fromTimestamp, fromOrder: fromOrder, limit: limit)
 
-            observer(.success(transactions.map() { self.transactionInfo(fromTransaction: $0) }))
+            observer(.success(transactions.map() { self.transactionInfoConverter.transactionInfo(fromTransaction: $0) }))
             return Disposables.create()
         }
     }

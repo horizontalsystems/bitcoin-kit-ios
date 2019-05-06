@@ -1,6 +1,7 @@
 import BitcoinCore
 
 class InstantTransactionManager {
+    private var state: IInstantTransactionState
 
     enum InstantSendHandleError: Error {
         case instantTransactionNotExist
@@ -8,12 +9,13 @@ class InstantTransactionManager {
 
     private var storage: IDashStorage
     private var instantSendFactory: IInstantSendFactory
-    private let transactionLockVoteValidator: ITransactionLockVoteValidator
 
-    init(storage: IDashStorage, instantSendFactory: IInstantSendFactory, transactionLockVoteValidator: ITransactionLockVoteValidator) {
+    init(storage: IDashStorage, instantSendFactory: IInstantSendFactory, instantTransactionState: IInstantTransactionState) {
         self.storage = storage
         self.instantSendFactory = instantSendFactory
-        self.transactionLockVoteValidator = transactionLockVoteValidator
+        self.state = instantTransactionState
+
+        state.instantTransactionHashes = storage.instantTransactionHashes()
     }
 
     private func makeInputs(for txHash: Data, inputs: [Input]) -> [InstantTransactionInput] {
@@ -47,23 +49,26 @@ extension InstantTransactionManager: IInstantTransactionManager {
         return makeInputs(for: txHash, inputs: storage.inputs(transactionHash: txHash))
     }
 
-    func increaseVoteCount(for inputTxHash: Data) {
-        guard let input = storage.instantTransactionInput(for: inputTxHash) else {
+    func updateInput(for inputTxHash: Data, transactionInputs: [InstantTransactionInput]) throws {
+        var updatedInputs = transactionInputs
+        guard let inputIndex = transactionInputs.index(where: { $0.inputTxHash == inputTxHash }) else {
             // can't find input for this vote. Ignore it
-            return
+            throw DashKitErrors.LockVoteValidation.txInputNotFound
         }
+        let input = transactionInputs[inputIndex]
         let increasedInput = instantSendFactory.instantTransactionInput(txHash: input.txHash, inputTxHash: input.inputTxHash, voteCount: input.voteCount + 1, blockHeight: input.blockHeight)
-
         storage.add(instantTransactionInput: increasedInput)
+
+        updatedInputs[inputIndex] = increasedInput
+        if (updatedInputs.filter { $0.voteCount < InstantSend.requiredVoteCount }).isEmpty {
+            state.append(input.txHash)
+            storage.add(instantTransactionHash: input.txHash)
+            storage.removeInstantTransactionInputs(for: input.txHash)
+        }
     }
 
     func isTransactionInstant(txHash: Data) -> Bool {
-        let inputs = storage.instantTransactionInputs(for: txHash)
-        guard !inputs.isEmpty else {
-            return false
-        }
-
-        return inputs.filter { $0.voteCount < InstantSend.requiredVoteCount }.isEmpty
+        return state.instantTransactionHashes.contains(txHash)
     }
 
 }

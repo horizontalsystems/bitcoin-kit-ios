@@ -373,7 +373,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-BitcoinCashKitTests/Pods-BitcoinCashKitTests-frameworks.sh",
+				"${SRCROOT}/../Pods/Target Support Files/Pods-BitcoinCashKitTests/Pods-BitcoinCashKitTests-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/HSCryptoKit/HSCryptoKit.framework",
 				"${BUILT_PRODUCTS_DIR}/HSHDWalletKit/HSHDWalletKit.framework",
 				"${BUILT_PRODUCTS_DIR}/RxSwift/RxSwift.framework",
@@ -402,7 +402,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BitcoinCashKitTests/Pods-BitcoinCashKitTests-frameworks.sh\"\n";
+			shellScript = "\"${SRCROOT}/../Pods/Target Support Files/Pods-BitcoinCashKitTests/Pods-BitcoinCashKitTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		3A5B14632269E76500DF70E2 /* Cuckoo */ = {
@@ -410,14 +410,10 @@
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputFileListPaths = (
-			);
 			inputPaths = (
 				"$(SRCROOT)/${PROJECT_NAME}/Core/Protocols.swift",
 			);
 			name = Cuckoo;
-			outputFileListPaths = (
-			);
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;

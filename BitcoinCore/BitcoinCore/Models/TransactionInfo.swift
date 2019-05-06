@@ -1,6 +1,6 @@
 import Foundation
 
-public struct TransactionInfo {
+open class TransactionInfo: ITransactionInfo {
     public let transactionHash: String
     public let transactionIndex: Int
     public let from: [TransactionAddressInfo]
@@ -8,6 +8,17 @@ public struct TransactionInfo {
     public let amount: Int
     public let blockHeight: Int?
     public let timestamp: Int
+
+    public required init(transactionHash: String, transactionIndex: Int, from: [TransactionAddressInfo], to: [TransactionAddressInfo], amount: Int, blockHeight: Int?, timestamp: Int) {
+        self.transactionHash = transactionHash
+        self.transactionIndex = transactionIndex
+        self.from = from
+        self.to = to
+        self.amount = amount
+        self.blockHeight = blockHeight
+        self.timestamp = timestamp
+    }
+
 }
 
 public struct TransactionAddressInfo {

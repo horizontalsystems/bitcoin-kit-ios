@@ -11,6 +11,8 @@ struct TransactionRecord {
     let to: [TransactionAddress]
 
     let blockHeight: Int?
+
+    var transactionExtraType: String?
 }
 
 struct TransactionAddress {

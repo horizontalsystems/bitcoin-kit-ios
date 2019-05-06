@@ -11,9 +11,12 @@ public class DashKit: AbstractKit {
 
     public enum NetworkType { case mainNet, testNet }
 
+    weak public var delegate: DashKitDelegate?
+
     private let storage: IDashStorage
 
     private var masternodeSyncer: MasternodeListSyncer?
+    private let dashTransactionInfoConverter: ITransactionInfoConverter
 
     public init(withWords words: [String], walletId: String, newWallet: Bool = false, networkType: NetworkType = .mainNet, minLogLevel: Logger.Level = .verbose) throws {
         let network: INetwork
@@ -21,6 +24,7 @@ public class DashKit: AbstractKit {
             case .mainNet: network = MainNet()
             case .testNet: network = TestNet()
         }
+        let logger = Logger(network: network, minLogLevel: minLogLevel)
 
         let databaseFileName = "\(walletId)-dash-\(networkType)"
 
@@ -37,6 +41,12 @@ public class DashKit: AbstractKit {
         let transactionSizeCalculator = TransactionSizeCalculator()
         let unspentOutputSelector = DashUnspentOutputSelector(calculator: transactionSizeCalculator)
 
+        let instantSendFactory = InstantSendFactory()
+        let instantTransactionState = InstantTransactionState()
+        let instantTransactionManager = InstantTransactionManager(storage: storage, instantSendFactory: instantSendFactory, instantTransactionState: instantTransactionState)
+
+        dashTransactionInfoConverter = DashTransactionInfoConverter(baseTransactionInfoConverter: BaseTransactionInfoConverter(), instantTransactionManager: instantTransactionManager)
+
         let bitcoinCore = try BitcoinCoreBuilder(minLogLevel: minLogLevel)
                 .set(network: network)
                 .set(words: words)
@@ -48,9 +58,11 @@ public class DashKit: AbstractKit {
                 .set(newWallet: newWallet)
                 .set(blockHeaderHasher: x11Hasher)
                 .set(unspentOutputSelector: unspentOutputSelector)
+                .set(transactionInfoConverter: dashTransactionInfoConverter)
                 .build()
 
         super.init(bitcoinCore: bitcoinCore, network: network)
+        bitcoinCore.delegate = self
 
         // extending BitcoinCore
 
@@ -92,12 +104,11 @@ public class DashKit: AbstractKit {
 
 // --------------------------------------
         let transactionLockVoteValidator = TransactionLockVoteValidator(storage: storage, hasher: singleHasher)
-        let instantSendFactory = InstantSendFactory()
         let instantTransactionSyncer = InstantTransactionSyncer(transactionSyncer: bitcoinCore.transactionSyncer)
         let lockVoteManager = TransactionLockVoteManager(transactionLockVoteValidator: transactionLockVoteValidator)
-        let instantTransactionManager = InstantTransactionManager(storage: storage, instantSendFactory: instantSendFactory, transactionLockVoteValidator: transactionLockVoteValidator)
 
-        let instantSend = InstantSend(transactionSyncer: instantTransactionSyncer, lockVoteManager: lockVoteManager, instantTransactionManager: instantTransactionManager)
+        let instantSend = InstantSend(transactionSyncer: instantTransactionSyncer, lockVoteManager: lockVoteManager, instantTransactionManager: instantTransactionManager, logger: logger)
+        instantSend.delegate = self
 
         bitcoinCore.add(peerTaskHandler: instantSend)
         bitcoinCore.add(inventoryItemsHandler: instantSend)
@@ -105,8 +116,56 @@ public class DashKit: AbstractKit {
 
     }
 
+    private func cast(transactionInfos:[TransactionInfo]) -> [DashTransactionInfo] {
+        return transactionInfos.compactMap { $0 as? DashTransactionInfo }
+    }
+
     public override func send(to address: String, value: Int, feeRate: Int) throws {
         try super.send(to: address, value: value, feeRate: 1)
+    }
+
+    public func transactions(fromHash: String?, limit: Int?) -> Single<[DashTransactionInfo]> {
+        return super.transactions(fromHash: fromHash, limit: limit).map { self.cast(transactionInfos: $0) }
+    }
+
+}
+
+extension DashKit: BitcoinCoreDelegate {
+
+    public func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo]) {
+        delegate?.transactionsUpdated(inserted: cast(transactionInfos: inserted), updated: cast(transactionInfos: updated))
+    }
+
+    public func transactionsDeleted(hashes: [String]) {
+        delegate?.transactionsDeleted(hashes: hashes)
+    }
+
+    public func balanceUpdated(balance: Int) {
+        delegate?.balanceUpdated(balance: balance)
+    }
+
+    public func lastBlockInfoUpdated(lastBlockInfo: BlockInfo) {
+        delegate?.lastBlockInfoUpdated(lastBlockInfo: lastBlockInfo)
+    }
+
+    public func kitStateUpdated(state: BitcoinCore.KitState) {
+        delegate?.kitStateUpdated(state: state)
+    }
+
+}
+
+extension DashKit: IInstantTransactionDelegate {
+
+    public func onUpdateInstant(transactionHash: Data) {
+        guard let transaction = storage.fullTransactionInfo(byHash: transactionHash) else {
+            return
+        }
+        let transactionInfo = dashTransactionInfoConverter.transactionInfo(fromTransaction: transaction)
+        bitcoinCore.delegateQueue.async { [weak self] in
+            if let kit = self {
+                kit.delegate?.transactionsUpdated(inserted: [], updated: kit.cast(transactionInfos: [transactionInfo]))
+            }
+        }
     }
 
 }

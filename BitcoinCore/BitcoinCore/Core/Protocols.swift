@@ -104,6 +104,7 @@ public protocol IStorage {
     func update(transaction: Transaction) throws
     func fullInfo(forTransactions: [TransactionWithBlock]) -> [FullTransactionForInfo]
     func fullTransactionsInfo(fromTimestamp: Int?, fromOrder: Int?, limit: Int?) -> [FullTransactionForInfo]
+    func fullTransactionInfo(byHash hash: Data) -> FullTransactionForInfo?
 
     func outputsWithPublicKeys() -> [OutputWithPublicKey]
     func unspentOutputs() -> [UnspentOutput]
@@ -407,13 +408,25 @@ protocol IKitStateProviderDelegate: class {
     func handleKitStateUpdate(state: BitcoinCore.KitState)
 }
 
+public protocol ITransactionInfo: class {
+    init(transactionHash: String, transactionIndex: Int, from: [TransactionAddressInfo], to: [TransactionAddressInfo], amount: Int, blockHeight: Int?, timestamp: Int)
+}
+
+public protocol IBaseTransactionInfoConverter {
+    func transactionInfo<T: TransactionInfo>(fromTransaction transactionForInfo: FullTransactionForInfo) -> T
+}
+
+public protocol ITransactionInfoConverter {
+    func transactionInfo(fromTransaction transactionForInfo: FullTransactionForInfo) -> TransactionInfo
+}
+
 protocol IDataProvider {
     var delegate: IDataProviderDelegate? { get set }
 
     var lastBlockInfo: BlockInfo? { get }
     var balance: Int { get }
-    func transactions(fromHash: String?, limit: Int?) -> Single<[TransactionInfo]>
     var debugInfo: String { get }
+    func transactions(fromHash: String?, limit: Int?) -> Single<[TransactionInfo]>
 }
 
 protocol IDataProviderDelegate: class {

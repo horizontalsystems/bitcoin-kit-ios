@@ -42,6 +42,14 @@ class DashGrdbStorage: GrdbStorage {
             }
         }
 
+        migrator.registerMigration("createInstantTransactionHashes") { db in
+            try db.create(table: InstantTransactionHash.databaseTableName) { t in
+                t.column(InstantTransactionHash.Columns.txHash.name, .text).notNull()
+
+                t.primaryKey([InstantTransactionHash.Columns.txHash.name], onConflict: .ignore)
+            }
+        }
+
         return migrator
     }
 
@@ -50,13 +58,13 @@ class DashGrdbStorage: GrdbStorage {
             try Masternode.deleteAll(db)
             try MasternodeListState.deleteAll(db)
             try InstantTransactionInput.deleteAll(db)
+            try InstantTransactionHash.deleteAll(db)
         }
         try super.clearGrdb()
     }
 }
 
 extension DashGrdbStorage: IDashStorage {
-
 
     var masternodes: [Masternode] {
         get {
@@ -91,6 +99,30 @@ extension DashGrdbStorage: IDashStorage {
         }
     }
 
+    func instantTransactionHashes() -> [Data] {
+        return try! dbPool.read { db in
+            try InstantTransactionHash.fetchAll(db).map { $0.txHash }
+        }
+    }
+
+    func add(instantTransactionHash: Data) {
+        _ = try? dbPool.write { db in
+            try InstantTransactionHash(txHash: instantTransactionHash).insert(db)
+        }
+    }
+
+    func add(instantTransactionInput: InstantTransactionInput) {
+        _ = try? dbPool.write { db in
+            try instantTransactionInput.insert(db)
+        }
+    }
+
+    func removeInstantTransactionInputs(for txHash: Data) {
+        _ = try! dbPool.write { db in
+            try InstantTransactionInput.filter(InstantTransactionInput.Columns.txHash == txHash).deleteAll(db)
+        }
+    }
+
     func instantTransactionInputs(for txHash: Data) -> [InstantTransactionInput] {
         return try! dbPool.read { db in
             try InstantTransactionInput.filter(InstantTransactionInput.Columns.txHash == txHash).fetchAll(db)
@@ -100,12 +132,6 @@ extension DashGrdbStorage: IDashStorage {
     func instantTransactionInput(for inputTxHash: Data) -> InstantTransactionInput? {
         return try! dbPool.read { db in
             try InstantTransactionInput.filter(InstantTransactionInput.Columns.inputTxHash == inputTxHash).fetchOne(db)
-        }
-    }
-
-    func add(instantTransactionInput: InstantTransactionInput) {
-        _ = try? dbPool.write { db in
-            try instantTransactionInput.insert(db)
         }
     }
 

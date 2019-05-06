@@ -48,6 +48,14 @@ protocol IDashPeer: IPeer {
 
 // ###############################
 
+public protocol DashKitDelegate: class {
+    func transactionsUpdated(inserted: [DashTransactionInfo], updated: [DashTransactionInfo])
+    func transactionsDeleted(hashes: [String])
+    func balanceUpdated(balance: Int)
+    func lastBlockInfoUpdated(lastBlockInfo: BlockInfo)
+    func kitStateUpdated(state: BitcoinCore.KitState)
+}
+
 protocol IPeerTaskFactory {
     func createRequestMasternodeListDiffTask(baseBlockHash: Data, blockHash: Data) -> PeerTask
 }
@@ -66,11 +74,16 @@ protocol IDashStorage {
 
     func inputs(transactionHash: Data) -> [Input]
 
+    func instantTransactionHashes() -> [Data]
+    func add(instantTransactionHash: Data)
+
+    func add(instantTransactionInput: InstantTransactionInput)
+    func removeInstantTransactionInputs(for txHash: Data)
     func instantTransactionInputs(for txHash: Data) -> [InstantTransactionInput]
     func instantTransactionInput(for inputTxHash: Data) -> InstantTransactionInput?
-    func add(instantTransactionInput: InstantTransactionInput)
 
     func block(byHash: Data) -> Block?
+    func fullTransactionInfo(byHash hash: Data) -> FullTransactionForInfo?
 }
 
 protocol IInstantSendFactory {
@@ -108,8 +121,17 @@ protocol IMerkleRootCreator {
 
 protocol IInstantTransactionManager {
     func instantTransactionInputs(for txHash: Data, instantTransaction: FullTransaction?) -> [InstantTransactionInput]
-    func increaseVoteCount(for inputTxHash: Data)
+    func updateInput(for inputTxHash: Data, transactionInputs: [InstantTransactionInput]) throws
     func isTransactionInstant(txHash: Data) -> Bool
+}
+
+public protocol IInstantTransactionDelegate: class {
+    func onUpdateInstant(transactionHash: Data)
+}
+
+protocol IInstantTransactionState {
+    var instantTransactionHashes: [Data] { get set }
+    func append(_ hash: Data)
 }
 
 protocol IMasternodeParser {
@@ -121,13 +143,14 @@ protocol ITransactionLockVoteValidator {
 }
 
 protocol ITransactionLockVoteManager {
-    func takeRelayedLockVotes(for txHash: Data) -> [TransactionLockVoteMessage]
+    var relayedLockVotes: Set<TransactionLockVoteMessage> { get }
+    var checkedLockVotes: Set<TransactionLockVoteMessage> { get }
+    func processed(lvHash: Data) -> Bool
     func add(relayed: TransactionLockVoteMessage)
-    func inRelayed(lvHash: Data) -> Bool
-
     func add(checked: TransactionLockVoteMessage)
+
+    func takeRelayedLockVotes(for txHash: Data) -> [TransactionLockVoteMessage]
     func removeCheckedLockVotes(for txHash: Data)
-    func inChecked(lvHash: Data) -> Bool
 
     func validate(lockVote: TransactionLockVoteMessage) throws
 }
