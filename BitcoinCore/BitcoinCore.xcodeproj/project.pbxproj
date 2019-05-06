@@ -1160,7 +1160,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/../Pods/Target Support Files/Pods-BitcoinCoreTests/Pods-BitcoinCoreTests-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-BitcoinCoreTests/Pods-BitcoinCoreTests-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/HSCryptoKit/HSCryptoKit.framework",
 				"${BUILT_PRODUCTS_DIR}/HSHDWalletKit/HSHDWalletKit.framework",
 				"${BUILT_PRODUCTS_DIR}/RxSwift/RxSwift.framework",
@@ -1189,7 +1189,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/../Pods/Target Support Files/Pods-BitcoinCoreTests/Pods-BitcoinCoreTests-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BitcoinCoreTests/Pods-BitcoinCoreTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		D380FD6620FCC1C800276993 /* Cuckoo */ = {
