@@ -4,6 +4,7 @@ import DashKit
 import RxSwift
 
 class DashAdapter: BaseAdapter {
+    override var feeRate: Int { return 1 }
     private let dashKit: DashKit
 
     init(words: [String], testMode: Bool) {

@@ -57,7 +57,7 @@ extension TransactionBuilder: ITransactionBuilder {
         } else {
             // Estimated fee
             // Default to .p2pkh address
-            let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: .p2pkh, changeType: .p2pkh, senderPay: senderPay, unspentOutputs: unspentOutputProvider.allUnspentOutputs)
+            let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: .p2pkh, changeType: .p2pkh, senderPay: senderPay)
             return selectedOutputsInfo.fee
         }
     }
@@ -69,7 +69,7 @@ extension TransactionBuilder: ITransactionBuilder {
 
         let changeScriptType = ScriptType.p2pkh
         let address = try addressConverter.convert(address: toAddress)
-        let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: address.scriptType, changeType: changeScriptType, senderPay: senderPay, unspentOutputs: unspentOutputProvider.allUnspentOutputs)
+        let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: address.scriptType, changeType: changeScriptType, senderPay: senderPay)
 
         if !senderPay {
             guard selectedOutputsInfo.fee < value else {

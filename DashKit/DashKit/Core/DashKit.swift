@@ -18,7 +18,7 @@ public class DashKit: AbstractKit {
     private var masternodeSyncer: MasternodeListSyncer?
     private let dashTransactionInfoConverter: ITransactionInfoConverter
 
-    public init(withWords words: [String], walletId: String, newWallet: Bool = false, networkType: NetworkType = .mainNet, minLogLevel: Logger.Level = .verbose) throws {
+    public init(withWords words: [String], walletId: String, newWallet: Bool = false, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) throws {
         let network: INetwork
         var initialSyncApiUrl: String
 
@@ -46,9 +46,6 @@ public class DashKit: AbstractKit {
         let doubleShaHasher = DoubleShaHasher()     // Use doubleSha256 for hash
         let x11Hasher = X11Hasher()         // Use for block header hash
 
-        let transactionSizeCalculator = TransactionSizeCalculator()
-        let unspentOutputSelector = DashUnspentOutputSelector(calculator: transactionSizeCalculator)
-
         let instantSendFactory = InstantSendFactory()
         let instantTransactionState = InstantTransactionState()
         let instantTransactionManager = InstantTransactionManager(storage: storage, instantSendFactory: instantSendFactory, instantTransactionState: instantTransactionState)
@@ -66,7 +63,6 @@ public class DashKit: AbstractKit {
                 .set(storage: storage)
                 .set(newWallet: newWallet)
                 .set(blockHeaderHasher: x11Hasher)
-                .set(unspentOutputSelector: unspentOutputSelector)
                 .set(transactionInfoConverter: dashTransactionInfoConverter)
                 .build()
 
@@ -111,6 +107,10 @@ public class DashKit: AbstractKit {
         bitcoinCore.add(peerGroupListener: masternodeSyncer)
         self.masternodeSyncer = masternodeSyncer
 
+        let calculator = TransactionSizeCalculator()
+        let confirmedUnspentOutputProvider = ConfirmedUnspentOutputProvider(storage: storage, confirmationsThreshold: confirmationsThreshold)
+        bitcoinCore.prepend(unspentOutputSelector: UnspentOutputSelector(calculator: calculator, provider: confirmedUnspentOutputProvider, outputsLimit: 4))
+        bitcoinCore.prepend(unspentOutputSelector: UnspentOutputSelectorSingleNoChange(calculator: calculator, provider: confirmedUnspentOutputProvider))
 // --------------------------------------
         let transactionLockVoteValidator = TransactionLockVoteValidator(storage: storage, hasher: singleHasher)
         let instantTransactionSyncer = InstantTransactionSyncer(transactionSyncer: bitcoinCore.transactionSyncer)
@@ -130,7 +130,7 @@ public class DashKit: AbstractKit {
     }
 
     public override func send(to address: String, value: Int, feeRate: Int) throws {
-        try super.send(to: address, value: value, feeRate: 1)
+        try super.send(to: address, value: value, feeRate: feeRate)
     }
 
     public func transactions(fromHash: String?, limit: Int?) -> Single<[DashTransactionInfo]> {
