@@ -28,19 +28,19 @@ class RequestRouter: URLRequestConvertible {
 
 }
 
-class ApiManager {
+public class ApiManager {
     private let apiUrl: String
 
     private let logger: Logger?
 
 
-    required init(apiUrl: String, logger: Logger? = nil) {
+    required public init(apiUrl: String, logger: Logger? = nil) {
         self.apiUrl = apiUrl
 
         self.logger = logger
     }
 
-    func request(withMethod method: HTTPMethod, path: String, parameters: [String: Any]? = nil, httpBody: Data? = nil) -> URLRequestConvertible {
+    public func request(withMethod method: HTTPMethod, path: String, parameters: [String: Any]? = nil, httpBody: Data? = nil) -> URLRequestConvertible {
         let baseUrl = URL(string: apiUrl)!
         var request = URLRequest(url: baseUrl.appendingPathComponent(path))
         request.httpMethod = method.rawValue
@@ -53,7 +53,7 @@ class ApiManager {
         return RequestRouter(request: request, encoding: method == .get ? URLEncoding.default : JSONEncoding.default, parameters: parameters)
     }
 
-    func observable<T>(forRequest request: URLRequestConvertible, mapper: @escaping (Any) -> T?) -> Observable<T> {
+    public func observable<T>(forRequest request: URLRequestConvertible, mapper: @escaping (Any) -> T?) -> Observable<T> {
         return self.observable(forRequest: request)
                 .flatMap { dataResponse -> Observable<T> in
                     switch dataResponse.result {
@@ -74,7 +74,7 @@ class ApiManager {
                 }
     }
 
-    func observable<T: ImmutableMappable>(forRequest request: URLRequestConvertible) -> Observable<[T]> {
+    public func observable<T: ImmutableMappable>(forRequest request: URLRequestConvertible) -> Observable<[T]> {
         return observable(forRequest: request, mapper: { json in
             if let jsonArray = json as? [[String: Any]] {
                 return jsonArray.compactMap { try? T(JSONObject: $0) }
@@ -83,7 +83,7 @@ class ApiManager {
         })
     }
 
-    func observable<T: ImmutableMappable>(forRequest request: URLRequestConvertible) -> Observable<T> {
+    public func observable<T: ImmutableMappable>(forRequest request: URLRequestConvertible) -> Observable<T> {
         return observable(forRequest: request, mapper: { json in
             if let jsonObject = json as? [String: Any], let object = try? T(JSONObject: jsonObject) {
                 return object

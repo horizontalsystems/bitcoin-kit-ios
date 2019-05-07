@@ -1,6 +1,6 @@
 class BlockHashFetcherHelper: IBlockHashFetcherHelper {
 
-    func lastUsedIndex(addresses: [[String]], outputs: [BCoinApi.TransactionOutputItem]) -> Int {
+    func lastUsedIndex(addresses: [[String]], outputs: [SyncTransactionOutputItem]) -> Int {
         let searchAddressStrings = outputs.map { $0.address }
         let searchScriptStrings = outputs.map { $0.script }
 
