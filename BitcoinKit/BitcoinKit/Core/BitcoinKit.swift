@@ -18,7 +18,7 @@ public class BitcoinKit: AbstractKit {
 
     public init(withWords words: [String], walletId: String, newWallet: Bool = false, networkType: NetworkType = .mainNet, minLogLevel: Logger.Level = .verbose) throws {
         let network: INetwork
-        var initialSyncApiUrl: String? = nil
+        let initialSyncApiUrl: String
 
         switch networkType {
             case .mainNet:
@@ -27,8 +27,11 @@ public class BitcoinKit: AbstractKit {
             case .testNet:
                 network = TestNet()
                 initialSyncApiUrl = "http://btc-testnet.horizontalsystems.xyz/apg"
-            case .regTest: network = RegTest()
+            case .regTest:
+                network = RegTest()
+                initialSyncApiUrl = ""
         }
+        let initialSyncApi = BCoinApi(url: initialSyncApiUrl)
 
         let databaseFileName = "\(walletId)-bitcoin-\(networkType)"
 
@@ -40,7 +43,7 @@ public class BitcoinKit: AbstractKit {
 
         let bitcoinCore = try BitcoinCoreBuilder(minLogLevel: minLogLevel)
                 .set(network: network)
-                .set(initialSyncApiUrl: initialSyncApiUrl)
+                .set(initialSyncApi: initialSyncApi)
                 .set(words: words)
                 .set(paymentAddressParser: paymentAddressParser)
                 .set(addressSelector: addressSelector)

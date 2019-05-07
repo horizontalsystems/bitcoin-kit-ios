@@ -20,10 +20,18 @@ public class DashKit: AbstractKit {
 
     public init(withWords words: [String], walletId: String, newWallet: Bool = false, networkType: NetworkType = .mainNet, minLogLevel: Logger.Level = .verbose) throws {
         let network: INetwork
+        var initialSyncApiUrl: String
+
         switch networkType {
-            case .mainNet: network = MainNet()
-            case .testNet: network = TestNet()
+        case .mainNet:
+            network = MainNet()
+            initialSyncApiUrl = "https://dash.horizontalsystems.xyz/apg"
+        case .testNet:
+            network = TestNet()
+            initialSyncApiUrl = "http://dash-testnet.horizontalsystems.xyz/apg"
         }
+        let initialSyncApi = InsightApi(url: initialSyncApiUrl)
+
         let logger = Logger(network: network, minLogLevel: minLogLevel)
 
         let databaseFileName = "\(walletId)-dash-\(networkType)"
@@ -32,7 +40,7 @@ public class DashKit: AbstractKit {
         self.storage = storage
 
         let paymentAddressParser = PaymentAddressParser(validScheme: "dash", removeScheme: true)
-        let addressSelector = BitcoinAddressSelector()
+        let addressSelector = DashAddressSelector()
 
         let singleHasher = SingleHasher()   // Use single sha256 for hash
         let doubleShaHasher = DoubleShaHasher()     // Use doubleSha256 for hash
@@ -50,6 +58,7 @@ public class DashKit: AbstractKit {
         let bitcoinCore = try BitcoinCoreBuilder(minLogLevel: minLogLevel)
                 .set(network: network)
                 .set(words: words)
+                .set(initialSyncApi: initialSyncApi)
                 .set(paymentAddressParser: paymentAddressParser)
                 .set(addressSelector: addressSelector)
                 .set(walletId: walletId)

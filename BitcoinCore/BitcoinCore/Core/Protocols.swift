@@ -250,8 +250,8 @@ protocol IFactory {
     func bloomFilter(withElements: [Data]) -> BloomFilter
 }
 
-protocol IBCoinApi {
-    func getTransactions(addresses: [String]) -> Observable<[BCoinApi.TransactionItem]>
+public protocol ISyncTransactionApi {
+    func getTransactions(addresses: [String]) -> Observable<[SyncTransactionItem]>
 }
 
 protocol ISyncManager {
@@ -274,7 +274,7 @@ protocol IBlockHashFetcher {
 }
 
 protocol IBlockHashFetcherHelper {
-    func lastUsedIndex(addresses: [[String]], outputs: [BCoinApi.TransactionOutputItem]) -> Int
+    func lastUsedIndex(addresses: [[String]], outputs: [SyncTransactionOutputItem]) -> Int
 }
 
 protocol IInitialSyncerDelegate: class {

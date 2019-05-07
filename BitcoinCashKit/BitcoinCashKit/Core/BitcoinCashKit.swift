@@ -34,6 +34,7 @@ public class BitcoinCashKit: AbstractKit {
                 initialSyncApiUrl = "http://bch-testnet.horizontalsystems.xyz/apg"
                 validScheme = "bchtest"
         }
+        let initialSyncApi = BCoinApi(url: initialSyncApiUrl)
 
         let databaseFileName = "\(walletId)-bitcoincash-\(networkType)"
 
@@ -45,7 +46,7 @@ public class BitcoinCashKit: AbstractKit {
 
         let bitcoinCore = try BitcoinCoreBuilder(minLogLevel: minLogLevel)
                 .set(network: network)
-                .set(initialSyncApiUrl: initialSyncApiUrl)
+                .set(initialSyncApi: initialSyncApi)
                 .set(words: words)
                 .set(paymentAddressParser: paymentAddressParser)
                 .set(addressSelector: addressSelector)
