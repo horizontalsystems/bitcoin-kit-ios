@@ -45,14 +45,14 @@ class MainNet: INetwork {
         return Block(
                 withHeader: BlockHeader(
                         version: 536870912,
-                        headerHash: "000000000000000608ce4cc5480ab345bf42f125521f0f7833125f09c9fd0688".reversedData!,
-                        previousBlockHeaderHash: "0000000000000006d96ef1ae146bed5f1c769f3966a65df5f4ede44f375ae6fb".reversedData!,
+                        headerHash: "0000000000000008368fb8430955ff8c14080e170bff1856877a037d7de9ca0f".reversedData!,
+                        previousBlockHeaderHash: "000000000000001f7388f389c62aecab926fa6cc36cb4f308e95c7635aae60db".reversedData!,
                         merkleRoot: "5a764cf4380b768a8e4a015329b27d837278e499d1ff25efbe7f2ce02f6fcdc6".reversedData!,
-                        timestamp: 1555924446,
-                        bits: 421670238,
-                        nonce: 903050513
+                        timestamp: 1557189938,
+                        bits: 0x19204fc0,
+                        nonce: 2178073180
                 ),
-                height: 1058000)
+                height: 1065900)
     }
 
 }

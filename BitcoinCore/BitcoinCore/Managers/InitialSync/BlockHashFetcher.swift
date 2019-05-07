@@ -3,10 +3,10 @@ import RxSwift
 class BlockHashFetcher {
     private let addressSelector: IAddressSelector
     private let addressConverter: IAddressConverter
-    private let apiManager: IBCoinApi
+    private let apiManager: ISyncTransactionApi
     private let helper: IBlockHashFetcherHelper
 
-    init(addressSelector: IAddressSelector, apiManager: IBCoinApi, addressConverter: IAddressConverter, helper: IBlockHashFetcherHelper) {
+    init(addressSelector: IAddressSelector, apiManager: ISyncTransactionApi, addressConverter: IAddressConverter, helper: IBlockHashFetcherHelper) {
         self.addressSelector = addressSelector
         self.addressConverter = addressConverter
         self.apiManager = apiManager

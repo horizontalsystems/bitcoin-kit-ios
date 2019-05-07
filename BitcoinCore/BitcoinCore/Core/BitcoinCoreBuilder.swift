@@ -2,7 +2,7 @@ import Foundation
 import HSHDWalletKit
 
 public class BitcoinCoreBuilder {
-    public enum BuildError: Error { case noSeedData, noWalletId, noNetwork, noPaymentAddressParser, noAddressSelector, noStorage }
+    public enum BuildError: Error { case noSeedData, noWalletId, noNetwork, noPaymentAddressParser, noAddressSelector, noStorage, noInitialSyncApi }
 
     // required parameters
     private var seed: Data?
@@ -11,7 +11,7 @@ public class BitcoinCoreBuilder {
     private var paymentAddressParser: IPaymentAddressParser?
     private var addressSelector: IAddressSelector?
     private var walletId: String?
-    private var initialSyncApiUrl: String?
+    private var initialSyncApi: ISyncTransactionApi?
     private var logger: Logger
 
     private var blockHeaderHasher: IHasher?
@@ -90,8 +90,8 @@ public class BitcoinCoreBuilder {
         return self
     }
 
-    public func set(initialSyncApiUrl: String?) -> BitcoinCoreBuilder {
-        self.initialSyncApiUrl = initialSyncApiUrl
+    public func set(initialSyncApi: ISyncTransactionApi?) -> BitcoinCoreBuilder {
+        self.initialSyncApi = initialSyncApi
         return self
     }
 
@@ -122,6 +122,9 @@ public class BitcoinCoreBuilder {
         }
         guard let storage = self.storage else {
             throw BuildError.noStorage
+        }
+        guard let initialSyncApi = initialSyncApi else {
+            throw BuildError.noInitialSyncApi
         }
 
         let addressConverter = AddressConverterChain()
@@ -184,10 +187,7 @@ public class BitcoinCoreBuilder {
         let transactionSyncer = TransactionSyncer(storage: storage, processor: transactionProcessor, addressManager: addressManager, bloomFilterManager: bloomFilterManager)
         let mempoolTransactions = MempoolTransactions(transactionSyncer: transactionSyncer)
 
-        let initialSyncApiUrl = self.initialSyncApiUrl ?? "http://btc-testnet.horizontalsystems.xyz/apg"//todo dash can't initial sync blocks. Must avoid creation of blockDiscovery
-        let bcoinApi = BCoinApi(url: initialSyncApiUrl)
-
-        let blockHashFetcher = BlockHashFetcher(addressSelector: addressSelector, apiManager: bcoinApi, addressConverter: addressConverter, helper: BlockHashFetcherHelper())
+        let blockHashFetcher = BlockHashFetcher(addressSelector: addressSelector, apiManager: initialSyncApi, addressConverter: addressConverter, helper: BlockHashFetcherHelper())
         let blockDiscovery = BlockDiscoveryBatch(network: network, wallet: hdWallet, blockHashFetcher: blockHashFetcher, logger: logger)
 
         let stateManager = StateManager(storage: storage, network: network, newWallet: newWallet)
