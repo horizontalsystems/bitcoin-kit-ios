@@ -15,7 +15,6 @@ public class BitcoinCoreBuilder {
     private var logger: Logger
 
     private var blockHeaderHasher: IHasher?
-    private var unspentOutputSelector: IUnspentOutputSelector?
     private var transactionInfoConverter: ITransactionInfoConverter?
 
     // parameters with default values
@@ -77,11 +76,6 @@ public class BitcoinCoreBuilder {
 
     public func set(blockHeaderHasher: IHasher) -> BitcoinCoreBuilder {
         self.blockHeaderHasher = blockHeaderHasher
-        return self
-    }
-
-    public func set(unspentOutputSelector: IUnspentOutputSelector) -> BitcoinCoreBuilder {
-        self.unspentOutputSelector = unspentOutputSelector
         return self
     }
 
@@ -176,14 +170,7 @@ public class BitcoinCoreBuilder {
         let peerGroup = PeerGroup(factory: factory, reachabilityManager: reachabilityManager,
                 peerAddressManager: peerAddressManager, peerCount: peerCount, peerManager: peerManager, logger: logger)
 
-        let unspentOutputSelector: IUnspentOutputSelector
-        if let selector = self.unspentOutputSelector {
-            unspentOutputSelector = selector
-        } else {
-            let transactionSizeCalculator = TransactionSizeCalculator()
-            unspentOutputSelector = UnspentOutputSelector(calculator: transactionSizeCalculator)
-        }
-
+        let unspentOutputSelector = UnspentOutputSelectorChain()
         let transactionSyncer = TransactionSyncer(storage: storage, processor: transactionProcessor, addressManager: addressManager, bloomFilterManager: bloomFilterManager)
         let mempoolTransactions = MempoolTransactions(transactionSyncer: transactionSyncer)
 
@@ -221,6 +208,7 @@ public class BitcoinCoreBuilder {
                 blockValidatorChain: blockValidatorChain,
                 addressManager: addressManager,
                 addressConverter: addressConverter,
+                unspentOutputSelector: unspentOutputSelector,
                 kitStateProvider: kitStateProvider,
                 scriptBuilder: scriptBuilder,
                 transactionBuilder: transactionBuilder,
@@ -244,6 +232,9 @@ public class BitcoinCoreBuilder {
         bitcoinCore.prepend(scriptBuilder: ScriptBuilder())
         bitcoinCore.prepend(addressConverter: Base58AddressConverter(addressVersion: network.pubKeyHash, addressScriptVersion: network.scriptHash))
 
+        let transactionSizeCalculator = TransactionSizeCalculator()
+        bitcoinCore.prepend(unspentOutputSelector: UnspentOutputSelector(calculator: transactionSizeCalculator, provider: unspentOutputProvider))
+        bitcoinCore.prepend(unspentOutputSelector: UnspentOutputSelectorSingleNoChange(calculator: transactionSizeCalculator, provider: unspentOutputProvider))
         // this part can be moved to another place
 
         let blockHeaderParser = BlockHeaderParser(hasher: blockHeaderHasher ?? doubleShaHasher)

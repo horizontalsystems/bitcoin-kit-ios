@@ -32,14 +32,4 @@ extension UnspentOutputProvider: IUnspentOutputProvider {
                 })
     }
 
-    var balance: Int {
-        var balance = 0
-
-        for unspentOutput in self.allUnspentOutputs {
-            balance += unspentOutput.output.value
-        }
-
-        return balance
-    }
-
 }

@@ -56,7 +56,7 @@ class ReceiveController: UIViewController {
     }
 
     @IBAction func copyToClipboard() {
-        if let address = addressLabel?.text {
+        if let address = addressLabel?.text?.trimmingCharacters(in: .whitespaces) {
             UIPasteboard.general.setValue(address, forPasteboardType: "public.plain-text")
 
             let alert = UIAlertController(title: "Success", message: "Address copied", preferredStyle: .alert)

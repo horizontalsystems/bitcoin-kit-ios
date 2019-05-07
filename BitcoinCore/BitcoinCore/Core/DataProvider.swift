@@ -28,11 +28,11 @@ class DataProvider {
         self.storage = storage
         self.unspentOutputProvider = unspentOutputProvider
         self.transactionInfoConverter = transactionInfoConverter
-        self.balance = unspentOutputProvider.balance
+        self.balance = unspentOutputProvider.allUnspentOutputs.map { $0.output.value }.reduce(0, +)
         self.lastBlockInfo = storage.lastBlock.map { blockInfo(fromBlock: $0) }
 
         balanceUpdateSubject.throttle(throttleTime, scheduler: ConcurrentDispatchQueueScheduler(qos: .background)).subscribe(onNext: {
-            self.balance = unspentOutputProvider.balance
+            self.balance = unspentOutputProvider.allUnspentOutputs.map { $0.output.value }.reduce(0, +)
         }).disposed(by: disposeBag)
     }
 
@@ -103,24 +103,12 @@ extension DataProvider: IDataProvider {
     var debugInfo: String {
         var lines = [String]()
 
-//        let transactions = storage.transactions(sortedBy: Transaction.Columns.timestamp, secondSortedBy: Transaction.Columns.order, ascending: false)
         let pubKeys = storage.publicKeys().sorted(by: { $0.index < $1.index })
 
         for pubKey in pubKeys {
-
-//            lines.append("\(pubKey.account) --- \(pubKey.index) --- \(pubKey.external) --- hash: \(pubKey.keyHash.hex) --- p2wkph(SH) hash: \(pubKey.scriptHashForP2WPKH.hex)")
             lines.append("acc: \(pubKey.account) - inx: \(pubKey.index) - ext: \(pubKey.external) : \((try! Base58AddressConverter(addressVersion: 0x6f, addressScriptVersion: 0xc4).convert(keyHash: pubKey.keyHash, type: .p2pkh)).stringValue)")
         }
         lines.append("PUBLIC KEYS COUNT: \(pubKeys.count)")
-//        lines.append("TRANSACTIONS COUNT: \(transactions.count)")
-//        lines.append("BLOCK COUNT: \(storage.blocksCount)")
-//        if let block = storage.firstBlock {
-//            lines.append("First Block: \(block.height) --- \(block.headerHashReversedHex)")
-//        }
-//        if let block = storage.lastBlock {
-//            lines.append("Last Block: \(block.height) --- \(block.headerHashReversedHex)")
-//        }
-//
         return lines.joined(separator: "\n")
     }
 

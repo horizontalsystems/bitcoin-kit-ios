@@ -2,7 +2,7 @@ import BitcoinCore
 import RxSwift
 
 class BaseAdapter {
-    private let feeRate = 10
+    var feeRate: Int { return 10 }
     private let coinRate: Decimal = pow(10, 8)
 
     let name: String
@@ -140,7 +140,7 @@ extension BaseAdapter {
             let amount = convertToSatoshi(value: value)
             let fee = try abstractKit.fee(for: amount, toAddress: address, senderPay: true, feeRate: feeRate)
             return Decimal(fee) / coinRate
-        } catch SelectorError.notEnough(let maxFee) {
+        } catch BitcoinCoreErrors.UnspentOutputSelection.notEnough(let maxFee) {
             return Decimal(maxFee) / coinRate
         } catch {
             return 0
