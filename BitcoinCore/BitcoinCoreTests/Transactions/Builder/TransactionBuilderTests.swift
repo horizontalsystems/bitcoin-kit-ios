@@ -104,7 +104,7 @@ class TransactionBuilderTests: XCTestCase {
         changeOutput = Output(withValue: totalInputValue - value, index: 1, lockingScript: Data(), type: .p2pkh, keyHash: changePubKey.keyHash)
 
         stub(mockUnspentOutputSelector) { mock in
-            when(mock.select(value: any(), feeRate: any(), outputScriptType: any(), changeType: any(), senderPay: any(), unspentOutputs: any())).thenReturn(unspentOutputs)
+            when(mock.select(value: any(), feeRate: any(), outputScriptType: any(), changeType: any(), senderPay: any())).thenReturn(unspentOutputs)
         }
 
         stub(mockUnspentOutputProvider) { mock in
@@ -284,7 +284,7 @@ class TransactionBuilderTests: XCTestCase {
         value = totalInputValue
         unspentOutputs = SelectedUnspentOutputInfo(unspentOutputs: unspentOutputs.unspentOutputs, totalValue: unspentOutputs.totalValue, fee: unspentOutputs.fee, addChangeOutput: false)
         stub(mockUnspentOutputSelector) { mock in
-            when(mock.select(value: any(), feeRate: any(), outputScriptType: any(), changeType: any(), senderPay: any(), unspentOutputs: any())).thenReturn(unspentOutputs)
+            when(mock.select(value: any(), feeRate: any(), outputScriptType: any(), changeType: any(), senderPay: any())).thenReturn(unspentOutputs)
         }
 
         let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressPKH)
@@ -301,7 +301,7 @@ class TransactionBuilderTests: XCTestCase {
         value = totalInputValue - TransactionSizeCalculator().outputSize(type: .p2pkh) * feeRate
         unspentOutputs = SelectedUnspentOutputInfo(unspentOutputs: unspentOutputs.unspentOutputs, totalValue: unspentOutputs.totalValue, fee: unspentOutputs.fee, addChangeOutput: false)
         stub(mockUnspentOutputSelector) { mock in
-            when(mock.select(value: any(), feeRate: any(), outputScriptType: any(), changeType: any(), senderPay: any(), unspentOutputs: any())).thenReturn(unspentOutputs)
+            when(mock.select(value: any(), feeRate: any(), outputScriptType: any(), changeType: any(), senderPay: any())).thenReturn(unspentOutputs)
         }
 
         let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressPKH)

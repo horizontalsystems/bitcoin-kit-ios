@@ -15,6 +15,7 @@ public class BitcoinCore {
     private var dataProvider: IDataProvider & IBlockchainDataListener
     private let addressManager: IAddressManager
     private let addressConverter: AddressConverterChain
+    private let unspentOutputSelector: UnspentOutputSelectorChain
     private let kitStateProvider: IKitStateProvider & ISyncStateListener
 
     private let scriptBuilder: ScriptBuilderChain
@@ -82,6 +83,10 @@ public class BitcoinCore {
         self.addressConverter.prepend(addressConverter: addressConverter)
     }
 
+    public func prepend(unspentOutputSelector: IUnspentOutputSelector) {
+        self.unspentOutputSelector.prepend(unspentOutputSelector: unspentOutputSelector)
+    }
+
     // END: Extending
 
     public var delegateQueue = DispatchQueue(label: "bitcoin_delegate_queue")
@@ -89,7 +94,7 @@ public class BitcoinCore {
 
     init(storage: IStorage, cache: OutputsCache, dataProvider: IDataProvider & IBlockchainDataListener,
                 peerGroup: IPeerGroup, initialBlockDownload: IInitialBlockDownload, syncedReadyPeerManager: ISyncedReadyPeerManager, transactionSyncer: ITransactionSyncer,
-                blockValidatorChain: BlockValidatorChain, addressManager: IAddressManager, addressConverter: AddressConverterChain, kitStateProvider: IKitStateProvider & ISyncStateListener,
+                blockValidatorChain: BlockValidatorChain, addressManager: IAddressManager, addressConverter: AddressConverterChain, unspentOutputSelector: UnspentOutputSelectorChain, kitStateProvider: IKitStateProvider & ISyncStateListener,
                 scriptBuilder: ScriptBuilderChain, transactionBuilder: ITransactionBuilder, transactionCreator: ITransactionCreator,
                 paymentAddressParser: IPaymentAddressParser, networkMessageParser: NetworkMessageParser, networkMessageSerializer: NetworkMessageSerializer,
                 syncManager: SyncManager) {
@@ -103,6 +108,7 @@ public class BitcoinCore {
         self.blockValidatorChain = blockValidatorChain
         self.addressManager = addressManager
         self.addressConverter = addressConverter
+        self.unspentOutputSelector = unspentOutputSelector
         self.kitStateProvider = kitStateProvider
         self.scriptBuilder = scriptBuilder
         self.transactionBuilder = transactionBuilder

@@ -82,7 +82,11 @@ protocol IDashStorage {
     func instantTransactionInputs(for txHash: Data) -> [InstantTransactionInput]
     func instantTransactionInput(for inputTxHash: Data) -> InstantTransactionInput?
 
+    var lastBlock: Block? { get }
     func block(byHash: Data) -> Block?
+
+    func unspentOutputs() -> [UnspentOutput]
+
     func fullTransactionInfo(byHash hash: Data) -> FullTransactionForInfo?
 }
 

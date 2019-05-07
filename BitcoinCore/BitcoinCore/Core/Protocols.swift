@@ -368,7 +368,7 @@ public protocol IScriptBuilder {
     func lockingScript(for address: Address) throws -> Data
 }
 
-protocol ITransactionSizeCalculator {
+public protocol ITransactionSizeCalculator {
     func transactionSize(inputs: [ScriptType], outputScriptTypes: [ScriptType]) -> Int
     func outputSize(type: ScriptType) -> Int
     func inputSize(type: ScriptType) -> Int
@@ -376,12 +376,11 @@ protocol ITransactionSizeCalculator {
 }
 
 public protocol IUnspentOutputSelector {
-    func select(value: Int, feeRate: Int, outputScriptType: ScriptType, changeType: ScriptType, senderPay: Bool, unspentOutputs: [UnspentOutput]) throws -> SelectedUnspentOutputInfo
+    func select(value: Int, feeRate: Int, outputScriptType: ScriptType, changeType: ScriptType, senderPay: Bool) throws -> SelectedUnspentOutputInfo
 }
 
-protocol IUnspentOutputProvider {
+public protocol IUnspentOutputProvider {
     var allUnspentOutputs: [UnspentOutput] { get }
-    var balance: Int { get }
 }
 
 public protocol IBlockSyncer: class {
@@ -410,10 +409,6 @@ protocol IKitStateProviderDelegate: class {
 
 public protocol ITransactionInfo: class {
     init(transactionHash: String, transactionIndex: Int, from: [TransactionAddressInfo], to: [TransactionAddressInfo], amount: Int, blockHeight: Int?, timestamp: Int)
-}
-
-public protocol IBaseTransactionInfoConverter {
-    func transactionInfo<T: TransactionInfo>(fromTransaction transactionForInfo: FullTransactionForInfo) -> T
 }
 
 public protocol ITransactionInfoConverter {

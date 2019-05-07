@@ -34,7 +34,7 @@ class TransactionLockVoteValidator: ITransactionLockVoteValidator {
         }
 
         // 4. Check masternode in first 10 scores
-        guard (index + 1) < TransactionLockVoteValidator.totalSignatures else {
+        guard index < TransactionLockVoteValidator.totalSignatures else {
             throw DashKitErrors.LockVoteValidation.masternodeNotInTop
         }
 

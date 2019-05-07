@@ -24,13 +24,13 @@
 		58AAA1D98DEB1F6230E4EB27 /* TransactionLockVoteValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAACFBF2C153954A53AE70 /* TransactionLockVoteValidatorTests.swift */; };
 		58AAA1FC05748154358748CE /* InstantTransactionInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAF60A1E9BD745D645A7D /* InstantTransactionInput.swift */; };
 		58AAA2515EBD6650E0C005AA /* MasternodeSortedListTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA0398DAC6811AAD8FF86 /* MasternodeSortedListTests.swift */; };
-		58AAA27E3B63F7DF67F8006D /* DashUnspentOutputSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA46D9D0B4D29A96AFAC6 /* DashUnspentOutputSelector.swift */; };
 		58AAA2C9BDA51E4733F3AC0C /* MasternodeListMerkleRootCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAA9C78E24573D08995F0 /* MasternodeListMerkleRootCalculatorTests.swift */; };
 		58AAA2EBAFA03520E5C8F1F0 /* InstantTransactionSyncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA2B4C33E32CF46D2D98B /* InstantTransactionSyncer.swift */; };
 		58AAA41C7BA7F4AE78A99578 /* MasternodeListDiffMessageParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAA294A297E74A7E6CE52 /* MasternodeListDiffMessageParser.swift */; };
 		58AAA445C4B1CF142B33C236 /* MasternodeListMerkleRootCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAB4D9D73D00D4F098FB5 /* MasternodeListMerkleRootCalculator.swift */; };
 		58AAA4484F1C34B6B4E1F2E4 /* DarkGravityWaveValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA60B71D68ABDACE2F8FA /* DarkGravityWaveValidatorTests.swift */; };
 		58AAA497CB4425796D178DFF /* MasternodeListState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA0605DA659EF9FE6A8EA /* MasternodeListState.swift */; };
+		58AAA5020E3111ADB26B2261 /* ConfirmedUnspentOutputProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA135CAE12BD33A6D7D2E /* ConfirmedUnspentOutputProvider.swift */; };
 		58AAA51780FC3C29D1DEC96B /* InstantTransactionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAAD1F0767070DBC89C8F /* InstantTransactionManager.swift */; };
 		58AAA51AE7098469E57E970F /* InstantSendTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA8F6E9EC26E29F4587B0 /* InstantSendTests.swift */; };
 		58AAA59182DEFEC059D60216 /* InstantTransactionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAEA87DCEBE51E9F79BEA /* InstantTransactionManagerTests.swift */; };
@@ -70,7 +70,6 @@
 		58AAAC7FAFF35B1182E6CA45 /* GetMasternodeListDiffMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAD26E8F6F0D81E444A37 /* GetMasternodeListDiffMessage.swift */; };
 		58AAAD0C7E66CD27B52CE667 /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAC100B6F2FA333989819 /* Protocols.swift */; };
 		58AAAD35BC013CE1F8B6635B /* TransactionLockVoteValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA55694D2616FF8C256A3 /* TransactionLockVoteValidator.swift */; };
-		58AAAD4D13B7C50173064C11 /* DashUnspentOutputSelectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAADD73B4CFADDA94680EE /* DashUnspentOutputSelectorTests.swift */; };
 		58AAADFD826478EDA93605D5 /* TransactionLockMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA5430DB3AED5094E6996 /* TransactionLockMessage.swift */; };
 		58AAAE8B13F1DD739661FB19 /* DarkGravityWaveTestNetValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAD4E9080039DC9EDF4A2 /* DarkGravityWaveTestNetValidatorTests.swift */; };
 		58AAAE9A737EE5D91AD2884A /* InstantTransactionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA25F98854859029BE603 /* InstantTransactionState.swift */; };
@@ -109,6 +108,7 @@
 		58AAA0605DA659EF9FE6A8EA /* MasternodeListState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeListState.swift; sourceTree = "<group>"; };
 		58AAA0731BC44688D2072C72 /* TransactionLockVoteManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionLockVoteManagerTests.swift; sourceTree = "<group>"; };
 		58AAA0C1F67271207DA77330 /* MasternodeListManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeListManager.swift; sourceTree = "<group>"; };
+		58AAA135CAE12BD33A6D7D2E /* ConfirmedUnspentOutputProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConfirmedUnspentOutputProvider.swift; sourceTree = "<group>"; };
 		58AAA1776A1D0A594FC7FD18 /* TransactionLockVoteMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionLockVoteMessage.swift; sourceTree = "<group>"; };
 		58AAA1A86BE6A17469E53400 /* DashAddressSelector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashAddressSelector.swift; sourceTree = "<group>"; };
 		58AAA1C1D2E2538CBC33B663 /* TransactionLockMessageParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionLockMessageParser.swift; sourceTree = "<group>"; };
@@ -119,7 +119,6 @@
 		58AAA2B4C33E32CF46D2D98B /* InstantTransactionSyncer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstantTransactionSyncer.swift; sourceTree = "<group>"; };
 		58AAA2C73B87C78CAB570A68 /* MerkleRootCreator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MerkleRootCreator.swift; sourceTree = "<group>"; };
 		58AAA2DDA1326C29293D55B5 /* RequestTransactionLockRequestsTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestTransactionLockRequestsTask.swift; sourceTree = "<group>"; };
-		58AAA46D9D0B4D29A96AFAC6 /* DashUnspentOutputSelector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashUnspentOutputSelector.swift; sourceTree = "<group>"; };
 		58AAA5430DB3AED5094E6996 /* TransactionLockMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionLockMessage.swift; sourceTree = "<group>"; };
 		58AAA5554604118DB100DAD3 /* MasternodeListManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeListManagerTests.swift; sourceTree = "<group>"; };
 		58AAA55694D2616FF8C256A3 /* TransactionLockVoteValidator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionLockVoteValidator.swift; sourceTree = "<group>"; };
@@ -162,7 +161,6 @@
 		58AAAD56C817AE1E7BB86FDC /* CoinbaseTransactionSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoinbaseTransactionSerializer.swift; sourceTree = "<group>"; };
 		58AAAD5F70AEFFEF48035926 /* SingleHasher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SingleHasher.swift; sourceTree = "<group>"; };
 		58AAADC512D5340724ADCE13 /* CoinbaseTransaction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoinbaseTransaction.swift; sourceTree = "<group>"; };
-		58AAADD73B4CFADDA94680EE /* DashUnspentOutputSelectorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashUnspentOutputSelectorTests.swift; sourceTree = "<group>"; };
 		58AAAE28D7AB4A214D680314 /* PeerTaskFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerTaskFactory.swift; sourceTree = "<group>"; };
 		58AAAE510575878A4AB340C1 /* TestNet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestNet.swift; sourceTree = "<group>"; };
 		58AAAE8C1DD28970F1631067 /* InstantTransactionHash.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstantTransactionHash.swift; sourceTree = "<group>"; };
@@ -290,7 +288,6 @@
 		58AAA6893AE33BB0AA4E2FFE /* Managers */ = {
 			isa = PBXGroup;
 			children = (
-				58AAADD73B4CFADDA94680EE /* DashUnspentOutputSelectorTests.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -345,9 +342,9 @@
 		58AAA940CCEC533F3402FB59 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
-				58AAA46D9D0B4D29A96AFAC6 /* DashUnspentOutputSelector.swift */,
 				3C7B97DDBAAB290971492CBC /* InitialSync */,
 				58AAA1A86BE6A17469E53400 /* DashAddressSelector.swift */,
+				58AAA135CAE12BD33A6D7D2E /* ConfirmedUnspentOutputProvider.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -750,7 +747,6 @@
 				58AAA0581D001F2AA294802B /* TestNet.swift in Sources */,
 				58AAAA8392E527FFED910B01 /* MainNet.swift in Sources */,
 				58AAA0C13ECAF509575AC590 /* BitcoinCoreCompatibility.swift in Sources */,
-				58AAA27E3B63F7DF67F8006D /* DashUnspentOutputSelector.swift in Sources */,
 				58AAA2EBAFA03520E5C8F1F0 /* InstantTransactionSyncer.swift in Sources */,
 				58AAAA9B99A71DC2D87BBCDA /* InstantSend.swift in Sources */,
 				58AAA51780FC3C29D1DEC96B /* InstantTransactionManager.swift in Sources */,
@@ -761,6 +757,7 @@
 				58AAA1992857F107D48947E9 /* DashTransactionInfo.swift in Sources */,
 				3C7B999C966BB049FBC77466 /* InsightApi.swift in Sources */,
 				58AAAA292D3A413E0E9F44A7 /* DashAddressSelector.swift in Sources */,
+				58AAA5020E3111ADB26B2261 /* ConfirmedUnspentOutputProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -780,7 +777,6 @@
 				58AAA4484F1C34B6B4E1F2E4 /* DarkGravityWaveValidatorTests.swift in Sources */,
 				58AAAE8B13F1DD739661FB19 /* DarkGravityWaveTestNetValidatorTests.swift in Sources */,
 				58AAA8A21156727FB34BD469 /* GeneratedMocks.swift in Sources */,
-				58AAAD4D13B7C50173064C11 /* DashUnspentOutputSelectorTests.swift in Sources */,
 				58AAA51AE7098469E57E970F /* InstantSendTests.swift in Sources */,
 				58AAA59182DEFEC059D60216 /* InstantTransactionManagerTests.swift in Sources */,
 				58AAA055180E96AA33EF2C16 /* TransactionLockVoteManagerTests.swift in Sources */,
