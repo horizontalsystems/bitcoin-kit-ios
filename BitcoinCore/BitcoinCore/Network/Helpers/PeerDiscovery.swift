@@ -4,12 +4,14 @@ class PeerDiscovery: IPeerDiscovery {
     weak var peerAddressManager: IPeerAddressManager?
 
     func lookup(dnsSeed: String) {
-        DispatchQueue.global(qos: .background).async {
-            self.peerAddressManager?.add(ips: self.lookup(dnsSeed: dnsSeed))
+        DispatchQueue.global(qos: .background).async { [weak self] in
+            if let ips = self?._lookup(dnsSeed: dnsSeed) {
+                self?.peerAddressManager?.add(ips: ips)
+            }
         }
     }
 
-    private func lookup(dnsSeed: String) -> [String] {
+    private func _lookup(dnsSeed: String) -> [String] {
         let hostRef = CFHostCreateWithName(kCFAllocatorDefault, dnsSeed as CFString).takeRetainedValue()
         let resolved = CFHostStartInfoResolution(hostRef, CFHostInfoType.addresses, nil)
         var resolvedDarwin = DarwinBoolean(resolved)
