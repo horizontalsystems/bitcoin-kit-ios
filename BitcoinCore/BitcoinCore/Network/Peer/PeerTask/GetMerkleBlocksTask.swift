@@ -5,7 +5,7 @@ class GetMerkleBlocksTask: PeerTask {
     private let allowedIdleTime = 60.0
     private var blockHashes: [BlockHash]
     private var pendingMerkleBlocks = [MerkleBlock]()
-    private let merkleBlockHandler: IMerkleBlockHandler
+    private weak var merkleBlockHandler: IMerkleBlockHandler?
 
     init(blockHashes: [BlockHash], merkleBlockHandler: IMerkleBlockHandler, dateGenerator: @escaping () -> Date = Date.init) {
         self.blockHashes = blockHashes
@@ -75,7 +75,7 @@ class GetMerkleBlocksTask: PeerTask {
         }
 
         do {
-            try merkleBlockHandler.handle(merkleBlock: merkleBlock)
+            try merkleBlockHandler?.handle(merkleBlock: merkleBlock)
         } catch {
             delegate?.handle(failedTask: self, error: error)
         }

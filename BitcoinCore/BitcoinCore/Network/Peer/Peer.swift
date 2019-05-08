@@ -312,8 +312,8 @@ extension Peer: PeerConnectionDelegate {
     func connectionTimePeriodPassed() {
         connectionTimeoutManager.timePeriodPassed(peer: self)
 
-        queue.async {
-            if let task = self.tasks.first {
+        queue.async { [weak self] in
+            if let task = self?.tasks.first {
                 task.checkTimeout()
             }
         }
@@ -332,12 +332,12 @@ extension Peer: PeerConnectionDelegate {
     }
 
     func connection(didReceiveMessage message: IMessage) {
-        queue.async {
+        queue.async { [weak self] in
             do {
-                try self.handle(message: message)
+                try self?.handle(message: message)
             } catch {
-                self.log("Message handling failed with error: \(error)", level: .warning)
-                self.disconnect(error: error)
+                self?.log("Message handling failed with error: \(error)", level: .warning)
+                self?.disconnect(error: error)
             }
         }
     }
