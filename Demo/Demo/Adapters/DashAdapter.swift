@@ -33,6 +33,9 @@ class DashAdapter: BaseAdapter {
         return record
     }
 
+    class func clear() {
+        try? DashKit.clear()
+    }
 }
 
 extension DashAdapter: DashKitDelegate {

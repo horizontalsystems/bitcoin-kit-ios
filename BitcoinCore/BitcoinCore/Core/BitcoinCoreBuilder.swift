@@ -203,6 +203,7 @@ public class BitcoinCoreBuilder {
                 dataProvider: dataProvider,
                 peerGroup: peerGroup,
                 initialBlockDownload: initialBlockDownload,
+                bloomFilterLoader: bloomFilterLoader,
                 syncedReadyPeerManager: syncedReadyPeerManager,
                 transactionSyncer: transactionSyncer,
                 blockValidatorChain: blockValidatorChain,
@@ -222,9 +223,6 @@ public class BitcoinCoreBuilder {
         bloomFilterManager.delegate = bloomFilterLoader
         dataProvider.delegate = bitcoinCore
         kitStateProvider.delegate = bitcoinCore
-
-        bitcoinCore.peerGroup = peerGroup
-        bitcoinCore.transactionSyncer = transactionSyncer
 
         peerGroup.peerTaskHandler = bitcoinCore.peerTaskHandlerChain
         peerGroup.inventoryItemsHandler = bitcoinCore.inventoryItemsHandlerChain
@@ -260,16 +258,21 @@ public class BitcoinCoreBuilder {
                 .add(messageSerializer: TransactionMessageSerializer())
                 .add(messageSerializer: FilterLoadMessageSerializer())
 
-        bitcoinCore.add(peerGroupListener: bloomFilterLoader)
+        bloomFilterLoader.subscribeTo(observable: peerGroup.observable)
+        initialBlockDownload.subscribeTo(observable: peerGroup.observable)
+        syncedReadyPeerManager.subscribeTo(observable: peerGroup.observable)
+        mempoolTransactions.subscribeTo(observable: peerGroup.observable)
+
+
         bitcoinCore.add(peerTaskHandler: initialBlockDownload)
         bitcoinCore.add(inventoryItemsHandler: initialBlockDownload)
-        bitcoinCore.add(peerGroupListener: initialBlockDownload)
-        bitcoinCore.add(peerGroupListener: syncedReadyPeerManager)
-        bitcoinCore.add(peerSyncListener: syncedReadyPeerManager)
-        bitcoinCore.add(peerSyncAndReadyListeners: transactionSender)
+
+        syncedReadyPeerManager.subscribeTo(observable: initialBlockDownload.observable)
+        transactionSender.subscribeTo(observable: syncedReadyPeerManager.observable)
+
+
         bitcoinCore.add(peerTaskHandler: mempoolTransactions)
         bitcoinCore.add(inventoryItemsHandler: mempoolTransactions)
-        bitcoinCore.add(peerGroupListener: mempoolTransactions)
 
         return bitcoinCore
     }

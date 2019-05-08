@@ -5,6 +5,10 @@ import HSCryptoKit
 import RxSwift
 
 public class BitcoinKit: AbstractKit {
+    public static func clear() throws {
+        try DirectoryHelper.removeDirectory("BitcoinKit")
+    }
+
     public enum NetworkType { case mainNet, testNet, regTest }
 
     private let storage: IStorage
@@ -33,9 +37,8 @@ public class BitcoinKit: AbstractKit {
         }
         let initialSyncApi = BCoinApi(url: initialSyncApiUrl)
 
-        let databaseFileName = "\(walletId)-bitcoin-\(networkType)"
-
-        let storage = GrdbStorage(databaseFileName: databaseFileName)
+        let databaseFilePath = try DirectoryHelper.directoryURL(for: "BitcoinKit").appendingPathComponent("\(walletId)-\(networkType)").path
+        let storage = GrdbStorage(databaseFilePath: databaseFilePath)
         self.storage = storage
 
         let paymentAddressParser = PaymentAddressParser(validScheme: "bitcoin", removeScheme: true)

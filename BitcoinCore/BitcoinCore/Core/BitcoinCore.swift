@@ -12,7 +12,7 @@ public class BitcoinCore {
 
     private let storage: IStorage
     private let cache: OutputsCache
-    private var dataProvider: IDataProvider & IBlockchainDataListener
+    private var dataProvider: IDataProvider
     private let addressManager: IAddressManager
     private let addressConverter: AddressConverterChain
     private let unspentOutputSelector: UnspentOutputSelectorChain
@@ -31,13 +31,13 @@ public class BitcoinCore {
 
     // START: Extending
 
-    public var peerGroup: IPeerGroup
-    public var initialBlockDownload: IInitialBlockDownload
-    public var syncedReadyPeerManager: ISyncedReadyPeerManager
-    public var transactionSyncer: ITransactionSyncer
+    public let peerGroup: IPeerGroup
+    public let initialBlockDownload: IInitialBlockDownload
+    public let syncedReadyPeerManager: ISyncedReadyPeerManager
+    public let transactionSyncer: ITransactionSyncer
 
+    let bloomFilterLoader: BloomFilterLoader
     let blockValidatorChain: BlockValidatorChain
-
     let inventoryItemsHandlerChain = InventoryItemsHandlerChain()
     let peerTaskHandlerChain = PeerTaskHandlerChain()
 
@@ -53,14 +53,6 @@ public class BitcoinCore {
         peerTaskHandlerChain.add(handler: peerTaskHandler)
     }
 
-    public func add(peerSyncListener: IPeerSyncListener) {
-        initialBlockDownload.add(peerSyncListener: peerSyncListener)
-    }
-
-    public func add(peerSyncAndReadyListeners: IPeerSyncAndReadyListeners) {
-        syncedReadyPeerManager.add(listener: peerSyncAndReadyListeners)
-    }
-
     @discardableResult public func add(messageParser: IMessageParser) -> Self {
         networkMessageParser.add(parser: messageParser)
         return self
@@ -69,10 +61,6 @@ public class BitcoinCore {
     @discardableResult public func add(messageSerializer: IMessageSerializer) -> Self {
         networkMessageSerializer.add(serializer: messageSerializer)
         return self
-    }
-
-    public func add(peerGroupListener: IPeerGroupListener) {
-        peerGroup.add(peerGroupListener: peerGroupListener)
     }
 
     public func prepend(scriptBuilder: IScriptBuilder) {
@@ -92,8 +80,9 @@ public class BitcoinCore {
     public var delegateQueue = DispatchQueue(label: "bitcoin_delegate_queue")
     public weak var delegate: BitcoinCoreDelegate?
 
-    init(storage: IStorage, cache: OutputsCache, dataProvider: IDataProvider & IBlockchainDataListener,
-                peerGroup: IPeerGroup, initialBlockDownload: IInitialBlockDownload, syncedReadyPeerManager: ISyncedReadyPeerManager, transactionSyncer: ITransactionSyncer,
+    init(storage: IStorage, cache: OutputsCache, dataProvider: IDataProvider,
+                peerGroup: IPeerGroup, initialBlockDownload: IInitialBlockDownload, bloomFilterLoader: BloomFilterLoader,
+                syncedReadyPeerManager: ISyncedReadyPeerManager, transactionSyncer: ITransactionSyncer,
                 blockValidatorChain: BlockValidatorChain, addressManager: IAddressManager, addressConverter: AddressConverterChain, unspentOutputSelector: UnspentOutputSelectorChain, kitStateProvider: IKitStateProvider & ISyncStateListener,
                 scriptBuilder: ScriptBuilderChain, transactionBuilder: ITransactionBuilder, transactionCreator: ITransactionCreator,
                 paymentAddressParser: IPaymentAddressParser, networkMessageParser: NetworkMessageParser, networkMessageSerializer: NetworkMessageSerializer,
@@ -103,6 +92,7 @@ public class BitcoinCore {
         self.dataProvider = dataProvider
         self.peerGroup = peerGroup
         self.initialBlockDownload = initialBlockDownload
+        self.bloomFilterLoader = bloomFilterLoader
         self.syncedReadyPeerManager = syncedReadyPeerManager
         self.transactionSyncer = transactionSyncer
         self.blockValidatorChain = blockValidatorChain
@@ -131,12 +121,6 @@ extension BitcoinCore {
 
     func stop() {
         syncManager.stop()
-    }
-
-    public func clear() throws {
-        syncManager.stop()
-        try storage.clear()
-        cache.clear()
     }
 
 }

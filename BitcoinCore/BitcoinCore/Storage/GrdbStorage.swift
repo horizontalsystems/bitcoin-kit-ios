@@ -5,17 +5,8 @@ open class GrdbStorage {
     public var dbPool: DatabasePool
     private var dbsInTransaction = [Int: Database]()
 
-    private let databaseName: String
-    private var databaseURL: URL
-
-    public init(databaseFileName: String) {
-        self.databaseName = databaseFileName
-
-        databaseURL = try! FileManager.default
-                .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-                .appendingPathComponent("\(databaseName).sqlite")
-
-        dbPool = try! DatabasePool(path: databaseURL.path)
+    public init(databaseFilePath: String) {
+        dbPool = try! DatabasePool(path: databaseFilePath)
 
         try? migrator.migrate(dbPool)
     }
@@ -150,20 +141,6 @@ open class GrdbStorage {
         }
 
         return migrator
-    }
-
-    open func clearGrdb() throws {
-        _ = try! dbPool.write { db in
-            try BlockchainState.deleteAll(db)
-            try PeerAddress.deleteAll(db)
-            try BlockHash.deleteAll(db)
-            try SentTransaction.deleteAll(db)
-            try Input.deleteAll(db)
-            try Output.deleteAll(db)
-            try Transaction.deleteAll(db)
-            try PublicKey.deleteAll(db)
-            try Block.deleteAll(db)
-        }
     }
 
 }
@@ -735,12 +712,6 @@ extension GrdbStorage: IStorage {
 
             return publicKeys
         }
-    }
-
-    // Clear
-
-    public func clear() throws {
-        try clearGrdb()
     }
 
 }

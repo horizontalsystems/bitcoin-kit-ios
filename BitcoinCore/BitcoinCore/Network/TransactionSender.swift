@@ -1,4 +1,8 @@
+import RxSwift
+
 class TransactionSender {
+    private let disposeBag = DisposeBag()
+
     var transactionSyncer: ITransactionSyncer
     var peerManager: IPeerManager
     var initialBlockDownload: IInitialBlockDownload
@@ -48,6 +52,20 @@ class TransactionSender {
         }
     }
 
+    private func onPeerSyncedAndReady(peer: IPeer) {
+        guard peerManager.connected().count == initialBlockDownload.syncedPeers.count else {
+            return
+        }
+
+        let transactions = transactionSyncer.pendingTransactions()
+
+        guard transactions.count > 0, let peers = try? peersToSendTo() else {
+            return
+        }
+
+        send(transactions: transactionSyncer.pendingTransactions(), toPeers: peers)
+    }
+
 }
 
 extension TransactionSender: ITransactionSender {
@@ -62,22 +80,11 @@ extension TransactionSender: ITransactionSender {
         send(transactions: [pendingTransaction], toPeers: peers)
     }
 
-}
-
-extension TransactionSender: IPeerSyncAndReadyListeners {
-
-    public func onPeerSyncedAndReady(peer: IPeer) {
-        guard peerManager.connected().count == initialBlockDownload.syncedPeers.count else {
-            return
-        }
-
-        let transactions = transactionSyncer.pendingTransactions()
-
-        guard transactions.count > 0, let peers = try? peersToSendTo() else {
-            return
-        }
-
-        send(transactions: transactionSyncer.pendingTransactions(), toPeers: peers)
+    func subscribeTo(observable: Observable<IPeer>) {
+        observable.subscribe(onNext: { [weak self] in
+                    self?.onPeerSyncedAndReady(peer: $0)
+                })
+                .disposed(by: disposeBag)
     }
 
 }

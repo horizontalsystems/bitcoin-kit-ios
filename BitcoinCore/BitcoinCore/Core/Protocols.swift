@@ -121,8 +121,6 @@ public protocol IStorage {
     func publicKey(byRawOrKeyHash: Data) -> PublicKey?
     func add(publicKeys: [PublicKey])
     func publicKeysWithUsedState() -> [PublicKeyWithUsedState]
-
-    func clear() throws
 }
 
 public protocol IAddressSelector {
@@ -149,7 +147,7 @@ public protocol IBloomFilterManager {
 
 
 public protocol IPeerGroup: class {
-    func add(peerGroupListener: IPeerGroupListener)
+    var observable: Observable<PeerGroupEvent> { get }
 
     func start()
     func stop()
@@ -494,56 +492,27 @@ public protocol IMessageSerializer {
 }
 
 public protocol IInitialBlockDownload {
+    var observable: Observable<InitialBlockDownloadEvent> { get }
     var syncedPeers: [IPeer] { get }
     func isSynced(peer: IPeer) -> Bool
-    func add(peerSyncListener: IPeerSyncListener)
 }
 
 public protocol ISyncedReadyPeerManager {
     var peers: [IPeer] { get }
-    func add(listener: IPeerSyncAndReadyListeners)
+    var observable: Observable<IPeer> { get }
 }
 
-public protocol IInventoryItemsHandler {
+public protocol IInventoryItemsHandler: class {
     func handleInventoryItems(peer: IPeer, inventoryItems: [InventoryItem])
 }
 
-public protocol IPeerTaskHandler {
+public protocol IPeerTaskHandler: class {
     func handleCompletedTask(peer: IPeer, task: PeerTask) -> Bool
-}
-
-public protocol IPeerSyncListener {
-    func onPeerSynced(peer: IPeer)
-    func onPeerNotSynced(peer: IPeer)
-}
-
-public protocol IPeerSyncAndReadyListeners {
-    func onPeerSyncedAndReady(peer: IPeer)
 }
 
 protocol ITransactionSender {
     func verifyCanSend() throws
     func send(pendingTransaction: FullTransaction) throws
-}
-
-public protocol IPeerGroupListener {
-    func onStart()
-    func onStop()
-    func onPeerCreate(peer: IPeer)
-    func onPeerConnect(peer: IPeer)
-    func onPeerDisconnect(peer: IPeer, error: Error?)
-    func onPeerReady(peer: IPeer)
-    func onPeerBusy(peer: IPeer)
-}
-
-public extension IPeerGroupListener {
-    func onStart() {}
-    func onStop() {}
-    func onPeerCreate(peer: IPeer) {}
-    func onPeerConnect(peer: IPeer) {}
-    func onPeerDisconnect(peer: IPeer, error: Error?) {}
-    func onPeerReady(peer: IPeer) {}
-    func onPeerBusy(peer: IPeer) {}
 }
 
 protocol IMerkleBlockHandler {

@@ -13,6 +13,9 @@ class BitcoinCashAdapter: BaseAdapter {
         bitcoinCashKit.delegate = self
     }
 
+    class func clear() {
+        try? BitcoinCashKit.clear()
+    }
 }
 
 extension BitcoinCashAdapter: BitcoinCoreDelegate {

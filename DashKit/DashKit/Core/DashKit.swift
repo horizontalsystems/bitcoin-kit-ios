@@ -9,6 +9,10 @@ public class DashKit: AbstractKit {
     private static let targetSpacing = 150                                      // Time to mining one block ( 2.5 min. Dash )
     private static let maxTargetBits = 0x1e0fffff                               // Initially and max. target difficulty for blocks ( Dash )
 
+    public static func clear() throws {
+        try DirectoryHelper.removeDirectory("DashKit")
+    }
+
     public enum NetworkType { case mainNet, testNet }
 
     weak public var delegate: DashKitDelegate?
@@ -34,9 +38,8 @@ public class DashKit: AbstractKit {
 
         let logger = Logger(network: network, minLogLevel: minLogLevel)
 
-        let databaseFileName = "\(walletId)-dash-\(networkType)"
-
-        let storage = DashGrdbStorage(databaseFileName: databaseFileName)
+        let databaseFilePath = try DirectoryHelper.directoryURL(for: "DashKit").appendingPathComponent("\(walletId)-\(networkType)").path
+        let storage = DashGrdbStorage(databaseFilePath: databaseFilePath)
         self.storage = storage
 
         let paymentAddressParser = PaymentAddressParser(validScheme: "dash", removeScheme: true)
@@ -103,8 +106,10 @@ public class DashKit: AbstractKit {
         let masternodeSyncer = MasternodeListSyncer(bitcoinCore: bitcoinCore, initialBlockDownload: bitcoinCore.initialBlockDownload, peerTaskFactory: PeerTaskFactory(), masternodeListManager: masternodeListManager)
 
         bitcoinCore.add(peerTaskHandler: masternodeSyncer)
-        bitcoinCore.add(peerSyncListener: masternodeSyncer)
-        bitcoinCore.add(peerGroupListener: masternodeSyncer)
+
+        masternodeSyncer.subscribeTo(observable: bitcoinCore.initialBlockDownload.observable)
+        masternodeSyncer.subscribeTo(observable: bitcoinCore.peerGroup.observable)
+
         self.masternodeSyncer = masternodeSyncer
 
         let calculator = TransactionSizeCalculator()

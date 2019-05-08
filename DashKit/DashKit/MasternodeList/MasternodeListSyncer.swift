@@ -1,8 +1,8 @@
 import BitcoinCore
+import RxSwift
 
 class MasternodeListSyncer: IMasternodeListSyncer {
-    private var successor: IPeerTaskHandler?
-
+    private let disposeBag = DisposeBag()
     private let bitcoinCore: BitcoinCore
     private let initialBlockDownload: IInitialBlockDownload
     private let peerTaskFactory: IPeerTaskFactory
@@ -40,22 +40,42 @@ class MasternodeListSyncer: IMasternodeListSyncer {
         }
     }
 
+    func subscribeTo(observable: Observable<PeerGroupEvent>) {
+        observable.subscribe(
+                        onNext: { [weak self] in
+                            switch $0 {
+                            case .onPeerDisconnect(let peer, let error): self?.onPeerDisconnect(peer: peer, error: error)
+                            default: ()
+                            }
+                        }
+                )
+                .disposed(by: disposeBag)
+    }
+
+    func subscribeTo(observable: Observable<InitialBlockDownloadEvent>) {
+        observable.subscribe(
+                        onNext: { [weak self] in
+                            switch $0 {
+                            case .onPeerSynced(let peer): self?.onPeerSynced(peer: peer)
+                            default: ()
+                            }
+                        }
+                )
+                .disposed(by: disposeBag)
+    }
 }
 
-extension MasternodeListSyncer: IPeerSyncListener {
+extension MasternodeListSyncer {
 
-    func onPeerSynced(peer: IPeer) {
+    private func onPeerSynced(peer: IPeer) {
         assignNextSyncPeer()
     }
 
-    public func onPeerNotSynced(peer: IPeer) {
-    }
-
 }
 
-extension MasternodeListSyncer: IPeerGroupListener {
+extension MasternodeListSyncer {
 
-    func onPeerDisconnect(peer: IPeer, error: Error?) {
+    private func onPeerDisconnect(peer: IPeer, error: Error?) {
         if peer.equalTo(workingPeer) {
             workingPeer = nil
 

@@ -9,6 +9,10 @@ public class BitcoinCashKit: AbstractKit {
     private static let targetSpacing = 10 * 60                                  // Time to mining one block ( 10 min. same as Bitcoin )
     private static let maxTargetBits = 0x1d00ffff                               // Initially and max. target difficulty for blocks
 
+    public static func clear() throws {
+        try DirectoryHelper.removeDirectory("BitcoinCashKit")
+    }
+
     public enum NetworkType { case mainNet, testNet }
 
     public weak var delegate: BitcoinCoreDelegate? {
@@ -36,9 +40,8 @@ public class BitcoinCashKit: AbstractKit {
         }
         let initialSyncApi = BCoinApi(url: initialSyncApiUrl)
 
-        let databaseFileName = "\(walletId)-bitcoincash-\(networkType)"
-
-        let storage = BitcoinCashGrdbStorage(databaseFileName: databaseFileName)
+        let databaseFilePath = try DirectoryHelper.directoryURL(for: "BitcoinCashKit").appendingPathComponent("\(walletId)-\(networkType)").path
+        let storage = BitcoinCashGrdbStorage(databaseFilePath: databaseFilePath)
         self.storage = storage
 
         let paymentAddressParser = PaymentAddressParser(validScheme: validScheme, removeScheme: false)

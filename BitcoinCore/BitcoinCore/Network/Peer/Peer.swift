@@ -62,6 +62,10 @@ class Peer {
         connection.delegate = self
     }
 
+    deinit {
+        connection.disconnect(error: nil)
+    }
+
     private func sendVersion() {
         let versionMessage = VersionMessage(
                 version: protocolVersion,
