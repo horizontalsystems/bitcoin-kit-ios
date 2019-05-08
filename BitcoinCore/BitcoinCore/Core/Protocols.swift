@@ -515,6 +515,6 @@ protocol ITransactionSender {
     func send(pendingTransaction: FullTransaction) throws
 }
 
-protocol IMerkleBlockHandler {
+protocol IMerkleBlockHandler: AnyObject {
     func handle(merkleBlock: MerkleBlock) throws
 }
