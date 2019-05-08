@@ -12,8 +12,8 @@ project 'BitcoinCashKit/BitcoinCashKit'
 project 'DashKit/DashKit'
 
 def internal_pods
-  pod 'HSCryptoKit', '~> 1.0'
-  pod 'HSHDWalletKit', '~> 1.0'
+  pod 'HSCryptoKit', git: 'https://github.com/horizontalsystems/crypto-kit-ios'
+  pod 'HSHDWalletKit', git: 'https://github.com/horizontalsystems/hd-wallet-kit-ios'
 end
 
 def kit_pods
