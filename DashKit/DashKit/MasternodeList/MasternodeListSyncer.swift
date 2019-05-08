@@ -3,7 +3,7 @@ import RxSwift
 
 class MasternodeListSyncer: IMasternodeListSyncer {
     private let disposeBag = DisposeBag()
-    private let bitcoinCore: BitcoinCore
+    private weak var bitcoinCore: BitcoinCore?
     private let initialBlockDownload: IInitialBlockDownload
     private let peerTaskFactory: IPeerTaskFactory
     private let masternodeListManager: IMasternodeListManager
@@ -23,7 +23,7 @@ class MasternodeListSyncer: IMasternodeListSyncer {
     private func assignNextSyncPeer() {
         queue.async {
             guard self.workingPeer == nil,
-                  let lastBlockInfo = self.bitcoinCore.lastBlockInfo,
+                  let lastBlockInfo = self.bitcoinCore?.lastBlockInfo,
                   let syncedPeer = self.initialBlockDownload.syncedPeers.first,
                   let blockHash = lastBlockInfo.headerHash.reversedData else {
                 return
