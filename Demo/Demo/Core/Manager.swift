@@ -18,6 +18,7 @@ class Manager {
 
     func login(words: [String]) {
         save(words: words)
+        clearKits()
 
         DispatchQueue.global(qos: .userInitiated).async {
             self.initAdapters(words: words)
@@ -26,8 +27,6 @@ class Manager {
 
     func logout() {
         clearWords()
-
-        adapters.forEach { $0.clear() }
         adapters = []
     }
 
@@ -58,6 +57,12 @@ class Manager {
     private func clearWords() {
         UserDefaults.standard.removeObject(forKey: keyWords)
         UserDefaults.standard.synchronize()
+    }
+
+    private func clearKits() {
+        BitcoinAdapter.clear()
+        BitcoinCashAdapter.clear()
+        DashAdapter.clear()
     }
 
 }

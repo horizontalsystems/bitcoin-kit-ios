@@ -84,12 +84,6 @@ extension BaseAdapter {
         }
     }
 
-    func clear() {
-        DispatchQueue.global(qos: .userInitiated).async {
-            try! self.abstractKit.clear()
-        }
-    }
-
     var balance: Decimal {
         return Decimal(abstractKit.balance) / coinRate
     }

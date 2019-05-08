@@ -31,8 +31,8 @@ class DataProvider {
         self.balance = unspentOutputProvider.allUnspentOutputs.map { $0.output.value }.reduce(0, +)
         self.lastBlockInfo = storage.lastBlock.map { blockInfo(fromBlock: $0) }
 
-        balanceUpdateSubject.throttle(throttleTime, scheduler: ConcurrentDispatchQueueScheduler(qos: .background)).subscribe(onNext: {
-            self.balance = unspentOutputProvider.allUnspentOutputs.map { $0.output.value }.reduce(0, +)
+        balanceUpdateSubject.throttle(throttleTime, scheduler: ConcurrentDispatchQueueScheduler(qos: .background)).subscribe(onNext: { [weak self] in
+            self?.balance = unspentOutputProvider.allUnspentOutputs.map { $0.output.value }.reduce(0, +)
         }).disposed(by: disposeBag)
     }
 

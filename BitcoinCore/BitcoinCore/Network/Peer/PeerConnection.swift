@@ -17,13 +17,12 @@ class PeerConnection: NSObject {
 
     weak var delegate: PeerConnectionDelegate?
 
-    private var runLoop: RunLoop?
-
     private var readStream: Unmanaged<CFReadStream>?
     private var writeStream: Unmanaged<CFWriteStream>?
-    private var inputStream: InputStream?
-    private var outputStream: OutputStream?
     private var timer: Timer?
+    private weak var runLoop: RunLoop?
+    private weak var inputStream: InputStream?
+    private weak var outputStream: OutputStream?
 
     private var packets: Data = Data()
 
@@ -52,11 +51,12 @@ class PeerConnection: NSObject {
 
     private func connectAsync() {
         CFStreamCreatePairWithSocketToHost(kCFAllocatorDefault, host as CFString, port, &readStream, &writeStream)
-        inputStream = readStream!.takeRetainedValue()
-        outputStream = writeStream!.takeRetainedValue()
+        inputStream = readStream!.takeUnretainedValue()
+        outputStream = writeStream!.takeUnretainedValue()
 
-        inputStream?.delegate = self
-        outputStream?.delegate = self
+        weak var weakSelf = self
+        inputStream?.delegate = weakSelf
+        outputStream?.delegate = weakSelf
 
         inputStream?.schedule(in: .current, forMode: .common)
         outputStream?.schedule(in: .current, forMode: .common)
@@ -64,7 +64,7 @@ class PeerConnection: NSObject {
         inputStream?.open()
         outputStream?.open()
 
-        let timer = Timer(timeInterval: interval, repeats: true, block: { _ in self.delegate?.connectionTimePeriodPassed() })
+        let timer = Timer(timeInterval: interval, repeats: true, block: { [weak self] _ in self?.delegate?.connectionTimePeriodPassed() })
         self.timer = timer
 
         RunLoop.current.add(timer, forMode: .common)
@@ -119,20 +119,30 @@ extension PeerConnection: IPeerConnection {
     }
 
     func disconnect(error: Error? = nil) {
-        guard readStream != nil && readStream != nil else {
+        guard readStream != nil && writeStream != nil else {
             return
+        }
+
+        if let runLoop = self.runLoop {
+            inputStream?.remove(from: runLoop, forMode: .common)
+            outputStream?.remove(from: runLoop, forMode: .common)
+            timer?.invalidate()
+
+            CFRunLoopStop(runLoop.getCFRunLoop())
         }
 
         inputStream?.delegate = nil
         outputStream?.delegate = nil
         inputStream?.close()
         outputStream?.close()
-        inputStream?.remove(from: .current, forMode: .common)
-        outputStream?.remove(from: .current, forMode: .common)
-        timer?.invalidate()
+        readStream?.release()
+        writeStream?.release()
+
+        timer = nil
         readStream = nil
         writeStream = nil
-        runLoop = nil
+        inputStream = nil
+        outputStream = nil
         connected = false
 
         delegate?.connectionDidDisconnect(withError: error)

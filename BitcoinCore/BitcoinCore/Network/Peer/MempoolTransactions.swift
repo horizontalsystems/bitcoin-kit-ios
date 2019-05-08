@@ -1,4 +1,7 @@
+import RxSwift
+
 class MempoolTransactions {
+    private let disposeBag = DisposeBag()
     private let transactionSyncer: ITransactionSyncer
     private var requestedTransactions = [String: [Data]]()
 
@@ -28,6 +31,18 @@ class MempoolTransactions {
             }
         }
         return false
+    }
+
+    func subscribeTo(observable: Observable<PeerGroupEvent>) {
+        observable.subscribe(
+                        onNext: { [weak self] in
+                            switch $0 {
+                            case .onPeerDisconnect(let peer, let error): self?.onPeerDisconnect(peer: peer, error: error)
+                            default: ()
+                            }
+                        }
+                )
+                .disposed(by: disposeBag)
     }
 
 }
@@ -70,9 +85,9 @@ extension MempoolTransactions : IInventoryItemsHandler {
 
 }
 
-extension MempoolTransactions : IPeerGroupListener {
+extension MempoolTransactions {
 
-    func onPeerDisconnect(peer: IPeer, error: Error?) {
+    private func onPeerDisconnect(peer: IPeer, error: Error?) {
         requestedTransactions[peer.host] = nil
     }
 

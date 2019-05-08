@@ -18,10 +18,6 @@ open class AbstractKit {
         bitcoinCore.stop()
     }
 
-    open func clear() throws {
-        try bitcoinCore.clear()
-    }
-
     open var lastBlockInfo: BlockInfo? {
         return bitcoinCore.lastBlockInfo
     }

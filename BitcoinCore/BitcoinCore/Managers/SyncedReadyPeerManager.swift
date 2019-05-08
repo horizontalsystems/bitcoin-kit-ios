@@ -1,9 +1,12 @@
-public class SyncedReadyPeerManager {
+import RxSwift
 
+public class SyncedReadyPeerManager {
+    private let disposeBag = DisposeBag()
     private let peerGroup: IPeerGroup
     private let initialBlockDownload: IInitialBlockDownload
-    private var listeners = [IPeerSyncAndReadyListeners]()
     private var peerStates = [String: Bool]()
+
+    private let peerSyncedAndReadySubject = PublishSubject<IPeer>()
 
     init(peerGroup: IPeerGroup, initialBlockDownload: IInitialBlockDownload) {
         self.peerGroup = peerGroup
@@ -16,57 +19,84 @@ public class SyncedReadyPeerManager {
 
         if oldState != state {
             if state {
-                listeners.forEach { $0.onPeerSyncedAndReady(peer: peer) }
+                peerSyncedAndReadySubject.onNext(peer)
             } else {
             }
         }
     }
 
+    func subscribeTo(observable: Observable<PeerGroupEvent>) {
+        observable.subscribe(
+                        onNext: { [weak self] in
+                            switch $0 {
+                            case .onPeerConnect(let peer): self?.onPeerConnect(peer: peer)
+                            case .onPeerDisconnect(let peer, let error): self?.onPeerDisconnect(peer: peer, error: error)
+                            case .onPeerReady(let peer): self?.onPeerReady(peer: peer)
+                            default: ()
+                            }
+                        }
+                )
+                .disposed(by: disposeBag)
+    }
+
+    func subscribeTo(observable: Observable<InitialBlockDownloadEvent>) {
+        observable.subscribe(
+                        onNext: { [weak self] in
+                            switch $0 {
+                            case .onPeerSynced(let peer): self?.onPeerSynced(peer: peer)
+                            case .onPeerNotSynced(let peer): self?.onPeerNotSynced(peer: peer)
+                            }
+                        }
+                )
+                .disposed(by: disposeBag)
+    }
 }
 
 extension SyncedReadyPeerManager: ISyncedReadyPeerManager {
 
     public var peers: [IPeer] {
-        return initialBlockDownload.syncedPeers.filter { self.peerGroup.isReady(peer: $0) }
+        return initialBlockDownload.syncedPeers.filter {
+            self.peerGroup.isReady(peer: $0)
+        }
     }
 
-    public func add(listener: IPeerSyncAndReadyListeners) {
-        listeners.append(listener)
+    public var observable: Observable<IPeer> {
+        return peerSyncedAndReadySubject.asObservable()
     }
 
 }
 
-extension SyncedReadyPeerManager: IPeerGroupListener {
+extension SyncedReadyPeerManager {
 
-    public func onPeerConnect(peer: IPeer) {
+    private func onPeerConnect(peer: IPeer) {
         set(state: false, to: peer)
     }
 
-    public func onPeerDisconnect(peer: IPeer, error: Error?) {
+    private func onPeerDisconnect(peer: IPeer, error: Error?) {
         peerStates.removeValue(forKey: peer.host)
     }
 
-    public func onPeerReady(peer: IPeer) {
+    private func onPeerReady(peer: IPeer) {
         if initialBlockDownload.isSynced(peer: peer) {
             set(state: true, to: peer)
         }
     }
 
-    public func onPeerBusy(peer: IPeer) {
+    private func onPeerBusy(peer: IPeer) {
         set(state: false, to: peer)
     }
 
 }
 
-extension SyncedReadyPeerManager: IPeerSyncListener {
+extension SyncedReadyPeerManager {
 
-    public func onPeerSynced(peer: IPeer) {
+    private func onPeerSynced(peer: IPeer) {
         if peerGroup.isReady(peer: peer) {
             set(state: true, to: peer)
         }
     }
 
-    public func onPeerNotSynced(peer: IPeer) {
+    private func onPeerNotSynced(peer: IPeer) {
         set(state: false, to: peer)
     }
 
