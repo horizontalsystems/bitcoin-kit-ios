@@ -44,28 +44,14 @@ class TestNet: INetwork {
         return Block(
                 withHeader: BlockHeader(
                         version: 536870912,
-                        headerHash: "0000000f10a125d1d97784028be7c3b737e21a3ab76d59a60f8d244ab548de14".reversedData!,
-                        previousBlockHeaderHash: "00000025a533a276a43aaacc27d44f1e599f07fde18b8348c1355a9bcf0ea339".reversedData!,
+                        headerHash: "00000000064ca5bc01e45950d863fb7e938bdb9ecdec698e8d7acfb79a57d15e".reversedData!,
+                        previousBlockHeaderHash: "0000000006616ee85366fabce00a28af650519eb1c6106d613ce3678947a42fb".reversedData!,
                         merkleRoot: "fe39bdb86999ba1eaca10e56bf12528c9cce278c8dde66f399605d8e79e12fe6".reversedData!,
-                        timestamp: 1551699279,
-                        bits: 0x1d312d59,
-                        nonce: 4281733120
+                        timestamp: 1554724358,
+                        bits: 0x1c09e0a2,
+                        nonce: 3017212751
                 ),
-                height: 55032)
-    }
-    required init() {
-//        self.blockHelper = blockHelper
-//
-//        headerValidator = validatorFactory.validator(for: .header)
-//        difficultyValidator = validatorFactory.validator(for: .DGW)
-    }
-
-    func validate(block: Block, previousBlock: Block) throws {
-//        try headerValidator.validate(candidate: block, block: previousBlock, network: self)
-//        if blockHelper.previous(for: previousBlock, index: 24) == nil {                        //TODO: Remove trust first 24 block  in dash
-//            return
-//        }
-//        try difficultyValidator.validate(candidate: block, block: previousBlock, network: self)
+                height: 75900)
     }
 
 }
