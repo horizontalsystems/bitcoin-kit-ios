@@ -7,8 +7,8 @@ extension OutputsCache: IOutputsCache {
     func add(fromOutputs outputs: [Output]) {
         for output in outputs {
             if output.publicKeyPath != nil {
-                if var indices = myOutputs[output.transactionHash] {
-                    indices.append(output.index)
+                if myOutputs[output.transactionHash] != nil {
+                    myOutputs[output.transactionHash]?.append(output.index)
                 } else {
                     myOutputs[output.transactionHash] = [output.index]
                 }
