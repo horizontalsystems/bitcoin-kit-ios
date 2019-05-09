@@ -26,6 +26,7 @@ class PeerGroup {
 
     private let peersQueue: DispatchQueue
     private let inventoryQueue: DispatchQueue
+    private let subjectQueue: DispatchQueue
 
     private let logger: Logger?
 
@@ -39,6 +40,7 @@ class PeerGroup {
          peerAddressManager: IPeerAddressManager, peerCount: Int = 10, peerManager: IPeerManager,
          peersQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Local Queue", qos: .userInitiated),
          inventoryQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Inventory Queue", qos: .background),
+         subjectQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Subject Queue", qos: .background),
          scheduler: SchedulerType = SerialDispatchQueueScheduler(qos: .background),
          logger: Logger? = nil) {
         self.factory = factory
@@ -50,6 +52,7 @@ class PeerGroup {
 
         self.peersQueue = peersQueue
         self.inventoryQueue = inventoryQueue
+        self.subjectQueue = subjectQueue
 
         self.logger = logger
         self.observable = subject.asObservable().observeOn(scheduler)
@@ -67,7 +70,9 @@ class PeerGroup {
                 if let host = self.peerAddressManager.ip {
                     let peer = self.factory.peer(withHost: host, logger: self.logger)
                     peer.delegate = self
-                    self.subject.onNext(.onPeerCreate(peer: peer))
+                    self.subjectQueue.async {
+                        self.subject.onNext(.onPeerCreate(peer: peer))
+                    }
 
                     self.peerManager.add(peer: peer)
                     peer.connect()
@@ -109,15 +114,21 @@ extension PeerGroup: IPeerGroup {
 extension PeerGroup: PeerDelegate {
 
     func peerReady(_ peer: IPeer) {
-        self.subject.onNext(.onPeerReady(peer: peer))
+        subjectQueue.async {
+            self.subject.onNext(.onPeerReady(peer: peer))
+        }
     }
 
     func peerBusy(_ peer: IPeer) {
-        self.subject.onNext(.onPeerBusy(peer: peer))
+        subjectQueue.async {
+            self.subject.onNext(.onPeerBusy(peer: peer))
+        }
     }
 
     func peerDidConnect(_ peer: IPeer) {
-        self.subject.onNext(.onPeerConnect(peer: peer))
+        subjectQueue.async {
+            self.subject.onNext(.onPeerConnect(peer: peer))
+        }
     }
 
     func peerDidDisconnect(_ peer: IPeer, withError error: Error?) {
@@ -135,7 +146,9 @@ extension PeerGroup: PeerDelegate {
             peerAddressManager.markSuccess(ip: peer.host)
         }
 
-        self.subject.onNext(.onPeerDisconnect(peer: peer, error: error))
+        subjectQueue.async {
+            self.subject.onNext(.onPeerDisconnect(peer: peer, error: error))
+        }
         connectPeersIfRequired()
     }
 
