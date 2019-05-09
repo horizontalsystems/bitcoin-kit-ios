@@ -3,6 +3,7 @@ import ObjectMapper
 import BitcoinCore
 
 class InsightApi {
+    private static let paginationLimit = 50
     private let apiManager: ApiManager
 
     init(url: String, logger: Logger? = nil) {
@@ -16,9 +17,29 @@ extension InsightApi: ISyncTransactionApi {
     func getTransactions(addresses: [String]) -> Observable<[SyncTransactionItem]> {
         let joinedAddresses = addresses.joined(separator: ",")
 
-        let request = apiManager.request(withMethod: .get, path: "/addrs/\(joinedAddresses)/txs")
+        return getTransactionsRecursive(addresses: joinedAddresses)
+    }
+
+    private func getTransactionsRecursive(addresses: String, from: Int = 0, transactions: [SyncTransactionItem] = []) -> Observable<([SyncTransactionItem])> {
+        return getTransactions(addresses: addresses, from: from).flatMap { [weak self] result -> Observable<([SyncTransactionItem])> in
+            let resultTransactions = transactions + result.transactionItems.map { $0 as SyncTransactionItem }
+
+            let finishObservable = Observable.just(resultTransactions)
+            if result.totalItems <= result.to {
+                return finishObservable
+            } else {
+                return self?.getTransactionsRecursive(addresses: addresses, from: result.to, transactions: resultTransactions) ?? finishObservable
+            }
+        }
+    }
+
+    private func getTransactions(addresses: String, from: Int = 0) -> Observable<InsightResponseItem> {
+        var params = [String: Any]()
+        params["from"] = from
+        params["to"] = from + InsightApi.paginationLimit
+        let request = apiManager.request(withMethod: .get, path: "/addrs/\(addresses)/txs", parameters: params)
         let observable: Observable<InsightResponseItem> = apiManager.observable(forRequest: request)
-        return observable.map { $0.transactionItems.map { $0 as SyncTransactionItem } }
+        return observable
     }
 
     class InsightResponseItem: ImmutableMappable {
