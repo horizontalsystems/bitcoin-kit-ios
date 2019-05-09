@@ -32,6 +32,7 @@ public class SyncedReadyPeerManager {
                             case .onPeerConnect(let peer): self?.onPeerConnect(peer: peer)
                             case .onPeerDisconnect(let peer, let error): self?.onPeerDisconnect(peer: peer, error: error)
                             case .onPeerReady(let peer): self?.onPeerReady(peer: peer)
+                            case .onPeerBusy(let peer): self?.onPeerBusy(peer: peer)
                             default: ()
                             }
                         }

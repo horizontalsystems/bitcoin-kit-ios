@@ -44,51 +44,47 @@ public class InitialBlockDownload {
     }
 
     private func assignNextSyncPeer() {
-        peersQueue.async {
-            guard self.syncPeer == nil else {
-                return
-            }
+        guard syncPeer == nil else {
+            return
+        }
 
-            let nonSyncedPeers = self.peerManager.connected().filter { !self.syncedState($0) }
+        let nonSyncedPeers = peerManager.connected().filter { !syncedState($0) }
 
-            if let peer = nonSyncedPeers.first(where: { $0.ready }) {
-                self.logger?.debug("Setting sync peer to \(peer.logName)")
-                self.syncPeer = peer
-                self.blockSyncer?.downloadStarted()
-                self.downloadBlockchain()
-            }
+        if let peer = nonSyncedPeers.first(where: { $0.ready }) {
+            logger?.debug("Setting sync peer to \(peer.logName)")
+            syncPeer = peer
+            blockSyncer?.downloadStarted()
+            downloadBlockchain()
         }
     }
 
     private func downloadBlockchain() {
-        peersQueue.async {
-            guard let blockSyncer = self.blockSyncer, let syncPeer = self.syncPeer, syncPeer.ready else {
-                return
-            }
+        guard let blockSyncer = blockSyncer, let syncPeer = self.syncPeer, syncPeer.ready else {
+            return
+        }
 
-            let blockHashes = blockSyncer.getBlockHashes()
-            if blockHashes.isEmpty {
-                self.syncedStates[syncPeer.host] = self.blockHashesSyncedStates[syncPeer.host]
-            } else {
-                syncPeer.add(task: GetMerkleBlocksTask(blockHashes: blockHashes, merkleBlockHandler: self))
-            }
+        let blockHashes = blockSyncer.getBlockHashes()
+        if blockHashes.isEmpty {
+            syncedStates[syncPeer.host] = blockHashesSyncedStates[syncPeer.host]
+        } else {
+            syncPeer.add(task: GetMerkleBlocksTask(blockHashes: blockHashes, merkleBlockHandler: self))
+        }
 
-            if !self.blockHashesSyncedState(syncPeer) {
-                let blockLocatorHashes = blockSyncer.getBlockLocatorHashes(peerLastBlockHeight: syncPeer.announcedLastBlockHeight)
-                let expectedHashesMinCount = max(syncPeer.announcedLastBlockHeight - blockSyncer.localKnownBestBlockHeight, 0)
+        if !blockHashesSyncedState(syncPeer) {
+            let blockLocatorHashes = blockSyncer.getBlockLocatorHashes(peerLastBlockHeight: syncPeer.announcedLastBlockHeight)
+            let expectedHashesMinCount = max(syncPeer.announcedLastBlockHeight - blockSyncer.localKnownBestBlockHeight, 0)
 
-                syncPeer.add(task: GetBlockHashesTask(hashes: blockLocatorHashes, expectedHashesMinCount: expectedHashesMinCount))
-            }
+            syncPeer.add(task: GetBlockHashesTask(hashes: blockLocatorHashes, expectedHashesMinCount: expectedHashesMinCount))
+        }
 
-            if self.syncedState(syncPeer) {
-                self.syncedPeers.append(syncPeer)
-                blockSyncer.downloadCompleted()
-                self.syncStateListener.syncFinished()
-                syncPeer.sendMempoolMessage()
-                self.syncPeer = nil
-                self.subject.onNext(.onPeerSynced(peer: syncPeer))
-                self.assignNextSyncPeer()
-            }
+        if syncedState(syncPeer) {
+            syncedPeers.append(syncPeer)
+            blockSyncer.downloadCompleted()
+            syncStateListener.syncFinished()
+            syncPeer.sendMempoolMessage()
+            self.syncPeer = nil
+            subject.onNext(.onPeerSynced(peer: syncPeer))
+            assignNextSyncPeer()
         }
     }
 
@@ -122,14 +118,16 @@ extension InitialBlockDownload: IInitialBlockDownload {
 extension InitialBlockDownload: IInventoryItemsHandler {
 
     public func handleInventoryItems(peer: IPeer, inventoryItems: [InventoryItem]) {
-        if syncedState(peer) && inventoryItems.first(where: { $0.type == InventoryItem.ObjectType.blockMessage.rawValue }) != nil {
-            syncedStates[peer.host] = false
-            blockHashesSyncedStates[peer.host] = false
-            subject.onNext(.onPeerNotSynced(peer: peer))
-            if let index = syncedPeers.index(where: { $0.equalTo(peer) }) {
-                syncedPeers.remove(at: index)
+        peersQueue.async {
+            if self.syncedState(peer) && inventoryItems.first(where: { $0.type == InventoryItem.ObjectType.blockMessage.rawValue }) != nil {
+                self.syncedStates[peer.host] = false
+                self.blockHashesSyncedStates[peer.host] = false
+                self.subject.onNext(.onPeerNotSynced(peer: peer))
+                if let index = self.syncedPeers.index(where: { $0.equalTo(peer) }) {
+                    self.syncedPeers.remove(at: index)
+                }
+                self.assignNextSyncPeer()
             }
-            assignNextSyncPeer()
         }
     }
 
@@ -141,7 +139,9 @@ extension InitialBlockDownload: IPeerTaskHandler {
         switch task {
         case let t as GetBlockHashesTask:
             if t.blockHashes.isEmpty {
-                blockHashesSyncedStates[peer.host] = true
+                peersQueue.async {
+                    self.blockHashesSyncedStates[peer.host] = true
+                }
             } else {
                 blockSyncer?.add(blockHashes: t.blockHashes)
             }
@@ -171,26 +171,32 @@ extension InitialBlockDownload {
     }
 
     private func onPeerConnect(peer: IPeer) {
-        syncedStates[peer.host] = false
-        assignNextSyncPeer()
+        peersQueue.async {
+            self.syncedStates[peer.host] = false
+            self.assignNextSyncPeer()
+        }
     }
 
     private func onPeerDisconnect(peer: IPeer, error: Error?) {
-        if let index = syncedPeers.index(where: { $0.equalTo(peer) }) {
-            syncedPeers.remove(at: index)
-        }
-        syncedStates.removeValue(forKey: peer.host)
+        peersQueue.async {
+            if let index = self.syncedPeers.index(where: { $0.equalTo(peer) }) {
+                self.syncedPeers.remove(at: index)
+            }
+            self.syncedStates.removeValue(forKey: peer.host)
 
-        if peer.equalTo(syncPeer) {
-            syncPeer = nil
-            blockSyncer?.downloadFailed()
-            assignNextSyncPeer()
+            if peer.equalTo(self.syncPeer) {
+                self.syncPeer = nil
+                self.blockSyncer?.downloadFailed()
+                self.assignNextSyncPeer()
+            }
         }
     }
 
     private func onPeerReady(peer: IPeer) {
         if peer.equalTo(syncPeer) {
-            downloadBlockchain()
+            peersQueue.async {
+                self.downloadBlockchain()
+            }
         }
     }
 
