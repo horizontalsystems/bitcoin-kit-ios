@@ -303,7 +303,7 @@
 				"${BUILT_PRODUCTS_DIR}/HSHDWalletKit/HSHDWalletKit.framework",
 				"${BUILT_PRODUCTS_DIR}/ObjectMapper/ObjectMapper.framework",
 				"${BUILT_PRODUCTS_DIR}/RxSwift/RxSwift.framework",
-				"${BUILT_PRODUCTS_DIR}/HSCryptoX11/HSCryptoX11.framework",
+				"${BUILT_PRODUCTS_DIR}/CryptoX11.swift/HSCryptoX11.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (

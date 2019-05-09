@@ -45,14 +45,14 @@ target :DashKit do
     project 'DashKit/DashKit'
     kit_pods
 
-    pod 'HSCryptoX11', git: 'https://github.com/horizontalsystems/crypto-x11-ios'
+    pod 'CryptoX11.swift', git: 'https://github.com/horizontalsystems/crypto-x11-ios'
 end
 
 target :Demo do
     project 'Demo/Demo'
     kit_pods
 
-    pod 'HSCryptoX11', git: 'https://github.com/horizontalsystems/crypto-x11-ios'
+    pod 'CryptoX11.swift', git: 'https://github.com/horizontalsystems/crypto-x11-ios'
 end
 
 def test_pods
@@ -89,5 +89,5 @@ target :DashKitTests do
     internal_pods
     test_pods
 
-    pod 'HSCryptoX11', git: 'https://github.com/horizontalsystems/crypto-x11-ios'
+    pod 'CryptoX11.swift', git: 'https://github.com/horizontalsystems/crypto-x11-ios'
 end
