@@ -50,14 +50,14 @@ public class BitcoinCoreErrors {
         let errors: [Error]
     }
 
-    public struct UnspentOutputSelectionErrors: Error {
-        let errors: [Error]
-    }
-
     public enum UnspentOutputSelection: Error {
         case wrongValue
         case emptyOutputs
         case notEnough(maxFee: Int)
+    }
+
+    public enum Unexpected: Error {
+        case unkown
     }
 
 
