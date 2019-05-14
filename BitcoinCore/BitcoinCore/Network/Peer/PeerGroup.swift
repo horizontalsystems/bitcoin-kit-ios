@@ -70,16 +70,19 @@ class PeerGroup {
                 if let host = self.peerAddressManager.ip {
                     let peer = self.factory.peer(withHost: host, logger: self.logger)
                     peer.delegate = self
-                    self.subjectQueue.async {
-                        self.subject.onNext(.onPeerCreate(peer: peer))
-                    }
-
+                    self.onNext(.onPeerCreate(peer: peer))
                     self.peerManager.add(peer: peer)
                     peer.connect()
                 } else {
                     break
                 }
             }
+        }
+    }
+
+    private func onNext(_ event: PeerGroupEvent) {
+        subjectQueue.async {
+            self.subject.onNext(event)
         }
     }
 
@@ -94,7 +97,7 @@ extension PeerGroup: IPeerGroup {
 
         started = true
 
-        self.subject.onNext(.onStart)
+        onNext(.onStart)
         connectPeersIfRequired()
     }
 
@@ -102,7 +105,7 @@ extension PeerGroup: IPeerGroup {
         started = false
 
         peerManager.disconnectAll()
-        self.subject.onNext(.onStop)
+        onNext(.onStop)
     }
 
     func isReady(peer: IPeer) -> Bool {
@@ -114,21 +117,15 @@ extension PeerGroup: IPeerGroup {
 extension PeerGroup: PeerDelegate {
 
     func peerReady(_ peer: IPeer) {
-        subjectQueue.async {
-            self.subject.onNext(.onPeerReady(peer: peer))
-        }
+        onNext(.onPeerReady(peer: peer))
     }
 
     func peerBusy(_ peer: IPeer) {
-        subjectQueue.async {
-            self.subject.onNext(.onPeerBusy(peer: peer))
-        }
+        onNext(.onPeerBusy(peer: peer))
     }
 
     func peerDidConnect(_ peer: IPeer) {
-        subjectQueue.async {
-            self.subject.onNext(.onPeerConnect(peer: peer))
-        }
+        onNext(.onPeerConnect(peer: peer))
     }
 
     func peerDidDisconnect(_ peer: IPeer, withError error: Error?) {
@@ -146,9 +143,7 @@ extension PeerGroup: PeerDelegate {
             peerAddressManager.markSuccess(ip: peer.host)
         }
 
-        subjectQueue.async {
-            self.subject.onNext(.onPeerDisconnect(peer: peer, error: error))
-        }
+        onNext(.onPeerDisconnect(peer: peer, error: error))
         connectPeersIfRequired()
     }
 
