@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
   spec.name = 'BitcoinCashKit.swift'
   spec.module_name = "BitcoinCashKit"
-  spec.version = '0.5'
+  spec.version = '0.5.1'
   spec.summary = 'BitcoinCash library for Swift'
   spec.description = <<-DESC
                        BitcoinCashKit implements BitcoinCash protocol in Swift. It is an implementation of the BitcoinCash SPV protocol written (almost) entirely in swift.

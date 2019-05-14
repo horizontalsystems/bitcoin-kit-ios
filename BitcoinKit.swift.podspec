@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
   spec.name = 'BitcoinKit.swift'
   spec.module_name = 'BitcoinKit'
-  spec.version = '0.5'
+  spec.version = '0.5.1'
   spec.summary = 'Bitcoin library for Swift'
   spec.description = <<-DESC
                        BitcoinKit implements Bitcoin protocol in Swift.
