@@ -14,13 +14,14 @@ Pod::Spec.new do |spec|
 
   spec.requires_arc = true
   spec.source = { git: 'https://github.com/horizontalsystems/bitcoin-kit-ios.git', tag: "#{spec.version}" }
-  spec.source_files = 'DashKit/DashKit/**/*.{h,m,swift}'
+  spec.source_files = 'DashKit/DashKit/**/*.{h,m,mm,swift}'
   spec.ios.deployment_target = '11.0'
   spec.swift_version = '4.2'
 
   spec.dependency 'BitcoinCore.swift', '~> 0.5'
   spec.dependency 'HSCryptoKit', '~> 1.0'
   spec.dependency 'HSHDWalletKit', '~> 1.0'
+  spec.dependency 'CryptoBLS.swift', '~> 1.0'
   spec.dependency 'CryptoX11.swift', '~> 1.0'
   spec.dependency 'Alamofire', '~> 4.0'
   spec.dependency 'ObjectMapper', '~> 3.0'

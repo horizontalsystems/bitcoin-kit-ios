@@ -143,7 +143,7 @@ protocol IMasternodeParser {
 }
 
 protocol ITransactionLockVoteValidator {
-    func validate(quorumModifierHash: Data, masternodeProTxHash: Data) throws
+    func validate(lockVote: TransactionLockVoteMessage) throws
 }
 
 protocol ITransactionLockVoteManager {
