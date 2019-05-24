@@ -436,8 +436,6 @@ public protocol INetwork: class {
     var pubKeyHash: UInt8 { get }
     var privateKey: UInt8 { get }
     var scriptHash: UInt8 { get }
-    var pubKeyPrefixPattern: String { get }
-    var scriptPrefixPattern: String { get }
     var bech32PrefixPattern: String { get }
     var xPubKey: UInt32 { get }
     var xPrivKey: UInt32 { get }

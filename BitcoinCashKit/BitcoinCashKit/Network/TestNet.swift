@@ -8,8 +8,6 @@ class TestNet: INetwork {
     let pubKeyHash: UInt8 = 0x6f
     let privateKey: UInt8 = 0xef
     let scriptHash: UInt8 = 0xc4
-    let pubKeyPrefixPattern: String = "m|n"
-    let scriptPrefixPattern: String = "2"
     let bech32PrefixPattern: String = "bchtest"
     let xPubKey: UInt32 = 0x043587cf
     let xPrivKey: UInt32 = 0x04358394

@@ -1,5 +1,4 @@
 import BitcoinCore
-import HSCryptoX11
 
 class MainNet: INetwork {
 
@@ -11,8 +10,6 @@ class MainNet: INetwork {
     let pubKeyHash: UInt8 = 0x4c
     let privateKey: UInt8 = 0x80
     let scriptHash: UInt8 = 0x10
-    let pubKeyPrefixPattern: String = "X"
-    let scriptPrefixPattern: String = "7"
     let bech32PrefixPattern: String = "bc"
     let xPubKey: UInt32 = 0x0488b21e
     let xPrivKey: UInt32 = 0x0488ade4

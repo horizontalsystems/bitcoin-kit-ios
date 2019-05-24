@@ -4,6 +4,7 @@ public class DashKitErrors {
         case masternodeNotFound
         case masternodeNotInTop
         case txInputNotFound
+        case signatureNotValid
     }
 
 }

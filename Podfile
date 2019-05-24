@@ -45,6 +45,7 @@ target :DashKit do
     project 'DashKit/DashKit'
     kit_pods
 
+    pod 'CryptoBLS.swift', git: 'https://github.com/horizontalsystems/crypto-bls-ios'
     pod 'CryptoX11.swift', git: 'https://github.com/horizontalsystems/crypto-x11-ios'
 end
 
@@ -52,6 +53,7 @@ target :Demo do
     project 'Demo/Demo'
     kit_pods
 
+    pod 'CryptoBLS.swift', git: 'https://github.com/horizontalsystems/crypto-bls-ios'
     pod 'CryptoX11.swift', git: 'https://github.com/horizontalsystems/crypto-x11-ios'
 end
 
@@ -71,14 +73,14 @@ end
 
 target :BitcoinKitTests do
     project 'BitcoinKit/BitcoinKit'
-    
+
     internal_pods
     test_pods
 end
 
 target :BitcoinCashKitTests do
     project 'BitcoinCashKit/BitcoinCashKit'
-    
+
     internal_pods
     test_pods
 end
@@ -89,5 +91,6 @@ target :DashKitTests do
     internal_pods
     test_pods
 
+    pod 'CryptoBLS.swift', git: 'https://github.com/horizontalsystems/crypto-bls-ios'
     pod 'CryptoX11.swift', git: 'https://github.com/horizontalsystems/crypto-x11-ios'
 end

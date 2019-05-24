@@ -52,7 +52,7 @@ class TransactionLockVoteManager: ITransactionLockVoteManager {
 
     func validate(lockVote: TransactionLockVoteMessage) throws {
         // validate masternode in top 10 masternodes for quorumModifier
-        try transactionLockVoteValidator.validate(quorumModifierHash: lockVote.quorumModifierHash, masternodeProTxHash: lockVote.masternodeProTxHash)
+        try transactionLockVoteValidator.validate(lockVote: lockVote)
     }
 
 }
