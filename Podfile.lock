@@ -1,8 +1,9 @@
 PODS:
   - Alamofire (4.8.2)
   - BigInt (4.0.0)
+  - CryptoBLS.swift (1.0)
   - CryptoX11.swift (1.0)
-  - Cuckoo (0.13.0)
+  - Cuckoo (1.0.4)
   - GRDB.swift (3.7.0)
   - HSCryptoKit (1.3.0)
   - HSHDWalletKit (1.0.4):
@@ -17,6 +18,7 @@ PODS:
 DEPENDENCIES:
   - Alamofire (~> 4.0)
   - BigInt (~> 4.0)
+  - CryptoBLS.swift (from `https://github.com/horizontalsystems/crypto-bls-ios`)
   - CryptoX11.swift (from `https://github.com/horizontalsystems/crypto-x11-ios`)
   - Cuckoo
   - GRDB.swift (~> 3.0)
@@ -41,6 +43,8 @@ SPEC REPOS:
     - RxSwift
 
 EXTERNAL SOURCES:
+  CryptoBLS.swift:
+    :git: https://github.com/horizontalsystems/crypto-bls-ios
   CryptoX11.swift:
     :git: https://github.com/horizontalsystems/crypto-x11-ios
   HSCryptoKit:
@@ -49,8 +53,11 @@ EXTERNAL SOURCES:
     :git: https://github.com/horizontalsystems/hd-wallet-kit-ios
 
 CHECKOUT OPTIONS:
+  CryptoBLS.swift:
+    :commit: aae6d3056890aff07ba48d1864379d257d71bc20
+    :git: https://github.com/horizontalsystems/crypto-bls-ios
   CryptoX11.swift:
-    :commit: b1c203440891fc5f529a1577e0d20386559da581
+    :commit: b718f8dfb19c6eed8402088768d1f53dadca1e41
     :git: https://github.com/horizontalsystems/crypto-x11-ios
   HSCryptoKit:
     :commit: 376f161f13c5d8facd58a8150722458c5ed77237
@@ -62,8 +69,9 @@ CHECKOUT OPTIONS:
 SPEC CHECKSUMS:
   Alamofire: ae5c501addb7afdbb13687d7f2f722c78734c2d3
   BigInt: 2aad1a9942dc932ec8b84290d2c564a3d76f97ab
-  CryptoX11.swift: 59db498ef7934eb3c0a9e84a9c1848996a3c2282
-  Cuckoo: 3112ee8b01d84e21bde500a45f9992ac81d80006
+  CryptoBLS.swift: e83663b65b375b489ed426e7bbbdc252bcf40270
+  CryptoX11.swift: 3551396d8fb704cc21f1fdc46f14e7d2f7cbe2d0
+  Cuckoo: 58e8219aa80f956350b6d3b396e9f1d6871544e7
   GRDB.swift: 51cc9e57ae8ff7083a9d674c97925aa1de06aac5
   HSCryptoKit: 564a3888691658cba58aa60f7d037654fd3c6fb0
   HSHDWalletKit: e09162c2bb121c9db9b0cf203bd93b40965aad74
@@ -73,6 +81,6 @@ SPEC CHECKSUMS:
   RxBlocking: 79413e4d916f44bb3e113c5b2cc059e36fe58910
   RxSwift: f172070dfd1a93d70a9ab97a5a01166206e1c575
 
-PODFILE CHECKSUM: 2ac2087c74be723db1f618da29eff4c5d5d5c9eb
+PODFILE CHECKSUM: 2d1a104c5e200e4c5b017ea21331ec46d4d8c43f
 
-COCOAPODS: 1.6.1
+COCOAPODS: 1.6.2

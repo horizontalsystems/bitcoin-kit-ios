@@ -27,7 +27,7 @@ extension TransactionLockVoteMessage: Hashable {
     }
 
     public static func ==(lhs: TransactionLockVoteMessage, rhs: TransactionLockVoteMessage) -> Bool {
-        return lhs.hash == rhs.hash
+        return lhs.hash == rhs.hash && lhs.vchMasternodeSignature == rhs.vchMasternodeSignature
     }
 
 }

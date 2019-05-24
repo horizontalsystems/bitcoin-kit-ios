@@ -122,6 +122,15 @@ class TransactionLockVoteManagerTests: QuickSpec {
                 expect(manager.checkedLockVotes.contains(lockVotes[1])).to(equal(false))
             }
         }
+        describe("#validate(lockVote: TransactionLockVoteMessage)") {
+            it("checks call validate method") {
+                stub(mockLockVoteValidator) { mock in
+                    when(mock.validate(lockVote: equal(to: lockVotes[0]))).thenDoNothing()
+                }
+                try? manager.validate(lockVote: lockVotes[0])
+                verify(mockLockVoteValidator).validate(lockVote: equal(to: lockVotes[0]))
+            }
+        }
 
     }
 
