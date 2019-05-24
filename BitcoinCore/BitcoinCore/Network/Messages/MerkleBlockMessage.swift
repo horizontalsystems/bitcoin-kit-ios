@@ -1,9 +1,4 @@
-import Foundation
-import HSCryptoKit
-
 struct MerkleBlockMessage: IMessage {
-    let command: String = "merkleblock"
-
     let blockHeader: BlockHeader
 
     /// Number of transactions in the block (including unmatched ones)

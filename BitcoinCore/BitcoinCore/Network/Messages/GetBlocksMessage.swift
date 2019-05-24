@@ -1,8 +1,4 @@
-import Foundation
-import HSCryptoKit
-
 struct GetBlocksMessage: IMessage {
-    let command: String = "getblocks"
     /// the protocol version
     let version: UInt32
     /// number of block locator hash entries

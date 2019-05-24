@@ -91,7 +91,6 @@
 		2FA5DC6BEF26DD10A72A39EE /* BloomFilterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DE7E06652FCED7B288E7 /* BloomFilterManager.swift */; };
 		2FA5DC980A0E135863848CB0 /* TransactionProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DF1470723462D2CF707B /* TransactionProcessor.swift */; };
 		2FA5DCA14A91CAB48F61F2A0 /* TransactionBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DDAE64200E386070668C /* TransactionBuilderTests.swift */; };
-		2FA5DD4EABD7CB8026D71F75 /* IMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DFDD75C8D896B99C2ED6 /* IMessage.swift */; };
 		2FA5DD904B10D404DF9C6E04 /* RequestTransactionTaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D4A92FB8C2376A9A0090 /* RequestTransactionTaskTests.swift */; };
 		2FA5DDCC995A7F27AFB3DE18 /* PeerDelegateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DCB87581859B2E083377 /* PeerDelegateTests.swift */; };
 		2FA5DDD47BF94625B499ECC2 /* TransactionOutputSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DEC34722F594F85688C0 /* TransactionOutputSerializer.swift */; };
@@ -317,7 +316,6 @@
 		2FA5DFB5B9A13478ACBB61EB /* IPeerTaskDelegateTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IPeerTaskDelegateTests.swift; sourceTree = "<group>"; };
 		2FA5DFBF60F56D8A2FC86ED2 /* StateManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StateManagerTests.swift; sourceTree = "<group>"; };
 		2FA5DFC7FA0A5363BFFB8E28 /* GetBlockHashesTaskTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetBlockHashesTaskTests.swift; sourceTree = "<group>"; };
-		2FA5DFDD75C8D896B99C2ED6 /* IMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IMessage.swift; sourceTree = "<group>"; };
 		3C7B91E6E6DBA06A79ED8005 /* BCoinApi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BCoinApi.swift; sourceTree = "<group>"; };
 		3C7B983C4EC7F79E44560A7C /* TransactionPublicKeySetter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionPublicKeySetter.swift; sourceTree = "<group>"; };
 		3C7B9EBABAFF96958CFB2CB7 /* TransactionInputExtractorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionInputExtractorTests.swift; sourceTree = "<group>"; };
@@ -585,7 +583,6 @@
 				11B35FF2F94006C73B7773BC /* GetHeadersMessage.swift */,
 				D31711F420F7193000AEF61B /* InventoryItem.swift */,
 				D31711F720F7193000AEF61B /* InventoryMessage.swift */,
-				2FA5DFDD75C8D896B99C2ED6 /* IMessage.swift */,
 				D00DA94D213E86BC007F82D6 /* MemPoolMessage.swift */,
 				2FA5D5C9BB0E185AF72B9174 /* MerkleBlock.swift */,
 				D31711FB20F7193000AEF61B /* MerkleBlockMessage.swift */,
@@ -1378,7 +1375,6 @@
 				2FA5DDD47BF94625B499ECC2 /* TransactionOutputSerializer.swift in Sources */,
 				2FA5D56E3AE0E2E9817FC370 /* TransactionInputSerializer.swift in Sources */,
 				2FA5D6EC6F4A32E3489F89B0 /* TransactionMessage.swift in Sources */,
-				2FA5DD4EABD7CB8026D71F75 /* IMessage.swift in Sources */,
 				2FA5D599E444F6847B6E9A4C /* Peer.swift in Sources */,
 				2FA5D4F27E10A609FF81950E /* UnknownMessage.swift in Sources */,
 				58AAAD1C062938F07E90EA9D /* Address.swift in Sources */,

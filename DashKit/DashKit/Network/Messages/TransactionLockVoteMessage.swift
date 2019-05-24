@@ -1,8 +1,6 @@
 import BitcoinCore
 
 struct TransactionLockVoteMessage: IMessage {
-    let command: String = "txlvote"
-
     //  TXID of the transaction to lock
     let txHash: Data
     //  The unspent outpoint to lock in this transaction

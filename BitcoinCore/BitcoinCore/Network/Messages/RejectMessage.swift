@@ -1,8 +1,5 @@
-import Foundation
-
 /// The reject message is sent when messages are rejected.
 struct RejectMessage: IMessage {
-    let command: String = "reject"
     /// type of message rejected
     let message: VarString
     /// code relating to rejected message

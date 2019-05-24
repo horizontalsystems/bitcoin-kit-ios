@@ -1,8 +1,6 @@
 import BitcoinCore
 
 struct MasternodeListDiffMessage: IMessage {
-    let command: String = "mnlistdiff"
-
     let baseBlockHash: Data
     let blockHash: Data
     let totalTransactions: UInt32

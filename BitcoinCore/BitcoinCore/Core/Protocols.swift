@@ -469,6 +469,9 @@ public extension INetwork {
 
 }
 
+public protocol IMessage {
+}
+
 protocol INetworkMessageParser {
     func parse(data: Data) -> NetworkMessage?
 }
@@ -488,7 +491,7 @@ protocol INetworkMessageSerializer {
 
 public protocol IMessageSerializer {
     var id: String { get }
-    func serialize(message: IMessage) throws -> Data
+    func serialize(message: IMessage) -> Data?
 }
 
 public protocol IInitialBlockDownload {
