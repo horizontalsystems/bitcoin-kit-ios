@@ -19,4 +19,8 @@ struct RejectMessage: IMessage {
     /// block header hash of the object being rejected, so the field is 32 bytes.
     let data: Data
 
+    var description: String {
+        return "\(message) code: 0x\(String(ccode, radix: 16)) reason: \(reason)"
+    }
+
 }

@@ -16,6 +16,10 @@ struct TransactionLockVoteMessage: IMessage {
 
     let hash: Data
 
+    var description: String {
+        return "\(txHash.reversedHex)"
+    }
+
 }
 
 extension TransactionLockVoteMessage: Hashable {

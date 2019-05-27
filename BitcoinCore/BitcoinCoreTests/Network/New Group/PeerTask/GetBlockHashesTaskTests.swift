@@ -35,8 +35,8 @@ class GetBlockHashesTaskTests:XCTestCase {
         mockDelegate = MockIPeerTaskDelegate()
 
         stub(mockRequester) { mock in
-            when(mock).getBlocks(hashes: any()).thenDoNothing()
-            when(mock).ping(nonce: any()).thenDoNothing()
+            when(mock.protocolVersion.get).thenReturn(0)
+            when(mock).send(message: any()).thenDoNothing()
         }
         stub(mockDelegate) { mock in
             when(mock).handle(completedTask: any()).thenDoNothing()
@@ -73,7 +73,7 @@ class GetBlockHashesTaskTests:XCTestCase {
             inventories.append(InventoryItem(type: InventoryItem.ObjectType.blockMessage.rawValue, hash: Data(from: 100000000 * (i+1))))
         }
 
-        let _ = task.handle(items: inventories)
+        let _ = try! task.handle(message: InventoryMessage(inventoryItems: inventories))
         verifyNoMoreInteractions(mockDelegate)
 
 
@@ -100,7 +100,7 @@ class GetBlockHashesTaskTests:XCTestCase {
             inventories.append(InventoryItem(type: InventoryItem.ObjectType.blockMessage.rawValue, hash: Data(from: 1000000 * (i+1))))
         }
 
-        let _ = task.handle(items: inventories)
+        let _ = try! task.handle(message: InventoryMessage(inventoryItems: inventories))
         verify(mockDelegate).handle(completedTask: equal(to: task))
 
         // Wait maxAllowedIdleTime before timeout
@@ -119,7 +119,9 @@ class GetBlockHashesTaskTests:XCTestCase {
     func testStart() {
         task.start()
 
-        verify(mockRequester).getBlocks(hashes: equal(to: hashes))
+        verify(mockRequester).send(message: equal(to: GetBlocksMessage(protocolVersion: 0, headerHashes: hashes), equalWhen: {
+            ($0 as! GetBlocksMessage).blockLocatorHashes == ($1 as! GetBlocksMessage).blockLocatorHashes
+        }))
         XCTAssertTrue(dateIsGenerated)
         verifyNoMoreInteractions(mockDelegate)
     }
@@ -128,7 +130,7 @@ class GetBlockHashesTaskTests:XCTestCase {
         let blockInv = InventoryItem(type: InventoryItem.ObjectType.blockMessage.rawValue, hash: Data(from: 200000000))
         let txInv = InventoryItem(type: InventoryItem.ObjectType.transaction.rawValue, hash: Data(from: 200000001))
 
-        let handled = task.handle(items: [blockInv, txInv])
+        let handled = try! task.handle(message: InventoryMessage(inventoryItems: [blockInv, txInv]))
 
         XCTAssertTrue(handled)
         XCTAssertTrue(dateIsGenerated)
@@ -139,7 +141,7 @@ class GetBlockHashesTaskTests:XCTestCase {
     func testHandleItems_NoBlockInventories() {
         let txInv = InventoryItem(type: InventoryItem.ObjectType.transaction.rawValue, hash: Data(from: 200000001))
 
-        let handled = task.handle(items: [txInv])
+        let handled = try! task.handle(message: InventoryMessage(inventoryItems: [txInv]))
 
         XCTAssertFalse(handled)
         XCTAssertFalse(dateIsGenerated)
@@ -149,7 +151,7 @@ class GetBlockHashesTaskTests:XCTestCase {
     func testHandleItems_NewHashesContainLocatorHashes() {
         let block0Inv = InventoryItem(type: InventoryItem.ObjectType.blockMessage.rawValue, hash: hashes[0])
 
-        let handled = task.handle(items: [block0Inv])
+        let handled = try! task.handle(message: InventoryMessage(inventoryItems: [block0Inv]))
 
         XCTAssertTrue(handled)
         XCTAssertTrue(dateIsGenerated)
@@ -162,8 +164,8 @@ class GetBlockHashesTaskTests:XCTestCase {
         let block1Inv = InventoryItem(type: InventoryItem.ObjectType.blockMessage.rawValue, hash: Data(from: 300000000))
         let block2Inv = InventoryItem(type: InventoryItem.ObjectType.blockMessage.rawValue, hash: Data(from: 400000000))
 
-        let _ = task.handle(items: [block0Inv, block1Inv])
-        let handled = task.handle(items: [block2Inv])
+        let _ = try! task.handle(message: InventoryMessage(inventoryItems: [block0Inv, block1Inv]))
+        let handled = try! task.handle(message: InventoryMessage(inventoryItems: [block2Inv]))
 
         XCTAssertTrue(handled)
         XCTAssertTrue(dateIsGenerated)
@@ -176,8 +178,8 @@ class GetBlockHashesTaskTests:XCTestCase {
         let block1Inv = InventoryItem(type: InventoryItem.ObjectType.blockMessage.rawValue, hash: Data(from: 300000000))
         let block2Inv = InventoryItem(type: InventoryItem.ObjectType.blockMessage.rawValue, hash: Data(from: 400000000))
 
-        let _ = task.handle(items: [block2Inv])
-        let handled = task.handle(items: [block0Inv, block1Inv])
+        let _ = try! task.handle(message: InventoryMessage(inventoryItems: [block2Inv]))
+        let handled = try! task.handle(message: InventoryMessage(inventoryItems: [block0Inv, block1Inv]))
 
         XCTAssertTrue(handled)
         XCTAssertTrue(dateIsGenerated)
@@ -192,7 +194,7 @@ class GetBlockHashesTaskTests:XCTestCase {
             inventories.append(InventoryItem(type: InventoryItem.ObjectType.blockMessage.rawValue, hash: Data(from: 100000000 * (i+1))))
         }
 
-        let handled = task.handle(items: inventories)
+        let handled = try! task.handle(message: InventoryMessage(inventoryItems: inventories))
 
         XCTAssertTrue(handled)
         XCTAssertTrue(dateIsGenerated)

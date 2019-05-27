@@ -14,10 +14,17 @@ class RequestTransactionsTask: PeerTask {
             InventoryItem(type: InventoryItem.ObjectType.transaction.rawValue, hash: hash)
         }
 
-        requester?.getData(items: items)
+        requester?.send(message: GetDataMessage(inventoryItems: items))
     }
 
-    override func handle(transaction: FullTransaction) -> Bool {
+    override func handle(message: IMessage) throws -> Bool {
+        if let transactionMessage = message as? TransactionMessage {
+            return handle(transaction: transactionMessage.transaction)
+        }
+        return false
+    }
+
+    private func handle(transaction: FullTransaction) -> Bool {
         guard let index = hashes.index(where: { $0 == transaction.header.dataHash }) else {
             return false
         }

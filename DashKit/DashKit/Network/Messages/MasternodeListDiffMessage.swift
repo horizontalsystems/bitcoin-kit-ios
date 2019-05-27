@@ -13,4 +13,9 @@ struct MasternodeListDiffMessage: IMessage {
     let deletedMNs: [Data]
     let mnListCount: UInt32
     let mnList: [Masternode]
+
+    var description: String {
+        return "\(baseBlockHash) \(blockHash)"
+    }
+
 }

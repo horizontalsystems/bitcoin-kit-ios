@@ -30,4 +30,8 @@ struct VersionMessage: IMessage {
         return version >= network.bloomFilter
     }
 
+    var description: String {
+        return "\(version) --- \(userAgent?.value ?? "") --- \(ServiceFlags(rawValue: services)) -- \(String(describing: startHeight ?? 0))"
+    }
+
 }

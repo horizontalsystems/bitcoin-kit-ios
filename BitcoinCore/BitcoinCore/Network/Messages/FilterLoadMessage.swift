@@ -5,4 +5,8 @@ struct FilterLoadMessage: IMessage {
         self.bloomFilter = bloomFilter
     }
 
+    var description: String {
+        return "\(bloomFilter.elementsCount) item(s)"
+    }
+
 }

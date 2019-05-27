@@ -15,4 +15,8 @@ struct GetBlocksMessage: IMessage {
         hashStop = Data(count: 32)
     }
 
+    var description: String {
+        return "\(blockLocatorHashes.map { $0.reversedHex })"
+    }
+
 }

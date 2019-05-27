@@ -10,6 +10,10 @@ struct MerkleBlockMessage: IMessage {
     let numberOfFlags: VarInt
     let flags: [UInt8]
 
+    var description: String {
+        return "\(blockHeader.headerHash.reversedHex)"
+    }
+
 }
 
 extension MerkleBlockMessage: Equatable {

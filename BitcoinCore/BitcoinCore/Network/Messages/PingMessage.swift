@@ -3,4 +3,9 @@
 struct PingMessage: IMessage {
     /// random nonce
     let nonce: UInt64
+
+    var description: String {
+        return "\(nonce)"
+    }
+
 }

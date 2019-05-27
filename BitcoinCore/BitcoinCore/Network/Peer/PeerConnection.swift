@@ -95,12 +95,13 @@ class PeerConnection: NSObject {
                 return
             }
 
+            log("<- \(type(of: networkMessage.message)): \(networkMessage.message.description)")
             packets = Data(packets.dropFirst(NetworkMessage.minimumLength + Int(networkMessage.length)))
             delegate?.connection(didReceiveMessage: networkMessage.message)
         }
     }
 
-    private func log(_ message: String, level: Logger.Level = .debug, file: String = #file, function: String = #function, line: Int = #line) {
+    private func log(_ message: @autoclosure () -> Any, level: Logger.Level = .debug, file: String = #file, function: String = #function, line: Int = #line) {
         logger?.log(level: level, message: message, file: file, function: function, line: line, context: logName)
     }
 }
@@ -151,6 +152,7 @@ extension PeerConnection: IPeerConnection {
     }
 
     func send(message: IMessage) {
+        log("-> \(type(of: message)): \(message.description)")
         do {
             let data = try networkMessageSerializer.serialize(message: message)
             _ = data.withUnsafeBytes {

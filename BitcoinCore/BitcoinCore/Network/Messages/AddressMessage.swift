@@ -8,4 +8,8 @@ struct AddressMessage: IMessage {
         addressList = addresses
     }
 
+    var description: String {
+        return "\(addressList.count) address(es)"
+    }
+
 }

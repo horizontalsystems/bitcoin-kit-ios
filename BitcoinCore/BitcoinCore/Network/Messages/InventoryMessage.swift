@@ -10,4 +10,17 @@ struct InventoryMessage: IMessage {
         self.inventoryItems = inventoryItems
     }
 
+    var description: String {
+        let items = inventoryItems.map { item in
+            let objectTypeString: String
+            if case .unknown = item.objectType {
+                objectTypeString = String(item.type)
+            } else {
+                objectTypeString = "\(item.objectType)"
+            }
+            return "[\(objectTypeString): \(item.hash.reversedHex)]" }.joined(separator: ", ")
+
+        return "\(items)"
+    }
+
 }

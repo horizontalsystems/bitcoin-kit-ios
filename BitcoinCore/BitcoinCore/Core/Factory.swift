@@ -2,13 +2,11 @@ class Factory: IFactory {
     private let network: INetwork
     private let networkMessageParser: INetworkMessageParser
     private let networkMessageSerializer: INetworkMessageSerializer
-    private let merkleBlockValidator: IMerkleBlockValidator
 
-    init(network: INetwork, networkMessageParser: INetworkMessageParser, networkMessageSerializer: INetworkMessageSerializer, merkleBlockValidator: IMerkleBlockValidator) {
+    init(network: INetwork, networkMessageParser: INetworkMessageParser, networkMessageSerializer: INetworkMessageSerializer) {
         self.network = network
         self.networkMessageParser = networkMessageParser
         self.networkMessageSerializer = networkMessageSerializer
-        self.merkleBlockValidator = merkleBlockValidator
     }
 
     func block(withHeader header: BlockHeader, previousBlock: Block) -> Block {
@@ -37,7 +35,7 @@ class Factory: IFactory {
     }
 
     func peer(withHost host: String, logger: Logger? = nil) -> IPeer {
-        return Peer(host: host, network: network, connection: PeerConnection(host: host, port: network.port, networkMessageParser: networkMessageParser, networkMessageSerializer: networkMessageSerializer, logger: logger), connectionTimeoutManager: ConnectionTimeoutManager(), merkleBlockValidator: merkleBlockValidator, logger: logger)
+        return Peer(host: host, network: network, connection: PeerConnection(host: host, port: network.port, networkMessageParser: networkMessageParser, networkMessageSerializer: networkMessageSerializer, logger: logger), connectionTimeoutManager: ConnectionTimeoutManager(), logger: logger)
     }
 
     func blockHash(withHeaderHash headerHash: Data, height: Int, order: Int = 0) -> BlockHash {

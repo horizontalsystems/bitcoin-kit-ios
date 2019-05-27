@@ -36,11 +36,20 @@ class GetBlockHashesTask: PeerTask {
     }
 
     override func start() {
-        requester?.getBlocks(hashes: blockLocatorHashes)
+        if let requester = requester {
+            requester.send(message: GetBlocksMessage(protocolVersion: requester.protocolVersion, headerHashes: blockLocatorHashes))
+        }
         resetTimer()
     }
 
-    override func handle(items: [InventoryItem]) -> Bool {
+    override func handle(message: IMessage) throws -> Bool {
+        if let inventoryMessage = message as? InventoryMessage {
+            return handle(items: inventoryMessage.inventoryItems)
+        }
+        return false
+    }
+
+    private func handle(items: [InventoryItem]) -> Bool {
         let newHashes = items
                 .filter { item in return item.objectType == .blockMessage }
                 .map { item in return item.hash }
