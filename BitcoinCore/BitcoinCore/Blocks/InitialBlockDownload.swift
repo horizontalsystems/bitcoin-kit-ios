@@ -9,6 +9,7 @@ public class InitialBlockDownload {
     private var disposeBag = DisposeBag()
     private var blockSyncer: IBlockSyncer?
     private let peerManager: IPeerManager
+    private let merkleBlockValidator: IMerkleBlockValidator
     private let syncStateListener: ISyncStateListener
 
     private let subject = PublishSubject<InitialBlockDownloadEvent>()
@@ -23,12 +24,13 @@ public class InitialBlockDownload {
 
     public var syncedPeers = [IPeer]()
 
-    init(blockSyncer: IBlockSyncer?, peerManager: IPeerManager, syncStateListener: ISyncStateListener,
+    init(blockSyncer: IBlockSyncer?, peerManager: IPeerManager, merkleBlockValidator: IMerkleBlockValidator, syncStateListener: ISyncStateListener,
          peersQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Local Queue", qos: .userInitiated),
          scheduler: SchedulerType = SerialDispatchQueueScheduler(qos: .background),
          logger: Logger? = nil) {
         self.blockSyncer = blockSyncer
         self.peerManager = peerManager
+        self.merkleBlockValidator = merkleBlockValidator
         self.syncStateListener = syncStateListener
         self.peersQueue = peersQueue
         self.logger = logger
@@ -67,7 +69,7 @@ public class InitialBlockDownload {
         if blockHashes.isEmpty {
             syncedStates[syncPeer.host] = blockHashesSyncedStates[syncPeer.host]
         } else {
-            syncPeer.add(task: GetMerkleBlocksTask(blockHashes: blockHashes, merkleBlockHandler: self))
+            syncPeer.add(task: GetMerkleBlocksTask(blockHashes: blockHashes, merkleBlockValidator: merkleBlockValidator, merkleBlockHandler: self))
         }
 
         if !blockHashesSyncedState(syncPeer) {

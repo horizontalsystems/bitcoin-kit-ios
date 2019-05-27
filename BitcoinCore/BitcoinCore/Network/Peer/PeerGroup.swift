@@ -151,15 +151,17 @@ extension PeerGroup: PeerDelegate {
         _ = peerTaskHandler?.handleCompletedTask(peer: peer, task: task)
     }
 
-    func peer(_ peer: IPeer, didReceiveAddresses addresses: [NetworkAddress]) {
-        self.peerAddressManager.add(ips: addresses.map {
-            $0.address
-        })
-    }
-
-    func peer(_ peer: IPeer, didReceiveInventoryItems items: [InventoryItem]) {
-        inventoryQueue.async {
-            self.inventoryItemsHandler?.handleInventoryItems(peer: peer, inventoryItems: items)
+    func peer(_ peer: IPeer, didReceiveMessage message: IMessage) {
+        switch message {
+        case let addressMessage as AddressMessage:
+            self.peerAddressManager.add(ips: addressMessage.addressList.map {
+                $0.address
+            })
+        case let inventoryMessage as InventoryMessage:
+            inventoryQueue.async {
+                self.inventoryItemsHandler?.handleInventoryItems(peer: peer, inventoryItems: inventoryMessage.inventoryItems)
+            }
+        default: ()
         }
     }
 

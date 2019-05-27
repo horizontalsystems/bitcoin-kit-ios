@@ -1,9 +1,4 @@
-import Foundation
-import HSCryptoKit
-
 struct MerkleBlockMessage: IMessage {
-    let command: String = "merkleblock"
-
     let blockHeader: BlockHeader
 
     /// Number of transactions in the block (including unmatched ones)
@@ -14,6 +9,10 @@ struct MerkleBlockMessage: IMessage {
     /// flag bits, packed per 8 in a byte, least significant bit first (including standard varint size prefix)
     let numberOfFlags: VarInt
     let flags: [UInt8]
+
+    var description: String {
+        return "\(blockHeader.headerHash.reversedHex)"
+    }
 
 }
 

@@ -53,6 +53,9 @@ class ReceiveController: UIViewController {
 
     @objc func onSegmentChanged() {
         addressLabel?.text = "  \(currentAdapter?.receiveAddress ?? "")  "
+        if let adapter = currentAdapter {
+            print(adapter.debugInfo)
+        }
     }
 
     @IBAction func copyToClipboard() {

@@ -17,8 +17,7 @@ class SendTransactionTaskTests:XCTestCase {
         mockDelegate = MockIPeerTaskDelegate()
 
         stub(mockRequester) { mock in
-            when(mock).sendTransactionInventory(hash: any()).thenDoNothing()
-            when(mock).send(transaction: any()).thenDoNothing()
+            when(mock).send(message: any()).thenDoNothing()
         }
         stub(mockDelegate) { mock in
             when(mock).handle(completedTask: any()).thenDoNothing()
@@ -40,17 +39,20 @@ class SendTransactionTaskTests:XCTestCase {
 
     func testStart() {
         task.start()
+        let message = InventoryMessage(inventoryItems: [
+            InventoryItem(type: InventoryItem.ObjectType.transaction.rawValue, hash: transaction.header.dataHash)
+        ])
 
-        verify(mockRequester).sendTransactionInventory(hash: equal(to: transaction.header.dataHash))
+        verify(mockRequester).send(message: equal(to: message, equalWhen: { ($0 as! InventoryMessage).inventoryItems.first!.hash == ($1 as! InventoryMessage).inventoryItems.first!.hash }))
     }
 
     func testHandleGetData() {
         let inv = InventoryItem(type: InventoryItem.ObjectType.transaction.rawValue, hash: transaction.header.dataHash)
 
-        let handled = task.handle(getDataInventoryItem: inv)
+        let handled = try! task.handle(message: GetDataMessage(inventoryItems: [inv]))
 
         XCTAssertEqual(handled, true)
-        verify(mockRequester).send(transaction: equal(to: transaction, equalWhen: { $0.header.dataHash == $1.header.dataHash }))
+        verify(mockRequester).send(message: equal(to: TransactionMessage(transaction: transaction), equalWhen: { ($0 as! TransactionMessage).transaction.header.dataHash == ($1 as! TransactionMessage).transaction.header.dataHash }))
         verify(mockDelegate).handle(completedTask: equal(to: task))
         verifyNoMoreInteractions(mockRequester)
         verifyNoMoreInteractions(mockDelegate)
@@ -59,7 +61,7 @@ class SendTransactionTaskTests:XCTestCase {
     func testHandleGetData_NotTransactionInventory() {
         let inv = InventoryItem(type: InventoryItem.ObjectType.blockMessage.rawValue, hash: transaction.header.dataHash)
 
-        let handled = task.handle(getDataInventoryItem: inv)
+        let handled = try! task.handle(message: GetDataMessage(inventoryItems: [inv]))
 
         XCTAssertEqual(handled, false)
         verifyNoMoreInteractions(mockRequester)
@@ -69,7 +71,7 @@ class SendTransactionTaskTests:XCTestCase {
     func testHandleGetData_OtherTransactionInventory() {
         let inv = InventoryItem(type: InventoryItem.ObjectType.blockMessage.rawValue, hash: Data(from: 10000))
 
-        let handled = task.handle(getDataInventoryItem: inv)
+        let handled = try! task.handle(message: GetDataMessage(inventoryItems: [inv]))
 
         XCTAssertEqual(handled, false)
         verifyNoMoreInteractions(mockRequester)

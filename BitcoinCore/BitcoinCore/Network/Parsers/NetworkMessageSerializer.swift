@@ -2,19 +2,29 @@ import HSCryptoKit
 
 class NetworkMessageSerializer: INetworkMessageSerializer {
     let magic: UInt32
-    var messageSerializers = [String: IMessageSerializer]()
+    var messageSerializers = [IMessageSerializer]()
 
     init(magic: UInt32) {
         self.magic = magic
     }
 
     func add(serializer: IMessageSerializer) {
-        messageSerializers[serializer.id] = serializer
+        messageSerializers.append(serializer)
     }
 
     func serialize(message: IMessage) throws -> Data {
-        guard let messageData = try messageSerializers[message.command]?.serialize(message: message) else {
-            print("Can't find serializer for \(message.command)")
+        var resolvedSerializer: IMessageSerializer? = nil
+        var resolvedMessageData: Data? = nil
+
+        for serializer in messageSerializers {
+            if let messageData = serializer.serialize(message: message) {
+                resolvedSerializer = serializer
+                resolvedMessageData = messageData
+                break
+            }
+        }
+
+        guard let serializer = resolvedSerializer, let messageData = resolvedMessageData else {
             throw BitcoinCoreErrors.MessageSerialization.noMessageSerializer
         }
         let checksum = Data(CryptoKit.sha256sha256(messageData).prefix(4))
@@ -22,7 +32,7 @@ class NetworkMessageSerializer: INetworkMessageSerializer {
 
         var data = Data()
         data += magic.bigEndian
-        var bytes = [UInt8](message.command.data(using: .ascii)!)
+        var bytes = [UInt8](serializer.id.data(using: .ascii)!)
         bytes.append(contentsOf: [UInt8](repeating: 0, count: 12 - bytes.count))
         data += bytes
         data += length.littleEndian
@@ -37,9 +47,9 @@ class NetworkMessageSerializer: INetworkMessageSerializer {
 class GetDataMessageSerializer: IMessageSerializer {
     var id: String { return "getdata" }
 
-    func serialize(message: IMessage) throws -> Data {
+    func serialize(message: IMessage) -> Data? {
         guard let message = message as? GetDataMessage else {
-            throw BitcoinCoreErrors.MessageSerialization.wrongMessageSerializer
+            return nil
         }
 
         var data = Data()
@@ -57,9 +67,9 @@ class GetDataMessageSerializer: IMessageSerializer {
 class GetBlocksMessageSerializer: IMessageSerializer {
     var id: String { return "getblocks" }
 
-    func serialize(message: IMessage) throws -> Data {
+    func serialize(message: IMessage) -> Data? {
         guard let message = message as? GetBlocksMessage else {
-            throw BitcoinCoreErrors.MessageSerialization.wrongMessageSerializer
+            return nil
         }
 
         var data = Data()
@@ -77,9 +87,9 @@ class GetBlocksMessageSerializer: IMessageSerializer {
 class InventoryMessageSerializer: IMessageSerializer {
     var id: String { return "inv" }
 
-    func serialize(message: IMessage) throws -> Data {
+    func serialize(message: IMessage) -> Data? {
         guard let message = message as? InventoryMessage else {
-            throw BitcoinCoreErrors.MessageSerialization.wrongMessageSerializer
+            return nil
         }
 
         var data = Data()
@@ -95,9 +105,9 @@ class InventoryMessageSerializer: IMessageSerializer {
 class PingMessageSerializer: IMessageSerializer {
     var id: String { return "ping" }
 
-    func serialize(message: IMessage) throws -> Data {
+    func serialize(message: IMessage) -> Data? {
         guard let message = message as? PingMessage else {
-            throw BitcoinCoreErrors.MessageSerialization.wrongMessageSerializer
+            return nil
         }
 
         var data = Data()
@@ -110,9 +120,9 @@ class PingMessageSerializer: IMessageSerializer {
 class PongMessageSerializer: IMessageSerializer {
     var id: String { return "pong" }
 
-    func serialize(message: IMessage) throws -> Data {
+    func serialize(message: IMessage) -> Data? {
         guard let message = message as? PongMessage else {
-            throw BitcoinCoreErrors.MessageSerialization.wrongMessageSerializer
+            return nil
         }
 
         var data = Data()
@@ -125,9 +135,9 @@ class PongMessageSerializer: IMessageSerializer {
 class VersionMessageSerializer: IMessageSerializer {
     var id: String { return "version" }
 
-    func serialize(message: IMessage) throws -> Data {
+    func serialize(message: IMessage) -> Data? {
         guard let message = message as? VersionMessage else {
-            throw BitcoinCoreErrors.MessageSerialization.wrongMessageSerializer
+            return nil
         }
 
         var data = Data()
@@ -148,9 +158,9 @@ class VersionMessageSerializer: IMessageSerializer {
 class VerackMessageSerializer: IMessageSerializer {
     var id: String { return "verack" }
 
-    func serialize(message: IMessage) throws -> Data {
+    func serialize(message: IMessage) -> Data? {
         guard message is VerackMessage else {
-            throw BitcoinCoreErrors.MessageSerialization.wrongMessageSerializer
+            return nil
         }
 
         return Data()
@@ -161,9 +171,9 @@ class VerackMessageSerializer: IMessageSerializer {
 class MempoolMessageSerializer: IMessageSerializer {
     var id: String { return "mempool" }
 
-    func serialize(message: IMessage) throws -> Data {
+    func serialize(message: IMessage) -> Data? {
         guard message is MemPoolMessage else {
-            throw BitcoinCoreErrors.MessageSerialization.wrongMessageSerializer
+            return nil
         }
 
         return Data()
@@ -174,9 +184,9 @@ class MempoolMessageSerializer: IMessageSerializer {
 class TransactionMessageSerializer: IMessageSerializer {
     var id: String { return "tx" }
 
-    func serialize(message: IMessage) throws -> Data {
+    func serialize(message: IMessage) -> Data? {
         guard let message = message as? TransactionMessage else {
-            throw BitcoinCoreErrors.MessageSerialization.wrongMessageSerializer
+            return nil
         }
 
         return TransactionSerializer.serialize(transaction: message.transaction)
@@ -187,9 +197,9 @@ class TransactionMessageSerializer: IMessageSerializer {
 class FilterLoadMessageSerializer: IMessageSerializer {
     var id: String { return "filterload" }
 
-    func serialize(message: IMessage) throws -> Data {
+    func serialize(message: IMessage) -> Data? {
         guard let message = message as? FilterLoadMessage else {
-            throw BitcoinCoreErrors.MessageSerialization.wrongMessageSerializer
+            return nil
         }
 
         let bloomFilter = message.bloomFilter

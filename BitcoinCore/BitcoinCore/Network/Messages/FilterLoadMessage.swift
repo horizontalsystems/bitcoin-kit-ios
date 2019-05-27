@@ -1,13 +1,12 @@
-import Foundation
-import HSCryptoKit
-
 struct FilterLoadMessage: IMessage {
-    let command: String = "filterload"
-
     let bloomFilter: BloomFilter
 
     init(bloomFilter: BloomFilter) {
         self.bloomFilter = bloomFilter
+    }
+
+    var description: String {
+        return "\(bloomFilter.elementsCount) item(s)"
     }
 
 }

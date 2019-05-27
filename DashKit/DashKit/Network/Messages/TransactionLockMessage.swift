@@ -1,8 +1,11 @@
 import BitcoinCore
 
 struct TransactionLockMessage: IMessage {
-    let command: String = "ix"
 
     let transaction: FullTransaction
+
+    var description: String {
+        return "\(transaction.header.dataHash.reversedHex)"
+    }
 
 }

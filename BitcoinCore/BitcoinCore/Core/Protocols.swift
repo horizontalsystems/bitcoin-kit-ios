@@ -187,17 +187,12 @@ public protocol PeerDelegate: class {
     func peerDidDisconnect(_ peer: IPeer, withError error: Error?)
 
     func peer(_ peer: IPeer, didCompleteTask task: PeerTask)
-    func peer(_ peer: IPeer, didReceiveAddresses addresses: [NetworkAddress])
-    func peer(_ peer: IPeer, didReceiveInventoryItems items: [InventoryItem])
+    func peer(_ peer: IPeer, didReceiveMessage message: IMessage)
 }
 
 public protocol IPeerTaskRequester: class {
-    func getBlocks(hashes: [Data])
-    func getData(items: [InventoryItem])
-    func sendTransactionInventory(hash: Data)
-    func send(transaction: FullTransaction)
+    var protocolVersion: Int32 { get }
     func send(message: IMessage)
-    func ping(nonce: UInt64)
 }
 
 public protocol IPeerTaskDelegate: class {
@@ -467,6 +462,10 @@ public extension INetwork {
 
 }
 
+public protocol IMessage {
+    var description: String { get }
+}
+
 protocol INetworkMessageParser {
     func parse(data: Data) -> NetworkMessage?
 }
@@ -486,7 +485,7 @@ protocol INetworkMessageSerializer {
 
 public protocol IMessageSerializer {
     var id: String { get }
-    func serialize(message: IMessage) throws -> Data
+    func serialize(message: IMessage) -> Data?
 }
 
 public protocol IInitialBlockDownload {

@@ -17,27 +17,7 @@ open class PeerTask {
     open func start() {
     }
 
-    open func handle(blockHeaders: [BlockHeader]) -> Bool {
-        return false
-    }
-
-    open func handle(merkleBlock: MerkleBlock) -> Bool {
-        return false
-    }
-
-    open func handle(transaction: FullTransaction) -> Bool {
-        return false
-    }
-
-    open func handle(getDataInventoryItem item: InventoryItem) -> Bool {
-        return false
-    }
-
-    open func handle(items: [InventoryItem]) -> Bool {
-        return false
-    }
-
-    open func handle(message: IMessage) -> Bool {
+    open func handle(message: IMessage) throws -> Bool {
         return false
     }
 

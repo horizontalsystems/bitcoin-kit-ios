@@ -1,10 +1,6 @@
-import Foundation
-import HSCryptoKit
-
 /// When a node creates an outgoing connection, it will immediately advertise its version.
 /// The remote node will respond with its version. No further communication is possible until both peers have exchanged their version.
 struct VersionMessage: IMessage {
-    let command: String = "version"
     /// Identifies protocol version being used by the node
     let version: Int32
     /// bitfield of features to be enabled for this connection
@@ -32,6 +28,10 @@ struct VersionMessage: IMessage {
 
     func supportsBloomFilter(network: INetwork) -> Bool {
         return version >= network.bloomFilter
+    }
+
+    var description: String {
+        return "\(version) --- \(userAgent?.value ?? "") --- \(ServiceFlags(rawValue: services)) -- \(String(describing: startHeight ?? 0))"
     }
 
 }

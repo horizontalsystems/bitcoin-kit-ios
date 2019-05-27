@@ -1,8 +1,5 @@
-import Foundation
-
 /// The reject message is sent when messages are rejected.
 struct RejectMessage: IMessage {
-    let command: String = "reject"
     /// type of message rejected
     let message: VarString
     /// code relating to rejected message
@@ -21,5 +18,9 @@ struct RejectMessage: IMessage {
     /// Currently, all errors which provide this field fill it with the TXID or
     /// block header hash of the object being rejected, so the field is 32 bytes.
     let data: Data
+
+    var description: String {
+        return "\(message) code: 0x\(String(ccode, radix: 16)) reason: \(reason)"
+    }
 
 }

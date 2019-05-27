@@ -1,8 +1,6 @@
 import BitcoinCore
 
 struct TransactionLockVoteMessage: IMessage {
-    let command: String = "txlvote"
-
     //  TXID of the transaction to lock
     let txHash: Data
     //  The unspent outpoint to lock in this transaction
@@ -17,6 +15,10 @@ struct TransactionLockVoteMessage: IMessage {
     let vchMasternodeSignature: Data
 
     let hash: Data
+
+    var description: String {
+        return "\(txHash.reversedHex)"
+    }
 
 }
 

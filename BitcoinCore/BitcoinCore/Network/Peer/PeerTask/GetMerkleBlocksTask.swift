@@ -5,10 +5,12 @@ class GetMerkleBlocksTask: PeerTask {
     private let allowedIdleTime = 60.0
     private var blockHashes: [BlockHash]
     private var pendingMerkleBlocks = [MerkleBlock]()
+    private var merkleBlockValidator: IMerkleBlockValidator
     private weak var merkleBlockHandler: IMerkleBlockHandler?
 
-    init(blockHashes: [BlockHash], merkleBlockHandler: IMerkleBlockHandler, dateGenerator: @escaping () -> Date = Date.init) {
+    init(blockHashes: [BlockHash], merkleBlockValidator: IMerkleBlockValidator, merkleBlockHandler: IMerkleBlockHandler, dateGenerator: @escaping () -> Date = Date.init) {
         self.blockHashes = blockHashes
+        self.merkleBlockValidator = merkleBlockValidator
         self.merkleBlockHandler = merkleBlockHandler
         super.init(dateGenerator: dateGenerator)
     }
@@ -18,11 +20,23 @@ class GetMerkleBlocksTask: PeerTask {
             InventoryItem(type: InventoryItem.ObjectType.filteredBlockMessage.rawValue, hash: blockHash.headerHash)
         }
 
-        requester?.getData(items: items)
+        requester?.send(message: GetDataMessage(inventoryItems: items))
         resetTimer()
     }
 
-    override func handle(merkleBlock: MerkleBlock) -> Bool {
+    override func handle(message: IMessage) throws -> Bool {
+        switch message {
+        case let merkleBlockMessage as MerkleBlockMessage:
+            let merkleBlock = try merkleBlockValidator.merkleBlock(from: merkleBlockMessage)
+            return handle(merkleBlock: merkleBlock)
+        case let transactionMessage as TransactionMessage:
+            return handle(transaction: transactionMessage.transaction)
+        default:
+            return false
+        }
+    }
+
+    private func handle(merkleBlock: MerkleBlock) -> Bool {
         guard let blockHash = blockHashes.first(where: { blockHash in blockHash.headerHash == merkleBlock.headerHash }) else {
             return false
         }
@@ -39,7 +53,7 @@ class GetMerkleBlocksTask: PeerTask {
         return true
     }
 
-    override func handle(transaction: FullTransaction) -> Bool {
+    private func handle(transaction: FullTransaction) -> Bool {
         if let index = pendingMerkleBlocks.index(where: { $0.transactionHashes.contains(transaction.header.dataHash) }) {
             resetTimer()
 

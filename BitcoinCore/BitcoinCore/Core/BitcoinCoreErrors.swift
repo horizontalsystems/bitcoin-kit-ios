@@ -38,7 +38,6 @@ public class BitcoinCoreErrors {
 
     public enum MessageSerialization: Error {
         case noMessageSerializer
-        case wrongMessageSerializer
     }
 
     public enum ScriptBuild: Error {

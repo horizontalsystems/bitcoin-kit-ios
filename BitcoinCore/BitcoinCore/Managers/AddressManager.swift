@@ -66,7 +66,7 @@ extension AddressManager: IAddressManager {
 
     func fillGap() throws {
         let publicKeysWithUsedStates = storage.publicKeysWithUsedState()
-        let requiredAccountsCount: Int!
+        let requiredAccountsCount: Int
 
         if let lastUsedAccount = publicKeysWithUsedStates.filter({ $0.used }).sorted(by: { $0.publicKey.account < $1.publicKey.account }).last?.publicKey.account {
             requiredAccountsCount = lastUsedAccount + 1 + 1 // One because account starts from 0, One because we must have n+1 accounts

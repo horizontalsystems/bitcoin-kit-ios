@@ -9,15 +9,36 @@ class SendTransactionTask: PeerTask {
     }
 
     override func start() {
-        requester?.sendTransactionInventory(hash: transaction.header.dataHash)
+        let message = InventoryMessage(inventoryItems: [
+            InventoryItem(type: InventoryItem.ObjectType.transaction.rawValue, hash: transaction.header.dataHash)
+        ])
+
+        requester?.send(message: message)
     }
 
-    override func handle(getDataInventoryItem item: InventoryItem) -> Bool {
+    override func handle(message: IMessage) throws -> Bool {
+        var handled = false
+
+        if let getDataMessage = message as? GetDataMessage {
+            // We assume that this is the only task waiting for all inventories in this message
+            // Otherwise, it means that we also must feed other tasks with this message
+            // and we must have a smarter message handling mechanism
+            for item in getDataMessage.inventoryItems {
+                if handle(getDataInventoryItem: item) {
+                    handled = true
+                }
+            }
+        }
+
+        return handled
+    }
+
+    private func handle(getDataInventoryItem item: InventoryItem) -> Bool {
         guard item.objectType == .transaction && item.hash == transaction.header.dataHash else {
             return false
         }
 
-        requester?.send(transaction: transaction)
+        requester?.send(message: TransactionMessage(transaction: transaction))
         delegate?.handle(completedTask: self)
 
         return true
