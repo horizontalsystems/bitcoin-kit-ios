@@ -95,9 +95,15 @@ class PeerConnection: NSObject {
                 return
             }
 
-            log("<- \(type(of: networkMessage.message)): \(networkMessage.message.description)")
             packets = Data(packets.dropFirst(NetworkMessage.minimumLength + Int(networkMessage.length)))
-            delegate?.connection(didReceiveMessage: networkMessage.message)
+            let message = networkMessage.message
+
+            guard !(message is UnknownMessage) else {
+                return
+            }
+
+            log("<- \(type(of: message)): \(message.description)")
+            delegate?.connection(didReceiveMessage: message)
         }
     }
 
