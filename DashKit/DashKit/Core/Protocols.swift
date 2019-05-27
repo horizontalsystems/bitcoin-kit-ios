@@ -87,6 +87,7 @@ protocol IDashStorage {
 
     func unspentOutputs() -> [UnspentOutput]
 
+    func transactionExists(byHash: Data) -> Bool
     func fullTransactionInfo(byHash hash: Data) -> FullTransactionForInfo?
 }
 
@@ -127,6 +128,8 @@ protocol IInstantTransactionManager {
     func instantTransactionInputs(for txHash: Data, instantTransaction: FullTransaction?) -> [InstantTransactionInput]
     func updateInput(for inputTxHash: Data, transactionInputs: [InstantTransactionInput]) throws
     func isTransactionInstant(txHash: Data) -> Bool
+    func isTransactionExists(txHash: Data) -> Bool
+    func makeInstant(txHash: Data)
 }
 
 public protocol IInstantTransactionDelegate: class {
@@ -145,6 +148,11 @@ protocol IMasternodeParser {
 protocol ITransactionLockVoteValidator {
     func validate(lockVote: TransactionLockVoteMessage) throws
 }
+
+protocol IInstantSendLockValidator {
+    func validate(isLock: ISLockMessage) throws
+}
+
 
 protocol ITransactionLockVoteManager {
     var relayedLockVotes: Set<TransactionLockVoteMessage> { get }

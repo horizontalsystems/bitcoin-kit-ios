@@ -11,6 +11,10 @@ class CoinbaseTransactionSerializer: ICoinbaseTransactionSerializer {
         data += Data(from: coinbaseTransaction.height)
         data += coinbaseTransaction.merkleRootMNList
 
+        if let merkleRootQuorums = coinbaseTransaction.merkleRootQuorums {
+            data += merkleRootQuorums
+        }
+
         return data
     }
 

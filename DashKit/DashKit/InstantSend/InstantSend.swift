@@ -1,6 +1,6 @@
 import BitcoinCore
 
-enum DashInventoryType: Int32 { case msgTxLockRequest = 4, msgTxLockVote = 5 }
+enum DashInventoryType: Int32 { case msgTxLockRequest = 4, msgTxLockVote = 5, msgIsLock = 30 }
 
 class InstantSend {
     static let requiredVoteCount = 6
@@ -9,14 +9,16 @@ class InstantSend {
     private let transactionSyncer: IDashTransactionSyncer
     private let instantTransactionManager: IInstantTransactionManager
     private let lockVoteManager: ITransactionLockVoteManager
+    private let instantSendLockValidator: IInstantSendLockValidator
 
     public weak var delegate: IInstantTransactionDelegate?
 
     private let logger: Logger?
 
-    init(transactionSyncer: IDashTransactionSyncer, lockVoteManager: ITransactionLockVoteManager, instantTransactionManager: IInstantTransactionManager, dispatchQueue: DispatchQueue = DispatchQueue(label: "DashInstantSend", qos: .userInitiated), logger: Logger? = nil) {
+    init(transactionSyncer: IDashTransactionSyncer, lockVoteManager: ITransactionLockVoteManager, instantSendLockValidator: IInstantSendLockValidator, instantTransactionManager: IInstantTransactionManager, dispatchQueue: DispatchQueue = DispatchQueue(label: "DashInstantSend", qos: .userInitiated), logger: Logger? = nil) {
         self.transactionSyncer = transactionSyncer
         self.lockVoteManager = lockVoteManager
+        self.instantSendLockValidator = instantSendLockValidator
         self.instantTransactionManager = instantTransactionManager
         self.dispatchQueue = dispatchQueue
 
@@ -38,6 +40,12 @@ extension InstantSend: IPeerTaskHandler {
         case let task as RequestTransactionLockVotesTask:
             dispatchQueue.async {
                 self.handle(transactionLockVotes: task.transactionLockVotes)
+            }
+            return true
+
+        case let task as RequestLlmqInstantLocksTask:
+            dispatchQueue.async {
+                self.handle(llmqInstantSendLocks: task.llmqInstantLocks)
             }
             return true
 
@@ -102,6 +110,28 @@ extension InstantSend: IPeerTaskHandler {
         }
     }
 
+    private func handle(llmqInstantSendLocks: [ISLockMessage]) {
+        for isLock in llmqInstantSendLocks {
+            // check transaction already not in instant
+            guard !instantTransactionManager.isTransactionInstant(txHash: isLock.txHash) else {
+                continue
+            }
+            // do nothing if tx doesn't exist
+            guard instantTransactionManager.isTransactionExists(txHash: isLock.txHash) else {
+                continue
+            }
+            // validation
+            do {
+                try instantSendLockValidator.validate(isLock: isLock)
+
+                instantTransactionManager.makeInstant(txHash: isLock.txHash)
+                delegate?.onUpdateInstant(transactionHash: isLock.txHash)
+            } catch {
+                logger?.error(error)
+            }
+        }
+    }
+
 }
 
 extension InstantSend: IInventoryItemsHandler {
@@ -109,6 +139,7 @@ extension InstantSend: IInventoryItemsHandler {
     func handleInventoryItems(peer: IPeer, inventoryItems: [InventoryItem]) {
         var transactionLockRequests = [Data]()
         var transactionLockVotes = [Data]()
+        var llmqInstantLocks = [Data]()
 
         inventoryItems.forEach { item in
             switch item.type {
@@ -118,6 +149,9 @@ extension InstantSend: IInventoryItemsHandler {
             case DashInventoryType.msgTxLockVote.rawValue:
                 transactionLockVotes.append(item.hash)
 
+            case DashInventoryType.msgIsLock.rawValue:
+                llmqInstantLocks.append(item.hash)
+
             default: break
             }
         }
@@ -126,6 +160,9 @@ extension InstantSend: IInventoryItemsHandler {
         }
         if !transactionLockVotes.isEmpty {
             peer.add(task: RequestTransactionLockVotesTask(hashes: transactionLockVotes))
+        }
+        if !llmqInstantLocks.isEmpty {
+            peer.add(task: RequestLlmqInstantLocksTask(hashes: llmqInstantLocks))
         }
     }
 

@@ -385,6 +385,10 @@ extension GrdbStorage: IStorage {
         }
     }
 
+    public func transactionExists(byHash hash: Data) -> Bool {
+        return transaction(byHash: hash) != nil
+    }
+
     public func transactions(ofBlock block: Block) -> [Transaction] {
         return try! dbPool.read { db in
             try Transaction.filter(Transaction.Columns.blockHash == block.headerHash).fetchAll(db)

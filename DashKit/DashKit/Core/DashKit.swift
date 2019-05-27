@@ -79,6 +79,7 @@ public class DashKit: AbstractKit {
         bitcoinCore.add(messageParser: TransactionLockMessageParser())
                 .add(messageParser: TransactionLockVoteMessageParser())
                 .add(messageParser: MasternodeListDiffMessageParser(masternodeParser: masternodeParser))
+                .add(messageParser: ISLockParser(hasher: doubleShaHasher))
 
         bitcoinCore.add(messageSerializer: GetMasternodeListDiffMessageSerializer())
 
@@ -118,10 +119,11 @@ public class DashKit: AbstractKit {
         bitcoinCore.prepend(unspentOutputSelector: UnspentOutputSelectorSingleNoChange(calculator: calculator, provider: confirmedUnspentOutputProvider))
 // --------------------------------------
         let transactionLockVoteValidator = TransactionLockVoteValidator(storage: storage, hasher: singleHasher)
+        let instantSendLockValidator = InstantSendLockValidator()
         let instantTransactionSyncer = InstantTransactionSyncer(transactionSyncer: bitcoinCore.transactionSyncer)
         let lockVoteManager = TransactionLockVoteManager(transactionLockVoteValidator: transactionLockVoteValidator)
 
-        let instantSend = InstantSend(transactionSyncer: instantTransactionSyncer, lockVoteManager: lockVoteManager, instantTransactionManager: instantTransactionManager, logger: logger)
+        let instantSend = InstantSend(transactionSyncer: instantTransactionSyncer, lockVoteManager: lockVoteManager, instantSendLockValidator: instantSendLockValidator, instantTransactionManager: instantTransactionManager, logger: logger)
         instantSend.delegate = self
 
         bitcoinCore.add(peerTaskHandler: instantSend)

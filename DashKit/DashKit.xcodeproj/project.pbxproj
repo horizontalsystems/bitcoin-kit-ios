@@ -20,7 +20,6 @@
 		58AAA13627CA1604C0F59C99 /* MasternodeListManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA0C1F67271207DA77330 /* MasternodeListManager.swift */; };
 		58AAA15491096368AD69A2D5 /* Masternode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAEB5DE9557F4E41A7907 /* Masternode.swift */; };
 		58AAA1992857F107D48947E9 /* DashTransactionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA6FCD2841CF6180EBFB0 /* DashTransactionInfo.swift */; };
-		58AAA1A73CE6C5571C937A8E /* QorumMasternode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA8311749C93B64394A62 /* QorumMasternode.swift */; };
 		58AAA1D98DEB1F6230E4EB27 /* TransactionLockVoteValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAACFBF2C153954A53AE70 /* TransactionLockVoteValidatorTests.swift */; };
 		58AAA1FC05748154358748CE /* InstantTransactionInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAF60A1E9BD745D645A7D /* InstantTransactionInput.swift */; };
 		58AAA2515EBD6650E0C005AA /* MasternodeSortedListTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA0398DAC6811AAD8FF86 /* MasternodeSortedListTests.swift */; };
@@ -39,10 +38,11 @@
 		58AAA5F7AF7CF8E3A909BD56 /* InstantTransactionHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAE8C1DD28970F1631067 /* InstantTransactionHash.swift */; };
 		58AAA64303E7973D3D8D2CD0 /* MasternodeCbTxHashCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA71B32E48969A3E1E52B /* MasternodeCbTxHashCalculator.swift */; };
 		58AAA656BDEBDEE092B93C5F /* DarkGravityWaveValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA26075017A2987200D87 /* DarkGravityWaveValidator.swift */; };
+		58AAA65979EDF654C84E786F /* ISLockParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA9D06F311DA7412688B5 /* ISLockParser.swift */; };
 		58AAA6966A02C430A3B46BE6 /* MerkleRootCreatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAAE0DB889BE114C53B2E /* MerkleRootCreatorTests.swift */; };
-		58AAA7570A8249E5BCEFA884 /* TransactionLockVoteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA646087689D9BEF014EE /* TransactionLockVoteManager.swift */; };
-		58AAA7AA0BD7341B6BC240D3 /* SingleHasher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAD5F70AEFFEF48035926 /* SingleHasher.swift */; };
+		58AAA741B1FD041F7B434CD5 /* TransactionLockVoteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAA110961D4988D83E86E /* TransactionLockVoteManager.swift */; };
 		58AAA7C359F5952EE5807FDB /* MasternodeParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAF1192518AD77095979C /* MasternodeParser.swift */; };
+		58AAA7D71380E4555B03B662 /* TransactionLockVoteValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA74142320578EB118DB0 /* TransactionLockVoteValidator.swift */; };
 		58AAA7FC48828C89D56C1110 /* MasternodeListSyncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA0373C0AAF259D678D34 /* MasternodeListSyncer.swift */; };
 		58AAA831BD89687D9A128590 /* GetMasternodeListDiffMessageSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA59886999B6239DD0E0A /* GetMasternodeListDiffMessageSerializer.swift */; };
 		58AAA88B80E723DCE1D3DA15 /* TransactionLockMessageParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA1C1D2E2538CBC33B663 /* TransactionLockMessageParser.swift */; };
@@ -53,6 +53,7 @@
 		58AAA95B92844E2FC089DBB2 /* DashTestData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAC14D905BB97DE6AD45B /* DashTestData.swift */; };
 		58AAA96D0CEBDA919FE95A8D /* DashGrdbStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA7CEBD06DD533915741E /* DashGrdbStorage.swift */; };
 		58AAA99C55992149EBC964E0 /* DashExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA96578DB9BE7A8E1AA65 /* DashExtensions.swift */; };
+		58AAAA13B65A94F50CDE64C1 /* ISLockMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA9C4B7A2015BBE7EEF4B /* ISLockMessage.swift */; };
 		58AAAA292D3A413E0E9F44A7 /* DashAddressSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA1A86BE6A17469E53400 /* DashAddressSelector.swift */; };
 		58AAAA59995E41B1661BBBAB /* MasternodeListDiffMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAB4372CC0F55CBBE60C9 /* MasternodeListDiffMessage.swift */; };
 		58AAAA8392E527FFED910B01 /* MainNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAA839FB2C7EA770A036D /* MainNet.swift */; };
@@ -61,18 +62,21 @@
 		58AAAAF33AF064F43E1A3129 /* CoinbaseTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAADC512D5340724ADCE13 /* CoinbaseTransaction.swift */; };
 		58AAAB37BB32AC64A697BB91 /* MasternodeListSyncerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAFDB68C6C388232EE26B /* MasternodeListSyncerTests.swift */; };
 		58AAAB6554710D83D6C2F372 /* MasternodeListManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA5554604118DB100DAD3 /* MasternodeListManagerTests.swift */; };
-		58AAAB7E54D2CC6C641D32EE /* LockVoteSignatureValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA64803A99F570E974720 /* LockVoteSignatureValidator.swift */; };
 		58AAAB7ECD59374B52739E52 /* MasternodeCbTxHashCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA67A09CB1D83F0DB016E /* MasternodeCbTxHashCalculatorTests.swift */; };
 		58AAABDCC27012ACCBF0CE45 /* RequestTransactionLockRequestsTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA2DDA1326C29293D55B5 /* RequestTransactionLockRequestsTask.swift */; };
 		58AAABEA6F0463A71A950334 /* DarkGravityWaveTestNetValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA2017DB5CEA5C9B9D720 /* DarkGravityWaveTestNetValidator.swift */; };
 		58AAAC4E69BC0FF9EE882D49 /* X11Hasher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA6C2797950C38AA3F125 /* X11Hasher.swift */; };
 		58AAAC7B6DD2F0BE59353036 /* TransactionLockVoteMessageParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAC1F302551317CABA7AC /* TransactionLockVoteMessageParser.swift */; };
+		58AAAC7E3D2B161ACFEB3276 /* InstantSendLockValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAB949FDA9A6E33CA983E /* InstantSendLockValidatorTests.swift */; };
 		58AAAC7FAFF35B1182E6CA45 /* GetMasternodeListDiffMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAD26E8F6F0D81E444A37 /* GetMasternodeListDiffMessage.swift */; };
 		58AAAD0C7E66CD27B52CE667 /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAC100B6F2FA333989819 /* Protocols.swift */; };
-		58AAAD35BC013CE1F8B6635B /* TransactionLockVoteValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA55694D2616FF8C256A3 /* TransactionLockVoteValidator.swift */; };
 		58AAADFD826478EDA93605D5 /* TransactionLockMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA5430DB3AED5094E6996 /* TransactionLockMessage.swift */; };
+		58AAAE24A6D0888B5549F1C8 /* QorumMasternode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA5F935C9CEC4E2C143F3 /* QorumMasternode.swift */; };
+		58AAAE764318B3B62C9D7F76 /* InstantSendLockValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA64AC0729742A80FDCB5 /* InstantSendLockValidator.swift */; };
 		58AAAE8B13F1DD739661FB19 /* DarkGravityWaveTestNetValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAD4E9080039DC9EDF4A2 /* DarkGravityWaveTestNetValidatorTests.swift */; };
 		58AAAE9A737EE5D91AD2884A /* InstantTransactionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA25F98854859029BE603 /* InstantTransactionState.swift */; };
+		58AAAEB8F73B3EBECD25F7B9 /* RequestLlmqInstantLocksTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA42CB13DB7A5BAB11FD8 /* RequestLlmqInstantLocksTask.swift */; };
+		58AAAEC46E9FC647D4132A66 /* SingleHasher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAFA578A209A7038893B5 /* SingleHasher.swift */; };
 		58AAAEEBE458C55215794E3A /* DashKitErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAC7FA40D103A60955173 /* DashKitErrors.swift */; };
 		58AAAF03C62698387C52FF5C /* MerkleRootCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA2C73B87C78CAB570A68 /* MerkleRootCreator.swift */; };
 		58AAAF53804CBB6C937DE062 /* PeerTaskFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAE28D7AB4A214D680314 /* PeerTaskFactory.swift */; };
@@ -119,26 +123,29 @@
 		58AAA2B4C33E32CF46D2D98B /* InstantTransactionSyncer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstantTransactionSyncer.swift; sourceTree = "<group>"; };
 		58AAA2C73B87C78CAB570A68 /* MerkleRootCreator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MerkleRootCreator.swift; sourceTree = "<group>"; };
 		58AAA2DDA1326C29293D55B5 /* RequestTransactionLockRequestsTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestTransactionLockRequestsTask.swift; sourceTree = "<group>"; };
+		58AAA42CB13DB7A5BAB11FD8 /* RequestLlmqInstantLocksTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestLlmqInstantLocksTask.swift; sourceTree = "<group>"; };
 		58AAA5430DB3AED5094E6996 /* TransactionLockMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionLockMessage.swift; sourceTree = "<group>"; };
 		58AAA5554604118DB100DAD3 /* MasternodeListManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeListManagerTests.swift; sourceTree = "<group>"; };
-		58AAA55694D2616FF8C256A3 /* TransactionLockVoteValidator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionLockVoteValidator.swift; sourceTree = "<group>"; };
 		58AAA59886999B6239DD0E0A /* GetMasternodeListDiffMessageSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetMasternodeListDiffMessageSerializer.swift; sourceTree = "<group>"; };
+		58AAA5F935C9CEC4E2C143F3 /* QorumMasternode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QorumMasternode.swift; sourceTree = "<group>"; };
 		58AAA60B71D68ABDACE2F8FA /* DarkGravityWaveValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DarkGravityWaveValidatorTests.swift; sourceTree = "<group>"; };
-		58AAA646087689D9BEF014EE /* TransactionLockVoteManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionLockVoteManager.swift; sourceTree = "<group>"; };
-		58AAA64803A99F570E974720 /* LockVoteSignatureValidator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LockVoteSignatureValidator.swift; sourceTree = "<group>"; };
+		58AAA64AC0729742A80FDCB5 /* InstantSendLockValidator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstantSendLockValidator.swift; sourceTree = "<group>"; };
 		58AAA67A09CB1D83F0DB016E /* MasternodeCbTxHashCalculatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeCbTxHashCalculatorTests.swift; sourceTree = "<group>"; };
 		58AAA6C2797950C38AA3F125 /* X11Hasher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = X11Hasher.swift; sourceTree = "<group>"; };
 		58AAA6EB559F918C1B3BB71F /* MasternodeSortedList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeSortedList.swift; sourceTree = "<group>"; };
 		58AAA6F46B5CED8D35657996 /* RequestTransactionLockVotesTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestTransactionLockVotesTask.swift; sourceTree = "<group>"; };
 		58AAA6FCD2841CF6180EBFB0 /* DashTransactionInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashTransactionInfo.swift; sourceTree = "<group>"; };
 		58AAA71B32E48969A3E1E52B /* MasternodeCbTxHashCalculator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeCbTxHashCalculator.swift; sourceTree = "<group>"; };
+		58AAA74142320578EB118DB0 /* TransactionLockVoteValidator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionLockVoteValidator.swift; sourceTree = "<group>"; };
 		58AAA7CBEEC5D08B11A7C6DB /* GeneratedMocks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratedMocks.swift; sourceTree = "<group>"; };
 		58AAA7CEBD06DD533915741E /* DashGrdbStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashGrdbStorage.swift; sourceTree = "<group>"; };
 		58AAA81B4D4D5458EE3FE964 /* BitcoinCoreCompatibility.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinCoreCompatibility.swift; sourceTree = "<group>"; };
-		58AAA8311749C93B64394A62 /* QorumMasternode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QorumMasternode.swift; sourceTree = "<group>"; };
 		58AAA85F9F3918BB7E6A2C91 /* Outpoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Outpoint.swift; sourceTree = "<group>"; };
 		58AAA8F6E9EC26E29F4587B0 /* InstantSendTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstantSendTests.swift; sourceTree = "<group>"; };
 		58AAA96578DB9BE7A8E1AA65 /* DashExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashExtensions.swift; sourceTree = "<group>"; };
+		58AAA9C4B7A2015BBE7EEF4B /* ISLockMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ISLockMessage.swift; sourceTree = "<group>"; };
+		58AAA9D06F311DA7412688B5 /* ISLockParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ISLockParser.swift; sourceTree = "<group>"; };
+		58AAAA110961D4988D83E86E /* TransactionLockVoteManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionLockVoteManager.swift; sourceTree = "<group>"; };
 		58AAAA294A297E74A7E6CE52 /* MasternodeListDiffMessageParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeListDiffMessageParser.swift; sourceTree = "<group>"; };
 		58AAAA2DA43B76925444C8F6 /* DashKit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashKit.swift; sourceTree = "<group>"; };
 		58AAAA839FB2C7EA770A036D /* MainNet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainNet.swift; sourceTree = "<group>"; };
@@ -149,6 +156,7 @@
 		58AAAB4372CC0F55CBBE60C9 /* MasternodeListDiffMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeListDiffMessage.swift; sourceTree = "<group>"; };
 		58AAAB4D9D73D00D4F098FB5 /* MasternodeListMerkleRootCalculator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeListMerkleRootCalculator.swift; sourceTree = "<group>"; };
 		58AAAB557638C1D92ECCA51F /* MasternodeSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeSerializer.swift; sourceTree = "<group>"; };
+		58AAAB949FDA9A6E33CA983E /* InstantSendLockValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstantSendLockValidatorTests.swift; sourceTree = "<group>"; };
 		58AAAC100B6F2FA333989819 /* Protocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Protocols.swift; sourceTree = "<group>"; };
 		58AAAC14D905BB97DE6AD45B /* DashTestData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashTestData.swift; sourceTree = "<group>"; };
 		58AAAC1F302551317CABA7AC /* TransactionLockVoteMessageParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionLockVoteMessageParser.swift; sourceTree = "<group>"; };
@@ -159,7 +167,6 @@
 		58AAAD4E2C46D1C1038E68FD /* DashTransactionInfoConverter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashTransactionInfoConverter.swift; sourceTree = "<group>"; };
 		58AAAD4E9080039DC9EDF4A2 /* DarkGravityWaveTestNetValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DarkGravityWaveTestNetValidatorTests.swift; sourceTree = "<group>"; };
 		58AAAD56C817AE1E7BB86FDC /* CoinbaseTransactionSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoinbaseTransactionSerializer.swift; sourceTree = "<group>"; };
-		58AAAD5F70AEFFEF48035926 /* SingleHasher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SingleHasher.swift; sourceTree = "<group>"; };
 		58AAADC512D5340724ADCE13 /* CoinbaseTransaction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoinbaseTransaction.swift; sourceTree = "<group>"; };
 		58AAAE28D7AB4A214D680314 /* PeerTaskFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerTaskFactory.swift; sourceTree = "<group>"; };
 		58AAAE510575878A4AB340C1 /* TestNet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestNet.swift; sourceTree = "<group>"; };
@@ -168,6 +175,7 @@
 		58AAAEB5DE9557F4E41A7907 /* Masternode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Masternode.swift; sourceTree = "<group>"; };
 		58AAAF1192518AD77095979C /* MasternodeParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeParser.swift; sourceTree = "<group>"; };
 		58AAAF60A1E9BD745D645A7D /* InstantTransactionInput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstantTransactionInput.swift; sourceTree = "<group>"; };
+		58AAAFA578A209A7038893B5 /* SingleHasher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SingleHasher.swift; sourceTree = "<group>"; };
 		58AAAFDB68C6C388232EE26B /* MasternodeListSyncerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeListSyncerTests.swift; sourceTree = "<group>"; };
 		5E70D9F39ED77288F419EFE4 /* Pods-DashKit.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DashKit.release.xcconfig"; path = "../Pods/Target Support Files/Pods-DashKit/Pods-DashKit.release.xcconfig"; sourceTree = "<group>"; };
 		A870AB8888E53BA2DFCB89CE /* Pods-DashKitTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DashKitTests.release.xcconfig"; path = "../Pods/Target Support Files/Pods-DashKitTests/Pods-DashKitTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -227,7 +235,6 @@
 				58AAAEAEA95D4491C5E271B7 /* Models */,
 				58AAAB3ABD5FBE6562B9BDDF /* Network */,
 				58AAA07E0767C45516BDD9E6 /* Storage */,
-				58AAAAE93615EF832639D020 /* TransactionLockVote */,
 				3A7A7D60226842DD0063D6AD /* DashKit.h */,
 				3A7A7D61226842DD0063D6AD /* Info.plist */,
 				58AAAC7FA40D103A60955173 /* DashKitErrors.swift */,
@@ -246,7 +253,6 @@
 				58AAAC14D905BB97DE6AD45B /* DashTestData.swift */,
 				58AAA96578DB9BE7A8E1AA65 /* DashExtensions.swift */,
 				58AAA7CBEEC5D08B11A7C6DB /* GeneratedMocks.swift */,
-				58AAA6893AE33BB0AA4E2FFE /* Managers */,
 			);
 			path = DashKitTests;
 			sourceTree = "<group>";
@@ -277,19 +283,20 @@
 			path = Storage;
 			sourceTree = "<group>";
 		};
+		58AAA23018F169F97F40BFE4 /* InstantSendLock */ = {
+			isa = PBXGroup;
+			children = (
+				58AAA64AC0729742A80FDCB5 /* InstantSendLockValidator.swift */,
+			);
+			path = InstantSendLock;
+			sourceTree = "<group>";
+		};
 		58AAA4BBF5A68076E07F528B /* Blocks */ = {
 			isa = PBXGroup;
 			children = (
 				58AAAF77CC4512D2CE905DA5 /* Validators */,
 			);
 			path = Blocks;
-			sourceTree = "<group>";
-		};
-		58AAA6893AE33BB0AA4E2FFE /* Managers */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Managers;
 			sourceTree = "<group>";
 		};
 		58AAA6F49F58BB3826F6AE0A /* InstantSend */ = {
@@ -299,7 +306,8 @@
 				58AAA2B4C33E32CF46D2D98B /* InstantTransactionSyncer.swift */,
 				58AAA0399119E61DC3C34677 /* InstantSend.swift */,
 				58AAAAD1F0767070DBC89C8F /* InstantTransactionManager.swift */,
-				58AAA646087689D9BEF014EE /* TransactionLockVoteManager.swift */,
+				58AAAF9337042FF679E9FB04 /* TransactionLockVote */,
+				58AAA23018F169F97F40BFE4 /* InstantSendLock */,
 			);
 			path = InstantSend;
 			sourceTree = "<group>";
@@ -311,6 +319,7 @@
 				58AAAF1192518AD77095979C /* MasternodeParser.swift */,
 				58AAA1C1D2E2538CBC33B663 /* TransactionLockMessageParser.swift */,
 				58AAAC1F302551317CABA7AC /* TransactionLockVoteMessageParser.swift */,
+				58AAA9D06F311DA7412688B5 /* ISLockParser.swift */,
 			);
 			path = Parsers;
 			sourceTree = "<group>";
@@ -322,6 +331,7 @@
 				58AAA2AF3D5C879040D2E7AE /* RequestMasternodeListDiffTask.swift */,
 				58AAA2DDA1326C29293D55B5 /* RequestTransactionLockRequestsTask.swift */,
 				58AAA6F46B5CED8D35657996 /* RequestTransactionLockVotesTask.swift */,
+				58AAA42CB13DB7A5BAB11FD8 /* RequestLlmqInstantLocksTask.swift */,
 			);
 			path = PeerTask;
 			sourceTree = "<group>";
@@ -355,17 +365,6 @@
 				58AAA59886999B6239DD0E0A /* GetMasternodeListDiffMessageSerializer.swift */,
 			);
 			path = Serializers;
-			sourceTree = "<group>";
-		};
-		58AAAAE93615EF832639D020 /* TransactionLockVote */ = {
-			isa = PBXGroup;
-			children = (
-				58AAA64803A99F570E974720 /* LockVoteSignatureValidator.swift */,
-				58AAA8311749C93B64394A62 /* QorumMasternode.swift */,
-				58AAAD5F70AEFFEF48035926 /* SingleHasher.swift */,
-				58AAA55694D2616FF8C256A3 /* TransactionLockVoteValidator.swift */,
-			);
-			path = TransactionLockVote;
 			sourceTree = "<group>";
 		};
 		58AAAB3ABD5FBE6562B9BDDF /* Network */ = {
@@ -402,6 +401,7 @@
 				58AAA85F9F3918BB7E6A2C91 /* Outpoint.swift */,
 				58AAA5430DB3AED5094E6996 /* TransactionLockMessage.swift */,
 				58AAA1776A1D0A594FC7FD18 /* TransactionLockVoteMessage.swift */,
+				58AAA9C4B7A2015BBE7EEF4B /* ISLockMessage.swift */,
 			);
 			path = Messages;
 			sourceTree = "<group>";
@@ -468,6 +468,14 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		58AAAF2D981354787830392C /* InstantSendLock */ = {
+			isa = PBXGroup;
+			children = (
+				58AAAB949FDA9A6E33CA983E /* InstantSendLockValidatorTests.swift */,
+			);
+			path = InstantSendLock;
+			sourceTree = "<group>";
+		};
 		58AAAF77CC4512D2CE905DA5 /* Validators */ = {
 			isa = PBXGroup;
 			children = (
@@ -484,8 +492,20 @@
 				58AAA8F6E9EC26E29F4587B0 /* InstantSendTests.swift */,
 				58AAAEA87DCEBE51E9F79BEA /* InstantTransactionManagerTests.swift */,
 				58AAA0731BC44688D2072C72 /* TransactionLockVoteManagerTests.swift */,
+				58AAAF2D981354787830392C /* InstantSendLock */,
 			);
 			path = InstantSend;
+			sourceTree = "<group>";
+		};
+		58AAAF9337042FF679E9FB04 /* TransactionLockVote */ = {
+			isa = PBXGroup;
+			children = (
+				58AAA5F935C9CEC4E2C143F3 /* QorumMasternode.swift */,
+				58AAAFA578A209A7038893B5 /* SingleHasher.swift */,
+				58AAA74142320578EB118DB0 /* TransactionLockVoteValidator.swift */,
+				58AAAA110961D4988D83E86E /* TransactionLockVoteManager.swift */,
+			);
+			path = TransactionLockVote;
 			sourceTree = "<group>";
 		};
 		A4D4B79F97B391375F9FB23B /* Pods */ = {
@@ -740,10 +760,6 @@
 				58AAA59BBD76BAB11AAC061A /* RequestMasternodeListDiffTask.swift in Sources */,
 				58AAA831BD89687D9A128590 /* GetMasternodeListDiffMessageSerializer.swift in Sources */,
 				58AAAC4E69BC0FF9EE882D49 /* X11Hasher.swift in Sources */,
-				58AAA1A73CE6C5571C937A8E /* QorumMasternode.swift in Sources */,
-				58AAAD35BC013CE1F8B6635B /* TransactionLockVoteValidator.swift in Sources */,
-				58AAA7AA0BD7341B6BC240D3 /* SingleHasher.swift in Sources */,
-				58AAAB7E54D2CC6C641D32EE /* LockVoteSignatureValidator.swift in Sources */,
 				58AAA656BDEBDEE092B93C5F /* DarkGravityWaveValidator.swift in Sources */,
 				58AAABEA6F0463A71A950334 /* DarkGravityWaveTestNetValidator.swift in Sources */,
 				58AAA0581D001F2AA294802B /* TestNet.swift in Sources */,
@@ -752,7 +768,6 @@
 				58AAA2EBAFA03520E5C8F1F0 /* InstantTransactionSyncer.swift in Sources */,
 				58AAAA9B99A71DC2D87BBCDA /* InstantSend.swift in Sources */,
 				58AAA51780FC3C29D1DEC96B /* InstantTransactionManager.swift in Sources */,
-				58AAA7570A8249E5BCEFA884 /* TransactionLockVoteManager.swift in Sources */,
 				58AAA8A7E766E534A92D1A42 /* DashTransactionInfoConverter.swift in Sources */,
 				58AAA5F7AF7CF8E3A909BD56 /* InstantTransactionHash.swift in Sources */,
 				58AAAE9A737EE5D91AD2884A /* InstantTransactionState.swift in Sources */,
@@ -760,6 +775,14 @@
 				3C7B999C966BB049FBC77466 /* InsightApi.swift in Sources */,
 				58AAAA292D3A413E0E9F44A7 /* DashAddressSelector.swift in Sources */,
 				58AAA5020E3111ADB26B2261 /* ConfirmedUnspentOutputProvider.swift in Sources */,
+				58AAAA13B65A94F50CDE64C1 /* ISLockMessage.swift in Sources */,
+				58AAA65979EDF654C84E786F /* ISLockParser.swift in Sources */,
+				58AAAE24A6D0888B5549F1C8 /* QorumMasternode.swift in Sources */,
+				58AAAEC46E9FC647D4132A66 /* SingleHasher.swift in Sources */,
+				58AAA7D71380E4555B03B662 /* TransactionLockVoteValidator.swift in Sources */,
+				58AAA741B1FD041F7B434CD5 /* TransactionLockVoteManager.swift in Sources */,
+				58AAAE764318B3B62C9D7F76 /* InstantSendLockValidator.swift in Sources */,
+				58AAAEB8F73B3EBECD25F7B9 /* RequestLlmqInstantLocksTask.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -782,6 +805,7 @@
 				58AAA51AE7098469E57E970F /* InstantSendTests.swift in Sources */,
 				58AAA59182DEFEC059D60216 /* InstantTransactionManagerTests.swift in Sources */,
 				58AAA055180E96AA33EF2C16 /* TransactionLockVoteManagerTests.swift in Sources */,
+				58AAAC7E3D2B161ACFEB3276 /* InstantSendLockValidatorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

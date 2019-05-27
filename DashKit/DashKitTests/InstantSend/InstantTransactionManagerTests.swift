@@ -167,6 +167,45 @@ class InstantTransactionManagerTests: QuickSpec {
                 verify(mockState).instantTransactionHashes.get()
             }
         }
+        describe("#isTransactionExists(txHash: Data)") {
+            let existTxHash = Data(hex: "0101")!
+            let notExistTxHash = Data(hex: "0202")!
+            beforeEach {
+                stub(mockStorage) {mock in
+                    when(mock.transactionExists(byHash: equal(to: existTxHash))).thenReturn(true)
+                    when(mock.transactionExists(byHash: equal(to: notExistTxHash))).thenReturn(false)
+                }
+            }
+            it("returns true if exist") {
+                let exist = manager.isTransactionExists(txHash: existTxHash)
+
+                expect(exist).to(equal(true))
+                verify(mockStorage).transactionExists(byHash: equal(to: existTxHash))
+            }
+            it("returns false when not exist") {
+                let exist = manager.isTransactionExists(txHash: notExistTxHash)
+
+                expect(exist).to(equal(false))
+                verify(mockStorage).transactionExists(byHash: equal(to: notExistTxHash))
+            }
+        }
+        describe("#makeInstant(txHash: Data)") {
+            let txHash = Data(hex: "0101")!
+            beforeEach {
+                stub(mockStorage) {mock in
+                    when(mock.add(instantTransactionHash: equal(to: txHash))).thenDoNothing()
+                }
+                stub(mockState) {mock in
+                    when(mock.append(equal(to: txHash))).thenDoNothing()
+                }
+            }
+            it("add txHash") {
+                manager.makeInstant(txHash: txHash)
+
+                verify(mockState).append(equal(to: txHash))
+                verify(mockStorage).add(instantTransactionHash: equal(to: txHash))
+            }
+        }
     }
 
 }

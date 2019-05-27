@@ -95,6 +95,7 @@ public protocol IStorage {
     func unstaleAllBlocks() throws
 
 
+    func transactionExists(byHash: Data) -> Bool
     func transaction(byHash: Data) -> Transaction?
     func transactions(ofBlock: Block) -> [Transaction]
     func newTransactions() -> [Transaction]
