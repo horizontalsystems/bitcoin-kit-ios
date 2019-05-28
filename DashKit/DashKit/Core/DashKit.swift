@@ -20,6 +20,7 @@ public class DashKit: AbstractKit {
     private let storage: IDashStorage
 
     private var masternodeSyncer: MasternodeListSyncer?
+    private var instantSend: InstantSend?
     private let dashTransactionInfoConverter: ITransactionInfoConverter
 
     public init(withWords words: [String], walletId: String, newWallet: Bool = false, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) throws {
@@ -62,13 +63,12 @@ public class DashKit: AbstractKit {
                 .set(paymentAddressParser: paymentAddressParser)
                 .set(addressSelector: addressSelector)
                 .set(walletId: walletId)
-                .set(peerSize: 4)
+                .set(peerSize: 2)
                 .set(storage: storage)
                 .set(newWallet: newWallet)
                 .set(blockHeaderHasher: x11Hasher)
                 .set(transactionInfoConverter: dashTransactionInfoConverter)
                 .build()
-
         super.init(bitcoinCore: bitcoinCore, network: network)
         bitcoinCore.delegate = self
 
@@ -120,11 +120,18 @@ public class DashKit: AbstractKit {
 // --------------------------------------
         let transactionLockVoteValidator = TransactionLockVoteValidator(storage: storage, hasher: singleHasher)
         let instantSendLockValidator = InstantSendLockValidator()
+
         let instantTransactionSyncer = InstantTransactionSyncer(transactionSyncer: bitcoinCore.transactionSyncer)
         let lockVoteManager = TransactionLockVoteManager(transactionLockVoteValidator: transactionLockVoteValidator)
+        let instantSendLockManager = InstantSendLockManager(instantSendLockValidator: instantSendLockValidator)
 
-        let instantSend = InstantSend(transactionSyncer: instantTransactionSyncer, lockVoteManager: lockVoteManager, instantSendLockValidator: instantSendLockValidator, instantTransactionManager: instantTransactionManager, logger: logger)
-        instantSend.delegate = self
+        let instantSendLockHandler = InstantSendLockHandler(instantTransactionManager: instantTransactionManager, instantSendLockManager: instantSendLockManager, logger: logger)
+        instantSendLockHandler.delegate = self
+        let transactionLockVoteHandler = TransactionLockVoteHandler(instantTransactionManager: instantTransactionManager, lockVoteManager: lockVoteManager, logger: logger)
+        transactionLockVoteHandler.delegate = self
+
+        let instantSend = InstantSend(transactionSyncer: instantTransactionSyncer, transactionLockVoteHandler: transactionLockVoteHandler, instantSendLockHandler: instantSendLockHandler, logger: logger)
+        self.instantSend = instantSend
 
         bitcoinCore.add(peerTaskHandler: instantSend)
         bitcoinCore.add(inventoryItemsHandler: instantSend)
@@ -149,6 +156,9 @@ public class DashKit: AbstractKit {
 extension DashKit: BitcoinCoreDelegate {
 
     public func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo]) {
+        // check for all new transactions if it's has instant lock
+        inserted.compactMap { Data(hex : $0.transactionHash) }.forEach { instantSend?.handle(insertedTxHash: $0) }
+
         delegate?.transactionsUpdated(inserted: cast(transactionInfos: inserted), updated: cast(transactionInfos: updated))
     }
 

@@ -8,3 +8,15 @@ struct ISLockMessage: IMessage {
     let sign: Data
     let hash: Data
 }
+
+extension ISLockMessage: Hashable {
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(hash)
+    }
+
+    public static func ==(lhs: ISLockMessage, rhs: ISLockMessage) -> Bool {
+        return lhs.hash == rhs.hash && lhs.sign == rhs.sign
+    }
+
+}

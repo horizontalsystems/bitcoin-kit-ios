@@ -145,14 +145,19 @@ protocol IMasternodeParser {
     func parse(byteStream: ByteStream) -> Masternode
 }
 
+protocol ITransactionLockVoteHandler {
+    func handle(transaction: FullTransaction)
+    func handle(lockVote: TransactionLockVoteMessage)
+}
+
+protocol IInstantSendLockHandler {
+    func handle(transactionHash: Data)
+    func handle(isLock: ISLockMessage)
+}
+
 protocol ITransactionLockVoteValidator {
     func validate(lockVote: TransactionLockVoteMessage) throws
 }
-
-protocol IInstantSendLockValidator {
-    func validate(isLock: ISLockMessage) throws
-}
-
 
 protocol ITransactionLockVoteManager {
     var relayedLockVotes: Set<TransactionLockVoteMessage> { get }
@@ -162,8 +167,21 @@ protocol ITransactionLockVoteManager {
     func add(checked: TransactionLockVoteMessage)
 
     func takeRelayedLockVotes(for txHash: Data) -> [TransactionLockVoteMessage]
-    func removeCheckedLockVotes(for txHash: Data)
 
     func validate(lockVote: TransactionLockVoteMessage) throws
 }
+
+protocol IInstantSendLockValidator {
+    func validate(isLock: ISLockMessage) throws
+}
+
+protocol IInstantSendLockManager {
+    var relayedLocks: [Data: ISLockMessage] { get }
+    func add(relayed: ISLockMessage)
+
+    func takeRelayedLock(for txHash: Data) -> ISLockMessage?
+
+    func validate(isLock: ISLockMessage) throws
+}
+
 
