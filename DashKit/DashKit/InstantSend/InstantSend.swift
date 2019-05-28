@@ -1,26 +1,27 @@
 import BitcoinCore
 
-enum DashInventoryType: Int32 { case msgTxLockRequest = 4, msgTxLockVote = 5 }
+enum DashInventoryType: Int32 { case msgTxLockRequest = 4, msgTxLockVote = 5, msgIsLock = 30 }
 
 class InstantSend {
     static let requiredVoteCount = 6
     let dispatchQueue: DispatchQueue
 
     private let transactionSyncer: IDashTransactionSyncer
-    private let instantTransactionManager: IInstantTransactionManager
-    private let lockVoteManager: ITransactionLockVoteManager
-
-    public weak var delegate: IInstantTransactionDelegate?
-
+    private let transactionLockVoteHandler: ITransactionLockVoteHandler
+    private let instantSendLockHandler: IInstantSendLockHandler
     private let logger: Logger?
 
-    init(transactionSyncer: IDashTransactionSyncer, lockVoteManager: ITransactionLockVoteManager, instantTransactionManager: IInstantTransactionManager, dispatchQueue: DispatchQueue = DispatchQueue(label: "DashInstantSend", qos: .userInitiated), logger: Logger? = nil) {
+    init(transactionSyncer: IDashTransactionSyncer, transactionLockVoteHandler: ITransactionLockVoteHandler, instantSendLockHandler: IInstantSendLockHandler, dispatchQueue: DispatchQueue = DispatchQueue(label: "DashInstantSend", qos: .userInitiated), logger: Logger? = nil) {
         self.transactionSyncer = transactionSyncer
-        self.lockVoteManager = lockVoteManager
-        self.instantTransactionManager = instantTransactionManager
+        self.transactionLockVoteHandler = transactionLockVoteHandler
+        self.instantSendLockHandler = instantSendLockHandler
         self.dispatchQueue = dispatchQueue
 
         self.logger = logger
+    }
+
+    public func handle(insertedTxHash: Data) {
+        instantSendLockHandler.handle(transactionHash: insertedTxHash)
     }
 
 }
@@ -41,6 +42,12 @@ extension InstantSend: IPeerTaskHandler {
             }
             return true
 
+        case let task as RequestLlmqInstantLocksTask:
+            dispatchQueue.async {
+                self.handle(llmqInstantSendLocks: task.llmqInstantLocks)
+            }
+            return true
+
         default: return false
         }
     }
@@ -49,56 +56,19 @@ extension InstantSend: IPeerTaskHandler {
         transactionSyncer.handle(transactions: transactions)
 
         for transaction in transactions {
-            // check transaction already not in instant
-            guard !instantTransactionManager.isTransactionInstant(txHash: transaction.header.dataHash) else {
-                continue
-            }
-            // prepare instant inputs for ix
-            let inputs = instantTransactionManager.instantTransactionInputs(for: transaction.header.dataHash, instantTransaction: transaction)
-
-            // poll relayed lock votes to update inputs
-            let relayedVotes = lockVoteManager.takeRelayedLockVotes(for: transaction.header.dataHash)
-            relayedVotes.forEach { vote in
-                handle(lockVote: vote, instantInputs: inputs)
-            }
+            transactionLockVoteHandler.handle(transaction: transaction)
         }
     }
 
     private func handle(transactionLockVotes: [TransactionLockVoteMessage]) {
-        for vote in transactionLockVotes {
-            // check transaction already not in instant
-            guard !instantTransactionManager.isTransactionInstant(txHash: vote.txHash) else {
-                continue
-            }
-            guard !lockVoteManager.processed(lvHash: vote.hash) else {
-                continue
-            }
-            let inputs = instantTransactionManager.instantTransactionInputs(for: vote.txHash, instantTransaction: nil)
-            guard !inputs.isEmpty else {
-                lockVoteManager.add(relayed: vote)
-                continue
-            }
-            handle(lockVote: vote, instantInputs: inputs)
+        for lockVote in transactionLockVotes {
+            transactionLockVoteHandler.handle(lockVote: lockVote)
         }
     }
 
-    private func handle(lockVote: TransactionLockVoteMessage, instantInputs: [InstantTransactionInput]) {
-        lockVoteManager.add(checked: lockVote)
-        // ignore votes for inputs which already has 6 votes
-        guard let input = instantInputs.first(where: { $0.inputTxHash == lockVote.outpoint.txHash }), input.voteCount < InstantSend.requiredVoteCount else {
-            return
-        }
-
-        do {
-            try lockVoteManager.validate(lockVote: lockVote)
-            try instantTransactionManager.updateInput(for: lockVote.outpoint.txHash, transactionInputs: instantInputs)
-
-            let instant = instantTransactionManager.isTransactionInstant(txHash: lockVote.txHash)
-            if instant {
-                delegate?.onUpdateInstant(transactionHash: lockVote.txHash)
-            }
-        } catch {
-            logger?.error(error)
+    private func handle(llmqInstantSendLocks: [ISLockMessage]) {
+        for isLock in llmqInstantSendLocks {
+            instantSendLockHandler.handle(isLock: isLock)
         }
     }
 
@@ -109,6 +79,7 @@ extension InstantSend: IInventoryItemsHandler {
     func handleInventoryItems(peer: IPeer, inventoryItems: [InventoryItem]) {
         var transactionLockRequests = [Data]()
         var transactionLockVotes = [Data]()
+        var isLocks = [Data]()
 
         inventoryItems.forEach { item in
             switch item.type {
@@ -118,6 +89,9 @@ extension InstantSend: IInventoryItemsHandler {
             case DashInventoryType.msgTxLockVote.rawValue:
                 transactionLockVotes.append(item.hash)
 
+            case DashInventoryType.msgIsLock.rawValue:
+                isLocks.append(item.hash)
+
             default: break
             }
         }
@@ -126,6 +100,9 @@ extension InstantSend: IInventoryItemsHandler {
         }
         if !transactionLockVotes.isEmpty {
             peer.add(task: RequestTransactionLockVotesTask(hashes: transactionLockVotes))
+        }
+        if !isLocks.isEmpty {
+            peer.add(task: RequestLlmqInstantLocksTask(hashes: isLocks))
         }
     }
 

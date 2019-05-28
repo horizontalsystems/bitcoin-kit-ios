@@ -71,4 +71,13 @@ extension InstantTransactionManager: IInstantTransactionManager {
         return state.instantTransactionHashes.contains(txHash)
     }
 
+    func isTransactionExists(txHash: Data) -> Bool {
+        return storage.transactionExists(byHash: txHash)
+    }
+
+    func makeInstant(txHash: Data) {
+        state.append(txHash)
+        storage.add(instantTransactionHash: txHash)
+    }
+
 }

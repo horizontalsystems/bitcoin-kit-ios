@@ -27,31 +27,12 @@ class TransactionLockVoteManager: ITransactionLockVoteManager {
         checkedLockVotes.insert(checked)
     }
 
-    func removeCheckedLockVotes(for txHash: Data) {
-        remove(from: &checkedLockVotes, txHash: txHash)
-    }
-
-    func clean() {
-        checkedLockVotes.removeAll()
-        relayedLockVotes.removeAll()
-    }
-
     func processed(lvHash: Data) -> Bool {
         return relayedLockVotes.first(where: { $0.hash == lvHash }) != nil || checkedLockVotes.first(where: { $0.hash == lvHash }) != nil
     }
 
-    private func remove(from set: inout Set<TransactionLockVoteMessage>, txHash: Data) {
-        var removingSet = Set<TransactionLockVoteMessage>()
-        set.forEach {
-            if $0.txHash == txHash {
-                removingSet.insert($0)
-            }
-        }
-        set.subtract(removingSet)
-    }
-
     func validate(lockVote: TransactionLockVoteMessage) throws {
-        // validate masternode in top 10 masternodes for quorumModifier
+        // validate masternode in top 10 masternodes for quorumModifier and has right signature
         try transactionLockVoteValidator.validate(lockVote: lockVote)
     }
 
