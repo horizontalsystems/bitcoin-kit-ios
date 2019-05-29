@@ -87,6 +87,7 @@ protocol IDashStorage {
 
     func unspentOutputs() -> [UnspentOutput]
 
+    func transactionExists(byHash: Data) -> Bool
     func fullTransactionInfo(byHash hash: Data) -> FullTransactionForInfo?
 }
 
@@ -127,6 +128,8 @@ protocol IInstantTransactionManager {
     func instantTransactionInputs(for txHash: Data, instantTransaction: FullTransaction?) -> [InstantTransactionInput]
     func updateInput(for inputTxHash: Data, transactionInputs: [InstantTransactionInput]) throws
     func isTransactionInstant(txHash: Data) -> Bool
+    func isTransactionExists(txHash: Data) -> Bool
+    func makeInstant(txHash: Data)
 }
 
 public protocol IInstantTransactionDelegate: class {
@@ -142,6 +145,16 @@ protocol IMasternodeParser {
     func parse(byteStream: ByteStream) -> Masternode
 }
 
+protocol ITransactionLockVoteHandler {
+    func handle(transaction: FullTransaction)
+    func handle(lockVote: TransactionLockVoteMessage)
+}
+
+protocol IInstantSendLockHandler {
+    func handle(transactionHash: Data)
+    func handle(isLock: ISLockMessage)
+}
+
 protocol ITransactionLockVoteValidator {
     func validate(lockVote: TransactionLockVoteMessage) throws
 }
@@ -154,8 +167,21 @@ protocol ITransactionLockVoteManager {
     func add(checked: TransactionLockVoteMessage)
 
     func takeRelayedLockVotes(for txHash: Data) -> [TransactionLockVoteMessage]
-    func removeCheckedLockVotes(for txHash: Data)
 
     func validate(lockVote: TransactionLockVoteMessage) throws
 }
+
+protocol IInstantSendLockValidator {
+    func validate(isLock: ISLockMessage) throws
+}
+
+protocol IInstantSendLockManager {
+    var relayedLocks: [Data: ISLockMessage] { get }
+    func add(relayed: ISLockMessage)
+
+    func takeRelayedLock(for txHash: Data) -> ISLockMessage?
+
+    func validate(isLock: ISLockMessage) throws
+}
+
 

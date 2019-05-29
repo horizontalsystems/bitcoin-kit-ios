@@ -11,7 +11,7 @@ extension BitcoinCashGrdbStorage: IBitcoinCashStorage {
             var timestamps = [Int]()
 
             let sql = "SELECT blocks.timestamp FROM blocks WHERE blocks.height >= \(startHeight) AND blocks.height <= \(endHeight) ORDER BY blocks.timestamp \(ascending ? "ASC" : "DESC")"
-            let rows = try Row.fetchCursor(db, sql)
+            let rows = try Row.fetchCursor(db, sql: sql)
 
             while let row = try rows.next() {
                 if let timestamp = Int.fromDatabaseValue(row["timestamp"]) {

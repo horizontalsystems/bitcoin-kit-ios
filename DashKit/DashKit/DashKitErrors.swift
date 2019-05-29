@@ -7,4 +7,8 @@ public class DashKitErrors {
         case signatureNotValid
     }
 
+    public enum InstantSendLockValidation: Error {
+        case signatureNotValid
+    }
+
 }

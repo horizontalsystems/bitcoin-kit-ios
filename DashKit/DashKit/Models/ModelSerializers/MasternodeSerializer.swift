@@ -9,7 +9,7 @@ class MasternodeSerializer: IMasternodeSerializer {
 
         data += masternode.pubKeyOperator
         data += masternode.keyIDVoting
-        data += Data(bytes: [masternode.isValid ? 0x01 : 0x00])
+        data += Data([masternode.isValid ? 0x01 : 0x00])
 
         return data
     }

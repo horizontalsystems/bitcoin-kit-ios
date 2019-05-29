@@ -226,7 +226,7 @@ extension GrdbStorage: IStorage {
 
     public var blockHashHeaderHashes: [Data] {
         return try! dbPool.read { db in
-            let rows = try Row.fetchCursor(db, "SELECT headerHash from blockHashes")
+            let rows = try Row.fetchCursor(db, sql: "SELECT headerHash from blockHashes")
             var hashes = [Data]()
 
             while let row = try rows.next() {
@@ -239,7 +239,7 @@ extension GrdbStorage: IStorage {
 
     public func blockHashHeaderHashes(except excludedHash: Data) -> [String] {
         return try! dbPool.read { db in
-            let rows = try Row.fetchCursor(db, "SELECT headerHash from blockHashes WHERE headerHash != ?", arguments: [excludedHash])
+            let rows = try Row.fetchCursor(db, sql: "SELECT headerHash from blockHashes WHERE headerHash != ?", arguments: [excludedHash])
             var hexes = [String]()
 
             while let row = try rows.next() {
@@ -374,7 +374,7 @@ extension GrdbStorage: IStorage {
 
     public func unstaleAllBlocks() throws {
         _ = try! dbPool.write { db in
-            try db.execute("UPDATE \(Block.databaseTableName) SET stale = ? WHERE stale = ?", arguments: [true, false])
+            try db.execute(sql: "UPDATE \(Block.databaseTableName) SET stale = ? WHERE stale = ?", arguments: [true, false])
         }
     }
 
@@ -383,6 +383,10 @@ extension GrdbStorage: IStorage {
         return try! dbPool.read { db in
             try Transaction.filter(Transaction.Columns.dataHash == hash).fetchOne(db)
         }
+    }
+
+    public func transactionExists(byHash hash: Data) -> Bool {
+        return transaction(byHash: hash) != nil
     }
 
     public func transactions(ofBlock block: Block) -> [Transaction] {
@@ -456,7 +460,7 @@ extension GrdbStorage: IStorage {
                           LEFT JOIN outputs ON inputs.previousOutputTxHash = outputs.transactionHash AND inputs.previousOutputIndex = outputs."index"
                           WHERE inputs.transactionHash IN (\(transactionHashChunks.map({ "x'" + $0.hex + "'" }).joined(separator: ",")))
                           """
-                let rows = try Row.fetchCursor(db, sql, adapter: adapter)
+                let rows = try Row.fetchCursor(db, sql: sql, adapter: adapter)
 
                 while let row = try rows.next() {
                     inputs.append(InputWithPreviousOutput(input: row["input"], previousOutput: row["output"]))
@@ -500,7 +504,7 @@ extension GrdbStorage: IStorage {
                       WHERE transactions.dataHash = \("x'" + hash.hex + "'")                    
                       """
 
-            let rows = try Row.fetchCursor(db, sql, adapter: adapter)
+            let rows = try Row.fetchCursor(db, sql: sql, adapter: adapter)
 
             if let row = try rows.next() {
                 transaction = TransactionWithBlock(transaction: row["transaction"], blockHeight: row["blockHeight"])
@@ -540,7 +544,7 @@ extension GrdbStorage: IStorage {
                 sql += " LIMIT \(limit)"
             }
 
-            let rows = try Row.fetchCursor(db, sql, adapter: adapter)
+            let rows = try Row.fetchCursor(db, sql: sql, adapter: adapter)
 
             while let row = try rows.next() {
                 transactions.append(TransactionWithBlock(transaction: row["transaction"], blockHeight: row["blockHeight"]))
@@ -574,7 +578,7 @@ extension GrdbStorage: IStorage {
                       LEFT JOIN transactions ON inputs.transactionHash = transactions.dataHash
                       LEFT JOIN blocks ON transactions.blockHash = blocks.headerHash
                       """
-            let rows = try Row.fetchCursor(db, sql, adapter: adapter)
+            let rows = try Row.fetchCursor(db, sql: sql, adapter: adapter)
 
             var outputs = [OutputWithPublicKey]()
             while let row = try rows.next() {
@@ -607,7 +611,7 @@ extension GrdbStorage: IStorage {
                       LEFT JOIN blocks ON transactions.blockHash = blocks.headerHash
                       WHERE outputs.scriptType != \(ScriptType.unknown.rawValue)
                       """
-            let rows = try Row.fetchCursor(db, sql, adapter: adapter)
+            let rows = try Row.fetchCursor(db, sql: sql, adapter: adapter)
 
             var outputs = [UnspentOutput]()
             while let row = try rows.next() {
@@ -704,7 +708,7 @@ extension GrdbStorage: IStorage {
                       LEFT JOIN outputs ON publicKeys.path = outputs.publicKeyPath
                       """
 
-            let rows = try Row.fetchCursor(db, sql, adapter: adapter)
+            let rows = try Row.fetchCursor(db, sql: sql, adapter: adapter)
             var publicKeys = [PublicKeyWithUsedState]()
             while let row = try rows.next() {
                 publicKeys.append(PublicKeyWithUsedState(publicKey: row["publicKey"], used: row["transactionHash"] != nil))

@@ -34,7 +34,7 @@ extension InputSigner: IInputSigner {
         var serializedTransaction = try TransactionSerializer.serializedForSignature(transaction: transaction, inputsToSign: inputsToSign, outputs: outputs, inputIndex: index, forked: witness || network.sigHash.forked)
         serializedTransaction += UInt32(network.sigHash.value)
         let signatureHash = CryptoKit.sha256sha256(serializedTransaction)
-        let signature = try CryptoKit.sign(data: signatureHash, privateKey: privateKeyData) + Data(bytes: [network.sigHash.value])
+        let signature = try CryptoKit.sign(data: signatureHash, privateKey: privateKeyData) + Data([network.sigHash.value])
 
         switch previousOutput.scriptType {
         case .p2pk: return [signature]
