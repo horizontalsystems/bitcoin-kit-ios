@@ -55,27 +55,27 @@ class RequestTransactionTaskTests: XCTestCase {
     }
 
     func testHandleTransaction_NotRequestedTransaction() {
-        let handled = try! task.handle(message: TransactionMessage(transaction: TestData.p2pkTransaction))
+        let handled = try! task.handle(message: TransactionMessage(transaction: TestData.p2pkTransaction, size: 0))
 
         XCTAssertEqual(handled, false)
         verifyNoMoreInteractions(mockDelegate)
     }
 
     func testHandleTransaction() {
-        let handled = try! task.handle(message: TransactionMessage(transaction: transactions[0]))
+        let handled = try! task.handle(message: TransactionMessage(transaction: transactions[0], size: 0))
 
         XCTAssertEqual(handled, true)
         verifyNoMoreInteractions(mockDelegate)
     }
 
     func testHandleTransaction_AllTransactionsReceived() {
-        let _ = try! task.handle(message: TransactionMessage(transaction: transactions[0]))
+        let _ = try! task.handle(message: TransactionMessage(transaction: transactions[0], size: 0))
         reset(mockDelegate)
         stub(mockDelegate) { mock in
             when(mock).handle(completedTask: any()).thenDoNothing()
         }
 
-        let handled = try! task.handle(message: TransactionMessage(transaction: transactions[1]))
+        let handled = try! task.handle(message: TransactionMessage(transaction: transactions[1], size: 0))
 
         XCTAssertEqual(handled, true)
         verify(mockDelegate).handle(completedTask: equal(to: task))
@@ -83,13 +83,13 @@ class RequestTransactionTaskTests: XCTestCase {
     }
 
     func testHandleTransaction_SaveTransactionRepeated() {
-        let _ = try! task.handle(message: TransactionMessage(transaction: transactions[0]))
+        let _ = try! task.handle(message: TransactionMessage(transaction: transactions[0], size: 0))
         reset(mockDelegate)
         stub(mockDelegate) { mock in
             when(mock).handle(completedTask: any()).thenDoNothing()
         }
 
-        let handled = try! task.handle(message: TransactionMessage(transaction: transactions[0]))
+        let handled = try! task.handle(message: TransactionMessage(transaction: transactions[0], size: 0))
 
         XCTAssertEqual(handled, false)
         verifyNoMoreInteractions(mockDelegate)

@@ -1,6 +1,26 @@
 import Foundation
 
 class GetMerkleBlocksTask: PeerTask {
+    struct TooSlowPeer: Error {
+        let minMerkleBlocks: Int
+        let minTransactionsCount: Int
+        let minTransactionsSize: Int
+        let merkleBlocks: Int
+        let transactionsCount: Int
+        let transactionsSize: Int
+    }
+
+    private var waitingStartTime: Double = 0
+    private var totalWaitingTime: Double = 0
+    private var warningsCount = 0
+    private var firstResponseReceived = false
+
+    private var minMerkleBlocksCount: Double
+    private var minTransactionsCount: Double
+    private var minTransactionsSize: Double
+    private var merkleBlocksCount = 0
+    private var transactionsCount = 0
+    private var transactionsSize = 0
 
     private let allowedIdleTime = 60.0
     private var blockHashes: [BlockHash]
@@ -8,10 +28,16 @@ class GetMerkleBlocksTask: PeerTask {
     private var merkleBlockValidator: IMerkleBlockValidator
     private weak var merkleBlockHandler: IMerkleBlockHandler?
 
-    init(blockHashes: [BlockHash], merkleBlockValidator: IMerkleBlockValidator, merkleBlockHandler: IMerkleBlockHandler, dateGenerator: @escaping () -> Date = Date.init) {
+    init(blockHashes: [BlockHash], merkleBlockValidator: IMerkleBlockValidator, merkleBlockHandler: IMerkleBlockHandler,
+         minMerkleBlocksCount: Double, minTransactionsCount: Double, minTransactionsSize: Double,
+         dateGenerator: @escaping () -> Date = Date.init) {
         self.blockHashes = blockHashes
         self.merkleBlockValidator = merkleBlockValidator
         self.merkleBlockHandler = merkleBlockHandler
+        self.minMerkleBlocksCount = minMerkleBlocksCount
+        self.minTransactionsCount = minTransactionsCount
+        self.minTransactionsSize = minTransactionsSize
+
         super.init(dateGenerator: dateGenerator)
     }
 
@@ -21,19 +47,80 @@ class GetMerkleBlocksTask: PeerTask {
         }
 
         requester?.send(message: GetDataMessage(inventoryItems: items))
+        resumeWaiting()
         resetTimer()
     }
 
     override func handle(message: IMessage) throws -> Bool {
+        pauseWaiting()
+        var handled = false
+
         switch message {
         case let merkleBlockMessage as MerkleBlockMessage:
             let merkleBlock = try merkleBlockValidator.merkleBlock(from: merkleBlockMessage)
-            return handle(merkleBlock: merkleBlock)
+            merkleBlocksCount += 1
+            transactionsCount += Int(merkleBlockMessage.totalTransactions)
+            handled = handle(merkleBlock: merkleBlock)
+
         case let transactionMessage as TransactionMessage:
-            return handle(transaction: transactionMessage.transaction)
-        default:
-            return false
+            transactionsSize += transactionMessage.size
+            handled = handle(transaction: transactionMessage.transaction)
+
+        default: ()
         }
+
+        resumeWaiting()
+        return handled
+    }
+
+    override func checkTimeout() {
+        guard !blockHashes.isEmpty else {
+            delegate?.handle(completedTask: self)
+            return
+        }
+
+        pauseWaiting()
+        guard totalWaitingTime >= 1 else {
+            resumeWaiting()
+            return
+        }
+
+
+        let minMerkleBlocksCount = Int((self.minMerkleBlocksCount * totalWaitingTime).rounded())
+        let minTransactionsCount = Int((self.minTransactionsCount * totalWaitingTime).rounded())
+        let minTransactionsSize = Int((self.minTransactionsSize * totalWaitingTime).rounded())
+
+        if merkleBlocksCount < minMerkleBlocksCount && transactionsCount < minTransactionsCount && transactionsSize < minTransactionsSize {
+            warningsCount += 1
+            if warningsCount >= 10 {
+                delegate?.handle(failedTask: self, error: TooSlowPeer(
+                        minMerkleBlocks: minMerkleBlocksCount, minTransactionsCount: minTransactionsCount, minTransactionsSize: minTransactionsSize,
+                        merkleBlocks: merkleBlocksCount, transactionsCount: transactionsCount, transactionsSize: transactionsSize
+                ))
+                return
+            }
+        }
+
+        totalWaitingTime = 0
+        merkleBlocksCount = 0
+        transactionsCount = 0
+        transactionsSize = 0
+        resumeWaiting()
+    }
+
+    private func pauseWaiting() {
+        let timePassed = dateGenerator().timeIntervalSince1970 - waitingStartTime
+
+        if firstResponseReceived {
+            totalWaitingTime += timePassed
+        } else {
+            firstResponseReceived = true
+            totalWaitingTime += timePassed / 2
+        }
+    }
+
+    private func resumeWaiting() {
+        waitingStartTime = dateGenerator().timeIntervalSince1970
     }
 
     private func handle(merkleBlock: MerkleBlock) -> Bool {
@@ -69,18 +156,6 @@ class GetMerkleBlocksTask: PeerTask {
         }
 
         return false
-    }
-
-    override func checkTimeout() {
-        if let lastActiveTime = lastActiveTime {
-            if dateGenerator().timeIntervalSince1970 - lastActiveTime > allowedIdleTime {
-                if blockHashes.isEmpty {
-                    delegate?.handle(completedTask: self)
-                } else {
-                    delegate?.handle(failedTask: self, error: TimeoutError())
-                }
-            }
-        }
     }
 
     private func handle(completeMerkleBlock merkleBlock: MerkleBlock) {

@@ -12,6 +12,11 @@ public class InitialBlockDownload {
     private let merkleBlockValidator: IMerkleBlockValidator
     private let syncStateListener: ISyncStateListener
 
+    private var minMerkleBlocksCount: Double = 0
+    private var minTransactionsCount: Double = 0
+    private var minTransactionsSize: Double = 0
+    private var slowPeersDisconnected = 0
+
     private let subject = PublishSubject<InitialBlockDownloadEvent>()
     public let observable: Observable<InitialBlockDownloadEvent>
 
@@ -35,6 +40,7 @@ public class InitialBlockDownload {
         self.peersQueue = peersQueue
         self.logger = logger
         self.observable = subject.asObservable().observeOn(scheduler)
+        resetRequiredDownloadSpeed()
     }
 
     private func syncedState(_ peer: IPeer) -> Bool {
@@ -69,7 +75,9 @@ public class InitialBlockDownload {
         if blockHashes.isEmpty {
             syncedStates[syncPeer.host] = blockHashesSyncedStates[syncPeer.host]
         } else {
-            syncPeer.add(task: GetMerkleBlocksTask(blockHashes: blockHashes, merkleBlockValidator: merkleBlockValidator, merkleBlockHandler: self))
+            syncPeer.add(task: GetMerkleBlocksTask(
+                    blockHashes: blockHashes, merkleBlockValidator: merkleBlockValidator, merkleBlockHandler: self,
+                    minMerkleBlocksCount: minMerkleBlocksCount, minTransactionsCount: minTransactionsCount, minTransactionsSize: minTransactionsSize))
         }
 
         if !blockHashesSyncedState(syncPeer) {
@@ -88,6 +96,18 @@ public class InitialBlockDownload {
             subject.onNext(.onPeerSynced(peer: syncPeer))
             assignNextSyncPeer()
         }
+    }
+
+    private func resetRequiredDownloadSpeed() {
+        minMerkleBlocksCount = 500
+        minTransactionsCount = 50_000
+        minTransactionsSize = 100_000
+    }
+
+    private func decreaseRequiredDownloadSpeed() {
+        minMerkleBlocksCount = minMerkleBlocksCount / 3
+        minTransactionsCount = minTransactionsCount / 3
+        minTransactionsSize = minTransactionsSize / 3
     }
 
     func subscribeTo(observable: Observable<PeerGroupEvent>) {
@@ -161,6 +181,7 @@ extension InitialBlockDownload {
 
     private func onStart() {
         syncStateListener.syncStarted()
+        resetRequiredDownloadSpeed()
         blockSyncer?.prepareForDownload()
     }
 
@@ -181,6 +202,14 @@ extension InitialBlockDownload {
 
     private func onPeerDisconnect(peer: IPeer, error: Error?) {
         peersQueue.async {
+            if error is GetMerkleBlocksTask.TooSlowPeer {
+                self.slowPeersDisconnected += 1
+                if self.slowPeersDisconnected >= 3 {
+                    self.decreaseRequiredDownloadSpeed()
+                    self.slowPeersDisconnected = 0
+                }
+            }
+
             if let index = self.syncedPeers.index(where: { $0.equalTo(peer) }) {
                 self.syncedPeers.remove(at: index)
             }

@@ -52,7 +52,7 @@ class SendTransactionTaskTests:XCTestCase {
         let handled = try! task.handle(message: GetDataMessage(inventoryItems: [inv]))
 
         XCTAssertEqual(handled, true)
-        verify(mockRequester).send(message: equal(to: TransactionMessage(transaction: transaction), equalWhen: { ($0 as! TransactionMessage).transaction.header.dataHash == ($1 as! TransactionMessage).transaction.header.dataHash }))
+        verify(mockRequester).send(message: equal(to: TransactionMessage(transaction: transaction, size: 0), equalWhen: { ($0 as! TransactionMessage).transaction.header.dataHash == ($1 as! TransactionMessage).transaction.header.dataHash }))
         verify(mockDelegate).handle(completedTask: equal(to: task))
         verifyNoMoreInteractions(mockRequester)
         verifyNoMoreInteractions(mockDelegate)

@@ -38,7 +38,7 @@ class SendTransactionTask: PeerTask {
             return false
         }
 
-        requester?.send(message: TransactionMessage(transaction: transaction))
+        requester?.send(message: TransactionMessage(transaction: transaction, size: 0))
         delegate?.handle(completedTask: self)
 
         return true

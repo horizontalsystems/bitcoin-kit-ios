@@ -19,9 +19,7 @@ class Peer {
     private let connectionTimeoutManager: IConnectionTimeoutManager
     private var tasks: [PeerTask] = []
 
-    private let queue: DispatchQueue
     private let network: INetwork
-
     private let logger: Logger?
 
     var announcedLastBlockHeight: Int32 = 0
@@ -45,17 +43,11 @@ class Peer {
         return connection.logName
     }
 
-    init(host: String, network: INetwork, connection: IPeerConnection, connectionTimeoutManager: IConnectionTimeoutManager, queue: DispatchQueue? = nil, logger: Logger? = nil) {
+    init(host: String, network: INetwork, connection: IPeerConnection, connectionTimeoutManager: IConnectionTimeoutManager, logger: Logger? = nil) {
         self.connection = connection
         self.connectionTimeoutManager = connectionTimeoutManager
         self.network = network
         self.logger = logger
-
-        if let queue = queue {
-            self.queue = queue
-        } else {
-            self.queue = DispatchQueue(label: "Peer: \(host)", qos: .userInitiated)
-        }
 
         connection.delegate = self
     }
@@ -224,10 +216,8 @@ extension Peer: PeerConnectionDelegate {
     func connectionTimePeriodPassed() {
         connectionTimeoutManager.timePeriodPassed(peer: self)
 
-        queue.async { [weak self] in
-            if let task = self?.tasks.first {
-                task.checkTimeout()
-            }
+        if let task = self.tasks.first {
+            task.checkTimeout()
         }
     }
 
@@ -244,13 +234,11 @@ extension Peer: PeerConnectionDelegate {
     }
 
     func connection(didReceiveMessage message: IMessage) {
-        queue.async { [weak self] in
-            do {
-                try self?.handle(message: message)
-            } catch {
-                self?.log("Message handling failed with error: \(error)", level: .warning)
-                self?.disconnect(error: error)
-            }
+        do {
+            try self.handle(message: message)
+        } catch {
+            self.log("Message handling failed with error: \(error)", level: .warning)
+            self.disconnect(error: error)
         }
     }
 

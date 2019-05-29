@@ -206,7 +206,7 @@ class TransactionMessageParser: IMessageParser {
     var id: String { return "tx" }
 
     func parse(data: Data) -> IMessage {
-        return TransactionMessage(transaction: TransactionSerializer.deserialize(data: data))
+        return TransactionMessage(transaction: TransactionSerializer.deserialize(data: data), size: data.count)
     }
 
 }
