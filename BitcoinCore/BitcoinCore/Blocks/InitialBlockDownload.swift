@@ -125,7 +125,7 @@ extension InitialBlockDownload: IInventoryItemsHandler {
                 self.syncedStates[peer.host] = false
                 self.blockHashesSyncedStates[peer.host] = false
                 self.subject.onNext(.onPeerNotSynced(peer: peer))
-                if let index = self.syncedPeers.index(where: { $0.equalTo(peer) }) {
+                if let index = self.syncedPeers.firstIndex(where: { $0.equalTo(peer) }) {
                     self.syncedPeers.remove(at: index)
                 }
                 self.assignNextSyncPeer()
@@ -181,7 +181,7 @@ extension InitialBlockDownload {
 
     private func onPeerDisconnect(peer: IPeer, error: Error?) {
         peersQueue.async {
-            if let index = self.syncedPeers.index(where: { $0.equalTo(peer) }) {
+            if let index = self.syncedPeers.firstIndex(where: { $0.equalTo(peer) }) {
                 self.syncedPeers.remove(at: index)
             }
             self.syncedStates.removeValue(forKey: peer.host)

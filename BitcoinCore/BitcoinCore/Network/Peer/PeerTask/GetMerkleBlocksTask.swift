@@ -54,7 +54,7 @@ class GetMerkleBlocksTask: PeerTask {
     }
 
     private func handle(transaction: FullTransaction) -> Bool {
-        if let index = pendingMerkleBlocks.index(where: { $0.transactionHashes.contains(transaction.header.dataHash) }) {
+        if let index = pendingMerkleBlocks.firstIndex(where: { $0.transactionHashes.contains(transaction.header.dataHash) }) {
             resetTimer()
 
             let block = pendingMerkleBlocks[index]
@@ -84,7 +84,7 @@ class GetMerkleBlocksTask: PeerTask {
     }
 
     private func handle(completeMerkleBlock merkleBlock: MerkleBlock) {
-        if let index = blockHashes.index(where: { $0.headerHash == merkleBlock.headerHash }) {
+        if let index = blockHashes.firstIndex(where: { $0.headerHash == merkleBlock.headerHash }) {
             blockHashes.remove(at: index)
         }
 

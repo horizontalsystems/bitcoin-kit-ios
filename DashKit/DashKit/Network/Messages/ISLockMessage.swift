@@ -7,6 +7,10 @@ struct ISLockMessage: IMessage {
     let txHash: Data
     let sign: Data
     let hash: Data
+    
+    var description: String {
+        return "\(txHash) - \(inputs.count) inputs locked"
+    }
 }
 
 extension ISLockMessage: Hashable {

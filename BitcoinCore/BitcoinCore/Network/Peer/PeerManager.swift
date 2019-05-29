@@ -8,7 +8,7 @@ class PeerManager: IPeerManager {
     }
 
     func peerDisconnected(peer: IPeer) {
-        if let index = self.peers.index(where: { $0.equalTo(peer) }) {
+        if let index = self.peers.firstIndex(where: { $0.equalTo(peer) }) {
             self.peers.remove(at: index)
         }
     }

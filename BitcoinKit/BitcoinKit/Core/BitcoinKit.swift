@@ -85,7 +85,7 @@ public class BitcoinKit: AbstractKit {
 
         lines.append("--------------- Bitcoin Segwit (zero program) addresses --------------------")
         for pubKey in pubKeys {
-            lines.append("acc: \(pubKey.account) - inx: \(pubKey.index) - ext: \(pubKey.external) : \(try! bech32AddressConverter.convert(keyHash: Data(bytes: [0x00, 0x14]) + pubKey.keyHash, type: .p2wpkh).stringValue)") 
+            lines.append("acc: \(pubKey.account) - inx: \(pubKey.index) - ext: \(pubKey.external) : \(try! bech32AddressConverter.convert(keyHash: Data([0x00, 0x14]) + pubKey.keyHash, type: .p2wpkh).stringValue)") 
         }
 
         return lines.joined(separator: "\n")

@@ -44,31 +44,31 @@ public class Logger {
     /// log something generally unimportant (lowest priority)
     public func verbose(_ message: @autoclosure () -> Any, _
     file: String = #file, _ function: String = #function, line: Int = #line, context: Any? = nil, network: INetwork? = nil) {
-        log(level: .verbose, message: message, file: file, function: function, line: line, context: context, network: network)
+        log(level: .verbose, message: message(), file: file, function: function, line: line, context: context, network: network)
     }
 
     /// log something which help during debugging (low priority)
     public func debug(_ message: @autoclosure () -> Any, _
     file: String = #file, _ function: String = #function, line: Int = #line, context: Any? = nil, network: INetwork? = nil) {
-        log(level: .debug, message: message, file: file, function: function, line: line, context: context, network: network)
+        log(level: .debug, message: message(), file: file, function: function, line: line, context: context, network: network)
     }
 
     /// log something which you are really interested but which is not an issue or error (normal priority)
     public func info(_ message: @autoclosure () -> Any, _
     file: String = #file, _ function: String = #function, line: Int = #line, context: Any? = nil, network: INetwork? = nil) {
-        log(level: .info, message: message, file: file, function: function, line: line, context: context, network: network)
+        log(level: .info, message: message(), file: file, function: function, line: line, context: context, network: network)
     }
 
     /// log something which may cause big trouble soon (high priority)
     public func warning(_ message: @autoclosure () -> Any, _
     file: String = #file, _ function: String = #function, line: Int = #line, context: Any? = nil, network: INetwork? = nil) {
-        log(level: .warning, message: message, file: file, function: function, line: line, context: context, network: network)
+        log(level: .warning, message: message(), file: file, function: function, line: line, context: context, network: network)
     }
 
     /// log something which will keep you awake at night (highest priority)
     public func error(_ message: @autoclosure () -> Any, _
     file: String = #file, _ function: String = #function, line: Int = #line, context: Any? = nil, network: INetwork? = nil) {
-        log(level: .error, message: message, file: file, function: function, line: line, context: context, network: network)
+        log(level: .error, message: message(), file: file, function: function, line: line, context: context, network: network)
     }
 
     /// custom logging to manually adjust values, should just be used by other frameworks

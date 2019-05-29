@@ -108,7 +108,7 @@ class PeerConnection: NSObject {
     }
 
     private func log(_ message: @autoclosure () -> Any, level: Logger.Level = .debug, file: String = #file, function: String = #function, line: Int = #line) {
-        logger?.log(level: level, message: message, file: file, function: function, line: line, context: logName)
+        logger?.log(level: level, message: message(), file: file, function: function, line: line, context: logName)
     }
 }
 
@@ -161,8 +161,11 @@ extension PeerConnection: IPeerConnection {
         log("-> \(type(of: message)): \(message.description)")
         do {
             let data = try networkMessageSerializer.serialize(message: message)
+            guard !data.isEmpty else {
+                return
+            }
             _ = data.withUnsafeBytes {
-                outputStream?.write($0, maxLength: data.count)
+                outputStream?.write($0.baseAddress!.assumingMemoryBound(to: UInt8.self), maxLength: data.count)
             }
         } catch {
             log("Connection can't send message \(message) with error \(error)", level: .error) //todo catch error when try send message not registered in serializers

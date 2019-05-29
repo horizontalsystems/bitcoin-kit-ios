@@ -2,13 +2,13 @@ import Foundation
 import HSCryptoKit
 
 public class OpCode {
-    public static let p2pkhStart = Data(bytes: [OpCode.dup, OpCode.hash160])
-    public static let p2pkhFinish = Data(bytes: [OpCode.equalVerify, OpCode.checkSig])
+    public static let p2pkhStart = Data([OpCode.dup, OpCode.hash160])
+    public static let p2pkhFinish = Data([OpCode.equalVerify, OpCode.checkSig])
 
-    public static let p2pkFinish = Data(bytes: [OpCode.checkSig])
+    public static let p2pkFinish = Data([OpCode.checkSig])
 
-    public static let p2shStart = Data(bytes: [OpCode.hash160])
-    public static let p2shFinish = Data(bytes: [OpCode.equal])
+    public static let p2shStart = Data([OpCode.hash160])
+    public static let p2shFinish = Data([OpCode.equal])
 
     public static let pFromShCodes = [checkSig, checkSigVerify, checkMultiSig, checkMultiSigVerify]
 
@@ -52,10 +52,10 @@ public class OpCode {
         var bytes = Data()
 
         switch length {
-        case 0x00...0x4b: bytes = Data(bytes: [UInt8(length)])
-        case 0x4c...0xff: bytes = Data(bytes: [OpCode.pushData1]) + UInt8(length).littleEndian
-        case 0x0100...0xffff: bytes = Data(bytes: [OpCode.pushData2]) + UInt16(length).littleEndian
-        case 0x10000...0xffffffff: bytes = Data(bytes: [OpCode.pushData4]) + UInt32(length).littleEndian
+        case 0x00...0x4b: bytes = Data([UInt8(length)])
+        case 0x4c...0xff: bytes = Data([OpCode.pushData1]) + UInt8(length).littleEndian
+        case 0x0100...0xffff: bytes = Data([OpCode.pushData2]) + UInt16(length).littleEndian
+        case 0x10000...0xffffffff: bytes = Data([OpCode.pushData4]) + UInt32(length).littleEndian
         default: return data
         }
 
