@@ -25,7 +25,7 @@ class RequestTransactionsTask: PeerTask {
     }
 
     private func handle(transaction: FullTransaction) -> Bool {
-        guard let index = hashes.index(where: { $0 == transaction.header.dataHash }) else {
+        guard let index = hashes.firstIndex(where: { $0 == transaction.header.dataHash }) else {
             return false
         }
 

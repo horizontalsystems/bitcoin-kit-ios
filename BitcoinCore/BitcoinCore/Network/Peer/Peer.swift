@@ -260,7 +260,7 @@ extension Peer: IPeerTaskDelegate {
 
     func handle(completedTask task: PeerTask) {
         log("Handling completed task: \(type(of: task))")
-        if let index = tasks.index(where: { $0 === task }) {
+        if let index = tasks.firstIndex(where: { $0 === task }) {
             let task = tasks.remove(at: index)
             delegate?.peer(self, didCompleteTask: task)
         }

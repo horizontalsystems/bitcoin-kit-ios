@@ -36,9 +36,12 @@ public class DifficultyEncoder: IDifficultyEncoder {
 
         // make unsigned big int for get array of bytes
         let data = bigInt.magnitude.serialize()
+        guard !data.isEmpty else {
+            return 0
+        }
 
         var byteArray = data.withUnsafeBytes {
-            [UInt8](UnsafeBufferPointer(start: $0, count: data.count))
+            [UInt8](UnsafeBufferPointer(start: $0.baseAddress!.assumingMemoryBound(to: UInt8.self), count: data.count))
         }
 
         if let firstByte = byteArray.first, firstByte > 0x7f {

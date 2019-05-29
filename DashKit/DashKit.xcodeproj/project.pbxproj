@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -608,6 +608,7 @@
 				TargetAttributes = {
 					3A7A7D5C226842DD0063D6AD = {
 						CreatedOnToolsVersion = 10.1;
+						LastSwiftMigration = 1020;
 					};
 					3A7A7D65226842DD0063D6AD = {
 						CreatedOnToolsVersion = 10.1;
@@ -620,6 +621,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = 3A7A7D53226842DD0063D6AD;
 			productRefGroup = 3A7A7D5E226842DD0063D6AD /* Products */;
@@ -966,7 +968,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.horizontalsystems.DashKit;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -992,7 +994,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.horizontalsystems.DashKit;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -1011,7 +1013,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.horizontalsystems.DashKitTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -1030,7 +1032,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.horizontalsystems.DashKitTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

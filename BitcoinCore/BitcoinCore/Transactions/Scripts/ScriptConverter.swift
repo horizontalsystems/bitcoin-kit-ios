@@ -8,7 +8,7 @@ public class ScriptConverter {
             if let data = chunk.data {
                 scriptData += OpCode.push(data)
             } else {
-                scriptData += Data(bytes: [chunk.opCode])
+                scriptData += Data([chunk.opCode])
             }
         }
         return scriptData

@@ -46,8 +46,8 @@ class InitialSyncer {
         if async {
             observable = observable.subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
         }
-
-        observable.subscribe(onNext: { [weak self] keys, responses in
+        
+        observable.subscribe(onSuccess: { [weak self] keys, responses in
                     self?.handle(forAccount: account, keys: keys, blockHashes: responses)
                 }, onError: { [weak self] error in
                     self?.handle(error: error)

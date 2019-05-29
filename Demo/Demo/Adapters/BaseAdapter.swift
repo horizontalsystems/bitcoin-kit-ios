@@ -67,11 +67,11 @@ class BaseAdapter {
 extension BaseAdapter {
 
     var lastBlockObservable: Observable<Void> {
-        return lastBlockSignal.asObservable().throttle(0.2, scheduler: ConcurrentDispatchQueueScheduler(qos: .userInitiated))
+        return lastBlockSignal.asObservable().throttle(DispatchTimeInterval.milliseconds(200), scheduler: ConcurrentDispatchQueueScheduler(qos: .userInitiated))
     }
 
     var syncStateObservable: Observable<Void> {
-        return syncStateSignal.asObservable().throttle(0.2, scheduler: ConcurrentDispatchQueueScheduler(qos: .userInitiated))
+        return syncStateSignal.asObservable().throttle(DispatchTimeInterval.milliseconds(200), scheduler: ConcurrentDispatchQueueScheduler(qos: .userInitiated))
     }
 
     var balanceObservable: Observable<Void> {

@@ -51,7 +51,7 @@ extension InstantTransactionManager: IInstantTransactionManager {
 
     func updateInput(for inputTxHash: Data, transactionInputs: [InstantTransactionInput]) throws {
         var updatedInputs = transactionInputs
-        guard let inputIndex = transactionInputs.index(where: { $0.inputTxHash == inputTxHash }) else {
+        guard let inputIndex = transactionInputs.firstIndex(where: { $0.inputTxHash == inputTxHash }) else {
             // can't find input for this vote. Ignore it
             throw DashKitErrors.LockVoteValidation.txInputNotFound
         }
