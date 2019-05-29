@@ -7,7 +7,7 @@ PODS:
   - GRDB.swift (4.0.1):
     - GRDB.swift/standard (= 4.0.1)
   - GRDB.swift/standard (4.0.1)
-  - HSCryptoKit (1.4.0)
+  - HSCryptoKit (1.4.1)
   - HSHDWalletKit (1.1):
     - HSCryptoKit (~> 1.4)
   - Nimble (8.0.1)
@@ -55,7 +55,7 @@ SPEC CHECKSUMS:
   CryptoX11.swift: 8f0ca5fbfefbe49126220ce23b5de106928cf0f0
   Cuckoo: 56ceda7442986ad2aa0615f462b0e431253b97a5
   GRDB.swift: 106a830decf1d92a3fc63c6d6a2f6586f6187297
-  HSCryptoKit: b57163713287e08f0cdd9ac40165e77b7bdc7e66
+  HSCryptoKit: 639ab56381fa4c4b9da520e286c9f993b5b8b028
   HSHDWalletKit: 1d946bd24bd307cc494141f4e518d25db814f050
   Nimble: 45f786ae66faa9a709624227fae502db55a8bdd0
   ObjectMapper: 0d4402610f4e468903ae64629eec4784531e5c51
