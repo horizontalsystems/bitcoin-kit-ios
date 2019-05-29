@@ -88,22 +88,22 @@ class PeerConnection: NSObject {
             } else {
                 packets += Data(bytesNoCopy: buffer, count: numberOfBytesRead, deallocator: .none)
             }
-        }
 
-        while packets.count >= NetworkMessage.minimumLength {
-            guard let networkMessage = networkMessageParser.parse(data: packets) else {
-                return
+            while packets.count >= NetworkMessage.minimumLength {
+                guard let networkMessage = networkMessageParser.parse(data: packets) else {
+                    break
+                }
+
+                packets = Data(packets.dropFirst(NetworkMessage.minimumLength + Int(networkMessage.length)))
+                let message = networkMessage.message
+
+                guard !(message is UnknownMessage) else {
+                    break
+                }
+
+                log("<- \(type(of: message)): \(message.description)")
+                delegate?.connection(didReceiveMessage: message)
             }
-
-            packets = Data(packets.dropFirst(NetworkMessage.minimumLength + Int(networkMessage.length)))
-            let message = networkMessage.message
-
-            guard !(message is UnknownMessage) else {
-                return
-            }
-
-            log("<- \(type(of: message)): \(message.description)")
-            delegate?.connection(didReceiveMessage: message)
         }
     }
 
