@@ -47,7 +47,7 @@
 //                    _ = try merkleBranch.calculateMerkleRoot(txCount: totalTransactions, hashes: hashes, flags: [223, 22, 0, 1])
 //                    fail("Must have exception")
 //                } catch let error as MerkleBlockValidator.ValidationError {
-//                    expect(error).to(equal(MerkleBlockValidator.ValidationError.unnecessaryBits) )
+//                    expect(error).to(equal(MerkleBlockValidator.DashKitErrors.MasternodeListValidation.unnecessaryBits) )
 //                } catch {
 //                    XCTFail("Unknown Exception")
 //                }
@@ -58,7 +58,7 @@
 //                    _ = try merkleBranch.calculateMerkleRoot(txCount: totalTransactions, hashes: hashes, flags: [223, 22, 5])
 //                    fail("Must have exception")
 //                } catch let error as MerkleBlockValidator.ValidationError {
-//                    expect(error).to(equal(MerkleBlockValidator.ValidationError.notEnoughHashes) )
+//                    expect(error).to(equal(MerkleBlockValidator.DashKitErrors.MasternodeListValidation.notEnoughHashes) )
 //                } catch {
 //                    XCTFail("Unknown Exception")
 //                }
@@ -69,7 +69,7 @@
 //                    _ = try merkleBranch.calculateMerkleRoot(txCount: totalTransactions, hashes: hashes, flags: [223, 22])
 //                    fail("Must have exception")
 //                } catch let error as MerkleBlockValidator.ValidationError {
-//                    expect(error).to(equal(MerkleBlockValidator.ValidationError.notEnoughBits) )
+//                    expect(error).to(equal(MerkleBlockValidator.DashKitErrors.MasternodeListValidation.notEnoughBits) )
 //                } catch {
 //                    XCTFail("Unknown Exception")
 //                }

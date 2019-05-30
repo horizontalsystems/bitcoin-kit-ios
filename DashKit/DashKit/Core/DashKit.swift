@@ -75,10 +75,11 @@ public class DashKit: AbstractKit {
         // extending BitcoinCore
 
         let masternodeParser = MasternodeParser(hasher: singleHasher)
+        let quorumParser = QuorumParser(hasher: doubleShaHasher)
 
         bitcoinCore.add(messageParser: TransactionLockMessageParser())
                 .add(messageParser: TransactionLockVoteMessageParser())
-                .add(messageParser: MasternodeListDiffMessageParser(masternodeParser: masternodeParser))
+                .add(messageParser: MasternodeListDiffMessageParser(masternodeParser: masternodeParser, quorumParser: quorumParser))
                 .add(messageParser: ISLockParser(hasher: doubleShaHasher))
 
         bitcoinCore.add(messageSerializer: GetMasternodeListDiffMessageSerializer())
@@ -100,10 +101,14 @@ public class DashKit: AbstractKit {
         let masternodeSerializer = MasternodeSerializer()
         let coinbaseTransactionSerializer = CoinbaseTransactionSerializer()
         let masternodeCbTxHasher = MasternodeCbTxHasher(coinbaseTransactionSerializer: coinbaseTransactionSerializer, hasher: doubleShaHasher)
+
         let masternodeMerkleRootCreator = MerkleRootCreator(hasher: doubleShaHasher)
+        let quorumMerkleRootCreator = MerkleRootCreator(hasher: doubleShaHasher)
 
         let masternodeListMerkleRootCalculator = MasternodeListMerkleRootCalculator(masternodeSerializer: masternodeSerializer, masternodeHasher: doubleShaHasher, masternodeMerkleRootCreator: masternodeMerkleRootCreator)
-        let masternodeListManager = MasternodeListManager(storage: storage, masternodeListMerkleRootCalculator: masternodeListMerkleRootCalculator, masternodeCbTxHasher: masternodeCbTxHasher, merkleBranch: merkleBranch)
+        let quorumListMerkleRootCalculator = QuorumListMerkleRootCalculator(merkleRootCreator: quorumMerkleRootCreator, quorumHasher: doubleShaHasher)
+        let quorumListManager = QuorumListManager(storage: storage, quorumListMerkleRootCalculator: quorumListMerkleRootCalculator, merkleBranch: merkleBranch)
+        let masternodeListManager = MasternodeListManager(storage: storage, quorumListManager: quorumListManager, masternodeListMerkleRootCalculator: masternodeListMerkleRootCalculator, masternodeCbTxHasher: masternodeCbTxHasher, merkleBranch: merkleBranch)
         let masternodeSyncer = MasternodeListSyncer(bitcoinCore: bitcoinCore, initialBlockDownload: bitcoinCore.initialBlockDownload, peerTaskFactory: PeerTaskFactory(), masternodeListManager: masternodeListManager)
 
         bitcoinCore.add(peerTaskHandler: masternodeSyncer)

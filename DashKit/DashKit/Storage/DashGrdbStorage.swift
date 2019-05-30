@@ -49,6 +49,22 @@ class DashGrdbStorage: GrdbStorage {
                 t.primaryKey([InstantTransactionHash.Columns.txHash.name], onConflict: .ignore)
             }
         }
+        migrator.registerMigration("createQuorums") { db in
+            try db.create(table: Quorum.databaseTableName) { t in
+                t.column(Quorum.Columns.hash.name, .text).notNull()
+                t.column(Quorum.Columns.version.name, .integer).notNull()
+                t.column(Quorum.Columns.type.name, .integer).notNull()
+                t.column(Quorum.Columns.quorumHash.name, .text).notNull()
+                t.column(Quorum.Columns.signers.name, .text).notNull()
+                t.column(Quorum.Columns.validMembers.name, .text).notNull()
+                t.column(Quorum.Columns.quorumPublicKey.name, .text).notNull()
+                t.column(Quorum.Columns.quorumVvecHash.name, .text).notNull()
+                t.column(Quorum.Columns.quorumSig.name, .text).notNull()
+                t.column(Quorum.Columns.sig.name, .text).notNull()
+
+                t.primaryKey([Quorum.Columns.hash.name], onConflict: .replace)
+            }
+        }
 
         return migrator
     }
@@ -66,6 +82,20 @@ extension DashGrdbStorage: IDashStorage {
         set {
             _ = try? dbPool.write { db in
                 try Masternode.deleteAll(db)
+                try newValue.forEach { try $0.insert(db) }
+            }
+        }
+    }
+
+    var quorums: [Quorum] {
+        get {
+            return try! dbPool.read { db in
+                try Quorum.fetchAll(db)
+            }
+        }
+        set {
+            _ = try? dbPool.write { db in
+                try Quorum.deleteAll(db)
                 try newValue.forEach { try $0.insert(db) }
             }
         }

@@ -91,7 +91,7 @@
 //            _ = try validator.merkleBlock(from: getSampleMessage()).transactionHashes
 //        } catch let error as MerkleBlockValidator.ValidationError {
 //            caught = true
-//            XCTAssertEqual(error, MerkleBlockValidator.ValidationError.wrongMerkleRoot)
+//            XCTAssertEqual(error, MerkleBlockValidator.DashKitErrors.MasternodeListValidation.wrongMerkleRoot)
 //        } catch {
 //            XCTFail("Unknown Exception")
 //        }
@@ -108,7 +108,7 @@
 //            _ = try validator.merkleBlock(from: getSampleMessage()).transactionHashes
 //            XCTFail("Should Throw Exception")
 //        } catch let error as MerkleBlockValidator.ValidationError {
-//            XCTAssertEqual(error, MerkleBlockValidator.ValidationError.noTransactions)
+//            XCTAssertEqual(error, MerkleBlockValidator.DashKitErrors.MasternodeListValidation.noTransactions)
 //        } catch {
 //            XCTFail("Unknown Exception")
 //        }
@@ -121,7 +121,7 @@
 //            _ = try validator.merkleBlock(from: getSampleMessage()).transactionHashes
 //            XCTFail("Should Throw Exception")
 //        } catch let error as MerkleBlockValidator.ValidationError {
-//            XCTAssertEqual(error, MerkleBlockValidator.ValidationError.tooManyTransactions)
+//            XCTAssertEqual(error, MerkleBlockValidator.DashKitErrors.MasternodeListValidation.tooManyTransactions)
 //        } catch {
 //            XCTFail("Unknown Exception")
 //        }
@@ -134,7 +134,7 @@
 //            _ = try validator.merkleBlock(from: getSampleMessage()).transactionHashes
 //            XCTFail("Should Throw Exception")
 //        } catch let error as MerkleBlockValidator.ValidationError {
-//            XCTAssertEqual(error, MerkleBlockValidator.ValidationError.moreHashesThanTransactions)
+//            XCTAssertEqual(error, MerkleBlockValidator.DashKitErrors.MasternodeListValidation.moreHashesThanTransactions)
 //        } catch {
 //            XCTFail("Unknown Exception")
 //        }
@@ -148,7 +148,7 @@
 //            _ = try validator.merkleBlock(from: getSampleMessage()).transactionHashes
 //            XCTFail("Should Throw Exception")
 //        } catch let error as MerkleBlockValidator.ValidationError {
-//            XCTAssertEqual(error, MerkleBlockValidator.ValidationError.matchedBitsFewerThanHashes)
+//            XCTAssertEqual(error, MerkleBlockValidator.DashKitErrors.MasternodeListValidation.matchedBitsFewerThanHashes)
 //        } catch {
 //            XCTFail("Unknown Exception")
 //        }

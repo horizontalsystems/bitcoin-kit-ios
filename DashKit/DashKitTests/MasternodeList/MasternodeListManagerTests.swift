@@ -126,7 +126,7 @@
 //                    try manager.updateList(masternodeListDiffMessage: message)
 //                    XCTFail("must catch error!")
 //                } catch let error as MasternodeListManager.ValidationError {
-//                    XCTAssertEqual(error, MasternodeListManager.ValidationError.wrongMerkleRootList)
+//                    XCTAssertEqual(error, DashKitErrors.MasternodeListValidation.wrongMerkleRootList)
 //                } catch {
 //                    XCTFail("Invalid Error thrown!")
 //                }
@@ -141,7 +141,7 @@
 //                    try manager.updateList(masternodeListDiffMessage: message)
 //                    XCTFail("must catch error!")
 //                } catch let error as MasternodeListManager.ValidationError {
-//                    XCTAssertEqual(error, MasternodeListManager.ValidationError.wrongCoinbaseHash)
+//                    XCTAssertEqual(error, DashKitErrors.MasternodeListValidation.wrongCoinbaseHash)
 //                } catch {
 //                    XCTFail("Invalid Error thrown!")
 //                }
@@ -156,7 +156,7 @@
 //                    try manager.updateList(masternodeListDiffMessage: message)
 //                    XCTFail("must catch error!")
 //                } catch let error as MasternodeListManager.ValidationError {
-//                    XCTAssertEqual(error, MasternodeListManager.ValidationError.noMerkleBlockHeader)
+//                    XCTAssertEqual(error, DashKitErrors.MasternodeListValidation.noMerkleBlockHeader)
 //                } catch {
 //                    XCTFail("Invalid Error thrown!")
 //                }
@@ -171,7 +171,7 @@
 //                    try manager.updateList(masternodeListDiffMessage: message)
 //                    XCTFail("must catch error!")
 //                } catch let error as MasternodeListManager.ValidationError {
-//                    XCTAssertEqual(error, MasternodeListManager.ValidationError.noMerkleBlockHeader)
+//                    XCTAssertEqual(error, DashKitErrors.MasternodeListValidation.noMerkleBlockHeader)
 //                } catch {
 //                    XCTFail("Invalid Error thrown!")
 //                }
@@ -186,7 +186,7 @@
 //                    try manager.updateList(masternodeListDiffMessage: message)
 //                    XCTFail("must catch error!")
 //                } catch let error as MasternodeListManager.ValidationError {
-//                    XCTAssertEqual(error, MasternodeListManager.ValidationError.wrongMerkleRoot)
+//                    XCTAssertEqual(error, DashKitErrors.MasternodeListValidation.wrongMerkleRoot)
 //                } catch {
 //                    XCTFail("Invalid Error thrown!")
 //                }

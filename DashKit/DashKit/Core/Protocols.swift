@@ -65,11 +65,16 @@ protocol IMasternodeListManager {
     func updateList(masternodeListDiffMessage: MasternodeListDiffMessage) throws
 }
 
+protocol IQuorumListManager {
+    func updateList(masternodeListDiffMessage: MasternodeListDiffMessage) throws
+}
+
 protocol IMasternodeListSyncer {
 }
 
 protocol IDashStorage {
     var masternodes: [Masternode] { get set }
+    var quorums: [Quorum] { get set }
     var masternodeListState: MasternodeListState? { get set }
 
     func inputs(transactionHash: Data) -> [Input]
@@ -104,8 +109,21 @@ protocol IMasternodeSortedList {
     func remove(by proRegTxHashes: [Data])
 }
 
+protocol IQuorumSortedList {
+    var quorums: [Quorum] { get }
+
+    func add(quorums: [Quorum])
+    func removeAll()
+    func remove(quorums: [Quorum])
+    func remove(by pairs: [(type: UInt8, quorumHash: Data)])
+}
+
 protocol IMasternodeListMerkleRootCalculator {
     func calculateMerkleRoot(sortedMasternodes: [Masternode]) -> Data?
+}
+
+protocol IQuorumListMerkleRootCalculator {
+    func calculateMerkleRoot(sortedQuorums: [Quorum]) -> Data?
 }
 
 protocol IMasternodeCbTxHasher {
@@ -143,6 +161,10 @@ protocol IInstantTransactionState {
 
 protocol IMasternodeParser {
     func parse(byteStream: ByteStream) -> Masternode
+}
+
+protocol IQuorumParser {
+    func parse(byteStream: ByteStream) -> Quorum
 }
 
 protocol ITransactionLockVoteHandler {

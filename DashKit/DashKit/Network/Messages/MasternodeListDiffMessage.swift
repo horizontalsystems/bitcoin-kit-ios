@@ -13,6 +13,8 @@ struct MasternodeListDiffMessage: IMessage {
     let deletedMNs: [Data]
     let mnListCount: UInt32
     let mnList: [Masternode]
+    let deletedQuorums: [(type: UInt8, quorumHash: Data)]
+    let quorumList: [Quorum]
 
     var description: String {
         return "\(baseBlockHash) \(blockHash)"

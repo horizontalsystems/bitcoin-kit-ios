@@ -11,4 +11,16 @@ public class DashKitErrors {
         case signatureNotValid
     }
 
+    enum MasternodeListValidation: Error {
+        case wrongMerkleRootList
+        case wrongCoinbaseHash
+        case noMerkleBlockHeader
+        case wrongMerkleRoot
+    }
+
+    enum QuorumListValidation: Error {
+        case wrongMerkleRootList
+    }
+
+
 }
