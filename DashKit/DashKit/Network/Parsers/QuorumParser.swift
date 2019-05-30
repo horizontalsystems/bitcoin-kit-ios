@@ -12,8 +12,9 @@ class QuorumParser: IQuorumParser {
         let versionData = byteStream.read(Data.self, count: 2)
         let version = versionData.to(type: UInt16.self).littleEndian
 
-        let type = byteStream.read(UInt8.self)
-        let quorumHash = byteStream.read(Data.self, count: 32)
+        let typeWithQuorumHash = byteStream.read(Data.self, count: 33)
+        let type = typeWithQuorumHash[0]
+        let quorumHash = typeWithQuorumHash.subdata(in: Range(uncheckedBounds: (lower: 1, upper: 33)))
 
         let signerSizeVarInt = byteStream.read(VarInt.self)
         let signerSize = Int(signerSizeVarInt.underlyingValue)
@@ -31,18 +32,18 @@ class QuorumParser: IQuorumParser {
         let sig = byteStream.read(Data.self, count: 96)
 
         let data = versionData +
-                type +
-                quorumHash +
-                signerSizeVarInt.data +
-                signers +
-                validMemberSizeVarInt.data +
-                members +
-                quorumPublicKey +
-                quorumVvecHash +
-                quorumSig +
-                sig
+                    type +
+                    quorumHash +
+                    signerSizeVarInt.data +
+                    signers +
+                    validMemberSizeVarInt.data +
+                    members +
+                    quorumPublicKey +
+                    quorumVvecHash +
+                    quorumSig +
+                    sig
         let hash = hasher.hash(data: data)
-        return Quorum(hash: hash, version: version, type: type, quorumHash: quorumHash, signers: signers, validMembers: members, quorumPublicKey: quorumPublicKey, quorumVvecHash: quorumVvecHash, quorumSig: quorumSig, sig: sig)
+        return Quorum(hash: hash, version: version, type: type, quorumHash: quorumHash, typeWithQuorumHash: typeWithQuorumHash, signers: signers, validMembers: members, quorumPublicKey: quorumPublicKey, quorumVvecHash: quorumVvecHash, quorumSig: quorumSig, sig: sig)
     }
 
 }

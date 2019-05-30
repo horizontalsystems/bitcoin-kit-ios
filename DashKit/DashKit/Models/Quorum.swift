@@ -5,6 +5,7 @@ class Quorum: Record {
     let version: UInt16
     let type: UInt8
     let quorumHash: Data
+    let typeWithQuorumHash: Data
     let signers: Data
     let validMembers: Data
     let quorumPublicKey: Data
@@ -21,6 +22,7 @@ class Quorum: Record {
         case version
         case type
         case quorumHash
+        case typeWithQuorumHash
         case signers
         case validMembers
         case quorumPublicKey
@@ -34,6 +36,7 @@ class Quorum: Record {
         version = row[Columns.version]
         type = row[Columns.type]
         quorumHash = row[Columns.quorumHash]
+        typeWithQuorumHash = row[Columns.typeWithQuorumHash]
         signers = row[Columns.signers]
         validMembers = row[Columns.validMembers]
         quorumPublicKey = row[Columns.quorumPublicKey]
@@ -49,6 +52,7 @@ class Quorum: Record {
         container[Columns.version] = version
         container[Columns.type] = type
         container[Columns.quorumHash] = quorumHash
+        container[Columns.typeWithQuorumHash] = typeWithQuorumHash
         container[Columns.signers] = signers
         container[Columns.validMembers] = validMembers
         container[Columns.quorumPublicKey] = quorumPublicKey
@@ -57,11 +61,12 @@ class Quorum: Record {
         container[Columns.sig] = sig
     }
 
-    init(hash: Data, version: UInt16, type: UInt8, quorumHash: Data, signers: Data, validMembers: Data, quorumPublicKey: Data, quorumVvecHash: Data, quorumSig: Data, sig: Data) {
+    init(hash: Data, version: UInt16, type: UInt8, quorumHash: Data, typeWithQuorumHash: Data, signers: Data, validMembers: Data, quorumPublicKey: Data, quorumVvecHash: Data, quorumSig: Data, sig: Data) {
         self.dataHash = hash
         self.version = version
         self.type = type
         self.quorumHash = quorumHash
+        self.typeWithQuorumHash = typeWithQuorumHash
         self.signers = signers
         self.validMembers = validMembers
         self.quorumPublicKey = quorumPublicKey

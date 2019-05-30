@@ -11,12 +11,14 @@ import BitcoinCore
 class QuorumListManager: IQuorumListManager {
 
     private var storage: IDashStorage
+    private let hasher: IDashHasher
     private let quorumListMerkleRootCalculator: IQuorumListMerkleRootCalculator
     private let quorumSortedList: IQuorumSortedList
     private let merkleBranch: IMerkleBranch
 
-    init(storage: IDashStorage, quorumListMerkleRootCalculator: IQuorumListMerkleRootCalculator, merkleBranch: IMerkleBranch, quorumSortedList: IQuorumSortedList = QuorumSortedList()) {
+    init(storage: IDashStorage, hasher: IDashHasher, quorumListMerkleRootCalculator: IQuorumListMerkleRootCalculator, merkleBranch: IMerkleBranch, quorumSortedList: IQuorumSortedList = QuorumSortedList()) {
         self.storage = storage
+        self.hasher = hasher
         self.quorumListMerkleRootCalculator = quorumListMerkleRootCalculator
         self.merkleBranch = merkleBranch
         self.quorumSortedList = quorumSortedList
@@ -44,6 +46,31 @@ class QuorumListManager: IQuorumListManager {
             //.07
             storage.quorums = sortedQuorums
         }
+    }
+
+    func quorum(for requestID: Data, type: QuorumType) throws -> Quorum {
+        let typedQuorums = storage.quorums(by: type)
+
+        guard !typedQuorums.isEmpty else {
+            throw DashKitErrors.ISLockValidation.quorumNotFound
+        }
+
+        var quorum = typedQuorums[0]
+        var lowestHash = orderingHash(quorum: quorum, requestID: requestID)
+
+        for index in 1..<typedQuorums.count {
+            let currentOrderingHash = orderingHash(quorum: typedQuorums[index], requestID: requestID)
+            if currentOrderingHash < lowestHash {
+                lowestHash = currentOrderingHash
+                quorum = typedQuorums[index]
+            }
+        }
+
+        return quorum
+    }
+
+    private func orderingHash(quorum: Quorum, requestID: Data) -> Data {
+        return hasher.hash(data: quorum.typeWithQuorumHash + requestID)
     }
 
 }

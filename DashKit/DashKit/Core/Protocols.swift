@@ -67,6 +67,7 @@ protocol IMasternodeListManager {
 
 protocol IQuorumListManager {
     func updateList(masternodeListDiffMessage: MasternodeListDiffMessage) throws
+    func quorum(for requestID: Data, type: QuorumType) throws -> Quorum
 }
 
 protocol IMasternodeListSyncer {
@@ -77,6 +78,7 @@ protocol IDashStorage {
     var quorums: [Quorum] { get set }
     var masternodeListState: MasternodeListState? { get set }
 
+    func quorums(by type: QuorumType) -> [Quorum]
     func inputs(transactionHash: Data) -> [Input]
 
     func instantTransactionHashes() -> [Data]

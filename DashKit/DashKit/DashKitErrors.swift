@@ -7,6 +7,11 @@ public class DashKitErrors {
         case signatureNotValid
     }
 
+    public enum ISLockValidation: Error {
+        case signatureNotValid
+        case quorumNotFound
+    }
+
     public enum InstantSendLockValidation: Error {
         case signatureNotValid
     }
