@@ -3,11 +3,13 @@ import BitcoinCore
 
 class MasternodeListDiffMessageParser: IMessageParser {
     private let masternodeParser: IMasternodeParser
+    private let quorumParser: IQuorumParser
 
     var id: String { return "mnlistdiff" }
 
-    init(masternodeParser: IMasternodeParser) {
+    init(masternodeParser: IMasternodeParser, quorumParser: IQuorumParser) {
         self.masternodeParser = masternodeParser
+        self.quorumParser = quorumParser
     }
 
     func parse(data: Data) -> IMessage {
@@ -39,6 +41,18 @@ class MasternodeListDiffMessageParser: IMessageParser {
             mnList.append(masternodeParser.parse(byteStream: byteStream))
         }
 
+        let deletedQuorumsCount = Int(byteStream.read(VarInt.self).underlyingValue)
+        var deletedQuorums = [(type: UInt8, quorumHash: Data)]()
+        for _ in 0..<deletedQuorumsCount {
+            deletedQuorums.append((type: byteStream.read(UInt8.self), quorumHash: byteStream.read(Data.self, count: 32)))
+        }
+
+        let newQuorumsCount = Int(byteStream.read(VarInt.self).underlyingValue)
+        var quorumList = [Quorum]()
+        for _ in 0..<newQuorumsCount {
+            quorumList.append(quorumParser.parse(byteStream: byteStream))
+        }
+
         return MasternodeListDiffMessage(baseBlockHash: baseBlockHash,
                 blockHash: blockHash,
                 totalTransactions: totalTransactions,
@@ -50,7 +64,10 @@ class MasternodeListDiffMessageParser: IMessageParser {
                 deletedMNsCount: deletedMNsCount,
                 deletedMNs: deletedMNs,
                 mnListCount: mnListCount,
-                mnList: mnList)
+                mnList: mnList,
+                deletedQuorums: deletedQuorums,
+                quorumList: quorumList
+        )
     }
 
 }
