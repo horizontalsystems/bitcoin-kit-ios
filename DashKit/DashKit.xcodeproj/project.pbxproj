@@ -46,6 +46,7 @@
 		58AAA65979EDF654C84E786F /* ISLockParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA9D06F311DA7412688B5 /* ISLockParser.swift */; };
 		58AAA67497C667DD6794E85B /* TransactionLockVoteHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAB1C6D209CEB8839FABA /* TransactionLockVoteHandler.swift */; };
 		58AAA6966A02C430A3B46BE6 /* MerkleRootCreatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAAE0DB889BE114C53B2E /* MerkleRootCreatorTests.swift */; };
+		58AAA6C601A18EA4FF399D05 /* QuorumType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAB14B3DCDCBED15D0BE5 /* QuorumType.swift */; };
 		58AAA741B1FD041F7B434CD5 /* TransactionLockVoteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAA110961D4988D83E86E /* TransactionLockVoteManager.swift */; };
 		58AAA7C359F5952EE5807FDB /* MasternodeParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAF1192518AD77095979C /* MasternodeParser.swift */; };
 		58AAA7D71380E4555B03B662 /* TransactionLockVoteValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA74142320578EB118DB0 /* TransactionLockVoteValidator.swift */; };
@@ -167,6 +168,7 @@
 		58AAAAD1F0767070DBC89C8F /* InstantTransactionManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstantTransactionManager.swift; sourceTree = "<group>"; };
 		58AAAAE0DB889BE114C53B2E /* MerkleRootCreatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MerkleRootCreatorTests.swift; sourceTree = "<group>"; };
 		58AAAAE6497AEB457771A718 /* DashExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashExtensions.swift; sourceTree = "<group>"; };
+		58AAAB14B3DCDCBED15D0BE5 /* QuorumType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QuorumType.swift; sourceTree = "<group>"; };
 		58AAAB1C6D209CEB8839FABA /* TransactionLockVoteHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionLockVoteHandler.swift; sourceTree = "<group>"; };
 		58AAAB4372CC0F55CBBE60C9 /* MasternodeListDiffMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeListDiffMessage.swift; sourceTree = "<group>"; };
 		58AAAB4D9D73D00D4F098FB5 /* MasternodeListMerkleRootCalculator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeListMerkleRootCalculator.swift; sourceTree = "<group>"; };
@@ -405,6 +407,7 @@
 				58AAA879961D8A283F21BB9D /* QuorumSortedList.swift */,
 				58AAA3EBFD8F2F023852F70B /* QuorumListManager.swift */,
 				58AAA4AC566C9EC1630A1D83 /* QuorumListMerkleRootCalculator.swift */,
+				58AAAB14B3DCDCBED15D0BE5 /* QuorumType.swift */,
 			);
 			path = QuorumList;
 			sourceTree = "<group>";
@@ -814,6 +817,7 @@
 				58AAACBDFF8204102BA20514 /* MasternodeListManager.swift in Sources */,
 				58AAAB768B1B3D5501958643 /* QuorumListManager.swift in Sources */,
 				58AAA48909AC29CFA2761F65 /* QuorumListMerkleRootCalculator.swift in Sources */,
+				58AAA6C601A18EA4FF399D05 /* QuorumType.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

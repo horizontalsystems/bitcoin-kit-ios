@@ -55,6 +55,7 @@ class DashGrdbStorage: GrdbStorage {
                 t.column(Quorum.Columns.version.name, .integer).notNull()
                 t.column(Quorum.Columns.type.name, .integer).notNull()
                 t.column(Quorum.Columns.quorumHash.name, .text).notNull()
+                t.column(Quorum.Columns.typeWithQuorumHash.name, .text).notNull()
                 t.column(Quorum.Columns.signers.name, .text).notNull()
                 t.column(Quorum.Columns.validMembers.name, .text).notNull()
                 t.column(Quorum.Columns.quorumPublicKey.name, .text).notNull()
@@ -117,6 +118,12 @@ extension DashGrdbStorage: IDashStorage {
             _ = try? dbPool.write { db in
                 try newValue.insert(db)
             }
+        }
+    }
+
+    func quorums(by type: QuorumType) -> [Quorum] {
+        return try! dbPool.read { db in
+            try Quorum.filter(Quorum.Columns.type == type.rawValue).fetchAll(db)
         }
     }
 
