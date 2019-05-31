@@ -2,7 +2,7 @@ import BitcoinCore
 
 class MainNet: INetwork {
 
-    let protocolVersion: Int32 = 70213
+    let protocolVersion: Int32 = 70214
 
     let name = "dash-main-net"
 

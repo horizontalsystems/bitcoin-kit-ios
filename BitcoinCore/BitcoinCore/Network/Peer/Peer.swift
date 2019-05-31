@@ -7,6 +7,7 @@ class Peer {
         case peerHasExpiredBlockChain(localHeight: Int32, peerHeight: Int32)
         case peerNotFullNode
         case peerDoesNotSupportBloomFilter
+        case peerProtocolVersionOutdated
     }
 
     private var remotePeerValidated: Bool = false
@@ -113,6 +114,9 @@ class Peer {
     }
 
     private func validatePeerVersion(message: VersionMessage) throws {
+        guard message.version >= network.protocolVersion else {
+            throw PeerError.peerProtocolVersionOutdated
+        }
         guard let startHeight = message.startHeight, startHeight > 0 else {
             throw PeerError.peerBestBlockIsLessThanOne
         }
