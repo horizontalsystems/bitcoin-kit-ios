@@ -17,6 +17,7 @@
 		58AAA323FA5EDE02F99E25AE /* SegWitAddress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA71716FABEBBE3FFAB45 /* SegWitAddress.swift */; };
 		58AAA49B8012402356C135CE /* TestNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA6A33CBF3D1A0782C365 /* TestNet.swift */; };
 		58AAA4F949AA4261158F54B1 /* SegWitBech32AddressConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA5A526DD240851A5115F /* SegWitBech32AddressConverterTests.swift */; };
+		58AAA57AF8182EA3F11C0FD9 /* SegWitBech32KeyHashConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAABD4F082706A8D771796 /* SegWitBech32KeyHashConverter.swift */; };
 		58AAA63A4D5CB80B7D260F71 /* MainNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA5DC79D60B7733E52BEC /* MainNet.swift */; };
 		58AAA64BD96CE9A79484D42E /* SegWitBech32AddressConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA79DC50FFF8761BAFD89 /* SegWitBech32AddressConverter.swift */; };
 		58AAA663ECDC727231CA8863 /* Bech32.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA97073BF8F4DCA68CBE1 /* Bech32.swift */; };
@@ -59,6 +60,7 @@
 		58AAA8AA13E5099C73B8E79C /* GeneratedMocks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratedMocks.swift; sourceTree = "<group>"; };
 		58AAA97073BF8F4DCA68CBE1 /* Bech32.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bech32.swift; sourceTree = "<group>"; };
 		58AAAA628741DC6017350532 /* SegWitScriptBuilderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegWitScriptBuilderTests.swift; sourceTree = "<group>"; };
+		58AAABD4F082706A8D771796 /* SegWitBech32KeyHashConverter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegWitBech32KeyHashConverter.swift; sourceTree = "<group>"; };
 		58AAAC5F67BD7DA7392C6D82 /* SegWitBech32.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegWitBech32.swift; sourceTree = "<group>"; };
 		58AAACD1AA455F909A7E4378 /* RegTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegTest.swift; sourceTree = "<group>"; };
 		58AAACD3F4604233235F3FDD /* SegWitScriptBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegWitScriptBuilder.swift; sourceTree = "<group>"; };
@@ -181,6 +183,7 @@
 				58AAA97073BF8F4DCA68CBE1 /* Bech32.swift */,
 				58AAA71716FABEBBE3FFAB45 /* SegWitAddress.swift */,
 				58AAACD3F4604233235F3FDD /* SegWitScriptBuilder.swift */,
+				58AAABD4F082706A8D771796 /* SegWitBech32KeyHashConverter.swift */,
 			);
 			path = SegWit;
 			sourceTree = "<group>";
@@ -393,6 +396,7 @@
 				58AAA323FA5EDE02F99E25AE /* SegWitAddress.swift in Sources */,
 				58AAAC2EE10933D65DA4B027 /* SegWitScriptBuilder.swift in Sources */,
 				58AAAAAAA18E7D96FE94AADE /* BitcoinKitErrors.swift in Sources */,
+				58AAA57AF8182EA3F11C0FD9 /* SegWitBech32KeyHashConverter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

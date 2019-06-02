@@ -8,6 +8,8 @@ class BaseAdapter {
     let name: String
     let coinCode: String
 
+    var changeableAddressType: Bool { return false }
+
     private let abstractKit: AbstractKit
 
     let lastBlockSignal = Signal()
@@ -100,8 +102,8 @@ extension BaseAdapter {
         return abstractKit.syncState
     }
 
-    var receiveAddress: String {
-        return abstractKit.receiveAddress
+    func receiveAddress(for type: ScriptType) -> String {
+        return abstractKit.receiveAddress(for: type)
     }
 
     func validate(address: String) throws {

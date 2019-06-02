@@ -4,7 +4,8 @@ import HSHDWalletKit
 class WordsController: UIViewController {
 
     @IBOutlet weak var textView: UITextView?
-
+    @IBOutlet weak var wordListControl: UISegmentedControl!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -13,7 +14,21 @@ class WordsController: UIViewController {
         textView?.textContainerInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         textView?.layer.cornerRadius = 8
 
-        textView?.text = Configuration.shared.defaultWords
+        textView?.text = Configuration.shared.defaultWords[wordListControl.selectedSegmentIndex]
+        updateWordListControl()
+    }
+
+    func updateWordListControl() {
+        let accountCount = Configuration.shared.defaultWords.count
+        guard accountCount > 1 else {
+            wordListControl.isHidden = true
+            return
+        }
+        wordListControl.removeAllSegments()
+        for index in 0..<accountCount {
+            wordListControl.insertSegment(withTitle: "\(accountCount - index)", at: 0, animated: false)
+        }
+        wordListControl.selectedSegmentIndex = 0
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -21,10 +36,14 @@ class WordsController: UIViewController {
 
         view.endEditing(true)
     }
-
+    @IBAction func changeWordList(_ sender: Any) {
+        textView?.text = Configuration.shared.defaultWords[wordListControl.selectedSegmentIndex]
+    }
+    
     @IBAction func generateNewWords() {
         if let generatedWords = try? Mnemonic.generate() {
             textView?.text = generatedWords.joined(separator: " ")
+            wordListControl.selectedSegmentIndex = UISegmentedControl.noSegment
         }
     }
 

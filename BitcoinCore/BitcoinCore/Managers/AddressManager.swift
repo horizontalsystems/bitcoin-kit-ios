@@ -8,11 +8,13 @@ class AddressManager {
 
     private let storage: IStorage
     private let hdWallet: IHDWallet
+    private let addressKeyHashConverter: IAddressKeyHashConverter?
     private let addressConverter: IAddressConverter
 
-    init(storage: IStorage, hdWallet: IHDWallet, addressConverter: IAddressConverter) {
+    init(storage: IStorage, hdWallet: IHDWallet, addressConverter: IAddressConverter, addressKeyHashConverter: IAddressKeyHashConverter? = nil) {
         self.storage = storage
         self.addressConverter = addressConverter
+        self.addressKeyHashConverter = addressKeyHashConverter
         self.hdWallet = hdWallet
     }
 
@@ -60,8 +62,11 @@ extension AddressManager: IAddressManager {
         return try publicKey(external: false)
     }
 
-    func receiveAddress() throws -> String {
-        return try addressConverter.convert(keyHash: publicKey(external: true).keyHash, type: .p2pkh).stringValue
+    func receiveAddress(for type: ScriptType) throws -> String {
+        let keyHash = try publicKey(external: true).keyHash
+        let correctKeyHash = addressKeyHashConverter?.convert(keyHash: keyHash, type: type) ?? keyHash
+
+        return try addressConverter.convert(keyHash: correctKeyHash, type: type).stringValue
     }
 
     func fillGap() throws {
@@ -112,8 +117,8 @@ extension AddressManager: IAddressManager {
 
 extension AddressManager {
 
-    public static func instance(storage: IStorage, hdWallet: IHDWallet, addressConverter: IAddressConverter) -> AddressManager {
-        let addressManager = AddressManager(storage: storage, hdWallet: hdWallet, addressConverter: addressConverter)
+    public static func instance(storage: IStorage, hdWallet: IHDWallet, addressConverter: IAddressConverter, addressKeyHashConverter: IAddressKeyHashConverter? = nil) -> AddressManager {
+        let addressManager = AddressManager(storage: storage, hdWallet: hdWallet, addressConverter: addressConverter, addressKeyHashConverter: addressKeyHashConverter)
         try? addressManager.fillGap()
         return addressManager
     }

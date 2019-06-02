@@ -43,6 +43,7 @@ public class BitcoinKit: AbstractKit {
 
         let paymentAddressParser = PaymentAddressParser(validScheme: "bitcoin", removeScheme: true)
         let addressSelector = BitcoinAddressSelector()
+        let addressKeyHashConverter = SegWitBech32KeyHashConverter()
 
         let bitcoinCore = try BitcoinCoreBuilder(minLogLevel: minLogLevel)
                 .set(network: network)
@@ -50,6 +51,7 @@ public class BitcoinKit: AbstractKit {
                 .set(words: words)
                 .set(paymentAddressParser: paymentAddressParser)
                 .set(addressSelector: addressSelector)
+                .set(addressKeyHashConverter: addressKeyHashConverter)
                 .set(walletId: walletId)
                 .set(peerSize: 10)
                 .set(newWallet: newWallet)

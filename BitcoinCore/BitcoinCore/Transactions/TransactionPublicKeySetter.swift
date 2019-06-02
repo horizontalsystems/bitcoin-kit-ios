@@ -15,8 +15,11 @@ extension TransactionPublicKeySetter: ITransactionPublicKeySetter {
             var correctKey = key
             if output.scriptType == .p2wpkh, key.count > 2 {
                 correctKey = key.dropFirst(2)
+            }
+            if output.scriptType == .p2sh {
                 if let publicKey = storage.publicKey(byScriptHashForP2WPKH: correctKey) {
                     output.publicKeyPath = publicKey.path
+                    output.keyHash = publicKey.keyHash
                     output.scriptType = .p2wpkhSh
                     return true
                 }

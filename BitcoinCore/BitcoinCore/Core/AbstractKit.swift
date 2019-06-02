@@ -50,8 +50,8 @@ open class AbstractKit {
         return try bitcoinCore.fee(for: value, toAddress: toAddress, senderPay: senderPay, feeRate: feeRate)
     }
 
-    open var receiveAddress: String {
-        return bitcoinCore.receiveAddress
+    open func receiveAddress(for type: ScriptType) -> String {
+        return bitcoinCore.receiveAddress(for: type)
     }
 
     open var debugInfo: String {

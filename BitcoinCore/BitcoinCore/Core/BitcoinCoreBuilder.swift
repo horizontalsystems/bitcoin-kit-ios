@@ -10,6 +10,7 @@ public class BitcoinCoreBuilder {
     private var network: INetwork?
     private var paymentAddressParser: IPaymentAddressParser?
     private var addressSelector: IAddressSelector?
+    private var addressKeyHashConverter: IAddressKeyHashConverter?
     private var walletId: String?
     private var initialSyncApi: ISyncTransactionApi?
     private var logger: Logger
@@ -46,6 +47,11 @@ public class BitcoinCoreBuilder {
 
     public func set(addressSelector: IAddressSelector) -> BitcoinCoreBuilder {
         self.addressSelector = addressSelector
+        return self
+    }
+
+    public func set(addressKeyHashConverter: IAddressKeyHashConverter) -> BitcoinCoreBuilder {
+        self.addressKeyHashConverter = addressKeyHashConverter
         return self
     }
 
@@ -145,7 +151,7 @@ public class BitcoinCoreBuilder {
 
         let factory = Factory(network: network, networkMessageParser: networkMessageParser, networkMessageSerializer: networkMessageSerializer)
 
-        let addressManager = AddressManager.instance(storage: storage, hdWallet: hdWallet, addressConverter: addressConverter)
+        let addressManager = AddressManager.instance(storage: storage, hdWallet: hdWallet, addressConverter: addressConverter, addressKeyHashConverter: addressKeyHashConverter)
 
         let myOutputsCache = OutputsCache.instance(storage: storage)
         let scriptConverter = ScriptConverter()
