@@ -28,7 +28,7 @@ open class GrdbStorage {
                 t.column(PeerAddress.Columns.ip.name, .text).notNull()
                 t.column(PeerAddress.Columns.score.name, .integer).notNull()
 
-                t.primaryKey([PeerAddress.Columns.ip.name], onConflict: .replace)
+                t.primaryKey([PeerAddress.Columns.ip.name], onConflict: .ignore)
             }
         }
 
@@ -143,6 +143,7 @@ open class GrdbStorage {
         migrator.registerMigration("addConnectionTimeToPeerAddresses") { db in
             try db.alter(table: PeerAddress.databaseTableName) { t in
                 t.add(column: PeerAddress.Columns.connectionTime.name, .double)
+
             }
         }
 
@@ -169,14 +170,6 @@ extension GrdbStorage: IStorage {
     }
 
     // PeerAddress
-
-    public func existingPeerAddresses(fromIps ips: [String]) -> [PeerAddress] {
-        return try! dbPool.read { db in
-            try PeerAddress
-                    .filter(ips.contains(PeerAddress.Columns.ip))
-                    .fetchAll(db)
-        }
-    }
 
     public func leastScoreFastestPeerAddress(excludingIps: [String]) -> PeerAddress? {
         return try! dbPool.read { db in

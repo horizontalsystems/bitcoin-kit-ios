@@ -6,6 +6,8 @@ public enum InitialBlockDownloadEvent {
 }
 
 public class InitialBlockDownload {
+    private static let peerSwitchMinimumRatio = 1.5
+
     private var disposeBag = DisposeBag()
     private var blockSyncer: IBlockSyncer
     private let peerManager: IPeerManager
@@ -199,13 +201,13 @@ extension InitialBlockDownload {
     }
 
     private func onPeerCreate(peer: IPeer) {
-        peer.localBestBlockHeight = blockSyncer.localDownloadedBestBlockHeight ?? 0
+        peer.localBestBlockHeight = blockSyncer.localDownloadedBestBlockHeight
     }
 
     private func onPeerConnect(peer: IPeer) {
         peersQueue.async {
             self.syncedStates[peer.host] = false
-            if let syncPeer = self.syncPeer, syncPeer.connectionTime > peer.connectionTime * 1.1 {
+            if let syncPeer = self.syncPeer, syncPeer.connectionTime > peer.connectionTime * InitialBlockDownload.peerSwitchMinimumRatio {
                 self.selectNewPeer = true
             }
             self.assignNextSyncPeer()

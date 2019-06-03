@@ -49,17 +49,10 @@ extension PeerAddressManager: IPeerAddressManager {
             return
         }
 
-        let existingAddresses = storage.existingPeerAddresses(fromIps: ips)
-
-        let newAddresses = ips
-                .filter { ip in !existingAddresses.contains(where: { $0.ip == ip }) }
-                .unique
-                .map { PeerAddress(ip: $0, score: 0) }
-
+        let newAddresses = ips.map { PeerAddress(ip: $0, score: 0) }
         logger?.debug("Adding new addresses: \(newAddresses.count)")
 
         storage.save(peerAddresses: newAddresses)
-
         delegate?.newIpsAdded()
     }
 

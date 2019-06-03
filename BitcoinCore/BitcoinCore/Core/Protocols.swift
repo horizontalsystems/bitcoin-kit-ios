@@ -61,7 +61,6 @@ public protocol IStorage {
     var initialRestored: Bool? { get }
     func set(initialRestored: Bool)
 
-    func existingPeerAddresses(fromIps ips: [String]) -> [PeerAddress]
     func leastScoreFastestPeerAddress(excludingIps: [String]) -> PeerAddress?
     func save(peerAddresses: [PeerAddress])
     func increasePeerAddressScore(ip: String)

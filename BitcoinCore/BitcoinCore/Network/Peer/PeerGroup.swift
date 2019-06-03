@@ -23,8 +23,6 @@ class PeerGroup {
     private var peerCountConnected = 0          // number of peers connected to
 
     private var started: Bool = false
-    private var _started: Bool = false
-
 
     private let peersQueue: DispatchQueue
     private let inventoryQueue: DispatchQueue
