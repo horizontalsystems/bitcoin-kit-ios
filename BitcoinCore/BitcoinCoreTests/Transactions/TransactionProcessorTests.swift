@@ -36,6 +36,7 @@ class TransactionProcessorTests: XCTestCase {
             when(mock.transaction(byHash: any())).thenReturn(nil)
             when(mock.add(transaction: any())).thenDoNothing()
             when(mock.update(transaction: any())).thenDoNothing()
+            when(mock.update(block: any())).thenDoNothing()
         }
         stub(mockOutputsCache) { mock in
             when(mock.add(fromOutputs: any())).thenDoNothing()
@@ -200,6 +201,7 @@ class TransactionProcessorTests: XCTestCase {
         verify(mockStorage).update(transaction: equal(to: transactions[1].header))
         verify(mockStorage).add(transaction: equal(to: transactions[2]))
         verify(mockStorage).update(transaction: equal(to: transactions[3].header))
+        verify(mockStorage).update(block: equal(to: block))
         verify(mockBlockchainDataListener).onUpdate(updated: equal(to: [transactions[1].header, transactions[3].header]), inserted: equal(to: [transactions[0].header, transactions[2].header]), inBlock: equal(to: block))
 
         for (i, transaction) in transactions.enumerated() {

@@ -13,6 +13,7 @@ public class Block: Record {
     public var headerHash: Data
     public var height: Int
     var stale: Bool = false
+    var hasTransactions: Bool = false
 
     public init(withHeader header: BlockHeader, height: Int) {
         version = header.version
@@ -45,6 +46,7 @@ public class Block: Record {
         case headerHash
         case height
         case stale
+        case hasTransactions
     }
 
     required init(row: Row) {
@@ -57,6 +59,7 @@ public class Block: Record {
         headerHash = row[Columns.headerHash]
         height = row[Columns.height]
         stale = row[Columns.stale]
+        hasTransactions = row[Columns.hasTransactions]
 
         super.init(row: row)
     }
@@ -71,6 +74,7 @@ public class Block: Record {
         container[Columns.headerHash] = headerHash
         container[Columns.height] = height
         container[Columns.stale] = stale
+        container[Columns.hasTransactions] = hasTransactions
     }
 
 }
