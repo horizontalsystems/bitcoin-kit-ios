@@ -28,7 +28,7 @@ open class GrdbStorage {
                 t.column(PeerAddress.Columns.ip.name, .text).notNull()
                 t.column(PeerAddress.Columns.score.name, .integer).notNull()
 
-                t.primaryKey([PeerAddress.Columns.ip.name], onConflict: .replace)
+                t.primaryKey([PeerAddress.Columns.ip.name], onConflict: .ignore)
             }
         }
 
@@ -140,6 +140,13 @@ open class GrdbStorage {
             }
         }
 
+        migrator.registerMigration("addConnectionTimeToPeerAddresses") { db in
+            try db.alter(table: PeerAddress.databaseTableName) { t in
+                t.add(column: PeerAddress.Columns.connectionTime.name, .double)
+
+            }
+        }
+
         return migrator
     }
 
@@ -164,19 +171,11 @@ extension GrdbStorage: IStorage {
 
     // PeerAddress
 
-    public func existingPeerAddresses(fromIps ips: [String]) -> [PeerAddress] {
-        return try! dbPool.read { db in
-            try PeerAddress
-                    .filter(ips.contains(PeerAddress.Columns.ip))
-                    .fetchAll(db)
-        }
-    }
-
-    public func leastScorePeerAddress(excludingIps: [String]) -> PeerAddress? {
+    public func leastScoreFastestPeerAddress(excludingIps: [String]) -> PeerAddress? {
         return try! dbPool.read { db in
             try PeerAddress
                     .filter(!excludingIps.contains(PeerAddress.Columns.ip))
-                    .order(PeerAddress.Columns.score.asc)
+                    .order(PeerAddress.Columns.score.asc, PeerAddress.Columns.connectionTime.asc)
                     .fetchOne(db)
         }
     }
@@ -201,6 +200,15 @@ extension GrdbStorage: IStorage {
     public func deletePeerAddress(byIp ip: String) {
         _ = try! dbPool.write { db in
             try PeerAddress.filter(PeerAddress.Columns.ip == ip).deleteAll(db)
+        }
+    }
+
+    public func set(connectionTime: Double, toPeerAddress ip: String) {
+        _ = try! dbPool.write { db in
+            if let peerAddress = try PeerAddress.filter(PeerAddress.Columns.ip == ip).fetchOne(db) {
+                peerAddress.connectionTime = connectionTime
+                try peerAddress.save(db)
+            }
         }
     }
 

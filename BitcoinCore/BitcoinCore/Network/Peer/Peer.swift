@@ -13,6 +13,7 @@ class Peer {
     private var remotePeerValidated: Bool = false
     private var versionSent: Bool = false
     private var mempoolSent: Bool = false
+    private var connectStartTime: Double?
 
     weak var delegate: PeerDelegate?
 
@@ -27,6 +28,7 @@ class Peer {
     var localBestBlockHeight: Int32 = 0
     // TODO seems like property connected is not needed. It is always true in PeerManager. Need to check it and remove
     var connected: Bool = false
+    var connectionTime: Double = 1000
 
     var protocolVersion: Int32 {
         return network.protocolVersion
@@ -77,23 +79,30 @@ class Peer {
         connection.send(message: VerackMessage())
     }
 
+    private func handleCompletedHandshake() {
+        guard remotePeerValidated && !connected else {
+            return
+        }
+
+        connected = true
+        guard let connectStartTime = self.connectStartTime else {
+            connection.disconnect(error: nil)
+            return
+        }
+        connectionTime = Date().timeIntervalSince1970 - connectStartTime
+        delegate?.peerDidConnect(self)
+    }
+
     private func handle(message: IMessage) throws {
-        if let versionMessage = message as? VersionMessage {
-            handle(message: versionMessage)
-            return
-        } else if let _ = message as? VerackMessage {
-            handleVerackMessage()
-            return
-        }
-
-        guard self.connected else {
-            return
-        }
-
         switch message {
+        case let versionMessage as VersionMessage: handle(message: versionMessage)
+        case _ as VerackMessage: handleCompletedHandshake()
         case let pingMessage as PingMessage: handle(message: pingMessage)
         case _ as PongMessage: ()
-        default: try handle(anyMessage: message)
+        default:
+            if self.connected {
+                try handle(anyMessage: message)
+            }
         }
     }
 
@@ -109,8 +118,7 @@ class Peer {
         self.announcedLastBlockHeight = message.startHeight ?? 0
 
         sendVerack()
-        connected = true
-        delegate?.peerDidConnect(self)
+        handleCompletedHandshake()
     }
 
     private func validatePeerVersion(message: VersionMessage) throws {
@@ -132,15 +140,6 @@ class Peer {
         guard message.supportsBloomFilter(network: network) else {
             throw PeerError.peerDoesNotSupportBloomFilter
         }
-    }
-
-    private func handleVerackMessage() {
-        guard remotePeerValidated && !connected else {
-            return
-        }
-
-        connected = true
-        delegate?.peerDidConnect(self)
     }
 
     private func handle(message: PingMessage) {
@@ -168,6 +167,7 @@ extension Peer: IPeer {
 
     func connect() {
         connection.connect()
+        connectStartTime = Date().timeIntervalSince1970
     }
 
     func disconnect(error: Error? = nil) {
