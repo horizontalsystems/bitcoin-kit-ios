@@ -4,6 +4,7 @@ import RxSwift
 
 class BitcoinAdapter: BaseAdapter {
     private let bitcoinKit: BitcoinKit
+    override var changeableAddressType: Bool { return true }
 
     init(words: [String], testMode: Bool) {
         let networkType: BitcoinKit.NetworkType = testMode ? .testNet : .mainNet

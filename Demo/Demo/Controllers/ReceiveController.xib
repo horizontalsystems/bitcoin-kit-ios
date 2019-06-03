@@ -4,14 +4,16 @@
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
+        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="ReceiveController" customModule="EthereumKitDemo" customModuleProvider="target">
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="ReceiveController" customModule="Demo" customModuleProvider="target">
             <connections>
                 <outlet property="addressLabel" destination="SOD-d7-YsF" id="RPU-8u-SVb"/>
+                <outlet property="addressTypeControl" destination="RFL-q5-nXR" id="a2b-14-v2o"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
             </connections>
         </placeholder>
@@ -37,24 +39,40 @@
                     <nil key="highlightedColor"/>
                 </label>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="a2A-Fu-Eqr">
-                    <rect key="frame" x="168" y="138" width="39" height="32"/>
+                    <rect key="frame" x="168" y="178" width="39" height="32"/>
                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                     <state key="normal" title="Copy"/>
                     <connections>
                         <action selector="copyToClipboard" destination="-1" eventType="touchUpInside" id="bqk-aE-5NZ"/>
                     </connections>
                 </button>
+                <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="RFL-q5-nXR">
+                    <rect key="frame" x="20" y="136" width="335" height="28"/>
+                    <segments>
+                        <segment title="p2pkh"/>
+                        <segment title="p2wpkh"/>
+                        <segment title="p2sh(wpkh)"/>
+                    </segments>
+                    <connections>
+                        <action selector="onAddressTypeChanged:" destination="-1" eventType="valueChanged" id="Ep1-wZ-2lD"/>
+                    </connections>
+                </segmentedControl>
             </subviews>
             <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <constraints>
+                <constraint firstItem="RFL-q5-nXR" firstAttribute="trailing" secondItem="SOD-d7-YsF" secondAttribute="trailing" id="5vq-nS-hPL"/>
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="lJJ-k1-zZg" secondAttribute="trailing" constant="20" id="61p-2I-tPm"/>
+                <constraint firstItem="RFL-q5-nXR" firstAttribute="top" secondItem="SOD-d7-YsF" secondAttribute="bottom" constant="18" id="DWr-0Z-TFb"/>
                 <constraint firstItem="lJJ-k1-zZg" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="20" id="HyB-ze-IQM"/>
                 <constraint firstItem="SOD-d7-YsF" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="20" id="JzL-V8-Y4x"/>
+                <constraint firstItem="a2A-Fu-Eqr" firstAttribute="top" secondItem="RFL-q5-nXR" secondAttribute="bottom" constant="15" id="L7t-fY-q7N"/>
+                <constraint firstItem="RFL-q5-nXR" firstAttribute="leading" secondItem="SOD-d7-YsF" secondAttribute="leading" id="OgI-3e-wO3"/>
                 <constraint firstItem="a2A-Fu-Eqr" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="P9b-4Z-fWD"/>
                 <constraint firstItem="lJJ-k1-zZg" firstAttribute="top" secondItem="fnl-2z-Ty3" secondAttribute="top" constant="20" id="gDf-iy-SWI"/>
                 <constraint firstItem="SOD-d7-YsF" firstAttribute="top" secondItem="lJJ-k1-zZg" secondAttribute="bottom" constant="20" id="k85-kX-66e"/>
+                <constraint firstItem="RFL-q5-nXR" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="upz-ea-AzV"/>
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="SOD-d7-YsF" secondAttribute="trailing" constant="20" id="vsV-HG-LOo"/>
-                <constraint firstItem="a2A-Fu-Eqr" firstAttribute="top" secondItem="SOD-d7-YsF" secondAttribute="bottom" constant="20" id="vui-M1-LdE"/>
+                <constraint firstItem="a2A-Fu-Eqr" firstAttribute="top" secondItem="SOD-d7-YsF" secondAttribute="bottom" constant="60" id="vui-M1-LdE"/>
             </constraints>
             <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
         </view>

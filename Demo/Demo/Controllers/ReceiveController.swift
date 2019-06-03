@@ -1,11 +1,13 @@
 import UIKit
 import RxSwift
+import BitcoinCore
 
 class ReceiveController: UIViewController {
     private let disposeBag = DisposeBag()
 
     @IBOutlet weak var addressLabel: UILabel?
-
+    @IBOutlet weak var addressTypeControl: UISegmentedControl!
+    
     private var adapters = [BaseAdapter]()
     private let segmentedControl = UISegmentedControl()
 
@@ -43,6 +45,9 @@ class ReceiveController: UIViewController {
 
         segmentedControl.selectedSegmentIndex = 0
         segmentedControl.sendActions(for: .valueChanged)
+
+        addressTypeControl.selectedSegmentIndex = 0
+        addressTypeControl.isHidden = false
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -51,13 +56,32 @@ class ReceiveController: UIViewController {
         segmentedControl.sendActions(for: .valueChanged)
     }
 
+    func type(segment: Int) -> ScriptType {
+        switch segment {
+        case 1: return .p2wpkh
+        case 2: return .p2wpkhSh
+        default: return .p2pkh
+        }
+    }
+
     @objc func onSegmentChanged() {
-        addressLabel?.text = "  \(currentAdapter?.receiveAddress ?? "")  "
+        addressTypeControl.isHidden = segmentedControl.selectedSegmentIndex != 0
+        addressTypeControl.selectedSegmentIndex = 0
+        updateAddress()
+
         if let adapter = currentAdapter {
             print(adapter.debugInfo)
         }
     }
+    func updateAddress() {
+        let segment = addressTypeControl.selectedSegmentIndex
+        addressLabel?.text = "  \(currentAdapter?.receiveAddress(for: type(segment: segment)) ?? "")  "
+    }
 
+    @IBAction func onAddressTypeChanged(_ sender: Any) {
+        updateAddress()
+    }
+    
     @IBAction func copyToClipboard() {
         if let address = addressLabel?.text?.trimmingCharacters(in: .whitespaces) {
             UIPasteboard.general.setValue(address, forPasteboardType: "public.plain-text")

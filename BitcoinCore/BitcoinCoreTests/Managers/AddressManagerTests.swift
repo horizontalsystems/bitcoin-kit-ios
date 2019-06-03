@@ -92,7 +92,7 @@ class AddressManagerTests: XCTestCase {
             when(mock.convert(keyHash: equal(to: publicKeys[3].publicKey.keyHash), type: equal(to: ScriptType.p2pkh))).thenReturn(address)
         }
 
-        XCTAssertEqual(try? manager.receiveAddress(), address.stringValue)
+        XCTAssertEqual(try? manager.receiveAddress(for: .p2pkh), address.stringValue)
         verify(mockAddressConverter).convert(keyHash: equal(to: publicKeys[3].publicKey.keyHash), type: equal(to: ScriptType.p2pkh))
     }
 
@@ -104,7 +104,7 @@ class AddressManagerTests: XCTestCase {
         }
 
         do {
-            let _ = try manager.receiveAddress()
+            let _ = try manager.receiveAddress(for: .p2pkh)
             XCTFail("Should throw exception")
         } catch let error as AddressManager.AddressManagerError {
             XCTAssertEqual(error, AddressManager.AddressManagerError.noUnusedPublicKey)

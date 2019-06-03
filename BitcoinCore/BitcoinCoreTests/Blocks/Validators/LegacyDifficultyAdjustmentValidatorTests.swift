@@ -22,7 +22,7 @@ class LegacyDifficultyAdjustmentValidatorTests: XCTestCase {
         stub(mockEncoder) { mock in
             when(mock.decodeCompact(bits: 476399191)).thenReturn(BigInt("10665477591887247494381404907447500979192021944764506987270680608768"))
             when(mock.decodeCompact(bits: 474199013)).thenReturn(BigInt("7129927859545590787920041835044506526699926406309469412482969763840"))
-            when(mock.encodeCompact(from: equal(to: BigInt("7129928201274994723790235748908587989251132236328748923672922318604")!))).thenReturn(474199013)
+            when(mock.encodeCompact(from: equal(to: BigInt("7129928201274994723790235748908587989251132236328748923672922318604")))).thenReturn(474199013)
         }
         mockBlockHelper = MockIBlockValidatorHelper()
 
@@ -83,7 +83,7 @@ class LegacyDifficultyAdjustmentValidatorTests: XCTestCase {
 
     func testNotDifficultyTransitionEqualBits() {
         stub(mockEncoder) { mock in
-            when(mock.encodeCompact(from: equal(to: BigInt("7129928201274994723790235748908587989251132236328748923672922318604")!))).thenReturn(0)
+            when(mock.encodeCompact(from: equal(to: BigInt("7129928201274994723790235748908587989251132236328748923672922318604")))).thenReturn(0)
         }
         do {
             try validator.validate(block: block, previousBlock: previousBlock)

@@ -159,8 +159,8 @@ extension BitcoinCore {
         return try transactionBuilder.fee(for: value, feeRate: feeRate, senderPay: senderPay, address: toAddress)
     }
 
-    public var receiveAddress: String {
-        return (try? addressManager.receiveAddress()) ?? ""
+    public func receiveAddress(for type: ScriptType) -> String {
+        return (try? addressManager.receiveAddress(for: type)) ?? ""
     }
 
     public var debugInfo: String {

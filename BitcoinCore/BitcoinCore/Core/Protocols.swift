@@ -130,7 +130,7 @@ public protocol IAddressSelector {
 
 public protocol IAddressManager {
     func changePublicKey() throws -> PublicKey
-    func receiveAddress() throws -> String
+    func receiveAddress(for type: ScriptType) throws -> String
     func fillGap() throws
     func addKeys(keys: [PublicKey]) throws
     func gapShifts() -> Bool
@@ -277,6 +277,10 @@ protocol IInitialSyncerDelegate: class {
 
 protocol IPaymentAddressParser {
     func parse(paymentAddress: String) -> BitcoinPaymentData
+}
+
+public protocol IAddressKeyHashConverter {
+    func convert(keyHash: Data, type: ScriptType) -> Data
 }
 
 public protocol IAddressConverter {
