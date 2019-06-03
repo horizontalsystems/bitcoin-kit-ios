@@ -24,6 +24,8 @@ extension TransactionOutputAddressExtractor: ITransactionOutputAddressExtractor 
             switch output.scriptType {
             case .p2pk:
                 keyHash = CryptoKit.sha256ripemd160(key)
+            case .p2wpkhSh:
+                keyHash = CryptoKit.sha256ripemd160(OpCode.scriptWPKH(key))
             default: keyHash = key
             }
 
