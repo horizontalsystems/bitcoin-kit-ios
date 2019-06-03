@@ -20,7 +20,7 @@ class PeerAddressManager {
 extension PeerAddressManager: IPeerAddressManager {
 
     var ip: String? {
-        guard let ip = storage.leastScorePeerAddress(excludingIps: state.usedIps)?.ip else {
+        guard let ip = storage.leastScoreFastestPeerAddress(excludingIps: state.usedIps)?.ip else {
             for dnsSeed in dnsSeeds {
                 peerDiscovery.lookup(dnsSeed: dnsSeed)
             }
@@ -63,4 +63,7 @@ extension PeerAddressManager: IPeerAddressManager {
         delegate?.newIpsAdded()
     }
 
+    func markConnected(peer: IPeer) {
+        storage.set(connectionTime: peer.connectionTime, toPeerAddress: peer.host)
+    }
 }

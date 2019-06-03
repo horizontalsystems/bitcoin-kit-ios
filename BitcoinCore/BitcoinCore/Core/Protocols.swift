@@ -46,6 +46,7 @@ protocol IPeerAddressManager: class {
     func markSuccess(ip: String)
     func markFailed(ip: String)
     func add(ips: [String])
+    func markConnected(peer: IPeer)
 }
 
 protocol IStateManager {
@@ -61,11 +62,11 @@ public protocol IStorage {
     func set(initialRestored: Bool)
 
     func existingPeerAddresses(fromIps ips: [String]) -> [PeerAddress]
-    func leastScorePeerAddress(excludingIps: [String]) -> PeerAddress?
+    func leastScoreFastestPeerAddress(excludingIps: [String]) -> PeerAddress?
     func save(peerAddresses: [PeerAddress])
     func increasePeerAddressScore(ip: String)
     func deletePeerAddress(byIp ip: String)
-
+    func set(connectionTime: Double, toPeerAddress: String)
 
 
     var blockchainBlockHashes: [BlockHash] { get }
@@ -162,6 +163,7 @@ protocol IPeerManager: class {
     func disconnectAll()
     func totalPeersCount() -> Int
     func connected() -> [IPeer]
+    func sorted() -> [IPeer]
 }
 
 public protocol IPeer: class {
@@ -172,6 +174,7 @@ public protocol IPeer: class {
     var logName: String { get }
     var ready: Bool { get }
     var connected: Bool { get }
+    var connectionTime: Double { get }
     func connect()
     func disconnect(error: Error?)
     func add(task: PeerTask)

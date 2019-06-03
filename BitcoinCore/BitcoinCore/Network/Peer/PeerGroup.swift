@@ -18,7 +18,9 @@ class PeerGroup {
     private var peerAddressManager: IPeerAddressManager
     private var peerManager: IPeerManager
 
-    private var peerCount: Int
+    private var peerCountToHold: Int            // number of peers held
+    private var peerCountToConnect = 100        // number of peers to connect to
+    private var peerCountConnected = 0          // number of peers connected to
 
     private var started: Bool = false
     private var _started: Bool = false
@@ -47,7 +49,7 @@ class PeerGroup {
 
         self.reachabilityManager = reachabilityManager
         self.peerAddressManager = peerAddressManager
-        self.peerCount = peerCount
+        self.peerCountToHold = peerCount
         self.peerManager = peerManager
 
         self.peersQueue = peersQueue
@@ -66,16 +68,23 @@ class PeerGroup {
                 return
             }
 
-            for _ in self.peerManager.totalPeersCount()..<self.peerCount {
+            var peersToConnect = [IPeer]()
+
+            for _ in self.peerManager.totalPeersCount()..<self.peerCountToHold {
                 if let host = self.peerAddressManager.ip {
                     let peer = self.factory.peer(withHost: host, logger: self.logger)
                     peer.delegate = self
-                    self.onNext(.onPeerCreate(peer: peer))
-                    self.peerManager.add(peer: peer)
-                    peer.connect()
+                    peersToConnect.append(peer)
                 } else {
                     break
                 }
+            }
+
+            for peer in peersToConnect {
+                self.peerCountConnected += 1
+                self.onNext(.onPeerCreate(peer: peer))
+                self.peerManager.add(peer: peer)
+                peer.connect()
             }
         }
     }
@@ -96,6 +105,7 @@ extension PeerGroup: IPeerGroup {
         }
 
         started = true
+        peerCountConnected = 0
 
         onNext(.onStart)
         connectPeersIfRequired()
@@ -125,7 +135,15 @@ extension PeerGroup: PeerDelegate {
     }
 
     func peerDidConnect(_ peer: IPeer) {
+        peerAddressManager.markConnected(peer: peer)
         onNext(.onPeerConnect(peer: peer))
+
+        if peerCountToConnect > peerCountConnected && peerCountToHold > 1 {
+            let sortedPeers = peerManager.sorted()
+            if sortedPeers.count >= peerCountToHold {
+                sortedPeers.last?.disconnect(error: nil)
+            }
+        }
     }
 
     func peerDidDisconnect(_ peer: IPeer, withError error: Error?) {

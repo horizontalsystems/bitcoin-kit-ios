@@ -7,7 +7,7 @@ public enum InitialBlockDownloadEvent {
 
 public class InitialBlockDownload {
     private var disposeBag = DisposeBag()
-    private var blockSyncer: IBlockSyncer?
+    private var blockSyncer: IBlockSyncer
     private let peerManager: IPeerManager
     private let merkleBlockValidator: IMerkleBlockValidator
     private let syncStateListener: ISyncStateListener
@@ -23,13 +23,14 @@ public class InitialBlockDownload {
     private var syncedStates = [String: Bool]()
     private var blockHashesSyncedStates = [String: Bool]()
 
+    private var selectNewPeer = false
     private var syncPeer: IPeer?
     private let peersQueue: DispatchQueue
     private let logger: Logger?
 
     public var syncedPeers = [IPeer]()
 
-    init(blockSyncer: IBlockSyncer?, peerManager: IPeerManager, merkleBlockValidator: IMerkleBlockValidator, syncStateListener: ISyncStateListener,
+    init(blockSyncer: IBlockSyncer, peerManager: IPeerManager, merkleBlockValidator: IMerkleBlockValidator, syncStateListener: ISyncStateListener,
          peersQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Local Queue", qos: .userInitiated),
          scheduler: SchedulerType = SerialDispatchQueueScheduler(qos: .background),
          logger: Logger? = nil) {
@@ -56,18 +57,26 @@ public class InitialBlockDownload {
             return
         }
 
-        let nonSyncedPeers = peerManager.connected().filter { !syncedState($0) }
+        let nonSyncedPeers = peerManager.sorted().filter { !syncedState($0) }
 
         if let peer = nonSyncedPeers.first(where: { $0.ready }) {
             logger?.debug("Setting sync peer to \(peer.logName)")
             syncPeer = peer
-            blockSyncer?.downloadStarted()
+            blockSyncer.downloadStarted()
             downloadBlockchain()
         }
     }
 
     private func downloadBlockchain() {
-        guard let blockSyncer = blockSyncer, let syncPeer = self.syncPeer, syncPeer.ready else {
+        guard let syncPeer = self.syncPeer, syncPeer.ready else {
+            return
+        }
+
+        if selectNewPeer {
+            selectNewPeer = false
+            blockSyncer.downloadCompleted()
+            self.syncPeer = nil
+            assignNextSyncPeer()
             return
         }
 
@@ -165,11 +174,11 @@ extension InitialBlockDownload: IPeerTaskHandler {
                     self.blockHashesSyncedStates[peer.host] = true
                 }
             } else {
-                blockSyncer?.add(blockHashes: t.blockHashes)
+                blockSyncer.add(blockHashes: t.blockHashes)
             }
             return true
         case is GetMerkleBlocksTask:
-            blockSyncer?.downloadIterationCompleted()
+            blockSyncer.downloadIterationCompleted()
             return true
         default: return false
         }
@@ -182,7 +191,7 @@ extension InitialBlockDownload {
     private func onStart() {
         syncStateListener.syncStarted()
         resetRequiredDownloadSpeed()
-        blockSyncer?.prepareForDownload()
+        blockSyncer.prepareForDownload()
     }
 
     private func onStop() {
@@ -190,12 +199,15 @@ extension InitialBlockDownload {
     }
 
     private func onPeerCreate(peer: IPeer) {
-        peer.localBestBlockHeight = blockSyncer?.localDownloadedBestBlockHeight ?? 0
+        peer.localBestBlockHeight = blockSyncer.localDownloadedBestBlockHeight ?? 0
     }
 
     private func onPeerConnect(peer: IPeer) {
         peersQueue.async {
             self.syncedStates[peer.host] = false
+            if let syncPeer = self.syncPeer, syncPeer.connectionTime > peer.connectionTime * 1.1 {
+                self.selectNewPeer = true
+            }
             self.assignNextSyncPeer()
         }
     }
@@ -217,7 +229,7 @@ extension InitialBlockDownload {
 
             if peer.equalTo(self.syncPeer) {
                 self.syncPeer = nil
-                self.blockSyncer?.downloadFailed()
+                self.blockSyncer.downloadFailed()
                 self.assignNextSyncPeer()
             }
         }
@@ -237,7 +249,7 @@ extension InitialBlockDownload: IMerkleBlockHandler {
 
     func handle(merkleBlock: MerkleBlock) throws {
         let maxBlockHeight = syncPeer?.announcedLastBlockHeight ?? 0
-        try blockSyncer?.handle(merkleBlock: merkleBlock, maxBlockHeight: maxBlockHeight)
+        try blockSyncer.handle(merkleBlock: merkleBlock, maxBlockHeight: maxBlockHeight)
     }
 
 }

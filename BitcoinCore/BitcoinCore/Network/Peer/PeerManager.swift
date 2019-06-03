@@ -27,4 +27,8 @@ class PeerManager: IPeerManager {
         return peers.filter({ $0.connected })
     }
 
+    func sorted() -> [IPeer] {
+        return connected().sorted(by: { $0.connectionTime < $1.connectionTime })
+    }
+
 }
