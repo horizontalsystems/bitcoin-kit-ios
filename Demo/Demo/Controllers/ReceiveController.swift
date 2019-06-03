@@ -58,9 +58,8 @@ class ReceiveController: UIViewController {
 
     func type(segment: Int) -> ScriptType {
         switch segment {
-        case 1: return .p2sh
-        case 2: return .p2wpkh
-        case 3: return .p2wpkhSh
+        case 1: return .p2wpkh
+        case 2: return .p2wpkhSh
         default: return .p2pkh
         }
     }

@@ -50,9 +50,8 @@
                     <rect key="frame" x="20" y="136" width="335" height="28"/>
                     <segments>
                         <segment title="p2pkh"/>
-                        <segment title="p2sh"/>
                         <segment title="p2wpkh"/>
-                        <segment title="p2wsh"/>
+                        <segment title="p2sh(wpkh)"/>
                     </segments>
                     <connections>
                         <action selector="onAddressTypeChanged:" destination="-1" eventType="valueChanged" id="Ep1-wZ-2lD"/>

@@ -53,15 +53,27 @@ class TransactionPublicKeySetterTests: XCTestCase {
         XCTAssertEqual(tx.outputs[0].publicKeyPath, publicKey.path)
     }
 
-    func testSetP2WPKHSHKeys() {
+    func testSetP2WPKHKeys() {
         let tx = TestData.p2pkhTransaction
         tx.outputs[0].scriptType = .p2wpkh
-        tx.outputs[0].keyHash = Data(hex: "0014")! + publicKey.scriptHashForP2WPKH
+        tx.outputs[0].keyHash = Data(hex: "0014")! + publicKey.keyHash
+        let mine = transactionKeySetter.set(output: tx.outputs[0])
+
+        XCTAssertEqual(mine, true)
+        XCTAssertEqual(tx.outputs[0].publicKeyPath, publicKey.path)
+        XCTAssertEqual(tx.outputs[0].scriptType, .p2wpkh)
+    }
+
+    func testSetP2WPKHSHKeys() {
+        let tx = TestData.p2pkhTransaction
+        tx.outputs[0].scriptType = .p2sh
+        tx.outputs[0].keyHash = publicKey.scriptHashForP2WPKH
         let mine = transactionKeySetter.set(output: tx.outputs[0])
 
         XCTAssertEqual(mine, true)
         XCTAssertEqual(tx.outputs[0].publicKeyPath, publicKey.path)
         XCTAssertEqual(tx.outputs[0].scriptType, .p2wpkhSh)
+        XCTAssertEqual(tx.outputs[0].keyHash, publicKey.keyHash)
     }
 
 }
