@@ -143,8 +143,15 @@ open class GrdbStorage {
         migrator.registerMigration("addConnectionTimeToPeerAddresses") { db in
             try db.alter(table: PeerAddress.databaseTableName) { t in
                 t.add(column: PeerAddress.Columns.connectionTime.name, .double)
-
             }
+        }
+
+        migrator.registerMigration("addHasTransactionsToBlocks") { db in
+            try db.alter(table: Block.databaseTableName) { t in
+                t.add(column: Block.Columns.hasTransactions.name, .boolean).notNull().defaults(to: false)
+            }
+
+            try db.execute(sql: "UPDATE \(Block.databaseTableName) SET \(Block.Columns.hasTransactions.name) = true")
         }
 
         return migrator
@@ -284,6 +291,16 @@ extension GrdbStorage: IStorage {
         }
     }
 
+    public func deleteUselessBlocks(before height: Int) {
+        _ = try! dbPool.write { db in
+            try Block.filter(Block.Columns.height < height).filter(Block.Columns.hasTransactions == false).deleteAll(db)
+        }
+    }
+
+    public func releaseMemory() {
+        dbPool.releaseMemory()
+    }
+
     // Block
 
     public var blocksCount: Int {
@@ -301,6 +318,12 @@ extension GrdbStorage: IStorage {
     public func blocksCount(headerHashes: [Data]) -> Int {
         return try! dbPool.read { db in
             try Block.filter(headerHashes.contains(Block.Columns.headerHash)).fetchCount(db)
+        }
+    }
+
+    public func update(block: Block) {
+        _ = try! dbPool.write { db in
+            try block.update(db)
         }
     }
 

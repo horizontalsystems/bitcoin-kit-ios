@@ -237,6 +237,13 @@ extension BitcoinCore {
         case notSynced
     }
 
+    public enum SyncMode: Equatable {
+        case full                           // Sync from bip44CheckpointBlock. Api restore disabled
+        case fromDate(date: TimeInterval)   // Sync from given date. Api restore disable
+        case api                            // Sync from lastCheckpointBlock. Api restore enabled
+        case newWallet                      // Sync from lastCheckpointBlock. Api restore enabled
+    }
+
 }
 
 extension BitcoinCore.KitState {

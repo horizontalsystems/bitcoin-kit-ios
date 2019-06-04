@@ -7,9 +7,9 @@ class DashAdapter: BaseAdapter {
     override var feeRate: Int { return 1 }
     private let dashKit: DashKit
 
-    init(words: [String], testMode: Bool) {
+    init(words: [String], testMode: Bool, syncMode: BitcoinCore.SyncMode) {
         let networkType: DashKit.NetworkType = testMode ? .testNet : .mainNet
-        dashKit = try! DashKit(withWords: words, walletId: "walletId", newWallet: false, networkType: networkType, minLogLevel: Configuration.shared.minLogLevel)
+        dashKit = try! DashKit(withWords: words, walletId: "walletId", syncMode: syncMode, networkType: networkType, minLogLevel: Configuration.shared.minLogLevel)
 
         super.init(name: "Dash", coinCode: "DASH", abstractKit: dashKit)
         dashKit.delegate = self

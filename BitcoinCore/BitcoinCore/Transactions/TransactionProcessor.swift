@@ -57,6 +57,11 @@ class TransactionProcessor {
         transaction.status = .relayed
         transaction.timestamp = block?.timestamp ?? Int(dateGenerator().timeIntervalSince1970)
         transaction.order = order
+
+        if let block = block, !block.hasTransactions {
+            block.hasTransactions = true
+            storage.update(block: block)
+        }
     }
 
 }

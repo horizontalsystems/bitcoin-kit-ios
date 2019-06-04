@@ -1,4 +1,5 @@
 import RxSwift
+import BitcoinCore
 
 class Manager {
     static let shared = Manager()
@@ -11,17 +12,24 @@ class Manager {
     init() {
         if let words = savedWords {
             DispatchQueue.global(qos: .userInitiated).async {
-                self.initAdapters(words: words)
+                self.initAdapters(words: words, syncMode: .api)
             }
         }
     }
 
-    func login(words: [String]) {
+    func login(words: [String], syncModeStr: String) {
         save(words: words)
         clearKits()
 
+        let syncMode: BitcoinCore.SyncMode
+        if syncModeStr == "full" {
+            syncMode = .full
+        } else {
+            syncMode = .api
+        }
+
         DispatchQueue.global(qos: .userInitiated).async {
-            self.initAdapters(words: words)
+            self.initAdapters(words: words, syncMode: syncMode)
         }
     }
 
@@ -30,13 +38,13 @@ class Manager {
         adapters = []
     }
 
-    private func initAdapters(words: [String]) {
+    private func initAdapters(words: [String], syncMode: BitcoinCore.SyncMode) {
         let configuration = Configuration.shared
 
         adapters = [
-            BitcoinAdapter(words: words, testMode: configuration.testNet),
-            BitcoinCashAdapter(words: words, testMode: configuration.testNet),
-            DashAdapter(words: words, testMode: configuration.testNet),
+            BitcoinAdapter(words: words, testMode: configuration.testNet, syncMode: syncMode),
+            BitcoinCashAdapter(words: words, testMode: configuration.testNet, syncMode: syncMode),
+            DashAdapter(words: words, testMode: configuration.testNet, syncMode: syncMode),
         ]
 
         adapterSignal.notify()

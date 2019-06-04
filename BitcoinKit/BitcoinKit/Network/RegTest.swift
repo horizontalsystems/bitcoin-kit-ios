@@ -22,7 +22,7 @@ class RegTest: INetwork {
          "btc03-regtest.horizontalsystems.xyz",
     ]
 
-    var genesisBlock: Block {
+    var bip44CheckpointBlock: Block {
         return Block(
                 withHeader: BlockHeader(
                         version: 1,
@@ -36,7 +36,7 @@ class RegTest: INetwork {
                 height: 0)
     }
 
-    var checkpointBlock: Block {
+    var lastCheckpointBlock: Block {
         return Block(
                 withHeader: BlockHeader(
                         version: 1,

@@ -1,12 +1,10 @@
 class StateManager {
     private let storage: IStorage
-    private let network: INetwork
-    private let newWallet: Bool
+    private let restoreFromApi: Bool
 
-    init(storage: IStorage, network: INetwork, newWallet: Bool) {
+    init(storage: IStorage, restoreFromApi: Bool) {
         self.storage = storage
-        self.network = network
-        self.newWallet = newWallet
+        self.restoreFromApi = restoreFromApi
     }
 
 }
@@ -15,11 +13,7 @@ extension StateManager: IStateManager {
 
     var restored: Bool {
         get {
-            guard network.syncableFromApi else {
-                return true
-            }
-
-            guard !newWallet else {
+            guard restoreFromApi else {
                 return true
             }
 

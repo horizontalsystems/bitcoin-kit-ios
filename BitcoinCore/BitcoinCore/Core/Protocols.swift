@@ -77,10 +77,13 @@ public protocol IStorage {
     func add(blockHashes: [BlockHash])
     func deleteBlockHash(byHash: Data)
     func deleteBlockchainBlockHashes()
+    func deleteUselessBlocks(before: Int)
+    func releaseMemory()
 
     var blocksCount: Int { get }
     var lastBlock: Block? { get }
     func blocksCount(headerHashes: [Data]) -> Int
+    func update(block: Block)
     func save(block: Block)
     func blocks(heightGreaterThan: Int, sortedBy: Block.Columns, limit: Int) -> [Block]
     func blocks(from startHeight: Int, to endHeight: Int, ascending: Bool) -> [Block]
@@ -444,8 +447,8 @@ public protocol INetwork: class {
     var magic: UInt32 { get }
     var port: UInt32 { get }
     var dnsSeeds: [String] { get }
-    var genesisBlock: Block { get }
-    var checkpointBlock: Block { get }
+    var bip44CheckpointBlock: Block { get }
+    var lastCheckpointBlock: Block { get }
     var coinType: UInt32 { get }
     var sigHash: SigHashType { get }
     var syncableFromApi: Bool { get }

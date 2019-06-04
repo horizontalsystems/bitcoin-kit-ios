@@ -5,9 +5,9 @@ import RxSwift
 class BitcoinCashAdapter: BaseAdapter {
     private let bitcoinCashKit: BitcoinCashKit
 
-    init(words: [String], testMode: Bool) {
+    init(words: [String], testMode: Bool, syncMode: BitcoinCore.SyncMode) {
         let networkType: BitcoinCashKit.NetworkType = testMode ? .testNet : .mainNet
-        bitcoinCashKit = try! BitcoinCashKit(withWords: words, walletId: "walletId", networkType: networkType, minLogLevel: Configuration.shared.minLogLevel)
+        bitcoinCashKit = try! BitcoinCashKit(withWords: words, walletId: "walletId", syncMode: syncMode, networkType: networkType, minLogLevel: Configuration.shared.minLogLevel)
 
         super.init(name: "Bitcoin Cash", coinCode: "BCH", abstractKit: bitcoinCashKit)
         bitcoinCashKit.delegate = self

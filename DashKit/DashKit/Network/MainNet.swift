@@ -25,7 +25,7 @@ class MainNet: INetwork {
         "dnsseed.masternode.io",
     ]
 
-    var genesisBlock: Block {
+    var bip44CheckpointBlock: Block {
         return Block(
                 withHeader: BlockHeader(
                         version: 1,
@@ -38,18 +38,18 @@ class MainNet: INetwork {
                 ),
                 height: 0)
     }
-    var checkpointBlock: Block {
+    var lastCheckpointBlock: Block {
         return Block(
                 withHeader: BlockHeader(
-                        version: 536870912,
-                        headerHash: "0000000000000003bb7d2b3945dff00674f750b48e5de5b65139cbcd2a6f0d3e".reversedData!,
-                        previousBlockHeaderHash: "0000000000000008d97c982f13b79db8e6992e3e3735050ed4a8e1cab8b252e9".reversedData!,
-                        merkleRoot: "104d81ab298edb237539e4f0a6189f46825bea2de1375aacf846377ab5353c51".reversedData!,
-                        timestamp: 1557390509,
-                        bits: 421233986,
-                        nonce: 2584914130
+                        version: 536870928,
+                        headerHash: "00000000000000011ce58a8bb55333277640b015e97689f9277d582a4c1f9999".reversedData!,
+                        previousBlockHeaderHash: "000000000000000fcbac491b68a0774d1b9f82edeae8742eb492815e8fa76ca5".reversedData!,
+                        merkleRoot: "91e15e6045c20d06abc41eb5feb17813ccc723f6f018ca8fd01485e8837bc761".reversedData!,
+                        timestamp: 1559624664,
+                        bits: 0x191a414a,
+                        nonce: 838341360
                 ),
-                height: 1067177)
+                height: 1081358)
     }
 
 }

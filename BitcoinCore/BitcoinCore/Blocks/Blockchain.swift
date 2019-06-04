@@ -34,6 +34,11 @@ extension Blockchain: IBlockchain {
         try storage.add(block: block)
         listener?.onInsert(block: block)
 
+        if block.height % 2016 == 0 {
+            storage.deleteUselessBlocks(before: block.height - 2016)
+            storage.releaseMemory()
+        }
+
         return block
     }
 

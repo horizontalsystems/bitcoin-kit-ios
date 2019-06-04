@@ -33,7 +33,7 @@ class BlockDiscoveryBatchTest: XCTestCase {
         }
 
         stub(mockNetwork) {mock in
-            when(mock.checkpointBlock.get).thenReturn(TestData.checkpointBlock)
+            when(mock.lastCheckpointBlock.get).thenReturn(TestData.checkpointBlock)
         }
 
         blockDiscovery = BlockDiscoveryBatch(network: mockNetwork, wallet: mockWallet, blockHashFetcher: mockBlockHashFetcher, logger: nil)
