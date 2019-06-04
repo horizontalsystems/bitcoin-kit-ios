@@ -53,6 +53,9 @@ class TransactionProcessor {
     }
 
     private func relay(transaction: Transaction, withOrder order: Int, inBlock block: Block?) {
+        guard block != nil || transaction.blockHash == nil else {
+            return
+        }
         transaction.blockHash = block?.headerHash
         transaction.status = .relayed
         transaction.timestamp = block?.timestamp ?? Int(dateGenerator().timeIntervalSince1970)

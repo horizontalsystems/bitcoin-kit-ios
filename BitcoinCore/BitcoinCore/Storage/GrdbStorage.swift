@@ -405,7 +405,7 @@ extension GrdbStorage: IStorage {
 
     public func unstaleAllBlocks() throws {
         _ = try! dbPool.write { db in
-            try db.execute(sql: "UPDATE \(Block.databaseTableName) SET stale = ? WHERE stale = ?", arguments: [true, false])
+            try db.execute(sql: "UPDATE \(Block.databaseTableName) SET stale = ? WHERE stale = ?", arguments: [false, true])
         }
     }
 

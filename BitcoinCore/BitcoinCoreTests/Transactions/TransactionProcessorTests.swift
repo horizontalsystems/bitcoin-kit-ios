@@ -179,6 +179,44 @@ class TransactionProcessorTests: XCTestCase {
         }
     }
 
+    func testProcessReceivedMempool_After_Block_TransactionExists() {
+        let transaction = TestData.p2pkhTransaction
+        let block = TestData.firstBlock
+        transaction.header.status = .new
+
+        stub(mockStorage) { mock in
+            when(mock.transaction(byHash: equal(to: transaction.header.dataHash))).thenReturn(transaction.header)
+        }
+
+        try! transactionProcessor.processReceived(transactions: [transaction], inBlock: block, skipCheckBloomFilter: false)
+        try! transactionProcessor.processReceived(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false)
+
+        XCTAssertEqual(transaction.header.status, TransactionStatus.relayed)
+        XCTAssertEqual(transaction.header.blockHash, block.headerHash)
+        XCTAssertEqual(transaction.header.timestamp, block.timestamp)
+        XCTAssertEqual(transaction.header.order, 0)
+    }
+
+    func testProcessReceivedBlock_After_Block_TransactionExists() {
+        let transaction = TestData.p2pkhTransaction
+        let block = TestData.firstBlock
+        let nextBlock = TestData.secondBlock
+        transaction.header.status = .new
+
+        stub(mockStorage) { mock in
+            when(mock.transaction(byHash: equal(to: transaction.header.dataHash))).thenReturn(transaction.header)
+        }
+
+        try! transactionProcessor.processReceived(transactions: [transaction], inBlock: block, skipCheckBloomFilter: false)
+        try! transactionProcessor.processReceived(transactions: [transaction], inBlock: nextBlock, skipCheckBloomFilter: false)
+
+        XCTAssertEqual(transaction.header.status, TransactionStatus.relayed)
+        XCTAssertEqual(transaction.header.blockHash, nextBlock.headerHash)
+        XCTAssertEqual(transaction.header.timestamp, nextBlock.timestamp)
+        XCTAssertEqual(transaction.header.order, 0)
+    }
+
+
     func testProcessReceived_SeveralTransactionsInBlock() {
         let transactions = self.transactions()
         let block = TestData.firstBlock
