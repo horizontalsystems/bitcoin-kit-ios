@@ -13,7 +13,7 @@ class BlockDiscoveryBatch {
         self.wallet = wallet
         self.blockHashFetcher = blockHashFetcher
 
-        maxHeight = network.checkpointBlock.height
+        maxHeight = network.lastCheckpointBlock.height
         gapLimit = wallet.gapLimit
     }
 

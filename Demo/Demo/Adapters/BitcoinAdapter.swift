@@ -6,9 +6,9 @@ class BitcoinAdapter: BaseAdapter {
     private let bitcoinKit: BitcoinKit
     override var changeableAddressType: Bool { return true }
 
-    init(words: [String], testMode: Bool) {
+    init(words: [String], testMode: Bool, syncMode: BitcoinCore.SyncMode) {
         let networkType: BitcoinKit.NetworkType = testMode ? .testNet : .mainNet
-        bitcoinKit = try! BitcoinKit(withWords: words, walletId: "walletId", networkType: networkType, minLogLevel: Configuration.shared.minLogLevel)
+        bitcoinKit = try! BitcoinKit(withWords: words, walletId: "walletId", syncMode: syncMode, networkType: networkType, minLogLevel: Configuration.shared.minLogLevel)
 
         super.init(name: "Bitcoin", coinCode: "BTC", abstractKit: bitcoinKit)
         bitcoinKit.delegate = self

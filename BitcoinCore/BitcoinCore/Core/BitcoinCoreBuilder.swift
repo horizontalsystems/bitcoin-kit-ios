@@ -20,7 +20,7 @@ public class BitcoinCoreBuilder {
 
     // parameters with default values
     private var confirmationsThreshold = 6
-    private var newWallet = false
+    private var syncMode = BitcoinCore.SyncMode.api
     private var peerCount = 10
 
     private var storage: IStorage?
@@ -65,8 +65,8 @@ public class BitcoinCoreBuilder {
         return self
     }
 
-    public func set(newWallet: Bool) -> BitcoinCoreBuilder {
-        self.newWallet = newWallet
+    public func set(syncMode: BitcoinCore.SyncMode) -> BitcoinCoreBuilder {
+        self.syncMode = syncMode
         return self
     }
 
@@ -183,7 +183,7 @@ public class BitcoinCoreBuilder {
         let blockHashFetcher = BlockHashFetcher(addressSelector: addressSelector, apiManager: initialSyncApi, addressConverter: addressConverter, helper: BlockHashFetcherHelper())
         let blockDiscovery = BlockDiscoveryBatch(network: network, wallet: hdWallet, blockHashFetcher: blockHashFetcher, logger: logger)
 
-        let stateManager = StateManager(storage: storage, network: network, newWallet: newWallet)
+        let stateManager = StateManager(storage: storage, restoreFromApi: network.syncableFromApi && syncMode == BitcoinCore.SyncMode.api)
 
         let initialSyncer = InitialSyncer(storage: storage, listener: kitStateProvider, stateManager: stateManager, blockDiscovery: blockDiscovery, addressManager: addressManager, logger: logger)
 
@@ -193,7 +193,8 @@ public class BitcoinCoreBuilder {
 
         let blockValidatorChain = BlockValidatorChain(proofOfWorkValidator: ProofOfWorkValidator(difficultyEncoder: DifficultyEncoder()))
         let blockchain = Blockchain(storage: storage, blockValidator: blockValidatorChain, factory: factory, listener: dataProvider)
-        let blockSyncer = BlockSyncer.instance(storage: storage, network: network, factory: factory, listener: kitStateProvider, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager, logger: logger)
+        let checkpointBlock = syncMode == .full ? network.bip44CheckpointBlock : network.lastCheckpointBlock
+        let blockSyncer = BlockSyncer.instance(storage: storage, checkpointBlock: checkpointBlock, factory: factory, listener: kitStateProvider, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager, logger: logger)
         let initialBlockDownload = InitialBlockDownload(blockSyncer: blockSyncer, peerManager: peerManager, merkleBlockValidator: merkleBlockValidator, syncStateListener: kitStateProvider, logger: logger)
         let syncedReadyPeerManager = SyncedReadyPeerManager(peerGroup: peerGroup, initialBlockDownload: initialBlockDownload)
 

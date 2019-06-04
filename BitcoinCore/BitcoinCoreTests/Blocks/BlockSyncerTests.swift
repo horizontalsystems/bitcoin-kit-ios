@@ -7,7 +7,6 @@ import Cuckoo
 class BlockSyncerTests: QuickSpec {
     override func spec() {
         let mockStorage = MockIStorage()
-        let mockNetwork = MockINetwork()
         let mockFactory = MockIFactory()
         let mockListener = MockISyncStateListener()
         let mockTransactionProcessor = MockITransactionProcessor()
@@ -20,9 +19,6 @@ class BlockSyncerTests: QuickSpec {
         var syncer: BlockSyncer!
 
         beforeEach {
-            stub(mockNetwork) { mock in
-                when(mock.checkpointBlock.get).thenReturn(checkpointBlock)
-            }
             stub(mockStorage) { mock in
                 when(mock.blocksCount.get).thenReturn(1)
                 when(mock.lastBlock.get).thenReturn(nil)
@@ -46,7 +42,7 @@ class BlockSyncerTests: QuickSpec {
         }
 
         afterEach {
-            reset(mockStorage, mockNetwork, mockListener, mockTransactionProcessor, mockBlockchain, mockAddressManager, mockBloomFilterManager, mockState)
+            reset(mockStorage, mockListener, mockTransactionProcessor, mockBlockchain, mockAddressManager, mockBloomFilterManager, mockState)
 
             syncer = nil
         }
@@ -64,7 +60,7 @@ class BlockSyncerTests: QuickSpec {
                             when(mock.initialBestBlockHeightUpdated(height: equal(to: Int32(checkpointBlock.height)))).thenDoNothing()
                         }
 
-                        let _ = BlockSyncer.instance(storage: mockStorage, network: mockNetwork, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
+                        let _ = BlockSyncer.instance(storage: mockStorage, checkpointBlock: checkpointBlock, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
                                 blockchain: mockBlockchain, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager, hashCheckpointThreshold: 100)
                     }
 
@@ -92,7 +88,7 @@ class BlockSyncerTests: QuickSpec {
                             when(mock.initialBestBlockHeightUpdated(height: equal(to: Int32(checkpointBlock.height)))).thenDoNothing()
                         }
 
-                        let _ = BlockSyncer.instance(storage: mockStorage, network: mockNetwork, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
+                        let _ = BlockSyncer.instance(storage: mockStorage, checkpointBlock: checkpointBlock, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
                                 blockchain: mockBlockchain, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager, hashCheckpointThreshold: 100)
                     }
 
@@ -109,7 +105,7 @@ class BlockSyncerTests: QuickSpec {
 
         context("instance methods") {
             beforeEach {
-                syncer = BlockSyncer(storage: mockStorage, network: mockNetwork, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
+                syncer = BlockSyncer(storage: mockStorage, checkpointBlock: checkpointBlock, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
                         blockchain: mockBlockchain, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager,
                         hashCheckpointThreshold: 100, logger: nil, state: mockState)
             }

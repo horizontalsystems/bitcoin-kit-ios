@@ -4,7 +4,7 @@ class BlockSyncer {
     private let storage: IStorage
 
     private let listener: ISyncStateListener
-    private let network: INetwork
+    private let checkpointBlock: Block
     private let factory: IFactory
     private let transactionProcessor: ITransactionProcessor
     private let blockchain: IBlockchain
@@ -16,12 +16,12 @@ class BlockSyncer {
 
     private let logger: Logger?
 
-    init(storage: IStorage, network: INetwork, factory: IFactory, listener: ISyncStateListener, transactionProcessor: ITransactionProcessor,
+    init(storage: IStorage, checkpointBlock: Block, factory: IFactory, listener: ISyncStateListener, transactionProcessor: ITransactionProcessor,
          blockchain: IBlockchain, addressManager: IAddressManager, bloomFilterManager: IBloomFilterManager,
          hashCheckpointThreshold: Int, logger: Logger?, state: BlockSyncerState
     ) {
         self.storage = storage
-        self.network = network
+        self.checkpointBlock = checkpointBlock
         self.factory = factory
         self.transactionProcessor = transactionProcessor
         self.blockchain = blockchain
@@ -50,7 +50,7 @@ class BlockSyncer {
     }
 
     private func clearPartialBlocks() throws {
-        let blockReversedHashes = storage.blockHashHeaderHashes(except: network.checkpointBlock.headerHash)
+        let blockReversedHashes = storage.blockHashHeaderHashes(except: checkpointBlock.headerHash)
 
         let blocksToDelete = storage.blocks(byHexes: blockReversedHashes)
         try blockchain.deleteBlocks(blocks: blocksToDelete)
@@ -107,7 +107,7 @@ extension BlockSyncer: IBlockSyncer {
         }
 
         if blockLocatorHashes.isEmpty {
-            for block in storage.blocks(heightGreaterThan: network.checkpointBlock.height, sortedBy: Block.Columns.height, limit: 10) {
+            for block in storage.blocks(heightGreaterThan: checkpointBlock.height, sortedBy: Block.Columns.height, limit: 10) {
                 blockLocatorHashes.append(block.headerHash)
             }
         }
@@ -117,7 +117,7 @@ extension BlockSyncer: IBlockSyncer {
                 blockLocatorHashes.append(peerLastBlock.headerHash)
             }
         } else {
-            blockLocatorHashes.append(network.checkpointBlock.headerHash)
+            blockLocatorHashes.append(checkpointBlock.headerHash)
         }
 
         return blockLocatorHashes
@@ -168,16 +168,16 @@ extension BlockSyncer: IBlockSyncer {
 
 extension BlockSyncer {
 
-    public static func instance(storage: IStorage, network: INetwork, factory: IFactory, listener: ISyncStateListener, transactionProcessor: ITransactionProcessor,
+    public static func instance(storage: IStorage, checkpointBlock: Block, factory: IFactory, listener: ISyncStateListener, transactionProcessor: ITransactionProcessor,
                                 blockchain: IBlockchain, addressManager: IAddressManager, bloomFilterManager: IBloomFilterManager,
                                 hashCheckpointThreshold: Int = 100, logger: Logger? = nil, state: BlockSyncerState = BlockSyncerState()) -> BlockSyncer {
 
-        let syncer = BlockSyncer(storage: storage, network: network, factory: factory, listener: listener, transactionProcessor: transactionProcessor,
+        let syncer = BlockSyncer(storage: storage, checkpointBlock: checkpointBlock, factory: factory, listener: listener, transactionProcessor: transactionProcessor,
                 blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager,
                 hashCheckpointThreshold: hashCheckpointThreshold, logger: logger, state: state)
 
         if storage.blocksCount == 0 {
-            storage.save(block: network.checkpointBlock)
+            storage.save(block: checkpointBlock)
         }
 
         listener.initialBestBlockHeightUpdated(height: syncer.localDownloadedBestBlockHeight)

@@ -1,4 +1,5 @@
 import RxSwift
+import BitcoinCore
 
 class Manager {
     static let shared = Manager()
@@ -34,9 +35,9 @@ class Manager {
         let configuration = Configuration.shared
 
         adapters = [
-            BitcoinAdapter(words: words, testMode: configuration.testNet),
-            BitcoinCashAdapter(words: words, testMode: configuration.testNet),
-            DashAdapter(words: words, testMode: configuration.testNet),
+            BitcoinAdapter(words: words, testMode: configuration.testNet, syncMode: configuration.syncMode),
+            BitcoinCashAdapter(words: words, testMode: configuration.testNet, syncMode: configuration.syncMode),
+            DashAdapter(words: words, testMode: configuration.testNet, syncMode: configuration.syncMode),
         ]
 
         adapterSignal.notify()

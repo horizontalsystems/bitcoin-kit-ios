@@ -15,38 +15,38 @@ class MainNet: INetwork {
     let port: UInt32 = 8333
     let coinType: UInt32 = 0
     let sigHash: SigHashType = .bitcoinCashAll
-    var syncableFromApi: Bool = true
+    var syncableFromApi: Bool = false
 
     let dnsSeeds = [
         "seed.bitcoinabc.org",
     ]
 
-    var genesisBlock: Block {
+    var bip44CheckpointBlock: Block {
         return Block(
                 withHeader: BlockHeader(
-                        version: 1,
-                        headerHash: "00000000839a8e6886ab5951d76f411475428afc90947ee320161bbf18eb6048".reversedData!,
-                        previousBlockHeaderHash: "0000000000000000000000000000000000000000000000000000000000000000".reversedData!,
-                        merkleRoot: "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b".reversedData!,
-                        timestamp: 1231006505,
-                        bits: 486604799,
-                        nonce: 2083236893
+                        version: 2,
+                        headerHash: "00000000000000003decdbb5f3811eab3148fbc29d3610528eb3b50d9ee5723f".reversedData!,
+                        previousBlockHeaderHash: "00000000000000006bcf448b771c8f4db4e2ca653474e3b29504ec08422b3fba".reversedData!,
+                        merkleRoot: "4ea18e999a57fc55fb390558dbb88a7b9c55c71c7de4cec160c045802ee587d2".reversedData!,
+                        timestamp: 1397755646,
+                        bits: 419470732,
+                        nonce: 2160181286
                 ),
-                height: 0)
+                height: 296352)
     }
 
-    var checkpointBlock: Block {
+    var lastCheckpointBlock: Block {
         return Block(
                 withHeader: BlockHeader(
-                        version: 805289984,
-                        headerHash: "0000000000000000030e41502adfbcb20fdca66b15cc9e157449585c6c85da6e".reversedData!,
-                        previousBlockHeaderHash: "000000000000000000e1f8ea917f17c378fdfd8d13f23160c6cb522d406c37ab".reversedData!,
-                        merkleRoot: "923fb5f581b3dfe4bc6103891c63e5789abbaac7d8fcd2ba4b25ac2abccdba9c".reversedData!,
-                        timestamp: 1557394860,
-                        bits: 402883015,
-                        nonce: 3963128149
+                        version: 0x2000e000,
+                        headerHash: "00000000000000000040f26002e04126dc84700d6f82c0785efab2293080fe68".reversedData!,
+                        previousBlockHeaderHash: "00000000000000000000000002a1f5acfab47e5e1afcac9f50eb9b7c875e6c736d0997630000000000e1f8ea917f17c378fdfd8d13f23160c6cb522d406c37ab".reversedData!,
+                        merkleRoot: "e6a8e517f708d294f426895c255cfd0a443d7f55a768b04398eadde0c516027c".reversedData!,
+                        timestamp: 1559650598,
+                        bits: 0x1803769a,
+                        nonce: 0xed7bb8ff
                 ),
-                height: 581790)
+                height: 585504)
     }
 
 }

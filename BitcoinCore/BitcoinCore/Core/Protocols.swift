@@ -447,8 +447,8 @@ public protocol INetwork: class {
     var magic: UInt32 { get }
     var port: UInt32 { get }
     var dnsSeeds: [String] { get }
-    var genesisBlock: Block { get }
-    var checkpointBlock: Block { get }
+    var bip44CheckpointBlock: Block { get }
+    var lastCheckpointBlock: Block { get }
     var coinType: UInt32 { get }
     var sigHash: SigHashType { get }
     var syncableFromApi: Bool { get }
