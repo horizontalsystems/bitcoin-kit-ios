@@ -5,15 +5,21 @@ class EDAValidator: IBlockValidator {
     private let difficultyEncoder: IBitcoinCashDifficultyEncoder
     private let blockHelper: IBitcoinCashBlockValidatorHelper
     private let maxTargetBits: Int
+    private let firstCheckpointHeight: Int
 
-    init(encoder: IBitcoinCashDifficultyEncoder, blockHelper: IBitcoinCashBlockValidatorHelper, maxTargetBits: Int) {
+    init(encoder: IBitcoinCashDifficultyEncoder, blockHelper: IBitcoinCashBlockValidatorHelper, maxTargetBits: Int, firstCheckpointHeight: Int) {
         difficultyEncoder = encoder
         self.blockHelper = blockHelper
 
         self.maxTargetBits = maxTargetBits
+        self.firstCheckpointHeight = firstCheckpointHeight
     }
 
     func validate(block: Block, previousBlock: Block) throws {
+        guard previousBlock.height >= firstCheckpointHeight + 6 else {
+            return                                                                              // we must trust first 6 blocks from checkpoint, because can't calculate it's bits
+        }
+
         if previousBlock.bits == maxTargetBits {
             if block.bits != maxTargetBits {
                 throw BitcoinCoreErrors.BlockValidation.notEqualBits

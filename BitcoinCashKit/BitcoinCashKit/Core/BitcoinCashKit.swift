@@ -54,7 +54,7 @@ public class BitcoinCashKit: AbstractKit {
                 .set(paymentAddressParser: paymentAddressParser)
                 .set(addressSelector: addressSelector)
                 .set(walletId: walletId)
-                .set(peerSize: 4)
+                .set(peerSize: 10)
                 .set(syncMode: syncMode)
                 .set(storage: storage)
                 .build()
@@ -71,9 +71,9 @@ public class BitcoinCashKit: AbstractKit {
 
         switch networkType {
         case .mainNet:
-            bitcoinCore.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: coreBlockHelper, heightInterval: BitcoinCore.heightInterval, targetTimespan: BitcoinCore.targetSpacing * BitcoinCore.heightInterval, maxTargetBits: BitcoinCore.maxTargetBits))
             bitcoinCore.add(blockValidator: DAAValidator(encoder: difficultyEncoder, blockHelper: blockHelper, targetSpacing: BitcoinCashKit.targetSpacing, heightInterval: BitcoinCashKit.heightInterval, firstCheckpointHeight: network.lastCheckpointBlock.height))
-            bitcoinCore.add(blockValidator: EDAValidator(encoder: difficultyEncoder, blockHelper: blockHelper, maxTargetBits: BitcoinCore.maxTargetBits))
+            bitcoinCore.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: coreBlockHelper, heightInterval: BitcoinCore.heightInterval, targetTimespan: BitcoinCore.targetSpacing * BitcoinCore.heightInterval, maxTargetBits: BitcoinCore.maxTargetBits))
+            bitcoinCore.add(blockValidator: EDAValidator(encoder: difficultyEncoder, blockHelper: blockHelper, maxTargetBits: BitcoinCore.maxTargetBits, firstCheckpointHeight: network.bip44CheckpointBlock.height))
         case .testNet: ()
             // not use test validators
         }
