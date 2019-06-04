@@ -15,7 +15,7 @@ class MainNet: INetwork {
     let port: UInt32 = 8333
     let coinType: UInt32 = 0
     let sigHash: SigHashType = .bitcoinCashAll
-    var syncableFromApi: Bool = false
+    var syncableFromApi: Bool = true
 
     let dnsSeeds = [
         "seed.bitcoinabc.org",
@@ -40,7 +40,7 @@ class MainNet: INetwork {
                 withHeader: BlockHeader(
                         version: 0x2000e000,
                         headerHash: "00000000000000000040f26002e04126dc84700d6f82c0785efab2293080fe68".reversedData!,
-                        previousBlockHeaderHash: "00000000000000000000000002a1f5acfab47e5e1afcac9f50eb9b7c875e6c736d0997630000000000e1f8ea917f17c378fdfd8d13f23160c6cb522d406c37ab".reversedData!,
+                        previousBlockHeaderHash: "000000000000000002a1f5acfab47e5e1afcac9f50eb9b7c875e6c736d099763".reversedData!,
                         merkleRoot: "e6a8e517f708d294f426895c255cfd0a443d7f55a768b04398eadde0c516027c".reversedData!,
                         timestamp: 1559650598,
                         bits: 0x1803769a,

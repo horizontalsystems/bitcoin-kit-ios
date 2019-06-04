@@ -5,7 +5,8 @@ class WordsController: UIViewController {
 
     @IBOutlet weak var textView: UITextView?
     @IBOutlet weak var wordListControl: UISegmentedControl!
-    
+    @IBOutlet weak var syncModeListControl: UISegmentedControl!
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -39,7 +40,7 @@ class WordsController: UIViewController {
     @IBAction func changeWordList(_ sender: Any) {
         textView?.text = Configuration.shared.defaultWords[wordListControl.selectedSegmentIndex]
     }
-    
+
     @IBAction func generateNewWords() {
         if let generatedWords = try? Mnemonic.generate() {
             textView?.text = generatedWords.joined(separator: " ")
@@ -52,8 +53,15 @@ class WordsController: UIViewController {
 
         do {
             try Mnemonic.validate(words: words)
+            
+            let syncMode: String
+            if syncModeListControl.selectedSegmentIndex == 0 {
+                syncMode = "full"
+            } else {
+                syncMode = "api"
+            }
 
-            Manager.shared.login(words: words)
+            Manager.shared.login(words: words, syncModeStr: syncMode)
 
             if let window = UIApplication.shared.keyWindow {
                 UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve, animations: {
