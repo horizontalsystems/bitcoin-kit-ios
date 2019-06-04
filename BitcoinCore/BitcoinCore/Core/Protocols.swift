@@ -43,6 +43,7 @@ protocol IReachabilityManager {
 protocol IPeerAddressManager: class {
     var delegate: IPeerAddressManagerDelegate? { get set }
     var ip: String? { get }
+    var hasFreshIps: Bool { get }
     func markSuccess(ip: String)
     func markFailed(ip: String)
     func add(ips: [String])
