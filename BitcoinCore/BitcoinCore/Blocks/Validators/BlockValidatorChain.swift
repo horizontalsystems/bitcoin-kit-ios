@@ -10,7 +10,7 @@ class BlockValidatorChain: IBlockValidator {
         try proofOfWorkValidator.validate(block: block, previousBlock: previousBlock)
 
         if let index = concreteValidators.firstIndex(where: { $0.isBlockValidatable(block: block, previousBlock: previousBlock) }) {
-            try? concreteValidators[index].validate(block: block, previousBlock: previousBlock)
+            try concreteValidators[index].validate(block: block, previousBlock: previousBlock)
         }
     }
 
