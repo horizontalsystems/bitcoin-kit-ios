@@ -22,6 +22,7 @@ public class BitcoinCoreBuilder {
     private var confirmationsThreshold = 6
     private var syncMode = BitcoinCore.SyncMode.api
     private var peerCount = 10
+    private var peerCountToConnect = 100
 
     private var storage: IStorage?
 
@@ -172,10 +173,6 @@ public class BitcoinCoreBuilder {
         let bloomFilterManager = BloomFilterManager(storage: storage, factory: factory)
 
         let peerManager = PeerManager()
-
-        let peerGroup = PeerGroup(factory: factory, reachabilityManager: reachabilityManager,
-                peerAddressManager: peerAddressManager, peerCount: peerCount, peerManager: peerManager, logger: logger)
-
         let unspentOutputSelector = UnspentOutputSelectorChain()
         let transactionSyncer = TransactionSyncer(storage: storage, processor: transactionProcessor, addressManager: addressManager, bloomFilterManager: bloomFilterManager)
         let mempoolTransactions = MempoolTransactions(transactionSyncer: transactionSyncer)
@@ -187,8 +184,6 @@ public class BitcoinCoreBuilder {
 
         let initialSyncer = InitialSyncer(storage: storage, listener: kitStateProvider, stateManager: stateManager, blockDiscovery: blockDiscovery, addressManager: addressManager, logger: logger)
 
-        let syncManager = SyncManager(reachabilityManager: reachabilityManager, initialSyncer: initialSyncer, peerGroup: peerGroup)
-
         let bloomFilterLoader = BloomFilterLoader(bloomFilterManager: bloomFilterManager, peerManager: peerManager)
 
         let blockValidatorChain = BlockValidatorChain(proofOfWorkValidator: ProofOfWorkValidator(difficultyEncoder: DifficultyEncoder()))
@@ -196,6 +191,10 @@ public class BitcoinCoreBuilder {
         let checkpointBlock = syncMode == .full ? network.bip44CheckpointBlock : network.lastCheckpointBlock
         let blockSyncer = BlockSyncer.instance(storage: storage, checkpointBlock: checkpointBlock, factory: factory, listener: kitStateProvider, transactionProcessor: transactionProcessor, blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager, logger: logger)
         let initialBlockDownload = InitialBlockDownload(blockSyncer: blockSyncer, peerManager: peerManager, merkleBlockValidator: merkleBlockValidator, syncStateListener: kitStateProvider, logger: logger)
+
+        let peerGroup = PeerGroup(factory: factory, reachabilityManager: reachabilityManager,
+                peerAddressManager: peerAddressManager, peerCount: peerCount, localDownloadedBestBlockHeight: blockSyncer.localDownloadedBestBlockHeight,
+                peerManager: peerManager, logger: logger)
         let syncedReadyPeerManager = SyncedReadyPeerManager(peerGroup: peerGroup, initialBlockDownload: initialBlockDownload)
 
         let inputSigner = InputSigner(hdWallet: hdWallet, network: network)
@@ -204,6 +203,7 @@ public class BitcoinCoreBuilder {
         let transactionSender = TransactionSender(transactionSyncer: transactionSyncer, peerManager: peerManager, initialBlockDownload: initialBlockDownload, syncedReadyPeerManager: syncedReadyPeerManager, logger: logger)
         let transactionCreator = TransactionCreator(transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, transactionSender: transactionSender)
 
+        let syncManager = SyncManager(reachabilityManager: reachabilityManager, initialSyncer: initialSyncer, peerGroup: peerGroup)
 
         let bitcoinCore = BitcoinCore(storage: storage,
                 cache: myOutputsCache,

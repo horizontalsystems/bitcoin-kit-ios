@@ -33,6 +33,14 @@ extension PeerAddressManager: IPeerAddressManager {
         return ip
     }
 
+    var hasFreshIps: Bool {
+        guard let peerAddress = storage.leastScoreFastestPeerAddress(excludingIps: state.usedIps) else {
+            return false
+        }
+
+        return peerAddress.connectionTime == nil
+    }
+
     func markSuccess(ip: String) {
         state.remove(usedIp: ip)
         storage.increasePeerAddressScore(ip: ip)

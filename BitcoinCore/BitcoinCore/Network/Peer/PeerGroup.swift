@@ -12,14 +12,18 @@ public enum PeerGroupEvent {
 }
 
 class PeerGroup {
+    private static let acceptableBlockHeightDifference = 50_000
+    private static let peerCountToConnect = 100
+
     private let factory: IFactory
 
     private let reachabilityManager: IReachabilityManager
     private var peerAddressManager: IPeerAddressManager
     private var peerManager: IPeerManager
 
-    private var peerCountToHold: Int            // number of peers held
-    private var peerCountToConnect = 100        // number of peers to connect to
+    private let localDownloadedBestBlockHeight: Int32
+    private let peerCountToHold: Int            // number of peers held
+    private var peerCountToConnect: Int?        // number of peers to connect to
     private var peerCountConnected = 0          // number of peers connected to
 
     private var started: Bool = false
@@ -37,8 +41,8 @@ class PeerGroup {
     let observable: Observable<PeerGroupEvent>
 
     init(factory: IFactory, reachabilityManager: IReachabilityManager,
-         peerAddressManager: IPeerAddressManager, peerCount: Int = 10, peerManager: IPeerManager,
-         peersQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Local Queue", qos: .userInitiated),
+         peerAddressManager: IPeerAddressManager, peerCount: Int = 10, localDownloadedBestBlockHeight: Int32,
+         peerManager: IPeerManager, peersQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Local Queue", qos: .userInitiated),
          inventoryQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Inventory Queue", qos: .background),
          subjectQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Subject Queue", qos: .background),
          scheduler: SchedulerType = SerialDispatchQueueScheduler(qos: .background),
@@ -47,6 +51,7 @@ class PeerGroup {
 
         self.reachabilityManager = reachabilityManager
         self.peerAddressManager = peerAddressManager
+        self.localDownloadedBestBlockHeight = localDownloadedBestBlockHeight
         self.peerCountToHold = peerCount
         self.peerManager = peerManager
 
@@ -136,7 +141,23 @@ extension PeerGroup: PeerDelegate {
         peerAddressManager.markConnected(peer: peer)
         onNext(.onPeerConnect(peer: peer))
 
-        if peerCountToConnect > peerCountConnected && peerCountToHold > 1 {
+        if let peerCountToConnect = peerCountToConnect {
+            disconnectSlowestPeer(peerCountToConnect: peerCountToConnect)
+        } else {
+            setPeerCountToConnect(for: peer)
+        }
+    }
+
+    private func setPeerCountToConnect(for peer: IPeer) {
+        if peer.announcedLastBlockHeight - localDownloadedBestBlockHeight > PeerGroup.acceptableBlockHeightDifference {
+            peerCountToConnect = PeerGroup.peerCountToConnect
+        } else {
+            peerCountToConnect = 0
+        }
+    }
+
+    private func disconnectSlowestPeer(peerCountToConnect: Int) {
+        if peerCountToConnect > peerCountConnected && peerCountToHold > 1 && peerAddressManager.hasFreshIps {
             let sortedPeers = peerManager.sorted()
             if sortedPeers.count >= peerCountToHold {
                 sortedPeers.last?.disconnect(error: nil)
