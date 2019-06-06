@@ -6,13 +6,15 @@ class DarkGravityWaveTestNetValidator: IBlockValidator {
     private let targetSpacing: Int
     private let targetTimeSpan: Int
     private let maxTargetBits: Int
+    private let powDGWHeight: Int
 
-    init(difficultyEncoder: IDashDifficultyEncoder, targetSpacing: Int, targetTimeSpan: Int, maxTargetBits: Int) {
+    init(difficultyEncoder: IDashDifficultyEncoder, targetSpacing: Int, targetTimeSpan: Int, maxTargetBits: Int, powDGWHeight: Int) {
         self.difficultyEncoder = difficultyEncoder
 
         self.targetSpacing = targetSpacing
         self.targetTimeSpan = targetTimeSpan
         self.maxTargetBits = maxTargetBits
+        self.powDGWHeight = powDGWHeight
     }
 
     func validate(block: Block, previousBlock: Block) throws {
@@ -35,7 +37,7 @@ class DarkGravityWaveTestNetValidator: IBlockValidator {
     }
 
     func isBlockValidatable(block: Block, previousBlock: Block) -> Bool {
-        return block.timestamp > previousBlock.timestamp + 4 * targetSpacing
+        return block.height >= powDGWHeight && (block.timestamp > previousBlock.timestamp + 4 * targetSpacing)
     }
 
 }

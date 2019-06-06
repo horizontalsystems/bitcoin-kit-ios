@@ -31,8 +31,9 @@ class EDAValidator: IBlockValidator {
         }
         let mpt6blocks = blockHelper.medianTimePast(block: previousBlock) - blockHelper.medianTimePast(block: cursorBlock)
         if(mpt6blocks >= 12 * 3600) {
-            let pow = difficultyEncoder.decodeCompact(bits: previousBlock.bits) >> 2
-            let powBits = min(difficultyEncoder.encodeCompact(from: pow), maxTargetBits)
+            let decodedBits = difficultyEncoder.decodeCompact(bits: previousBlock.bits)
+            let pow = decodedBits >> 2
+            let powBits = min(difficultyEncoder.encodeCompact(from: decodedBits + pow), maxTargetBits)
 
             guard powBits == block.bits else {
                 throw BitcoinCoreErrors.BlockValidation.notEqualBits

@@ -9,8 +9,9 @@ class DarkGravityWaveValidator: IBlockValidator {
     private let targetTimeSpan: Int
     private let maxTargetBits: Int
     private let firstCheckpointHeight: Int
+    private let powDGWHeight: Int
 
-    init(encoder: IDashDifficultyEncoder, blockHelper: IDashBlockValidatorHelper, heightInterval: Int, targetTimeSpan: Int, maxTargetBits: Int, firstCheckpointHeight: Int) {
+    init(encoder: IDashDifficultyEncoder, blockHelper: IDashBlockValidatorHelper, heightInterval: Int, targetTimeSpan: Int, maxTargetBits: Int, firstCheckpointHeight: Int, powDGWHeight: Int) {
         self.difficultyEncoder = encoder
         self.blockHelper = blockHelper
 
@@ -18,6 +19,7 @@ class DarkGravityWaveValidator: IBlockValidator {
         self.targetTimeSpan = targetTimeSpan
         self.maxTargetBits = maxTargetBits
         self.firstCheckpointHeight = firstCheckpointHeight
+        self.powDGWHeight = powDGWHeight
     }
 
     func validate(block: Block, previousBlock: Block) throws {
@@ -60,7 +62,7 @@ class DarkGravityWaveValidator: IBlockValidator {
     }
 
     func isBlockValidatable(block: Block, previousBlock: Block) -> Bool {
-        return true
+        return block.height >= powDGWHeight
     }
 
 }
