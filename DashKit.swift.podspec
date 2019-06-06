@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
   spec.name = 'DashKit.swift'
   spec.module_name = 'DashKit'
-  spec.version = '0.6.0'
+  spec.version = '0.6'
   spec.summary = 'Dash library for Swift'
   spec.description = <<-DESC
                        DashKit implements Dash protocol in Swift.
