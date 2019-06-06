@@ -1,12 +1,11 @@
 import RxSwift
 import ObjectMapper
-import BitcoinCore
 
-class InsightApi {
+public class InsightApi {
     private static let paginationLimit = 50
     private let apiManager: ApiManager
 
-    init(url: String, logger: Logger? = nil) {
+    public init(url: String, logger: Logger? = nil) {
         apiManager = ApiManager(apiUrl: url, logger: logger)
     }
 
@@ -14,7 +13,7 @@ class InsightApi {
 
 extension InsightApi: ISyncTransactionApi {
 
-    func getTransactions(addresses: [String]) -> Observable<[SyncTransactionItem]> {
+    public func getTransactions(addresses: [String]) -> Observable<[SyncTransactionItem]> {
         let joinedAddresses = addresses.joined(separator: ",")
 
         return getTransactionsRecursive(addresses: joinedAddresses)

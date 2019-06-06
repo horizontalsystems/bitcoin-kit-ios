@@ -10,7 +10,6 @@
 		3A7A7D67226842DD0063D6AD /* DashKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D5D226842DD0063D6AD /* DashKit.framework */; };
 		3A7A7D6E226842DD0063D6AD /* DashKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 3A7A7D60226842DD0063D6AD /* DashKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3A7A7D7F2268430D0063D6AD /* BitcoinCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A7A7D7E2268430D0063D6AD /* BitcoinCore.framework */; };
-		3C7B999C966BB049FBC77466 /* InsightApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C7B92EC3F3E54510C2308A5 /* InsightApi.swift */; };
 		58AAA04D4CDB79715654E978 /* TransactionLockVoteMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA1776A1D0A594FC7FD18 /* TransactionLockVoteMessage.swift */; };
 		58AAA050B036789F4EB37F6E /* RequestTransactionLockVotesTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA6F46B5CED8D35657996 /* RequestTransactionLockVotesTask.swift */; };
 		58AAA055180E96AA33EF2C16 /* TransactionLockVoteManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA0731BC44688D2072C72 /* TransactionLockVoteManagerTests.swift */; };
@@ -115,7 +114,6 @@
 		3A7A7D66226842DD0063D6AD /* DashKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DashKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3A7A7D6D226842DD0063D6AD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3A7A7D7E2268430D0063D6AD /* BitcoinCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = BitcoinCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		3C7B92EC3F3E54510C2308A5 /* InsightApi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsightApi.swift; sourceTree = "<group>"; };
 		3CBF9B9493B7FD18C59E784F /* Pods_DashKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DashKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		58AAA0373C0AAF259D678D34 /* MasternodeListSyncer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeListSyncer.swift; sourceTree = "<group>"; };
 		58AAA0398DAC6811AAD8FF86 /* MasternodeSortedListTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeSortedListTests.swift; sourceTree = "<group>"; };
@@ -293,7 +291,6 @@
 		3C7B97DDBAAB290971492CBC /* InitialSync */ = {
 			isa = PBXGroup;
 			children = (
-				3C7B92EC3F3E54510C2308A5 /* InsightApi.swift */,
 			);
 			path = InitialSync;
 			sourceTree = "<group>";
@@ -797,7 +794,6 @@
 				58AAA5F7AF7CF8E3A909BD56 /* InstantTransactionHash.swift in Sources */,
 				58AAAE9A737EE5D91AD2884A /* InstantTransactionState.swift in Sources */,
 				58AAA1992857F107D48947E9 /* DashTransactionInfo.swift in Sources */,
-				3C7B999C966BB049FBC77466 /* InsightApi.swift in Sources */,
 				58AAAA292D3A413E0E9F44A7 /* DashAddressSelector.swift in Sources */,
 				58AAA5020E3111ADB26B2261 /* ConfirmedUnspentOutputProvider.swift in Sources */,
 				58AAAA13B65A94F50CDE64C1 /* ISLockMessage.swift in Sources */,

@@ -31,14 +31,14 @@ public class BitcoinCashKit: AbstractKit {
         switch networkType {
             case .mainNet:
                 network = MainNet()
-                initialSyncApiUrl = "https://bch.horizontalsystems.xyz/apg"
+                initialSyncApiUrl = "https://blockdozer.com/api/"
                 validScheme = "bitcoincash"
             case .testNet:
                 network = TestNet()
-                initialSyncApiUrl = "http://bch-testnet.horizontalsystems.xyz/apg"
+                initialSyncApiUrl = "https://tbch.blockdozer.com/api/"
                 validScheme = "bchtest"
         }
-        let initialSyncApi = BCoinApi(url: initialSyncApiUrl)
+        let initialSyncApi = InsightApi(url: initialSyncApiUrl)
 
         let databaseFilePath = try DirectoryHelper.directoryURL(for: "BitcoinCashKit").appendingPathComponent("\(walletId)-\(networkType)").path
         let storage = BitcoinCashGrdbStorage(databaseFilePath: databaseFilePath)
