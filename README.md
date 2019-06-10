@@ -1,29 +1,36 @@
 # BitcoinKit-iOS
 
-Bitcoin and BitcoinCash(ABC) SPV wallet toolkit for Swift. This is a full implementation of SPV node including wallet creation/restore, syncronzation with network, send/receive transactions, and more.
+Bitcoin, BitcoinCash(ABC) and Dash wallet toolkit for Swift. This is a full implementation of SPV node including wallet creation/restore, synchronization with network, send/receive transactions, and more. The repository includes the main `BitcoinCore.swift` and `BitcoinKit.swift`, `BitcoinCashKit.swift` and `DashKit.swift` separate pods.
 
 
 ## Features
 
 - Full SPV implementation for fast mobile performance
 - Send/Receive Legacy transactions (*P2PKH*, *P2PK*, *P2SH*)
-- Send/Receive Segwit transactions (*P2WPKH*)
-- Send/Receive Segwit transactions compatible with legacy wallets (*P2WPKH-SH*)
-- Fee calculation depending on wether sender pays the fee or receiver
-- Encoding/Decoding of base58, bech32, cashaddr addresses
 - [BIP32](https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki) hierarchical deterministic wallets implementation.
 - [BIP39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) mnemonic code for generating deterministic keys.
 - [BIP44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) multi-account hierarchy for deterministic wallets.
 - [BIP21](https://github.com/bitcoin/bips/blob/master/bip-0021.mediawiki) URI schemes, which include payment address, amount, label and other params
-- Real-time fee rates
 
+### BitcoinKit.swift
+- Send/Receive Segwit transactions (*P2WPKH*)
+- Send/Receive Segwit transactions compatible with legacy wallets (*P2WPKH-SH*)
+- base58, bech32
 
+### BitcoinCashKit.swift
+- bech32 cashaddr addresses
+
+### DashKit.swfit
+- Instant send
+- LLMQ lock, Masternodes validation
 
 ## Usage
 
+On this page, we'll use *Kits* to refer to one of `BitcoinKit.swift`, `BitcoinCashKit.swift` and `DashKit.swift` kits.
+
 ### Initialization
 
-`BitcoinKit` requires you to provide mnemonic phrase when it is initialized:
+*Kits* requires you to provide mnemonic phrase when it is initialized:
 
 ```swift
 let words = ["word1", ... , "word12"]
@@ -32,16 +39,29 @@ let words = ["word1", ... , "word12"]
 #### Bitcoin
 
 ```swift
-let bitcoinKit = BitcoinKit(withWords: words, coin: .bitcoin(network: .testNet), minLogLevel: .verbose)
+let bitcoinKit = BitcoinKit(withWords: words, walletId: "bitcoin-wallet-id", syncMode: .api, networkType: .mainNet)
 ```
 
 #### Bitcoin Cash
 
 ```swift
-let bitcoinCashKit = BitcoinKit(withWords: words, coin: .bitcoinCash(network: .testNet), minLogLevel: .verbose)
+let bitcoinCashKit = BitcoinCashKit(withWords: words, walletId: "bitcoin-cash-wallet-id", syncMode: .api, networkType: .mainNet)
 ```
 
-Both networks can be configured to work in `mainNet` or `testNet`.
+#### Dash
+
+```swift
+let dashKit = DashKit(withWords: words, walletId: "dash-wallet-id", syncMode: .api, networkType: .mainNet)
+```
+
+All 3 *Kits* can be configured to work in `.mainNet` or `.testNet`. 
+
+##### `sycMode` paramater
+*Kits* can restore existing wallet or create a new one. When restoring, it generates addresses for given wallet according to bip44 protocol, then it pulls all historical transactions for each of those addresses. This is done only once on initial sync. `syncMode` parameter defines where it pulls historical transactions from. When they are pulled, it continues to sync according to [SPV](https://en.bitcoinwiki.org/wiki/Simplified_Payment_Verification) protocol no matter which syncMode was used for initial sync. There are 3 modes available:
+
+- `.full`: Fully synchronizes from peer-to-peer network starting from the block when bip44 was introduced. This mode is the most private (since it fully complies with [SPV](https://en.bitcoinwiki.org/wiki/Simplified_Payment_Verification) protocol), but it takes approximately 2 hours to sync upto now (June 10, 2019).
+- `.api`: Transactions before checkpoint are pulled from API(currently [Insight API](https://github.com/bitpay/insight-api) or [BcoinAPI](http://bcoin.io/api-docs/)). Then the rest is synchronized from peer-to-peer network. This is the fastest one, but it's possible for an attacker to learn which addresses you own. Checkpoints are updated with each new release and hardcoded so the blocks validation is not broken.
+- `.newWallet`: No need to pull transactions.
 
 ##### Additional parameters:
 - `confirmationsThreshold`: Minimum number of confirmations required for an unspent output in incoming transaction to be spent (*default: 6*)
@@ -49,24 +69,16 @@ Both networks can be configured to work in `mainNet` or `testNet`.
 
 ### Starting and Stopping
 
-`BitcoinKit` requires to be started with `start` command, but does not need to be stopped. It will be in synced state as long as it is possible:
+*Kits* require to be started with `start` command. It will be in synced state as long as it is possible. You can call `stop` to stop it
 
 ```swift
-try bitcoinKit.start()
+bitcoinKit.start()
+bitcoinKit.stop()
 ```
-
-#### Clearing data from device
-
-`BitcoinKit` uses internal database for storing data fetched from blockchain. `clear` command can be used to stop and clean all stored data:
-
-```swift
-try bitcoinKit.clear()
-```
-
 
 ### Getting wallet data
 
-`BitcoinKit` holds all kinds of data obtained from and needed for working with blockchain network
+*Kits* hold all kinds of data obtained from and needed for working with blockchain network
 
 #### Current Balance
 
@@ -105,14 +117,13 @@ bitcoinKit.receiveAddress
 
 #### Transactions
 
-You can get all your transactions as follows:
+*Kits* have `transactions(fromHash: nil, limit: nil)` methods which return `Single<TransactionInfo>`(for BitcoinKit and BitcoinCashKit) and `Single<DashTransactionInfo>`(for DashKit) [RX Single Observers](https://github.com/ReactiveX/RxSwift/blob/master/Documentation/Traits.md#single).
 
+`TransactionInfo`:
 ```swift
-bitcoinKit.transactions
-
-// ▿ 2 elements
-//   ▿ 0 : TransactionInfo
+//   ▿ TransactionInfo
 //     - transactionHash : "0f83c9b330f936dc4a2458b7d3bb06dce6647a521bf6d98f9c9d3cdd5f6d2a73"
+//     - transactionIndex : 500000
 //     ▿ from : 2 elements
 //       ▿ 0 : TransactionAddressInfo
 //         - address : "mft8jpnf3XwwqhaYSYMSXePFN85mGU4oBd"
@@ -132,16 +143,41 @@ bitcoinKit.transactions
 //       - some : 1446602
 //    ▿ timestamp : Optional<Int>
 //       - some : 1543995972
-//   ▿ 1 : TransactionInfo
-//  ...
+```
+
+`DashTransactionInfo`:
+```swift
+//   ▿ DashTransactionInfo
+//     - transactionHash : "0f83c9b330f936dc4a2458b7d3bb06dce6647a521bf6d98f9c9d3cdd5f6d2a73"
+//     - transactionIndex : 500000
+//     - instantTx : true
+//     ▿ from : 2 elements
+//       ▿ 0 : TransactionAddressInfo
+//         - address : "mft8jpnf3XwwqhaYSYMSXePFN85mGU4oBd"
+//         - mine : true
+//       ▿ 1 : TransactionAddressInfo
+//         - address : "mnNS5LEQDnYC2xqT12MnQmcuSvhfpem8gt"
+//         - mine : true
+//     ▿ to : 2 elements
+//       ▿ 0 : TransactionAddressInfo
+//         - address : "n43efNftHQ1cXYMZK4Dc53wgR6XgzZHGjs"
+//         - mine : false
+//       ▿ 1 : TransactionAddressInfo
+//         - address : "mrjQyzbX9SiJxRC2mQhT4LvxFEmt9KEeRY"
+//         - mine : true
+//     - amount : -800378
+//     ▿ blockHeight : Optional<Int>
+//       - some : 1446602
+//    ▿ timestamp : Optional<Int>
+//       - some : 1543995972
 ```
 
 ### Creating new transaction
 
-In order to create new transaction, call `send(to: String, value: Int)` method on `BitcoinKit`
+In order to create new transaction, call `send(to: String, value: Int, feeRate: Int)` method on *Kits*
 
 ```swift
-try bitcoinKit.send(to: "mrjQyzbX9SiJxRC2mQhT4LvxFEmt9KEeRY", value: 1000000)
+try bitcoinKit.send(to: "mrjQyzbX9SiJxRC2mQhT4LvxFEmt9KEeRY", value: 1000000, feeRate: 10000)
 ```
 
 This first validates a given address and amount, creates new transaction, then sends it over the peers network. If there's any error with given address/amount or network, it raises an exception.
@@ -152,7 +188,7 @@ One can validate address and fee by using following methods:
 
 ```swift
 try bitcoinKit.validate(address: "mrjQyzbX9SiJxRC2mQhT4LvxFEmt9KEeRY")
-try bitcoinKit.fee(for: 1000000, toAddress: "mrjQyzbX9SiJxRC2mQhT4LvxFEmt9KEeRY", senderPay: true)
+try bitcoinKit.fee(for: 1000000, toAddress: "mrjQyzbX9SiJxRC2mQhT4LvxFEmt9KEeRY", senderPay: true, feeRate: 10000)
 ```
 `senderPay` parameter defines who pays the fee
 
@@ -178,46 +214,41 @@ bitcoinKit.parse(paymentAddress: "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?amo
 
 ### Subscribing to BitcoinKit data
 
-`BitcoinKit` provides with data like transactions, blocks, balance, kits state in real-time. `BitcoinKitDelegate` protocol must be implemented and set to `BitcoinKit` instance to receive that data.
+*Kits* provide with data like transactions, blocks, balance, kits state in real-time. `BitcoinCoreDelegate` protocol must be implemented and set to *Kits* instance to receive that data.
 
 ```swift
 class Manager {
 
 	init(words: [String]) {
-		bitcoinKit = BitcoinKit(withWords: words, coin: .bitcoin(network: .mainNet)
+		bitcoinKit = BitcoinKit(withWords: words, walletId: "bitcoin-wallet-id")
         bitcoinKit.delegate = self
     }
 
 }
 
-extension Manager: BitcoinKitDelegate {
+extension Manager: BitcoinCoreDelegate {
 
-    public func transactionsUpdated(bitcoinKit: BitcoinKit, inserted: [TransactionInfo], updated: [TransactionInfo]) {
-		// do something with transactions
+    func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo]) {
     }
 
-public func transactionsDeleted(hashes: [String]) {
-    // do something with transactions
+    func transactionsDeleted(hashes: [String]) {
     }
 
-
-    public func balanceUpdated(bitcoinKit: BitcoinKit, balance: Int) {
-		// do something with balance
+    func balanceUpdated(balance: Int) {
     }
 
-    public func lastBlockInfoUpdated(bitcoinKit: BitcoinKit, lastBlockInfo: BlockInfo) {
-		// do something with lastBlockInfo
+    func lastBlockInfoUpdated(lastBlockInfo: BlockInfo) {
     }
 
-    public func kitStateUpdated(state: BitcoinKit.KitState) {
-		// BitcoinKit.KitState can be one of 3 following states:
+    public func kitStateUpdated(state: BitcoinCore.KitState) {
+		// BitcoinCore.KitState can be one of 3 following states:
 		// .synced
 		// .syncing(progress: Double)
 		// .notSynced
 		// 
 		// These states can be used to implement progress bar, etc
     }
-
+    
 }
 ```
 Listener events are run in a dedicated background thread. It can be switched to main thread by setting the  ```delegateQueue``` property to ```DispatchQueue.main```
@@ -229,7 +260,7 @@ bitcoinKit.delegateQueue = DispatchQueue.main
 ## Prerequisites
 
 * Xcode 10.0+
-* Swift 4.1+
+* Swift 5+
 * iOS 11+
 
 ## Installation
@@ -244,7 +275,7 @@ $ gem install cocoapods
 
 > CocoaPods 1.5.0+ is required to build BitcoinKit.
 
-To integrate HSBitcoinKit into your Xcode project using CocoaPods, specify it in your `Podfile`:
+To integrate BitcoinKit into your Xcode project using CocoaPods, specify it in your `Podfile`:
 
 ```ruby
 source 'https://github.com/CocoaPods/Specs.git'
@@ -252,7 +283,10 @@ platform :ios, '10.0'
 use_frameworks!
 
 target '<Your Target Name>' do
-	pod 'HSBitcoinKit'
+  pod 'BitcoinCore.swift'
+  pod 'BitcoinKit.swift'
+  pod 'BitcoinCashKit.swift'
+  pod 'DashKit.swift'
 end
 ```
 
@@ -273,7 +307,11 @@ All features of the library are used in example project. It can be referred as a
 * [HSHDWalletKit](https://github.com/horizontalsystems/hd-wallet-kit-ios) - HD Wallet related features, mnemonic phrase geneartion.
 * [HSCryptoKit](https://github.com/horizontalsystems/crypto-kit-ios) - Crypto functions required for working with blockchain.
 
+### Dash dependencies
+* [CryptoBLS.swift](https://github.com/horizontalsystems/crypto-bls-ios)
+* [CryptoX11.swift](https://github.com/horizontalsystems/crypto-x11-ios)
+
 ## License
 
-The `HSBitcoinKit` toolkit is open source and available under the terms of the [MIT License](https://github.com/horizontalsystems/bitcoin-kit-ios/blob/master/LICENSE).
+The `BitcoinKit-iOS` toolkit is open source and available under the terms of the [MIT License](https://github.com/horizontalsystems/bitcoin-kit-ios/blob/master/LICENSE).
 
