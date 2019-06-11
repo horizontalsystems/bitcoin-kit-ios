@@ -12,6 +12,11 @@ protocol IBitcoinCashHasher {
     func hash(data: Data) -> Data
 }
 
+protocol IBitcoinCashBlockValidator {
+    func validate(block: Block, previousBlock: Block) throws
+    func isBlockValidatable(block: Block, previousBlock: Block) -> Bool
+}
+
 // ###############################
 
 protocol IBitcoinCashBlockValidatorHelper {

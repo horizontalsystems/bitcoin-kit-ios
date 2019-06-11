@@ -31,6 +31,7 @@ public class BitcoinCoreErrors {
         case noCheckpointBlock
         case noPreviousBlock
         case wrongPreviousHeader
+        case wrongHeaderHash
         case notEqualBits
         case notDifficultyTransitionEqualBits
         case invalidProofOfWork
