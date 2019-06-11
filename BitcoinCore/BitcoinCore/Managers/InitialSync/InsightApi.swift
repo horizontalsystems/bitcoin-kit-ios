@@ -76,8 +76,8 @@ extension InsightApi: ISyncTransactionApi {
 
     class InsightTransactionOutputItem: SyncTransactionOutputItem {
         required init(map: Map) throws {
-            let script: String = try map.value("scriptPubKey.hex")
-            let address: [String] = try map.value("scriptPubKey.addresses")
+            let script: String = (try? map.value("scriptPubKey.hex")) ?? ""
+            let address: [String] = (try? map.value("scriptPubKey.addresses")) ?? []
             super.init(script: script, address: address.joined())
         }
 
