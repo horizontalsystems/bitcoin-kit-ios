@@ -63,6 +63,7 @@ public class DashKit: AbstractKit {
                 .set(paymentAddressParser: paymentAddressParser)
                 .set(addressSelector: addressSelector)
                 .set(walletId: walletId)
+                .set(confirmationsThreshold: confirmationsThreshold)
                 .set(peerSize: 10)
                 .set(storage: storage)
                 .set(syncMode: syncMode)
