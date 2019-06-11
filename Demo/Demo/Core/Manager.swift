@@ -3,38 +3,34 @@ import BitcoinCore
 
 class Manager {
     static let shared = Manager()
+    private static let syncModes: [BitcoinCore.SyncMode] = [.full, .api, .newWallet]
 
     private let keyWords = "mnemonic_words"
+    private let syncModeKey = "syncMode"
 
     let adapterSignal = Signal()
     var adapters = [BaseAdapter]()
 
     init() {
-        if let words = savedWords {
+        if let words = savedWords, let syncModeIndex = savedSyncModeIndex {
             DispatchQueue.global(qos: .userInitiated).async {
-                self.initAdapters(words: words, syncMode: .api)
+                self.initAdapters(words: words, syncMode: Manager.syncModes[syncModeIndex])
             }
         }
     }
 
-    func login(words: [String], syncModeStr: String) {
+    func login(words: [String], syncModeIndex: Int) {
         save(words: words)
+        save(syncModeIndex: syncModeIndex)
         clearKits()
 
-        let syncMode: BitcoinCore.SyncMode
-        if syncModeStr == "full" {
-            syncMode = .full
-        } else {
-            syncMode = .api
-        }
-
         DispatchQueue.global(qos: .userInitiated).async {
-            self.initAdapters(words: words, syncMode: syncMode)
+            self.initAdapters(words: words, syncMode: Manager.syncModes[syncModeIndex])
         }
     }
 
     func logout() {
-        clearWords()
+        clearUserDefaults()
         adapters = []
     }
 
@@ -57,13 +53,26 @@ class Manager {
         return nil
     }
 
+    var savedSyncModeIndex: Int? {
+        if let syncModeIndex = UserDefaults.standard.value(forKey: syncModeKey) as? Int {
+            return syncModeIndex
+        }
+        return nil
+    }
+
     private func save(words: [String]) {
         UserDefaults.standard.set(words.joined(separator: " "), forKey: keyWords)
         UserDefaults.standard.synchronize()
     }
 
-    private func clearWords() {
+    private func save(syncModeIndex: Int) {
+        UserDefaults.standard.set(syncModeIndex, forKey: syncModeKey)
+        UserDefaults.standard.synchronize()
+    }
+
+    private func clearUserDefaults() {
         UserDefaults.standard.removeObject(forKey: keyWords)
+        UserDefaults.standard.removeObject(forKey: syncModeKey)
         UserDefaults.standard.synchronize()
     }
 

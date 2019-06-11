@@ -18,13 +18,11 @@ class TransactionSender {
     }
 
     private func peersToSendTo() throws -> [IPeer] {
-        let peersCount = peerManager.connected().count
-        guard peersCount > 0 else {
+        guard peerManager.connected().count > 0 else {
             throw BitcoinCoreErrors.TransactionSendError.noConnectedPeers
         }
 
-        let syncedPeersCount = initialBlockDownload.syncedPeers.count
-        guard syncedPeersCount >= peersCount / 2 else {
+        guard initialBlockDownload.allPeersSynced else {
             throw BitcoinCoreErrors.TransactionSendError.peersNotSynced
         }
 

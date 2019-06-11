@@ -99,12 +99,10 @@ public class InitialBlockDownload {
         }
 
         if syncedState(syncPeer) {
-            syncedPeers.append(syncPeer)
-            blockSyncer.downloadCompleted()
-            syncStateListener.syncFinished()
-            syncPeer.sendMempoolMessage()
             self.syncPeer = nil
-            subject.onNext(.onPeerSynced(peer: syncPeer))
+            setPeerSynced(syncPeer)
+            blockSyncer.downloadCompleted()
+            syncPeer.sendMempoolMessage()
             assignNextSyncPeer()
         }
     }
@@ -119,6 +117,24 @@ public class InitialBlockDownload {
         minMerkleBlocksCount = minMerkleBlocksCount / 3
         minTransactionsCount = minTransactionsCount / 3
         minTransactionsSize = minTransactionsSize / 3
+    }
+
+    private func setPeerSynced(_ peer: IPeer) {
+        syncedStates[peer.host] = true
+        blockHashesSyncedStates[peer.host] = true
+        syncedPeers.append(peer)
+
+        subject.onNext(.onPeerSynced(peer: peer))
+        syncStateListener.syncFinished(all: allPeersSynced)
+    }
+
+    private func setPeerNotSynced(_ peer: IPeer) {
+        syncedStates[peer.host] = false
+        blockHashesSyncedStates[peer.host] = false
+        if let index = syncedPeers.firstIndex(where: { $0.equalTo(peer) }) {
+            syncedPeers.remove(at: index)
+        }
+        subject.onNext(.onPeerNotSynced(peer: peer))
     }
 
     func subscribeTo(observable: Observable<PeerGroupEvent>) {
@@ -138,6 +154,10 @@ public class InitialBlockDownload {
                 .disposed(by: disposeBag)
     }
 
+    public var allPeersSynced: Bool {
+        return syncedPeers.count > 0 && syncedPeers.count >= peerManager.connected().count / 3
+    }
+
 }
 
 extension InitialBlockDownload: IInitialBlockDownload {
@@ -153,12 +173,7 @@ extension InitialBlockDownload: IInventoryItemsHandler {
     public func handleInventoryItems(peer: IPeer, inventoryItems: [InventoryItem]) {
         peersQueue.async {
             if self.syncedState(peer) && inventoryItems.first(where: { $0.type == InventoryItem.ObjectType.blockMessage.rawValue }) != nil {
-                self.syncedStates[peer.host] = false
-                self.blockHashesSyncedStates[peer.host] = false
-                self.subject.onNext(.onPeerNotSynced(peer: peer))
-                if let index = self.syncedPeers.firstIndex(where: { $0.equalTo(peer) }) {
-                    self.syncedPeers.remove(at: index)
-                }
+                self.setPeerNotSynced(peer)
                 self.assignNextSyncPeer()
             }
         }

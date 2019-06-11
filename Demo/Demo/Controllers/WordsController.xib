@@ -75,8 +75,9 @@
                 <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="1" translatesAutoresizingMaskIntoConstraints="NO" id="I26-xv-GXa">
                     <rect key="frame" x="20" y="346" width="335" height="29"/>
                     <segments>
-                        <segment title="Full Sync"/>
-                        <segment title="Sync from API"/>
+                        <segment title="Full"/>
+                        <segment title="API"/>
+                        <segment title="New Wallet"/>
                     </segments>
                 </segmentedControl>
             </subviews>
