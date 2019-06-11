@@ -5,6 +5,10 @@ import HSCryptoKit
 import RxSwift
 
 public class BitcoinCashKit: AbstractKit {
+    private static let svChainForkHeight = 556767                                  // 2018 November 14
+    private static let abcChainForkBlockHash = "0000000000000000004626ff6e3b936941d341c5932ece4357eeccac44e6d56c".reversedData!
+
+
     private static let heightInterval = 144                                     // Blocks count in window for calculating difficulty ( BitcoinCash )
     private static let targetSpacing = 10 * 60                                  // Time to mining one block ( 10 min. same as Bitcoin )
     private static let maxTargetBits = 0x1d00ffff                               // Initially and max. target difficulty for blocks
@@ -69,9 +73,12 @@ public class BitcoinCashKit: AbstractKit {
         let blockHelper = BitcoinCashBlockValidatorHelper(storage: storage, coreBlockValidatorHelper: coreBlockHelper)
         let difficultyEncoder = DifficultyEncoder()
 
+        let daaValidator = DAAValidator(encoder: difficultyEncoder, blockHelper: blockHelper, targetSpacing: BitcoinCashKit.targetSpacing, heightInterval: BitcoinCashKit.heightInterval, firstCheckpointHeight: network.lastCheckpointBlock.height)
+
         switch networkType {
         case .mainNet:
-            bitcoinCore.add(blockValidator: DAAValidator(encoder: difficultyEncoder, blockHelper: blockHelper, targetSpacing: BitcoinCashKit.targetSpacing, heightInterval: BitcoinCashKit.heightInterval, firstCheckpointHeight: network.lastCheckpointBlock.height))
+            bitcoinCore.add(blockValidator: ForkValidator(concreteValidator: daaValidator, forkHeight: BitcoinCashKit.svChainForkHeight, expectedBlockHash: BitcoinCashKit.abcChainForkBlockHash))
+            bitcoinCore.add(blockValidator: daaValidator)
             bitcoinCore.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: coreBlockHelper, heightInterval: BitcoinCore.heightInterval, targetTimespan: BitcoinCore.targetSpacing * BitcoinCore.heightInterval, maxTargetBits: BitcoinCore.maxTargetBits))
             bitcoinCore.add(blockValidator: EDAValidator(encoder: difficultyEncoder, blockHelper: blockHelper, maxTargetBits: BitcoinCore.maxTargetBits, firstCheckpointHeight: network.bip44CheckpointBlock.height))
         case .testNet: ()

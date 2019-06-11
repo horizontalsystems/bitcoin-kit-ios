@@ -18,7 +18,7 @@ class EDAValidatorTests: XCTestCase {
         mockDifficultyEncoder = MockIBitcoinCashDifficultyEncoder()
         mockBlockHelper = MockIBitcoinCashBlockValidatorHelper()
 
-        validator = EDAValidator(encoder: mockDifficultyEncoder, blockHelper: mockBlockHelper, maxTargetBits: 0x1d00ffff)
+        validator = EDAValidator(encoder: mockDifficultyEncoder, blockHelper: mockBlockHelper, maxTargetBits: 0x1d00ffff, firstCheckpointHeight: 0)
 
         block = TestData.firstBlock
         candidate = TestData.secondBlock
@@ -35,6 +35,25 @@ class EDAValidatorTests: XCTestCase {
         super.tearDown()
     }
 
+    func testIgnoreFirstBlocks() {
+        // we must ignore all blocks before firstCheckpoint + 6
+        let ignoredPreviousBlock = Block(withHeader: BlockHeader(
+                version: 1,
+                headerHash: "11b10ccc".reversedData!,
+                previousBlockHeaderHash: Data(repeating: 0x01, count: 2),
+                merkleRoot: Data(),
+                timestamp: 1337966314,
+                bits: 386604799,
+                nonce: 1716024842
+        ), height: 5)
+        do {
+            try validator.validate(block: block, previousBlock: ignoredPreviousBlock)
+            verifyNoMoreInteractions(mockBlockHelper)
+            verifyNoMoreInteractions(mockDifficultyEncoder)
+        } catch let error {
+            XCTFail("\(error) Exception Thrown")
+        }
+    }
     func testValidate() {
         do {
             try validator.validate(block: candidate, previousBlock: block)
