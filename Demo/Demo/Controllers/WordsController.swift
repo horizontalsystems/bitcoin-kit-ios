@@ -53,15 +53,8 @@ class WordsController: UIViewController {
 
         do {
             try Mnemonic.validate(words: words)
-            
-            let syncMode: String
-            if syncModeListControl.selectedSegmentIndex == 0 {
-                syncMode = "full"
-            } else {
-                syncMode = "api"
-            }
 
-            Manager.shared.login(words: words, syncModeStr: syncMode)
+            Manager.shared.login(words: words, syncModeIndex: syncModeListControl.selectedSegmentIndex)
 
             if let window = UIApplication.shared.keyWindow {
                 UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve, animations: {

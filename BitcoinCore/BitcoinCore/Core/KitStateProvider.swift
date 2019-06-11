@@ -27,8 +27,8 @@ extension KitStateProvider: ISyncStateListener {
         syncState = .notSynced
     }
 
-    func syncFinished() {
-        syncState = .synced
+    func syncFinished(all: Bool) {
+        syncState = all ? .synced : .syncing(progress: 1)
     }
 
     func initialBestBlockHeightUpdated(height: Int32) {
@@ -43,18 +43,9 @@ extension KitStateProvider: ISyncStateListener {
 
         let blocksDownloaded = currentBestBlockHeight - initialBestBlockHeight
         let allBlocksToDownload = maxBlockHeight - initialBestBlockHeight
-        var progress: Double = 0
 
-        if allBlocksToDownload <= 0 || allBlocksToDownload <= blocksDownloaded {
-            progress = 1.0
-        } else {
-            progress = Double(blocksDownloaded) / Double(allBlocksToDownload)
-        }
-
-        if progress >= 1 {
-            syncState = .synced
-        } else {
-            syncState = .syncing(progress: progress)
+        if allBlocksToDownload > 0 && allBlocksToDownload > blocksDownloaded {
+            syncState = .syncing(progress: Double(blocksDownloaded) / Double(allBlocksToDownload))
         }
     }
 
