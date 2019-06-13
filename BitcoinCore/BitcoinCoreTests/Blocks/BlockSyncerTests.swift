@@ -49,55 +49,107 @@ class BlockSyncerTests: QuickSpec {
 
         context("static methods") {
             describe("#instance") {
+                it("triggers #initialBestBlockHeightUpdated event on listener") {
+                    stub(mockStorage) { mock in
+                        when(mock.lastBlock.get).thenReturn(checkpointBlock)
+                    }
+                    stub(mockListener) { mock in
+                        when(mock.initialBestBlockHeightUpdated(height: any())).thenDoNothing()
+                    }
+
+
+                    let _ = BlockSyncer.instance(storage: mockStorage, checkpointBlock: checkpointBlock, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
+                            blockchain: mockBlockchain, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager, hashCheckpointThreshold: 100)
+
+                    verify(mockListener).initialBestBlockHeightUpdated(height: equal(to: Int32(checkpointBlock.height)))
+                    verifyNoMoreInteractions(mockListener)
+                }
+            }
+
+            describe("#checkpointBlock") {
+                let bip44CheckpointBlock = TestData.checkpointBlock
+                let lastCheckpointBlock = TestData.firstBlock
+                let mockNetwork = MockINetwork()
+
+                beforeEach {
+                    stub(mockNetwork) { mock in
+                        when(mock.bip44CheckpointBlock.get).thenReturn(bip44CheckpointBlock)
+                        when(mock.lastCheckpointBlock.get).thenReturn(lastCheckpointBlock)
+                    }
+                }
+
+                afterEach {
+                    reset(mockNetwork)
+                }
+
                 context("when there are some blocks in storage") {
+                    let lastBlock = TestData.secondBlock
+
                     beforeEach {
                         stub(mockStorage) { mock in
-                            when(mock.blocksCount.get).thenReturn(1)
-                            when(mock.lastBlock.get).thenReturn(checkpointBlock)
+                            when(mock.lastBlock.get).thenReturn(lastBlock)
                         }
-
-                        stub(mockListener) { mock in
-                            when(mock.initialBestBlockHeightUpdated(height: equal(to: Int32(checkpointBlock.height)))).thenDoNothing()
-                        }
-
-                        let _ = BlockSyncer.instance(storage: mockStorage, checkpointBlock: checkpointBlock, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
-                                blockchain: mockBlockchain, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager, hashCheckpointThreshold: 100)
                     }
 
                     it("doesn't save checkpointBlock to storage") {
+                        _ = BlockSyncer.checkpointBlock(network: mockNetwork, syncMode: .api, storage: mockStorage)
+
                         verify(mockStorage, never()).save(block: any())
-                        verify(mockStorage).blocksCount.get()
                         verify(mockStorage).lastBlock.get()
                         verifyNoMoreInteractions(mockStorage)
                     }
 
-                    it("triggers #initialBestBlockHeightUpdated event on listener") {
-                        verify(mockListener).initialBestBlockHeightUpdated(height: equal(to: Int32(checkpointBlock.height)))
-                        verifyNoMoreInteractions(mockListener)
+                    context("when syncMode is .full") {
+                        it("returns bip44CheckpointBlock") {
+                            expect(BlockSyncer.checkpointBlock(network: mockNetwork, syncMode: .full, storage: mockStorage)).to(equal(bip44CheckpointBlock))
+                        }
+                    }
+
+                    context("when syncMode is not .full") {
+                        context("when lastBlock's height is more than lastCheckpointBlock") {
+                            it("returns lastCheckpointBlock") {
+                                lastBlock.height = lastCheckpointBlock.height + 1
+                                expect(BlockSyncer.checkpointBlock(network: mockNetwork, syncMode: .api, storage: mockStorage)).to(equal(lastCheckpointBlock))
+                            }
+                        }
+
+                        context("when lastBlock's height is less than lastCheckpointBlock") {
+                            it("returns bip44CheckpointBlock") {
+                                lastBlock.height = lastCheckpointBlock.height - 1
+                                expect(BlockSyncer.checkpointBlock(network: mockNetwork, syncMode: .api, storage: mockStorage)).to(equal(bip44CheckpointBlock))
+                            }
+                        }
                     }
                 }
 
                 context("when there's no block in storage") {
                     beforeEach {
                         stub(mockStorage) { mock in
-                            when(mock.blocksCount.get).thenReturn(0)
-                            when(mock.lastBlock.get).thenReturn(checkpointBlock)
-                            when(mock.save(block: sameInstance(as: checkpointBlock))).thenDoNothing()
+                            when(mock.lastBlock.get).thenReturn(nil)
+                            when(mock.save(block: any())).thenDoNothing()
                         }
-                        stub(mockListener) { mock in
-                            when(mock.initialBestBlockHeightUpdated(height: equal(to: Int32(checkpointBlock.height)))).thenDoNothing()
-                        }
-
-                        let _ = BlockSyncer.instance(storage: mockStorage, checkpointBlock: checkpointBlock, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
-                                blockchain: mockBlockchain, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager, hashCheckpointThreshold: 100)
                     }
 
-                    it("saves checkpointBlock to storage") {
-                        verify(mockStorage).save(block: sameInstance(as: checkpointBlock))
+                    context("when syncMode is .full") {
+                        it("returns bip44CheckpointBlock") {
+                            expect(BlockSyncer.checkpointBlock(network: mockNetwork, syncMode: .full, storage: mockStorage)).to(equal(bip44CheckpointBlock))
+                        }
+
+                        it("saves bip44CheckpointBlock to storage") {
+                            BlockSyncer.checkpointBlock(network: mockNetwork, syncMode: .full, storage: mockStorage)
+                            verify(mockStorage).save(block: sameInstance(as: bip44CheckpointBlock))
+                        }
                     }
 
-                    it("triggers #initialBestBlockHeightUpdated event on listener") {
-                        verify(mockListener).initialBestBlockHeightUpdated(height: equal(to: Int32(checkpointBlock.height)))
+                    context("when syncMode is not .full") {
+                        it("returns lastCheckpointBlock") {
+                            expect(BlockSyncer.checkpointBlock(network: mockNetwork, syncMode: .api, storage: mockStorage)).to(equal(lastCheckpointBlock))
+                        }
+
+                        it("saves lastCheckpointBlock to storage") {
+                            BlockSyncer.checkpointBlock(network: mockNetwork, syncMode: .api, storage: mockStorage)
+                            verify(mockStorage).save(block: sameInstance(as: lastCheckpointBlock))
+                        }
                     }
                 }
             }
