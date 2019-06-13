@@ -168,21 +168,39 @@ extension BlockSyncer: IBlockSyncer {
 
 extension BlockSyncer {
 
-    public static func instance(storage: IStorage, checkpointBlock: Block, factory: IFactory, listener: ISyncStateListener, transactionProcessor: ITransactionProcessor,
-                                blockchain: IBlockchain, addressManager: IAddressManager, bloomFilterManager: IBloomFilterManager,
+    public static func instance(storage: IStorage, checkpointBlock: Block, factory: IFactory, listener: ISyncStateListener,
+                                transactionProcessor: ITransactionProcessor, blockchain: IBlockchain, addressManager: IAddressManager, bloomFilterManager: IBloomFilterManager,
                                 hashCheckpointThreshold: Int = 100, logger: Logger? = nil, state: BlockSyncerState = BlockSyncerState()) -> BlockSyncer {
 
         let syncer = BlockSyncer(storage: storage, checkpointBlock: checkpointBlock, factory: factory, listener: listener, transactionProcessor: transactionProcessor,
                 blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager,
                 hashCheckpointThreshold: hashCheckpointThreshold, logger: logger, state: state)
 
-        if storage.blocksCount == 0 {
-            storage.save(block: checkpointBlock)
-        }
-
         listener.initialBestBlockHeightUpdated(height: syncer.localDownloadedBestBlockHeight)
 
         return syncer
+    }
+
+    public static func checkpointBlock(network: INetwork, syncMode: BitcoinCore.SyncMode, storage: IStorage) -> Block {
+        let lastBlock = storage.lastBlock
+        let checkpointBlock: Block
+
+        if syncMode == .full {
+            checkpointBlock = network.bip44CheckpointBlock
+        } else if let block = lastBlock, block.height < network.lastCheckpointBlock.height {
+            // When app is updated there may be case when the last block in DB is earlier than new checkpoint block.
+            // In this case we set the very first checkpoint block for bip44,
+            // since it surely will be earlier than the last block in DB
+            checkpointBlock = network.bip44CheckpointBlock
+        } else {
+            checkpointBlock = network.lastCheckpointBlock
+        }
+
+        if lastBlock == nil {
+            storage.save(block: checkpointBlock)
+        }
+
+        return checkpointBlock
     }
 
 }
