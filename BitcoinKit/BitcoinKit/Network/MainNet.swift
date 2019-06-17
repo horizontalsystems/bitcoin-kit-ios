@@ -45,7 +45,7 @@ class MainNet: INetwork {
                         headerHash: "00000000000000000001791f463d849ce5363d751c91f7d3cd2ff18981ae221d".reversedData!,
                         previousBlockHeaderHash: "0000000000000000000485ab94f5ea60203aacfc9740b3e42700d7e7012f76d7".reversedData!,
                         merkleRoot: "2e76c50d3dcecc46264b7ff8e653d5c9f06680f4d88f5b239d58a531a3c12279".reversedData!,
-                        timestamp: 1559277784,
+                        timestamp: 1559256184,
                         bits: 0x1725bb76,
                         nonce: 0x423310ae
                 ),
