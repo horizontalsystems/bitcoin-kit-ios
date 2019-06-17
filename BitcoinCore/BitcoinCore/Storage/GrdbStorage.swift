@@ -154,6 +154,10 @@ open class GrdbStorage {
             try db.execute(sql: "UPDATE \(Block.databaseTableName) SET \(Block.Columns.hasTransactions.name) = true")
         }
 
+        migrator.registerMigration("setCorrectTimestampForCheckpointBlock578592") { db in
+            try db.execute(sql: "UPDATE \(Block.databaseTableName) SET \(Block.Columns.timestamp.name) = 1559256184 WHERE \(Block.Columns.height.name) == 578592 AND \(Block.Columns.timestamp.name) == 1559277784")
+        }
+
         return migrator
     }
 
