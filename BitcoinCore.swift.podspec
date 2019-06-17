@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
   spec.name = 'BitcoinCore.swift'
   spec.module_name = "BitcoinCore"
-  spec.version = '0.6'
+  spec.version = '0.6.1'
   spec.summary = 'Core library Bitcoin derived wallets for Swift'
   spec.description = <<-DESC
                        BitcoinCore implements Bitcoin core protocol in Swift. It is an implementation of the Bitcoin SPV protocol written (almost) entirely in swift.
