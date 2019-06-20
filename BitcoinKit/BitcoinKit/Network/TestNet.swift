@@ -41,15 +41,15 @@ class TestNet: INetwork {
     var lastCheckpointBlock: Block {
         return Block(
                 withHeader: BlockHeader(
-                        version: 0x20000000,
-                        headerHash: "000000000000011b820755b3bbe03de7f7b8854b9f03307f41dafea4694eee7b".reversedData!,
-                        previousBlockHeaderHash: "00000000000001d6874b4d88e387098c0b7100ff674d99781fc7045a78216a15".reversedData!,
-                        merkleRoot: "d108b1c6229e1bc0c5506307779c6a51b1cb4c8edf3f91bef36dd1a2c30dfc99".reversedData!,
-                        timestamp: 1558613325,
-                        bits: 436289093,
-                        nonce: 2472615319
+                        version: 0x20400000,
+                        headerHash: "000000000000608edb398b7969795bc0681c1fa280234f44cb2c506f853ae41e".reversedData!,
+                        previousBlockHeaderHash: "000000000001386a3904f0ba4f25dc7ace09b67a6fe8977e7aecc55813fa9ac5".reversedData!,
+                        merkleRoot: "c75984136598aaec589cbe0f61b1caf6c1eb69614c412861b474aedce5d71b7a".reversedData!,
+                        timestamp: 1560904860,
+                        bits: 0x1b008690,
+                        nonce: 0xcf731739
                 ),
-                height: 1518048)
+                height: 1560384)
     }
 
 }

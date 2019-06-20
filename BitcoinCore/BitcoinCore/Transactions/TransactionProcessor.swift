@@ -29,7 +29,7 @@ class TransactionProcessor {
 
     private func hasUnspentOutputs(transaction: FullTransaction) -> Bool {
         for output in transaction.outputs {
-            if output.publicKeyPath != nil, (output.scriptType == .p2wpkh || output.scriptType == .p2pk)  {
+            if output.publicKeyPath != nil, (output.scriptType == .p2wpkh || output.scriptType == .p2pk || output.scriptType == .p2wpkhSh)  {
                 return true
             }
         }
