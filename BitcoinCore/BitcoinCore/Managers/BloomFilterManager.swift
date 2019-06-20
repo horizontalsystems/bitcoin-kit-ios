@@ -51,7 +51,7 @@ extension BloomFilterManager: IBloomFilterManager {
         }
 
         var outputs = storage.outputsWithPublicKeys().filter { output in
-            return output.output.scriptType == ScriptType.p2wpkh || output.output.scriptType == ScriptType.p2pk
+            return output.output.scriptType == ScriptType.p2wpkh || output.output.scriptType == ScriptType.p2pk || output.output.scriptType == ScriptType.p2wpkhSh
         }
 
         if let bestBlockHeight = storage.lastBlock?.height {
