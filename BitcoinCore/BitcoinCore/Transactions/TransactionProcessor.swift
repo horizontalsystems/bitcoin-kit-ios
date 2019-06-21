@@ -27,8 +27,8 @@ class TransactionProcessor {
         self.queue = queue
     }
 
-    private func hasUnspentOutputs(transaction: FullTransaction) -> Bool {
-        for output in transaction.outputs {
+    private func expiresBloomFilter(outputs: [Output]) -> Bool {
+        for output in outputs {
             if output.publicKeyPath != nil, (output.scriptType == .p2wpkh || output.scriptType == .p2pk || output.scriptType == .p2wpkhSh)  {
                 return true
             }
@@ -53,9 +53,6 @@ class TransactionProcessor {
     }
 
     private func relay(transaction: Transaction, withOrder order: Int, inBlock block: Block?) {
-        guard block != nil || transaction.blockHash == nil else {
-            return
-        }
         transaction.blockHash = block?.headerHash
         transaction.status = .relayed
         transaction.timestamp = block?.timestamp ?? Int(dateGenerator().timeIntervalSince1970)
@@ -80,6 +77,9 @@ extension TransactionProcessor: ITransactionProcessor {
         try queue.sync {
             for (index, transaction) in transactions.inTopologicalOrder().enumerated() {
                 if let existingTransaction = self.storage.transaction(byHash: transaction.header.dataHash) {
+                    if existingTransaction.blockHash != nil && block == nil {
+                        continue
+                    }
                     self.relay(transaction: existingTransaction, withOrder: index, inBlock: block)
                     try self.storage.update(transaction: existingTransaction)
                     updated.append(existingTransaction)
@@ -95,7 +95,7 @@ extension TransactionProcessor: ITransactionProcessor {
                     inserted.append(transaction.header)
 
                     if !skipCheckBloomFilter {
-                        needToUpdateBloomFilter = needToUpdateBloomFilter || self.addressManager.gapShifts() || self.hasUnspentOutputs(transaction: transaction)
+                        needToUpdateBloomFilter = needToUpdateBloomFilter || self.addressManager.gapShifts() || self.expiresBloomFilter(outputs: transaction.outputs)
                     }
                 }
             }
@@ -118,6 +118,10 @@ extension TransactionProcessor: ITransactionProcessor {
         process(transaction: transaction)
         try storage.add(transaction: transaction)
         listener?.onUpdate(updated: [], inserted: [transaction.header], inBlock: nil)
+
+        if expiresBloomFilter(outputs: transaction.outputs) {
+            throw BloomFilterManager.BloomFilterExpired()
+        }
     }
 
 }
