@@ -164,25 +164,6 @@ class BloomFilterManagerTests: QuickSpec {
                     verify(mockBloomFilterManagerDelegate, never()).bloomFilterUpdated(bloomFilter: any())
                 }
             }
-
-            context("when no new element") {
-                it("doesn't trigger events") {
-                    stub(mockStorage) { mock in
-                        when(mock.publicKeys()).thenReturn([self.getPublicKey(withIndex: 0, chain: .external)])
-                        when(mock.outputsWithPublicKeys()).thenReturn([])
-                    }
-
-                    manager.regenerateBloomFilter()
-                    verify(mockBloomFilterManagerDelegate).bloomFilterUpdated(bloomFilter: any())
-                    reset(mockBloomFilterManagerDelegate)
-                    stub(mockBloomFilterManagerDelegate) { mock in
-                        when(mock.bloomFilterUpdated(bloomFilter: any())).thenDoNothing()
-                    }
-
-                    manager.regenerateBloomFilter()
-                    verify(mockBloomFilterManagerDelegate, never()).bloomFilterUpdated(bloomFilter: any())
-                }
-            }
         }
     }
 

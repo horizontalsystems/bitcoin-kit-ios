@@ -66,11 +66,8 @@ extension BloomFilterManager: IBloomFilterManager {
         }
 
         if !elements.isEmpty {
-            let bloomFilter = factory.bloomFilter(withElements: elements)
-            if self.bloomFilter?.filter != bloomFilter.filter {
-                self.bloomFilter = bloomFilter
-                delegate?.bloomFilterUpdated(bloomFilter: bloomFilter)
-            }
+            bloomFilter = factory.bloomFilter(withElements: elements)
+            delegate?.bloomFilterUpdated(bloomFilter: bloomFilter!)
         }
     }
 

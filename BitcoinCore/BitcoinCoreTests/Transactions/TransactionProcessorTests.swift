@@ -129,6 +129,20 @@ class TransactionProcessorTests: XCTestCase {
         verify(mockInputExtractor, never()).extract(transaction: any())
     }
 
+    func testProcessCreated_OutputsExpireBloomFiler() {
+        let transaction = TestData.p2wpkhTransaction
+        transaction.header.isMine = true
+        transaction.outputs[0].publicKeyPath = TestData.pubKey().path
+
+        do {
+            try transactionProcessor.processCreated(transaction: transaction)
+            XCTFail("Expecting error")
+        } catch _ as BloomFilterManager.BloomFilterExpired {
+        } catch {
+            XCTFail("Unexpected error")
+        }
+    }
+
     func testProcessReceived_TransactionExists() {
         let transaction = TestData.p2pkhTransaction
         transaction.header.status = .new
@@ -189,12 +203,24 @@ class TransactionProcessorTests: XCTestCase {
         }
 
         try! transactionProcessor.processReceived(transactions: [transaction], inBlock: block, skipCheckBloomFilter: false)
+        verify(mockStorage).update(transaction: equal(to: transaction.header))
+        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: [transaction.header]), inserted: equal(to: []), inBlock: equal(to: block))
+
+        reset(mockStorage, mockBlockchainDataListener)
+        stub(mockStorage) { mock in
+            when(mock.transaction(byHash: equal(to: transaction.header.dataHash))).thenReturn(transaction.header)
+        }
+
         try! transactionProcessor.processReceived(transactions: [transaction], inBlock: nil, skipCheckBloomFilter: false)
+
+        verify(mockStorage, never()).update(transaction: equal(to: transaction.header))
+        verify(mockBlockchainDataListener, never()).onUpdate(updated: equal(to: [transaction.header]), inserted: equal(to: []), inBlock: equal(to: nil))
 
         XCTAssertEqual(transaction.header.status, TransactionStatus.relayed)
         XCTAssertEqual(transaction.header.blockHash, block.headerHash)
         XCTAssertEqual(transaction.header.timestamp, block.timestamp)
         XCTAssertEqual(transaction.header.order, 0)
+
     }
 
     func testProcessReceivedBlock_After_Block_TransactionExists() {
@@ -208,7 +234,23 @@ class TransactionProcessorTests: XCTestCase {
         }
 
         try! transactionProcessor.processReceived(transactions: [transaction], inBlock: block, skipCheckBloomFilter: false)
+        verify(mockStorage).update(transaction: equal(to: transaction.header))
+        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: [transaction.header]), inserted: equal(to: []), inBlock: equal(to: block))
+
+        reset(mockStorage, mockBlockchainDataListener)
+        stub(mockStorage) { mock in
+            when(mock.update(transaction: any())).thenDoNothing()
+            when(mock.update(block: any())).thenDoNothing()
+            when(mock.transaction(byHash: equal(to: transaction.header.dataHash))).thenReturn(transaction.header)
+        }
+        stub(mockBlockchainDataListener) { mock in
+            when(mock.onUpdate(updated: any(), inserted: any(), inBlock: any())).thenDoNothing()
+        }
+
         try! transactionProcessor.processReceived(transactions: [transaction], inBlock: nextBlock, skipCheckBloomFilter: false)
+
+        verify(mockStorage).update(transaction: equal(to: transaction.header))
+        verify(mockBlockchainDataListener).onUpdate(updated: equal(to: [transaction.header]), inserted: equal(to: []), inBlock: equal(to: nextBlock))
 
         XCTAssertEqual(transaction.header.status, TransactionStatus.relayed)
         XCTAssertEqual(transaction.header.blockHash, nextBlock.headerHash)
@@ -308,7 +350,7 @@ class TransactionProcessorTests: XCTestCase {
         XCTAssertEqual(transaction.header.blockHash, nil)
     }
 
-    func testProcessReceived_TransactionNotExists_Mine_HasUnspentOutputs() {
+    func testProcessReceived_TransactionNotExists_Mine_OutputsExpireBloomFiler() {
         let transaction = TestData.p2wpkhTransaction
         transaction.header.isMine = true
         transaction.outputs[0].publicKeyPath = TestData.pubKey().path
