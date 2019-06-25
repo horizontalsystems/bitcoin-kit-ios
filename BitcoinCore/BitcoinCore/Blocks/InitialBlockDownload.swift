@@ -125,6 +125,7 @@ public class InitialBlockDownload {
         syncedPeers.append(peer)
 
         subject.onNext(.onPeerSynced(peer: peer))
+        syncStateListener.syncFinished()
     }
 
     private func setPeerNotSynced(_ peer: IPeer) {

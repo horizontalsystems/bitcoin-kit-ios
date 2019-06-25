@@ -32,6 +32,10 @@ extension KitStateProvider: ISyncStateListener {
         currentBestBlockHeight = height
     }
 
+    func syncFinished() {
+        syncState = .synced
+    }
+
     func currentBestBlockHeightUpdated(height: Int32, maxBlockHeight: Int32) {
         if currentBestBlockHeight < height {
             currentBestBlockHeight = height

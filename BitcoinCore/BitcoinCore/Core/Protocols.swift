@@ -223,6 +223,7 @@ protocol IConnectionTimeoutManager: class {
 }
 
 protocol ISyncStateListener: class {
+    func syncFinished()
     func syncStarted()
     func syncStopped()
     func initialBestBlockHeightUpdated(height: Int32)
