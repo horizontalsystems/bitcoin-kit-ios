@@ -7,20 +7,25 @@ public class SyncedReadyPeerManager {
     private var peerStates = [String: Bool]()
 
     private let peerSyncedAndReadySubject = PublishSubject<IPeer>()
+    private let peersQueue: DispatchQueue
 
-    init(peerGroup: IPeerGroup, initialBlockDownload: IInitialBlockDownload) {
+    init(peerGroup: IPeerGroup, initialBlockDownload: IInitialBlockDownload,
+         peersQueue: DispatchQueue = DispatchQueue(label: "SyncedReadyPeerManager Local Queue", qos: .userInitiated)) {
         self.peerGroup = peerGroup
         self.initialBlockDownload = initialBlockDownload
+        self.peersQueue = peersQueue
     }
 
     private func set(state: Bool, to peer: IPeer) {
-        let oldState = peerStates[peer.host] ?? false
-        peerStates[peer.host] = state
+        peersQueue.async {
+            let oldState = self.peerStates[peer.host] ?? false
+            self.peerStates[peer.host] = state
 
-        if oldState != state {
-            if state {
-                peerSyncedAndReadySubject.onNext(peer)
-            } else {
+            if oldState != state {
+                if state {
+                    self.peerSyncedAndReadySubject.onNext(peer)
+                } else {
+                }
             }
         }
     }

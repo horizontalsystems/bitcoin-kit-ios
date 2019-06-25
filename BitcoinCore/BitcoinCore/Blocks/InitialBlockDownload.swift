@@ -33,7 +33,7 @@ public class InitialBlockDownload {
     public var syncedPeers = [IPeer]()
 
     init(blockSyncer: IBlockSyncer, peerManager: IPeerManager, merkleBlockValidator: IMerkleBlockValidator, syncStateListener: ISyncStateListener,
-         peersQueue: DispatchQueue = DispatchQueue(label: "PeerGroup Local Queue", qos: .userInitiated),
+         peersQueue: DispatchQueue = DispatchQueue(label: "InitialBlockDownload Local Queue", qos: .userInitiated),
          scheduler: SchedulerType = SerialDispatchQueueScheduler(qos: .background),
          logger: Logger? = nil) {
         self.blockSyncer = blockSyncer
@@ -125,7 +125,6 @@ public class InitialBlockDownload {
         syncedPeers.append(peer)
 
         subject.onNext(.onPeerSynced(peer: peer))
-        syncStateListener.syncFinished(all: allPeersSynced)
     }
 
     private func setPeerNotSynced(_ peer: IPeer) {
@@ -154,8 +153,8 @@ public class InitialBlockDownload {
                 .disposed(by: disposeBag)
     }
 
-    public var allPeersSynced: Bool {
-        return syncedPeers.count > 0 && syncedPeers.count >= peerManager.connected().count / 3
+    public var hasSyncedPeer: Bool {
+        return syncedPeers.count > 0
     }
 
 }

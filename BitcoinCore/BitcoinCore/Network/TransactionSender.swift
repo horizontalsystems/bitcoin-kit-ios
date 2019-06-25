@@ -22,7 +22,7 @@ class TransactionSender {
             throw BitcoinCoreErrors.TransactionSendError.noConnectedPeers
         }
 
-        guard initialBlockDownload.allPeersSynced else {
+        guard initialBlockDownload.hasSyncedPeer else {
             throw BitcoinCoreErrors.TransactionSendError.peersNotSynced
         }
 
