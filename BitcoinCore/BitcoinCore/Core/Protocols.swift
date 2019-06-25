@@ -225,7 +225,6 @@ protocol IConnectionTimeoutManager: class {
 protocol ISyncStateListener: class {
     func syncStarted()
     func syncStopped()
-    func syncFinished(all: Bool)
     func initialBestBlockHeightUpdated(height: Int32)
     func currentBestBlockHeightUpdated(height: Int32, maxBlockHeight: Int32)
 }
@@ -500,7 +499,7 @@ public protocol IMessageSerializer {
 }
 
 public protocol IInitialBlockDownload {
-    var allPeersSynced: Bool { get }
+    var hasSyncedPeer: Bool { get }
     var observable: Observable<InitialBlockDownloadEvent> { get }
     var syncedPeers: [IPeer] { get }
     func isSynced(peer: IPeer) -> Bool
