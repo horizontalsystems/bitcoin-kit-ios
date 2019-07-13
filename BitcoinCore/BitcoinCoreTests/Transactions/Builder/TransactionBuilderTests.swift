@@ -39,6 +39,7 @@ class TransactionBuilderTests: XCTestCase {
     private var mockInputSigner: MockIInputSigner!
     private var mockScriptBuilder: MockIScriptBuilder!
     private var mockFactory: MockIFactory!
+    private var mockTransactionSizeCalculator: MockITransactionSizeCalculator!
 
     private var transactionBuilder: TransactionBuilder!
 
@@ -72,8 +73,9 @@ class TransactionBuilderTests: XCTestCase {
         mockInputSigner = MockIInputSigner()
         mockScriptBuilder = MockIScriptBuilder()
         mockFactory = MockIFactory()
+        mockTransactionSizeCalculator = MockITransactionSizeCalculator()
 
-        transactionBuilder = TransactionBuilder(unspentOutputSelector: mockUnspentOutputSelector, unspentOutputProvider: mockUnspentOutputProvider, addressManager: mockAddressManager, addressConverter: mockAddressConverter, inputSigner: mockInputSigner, scriptBuilder: mockScriptBuilder, factory: mockFactory)
+        transactionBuilder = TransactionBuilder(unspentOutputSelector: mockUnspentOutputSelector, unspentOutputProvider: mockUnspentOutputProvider, addressManager: mockAddressManager, addressConverter: mockAddressConverter, inputSigner: mockInputSigner, scriptBuilder: mockScriptBuilder, factory: mockFactory, transactionSizeCalculator: mockTransactionSizeCalculator)
 
         changePubKey = TestData.pubKey()
         changePubKeyAddress = "Rsfz3aRmCwTe2J8pSWSYRNYmweJ"
@@ -149,6 +151,7 @@ class TransactionBuilderTests: XCTestCase {
         mockAddressConverter = nil
         mockInputSigner = nil
         mockFactory = nil
+        mockTransactionSizeCalculator = nil
         transactionBuilder = nil
         changePubKey = nil
         toAddressPKH = nil
@@ -354,6 +357,82 @@ class TransactionBuilderTests: XCTestCase {
         } catch {
             XCTFail("Unexpected exception!")
         }
+    }
+
+    func testBuildTransaction_FromUnspentOutput_P2SH() {
+        let sigData = [Data(hex: "000001")!, Data(hex: "000002")!]
+        let value = 1000000
+
+        stub(mockInputSigner) { mock in
+            when(mock.sigScriptData(transaction: any(), inputsToSign: any(), outputs: any(), index: any())).thenReturn(sigData)
+        }
+        stub(mockTransactionSizeCalculator) { mock in
+            when(mock.transactionSize(inputs: equal(to: [ScriptType.p2sh]), outputScriptTypes: equal(to: [ScriptType.p2pkh]))).thenReturn(90)
+        }
+
+        let previousTransaction = TestData.p2shTransaction
+        previousTransaction.outputs[0].value = value
+        let unspentOutput = UnspentOutput(output: previousTransaction.outputs[0], publicKey: TestData.pubKey(), transaction: previousTransaction.header, blockHeight: nil)
+        let signatureScript = Data(repeating: 0, count: 10)
+        var calledWithSignatureAndPublicKey = false
+        let signatureScriptFunction: ((Data, Data) -> Data) = { (signature: Data, publicKey: Data) in
+            if signature == sigData[0] {
+                XCTAssertEqual(signature, sigData[0])
+                XCTAssertEqual(publicKey, sigData[1])
+                calledWithSignatureAndPublicKey = true
+            }
+            return signatureScript
+        }
+        let fee = (10 + 90) * feeRate
+
+        let resultTx = try! transactionBuilder.buildTransaction(from: unspentOutput, to: toAddressPKH, feeRate: feeRate, signatureScriptFunction: signatureScriptFunction)
+
+        XCTAssertNotEqual(resultTx.header.dataHash, Data())
+        XCTAssertEqual(resultTx.header.status, .new)
+        XCTAssertEqual(resultTx.header.isMine, true)
+        XCTAssertEqual(resultTx.header.segWit, false)
+        XCTAssertEqual(resultTx.header.isOutgoing, false)
+        XCTAssertEqual(resultTx.inputs.count, 1)
+        XCTAssertEqual(resultTx.outputs.count, 1)
+        XCTAssertEqual(resultTx.inputs[0].signatureScript, signatureScript)
+
+        verify(mockFactory).inputToSign(withPreviousOutput: equal(to: unspentOutput), script: equal(to: Data()), sequence: 0xFFFFFFFF)
+        verify(mockFactory).output(withValue: value - fee, index: 0, lockingScript: any(), type: equal(to: ScriptType.p2pkh), address: equal(to: toAddressPKH), keyHash: any(), publicKey: any())
+        XCTAssertTrue(calledWithSignatureAndPublicKey)
+    }
+
+    func testBuildTransaction_FromUnspentOutput_FeeMoreThanValue() {
+        let sigData = [Data(hex: "000001")!, Data(hex: "000002")!]
+        stub(mockInputSigner) { mock in
+            when(mock.sigScriptData(transaction: any(), inputsToSign: any(), outputs: any(), index: any())).thenReturn(sigData)
+        }
+        stub(mockTransactionSizeCalculator) { mock in
+            when(mock.transactionSize(inputs: equal(to: [ScriptType.p2sh]), outputScriptTypes: equal(to: [ScriptType.p2pkh]))).thenReturn(90)
+        }
+
+        let previousTransaction = TestData.p2shTransaction
+        let unspentOutput = UnspentOutput(output: previousTransaction.outputs[0], publicKey: TestData.pubKey(), transaction: previousTransaction.header, blockHeight: nil)
+        let signatureScript = Data(repeating: 0, count: 10)
+        var calledWithSignatureAndPublicKey = false
+        let signatureScriptFunction: ((Data, Data) -> Data) = { (signature: Data, publicKey: Data) in
+            if signature == sigData[0] {
+                XCTAssertEqual(signature, sigData[0])
+                XCTAssertEqual(publicKey, sigData[1])
+                calledWithSignatureAndPublicKey = true
+            }
+            return signatureScript
+        }
+        let fee = (10 + 90) * feeRate
+        previousTransaction.outputs[0].value = fee - 1
+
+        do {
+            _ = try transactionBuilder.buildTransaction(from: unspentOutput, to: toAddressPKH, feeRate: feeRate, signatureScriptFunction: signatureScriptFunction)
+        } catch let error as TransactionBuilder.BuildError {
+            XCTAssertEqual(error, TransactionBuilder.BuildError.feeMoreThanValue)
+        } catch let error {
+            XCTFail(error.localizedDescription)
+        }
+
     }
 
 }

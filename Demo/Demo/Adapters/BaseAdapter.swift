@@ -121,7 +121,7 @@ extension BaseAdapter {
 
         return Single.create { [unowned self] observer in
             do {
-                try self.abstractKit.send(to: address, value: satoshiAmount, feeRate: self.feeRate)
+                _ = try self.abstractKit.send(to: address, value: satoshiAmount, feeRate: self.feeRate)
                 observer(.success(()))
             } catch {
                 observer(.error(error))

@@ -10,6 +10,7 @@ class BloomFilterManagerTests: QuickSpec {
         let mockStorage = MockIStorage()
         let mockFactory = MockIFactory()
         let mockBloomFilterManagerDelegate = MockIBloomFilterManagerDelegate()
+        let mockBloomFilterProvider = MockIBloomFilterProvider()
 
         let bloomFilter = BloomFilter(elements: [Data(from: 9999999)])
         let lastBlock = TestData.checkpointBlock
@@ -149,6 +150,33 @@ class BloomFilterManagerTests: QuickSpec {
                             }
                         }
                     }
+                }
+            }
+
+            context("when has providers") {
+                let elements = [Data(repeating: 0, count: 32), Data(repeating: 1, count: 20)]
+
+                beforeEach {
+                    stub(mockStorage) { mock in
+                        when(mock.publicKeys()).thenReturn([])
+                        when(mock.outputsWithPublicKeys()).thenReturn([])
+                    }
+                    stub(mockBloomFilterProvider) { mock in
+                        when(mock.filterElements()).thenReturn(elements)
+                    }
+
+                    manager.add(provider: mockBloomFilterProvider)
+                }
+
+                afterEach {
+                    reset(mockBloomFilterProvider)
+                }
+
+                it("adds elements to bloom filter") {
+                    manager.regenerateBloomFilter()
+
+                    verify(mockFactory).bloomFilter(withElements: equal(to: elements))
+                    verify(mockBloomFilterManagerDelegate).bloomFilterUpdated(bloomFilter: equal(to: bloomFilter, equalWhen: { $0.filter == $1.filter }))
                 }
             }
 

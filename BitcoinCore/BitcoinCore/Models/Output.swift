@@ -44,19 +44,22 @@ public enum ScriptType: Int, DatabaseValueConvertible {
 public class Output: Record {
 
     public var value: Int
-    var lockingScript: Data
-    var index: Int
-    var transactionHash = Data()
+    public var lockingScript: Data
+    public var index: Int
+    var transactionHash: Data
     var publicKeyPath: String? = nil
     public var scriptType: ScriptType = .unknown
-    var keyHash: Data? = nil
+    public var redeemScript: Data? = nil
+    public var keyHash: Data? = nil
     var address: String? = nil
 
-    init(withValue value: Int, index: Int, lockingScript script: Data, type: ScriptType = .unknown, address: String? = nil, keyHash: Data? = nil, publicKey: PublicKey? = nil) {
+    public init(withValue value: Int, index: Int, lockingScript script: Data, transactionHash: Data = Data(), type: ScriptType = .unknown, redeemScript: Data? = nil, address: String? = nil, keyHash: Data? = nil, publicKey: PublicKey? = nil) {
         self.value = value
         self.lockingScript = script
         self.index = index
+        self.transactionHash = transactionHash
         self.scriptType = type
+        self.redeemScript = redeemScript
         self.address = address
         self.keyHash = keyHash
         self.publicKeyPath = publicKey?.path

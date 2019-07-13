@@ -15,14 +15,8 @@ class TransactionCreator {
         self.bloomFilterManager = bloomFilterManager
     }
 
-}
-
-extension TransactionCreator: ITransactionCreator {
-
-    func create(to address: String, value: Int, feeRate: Int, senderPay: Bool) throws {
+    func processAndSend(transaction: FullTransaction) throws {
         try transactionSender.verifyCanSend()
-
-        let transaction = try transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: senderPay, toAddress: address)
 
         do {
             try transactionProcessor.processCreated(transaction: transaction)
@@ -31,6 +25,24 @@ extension TransactionCreator: ITransactionCreator {
         }
 
         try transactionSender.send(pendingTransaction: transaction)
+    }
+
+}
+
+extension TransactionCreator: ITransactionCreator {
+
+    func create(to address: String, value: Int, feeRate: Int, senderPay: Bool) throws -> FullTransaction {
+        let transaction = try transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: senderPay, toAddress: address)
+
+        try processAndSend(transaction: transaction)
+        return transaction
+    }
+
+    func create(from unspentOutput: UnspentOutput, to address: String, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction {
+        let transaction = try transactionBuilder.buildTransaction(from: unspentOutput, to: address, feeRate: feeRate, signatureScriptFunction: signatureScriptFunction)
+
+        try processAndSend(transaction: transaction)
+        return transaction
     }
 
 }

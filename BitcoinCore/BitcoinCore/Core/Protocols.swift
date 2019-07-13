@@ -126,6 +126,7 @@ public protocol IStorage {
     func publicKey(byRawOrKeyHash: Data) -> PublicKey?
     func add(publicKeys: [PublicKey])
     func publicKeysWithUsedState() -> [PublicKeyWithUsedState]
+    func publicKey(byPath: String) -> PublicKey?
 }
 
 public protocol IAddressSelector {
@@ -134,17 +135,19 @@ public protocol IAddressSelector {
 
 public protocol IAddressManager {
     func changePublicKey() throws -> PublicKey
+    func receivePublicKey() throws -> PublicKey
     func receiveAddress(for type: ScriptType) throws -> String
     func fillGap() throws
     func addKeys(keys: [PublicKey]) throws
     func gapShifts() -> Bool
+    func publicKey(byPath: String) throws -> PublicKey
 }
 
 public protocol IBloomFilterManagerDelegate: class {
     func bloomFilterUpdated(bloomFilter: BloomFilter)
 }
 
-public protocol IBloomFilterManager {
+public protocol IBloomFilterManager: AnyObject {
     var delegate: IBloomFilterManagerDelegate? { get set }
     var bloomFilter: BloomFilter? { get }
     func regenerateBloomFilter()
@@ -340,12 +343,14 @@ public protocol ITransactionSyncer: class {
 }
 
 public protocol ITransactionCreator {
-    func create(to address: String, value: Int, feeRate: Int, senderPay: Bool) throws
+    func create(to address: String, value: Int, feeRate: Int, senderPay: Bool) throws -> FullTransaction
+    func create(from: UnspentOutput, to address: String, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction
 }
 
 protocol ITransactionBuilder {
     func fee(for value: Int, feeRate: Int, senderPay: Bool, address: String?) throws -> Int
     func buildTransaction(value: Int, feeRate: Int, senderPay: Bool, toAddress: String) throws -> FullTransaction
+    func buildTransaction(from: UnspentOutput, to: String, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction
 }
 
 protocol IBlockchain {
@@ -526,4 +531,21 @@ protocol ITransactionSender {
 
 protocol IMerkleBlockHandler: AnyObject {
     func handle(merkleBlock: MerkleBlock) throws
+}
+
+protocol ITransactionListener: class {
+    func onReceive(transaction: FullTransaction)
+}
+
+public protocol IWatchedTransactionDelegate {
+    func transactionReceived(transaction: FullTransaction, outputIndex: Int)
+    func transactionReceived(transaction: FullTransaction, inputIndex: Int)
+}
+
+protocol IWatchedTransactionManager {
+    func add(transactionFilter: BitcoinCore.TransactionFilter, delegatedTo: IWatchedTransactionDelegate)
+}
+
+protocol IBloomFilterProvider {
+    func filterElements() -> [Data]
 }

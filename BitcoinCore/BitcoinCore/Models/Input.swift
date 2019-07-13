@@ -5,7 +5,7 @@ public class Input: Record {
 
     public var previousOutputTxHash: Data
     var previousOutputIndex: Int
-    var signatureScript: Data
+    public var signatureScript: Data
     var sequence: Int
     var transactionHash = Data()
     var keyHash: Data? = nil
@@ -66,4 +66,5 @@ public class Input: Record {
 enum SerializationError: Error {
     case noPreviousOutput
     case noPreviousTransaction
+    case noPreviousOutputScript
 }

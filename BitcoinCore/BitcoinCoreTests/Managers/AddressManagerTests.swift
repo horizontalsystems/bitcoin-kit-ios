@@ -73,6 +73,41 @@ class AddressManagerTests: XCTestCase {
         }
     }
 
+    func testReceivePublicKey() {
+        let publicKeys = [
+            PublicKeyWithUsedState(publicKey: getPublicKey(withAccount: 0, index: 0, chain: .external), used: true),
+            PublicKeyWithUsedState(publicKey: getPublicKey(withAccount: 0, index: 0, chain: .internal), used: false),
+            PublicKeyWithUsedState(publicKey: getPublicKey(withAccount: 0, index: 3, chain: .external), used: false),
+            PublicKeyWithUsedState(publicKey: getPublicKey(withAccount: 0, index: 1, chain: .external), used: false),
+            PublicKeyWithUsedState(publicKey: getPublicKey(withAccount: 0, index: 2, chain: .external), used: false),
+            PublicKeyWithUsedState(publicKey: getPublicKey(withAccount: 0, index: 1, chain: .internal), used: false)
+        ]
+
+        stub(mockStorage) { mock in
+            when(mock.publicKeysWithUsedState()).thenReturn(publicKeys)
+        }
+
+        let changePublicKey = try! manager.receivePublicKey()
+        XCTAssertEqual(changePublicKey.keyHash, publicKeys[3].publicKey.keyHash)
+    }
+
+    func testReceivePublicKey_NoUnusedPublicKey() {
+        let publicKey = PublicKeyWithUsedState(publicKey: getPublicKey(withAccount: 0, index: 0, chain: .external), used: true)
+
+        stub(mockStorage) { mock in
+            when(mock.publicKeysWithUsedState()).thenReturn([publicKey])
+        }
+
+        do {
+            let _ = try manager.receivePublicKey()
+            XCTFail("Should throw exception")
+        } catch let error as AddressManager.AddressManagerError {
+            XCTAssertEqual(error, AddressManager.AddressManagerError.noUnusedPublicKey)
+        } catch {
+            XCTFail("Unexpected exception thrown")
+        }
+    }
+
     func testReceiveAddress() {
         let publicKeys = [
             PublicKeyWithUsedState(publicKey: getPublicKey(withAccount: 0, index: 0, chain: .external), used: true),
@@ -344,9 +379,47 @@ class AddressManagerTests: XCTestCase {
         XCTAssertEqual(manager.gapShifts(), false)
     }
 
+    func testPublicKey_byPath_ExistsInStorage() {
+        let key = getPublicKey(withAccount: 10, index: 20, chain: .internal)
+
+        stub(mockStorage) { mock in
+            when(mock.publicKey(byPath: equal(to: "10/0/20"))).thenReturn(key)
+        }
+
+        XCTAssertEqual(try! manager.publicKey(byPath: "10/0/20"), key)
+        verify(mockStorage).publicKey(byPath: equal(to: "10/0/20"))
+        verify(mockHDWallet, never()).publicKey(account: any(), index: any(), external: any())
+    }
+
+    func testPublicKey_byPath_DoesNotExistsInStorage() {
+        let key = getPublicKey(withAccount: 10, index: 20, chain: .external)
+
+        stub(mockStorage) { mock in
+            when(mock.publicKey(byPath: equal(to: "10/1/20"))).thenReturn(nil)
+        }
+        stub(mockHDWallet) { mock in
+            when(mock.publicKey(account: 10, index: 20, external: true)).thenReturn(key)
+        }
+
+        XCTAssertEqual(try! manager.publicKey(byPath: "10/1/20"), key)
+        verify(mockStorage).publicKey(byPath: equal(to: "10/1/20"))
+        verify(mockHDWallet).publicKey(account: 10, index: 20, external: true)
+    }
+
+    func testPublicKey_byPath_InvalidPath() {
+        do {
+            _ = try manager.publicKey(byPath: "0/0")
+            XCTFail("Expected exception")
+        } catch let error as AddressManager.AddressManagerError {
+            XCTAssertEqual(error, .invalidPath)
+        } catch {
+            XCTFail("Unexpected exception")
+        }
+    }
 
     private func getPublicKey(withAccount account: Int, index: Int, chain: HDWallet.Chain) -> PublicKey {
         let hdPrivKeyData = try! hdWallet.privateKeyData(account: account, index: index, external: chain == .external)
         return PublicKey(withAccount: account, index: index, external: chain == .external, hdPublicKeyData: hdPrivKeyData)
     }
+
 }

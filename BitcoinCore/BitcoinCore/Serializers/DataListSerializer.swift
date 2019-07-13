@@ -1,6 +1,6 @@
 import Foundation
 
-class DataListSerializer {
+public class DataListSerializer {
 
     static func serialize(dataList: [Data]) -> Data {
         var data = Data()

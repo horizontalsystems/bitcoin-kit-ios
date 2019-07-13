@@ -3,7 +3,7 @@ import BitcoinCore
 import RxSwift
 
 class BitcoinCashAdapter: BaseAdapter {
-    private let bitcoinCashKit: BitcoinCashKit
+    let bitcoinCashKit: BitcoinCashKit
 
     init(words: [String], testMode: Bool, syncMode: BitcoinCore.SyncMode) {
         let networkType: BitcoinCashKit.NetworkType = testMode ? .testNet : .mainNet

@@ -34,9 +34,20 @@ class TransactionInputSerializer {
         data += UInt32(output.index)
 
         if forCurrentInputSignature {
-            let scriptLength = VarInt(output.lockingScript.count)
+            let script: Data
+            switch inputToSign.previousOutput.scriptType {
+            case .p2sh:
+                guard let redeemScript = inputToSign.previousOutput.redeemScript else {
+                    throw SerializationError.noPreviousOutputScript
+                }
+                script = redeemScript
+            default:
+                script = output.lockingScript
+            }
+
+            let scriptLength = VarInt(script.count)
             data += scriptLength.serialized()
-            data += output.lockingScript
+            data += script
         } else {
             data += VarInt(0).serialized()
         }

@@ -82,6 +82,13 @@ public struct UnspentOutput {
     public let transaction: Transaction
     public let blockHeight: Int?
 
+    public init(output: Output, publicKey: PublicKey, transaction: Transaction, blockHeight: Int? = nil) {
+        self.output = output
+        self.publicKey = publicKey
+        self.transaction = transaction
+        self.blockHeight = blockHeight
+    }
+
 }
 
 public struct FullTransactionForInfo {

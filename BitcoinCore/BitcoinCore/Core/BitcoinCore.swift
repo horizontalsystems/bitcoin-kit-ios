@@ -14,6 +14,7 @@ public class BitcoinCore {
     private let cache: OutputsCache
     private var dataProvider: IDataProvider
     private let addressManager: IAddressManager
+    private let watchedTransactionManager: IWatchedTransactionManager
     private let addressConverter: AddressConverterChain
     private let unspentOutputSelector: UnspentOutputSelectorChain
     private let kitStateProvider: IKitStateProvider & ISyncStateListener
@@ -63,6 +64,10 @@ public class BitcoinCore {
         return self
     }
 
+    func publicKey(byPath path: String) throws -> PublicKey {
+        return try addressManager.publicKey(byPath: path)
+    }
+
     public func prepend(scriptBuilder: IScriptBuilder) {
         self.scriptBuilder.prepend(scriptBuilder: scriptBuilder)
     }
@@ -86,7 +91,7 @@ public class BitcoinCore {
                 blockValidatorChain: BlockValidatorChain, addressManager: IAddressManager, addressConverter: AddressConverterChain, unspentOutputSelector: UnspentOutputSelectorChain, kitStateProvider: IKitStateProvider & ISyncStateListener,
                 scriptBuilder: ScriptBuilderChain, transactionBuilder: ITransactionBuilder, transactionCreator: ITransactionCreator,
                 paymentAddressParser: IPaymentAddressParser, networkMessageParser: NetworkMessageParser, networkMessageSerializer: NetworkMessageSerializer,
-                syncManager: SyncManager) {
+                syncManager: SyncManager, watchedTransactionManager: IWatchedTransactionManager) {
         self.storage = storage
         self.cache = cache
         self.dataProvider = dataProvider
@@ -109,6 +114,7 @@ public class BitcoinCore {
         self.networkMessageSerializer = networkMessageSerializer
 
         self.syncManager = syncManager
+        self.watchedTransactionManager = watchedTransactionManager
     }
 
 }
@@ -143,8 +149,17 @@ extension BitcoinCore {
         return dataProvider.transactions(fromHash: fromHash, limit: limit)
     }
 
-    public func send(to address: String, value: Int, feeRate: Int) throws {
-        try transactionCreator.create(to: address, value: value, feeRate: feeRate, senderPay: true)
+    public func send(to address: String, value: Int, feeRate: Int) throws -> FullTransaction {
+        return try transactionCreator.create(to: address, value: value, feeRate: feeRate, senderPay: true)
+    }
+
+    public func send(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int) throws -> FullTransaction {
+        let address = try addressConverter.convert(keyHash: hash, type: scriptType)
+        return try send(to: address.stringValue, value: value, feeRate: feeRate)
+    }
+
+    func redeem(from unspentOutput: UnspentOutput, to address: String, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction {
+        return try transactionCreator.create(from: unspentOutput, to: address, feeRate: feeRate, signatureScriptFunction: signatureScriptFunction)
     }
 
     public func validate(address: String) throws {
@@ -161,6 +176,18 @@ extension BitcoinCore {
 
     public func receiveAddress(for type: ScriptType) -> String {
         return (try? addressManager.receiveAddress(for: type)) ?? ""
+    }
+
+    public func changePublicKey() throws -> PublicKey {
+        return try addressManager.changePublicKey()
+    }
+
+    public func receivePublicKey() throws -> PublicKey {
+        return try addressManager.receivePublicKey()
+    }
+
+    func watch(transaction: BitcoinCore.TransactionFilter, delegate: IWatchedTransactionDelegate) {
+        watchedTransactionManager.add(transactionFilter: transaction, delegatedTo: delegate)
     }
 
     public var debugInfo: String {
@@ -242,6 +269,11 @@ extension BitcoinCore {
         case fromDate(date: TimeInterval)   // Sync from given date. Api restore disable
         case api                            // Sync from lastCheckpointBlock. Api restore enabled
         case newWallet                      // Sync from lastCheckpointBlock. Api restore enabled
+    }
+
+    public enum TransactionFilter {
+        case p2shOutput(scriptHash: Data)
+        case outpoint(transactionHash: Data, outputIndex: Int)
     }
 
 }

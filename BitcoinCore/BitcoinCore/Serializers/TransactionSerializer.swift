@@ -46,7 +46,19 @@ public class TransactionSerializer {
             let inputToSign = inputsToSign[inputIndex]
 
             data += try TransactionInputSerializer.serializedOutPoint(input: inputToSign)
-            data += OpCode.push(OpCode.p2pkhStart + OpCode.push(inputToSign.previousOutput.keyHash!) + OpCode.p2pkhFinish)
+
+            switch inputToSign.previousOutput.scriptType {
+            case .p2sh:
+                guard let script = inputToSign.previousOutput.redeemScript else {
+                    throw SerializationError.noPreviousOutputScript
+                }
+                let scriptLength = VarInt(script.count)
+                data += scriptLength.serialized()
+                data += script
+            default:
+                data += OpCode.push(OpCode.p2pkhStart + OpCode.push(inputToSign.previousOutput.keyHash!) + OpCode.p2pkhFinish)
+            }
+
             data += inputToSign.previousOutput.value
             data += UInt32(inputToSign.input.sequence)
 

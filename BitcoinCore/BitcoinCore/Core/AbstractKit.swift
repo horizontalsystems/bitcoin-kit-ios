@@ -34,8 +34,16 @@ open class AbstractKit {
         return bitcoinCore.transactions(fromHash: fromHash, limit: limit)
     }
 
-    open func send(to address: String, value: Int, feeRate: Int) throws {
-        try bitcoinCore.send(to: address, value: value, feeRate: feeRate)
+    open func send(to address: String, value: Int, feeRate: Int) throws -> FullTransaction {
+        return try bitcoinCore.send(to: address, value: value, feeRate: feeRate)
+    }
+
+    public func send(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int) throws -> FullTransaction {
+        return try bitcoinCore.send(to: hash, scriptType: scriptType, value: value, feeRate: feeRate)
+    }
+
+    public func redeem(from unspentOutput: UnspentOutput, to address: String, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction {
+        return try bitcoinCore.redeem(from: unspentOutput, to: address, feeRate: feeRate, signatureScriptFunction: signatureScriptFunction)
     }
 
     open func validate(address: String) throws {
@@ -52,6 +60,22 @@ open class AbstractKit {
 
     open func receiveAddress(for type: ScriptType) -> String {
         return bitcoinCore.receiveAddress(for: type)
+    }
+
+    open func changePublicKey() throws -> PublicKey {
+        return try bitcoinCore.changePublicKey()
+    }
+
+    open func receivePublicKey() throws -> PublicKey {
+        return try bitcoinCore.receivePublicKey()
+    }
+
+    public func publicKey(byPath path: String) throws -> PublicKey {
+        return try bitcoinCore.publicKey(byPath: path)
+    }
+
+    open func watch(transaction: BitcoinCore.TransactionFilter, delegate: IWatchedTransactionDelegate) {
+        bitcoinCore.watch(transaction: transaction, delegate: delegate)
     }
 
     open var debugInfo: String {

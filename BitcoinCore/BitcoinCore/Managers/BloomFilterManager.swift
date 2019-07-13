@@ -1,6 +1,8 @@
 class BloomFilterManager {
     class BloomFilterExpired: Error {}
 
+    private var providers = [IBloomFilterProvider]()
+
     private let storage: IStorage
     private let factory: IFactory
     weak var delegate: IBloomFilterManagerDelegate?
@@ -10,16 +12,6 @@ class BloomFilterManager {
     init(storage: IStorage, factory: IFactory) {
         self.storage = storage
         self.factory = factory
-    }
-
-    // This method is a workaround
-    private func byteArrayLittleEndian(int: Int) -> [UInt8] {
-        return [
-            UInt8(int & 0x000000FF),
-            UInt8((int & 0x0000FF00) >> 8),
-            UInt8((int & 0x00FF0000) >> 16),
-            UInt8((int & 0xFF000000) >> 24)
-        ]
     }
 
     private func needToSetToBloomFilter(output: OutputWithPublicKey, bestBlockHeight: Int) -> Bool {
@@ -39,6 +31,10 @@ class BloomFilterManager {
 }
 
 extension BloomFilterManager: IBloomFilterManager {
+
+    func add(provider: IBloomFilterProvider) {
+        providers.append(provider)
+    }
 
     func regenerateBloomFilter() {
         var elements = [Data]()
@@ -63,6 +59,10 @@ extension BloomFilterManager: IBloomFilterManager {
         for outputWithPublicKey in outputs {
             let outpoint = outputWithPublicKey.output.transactionHash + byteArrayLittleEndian(int: outputWithPublicKey.output.index)
             elements.append(outpoint)
+        }
+
+        for provider in providers {
+            elements.append(contentsOf: provider.filterElements())
         }
 
         if !elements.isEmpty {

@@ -10,6 +10,7 @@ class TransactionProcessorTests: XCTestCase {
     private var mockOutputsCache: MockIOutputsCache!
     private var mockAddressManager: MockIAddressManager!
     private var mockBlockchainDataListener: MockIBlockchainDataListener!
+    private var mockTransactionListener: MockITransactionListener!
 
     private var generatedDate: Date!
     private var dateGenerator: (() -> Date)!
@@ -31,6 +32,7 @@ class TransactionProcessorTests: XCTestCase {
         mockOutputsCache = MockIOutputsCache()
         mockAddressManager = MockIAddressManager()
         mockBlockchainDataListener = MockIBlockchainDataListener()
+        mockTransactionListener = MockITransactionListener()
 
         stub(mockStorage) { mock in
             when(mock.transaction(byHash: any())).thenReturn(nil)
@@ -59,8 +61,12 @@ class TransactionProcessorTests: XCTestCase {
             when(mock.onDelete(transactionHashes: any())).thenDoNothing()
             when(mock.onInsert(block: any())).thenDoNothing()
         }
+        stub(mockTransactionListener) { mock in
+            when(mock.onReceive(transaction: any())).thenDoNothing()
+        }
 
         transactionProcessor = TransactionProcessor(storage: mockStorage, outputExtractor: mockOutputExtractor, inputExtractor: mockInputExtractor, outputsCache: mockOutputsCache, outputAddressExtractor: mockOutputAddressExtractor, addressManager: mockAddressManager, listener: mockBlockchainDataListener, dateGenerator: dateGenerator)
+        transactionProcessor.transactionListener = mockTransactionListener
     }
 
     override func tearDown() {
@@ -304,6 +310,7 @@ class TransactionProcessorTests: XCTestCase {
         verify(mockStorage).add(transaction: equal(to: transaction))
         verify(mockOutputAddressExtractor).extractOutputAddresses(transaction: equal(to: transaction))
         verify(mockInputExtractor).extract(transaction: equal(to: transaction))
+        verify(mockTransactionListener).onReceive(transaction: equal(to: transaction))
 
         XCTAssertEqual(transaction.header.status, TransactionStatus.relayed)
         XCTAssertEqual(transaction.header.blockHash, nil)
@@ -318,6 +325,7 @@ class TransactionProcessorTests: XCTestCase {
         verify(mockOutputExtractor).extract(transaction: equal(to: transaction))
         verify(mockOutputsCache).hasOutputs(forInputs: equal(to: transaction.inputs))
         verify(mockStorage, never()).add(transaction: any())
+        verify(mockTransactionListener).onReceive(transaction: equal(to: transaction))
         verifyNoMoreInteractions(mockBlockchainDataListener)
         verifyNoMoreInteractions(mockOutputAddressExtractor)
         verifyNoMoreInteractions(mockInputExtractor)
