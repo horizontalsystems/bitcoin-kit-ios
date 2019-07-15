@@ -9,6 +9,7 @@ class TransactionProcessor {
     private let addressManager: IAddressManager
 
     weak var listener: IBlockchainDataListener?
+    weak var transactionListener: ITransactionListener?
 
     private let dateGenerator: () -> Date
     private let queue: DispatchQueue
@@ -87,6 +88,7 @@ extension TransactionProcessor: ITransactionProcessor {
                 }
 
                 self.process(transaction: transaction)
+                self.transactionListener?.onReceive(transaction: transaction)
 
                 if transaction.header.isMine {
                     self.relay(transaction: transaction.header, withOrder: index, inBlock: block)

@@ -19,12 +19,11 @@ func pton(_ address: String) -> Data {
     return buffer
 }
 
-/// Version = 1 byte of 0 (zero); on the test network, this is 1 byte of 111
-/// Key hash = Version concatenated with RIPEMD-160(SHA-256(public key))
-/// Checksum = 1st 4 bytes of SHA-256(SHA-256(Key hash))
-/// Bitcoin Address = Base58Encode(Key hash concatenated with Checksum)
-func publicKeyHashToAddress(_ hash: Data) -> String {
-    let checksum = CryptoKit.sha256sha256(hash).prefix(4)
-    let address = Base58.encode(hash + checksum)
-    return address
+func byteArrayLittleEndian(int: Int) -> [UInt8] {
+    return [
+        UInt8(int & 0x000000FF),
+        UInt8((int & 0x0000FF00) >> 8),
+        UInt8((int & 0x00FF0000) >> 16),
+        UInt8((int & 0xFF000000) >> 24)
+    ]
 }

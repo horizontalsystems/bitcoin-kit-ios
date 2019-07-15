@@ -185,6 +185,7 @@ public class BitcoinCoreBuilder {
         let initialSyncer = InitialSyncer(storage: storage, listener: kitStateProvider, stateManager: stateManager, blockDiscovery: blockDiscovery, addressManager: addressManager, logger: logger)
 
         let bloomFilterLoader = BloomFilterLoader(bloomFilterManager: bloomFilterManager, peerManager: peerManager)
+        let watchedTransactionManager = WatchedTransactionManager()
 
         let blockValidatorChain = BlockValidatorChain(proofOfWorkValidator: ProofOfWorkValidator(difficultyEncoder: DifficultyEncoder()))
         let blockchain = Blockchain(storage: storage, blockValidator: blockValidatorChain, factory: factory, listener: dataProvider)
@@ -199,7 +200,8 @@ public class BitcoinCoreBuilder {
 
         let inputSigner = InputSigner(hdWallet: hdWallet, network: network)
         let scriptBuilder = ScriptBuilderChain()
-        let transactionBuilder = TransactionBuilder(unspentOutputSelector: unspentOutputSelector, unspentOutputProvider: unspentOutputProvider, addressManager: addressManager, addressConverter: addressConverter, inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory)
+        let transactionSizeCalculator = TransactionSizeCalculator()
+        let transactionBuilder = TransactionBuilder(unspentOutputSelector: unspentOutputSelector, unspentOutputProvider: unspentOutputProvider, addressManager: addressManager, addressConverter: addressConverter, inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory, transactionSizeCalculator: transactionSizeCalculator)
         let transactionSender = TransactionSender(transactionSyncer: transactionSyncer, peerManager: peerManager, initialBlockDownload: initialBlockDownload, syncedReadyPeerManager: syncedReadyPeerManager, logger: logger)
         let transactionCreator = TransactionCreator(transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, transactionSender: transactionSender, bloomFilterManager: bloomFilterManager)
 
@@ -224,20 +226,22 @@ public class BitcoinCoreBuilder {
                 paymentAddressParser: paymentAddressParser,
                 networkMessageParser: networkMessageParser,
                 networkMessageSerializer: networkMessageSerializer,
-                syncManager: syncManager)
+                syncManager: syncManager,
+                watchedTransactionManager: watchedTransactionManager)
 
         initialSyncer.delegate = syncManager
         bloomFilterManager.delegate = bloomFilterLoader
         dataProvider.delegate = bitcoinCore
         kitStateProvider.delegate = bitcoinCore
+        transactionProcessor.transactionListener = watchedTransactionManager
+
+        bloomFilterManager.add(provider: watchedTransactionManager)
 
         peerGroup.peerTaskHandler = bitcoinCore.peerTaskHandlerChain
         peerGroup.inventoryItemsHandler = bitcoinCore.inventoryItemsHandlerChain
 
         bitcoinCore.prepend(scriptBuilder: ScriptBuilder())
         bitcoinCore.prepend(addressConverter: Base58AddressConverter(addressVersion: network.pubKeyHash, addressScriptVersion: network.scriptHash))
-
-        let transactionSizeCalculator = TransactionSizeCalculator()
         bitcoinCore.prepend(unspentOutputSelector: UnspentOutputSelector(calculator: transactionSizeCalculator, provider: unspentOutputProvider))
         bitcoinCore.prepend(unspentOutputSelector: UnspentOutputSelectorSingleNoChange(calculator: transactionSizeCalculator, provider: unspentOutputProvider))
         // this part can be moved to another place

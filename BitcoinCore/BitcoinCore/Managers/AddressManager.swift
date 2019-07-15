@@ -4,6 +4,7 @@ class AddressManager {
 
     enum AddressManagerError: Error {
         case noUnusedPublicKey
+        case invalidPath
     }
 
     private let storage: IStorage
@@ -62,6 +63,10 @@ extension AddressManager: IAddressManager {
         return try publicKey(external: false)
     }
 
+    func receivePublicKey() throws -> PublicKey {
+        return try publicKey(external: true)
+    }
+
     func receiveAddress(for type: ScriptType) throws -> String {
         let keyHash = try publicKey(external: true).keyHash
         let correctKeyHash = addressKeyHashConverter?.convert(keyHash: keyHash, type: type) ?? keyHash
@@ -113,6 +118,19 @@ extension AddressManager: IAddressManager {
         return false
     }
 
+    public func publicKey(byPath path: String) throws -> PublicKey {
+        let parts = path.split(separator: "/")
+
+        guard parts.count == 3, let account = Int(parts[0]), let external = Int(parts[1]), let index = Int(parts[2]) else {
+            throw AddressManagerError.invalidPath
+        }
+
+        if let publicKey = storage.publicKey(byPath: path) {
+            return publicKey
+        }
+
+        return try hdWallet.publicKey(account: account, index: index, external: external == 1)
+    }
 }
 
 extension AddressManager {

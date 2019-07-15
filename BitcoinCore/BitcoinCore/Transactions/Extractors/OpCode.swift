@@ -15,14 +15,20 @@ public class OpCode {
     public static let pushData1: UInt8 = 0x4c
     public static let pushData2: UInt8 = 0x4d
     public static let pushData4: UInt8 = 0x4e
+    public static let drop: UInt8 = 0x75
     public static let dup: UInt8 = 0x76
+    public static let sha256: UInt8 = 0xA8
     public static let hash160: UInt8 = 0xA9
+    public static let size: UInt8 = 0x82
     public static let equal: UInt8 = 0x87
     public static let equalVerify: UInt8 = 0x88
     public static let checkSig: UInt8 = 0xAC
     public static let checkSigVerify: UInt8 = 0xAD
     public static let checkMultiSig: UInt8 = 0xAE
     public static let checkMultiSigVerify: UInt8 = 0xAF
+    public static let checkLockTimeVerify: UInt8 = 0xB1
+    public static let _if: UInt8 = 0x63
+    public static let _else: UInt8 = 0x67
     public static let endIf: UInt8 = 0x68
 
     public static func value(fromPush code: UInt8) -> UInt8? {

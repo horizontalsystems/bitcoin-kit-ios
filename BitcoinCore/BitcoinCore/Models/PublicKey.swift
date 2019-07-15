@@ -9,7 +9,7 @@ public class PublicKey: Record {
         case wrongNetwork
     }
 
-    let path: String
+    public let path: String
     public let account: Int
     public let index: Int
     public let external: Bool

@@ -3,7 +3,7 @@ import BitcoinCore
 import RxSwift
 
 class BitcoinAdapter: BaseAdapter {
-    private let bitcoinKit: BitcoinKit
+    let bitcoinKit: BitcoinKit
     override var changeableAddressType: Bool { return true }
 
     init(words: [String], testMode: Bool, syncMode: BitcoinCore.SyncMode) {

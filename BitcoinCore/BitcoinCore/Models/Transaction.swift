@@ -16,7 +16,7 @@ public class Transaction: Record {
     public var status: TransactionStatus = .relayed
     public var segWit: Bool = false
 
-    init(version: Int = 0, lockTime: Int = 0, timestamp: Int? = nil) {
+    public init(version: Int = 0, lockTime: Int = 0, timestamp: Int? = nil) {
         self.version = version
         self.lockTime = lockTime
         self.timestamp = timestamp ?? Int(Date().timeIntervalSince1970)

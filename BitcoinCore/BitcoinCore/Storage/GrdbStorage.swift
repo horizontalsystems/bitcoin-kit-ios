@@ -753,4 +753,10 @@ extension GrdbStorage: IStorage {
         }
     }
 
+    public func publicKey(byPath path: String) -> PublicKey? {
+        return try! dbPool.read { db in
+            try PublicKey.filter(PublicKey.Columns.path == path).fetchOne(db)
+        }
+    }
+
 }

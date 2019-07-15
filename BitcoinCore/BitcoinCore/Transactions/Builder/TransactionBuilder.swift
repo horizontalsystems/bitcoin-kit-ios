@@ -12,10 +12,12 @@ class TransactionBuilder {
     private let addressConverter: IAddressConverter
     private let inputSigner: IInputSigner
     private let factory: IFactory
+    private let transactionSizeCalculator: ITransactionSizeCalculator
 
     var scriptBuilder: IScriptBuilder
 
-    init(unspentOutputSelector: IUnspentOutputSelector, unspentOutputProvider: IUnspentOutputProvider, addressManager: IAddressManager, addressConverter: IAddressConverter, inputSigner: IInputSigner, scriptBuilder: IScriptBuilder, factory: IFactory) {
+    init(unspentOutputSelector: IUnspentOutputSelector, unspentOutputProvider: IUnspentOutputProvider, addressManager: IAddressManager, addressConverter: IAddressConverter,
+         inputSigner: IInputSigner, scriptBuilder: IScriptBuilder, factory: IFactory, transactionSizeCalculator: ITransactionSizeCalculator) {
         self.unspentOutputSelector = unspentOutputSelector
         self.unspentOutputProvider = unspentOutputProvider
         self.addressManager = addressManager
@@ -23,6 +25,7 @@ class TransactionBuilder {
         self.inputSigner = inputSigner
         self.scriptBuilder = scriptBuilder
         self.factory = factory
+        self.transactionSizeCalculator = transactionSizeCalculator
     }
 
     private func input(fromUnspentOutput unspentOutput: UnspentOutput) throws -> InputToSign {
@@ -126,6 +129,44 @@ extension TransactionBuilder: ITransactionBuilder {
         transaction.isOutgoing = true
 
         return FullTransaction(header: transaction, inputs: inputsToSign.map{ $0.input }, outputs: outputs)
+    }
+
+    func buildTransaction(from unspentOutput: UnspentOutput, to address: String, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction {
+        let address = try addressConverter.convert(address: address)
+
+        // Calculate fee
+        let emptySignature = Data(repeating: 0, count: TransactionSizeCalculator.signatureLength)
+        let emptyPublicKey = Data(repeating: 0, count: TransactionSizeCalculator.pubKeyLength)
+
+        let transactionSize = transactionSizeCalculator.transactionSize(inputs: [unspentOutput.output.scriptType], outputScriptTypes: [address.scriptType]) +
+                signatureScriptFunction(emptySignature, emptyPublicKey).count
+        let fee = transactionSize * feeRate
+
+        guard fee < unspentOutput.output.value else {
+            throw BuildError.feeMoreThanValue
+        }
+
+        // Add input without unlocking scripts
+        let inputToSign = try input(fromUnspentOutput: unspentOutput)
+
+        // Calculate receiveValue
+        let receivedValue = unspentOutput.output.value - fee
+
+        // Add :to output
+        let output = try self.output(withIndex: 0, address: address, value: receivedValue)
+
+        // Build transaction
+        let transaction = factory.transaction(version: 1, lockTime: 0)
+
+        // Sign inputs
+        let sigScriptData = try inputSigner.sigScriptData(transaction: transaction, inputsToSign: [inputToSign], outputs: [output], index: 0)
+        inputToSign.input.signatureScript = signatureScriptFunction(sigScriptData[0], sigScriptData[1])
+
+        transaction.status = .new
+        transaction.isMine = true
+        transaction.isOutgoing = false
+
+        return FullTransaction(header: transaction, inputs: [inputToSign.input], outputs: [output])
     }
 
 }
