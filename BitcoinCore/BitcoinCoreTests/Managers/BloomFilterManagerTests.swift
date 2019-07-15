@@ -162,6 +162,7 @@ class BloomFilterManagerTests: QuickSpec {
                         when(mock.outputsWithPublicKeys()).thenReturn([])
                     }
                     stub(mockBloomFilterProvider) { mock in
+                        when(mock.bloomFilterManager.set(_: any())).thenDoNothing()
                         when(mock.filterElements()).thenReturn(elements)
                     }
 

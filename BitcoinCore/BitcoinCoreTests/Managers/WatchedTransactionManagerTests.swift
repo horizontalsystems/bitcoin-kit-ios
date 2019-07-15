@@ -27,7 +27,8 @@ class WatchedTransactionManagerTests: QuickSpec {
                 when(mock.transactionReceived(transaction: any(), inputIndex: any())).thenDoNothing()
             }
 
-            manager = WatchedTransactionManager(bloomFilterManager: mockBloomFilterManager, queue: DispatchQueue.main)
+            manager = WatchedTransactionManager(queue: DispatchQueue.main)
+            manager.bloomFilterManager = mockBloomFilterManager
             manager.add(transactionFilter: .p2shOutput(scriptHash: scriptHash), delegatedTo: mockP2ShFilterDelegate)
             manager.add(transactionFilter: .outpoint(transactionHash: transactionHash, outputIndex: outputIndex), delegatedTo: mockOutpointFilterDelegate)
         }

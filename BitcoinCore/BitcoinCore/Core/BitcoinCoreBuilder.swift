@@ -185,7 +185,7 @@ public class BitcoinCoreBuilder {
         let initialSyncer = InitialSyncer(storage: storage, listener: kitStateProvider, stateManager: stateManager, blockDiscovery: blockDiscovery, addressManager: addressManager, logger: logger)
 
         let bloomFilterLoader = BloomFilterLoader(bloomFilterManager: bloomFilterManager, peerManager: peerManager)
-        let watchedTransactionManager = WatchedTransactionManager(bloomFilterManager: bloomFilterManager)
+        let watchedTransactionManager = WatchedTransactionManager()
 
         let blockValidatorChain = BlockValidatorChain(proofOfWorkValidator: ProofOfWorkValidator(difficultyEncoder: DifficultyEncoder()))
         let blockchain = Blockchain(storage: storage, blockValidator: blockValidatorChain, factory: factory, listener: dataProvider)

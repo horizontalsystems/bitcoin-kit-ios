@@ -413,13 +413,7 @@ class TransactionBuilderTests: XCTestCase {
         let previousTransaction = TestData.p2shTransaction
         let unspentOutput = UnspentOutput(output: previousTransaction.outputs[0], publicKey: TestData.pubKey(), transaction: previousTransaction.header, blockHeight: nil)
         let signatureScript = Data(repeating: 0, count: 10)
-        var calledWithSignatureAndPublicKey = false
         let signatureScriptFunction: ((Data, Data) -> Data) = { (signature: Data, publicKey: Data) in
-            if signature == sigData[0] {
-                XCTAssertEqual(signature, sigData[0])
-                XCTAssertEqual(publicKey, sigData[1])
-                calledWithSignatureAndPublicKey = true
-            }
             return signatureScript
         }
         let fee = (10 + 90) * feeRate

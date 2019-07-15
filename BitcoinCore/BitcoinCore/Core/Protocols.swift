@@ -546,6 +546,7 @@ protocol IWatchedTransactionManager {
     func add(transactionFilter: BitcoinCore.TransactionFilter, delegatedTo: IWatchedTransactionDelegate)
 }
 
-protocol IBloomFilterProvider {
+protocol IBloomFilterProvider: AnyObject {
+    var bloomFilterManager: IBloomFilterManager? { set get }
     func filterElements() -> [Data]
 }

@@ -33,6 +33,7 @@ class BloomFilterManager {
 extension BloomFilterManager: IBloomFilterManager {
 
     func add(provider: IBloomFilterProvider) {
+        provider.bloomFilterManager = self
         providers.append(provider)
     }
 

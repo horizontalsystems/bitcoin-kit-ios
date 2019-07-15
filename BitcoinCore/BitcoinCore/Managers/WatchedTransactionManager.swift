@@ -14,10 +14,9 @@ class WatchedTransactionManager {
     private var p2ShOutputFilters = [P2ShOutputFilter]()
     private var outpointFilters = [OutpointFilter]()
     private let queue: DispatchQueue
-    private weak var bloomFilterManager: IBloomFilterManager?
+    weak var bloomFilterManager: IBloomFilterManager?
 
-    init(bloomFilterManager: IBloomFilterManager, queue: DispatchQueue = DispatchQueue(label: "WatchedTransactionManager Queue", qos: .background)) {
-        self.bloomFilterManager = bloomFilterManager
+    init(queue: DispatchQueue = DispatchQueue(label: "WatchedTransactionManager Queue", qos: .background)) {
         self.queue = queue
     }
 
