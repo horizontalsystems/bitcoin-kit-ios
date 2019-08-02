@@ -149,13 +149,14 @@ extension BitcoinCore {
         return dataProvider.transactions(fromHash: fromHash, limit: limit)
     }
 
-    public func send(to address: String, value: Int, feeRate: Int) throws -> FullTransaction {
-        return try transactionCreator.create(to: address, value: value, feeRate: feeRate, senderPay: true)
+    public func send(to address: String, value: Int, feeRate: Int, changeScriptType: ScriptType) throws -> FullTransaction {
+        return try transactionCreator.create(to: address, value: value, feeRate: feeRate, senderPay: true, changeScriptType: changeScriptType)
     }
 
-    public func send(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int) throws -> FullTransaction {
+    public func send(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int, changeScriptType: ScriptType) throws -> FullTransaction {
+        // TODO: convert to scriptWPKH when scriptType is P2WPKHSH ?
         let address = try addressConverter.convert(keyHash: hash, type: scriptType)
-        return try send(to: address.stringValue, value: value, feeRate: feeRate)
+        return try send(to: address.stringValue, value: value, feeRate: feeRate, changeScriptType: changeScriptType)
     }
 
     func redeem(from unspentOutput: UnspentOutput, to address: String, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction {
@@ -170,8 +171,8 @@ extension BitcoinCore {
         return paymentAddressParser.parse(paymentAddress: paymentAddress)
     }
 
-    public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feeRate: Int) throws -> Int {
-        return try transactionBuilder.fee(for: value, feeRate: feeRate, senderPay: senderPay, address: toAddress)
+    public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feeRate: Int, changeScriptType: ScriptType) throws -> Int {
+        return try transactionBuilder.fee(for: value, feeRate: feeRate, senderPay: senderPay, address: toAddress, changeScriptType: changeScriptType)
     }
 
     public func receiveAddress(for type: ScriptType) -> String {

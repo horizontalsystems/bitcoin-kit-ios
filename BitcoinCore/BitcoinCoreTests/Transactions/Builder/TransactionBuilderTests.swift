@@ -164,7 +164,7 @@ class TransactionBuilderTests: XCTestCase {
     }
 
     func testFee_AddressGiven() {
-        let resultFee = try! transactionBuilder.fee(for: value, feeRate: feeRate, senderPay: false, address: toAddressPKH)
+        let resultFee = try! transactionBuilder.fee(for: value, feeRate: feeRate, senderPay: false, address: toAddressPKH, changeScriptType: .p2pkh)
         XCTAssertEqual(resultFee, 546)
     }
 
@@ -174,7 +174,7 @@ class TransactionBuilderTests: XCTestCase {
         }
 
         do {
-            let _ = try transactionBuilder.fee(for: value, feeRate: feeRate, senderPay: false, address: toAddressPKH)
+            let _ = try transactionBuilder.fee(for: value, feeRate: feeRate, senderPay: false, address: toAddressPKH, changeScriptType: .p2pkh)
         } catch let error as BitcoinCoreErrors.AddressConversion {
             XCTAssertEqual(error, BitcoinCoreErrors.AddressConversion.invalidAddressLength)
         } catch let error {
@@ -183,12 +183,12 @@ class TransactionBuilderTests: XCTestCase {
     }
 
     func testFee_AddressNotGiven_Error() {
-        let resultFee = try! transactionBuilder.fee(for: value, feeRate: feeRate, senderPay: false)
+        let resultFee = try! transactionBuilder.fee(for: value, feeRate: feeRate, senderPay: false, changeScriptType: .p2pkh)
         XCTAssertEqual(resultFee, fee)
     }
 
     func testBuildTransaction_P2PKH() {
-        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressPKH)
+        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressPKH, changeScriptType: .p2pkh)
 
         XCTAssertNotEqual(resultTx.header.dataHash, Data())
         XCTAssertEqual(resultTx.header.status, .new)
@@ -259,7 +259,7 @@ class TransactionBuilderTests: XCTestCase {
 //    }
 
     func testBuildTransaction_P2SH() {
-        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressSH)
+        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressSH, changeScriptType: .p2pkh)
 
         XCTAssertNotEqual(resultTx.header.dataHash, Data())
         XCTAssertEqual(resultTx.header.status, .new)
@@ -277,7 +277,7 @@ class TransactionBuilderTests: XCTestCase {
     }
 
     func testBuildTransactionSenderPay() {
-        _ = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: true, toAddress: toAddressPKH)
+        _ = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: true, toAddress: toAddressPKH, changeScriptType: .p2pkh)
 
         verify(mockFactory).output(withValue: value, index: 0, lockingScript: any(), type: equal(to: ScriptType.p2pkh), address: equal(to: toAddressPKH), keyHash: any(), publicKey: any())
         verify(mockFactory).output(withValue: unspentOutputs.unspentOutputs[0].output.value - value - fee, index: 1, lockingScript: any(), type: equal(to: ScriptType.p2pkh), address: equal(to: changePubKeyAddress), keyHash: any(), publicKey: any())
@@ -290,7 +290,7 @@ class TransactionBuilderTests: XCTestCase {
             when(mock.select(value: any(), feeRate: any(), outputScriptType: any(), changeType: any(), senderPay: any())).thenReturn(unspentOutputs)
         }
 
-        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressPKH)
+        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressPKH, changeScriptType: .p2pkh)
 
         XCTAssertEqual(resultTx.inputs.count, 1)
         XCTAssertEqual(resultTx.inputs[0].previousOutputTxHash, unspentOutputs.unspentOutputs[0].output.transactionHash)
@@ -307,7 +307,7 @@ class TransactionBuilderTests: XCTestCase {
             when(mock.select(value: any(), feeRate: any(), outputScriptType: any(), changeType: any(), senderPay: any())).thenReturn(unspentOutputs)
         }
 
-        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressPKH)
+        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressPKH, changeScriptType: .p2pkh)
 
         XCTAssertEqual(resultTx.inputs.count, 1)
         XCTAssertEqual(resultTx.inputs[0].previousOutputTxHash, unspentOutputs.unspentOutputs[0].output.transactionHash)
@@ -325,7 +325,7 @@ class TransactionBuilderTests: XCTestCase {
             when(mock.sigScriptData(transaction: any(), inputsToSign: any(), outputs: any(), index: any())).thenReturn(sigData)
         }
 
-        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressPKH)
+        let resultTx = try! transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressPKH, changeScriptType: .p2pkh)
         XCTAssertEqual(resultTx.inputs[0].signatureScript, sigScript)
     }
 
@@ -336,7 +336,7 @@ class TransactionBuilderTests: XCTestCase {
         )
 
         do {
-            let _ = try transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressPKH)
+            let _ = try transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressPKH, changeScriptType: .p2pkh)
         } catch let error as TransactionBuilder.BuildError {
             XCTAssertEqual(error, TransactionBuilder.BuildError.feeMoreThanValue)
         } catch let error {
@@ -350,7 +350,7 @@ class TransactionBuilderTests: XCTestCase {
         }
 
         do {
-            let _ = try transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressPKH)
+            let _ = try transactionBuilder.buildTransaction(value: value, feeRate: feeRate, senderPay: false, toAddress: toAddressPKH, changeScriptType: .p2pkh)
             XCTFail("No exception!")
         } catch let error as TransactionBuilder.BuildError {
             XCTAssertEqual(error, TransactionBuilder.BuildError.noChangeAddress)
