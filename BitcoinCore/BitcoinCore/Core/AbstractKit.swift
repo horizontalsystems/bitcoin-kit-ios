@@ -34,11 +34,11 @@ open class AbstractKit {
         return bitcoinCore.transactions(fromHash: fromHash, limit: limit)
     }
 
-    open func send(to address: String, value: Int, feeRate: Int, changeScriptType: ScriptType) throws -> FullTransaction {
+    open func send(to address: String, value: Int, feeRate: Int, changeScriptType: ScriptType = .p2pkh) throws -> FullTransaction {
         return try bitcoinCore.send(to: address, value: value, feeRate: feeRate, changeScriptType: changeScriptType)
     }
 
-    public func send(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int, changeScriptType: ScriptType) throws -> FullTransaction {
+    public func send(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int, changeScriptType: ScriptType = .p2pkh) throws -> FullTransaction {
         return try bitcoinCore.send(to: hash, scriptType: scriptType, value: value, feeRate: feeRate, changeScriptType: changeScriptType)
     }
 
@@ -54,7 +54,7 @@ open class AbstractKit {
         return bitcoinCore.parse(paymentAddress: paymentAddress)
     }
 
-    open func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feeRate: Int, changeScriptType: ScriptType) throws -> Int {
+    open func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feeRate: Int, changeScriptType: ScriptType = .p2pkh) throws -> Int {
         return try bitcoinCore.fee(for: value, toAddress: toAddress, senderPay: senderPay, feeRate: feeRate, changeScriptType: changeScriptType)
     }
 
