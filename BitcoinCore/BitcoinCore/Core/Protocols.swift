@@ -343,13 +343,13 @@ public protocol ITransactionSyncer: class {
 }
 
 public protocol ITransactionCreator {
-    func create(to address: String, value: Int, feeRate: Int, senderPay: Bool) throws -> FullTransaction
+    func create(to address: String, value: Int, feeRate: Int, senderPay: Bool, changeScriptType: ScriptType) throws -> FullTransaction
     func create(from: UnspentOutput, to address: String, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction
 }
 
 protocol ITransactionBuilder {
-    func fee(for value: Int, feeRate: Int, senderPay: Bool, address: String?) throws -> Int
-    func buildTransaction(value: Int, feeRate: Int, senderPay: Bool, toAddress: String) throws -> FullTransaction
+    func fee(for value: Int, feeRate: Int, senderPay: Bool, address: String?, changeScriptType: ScriptType) throws -> Int
+    func buildTransaction(value: Int, feeRate: Int, senderPay: Bool, toAddress: String, changeScriptType: ScriptType) throws -> FullTransaction
     func buildTransaction(from: UnspentOutput, to: String, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction
 }
 

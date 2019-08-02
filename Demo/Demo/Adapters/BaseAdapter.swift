@@ -8,7 +8,7 @@ class BaseAdapter {
     let name: String
     let coinCode: String
 
-    var changeableAddressType: Bool { return false }
+    var changeAddressScriptType: ScriptType { return .p2pkh }
 
     private let abstractKit: AbstractKit
 
@@ -121,7 +121,7 @@ extension BaseAdapter {
 
         return Single.create { [unowned self] observer in
             do {
-                _ = try self.abstractKit.send(to: address, value: satoshiAmount, feeRate: self.feeRate)
+                _ = try self.abstractKit.send(to: address, value: satoshiAmount, feeRate: self.feeRate, changeScriptType: self.changeAddressScriptType)
                 observer(.success(()))
             } catch {
                 observer(.error(error))
@@ -138,7 +138,7 @@ extension BaseAdapter {
     func fee(for value: Decimal, address: String?) -> Decimal {
         do {
             let amount = convertToSatoshi(value: value)
-            let fee = try abstractKit.fee(for: amount, toAddress: address, senderPay: true, feeRate: feeRate)
+            let fee = try abstractKit.fee(for: amount, toAddress: address, senderPay: true, feeRate: feeRate, changeScriptType: self.changeAddressScriptType)
             return Decimal(fee) / coinRate
         } catch BitcoinCoreErrors.UnspentOutputSelection.notEnough(let maxFee) {
             return Decimal(maxFee) / coinRate

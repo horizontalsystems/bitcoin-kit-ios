@@ -22,7 +22,7 @@ class TransactionCreatorTests: QuickSpec {
         describe("#create(to:value:feeRate:senderPay:)") {
             beforeEach {
                 stub(mockTransactionBuilder) { mock in
-                    when(mock.buildTransaction(value: any(), feeRate: any(), senderPay: any(), toAddress: any())).thenReturn(transaction)
+                    when(mock.buildTransaction(value: any(), feeRate: any(), senderPay: any(), toAddress: any(), changeScriptType: any())).thenReturn(transaction)
                 }
                 stub(mockTransactionProcessor) { mock in
                     when(mock.processCreated(transaction: any())).thenDoNothing()
@@ -46,11 +46,11 @@ class TransactionCreatorTests: QuickSpec {
                         when(mock.verifyCanSend()).thenDoNothing()
                     }
 
-                    _ = try? transactionCreator.create(to: "", value: 0, feeRate: 0, senderPay: false)
+                    _ = try? transactionCreator.create(to: "", value: 0, feeRate: 0, senderPay: false, changeScriptType: .p2pkh)
                 }
 
                 it("does create transaction") {
-                    verify(mockTransactionBuilder).buildTransaction(value: any(), feeRate: any(), senderPay: any(), toAddress: any())
+                    verify(mockTransactionBuilder).buildTransaction(value: any(), feeRate: any(), senderPay: any(), toAddress: any(), changeScriptType: any())
                     verify(mockTransactionProcessor).processCreated(transaction: any())
                 }
 
@@ -69,7 +69,7 @@ class TransactionCreatorTests: QuickSpec {
                         when(mock.verifyCanSend()).thenThrow(BitcoinCoreErrors.TransactionSendError.noConnectedPeers)
                     }
 
-                    _ = try? transactionCreator.create(to: "", value: 0, feeRate: 0, senderPay: false)
+                    _ = try? transactionCreator.create(to: "", value: 0, feeRate: 0, senderPay: false, changeScriptType: .p2pkh)
                 }
 
                 it("doesn't create transaction") {
@@ -86,17 +86,29 @@ class TransactionCreatorTests: QuickSpec {
                     stub(mockTransactionSender) { mock in
                         when(mock.verifyCanSend()).thenDoNothing()
                     }
-
-                    _ = try! transactionCreator.create(to: "", value: 0, feeRate: 0, senderPay: false)
                 }
 
-                it("creates transaction") {
-                    verify(mockTransactionBuilder).buildTransaction(value: 0, feeRate: 0, senderPay: false, toAddress: "")
-                    verify(mockTransactionProcessor).processCreated(transaction: equal(to: transaction))
+                context("when changeScriptType is .p2pkh") {
+                    beforeEach {
+                        _ = try! transactionCreator.create(to: "", value: 0, feeRate: 0, senderPay: false, changeScriptType: .p2pkh)
+                    }
+
+                    it("creates transaction") {
+                        verify(mockTransactionBuilder).buildTransaction(value: 0, feeRate: 0, senderPay: false, toAddress: "", changeScriptType: equal(to: ScriptType.p2pkh))
+                        verify(mockTransactionProcessor).processCreated(transaction: equal(to: transaction))
+                    }
+
+                    it("sends transaction") {
+                        verify(mockTransactionSender).send(pendingTransaction: equal(to: transaction))
+                    }
                 }
 
-                it("sends transaction") {
-                    verify(mockTransactionSender).send(pendingTransaction: equal(to: transaction))
+                context("when changeScriptType is .p2wpkh") {
+                    it("create transaction with p2wpkh change output") {
+                        _ = try! transactionCreator.create(to: "", value: 0, feeRate: 0, senderPay: false, changeScriptType: .p2wpkh)
+                        verify(mockTransactionBuilder).buildTransaction(value: 0, feeRate: 0, senderPay: false, toAddress: "", changeScriptType: equal(to: ScriptType.p2wpkh))
+                        verify(mockTransactionProcessor).processCreated(transaction: equal(to: transaction))
+                    }
                 }
             }
         }

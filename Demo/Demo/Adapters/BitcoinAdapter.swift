@@ -4,7 +4,7 @@ import RxSwift
 
 class BitcoinAdapter: BaseAdapter {
     let bitcoinKit: BitcoinKit
-    override var changeableAddressType: Bool { return true }
+    override var changeAddressScriptType: ScriptType { return .p2pkh }
 
     init(words: [String], testMode: Bool, syncMode: BitcoinCore.SyncMode) {
         let networkType: BitcoinKit.NetworkType = testMode ? .testNet : .mainNet
