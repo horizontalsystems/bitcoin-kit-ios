@@ -79,7 +79,9 @@ extension SyncedReadyPeerManager {
     }
 
     private func onPeerDisconnect(peer: IPeer, error: Error?) {
-        peerStates.removeValue(forKey: peer.host)
+        peersQueue.async {
+            self.peerStates.removeValue(forKey: peer.host)
+        }
     }
 
     private func onPeerReady(peer: IPeer) {
