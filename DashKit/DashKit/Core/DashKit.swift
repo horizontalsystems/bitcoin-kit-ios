@@ -5,15 +5,12 @@ import HSCryptoKit
 import RxSwift
 
 public class DashKit: AbstractKit {
+    private static let name = "DashKit"
     private static let heightInterval = 24                                      // Blocks count in window for calculating difficulty
     private static let targetSpacing = 150                                      // Time to mining one block ( 2.5 min. Dash )
     private static let maxTargetBits = 0x1e0fffff                               // Initially and max. target difficulty for blocks ( Dash )
 
-    public static func clear() throws {
-        try DirectoryHelper.removeDirectory("DashKit")
-    }
-
-    public enum NetworkType { case mainNet, testNet }
+    public enum NetworkType: String, CaseIterable { case mainNet, testNet }
 
     weak public var delegate: DashKitDelegate?
 
@@ -39,7 +36,7 @@ public class DashKit: AbstractKit {
 
         let logger = Logger(network: network, minLogLevel: minLogLevel)
 
-        let databaseFilePath = try DirectoryHelper.directoryURL(for: "DashKit").appendingPathComponent("\(walletId)-\(networkType)").path
+        let databaseFilePath = try DirectoryHelper.directoryURL(for: DashKit.name).appendingPathComponent("\(walletId)-\(networkType)").path
         let storage = DashGrdbStorage(databaseFilePath: databaseFilePath)
         self.storage = storage
 
@@ -198,6 +195,22 @@ extension DashKit: IInstantTransactionDelegate {
                 kit.delegate?.transactionsUpdated(inserted: [], updated: kit.cast(transactionInfos: [transactionInfo]))
             }
         }
+    }
+
+}
+
+extension DashKit {
+
+    public static func clear(exceptFor walletIdsToExclude: [String] = []) throws {
+        var excludedFileNames = [String]()
+
+        for walletId in walletIdsToExclude {
+            for type in NetworkType.allCases {
+                excludedFileNames.append("\(walletId)-\(type.rawValue)")
+            }
+        }
+
+        try DirectoryHelper.removeAll(inDirectory: DashKit.name, except: excludedFileNames)
     }
 
 }

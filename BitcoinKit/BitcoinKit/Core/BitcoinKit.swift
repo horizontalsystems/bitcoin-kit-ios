@@ -5,11 +5,9 @@ import HSCryptoKit
 import RxSwift
 
 public class BitcoinKit: AbstractKit {
-    public static func clear() throws {
-        try DirectoryHelper.removeDirectory("BitcoinKit")
-    }
+    private static let name = "BitcoinKit"
 
-    public enum NetworkType { case mainNet, testNet, regTest }
+    public enum NetworkType: String, CaseIterable { case mainNet, testNet, regTest }
 
     private let storage: IStorage
     private let bech32AddressConverter: IAddressConverter
@@ -37,7 +35,7 @@ public class BitcoinKit: AbstractKit {
         }
         let initialSyncApi = BCoinApi(url: initialSyncApiUrl)
 
-        let databaseFilePath = try DirectoryHelper.directoryURL(for: "BitcoinKit").appendingPathComponent("\(walletId)-\(networkType)").path
+        let databaseFilePath = try DirectoryHelper.directoryURL(for: BitcoinKit.name).appendingPathComponent("\(walletId)-\(networkType.rawValue)").path
         let storage = GrdbStorage(databaseFilePath: databaseFilePath)
         self.storage = storage
 
@@ -92,6 +90,22 @@ public class BitcoinKit: AbstractKit {
         }
 
         return lines.joined(separator: "\n")
+    }
+
+}
+
+extension BitcoinKit {
+
+    public static func clear(exceptFor walletIdsToExclude: [String] = []) throws {
+        var excludedFileNames = [String]()
+
+        for walletId in walletIdsToExclude {
+            for type in NetworkType.allCases {
+                excludedFileNames.append("\(walletId)-\(type.rawValue)")
+            }
+        }
+
+        try DirectoryHelper.removeAll(inDirectory: BitcoinKit.name, except: excludedFileNames)
     }
 
 }
