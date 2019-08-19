@@ -5,6 +5,7 @@ import HSCryptoKit
 import RxSwift
 
 public class BitcoinCashKit: AbstractKit {
+    private static let name = "BitcoinCashKit"
     private static let svChainForkHeight = 556767                                  // 2018 November 14
     private static let abcChainForkBlockHash = "0000000000000000004626ff6e3b936941d341c5932ece4357eeccac44e6d56c".reversedData!
 
@@ -13,11 +14,7 @@ public class BitcoinCashKit: AbstractKit {
     private static let targetSpacing = 10 * 60                                  // Time to mining one block ( 10 min. same as Bitcoin )
     private static let maxTargetBits = 0x1d00ffff                               // Initially and max. target difficulty for blocks
 
-    public static func clear() throws {
-        try DirectoryHelper.removeDirectory("BitcoinCashKit")
-    }
-
-    public enum NetworkType { case mainNet, testNet }
+    public enum NetworkType: String, CaseIterable { case mainNet, testNet }
 
     public weak var delegate: BitcoinCoreDelegate? {
         didSet {
@@ -44,7 +41,7 @@ public class BitcoinCashKit: AbstractKit {
         }
         let initialSyncApi = InsightApi(url: initialSyncApiUrl)
 
-        let databaseFilePath = try DirectoryHelper.directoryURL(for: "BitcoinCashKit").appendingPathComponent("\(walletId)-\(networkType)").path
+        let databaseFilePath = try DirectoryHelper.directoryURL(for: BitcoinCashKit.name).appendingPathComponent("\(walletId)-\(networkType)").path
         let storage = BitcoinCashGrdbStorage(databaseFilePath: databaseFilePath)
         self.storage = storage
 
@@ -85,6 +82,22 @@ public class BitcoinCashKit: AbstractKit {
         case .testNet: ()
             // not use test validators
         }
+    }
+
+}
+
+extension BitcoinCashKit {
+
+    public static func clear(exceptFor walletIdsToExclude: [String] = []) throws {
+        var excludedFileNames = [String]()
+
+        for walletId in walletIdsToExclude {
+            for type in NetworkType.allCases {
+                excludedFileNames.append("\(walletId)-\(type.rawValue)")
+            }
+        }
+
+        try DirectoryHelper.removeAll(inDirectory: BitcoinCashKit.name, except: excludedFileNames)
     }
 
 }
