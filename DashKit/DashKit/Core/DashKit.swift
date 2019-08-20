@@ -36,7 +36,7 @@ public class DashKit: AbstractKit {
 
         let logger = Logger(network: network, minLogLevel: minLogLevel)
 
-        let databaseFilePath = try DirectoryHelper.directoryURL(for: DashKit.name).appendingPathComponent("\(walletId)-\(networkType)").path
+        let databaseFilePath = try DirectoryHelper.directoryURL(for: DashKit.name).appendingPathComponent(DashKit.databaseFileName(walletId: walletId, networkType: networkType)).path
         let storage = DashGrdbStorage(databaseFilePath: databaseFilePath)
         self.storage = storage
 
@@ -206,11 +206,15 @@ extension DashKit {
 
         for walletId in walletIdsToExclude {
             for type in NetworkType.allCases {
-                excludedFileNames.append("\(walletId)-\(type.rawValue)")
+                excludedFileNames.append(databaseFileName(walletId: walletId, networkType: type))
             }
         }
 
         try DirectoryHelper.removeAll(inDirectory: DashKit.name, except: excludedFileNames)
+    }
+
+    private static func databaseFileName(walletId: String, networkType: NetworkType) -> String {
+        return "\(walletId)-\(networkType.rawValue)"
     }
 
 }
