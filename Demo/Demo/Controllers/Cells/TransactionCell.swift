@@ -41,6 +41,7 @@ class TransactionCell: UITableViewCell {
                     Tx Index:
                     Date:
                     Amount:
+                    Fee:
                     Block:
                     Confirmations:
                     \(from.map { _ in "From:" }.joined(separator: "\n"))
@@ -52,6 +53,7 @@ class TransactionCell: UITableViewCell {
                     \(transaction.transactionIndex)
                     \(TransactionCell.dateFormatter.string(from: Date(timeIntervalSince1970: transaction.timestamp)))
                     \(transaction.amount) \(coinCode)
+                    \(transaction.fee?.description ?? "") \(coinCode)
                     \(transaction.blockHeight.map { "# \($0)" } ?? "n/a")
                     \(confirmations)
                     \(from.joined(separator: "\n"))
