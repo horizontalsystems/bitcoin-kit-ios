@@ -417,7 +417,7 @@ protocol IKitStateProviderDelegate: class {
 }
 
 public protocol ITransactionInfo: class {
-    init(transactionHash: String, transactionIndex: Int, from: [TransactionAddressInfo], to: [TransactionAddressInfo], amount: Int, blockHeight: Int?, timestamp: Int)
+    init(transactionHash: String, transactionIndex: Int, from: [TransactionAddressInfo], to: [TransactionAddressInfo], amount: Int, fee: Int?, blockHeight: Int?, timestamp: Int)
 }
 
 public protocol ITransactionInfoConverter {

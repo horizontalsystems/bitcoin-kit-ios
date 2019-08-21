@@ -11,15 +11,16 @@ public class BaseTransactionInfoConverter: IBaseTransactionInfoConverter {
         var totalMineOutput: Int = 0
         var fromAddresses = [TransactionAddressInfo]()
         var toAddresses = [TransactionAddressInfo]()
+        var hasOnlyMyInputs = true
 
         for inputWithPreviousOutput in transactionForInfo.inputsWithPreviousOutputs {
             var mine = false
 
-            if let previousOutput = inputWithPreviousOutput.previousOutput {
-                if previousOutput.publicKeyPath != nil {
-                    totalMineInput += previousOutput.value
-                    mine = true
-                }
+            if let previousOutput = inputWithPreviousOutput.previousOutput, previousOutput.publicKeyPath != nil {
+                totalMineInput += previousOutput.value
+                mine = true
+            } else {
+                hasOnlyMyInputs = false
             }
 
             if let address = inputWithPreviousOutput.input.address {
@@ -40,7 +41,14 @@ public class BaseTransactionInfoConverter: IBaseTransactionInfoConverter {
             }
         }
 
-        let amount = totalMineOutput - totalMineInput
+        var amount = totalMineOutput - totalMineInput
+
+        var resolvedFee: Int? = nil
+        if hasOnlyMyInputs {
+            let fee = totalMineInput - transactionForInfo.outputs.reduce(0) { totalOutput, output in totalOutput + output.value }
+            amount += fee
+            resolvedFee = fee
+        }
 
         return T(
                 transactionHash: transactionForInfo.transactionWithBlock.transaction.dataHash.reversedHex,
@@ -48,6 +56,7 @@ public class BaseTransactionInfoConverter: IBaseTransactionInfoConverter {
                 from: fromAddresses,
                 to: toAddresses,
                 amount: amount,
+                fee: resolvedFee,
                 blockHeight: transactionForInfo.transactionWithBlock.blockHeight,
                 timestamp: transactionForInfo.transactionWithBlock.transaction.timestamp
         )

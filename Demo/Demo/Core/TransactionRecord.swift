@@ -5,6 +5,7 @@ struct TransactionRecord {
     let transactionIndex: Int
 
     let amount: Decimal
+    let fee: Decimal?
     let timestamp: Double
 
     let from: [TransactionAddress]

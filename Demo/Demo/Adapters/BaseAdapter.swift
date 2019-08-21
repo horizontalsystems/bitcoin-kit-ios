@@ -40,6 +40,7 @@ class BaseAdapter {
                 transactionHash: transaction.transactionHash,
                 transactionIndex: transaction.transactionIndex,
                 amount: Decimal(transaction.amount) / coinRate,
+                fee: transaction.fee.map { Decimal($0) / coinRate },
                 timestamp: Double(transaction.timestamp),
                 from: fromAddresses,
                 to: toAddresses,
