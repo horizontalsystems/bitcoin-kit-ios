@@ -41,14 +41,14 @@ class TestNet: INetwork {
         return Block(
                 withHeader: BlockHeader(
                         version: 536870912,
-                        headerHash: "000000000cf1ebc27139b55559f2a0e312e566e1fd7dcac7ccf4e58d973794f5".reversedData!,
-                        previousBlockHeaderHash: "000000001099bd5d3c903f2ab865b2c49c8bd29bddc9c990db43acd99617362c".reversedData!,
-                        merkleRoot: "e58aeda83f17834baedb488c5276a37376c61c375848761f9a02c1981fe0d507".reversedData!,
-                        timestamp: 1559651035,
-                        bits: 0x1c0f8fa9,
-                        nonce: 1118140024
+                        headerHash: "000000000d5cbf42cd0da22e4a2dc4aab275a5e8d5a8ab39025b1bd2d588ebfb".reversedData!,
+                        previousBlockHeaderHash: "000000000e34afe7600a439c89dbbb90908a6bf2bc117dcf30e82c89a83ec280".reversedData!,
+                        merkleRoot: "334130f690b9e58bfc61c767c89251913e87dd7a44a1eb30bdd0668d85313527".reversedData!,
+                        timestamp: 1566527727,
+                        bits: 0x1c0f2298,
+                        nonce: 958408694
                 ),
-                height: 111324)
+                height: 160834)
     }
 
 }
