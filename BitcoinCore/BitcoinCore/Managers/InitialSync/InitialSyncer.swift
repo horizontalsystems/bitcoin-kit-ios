@@ -10,19 +10,19 @@ class InitialSyncer {
     private let listener: ISyncStateListener
     private var stateManager: IStateManager
     private let blockDiscovery: IBlockDiscovery
-    private let addressManager: IAddressManager
+    private let publicKeyManager: IPublicKeyManager
 
     private let logger: Logger?
     private let async: Bool
 
     private var restoring = false
 
-    init(storage: IStorage, listener: ISyncStateListener, stateManager: IStateManager, blockDiscovery: IBlockDiscovery, addressManager: IAddressManager, async: Bool = true, logger: Logger? = nil) {
+    init(storage: IStorage, listener: ISyncStateListener, stateManager: IStateManager, blockDiscovery: IBlockDiscovery, publicKeyManager: IPublicKeyManager, async: Bool = true, logger: Logger? = nil) {
         self.storage = storage
         self.listener = listener
         self.stateManager = stateManager
         self.blockDiscovery = blockDiscovery
-        self.addressManager = addressManager
+        self.publicKeyManager = publicKeyManager
 
         self.logger = logger
         self.async = async
@@ -58,7 +58,7 @@ class InitialSyncer {
     private func handle(forAccount account: Int, keys: [PublicKey], blockHashes: [BlockHash]) {
         do {
             logger?.debug("Account \(account) has \(keys.count) keys and \(blockHashes.count) blocks")
-            try addressManager.addKeys(keys: keys)
+            try publicKeyManager.addKeys(keys: keys)
 
             // If gap shift is found
             if blockHashes.isEmpty {

@@ -8,7 +8,7 @@ class BlockSyncer {
     private let factory: IFactory
     private let transactionProcessor: ITransactionProcessor
     private let blockchain: IBlockchain
-    private let addressManager: IAddressManager
+    private let publicKeyManager: IPublicKeyManager
     private let bloomFilterManager: IBloomFilterManager
 
     private let hashCheckpointThreshold: Int
@@ -17,7 +17,7 @@ class BlockSyncer {
     private let logger: Logger?
 
     init(storage: IStorage, checkpointBlock: Block, factory: IFactory, listener: ISyncStateListener, transactionProcessor: ITransactionProcessor,
-         blockchain: IBlockchain, addressManager: IAddressManager, bloomFilterManager: IBloomFilterManager,
+         blockchain: IBlockchain, publicKeyManager: IPublicKeyManager, bloomFilterManager: IBloomFilterManager,
          hashCheckpointThreshold: Int, logger: Logger?, state: BlockSyncerState
     ) {
         self.storage = storage
@@ -25,7 +25,7 @@ class BlockSyncer {
         self.factory = factory
         self.transactionProcessor = transactionProcessor
         self.blockchain = blockchain
-        self.addressManager = addressManager
+        self.publicKeyManager = publicKeyManager
         self.bloomFilterManager = bloomFilterManager
         self.hashCheckpointThreshold = hashCheckpointThreshold
         self.listener = listener
@@ -57,7 +57,7 @@ class BlockSyncer {
     }
 
     private func handlePartialBlocks() throws {
-        try addressManager.fillGap()
+        try publicKeyManager.fillGap()
         bloomFilterManager.regenerateBloomFilter()
         state.iteration(hasPartialBlocks: false)
     }
@@ -169,11 +169,11 @@ extension BlockSyncer: IBlockSyncer {
 extension BlockSyncer {
 
     public static func instance(storage: IStorage, checkpointBlock: Block, factory: IFactory, listener: ISyncStateListener,
-                                transactionProcessor: ITransactionProcessor, blockchain: IBlockchain, addressManager: IAddressManager, bloomFilterManager: IBloomFilterManager,
+                                transactionProcessor: ITransactionProcessor, blockchain: IBlockchain, publicKeyManager: IPublicKeyManager, bloomFilterManager: IBloomFilterManager,
                                 hashCheckpointThreshold: Int = 100, logger: Logger? = nil, state: BlockSyncerState = BlockSyncerState()) -> BlockSyncer {
 
         let syncer = BlockSyncer(storage: storage, checkpointBlock: checkpointBlock, factory: factory, listener: listener, transactionProcessor: transactionProcessor,
-                blockchain: blockchain, addressManager: addressManager, bloomFilterManager: bloomFilterManager,
+                blockchain: blockchain, publicKeyManager: publicKeyManager, bloomFilterManager: bloomFilterManager,
                 hashCheckpointThreshold: hashCheckpointThreshold, logger: logger, state: state)
 
         listener.initialBestBlockHeightUpdated(height: syncer.localDownloadedBestBlockHeight)

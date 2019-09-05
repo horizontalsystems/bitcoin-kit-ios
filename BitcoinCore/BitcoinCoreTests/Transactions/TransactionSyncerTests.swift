@@ -8,7 +8,7 @@ class TransactionSyncerTests: QuickSpec {
     override func spec() {
         let mockStorage = MockIStorage()
         let mockTransactionProcessor = MockITransactionProcessor()
-        let mockAddressManager = MockIAddressManager()
+        let mockAddressManager = MockIPublicKeyManager()
         let mockBloomFilterManager = MockIBloomFilterManager()
         let maxRetriesCount = 3
         let retriesPeriod: Double = 60
@@ -32,7 +32,7 @@ class TransactionSyncerTests: QuickSpec {
             }
 
             syncer = TransactionSyncer(
-                    storage: mockStorage, processor: mockTransactionProcessor, addressManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager,
+                    storage: mockStorage, processor: mockTransactionProcessor, publicKeyManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager,
                     maxRetriesCount: maxRetriesCount, retriesPeriod: retriesPeriod, totalRetriesPeriod: totalRetriesPeriod)
         }
 

@@ -1,6 +1,6 @@
 import HSHDWalletKit
 
-class AddressManager {
+class PublicKeyManager {
 
     enum AddressManagerError: Error {
         case noUnusedPublicKey
@@ -57,7 +57,7 @@ class AddressManager {
     }
 }
 
-extension AddressManager: IAddressManager {
+extension PublicKeyManager: IPublicKeyManager {
 
     func changePublicKey() throws -> PublicKey {
         return try publicKey(external: false)
@@ -133,10 +133,10 @@ extension AddressManager: IAddressManager {
     }
 }
 
-extension AddressManager {
+extension PublicKeyManager {
 
-    public static func instance(storage: IStorage, hdWallet: IHDWallet, addressConverter: IAddressConverter, addressKeyHashConverter: IAddressKeyHashConverter? = nil) -> AddressManager {
-        let addressManager = AddressManager(storage: storage, hdWallet: hdWallet, addressConverter: addressConverter, addressKeyHashConverter: addressKeyHashConverter)
+    public static func instance(storage: IStorage, hdWallet: IHDWallet, addressConverter: IAddressConverter, addressKeyHashConverter: IAddressKeyHashConverter? = nil) -> PublicKeyManager {
+        let addressManager = PublicKeyManager(storage: storage, hdWallet: hdWallet, addressConverter: addressConverter, addressKeyHashConverter: addressKeyHashConverter)
         try? addressManager.fillGap()
         return addressManager
     }

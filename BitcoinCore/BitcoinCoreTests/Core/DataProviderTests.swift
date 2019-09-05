@@ -5,7 +5,7 @@
 //
 //class DataProviderTests: XCTestCase {
 //    private var mockStorage: MockIStorage!
-//    private var mockAddressManager: MockIAddressManager!
+//    private var mockAddressManager: MockIPublicKeyManager!
 //    private var mockAddressConverter: MockIAddressConverter!
 //    private var mockPaymentAddressParser: MockIPaymentAddressParser!
 //    private var mockUnspentOutputProvider: MockIUnspentOutputProvider!
@@ -20,7 +20,7 @@
 //        super.setUp()
 //
 //        mockStorage = MockIStorage()
-//        mockAddressManager = MockIAddressManager()
+//        mockAddressManager = MockIPublicKeyManager()
 //        mockAddressConverter = MockIAddressConverter()
 //        mockPaymentAddressParser = MockIPaymentAddressParser()
 //        mockUnspentOutputProvider = MockIUnspentOutputProvider()

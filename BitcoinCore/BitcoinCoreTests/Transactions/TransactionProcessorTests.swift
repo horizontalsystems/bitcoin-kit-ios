@@ -8,7 +8,7 @@ class TransactionProcessorTests: XCTestCase {
     private var mockOutputAddressExtractor: MockITransactionOutputAddressExtractor!
     private var mockInputExtractor: MockITransactionExtractor!
     private var mockOutputsCache: MockIOutputsCache!
-    private var mockAddressManager: MockIAddressManager!
+    private var mockAddressManager: MockIPublicKeyManager!
     private var mockBlockchainDataListener: MockIBlockchainDataListener!
     private var mockTransactionListener: MockITransactionListener!
 
@@ -30,7 +30,7 @@ class TransactionProcessorTests: XCTestCase {
         mockOutputAddressExtractor = MockITransactionOutputAddressExtractor()
         mockInputExtractor = MockITransactionExtractor()
         mockOutputsCache = MockIOutputsCache()
-        mockAddressManager = MockIAddressManager()
+        mockAddressManager = MockIPublicKeyManager()
         mockBlockchainDataListener = MockIBlockchainDataListener()
         mockTransactionListener = MockITransactionListener()
 

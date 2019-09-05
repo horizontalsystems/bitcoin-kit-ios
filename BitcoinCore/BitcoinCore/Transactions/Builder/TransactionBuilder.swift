@@ -8,7 +8,7 @@ class TransactionBuilder {
 
     private let unspentOutputSelector: IUnspentOutputSelector
     private let unspentOutputProvider: IUnspentOutputProvider
-    private let addressManager: IAddressManager
+    private let publicKeyManager: IPublicKeyManager
     private let addressConverter: IAddressConverter
     private let addressKeyHashConverter: IAddressKeyHashConverter?
     private let inputSigner: IInputSigner
@@ -17,12 +17,12 @@ class TransactionBuilder {
 
     var scriptBuilder: IScriptBuilder
 
-    init(unspentOutputSelector: IUnspentOutputSelector, unspentOutputProvider: IUnspentOutputProvider, addressManager: IAddressManager, addressConverter: IAddressConverter,
+    init(unspentOutputSelector: IUnspentOutputSelector, unspentOutputProvider: IUnspentOutputProvider, publicKeyManager: IPublicKeyManager, addressConverter: IAddressConverter,
          inputSigner: IInputSigner, scriptBuilder: IScriptBuilder, factory: IFactory, transactionSizeCalculator: ITransactionSizeCalculator,
          addressKeyHashConverter: IAddressKeyHashConverter? = nil) {
         self.unspentOutputSelector = unspentOutputSelector
         self.unspentOutputProvider = unspentOutputProvider
-        self.addressManager = addressManager
+        self.publicKeyManager = publicKeyManager
         self.addressConverter = addressConverter
         self.addressKeyHashConverter = addressKeyHashConverter
         self.inputSigner = inputSigner
@@ -69,7 +69,7 @@ extension TransactionBuilder: ITransactionBuilder {
     }
 
     func buildTransaction(value: Int, feeRate: Int, senderPay: Bool, toAddress: String, changeScriptType: ScriptType) throws -> FullTransaction {
-        guard let changePubKey = try? addressManager.changePublicKey() else {
+        guard let changePubKey = try? publicKeyManager.changePublicKey() else {
             throw BuildError.noChangeAddress
         }
 
