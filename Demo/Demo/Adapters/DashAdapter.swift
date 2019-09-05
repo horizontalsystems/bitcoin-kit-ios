@@ -34,7 +34,7 @@ class DashAdapter: BaseAdapter {
     }
 
     class func clear() {
-        try? DashKit.clear(exceptFor: ["walletId"])
+        try? DashKit.clear()
     }
 }
 

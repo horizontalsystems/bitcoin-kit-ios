@@ -7,6 +7,7 @@ public class BitcoinCoreBuilder {
     // required parameters
     private var seed: Data?
     private var words: [String]?
+    private var bip: Purpose = .bip44
     private var network: INetwork?
     private var paymentAddressParser: IPaymentAddressParser?
     private var addressSelector: IAddressSelector?
@@ -33,6 +34,11 @@ public class BitcoinCoreBuilder {
 
     public func set(words: [String]) -> BitcoinCoreBuilder {
         self.words = words
+        return self
+    }
+
+    public func set(bip: Purpose) -> BitcoinCoreBuilder {
+        self.bip = bip
         return self
     }
 
@@ -141,7 +147,7 @@ public class BitcoinCoreBuilder {
 
         let reachabilityManager = ReachabilityManager()
 
-        let hdWallet = HDWallet(seed: seed, coinType: network.coinType, xPrivKey: network.xPrivKey, xPubKey: network.xPubKey, gapLimit: 20)
+        let hdWallet = HDWallet(seed: seed, coinType: network.coinType, xPrivKey: network.xPrivKey, xPubKey: network.xPubKey, gapLimit: 20, purpose: bip)
 
         let networkMessageParser = NetworkMessageParser(magic: network.magic)
         let networkMessageSerializer = NetworkMessageSerializer(magic: network.magic)

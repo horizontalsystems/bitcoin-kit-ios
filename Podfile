@@ -13,7 +13,7 @@ project 'DashKit/DashKit'
 
 def internal_pods
   pod 'HSCryptoKit', '~> 1.4'
-  pod 'HSHDWalletKit', '~> 1.1'
+  pod 'HSHDWalletKit', '~> 1.2'
 end
 
 def kit_pods

@@ -38,7 +38,7 @@ class Manager {
         let configuration = Configuration.shared
 
         adapters = [
-            BitcoinAdapter(words: words, testMode: configuration.testNet, syncMode: syncMode),
+            BitcoinAdapter(words: words, bip: .bip49, testMode: configuration.testNet, syncMode: syncMode),
             BitcoinCashAdapter(words: words, testMode: configuration.testNet, syncMode: syncMode),
             DashAdapter(words: words, testMode: configuration.testNet, syncMode: syncMode),
         ]

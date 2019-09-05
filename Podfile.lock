@@ -3,15 +3,15 @@ PODS:
   - BigInt (4.0.0)
   - CryptoBLS.swift (1.1)
   - CryptoX11.swift (1.1)
-  - Cuckoo (1.0.5)
-  - GRDB.swift (4.0.1):
-    - GRDB.swift/standard (= 4.0.1)
-  - GRDB.swift/standard (4.0.1)
-  - HSCryptoKit (1.4.1)
-  - HSHDWalletKit (1.1):
-    - HSCryptoKit (~> 1.4)
-  - Nimble (8.0.1)
-  - ObjectMapper (3.4.2)
+  - Cuckoo (1.1.1)
+  - GRDB.swift (4.3.0):
+    - GRDB.swift/standard (= 4.3.0)
+  - GRDB.swift/standard (4.3.0)
+  - HSCryptoKit (1.5.0)
+  - HSHDWalletKit (1.2.0):
+    - HSCryptoKit (~> 1)
+  - Nimble (8.0.2)
+  - ObjectMapper (3.5.1)
   - Quick (2.1.0)
   - RxBlocking (5.0.0):
     - RxSwift (~> 5)
@@ -25,7 +25,7 @@ DEPENDENCIES:
   - Cuckoo
   - GRDB.swift (~> 4.0)
   - HSCryptoKit (~> 1.4)
-  - HSHDWalletKit (~> 1.1)
+  - HSHDWalletKit (~> 1.2)
   - Nimble
   - ObjectMapper (~> 3.0)
   - Quick
@@ -53,16 +53,16 @@ SPEC CHECKSUMS:
   BigInt: 2aad1a9942dc932ec8b84290d2c564a3d76f97ab
   CryptoBLS.swift: 89828d8e3013e45ce4f913d26008b91fc5d0f3a0
   CryptoX11.swift: 8f0ca5fbfefbe49126220ce23b5de106928cf0f0
-  Cuckoo: 56ceda7442986ad2aa0615f462b0e431253b97a5
-  GRDB.swift: 106a830decf1d92a3fc63c6d6a2f6586f6187297
-  HSCryptoKit: 639ab56381fa4c4b9da520e286c9f993b5b8b028
-  HSHDWalletKit: 1d946bd24bd307cc494141f4e518d25db814f050
-  Nimble: 45f786ae66faa9a709624227fae502db55a8bdd0
-  ObjectMapper: 0d4402610f4e468903ae64629eec4784531e5c51
+  Cuckoo: 6193c50e46403cc9417aa98752671a2a5ae6f3a6
+  GRDB.swift: 083ec261ce573888d8ed2eae1b49bc0bf40d9e2c
+  HSCryptoKit: 514a3111fd37ad18b7261d4a55271daaba3b0eb9
+  HSHDWalletKit: 6f5d5b1f9b1f950c948bdff13f5f52e5c5bcb7bb
+  Nimble: 622629381bda1dd5678162f21f1368cec7cbba60
+  ObjectMapper: 70187b8941977c62ccfb423caf6b50be405cabf0
   Quick: 4be43f6634acfa727dd106bdf3929ce125ffa79d
   RxBlocking: c67185d26498ea3cbe3e121917c3c16739e43123
   RxSwift: 8b0671caa829a763bbce7271095859121cbd895f
 
-PODFILE CHECKSUM: b45f4c6b3e83ecd66793f2ae2479d2038bcfc8e9
+PODFILE CHECKSUM: ef2010399b017fbc3b49c80f38b5b921edb0a5df
 
 COCOAPODS: 1.7.5

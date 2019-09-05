@@ -14,7 +14,7 @@ class BitcoinCashAdapter: BaseAdapter {
     }
 
     class func clear() {
-        try? BitcoinCashKit.clear(exceptFor: ["walletId"])
+        try? BitcoinCashKit.clear()
     }
 }
 
