@@ -3,17 +3,17 @@ import Foundation
 public class TransactionSyncer {
     private let storage: IStorage
     private let transactionProcessor: ITransactionProcessor
-    private let addressManager: IAddressManager
+    private let publicKeyManager: IPublicKeyManager
     private let bloomFilterManager: IBloomFilterManager
     private let maxRetriesCount: Int
     private let retriesPeriod: Double // seconds
     private let totalRetriesPeriod: Double // seconds
 
-    init(storage: IStorage, processor: ITransactionProcessor, addressManager: IAddressManager, bloomFilterManager: IBloomFilterManager,
+    init(storage: IStorage, processor: ITransactionProcessor, publicKeyManager: IPublicKeyManager, bloomFilterManager: IBloomFilterManager,
          maxRetriesCount: Int = 3, retriesPeriod: Double = 60, totalRetriesPeriod: Double = 60 * 60 * 24) {
         self.storage = storage
         self.transactionProcessor = processor
-        self.addressManager = addressManager
+        self.publicKeyManager = publicKeyManager
         self.bloomFilterManager = bloomFilterManager
         self.maxRetriesCount = maxRetriesCount
         self.retriesPeriod = retriesPeriod
@@ -67,7 +67,7 @@ extension TransactionSyncer: ITransactionSyncer {
         }
 
         if needToUpdateBloomFilter {
-            try? addressManager.fillGap()
+            try? publicKeyManager.fillGap()
             bloomFilterManager.regenerateBloomFilter()
         }
     }

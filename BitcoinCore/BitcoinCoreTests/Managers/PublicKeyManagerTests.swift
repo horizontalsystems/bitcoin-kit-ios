@@ -3,14 +3,14 @@ import Cuckoo
 import HSHDWalletKit
 @testable import BitcoinCore
 
-class AddressManagerTests: XCTestCase {
+class PublicKeyManagerTests: XCTestCase {
 
     private var mockStorage: MockIStorage!
     private var mockHDWallet: MockIHDWallet!
     private var mockAddressConverter: MockIAddressConverter!
 
     private var hdWallet: IHDWallet!
-    private var manager: AddressManager!
+    private var manager: PublicKeyManager!
 
     override func setUp() {
         super.setUp()
@@ -24,7 +24,7 @@ class AddressManagerTests: XCTestCase {
         }
 
         hdWallet = HDWallet(seed: Data(), coinType: UInt32(1), xPrivKey: UInt32(0x04358394), xPubKey: UInt32(0x043587cf))
-        manager = AddressManager(storage: mockStorage, hdWallet: mockHDWallet, addressConverter: mockAddressConverter)
+        manager = PublicKeyManager(storage: mockStorage, hdWallet: mockHDWallet, addressConverter: mockAddressConverter)
     }
 
     override func tearDown() {
@@ -66,8 +66,8 @@ class AddressManagerTests: XCTestCase {
         do {
             let _ = try manager.changePublicKey()
             XCTFail("Should throw exception")
-        } catch let error as AddressManager.AddressManagerError {
-            XCTAssertEqual(error, AddressManager.AddressManagerError.noUnusedPublicKey)
+        } catch let error as PublicKeyManager.AddressManagerError {
+            XCTAssertEqual(error, PublicKeyManager.AddressManagerError.noUnusedPublicKey)
         } catch {
             XCTFail("Unexpected exception thrown")
         }
@@ -101,8 +101,8 @@ class AddressManagerTests: XCTestCase {
         do {
             let _ = try manager.receivePublicKey()
             XCTFail("Should throw exception")
-        } catch let error as AddressManager.AddressManagerError {
-            XCTAssertEqual(error, AddressManager.AddressManagerError.noUnusedPublicKey)
+        } catch let error as PublicKeyManager.AddressManagerError {
+            XCTAssertEqual(error, PublicKeyManager.AddressManagerError.noUnusedPublicKey)
         } catch {
             XCTFail("Unexpected exception thrown")
         }
@@ -141,8 +141,8 @@ class AddressManagerTests: XCTestCase {
         do {
             let _ = try manager.receiveAddress(for: .p2pkh)
             XCTFail("Should throw exception")
-        } catch let error as AddressManager.AddressManagerError {
-            XCTAssertEqual(error, AddressManager.AddressManagerError.noUnusedPublicKey)
+        } catch let error as PublicKeyManager.AddressManagerError {
+            XCTAssertEqual(error, PublicKeyManager.AddressManagerError.noUnusedPublicKey)
         } catch {
             XCTFail("Unexpected exception thrown")
         }
@@ -410,7 +410,7 @@ class AddressManagerTests: XCTestCase {
         do {
             _ = try manager.publicKey(byPath: "0/0")
             XCTFail("Expected exception")
-        } catch let error as AddressManager.AddressManagerError {
+        } catch let error as PublicKeyManager.AddressManagerError {
             XCTAssertEqual(error, .invalidPath)
         } catch {
             XCTFail("Unexpected exception")

@@ -34,7 +34,7 @@ class TransactionBuilderTests: XCTestCase {
 
     private var mockUnspentOutputSelector: MockIUnspentOutputSelector!
     private var mockUnspentOutputProvider: MockIUnspentOutputProvider!
-    private var mockAddressManager: MockIAddressManager!
+    private var mockAddressManager: MockIPublicKeyManager!
     private var mockAddressConverter: MockIAddressConverter!
     private var mockInputSigner: MockIInputSigner!
     private var mockScriptBuilder: MockIScriptBuilder!
@@ -68,14 +68,14 @@ class TransactionBuilderTests: XCTestCase {
 
         mockUnspentOutputSelector = MockIUnspentOutputSelector()
         mockUnspentOutputProvider = MockIUnspentOutputProvider()
-        mockAddressManager = MockIAddressManager()
+        mockAddressManager = MockIPublicKeyManager()
         mockAddressConverter = MockIAddressConverter()
         mockInputSigner = MockIInputSigner()
         mockScriptBuilder = MockIScriptBuilder()
         mockFactory = MockIFactory()
         mockTransactionSizeCalculator = MockITransactionSizeCalculator()
 
-        transactionBuilder = TransactionBuilder(unspentOutputSelector: mockUnspentOutputSelector, unspentOutputProvider: mockUnspentOutputProvider, addressManager: mockAddressManager, addressConverter: mockAddressConverter, inputSigner: mockInputSigner, scriptBuilder: mockScriptBuilder, factory: mockFactory, transactionSizeCalculator: mockTransactionSizeCalculator)
+        transactionBuilder = TransactionBuilder(unspentOutputSelector: mockUnspentOutputSelector, unspentOutputProvider: mockUnspentOutputProvider, publicKeyManager: mockAddressManager, addressConverter: mockAddressConverter, inputSigner: mockInputSigner, scriptBuilder: mockScriptBuilder, factory: mockFactory, transactionSizeCalculator: mockTransactionSizeCalculator)
 
         changePubKey = TestData.pubKey()
         changePubKeyAddress = "Rsfz3aRmCwTe2J8pSWSYRNYmweJ"
@@ -346,7 +346,7 @@ class TransactionBuilderTests: XCTestCase {
 
     func testBuildTransaction_noChangeAddress() {
         stub(mockAddressManager) { mock in
-            when(mock.changePublicKey()).thenThrow(AddressManager.AddressManagerError.noUnusedPublicKey)
+            when(mock.changePublicKey()).thenThrow(PublicKeyManager.AddressManagerError.noUnusedPublicKey)
         }
 
         do {

@@ -13,7 +13,7 @@ public class BitcoinCore {
     private let storage: IStorage
     private let cache: OutputsCache
     private var dataProvider: IDataProvider
-    private let addressManager: IAddressManager
+    private let publicKeyManager: IPublicKeyManager
     private let watchedTransactionManager: IWatchedTransactionManager
     private let addressConverter: AddressConverterChain
     private let unspentOutputSelector: UnspentOutputSelectorChain
@@ -65,7 +65,7 @@ public class BitcoinCore {
     }
 
     func publicKey(byPath path: String) throws -> PublicKey {
-        return try addressManager.publicKey(byPath: path)
+        return try publicKeyManager.publicKey(byPath: path)
     }
 
     public func prepend(scriptBuilder: IScriptBuilder) {
@@ -88,7 +88,7 @@ public class BitcoinCore {
     init(storage: IStorage, cache: OutputsCache, dataProvider: IDataProvider,
                 peerGroup: IPeerGroup, initialBlockDownload: IInitialBlockDownload, bloomFilterLoader: BloomFilterLoader,
                 syncedReadyPeerManager: ISyncedReadyPeerManager, transactionSyncer: ITransactionSyncer,
-                blockValidatorChain: BlockValidatorChain, addressManager: IAddressManager, addressConverter: AddressConverterChain, unspentOutputSelector: UnspentOutputSelectorChain, kitStateProvider: IKitStateProvider & ISyncStateListener,
+                blockValidatorChain: BlockValidatorChain, addressManager: IPublicKeyManager, addressConverter: AddressConverterChain, unspentOutputSelector: UnspentOutputSelectorChain, kitStateProvider: IKitStateProvider & ISyncStateListener,
                 scriptBuilder: ScriptBuilderChain, transactionBuilder: ITransactionBuilder, transactionCreator: ITransactionCreator,
                 paymentAddressParser: IPaymentAddressParser, networkMessageParser: NetworkMessageParser, networkMessageSerializer: NetworkMessageSerializer,
                 syncManager: SyncManager, watchedTransactionManager: IWatchedTransactionManager) {
@@ -101,7 +101,7 @@ public class BitcoinCore {
         self.syncedReadyPeerManager = syncedReadyPeerManager
         self.transactionSyncer = transactionSyncer
         self.blockValidatorChain = blockValidatorChain
-        self.addressManager = addressManager
+        self.publicKeyManager = addressManager
         self.addressConverter = addressConverter
         self.unspentOutputSelector = unspentOutputSelector
         self.kitStateProvider = kitStateProvider
@@ -176,15 +176,15 @@ extension BitcoinCore {
     }
 
     public func receiveAddress(for type: ScriptType) -> String {
-        return (try? addressManager.receiveAddress(for: type)) ?? ""
+        return (try? publicKeyManager.receiveAddress(for: type)) ?? ""
     }
 
     public func changePublicKey() throws -> PublicKey {
-        return try addressManager.changePublicKey()
+        return try publicKeyManager.changePublicKey()
     }
 
     public func receivePublicKey() throws -> PublicKey {
-        return try addressManager.receivePublicKey()
+        return try publicKeyManager.receivePublicKey()
     }
 
     func watch(transaction: BitcoinCore.TransactionFilter, delegate: IWatchedTransactionDelegate) {

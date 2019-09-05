@@ -11,7 +11,7 @@ class InitialSyncerTests: QuickSpec {
         let mockListener = MockISyncStateListener()
         let mockStateManager = MockIStateManager()
         let mockBlockDiscovery = MockIBlockDiscovery()
-        let mockAddressManager = MockIAddressManager()
+        let mockAddressManager = MockIPublicKeyManager()
         let mockDelegate = MockIInitialSyncerDelegate()
 
         var syncer: InitialSyncer!
@@ -30,7 +30,7 @@ class InitialSyncerTests: QuickSpec {
 
             syncer = InitialSyncer(
                     storage: mockStorage, listener: mockListener, stateManager: mockStateManager, blockDiscovery: mockBlockDiscovery,
-                    addressManager: mockAddressManager, async: false
+                    publicKeyManager: mockAddressManager, async: false
             )
 
             syncer.delegate = mockDelegate

@@ -6,7 +6,7 @@ class TransactionProcessor {
     private let inputExtractor: ITransactionExtractor
     private let outputAddressExtractor: ITransactionOutputAddressExtractor
     private let outputsCache: IOutputsCache
-    private let addressManager: IAddressManager
+    private let publicKeyManager: IPublicKeyManager
 
     weak var listener: IBlockchainDataListener?
     weak var transactionListener: ITransactionListener?
@@ -14,7 +14,7 @@ class TransactionProcessor {
     private let dateGenerator: () -> Date
     private let queue: DispatchQueue
 
-    init(storage: IStorage, outputExtractor: ITransactionExtractor, inputExtractor: ITransactionExtractor, outputsCache: IOutputsCache, outputAddressExtractor: ITransactionOutputAddressExtractor, addressManager: IAddressManager, listener: IBlockchainDataListener? = nil,
+    init(storage: IStorage, outputExtractor: ITransactionExtractor, inputExtractor: ITransactionExtractor, outputsCache: IOutputsCache, outputAddressExtractor: ITransactionOutputAddressExtractor, addressManager: IPublicKeyManager, listener: IBlockchainDataListener? = nil,
          dateGenerator: @escaping () -> Date = Date.init, queue: DispatchQueue = DispatchQueue(label: "Transactions", qos: .background
     )) {
         self.storage = storage
@@ -22,7 +22,7 @@ class TransactionProcessor {
         self.inputExtractor = inputExtractor
         self.outputAddressExtractor = outputAddressExtractor
         self.outputsCache = outputsCache
-        self.addressManager = addressManager
+        self.publicKeyManager = addressManager
         self.listener = listener
         self.dateGenerator = dateGenerator
         self.queue = queue
@@ -97,7 +97,7 @@ extension TransactionProcessor: ITransactionProcessor {
                     inserted.append(transaction.header)
 
                     if !skipCheckBloomFilter {
-                        needToUpdateBloomFilter = needToUpdateBloomFilter || self.addressManager.gapShifts() || self.expiresBloomFilter(outputs: transaction.outputs)
+                        needToUpdateBloomFilter = needToUpdateBloomFilter || self.publicKeyManager.gapShifts() || self.expiresBloomFilter(outputs: transaction.outputs)
                     }
                 }
             }

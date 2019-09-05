@@ -133,7 +133,7 @@ public protocol IAddressSelector {
     func getAddressVariants(addressConverter: IAddressConverter, publicKey: PublicKey) -> [String]
 }
 
-public protocol IAddressManager {
+public protocol IPublicKeyManager {
     func changePublicKey() throws -> PublicKey
     func receivePublicKey() throws -> PublicKey
     func receiveAddress(for type: ScriptType) throws -> String
