@@ -9,13 +9,11 @@ class PublicKeyManager {
 
     private let storage: IStorage
     private let hdWallet: IHDWallet
-    private let addressKeyHashConverter: IAddressKeyHashConverter?
     private let addressConverter: IAddressConverter
 
-    init(storage: IStorage, hdWallet: IHDWallet, addressConverter: IAddressConverter, addressKeyHashConverter: IAddressKeyHashConverter? = nil) {
+    init(storage: IStorage, hdWallet: IHDWallet, addressConverter: IAddressConverter) {
         self.storage = storage
         self.addressConverter = addressConverter
-        self.addressKeyHashConverter = addressKeyHashConverter
         self.hdWallet = hdWallet
     }
 
@@ -65,13 +63,6 @@ extension PublicKeyManager: IPublicKeyManager {
 
     func receivePublicKey() throws -> PublicKey {
         return try publicKey(external: true)
-    }
-
-    func receiveAddress(for type: ScriptType) throws -> String {
-        let keyHash = try publicKey(external: true).keyHash
-        let correctKeyHash = addressKeyHashConverter?.convert(keyHash: keyHash, type: type) ?? keyHash
-
-        return try addressConverter.convert(keyHash: correctKeyHash, type: type).stringValue
     }
 
     func fillGap() throws {
@@ -135,8 +126,8 @@ extension PublicKeyManager: IPublicKeyManager {
 
 extension PublicKeyManager {
 
-    public static func instance(storage: IStorage, hdWallet: IHDWallet, addressConverter: IAddressConverter, addressKeyHashConverter: IAddressKeyHashConverter? = nil) -> PublicKeyManager {
-        let addressManager = PublicKeyManager(storage: storage, hdWallet: hdWallet, addressConverter: addressConverter, addressKeyHashConverter: addressKeyHashConverter)
+    public static func instance(storage: IStorage, hdWallet: IHDWallet, addressConverter: IAddressConverter) -> PublicKeyManager {
+        let addressManager = PublicKeyManager(storage: storage, hdWallet: hdWallet, addressConverter: addressConverter)
         try? addressManager.fillGap()
         return addressManager
     }

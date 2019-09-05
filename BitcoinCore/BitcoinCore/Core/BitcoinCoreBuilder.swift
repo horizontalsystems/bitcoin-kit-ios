@@ -8,10 +8,10 @@ public class BitcoinCoreBuilder {
     private var seed: Data?
     private var words: [String]?
     private var bip: Purpose = .bip44
+    private var scriptType: ScriptType = .p2pkh
     private var network: INetwork?
     private var paymentAddressParser: IPaymentAddressParser?
     private var addressSelector: IAddressSelector?
-    private var addressKeyHashConverter: IAddressKeyHashConverter?
     private var walletId: String?
     private var initialSyncApi: ISyncTransactionApi?
     private var logger: Logger
@@ -39,6 +39,11 @@ public class BitcoinCoreBuilder {
 
     public func set(bip: Purpose) -> BitcoinCoreBuilder {
         self.bip = bip
+        switch bip {
+        case .bip44: scriptType = .p2pkh
+        case .bip49: scriptType = .p2wpkhSh
+        case .bip84: scriptType = .p2wpkh
+        }
         return self
     }
 
@@ -54,11 +59,6 @@ public class BitcoinCoreBuilder {
 
     public func set(addressSelector: IAddressSelector) -> BitcoinCoreBuilder {
         self.addressSelector = addressSelector
-        return self
-    }
-
-    public func set(addressKeyHashConverter: IAddressKeyHashConverter) -> BitcoinCoreBuilder {
-        self.addressKeyHashConverter = addressKeyHashConverter
         return self
     }
 
@@ -158,7 +158,7 @@ public class BitcoinCoreBuilder {
 
         let factory = Factory(network: network, networkMessageParser: networkMessageParser, networkMessageSerializer: networkMessageSerializer)
 
-        let addressManager = PublicKeyManager.instance(storage: storage, hdWallet: hdWallet, addressConverter: addressConverter, addressKeyHashConverter: addressKeyHashConverter)
+        let addressManager = PublicKeyManager.instance(storage: storage, hdWallet: hdWallet, addressConverter: addressConverter)
 
         let myOutputsCache = OutputsCache.instance(storage: storage)
         let scriptConverter = ScriptConverter()
@@ -208,7 +208,7 @@ public class BitcoinCoreBuilder {
         let scriptBuilder = ScriptBuilderChain()
         let transactionSizeCalculator = TransactionSizeCalculator()
         let transactionBuilder = TransactionBuilder(unspentOutputSelector: unspentOutputSelector, unspentOutputProvider: unspentOutputProvider, publicKeyManager: addressManager, addressConverter: addressConverter, inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory,
-                transactionSizeCalculator: transactionSizeCalculator, addressKeyHashConverter: addressKeyHashConverter)
+                transactionSizeCalculator: transactionSizeCalculator)
         let transactionSender = TransactionSender(transactionSyncer: transactionSyncer, peerManager: peerManager, initialBlockDownload: initialBlockDownload, syncedReadyPeerManager: syncedReadyPeerManager, logger: logger)
         let transactionCreator = TransactionCreator(transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, transactionSender: transactionSender, bloomFilterManager: bloomFilterManager)
 
@@ -234,7 +234,8 @@ public class BitcoinCoreBuilder {
                 networkMessageParser: networkMessageParser,
                 networkMessageSerializer: networkMessageSerializer,
                 syncManager: syncManager,
-                watchedTransactionManager: watchedTransactionManager)
+                watchedTransactionManager: watchedTransactionManager,
+                scriptType: scriptType)
 
         initialSyncer.delegate = syncManager
         bloomFilterManager.delegate = bloomFilterLoader

@@ -10,7 +10,6 @@ class TransactionBuilder {
     private let unspentOutputProvider: IUnspentOutputProvider
     private let publicKeyManager: IPublicKeyManager
     private let addressConverter: IAddressConverter
-    private let addressKeyHashConverter: IAddressKeyHashConverter?
     private let inputSigner: IInputSigner
     private let factory: IFactory
     private let transactionSizeCalculator: ITransactionSizeCalculator
@@ -18,13 +17,11 @@ class TransactionBuilder {
     var scriptBuilder: IScriptBuilder
 
     init(unspentOutputSelector: IUnspentOutputSelector, unspentOutputProvider: IUnspentOutputProvider, publicKeyManager: IPublicKeyManager, addressConverter: IAddressConverter,
-         inputSigner: IInputSigner, scriptBuilder: IScriptBuilder, factory: IFactory, transactionSizeCalculator: ITransactionSizeCalculator,
-         addressKeyHashConverter: IAddressKeyHashConverter? = nil) {
+         inputSigner: IInputSigner, scriptBuilder: IScriptBuilder, factory: IFactory, transactionSizeCalculator: ITransactionSizeCalculator) {
         self.unspentOutputSelector = unspentOutputSelector
         self.unspentOutputProvider = unspentOutputProvider
         self.publicKeyManager = publicKeyManager
         self.addressConverter = addressConverter
-        self.addressKeyHashConverter = addressKeyHashConverter
         self.inputSigner = inputSigner
         self.scriptBuilder = scriptBuilder
         self.factory = factory
@@ -99,8 +96,7 @@ extension TransactionBuilder: ITransactionBuilder {
 
         // Add :change output if needed
         if selectedOutputsInfo.addChangeOutput {
-            let correctKeyHash = addressKeyHashConverter?.convert(keyHash: changePubKey.keyHash, type: changeScriptType) ?? changePubKey.keyHash
-            let changeAddress = try addressConverter.convert(keyHash: correctKeyHash, type: changeScriptType)
+            let changeAddress = try addressConverter.convert(publicKey: changePubKey, type: changeScriptType)
             outputs.append(try output(withIndex: 1, address: changeAddress, value: selectedOutputsInfo.totalValue - sentValue))
         }
 

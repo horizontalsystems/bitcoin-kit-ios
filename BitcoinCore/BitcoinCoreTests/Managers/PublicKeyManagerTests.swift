@@ -108,46 +108,6 @@ class PublicKeyManagerTests: XCTestCase {
         }
     }
 
-    func testReceiveAddress() {
-        let publicKeys = [
-            PublicKeyWithUsedState(publicKey: getPublicKey(withAccount: 0, index: 0, chain: .external), used: true),
-            PublicKeyWithUsedState(publicKey: getPublicKey(withAccount: 0, index: 0, chain: .internal), used: false),
-            PublicKeyWithUsedState(publicKey: getPublicKey(withAccount: 0, index: 3, chain: .external), used: false),
-            PublicKeyWithUsedState(publicKey: getPublicKey(withAccount: 0, index: 1, chain: .external), used: false),
-            PublicKeyWithUsedState(publicKey: getPublicKey(withAccount: 0, index: 1, chain: .internal), used: false),
-            PublicKeyWithUsedState(publicKey: getPublicKey(withAccount: 0, index: 2, chain: .external), used: false)
-        ]
-
-        stub(mockStorage) { mock in
-            when(mock.publicKeysWithUsedState()).thenReturn(publicKeys)
-        }
-
-        let address = LegacyAddress(type: .pubKeyHash, keyHash: publicKeys[3].publicKey.keyHash, base58: "receiveAddress")
-        stub(mockAddressConverter) { mock in
-            when(mock.convert(keyHash: equal(to: publicKeys[3].publicKey.keyHash), type: equal(to: ScriptType.p2pkh))).thenReturn(address)
-        }
-
-        XCTAssertEqual(try? manager.receiveAddress(for: .p2pkh), address.stringValue)
-        verify(mockAddressConverter).convert(keyHash: equal(to: publicKeys[3].publicKey.keyHash), type: equal(to: ScriptType.p2pkh))
-    }
-
-    func testReceiveAddress_NoUnusedPublicKey() {
-        let publicKey = PublicKeyWithUsedState(publicKey: getPublicKey(withAccount: 0, index: 0, chain: .external), used: true)
-
-        stub(mockStorage) { mock in
-            when(mock.publicKeysWithUsedState()).thenReturn([publicKey])
-        }
-
-        do {
-            let _ = try manager.receiveAddress(for: .p2pkh)
-            XCTFail("Should throw exception")
-        } catch let error as PublicKeyManager.AddressManagerError {
-            XCTAssertEqual(error, PublicKeyManager.AddressManagerError.noUnusedPublicKey)
-        } catch {
-            XCTFail("Unexpected exception thrown")
-        }
-    }
-
     func testFillGap() {
         let keys = [
             PublicKeyWithUsedState(publicKey: getPublicKey(withAccount: 0, index: 0, chain: .internal), used: true),

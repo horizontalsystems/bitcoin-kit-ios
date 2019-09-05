@@ -136,7 +136,6 @@ public protocol IAddressSelector {
 public protocol IPublicKeyManager {
     func changePublicKey() throws -> PublicKey
     func receivePublicKey() throws -> PublicKey
-    func receiveAddress(for type: ScriptType) throws -> String
     func fillGap() throws
     func addKeys(keys: [PublicKey]) throws
     func gapShifts() -> Bool
@@ -288,13 +287,10 @@ protocol IPaymentAddressParser {
     func parse(paymentAddress: String) -> BitcoinPaymentData
 }
 
-public protocol IAddressKeyHashConverter {
-    func convert(keyHash: Data, type: ScriptType) -> Data
-}
-
 public protocol IAddressConverter {
     func convert(address: String) throws -> Address
     func convert(keyHash: Data, type: ScriptType) throws -> Address
+    func convert(publicKey: PublicKey, type: ScriptType) throws -> Address
 }
 
 public protocol IScriptConverter {

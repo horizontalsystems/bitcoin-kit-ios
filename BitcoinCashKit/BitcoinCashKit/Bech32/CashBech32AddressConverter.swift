@@ -57,4 +57,7 @@ public class CashBech32AddressConverter: IAddressConverter {
         return CashAddress(type: addressType, keyHash: keyHash, cashAddrBech32: bech32, version: versionByte)
     }
 
+    public func convert(publicKey: PublicKey, type: ScriptType) throws -> Address {
+        return try convert(keyHash: publicKey.keyHash, type: type)
+    }
 }

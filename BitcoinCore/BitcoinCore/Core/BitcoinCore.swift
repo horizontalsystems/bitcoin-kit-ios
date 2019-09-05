@@ -30,6 +30,8 @@ public class BitcoinCore {
 
     private let syncManager: SyncManager
 
+    private let scriptType: ScriptType
+
     // START: Extending
 
     public let peerGroup: IPeerGroup
@@ -91,7 +93,7 @@ public class BitcoinCore {
                 blockValidatorChain: BlockValidatorChain, addressManager: IPublicKeyManager, addressConverter: AddressConverterChain, unspentOutputSelector: UnspentOutputSelectorChain, kitStateProvider: IKitStateProvider & ISyncStateListener,
                 scriptBuilder: ScriptBuilderChain, transactionBuilder: ITransactionBuilder, transactionCreator: ITransactionCreator,
                 paymentAddressParser: IPaymentAddressParser, networkMessageParser: NetworkMessageParser, networkMessageSerializer: NetworkMessageSerializer,
-                syncManager: SyncManager, watchedTransactionManager: IWatchedTransactionManager) {
+                syncManager: SyncManager, watchedTransactionManager: IWatchedTransactionManager, scriptType: ScriptType) {
         self.storage = storage
         self.cache = cache
         self.dataProvider = dataProvider
@@ -115,6 +117,7 @@ public class BitcoinCore {
 
         self.syncManager = syncManager
         self.watchedTransactionManager = watchedTransactionManager
+        self.scriptType = scriptType
     }
 
 }
@@ -175,8 +178,13 @@ extension BitcoinCore {
         return try transactionBuilder.fee(for: value, feeRate: feeRate, senderPay: senderPay, address: toAddress, changeScriptType: changeScriptType)
     }
 
-    public func receiveAddress(for type: ScriptType) -> String {
-        return (try? publicKeyManager.receiveAddress(for: type)) ?? ""
+    public func receiveAddress() -> String {
+        guard let publicKey = try? publicKeyManager.receivePublicKey(),
+              let address = try? addressConverter.convert(publicKey: publicKey, type: scriptType) else {
+            return ""
+        }
+
+        return address.stringValue
     }
 
     public func changePublicKey() throws -> PublicKey {
