@@ -1,4 +1,5 @@
 import BitcoinCore
+import HSCryptoKit
 
 class SegWitBech32AddressConverter: IAddressConverter {
     private let prefix: String
@@ -41,6 +42,10 @@ class SegWitBech32AddressConverter: IAddressConverter {
         }
         let bech32 = try SegWitBech32.encode(hrp: prefix, version: versionByte, program: keyHash)
         return SegWitAddress(type: addressType, keyHash: keyHash, bech32: bech32, version: versionByte)
+    }
+
+    func convert(publicKey: PublicKey, type: ScriptType) throws -> Address {
+        return try convert(keyHash: OpCode.scriptWPKH(publicKey.keyHash), type: type)
     }
 
 }

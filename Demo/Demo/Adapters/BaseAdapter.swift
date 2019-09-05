@@ -103,8 +103,8 @@ extension BaseAdapter {
         return abstractKit.syncState
     }
 
-    func receiveAddress(for type: ScriptType) -> String {
-        return abstractKit.receiveAddress(for: type)
+    func receiveAddress() -> String {
+        return abstractKit.receiveAddress()
     }
 
     func validate(address: String) throws {

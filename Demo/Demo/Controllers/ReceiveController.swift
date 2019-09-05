@@ -6,8 +6,7 @@ class ReceiveController: UIViewController {
     private let disposeBag = DisposeBag()
 
     @IBOutlet weak var addressLabel: UILabel?
-    @IBOutlet weak var addressTypeControl: UISegmentedControl!
-    
+
     private var adapters = [BaseAdapter]()
     private let segmentedControl = UISegmentedControl()
 
@@ -45,9 +44,6 @@ class ReceiveController: UIViewController {
 
         segmentedControl.selectedSegmentIndex = 0
         segmentedControl.sendActions(for: .valueChanged)
-
-        addressTypeControl.selectedSegmentIndex = 0
-        addressTypeControl.isHidden = false
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -56,17 +52,7 @@ class ReceiveController: UIViewController {
         segmentedControl.sendActions(for: .valueChanged)
     }
 
-    func type(segment: Int) -> ScriptType {
-        switch segment {
-        case 1: return .p2wpkh
-        case 2: return .p2wpkhSh
-        default: return .p2pkh
-        }
-    }
-
     @objc func onSegmentChanged() {
-        addressTypeControl.isHidden = segmentedControl.selectedSegmentIndex != 0
-        addressTypeControl.selectedSegmentIndex = 0
         updateAddress()
 
         if let adapter = currentAdapter {
@@ -74,8 +60,7 @@ class ReceiveController: UIViewController {
         }
     }
     func updateAddress() {
-        let segment = addressTypeControl.selectedSegmentIndex
-        addressLabel?.text = "  \(currentAdapter?.receiveAddress(for: type(segment: segment)) ?? "")  "
+        addressLabel?.text = "  \(currentAdapter?.receiveAddress() ?? "")  "
     }
 
     @IBAction func onAddressTypeChanged(_ sender: Any) {

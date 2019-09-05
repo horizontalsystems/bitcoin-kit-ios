@@ -58,8 +58,8 @@ open class AbstractKit {
         return try bitcoinCore.fee(for: value, toAddress: toAddress, senderPay: senderPay, feeRate: feeRate, changeScriptType: changeScriptType)
     }
 
-    open func receiveAddress(for type: ScriptType) -> String {
-        return bitcoinCore.receiveAddress(for: type)
+    open func receiveAddress() -> String {
+        return bitcoinCore.receiveAddress()
     }
 
     open func changePublicKey() throws -> PublicKey {

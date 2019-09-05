@@ -35,4 +35,19 @@ class AddressConverterChain: IAddressConverter {
         throw BitcoinCoreErrors.AddressConversionErrors(errors: errors)
     }
 
+    func convert(publicKey: PublicKey, type: ScriptType) throws -> Address {
+        var errors = [Error]()
+
+        for converter in concreteConverters {
+            do {
+                let converted = try converter.convert(publicKey: publicKey, type: type)
+                return converted
+            } catch {
+                errors.append(error)
+            }
+        }
+
+        throw BitcoinCoreErrors.AddressConversionErrors(errors: errors)
+    }
+
 }

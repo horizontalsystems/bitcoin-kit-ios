@@ -61,4 +61,9 @@ class Base58AddressConverter: IAddressConverter {
         return LegacyAddress(type: addressType, keyHash: keyHash, base58: base58)
     }
 
+    func convert(publicKey: PublicKey, type: ScriptType) throws -> Address {
+        let keyHash = type == .p2wpkhSh ? publicKey.scriptHashForP2WPKH : publicKey.keyHash
+        return try convert(keyHash: keyHash, type: type)
+    }
+
 }
