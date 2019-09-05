@@ -78,6 +78,7 @@
 		2FA5D806A7727E3BED0E54E7 /* DataObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D50922572F91F966DD4A /* DataObjects.swift */; };
 		2FA5D8284C7C94155AC50B7B /* GetBlockHashesTaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DFC7FA0A5363BFFB8E28 /* GetBlockHashesTaskTests.swift */; };
 		2FA5D84AA43DA05CAC68B912 /* WatchedTransactionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D8E67003F981BCB89CE3 /* WatchedTransactionManager.swift */; };
+		2FA5D87B923C2B78B5257957 /* Bip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D7A29489EA7A15A4B25D /* Bip.swift */; };
 		2FA5D8B8A3A3F14EDCE2EB25 /* SignatureScriptSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D79D58E62B0A4FA3952A /* SignatureScriptSerializer.swift */; };
 		2FA5D91DCF7F320369162C5A /* ReachabilityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D6676E3CB6028E1B6018 /* ReachabilityManager.swift */; };
 		2FA5D9D3DA2DF9BD402CE5DD /* SentTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DF037E951950A0F7FF03 /* SentTransaction.swift */; };
@@ -291,6 +292,7 @@
 		2FA5D65667DA8BFD91E91C8B /* GetBlockHashesTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetBlockHashesTask.swift; sourceTree = "<group>"; };
 		2FA5D6676E3CB6028E1B6018 /* ReachabilityManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReachabilityManager.swift; sourceTree = "<group>"; };
 		2FA5D79D58E62B0A4FA3952A /* SignatureScriptSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignatureScriptSerializer.swift; sourceTree = "<group>"; };
+		2FA5D7A29489EA7A15A4B25D /* Bip.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bip.swift; sourceTree = "<group>"; };
 		2FA5D82EFF381CE6233790A9 /* KitStateProviderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KitStateProviderTests.swift; sourceTree = "<group>"; };
 		2FA5D859C070F9718CACF08F /* KitStateProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KitStateProvider.swift; sourceTree = "<group>"; };
 		2FA5D880471F191DBCDAE574 /* TransactionSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionSerializer.swift; sourceTree = "<group>"; };
@@ -492,6 +494,7 @@
 				58AAA6603AEA2159F6126D10 /* Signal.swift */,
 				58AAA0FE0496F520DDA29BB1 /* TransactionInfoConverter.swift */,
 				58AAAFE91DB09FA5E32DD881 /* BaseTransactionInfoConverter.swift */,
+				2FA5D7A29489EA7A15A4B25D /* Bip.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -1450,6 +1453,7 @@
 				58AAAF671C4B3988EF6764B1 /* InsightApi.swift in Sources */,
 				2FA5D84AA43DA05CAC68B912 /* WatchedTransactionManager.swift in Sources */,
 				2FA5D8B8A3A3F14EDCE2EB25 /* SignatureScriptSerializer.swift in Sources */,
+				2FA5D87B923C2B78B5257957 /* Bip.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

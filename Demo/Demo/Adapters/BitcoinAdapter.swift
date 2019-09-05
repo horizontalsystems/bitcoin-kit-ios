@@ -5,9 +5,8 @@ import RxSwift
 
 class BitcoinAdapter: BaseAdapter {
     let bitcoinKit: BitcoinKit
-    override var changeAddressScriptType: ScriptType { return .p2pkh }
 
-    init(words: [String], bip: Purpose, testMode: Bool, syncMode: BitcoinCore.SyncMode) {
+    init(words: [String], bip: Bip, testMode: Bool, syncMode: BitcoinCore.SyncMode) {
         let networkType: BitcoinKit.NetworkType = testMode ? .testNet : .mainNet
         bitcoinKit = try! BitcoinKit(withWords: words, bip: bip, walletId: "walletId", syncMode: syncMode, networkType: networkType, minLogLevel: Configuration.shared.minLogLevel)
 
