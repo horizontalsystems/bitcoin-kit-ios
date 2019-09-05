@@ -13,11 +13,12 @@ class TransactionBuilder {
     private let inputSigner: IInputSigner
     private let factory: IFactory
     private let transactionSizeCalculator: ITransactionSizeCalculator
+    private let bip: Bip
 
     var scriptBuilder: IScriptBuilder
 
     init(unspentOutputSelector: IUnspentOutputSelector, unspentOutputProvider: IUnspentOutputProvider, publicKeyManager: IPublicKeyManager, addressConverter: IAddressConverter,
-         inputSigner: IInputSigner, scriptBuilder: IScriptBuilder, factory: IFactory, transactionSizeCalculator: ITransactionSizeCalculator) {
+         inputSigner: IInputSigner, scriptBuilder: IScriptBuilder, factory: IFactory, transactionSizeCalculator: ITransactionSizeCalculator, bip: Bip) {
         self.unspentOutputSelector = unspentOutputSelector
         self.unspentOutputProvider = unspentOutputProvider
         self.publicKeyManager = publicKeyManager
@@ -26,6 +27,7 @@ class TransactionBuilder {
         self.scriptBuilder = scriptBuilder
         self.factory = factory
         self.transactionSizeCalculator = transactionSizeCalculator
+        self.bip = bip
     }
 
     private func input(fromUnspentOutput unspentOutput: UnspentOutput) throws -> InputToSign {
@@ -52,10 +54,10 @@ extension TransactionBuilder: ITransactionBuilder {
     // :fee method returns the fee for the given amount
     // If address given and it's valid, it returns the actual fee
     // Otherwise, it returns the estimated fee
-    func fee(for value: Int, feeRate: Int, senderPay: Bool, address: String? = nil, changeScriptType: ScriptType) throws -> Int {
+    func fee(for value: Int, feeRate: Int, senderPay: Bool, address: String? = nil) throws -> Int {
         if let string = address, let _ = try? addressConverter.convert(address: string) {
             // Actual fee
-            let transaction = try buildTransaction(value: value, feeRate: feeRate, senderPay: senderPay, toAddress: string, changeScriptType: changeScriptType)
+            let transaction = try buildTransaction(value: value, feeRate: feeRate, senderPay: senderPay, toAddress: string)
             return TransactionSerializer.serialize(transaction: transaction, withoutWitness: true).count * feeRate
         } else {
             // Estimated fee
@@ -65,13 +67,13 @@ extension TransactionBuilder: ITransactionBuilder {
         }
     }
 
-    func buildTransaction(value: Int, feeRate: Int, senderPay: Bool, toAddress: String, changeScriptType: ScriptType) throws -> FullTransaction {
+    func buildTransaction(value: Int, feeRate: Int, senderPay: Bool, toAddress: String) throws -> FullTransaction {
         guard let changePubKey = try? publicKeyManager.changePublicKey() else {
             throw BuildError.noChangeAddress
         }
 
         let address = try addressConverter.convert(address: toAddress)
-        let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: address.scriptType, changeType: changeScriptType, senderPay: senderPay)
+        let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: address.scriptType, changeType: bip.scriptType, senderPay: senderPay)
 
         if !senderPay {
             guard selectedOutputsInfo.fee < value else {
@@ -96,7 +98,7 @@ extension TransactionBuilder: ITransactionBuilder {
 
         // Add :change output if needed
         if selectedOutputsInfo.addChangeOutput {
-            let changeAddress = try addressConverter.convert(publicKey: changePubKey, type: changeScriptType)
+            let changeAddress = try addressConverter.convert(publicKey: changePubKey, type: bip.scriptType)
             outputs.append(try output(withIndex: 1, address: changeAddress, value: selectedOutputsInfo.totalValue - sentValue))
         }
 

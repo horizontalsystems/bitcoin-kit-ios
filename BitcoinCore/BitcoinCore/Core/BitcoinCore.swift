@@ -30,7 +30,7 @@ public class BitcoinCore {
 
     private let syncManager: SyncManager
 
-    private let scriptType: ScriptType
+    private let bip: Bip
 
     // START: Extending
 
@@ -88,12 +88,12 @@ public class BitcoinCore {
     public weak var delegate: BitcoinCoreDelegate?
 
     init(storage: IStorage, cache: OutputsCache, dataProvider: IDataProvider,
-                peerGroup: IPeerGroup, initialBlockDownload: IInitialBlockDownload, bloomFilterLoader: BloomFilterLoader,
-                syncedReadyPeerManager: ISyncedReadyPeerManager, transactionSyncer: ITransactionSyncer,
-                blockValidatorChain: BlockValidatorChain, addressManager: IPublicKeyManager, addressConverter: AddressConverterChain, unspentOutputSelector: UnspentOutputSelectorChain, kitStateProvider: IKitStateProvider & ISyncStateListener,
-                scriptBuilder: ScriptBuilderChain, transactionBuilder: ITransactionBuilder, transactionCreator: ITransactionCreator,
-                paymentAddressParser: IPaymentAddressParser, networkMessageParser: NetworkMessageParser, networkMessageSerializer: NetworkMessageSerializer,
-                syncManager: SyncManager, watchedTransactionManager: IWatchedTransactionManager, scriptType: ScriptType) {
+         peerGroup: IPeerGroup, initialBlockDownload: IInitialBlockDownload, bloomFilterLoader: BloomFilterLoader,
+         syncedReadyPeerManager: ISyncedReadyPeerManager, transactionSyncer: ITransactionSyncer,
+         blockValidatorChain: BlockValidatorChain, addressManager: IPublicKeyManager, addressConverter: AddressConverterChain, unspentOutputSelector: UnspentOutputSelectorChain, kitStateProvider: IKitStateProvider & ISyncStateListener,
+         scriptBuilder: ScriptBuilderChain, transactionBuilder: ITransactionBuilder, transactionCreator: ITransactionCreator,
+         paymentAddressParser: IPaymentAddressParser, networkMessageParser: NetworkMessageParser, networkMessageSerializer: NetworkMessageSerializer,
+         syncManager: SyncManager, watchedTransactionManager: IWatchedTransactionManager, bip: Bip) {
         self.storage = storage
         self.cache = cache
         self.dataProvider = dataProvider
@@ -117,7 +117,7 @@ public class BitcoinCore {
 
         self.syncManager = syncManager
         self.watchedTransactionManager = watchedTransactionManager
-        self.scriptType = scriptType
+        self.bip = bip
     }
 
 }
@@ -152,14 +152,14 @@ extension BitcoinCore {
         return dataProvider.transactions(fromHash: fromHash, limit: limit)
     }
 
-    public func send(to address: String, value: Int, feeRate: Int, changeScriptType: ScriptType) throws -> FullTransaction {
-        return try transactionCreator.create(to: address, value: value, feeRate: feeRate, senderPay: true, changeScriptType: changeScriptType)
+    public func send(to address: String, value: Int, feeRate: Int) throws -> FullTransaction {
+        return try transactionCreator.create(to: address, value: value, feeRate: feeRate, senderPay: true)
     }
 
-    public func send(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int, changeScriptType: ScriptType) throws -> FullTransaction {
+    public func send(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int) throws -> FullTransaction {
         // TODO: convert to scriptWPKH when scriptType is P2WPKHSH ?
         let address = try addressConverter.convert(keyHash: hash, type: scriptType)
-        return try send(to: address.stringValue, value: value, feeRate: feeRate, changeScriptType: changeScriptType)
+        return try send(to: address.stringValue, value: value, feeRate: feeRate)
     }
 
     func redeem(from unspentOutput: UnspentOutput, to address: String, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction {
@@ -174,13 +174,13 @@ extension BitcoinCore {
         return paymentAddressParser.parse(paymentAddress: paymentAddress)
     }
 
-    public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feeRate: Int, changeScriptType: ScriptType) throws -> Int {
-        return try transactionBuilder.fee(for: value, feeRate: feeRate, senderPay: senderPay, address: toAddress, changeScriptType: changeScriptType)
+    public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feeRate: Int) throws -> Int {
+        return try transactionBuilder.fee(for: value, feeRate: feeRate, senderPay: senderPay, address: toAddress)
     }
 
     public func receiveAddress() -> String {
         guard let publicKey = try? publicKeyManager.receivePublicKey(),
-              let address = try? addressConverter.convert(publicKey: publicKey, type: scriptType) else {
+              let address = try? addressConverter.convert(publicKey: publicKey, type: bip.scriptType) else {
             return ""
         }
 
