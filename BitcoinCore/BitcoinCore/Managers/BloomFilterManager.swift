@@ -40,13 +40,6 @@ extension BloomFilterManager: IBloomFilterManager {
     func regenerateBloomFilter() {
         var elements = [Data]()
 
-        let publicKeys = storage.publicKeys()
-        for publicKey in publicKeys {
-            elements.append(publicKey.keyHash)
-            elements.append(publicKey.raw)
-            elements.append(publicKey.scriptHashForP2WPKH)
-        }
-
         var outputs = storage.outputsWithPublicKeys().filter { output in
             return output.output.scriptType == ScriptType.p2wpkh || output.output.scriptType == ScriptType.p2pk || output.output.scriptType == ScriptType.p2wpkhSh
         }

@@ -15,6 +15,15 @@ class RestoreKeyConverterChain : IRestoreKeyConverter {
         return keys.unique
     }
 
+    func bloomFilterElements(publicKey: PublicKey) -> [Data] {
+        var keys = [Data]()
+        for converter in converters {
+            keys.append(contentsOf: converter.bloomFilterElements(publicKey: publicKey))
+        }
+
+        return keys.unique
+    }
+
 }
 
 class Bip44RestoreKeyConverter {
@@ -33,6 +42,10 @@ extension Bip44RestoreKeyConverter : IRestoreKeyConverter {
         let legacyAddress = try? addressConverter.convert(publicKey: publicKey, type: .p2pkh).stringValue
 
         return [legacyAddress].compactMap { $0 }
+    }
+
+    func bloomFilterElements(publicKey: PublicKey) -> [Data] {
+        return [publicKey.keyHash, publicKey.raw]
     }
 
 }
@@ -55,6 +68,10 @@ extension Bip49RestoreKeyConverter : IRestoreKeyConverter {
         return [wpkhShAddress].compactMap { $0 }
     }
 
+    func bloomFilterElements(publicKey: PublicKey) -> [Data] {
+        return [publicKey.scriptHashForP2WPKH]
+    }
+
 }
 
 
@@ -74,6 +91,10 @@ extension Bip84RestoreKeyConverter : IRestoreKeyConverter {
         let segwitAddress = try? addressConverter.convert(publicKey: publicKey, type: .p2wpkh).stringValue
 
         return [segwitAddress].compactMap { $0 }
+    }
+
+    func bloomFilterElements(publicKey: PublicKey) -> [Data] {
+        return [publicKey.keyHash]
     }
 
 }

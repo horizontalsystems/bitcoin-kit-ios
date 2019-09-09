@@ -59,7 +59,7 @@ class BlockSyncerTests: QuickSpec {
 
 
                     let _ = BlockSyncer.instance(storage: mockStorage, checkpointBlock: checkpointBlock, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
-                            blockchain: mockBlockchain, publicKeyManager: mockAddressManager, bloomFilterManager: mockBloomFilterManager, hashCheckpointThreshold: 100)
+                            blockchain: mockBlockchain, publicKeyManager: mockAddressManager, hashCheckpointThreshold: 100)
 
                     verify(mockListener).initialBestBlockHeightUpdated(height: equal(to: Int32(checkpointBlock.height)))
                     verifyNoMoreInteractions(mockListener)
