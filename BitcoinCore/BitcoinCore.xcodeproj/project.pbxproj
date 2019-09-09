@@ -75,6 +75,7 @@
 		2FA5D67384D58067F71CD6B2 /* InputSigner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DF9995FA7DD7556893F7 /* InputSigner.swift */; };
 		2FA5D6EC6F4A32E3489F89B0 /* TransactionMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D307095385625960B0A0 /* TransactionMessage.swift */; };
 		2FA5D74EDAFB77BC86918E63 /* PeerDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DE9CAB1F15B04E2C54C9 /* PeerDiscovery.swift */; };
+		2FA5D761883BB2CCC770B790 /* IrregularOutputFinder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DE58A18A9451DFC02356 /* IrregularOutputFinder.swift */; };
 		2FA5D806A7727E3BED0E54E7 /* DataObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D50922572F91F966DD4A /* DataObjects.swift */; };
 		2FA5D8284C7C94155AC50B7B /* GetBlockHashesTaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DFC7FA0A5363BFFB8E28 /* GetBlockHashesTaskTests.swift */; };
 		2FA5D84AA43DA05CAC68B912 /* WatchedTransactionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D8E67003F981BCB89CE3 /* WatchedTransactionManager.swift */; };
@@ -312,6 +313,7 @@
 		2FA5DCD21585D41C520DF764 /* TransactionInputSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionInputSerializer.swift; sourceTree = "<group>"; };
 		2FA5DDAE64200E386070668C /* TransactionBuilderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionBuilderTests.swift; sourceTree = "<group>"; };
 		2FA5DDED90E11DEC3647B164 /* PeerAddress.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerAddress.swift; sourceTree = "<group>"; };
+		2FA5DE58A18A9451DFC02356 /* IrregularOutputFinder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IrregularOutputFinder.swift; sourceTree = "<group>"; };
 		2FA5DE7E06652FCED7B288E7 /* BloomFilterManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BloomFilterManager.swift; sourceTree = "<group>"; };
 		2FA5DE9CAB1F15B04E2C54C9 /* PeerDiscovery.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerDiscovery.swift; sourceTree = "<group>"; };
 		2FA5DEC11B1DA4DA336DBB28 /* ConnectionTimeoutManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectionTimeoutManager.swift; sourceTree = "<group>"; };
@@ -718,6 +720,7 @@
 				58AAA7A391E4B2F8C4E99B97 /* SyncedReadyPeerManager.swift */,
 				58AAA67094BBC66D3A385341 /* UnspentOutputSelectorSingleNoChange.swift */,
 				2FA5D8E67003F981BCB89CE3 /* WatchedTransactionManager.swift */,
+				2FA5DE58A18A9451DFC02356 /* IrregularOutputFinder.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -1454,6 +1457,7 @@
 				2FA5D8B8A3A3F14EDCE2EB25 /* SignatureScriptSerializer.swift in Sources */,
 				2FA5D87B923C2B78B5257957 /* Bip.swift in Sources */,
 				2FA5D97434F2504E5B4AC072 /* RestoreKeyConverter.swift in Sources */,
+				2FA5D761883BB2CCC770B790 /* IrregularOutputFinder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

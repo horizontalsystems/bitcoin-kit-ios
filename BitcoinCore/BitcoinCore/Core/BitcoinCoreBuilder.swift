@@ -147,6 +147,7 @@ public class BitcoinCoreBuilder {
         let publicKeyManager = PublicKeyManager.instance(storage: storage, hdWallet: hdWallet, restoreKeyConverter: restoreKeyConverterChain)
 
         let myOutputsCache = OutputsCache.instance(storage: storage)
+        let irregularOutputFinder = IrregularOutputFinder(storage: storage)
         let scriptConverter = ScriptConverter()
         let transactionInputExtractor = TransactionInputExtractor(storage: storage, scriptConverter: scriptConverter, addressConverter: addressConverter, logger: logger)
         let transactionKeySetter = TransactionPublicKeySetter(storage: storage)
@@ -155,14 +156,14 @@ public class BitcoinCoreBuilder {
         let transactionProcessor = TransactionProcessor(storage: storage,
                 outputExtractor: transactionOutputExtractor, inputExtractor: transactionInputExtractor,
                 outputsCache: myOutputsCache, outputAddressExtractor: transactionAddressExtractor,
-                addressManager: publicKeyManager, listener: dataProvider)
+                addressManager: publicKeyManager, irregularOutputFinder: irregularOutputFinder, listener: dataProvider)
 
         let kitStateProvider = KitStateProvider()
 
         let peerDiscovery = PeerDiscovery()
         let peerAddressManager = PeerAddressManager(storage: storage, dnsSeeds: network.dnsSeeds, peerDiscovery: peerDiscovery, logger: logger)
         peerDiscovery.peerAddressManager = peerAddressManager
-        let bloomFilterManager = BloomFilterManager(storage: storage, factory: factory)
+        let bloomFilterManager = BloomFilterManager(factory: factory)
 
         let peerManager = PeerManager()
         let unspentOutputSelector = UnspentOutputSelectorChain()
@@ -231,6 +232,7 @@ public class BitcoinCoreBuilder {
 
         bloomFilterManager.add(provider: watchedTransactionManager)
         bloomFilterManager.add(provider: publicKeyManager)
+        bloomFilterManager.add(provider: irregularOutputFinder)
 
         peerGroup.peerTaskHandler = bitcoinCore.peerTaskHandlerChain
         peerGroup.inventoryItemsHandler = bitcoinCore.inventoryItemsHandlerChain
