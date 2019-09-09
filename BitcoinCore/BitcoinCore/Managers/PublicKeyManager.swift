@@ -7,12 +7,15 @@ class PublicKeyManager {
         case invalidPath
     }
 
+    private let restoreKeyConverter: IRestoreKeyConverter
     private let storage: IStorage
     private let hdWallet: IHDWallet
+    weak var bloomFilterManager: IBloomFilterManager?
 
-    init(storage: IStorage, hdWallet: IHDWallet) {
+    init(storage: IStorage, hdWallet: IHDWallet, restoreKeyConverter: IRestoreKeyConverter) {
         self.storage = storage
         self.hdWallet = hdWallet
+        self.restoreKeyConverter = restoreKeyConverter
     }
 
     private func fillGap(publicKeysWithUsedStates: [PublicKeyWithUsedState], account: Int, external: Bool) throws {
@@ -77,6 +80,8 @@ extension PublicKeyManager: IPublicKeyManager {
             try fillGap(publicKeysWithUsedStates: publicKeysWithUsedStates, account: i, external: true)
             try fillGap(publicKeysWithUsedStates: publicKeysWithUsedStates, account: i, external: false)
         }
+
+        bloomFilterManager?.regenerateBloomFilter()
     }
 
     func addKeys(keys: [PublicKey]) throws {
@@ -122,10 +127,24 @@ extension PublicKeyManager: IPublicKeyManager {
     }
 }
 
+extension PublicKeyManager: IBloomFilterProvider {
+
+    func filterElements() -> [Data] {
+        var elements = [Data]()
+
+        for publicKey in storage.publicKeys() {
+            elements.append(contentsOf: restoreKeyConverter.bloomFilterElements(publicKey: publicKey))
+        }
+
+        return elements
+    }
+
+}
+
 extension PublicKeyManager {
 
-    public static func instance(storage: IStorage, hdWallet: IHDWallet) -> PublicKeyManager {
-        let addressManager = PublicKeyManager(storage: storage, hdWallet: hdWallet)
+    public static func instance(storage: IStorage, hdWallet: IHDWallet, restoreKeyConverter: IRestoreKeyConverter) -> PublicKeyManager {
+        let addressManager = PublicKeyManager(storage: storage, hdWallet: hdWallet, restoreKeyConverter: restoreKeyConverter)
         try? addressManager.fillGap()
         return addressManager
     }

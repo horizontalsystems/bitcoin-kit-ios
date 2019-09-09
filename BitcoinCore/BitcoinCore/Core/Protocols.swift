@@ -131,7 +131,7 @@ public protocol IStorage {
 
 public protocol IRestoreKeyConverter {
     func keysForApiRestore(publicKey: PublicKey) -> [String]
-//    func bloomFilterElements(publicKey: PublicKey) -> [Data]
+    func bloomFilterElements(publicKey: PublicKey) -> [Data]
 }
 
 public protocol IPublicKeyManager {
