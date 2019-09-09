@@ -28,7 +28,7 @@ class BloomFilterManagerTests: QuickSpec {
                 when(mock.lastBlock.get).thenReturn(lastBlock)
             }
 
-            manager = BloomFilterManager(storage: mockStorage, factory: mockFactory)
+            manager = BloomFilterManager(factory: mockFactory)
             manager.delegate = mockBloomFilterManagerDelegate
         }
 

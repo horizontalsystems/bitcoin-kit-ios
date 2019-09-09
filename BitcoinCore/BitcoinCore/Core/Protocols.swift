@@ -549,3 +549,7 @@ protocol IBloomFilterProvider: AnyObject {
     var bloomFilterManager: IBloomFilterManager? { set get }
     func filterElements() -> [Data]
 }
+
+protocol IIrregularOutputFinder {
+    func hasIrregularOutput(outputs: [Output]) -> Bool
+}

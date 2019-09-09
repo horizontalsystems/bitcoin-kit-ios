@@ -7,6 +7,7 @@ class TransactionProcessor {
     private let outputAddressExtractor: ITransactionOutputAddressExtractor
     private let outputsCache: IOutputsCache
     private let publicKeyManager: IPublicKeyManager
+    private let irregularOutputFinder: IIrregularOutputFinder
 
     weak var listener: IBlockchainDataListener?
     weak var transactionListener: ITransactionListener?
@@ -14,8 +15,9 @@ class TransactionProcessor {
     private let dateGenerator: () -> Date
     private let queue: DispatchQueue
 
-    init(storage: IStorage, outputExtractor: ITransactionExtractor, inputExtractor: ITransactionExtractor, outputsCache: IOutputsCache, outputAddressExtractor: ITransactionOutputAddressExtractor, addressManager: IPublicKeyManager, listener: IBlockchainDataListener? = nil,
-         dateGenerator: @escaping () -> Date = Date.init, queue: DispatchQueue = DispatchQueue(label: "Transactions", qos: .background
+    init(storage: IStorage, outputExtractor: ITransactionExtractor, inputExtractor: ITransactionExtractor, outputsCache: IOutputsCache,
+         outputAddressExtractor: ITransactionOutputAddressExtractor, addressManager: IPublicKeyManager, irregularOutputFinder: IIrregularOutputFinder,
+         listener: IBlockchainDataListener? = nil, dateGenerator: @escaping () -> Date = Date.init, queue: DispatchQueue = DispatchQueue(label: "Transactions", qos: .background
     )) {
         self.storage = storage
         self.outputExtractor = outputExtractor
@@ -23,19 +25,10 @@ class TransactionProcessor {
         self.outputAddressExtractor = outputAddressExtractor
         self.outputsCache = outputsCache
         self.publicKeyManager = addressManager
+        self.irregularOutputFinder = irregularOutputFinder
         self.listener = listener
         self.dateGenerator = dateGenerator
         self.queue = queue
-    }
-
-    private func expiresBloomFilter(outputs: [Output]) -> Bool {
-        for output in outputs {
-            if output.publicKeyPath != nil, (output.scriptType == .p2wpkh || output.scriptType == .p2pk || output.scriptType == .p2wpkhSh)  {
-                return true
-            }
-        }
-
-        return false
     }
 
     private func process(transaction: FullTransaction) {
@@ -97,7 +90,7 @@ extension TransactionProcessor: ITransactionProcessor {
                     inserted.append(transaction.header)
 
                     if !skipCheckBloomFilter {
-                        needToUpdateBloomFilter = needToUpdateBloomFilter || self.publicKeyManager.gapShifts() || self.expiresBloomFilter(outputs: transaction.outputs)
+                        needToUpdateBloomFilter = needToUpdateBloomFilter || self.publicKeyManager.gapShifts() || self.irregularOutputFinder.hasIrregularOutput(outputs: transaction.outputs)
                     }
                 }
             }
@@ -121,7 +114,7 @@ extension TransactionProcessor: ITransactionProcessor {
         try storage.add(transaction: transaction)
         listener?.onUpdate(updated: [], inserted: [transaction.header], inBlock: nil)
 
-        if expiresBloomFilter(outputs: transaction.outputs) {
+        if irregularOutputFinder.hasIrregularOutput(outputs: transaction.outputs) {
             throw BloomFilterManager.BloomFilterExpired()
         }
     }
