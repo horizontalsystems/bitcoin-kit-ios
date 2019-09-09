@@ -2,18 +2,16 @@ import HSHDWalletKit
 
 class PublicKeyManager {
 
-    enum AddressManagerError: Error {
+    enum PublicKeyManagerError: Error {
         case noUnusedPublicKey
         case invalidPath
     }
 
     private let storage: IStorage
     private let hdWallet: IHDWallet
-    private let addressConverter: IAddressConverter
 
-    init(storage: IStorage, hdWallet: IHDWallet, addressConverter: IAddressConverter) {
+    init(storage: IStorage, hdWallet: IHDWallet) {
         self.storage = storage
-        self.addressConverter = addressConverter
         self.hdWallet = hdWallet
     }
 
@@ -48,7 +46,7 @@ class PublicKeyManager {
                 .filter({ $0.publicKey.external == external && $0.publicKey.account == 0 && !$0.used })
                 .sorted(by: { $0.publicKey.index < $1.publicKey.index })
                 .first else {
-            throw AddressManagerError.noUnusedPublicKey
+            throw PublicKeyManagerError.noUnusedPublicKey
         }
 
         return unusedKey.publicKey
@@ -113,7 +111,7 @@ extension PublicKeyManager: IPublicKeyManager {
         let parts = path.split(separator: "/")
 
         guard parts.count == 3, let account = Int(parts[0]), let external = Int(parts[1]), let index = Int(parts[2]) else {
-            throw AddressManagerError.invalidPath
+            throw PublicKeyManagerError.invalidPath
         }
 
         if let publicKey = storage.publicKey(byPath: path) {
@@ -126,8 +124,8 @@ extension PublicKeyManager: IPublicKeyManager {
 
 extension PublicKeyManager {
 
-    public static func instance(storage: IStorage, hdWallet: IHDWallet, addressConverter: IAddressConverter) -> PublicKeyManager {
-        let addressManager = PublicKeyManager(storage: storage, hdWallet: hdWallet, addressConverter: addressConverter)
+    public static func instance(storage: IStorage, hdWallet: IHDWallet) -> PublicKeyManager {
+        let addressManager = PublicKeyManager(storage: storage, hdWallet: hdWallet)
         try? addressManager.fillGap()
         return addressManager
     }

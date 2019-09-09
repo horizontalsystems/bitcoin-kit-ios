@@ -66,8 +66,8 @@ class PublicKeyManagerTests: XCTestCase {
         do {
             let _ = try manager.changePublicKey()
             XCTFail("Should throw exception")
-        } catch let error as PublicKeyManager.AddressManagerError {
-            XCTAssertEqual(error, PublicKeyManager.AddressManagerError.noUnusedPublicKey)
+        } catch let error as PublicKeyManager.PublicKeyManagerError {
+            XCTAssertEqual(error, PublicKeyManager.PublicKeyManagerError.noUnusedPublicKey)
         } catch {
             XCTFail("Unexpected exception thrown")
         }
@@ -101,8 +101,8 @@ class PublicKeyManagerTests: XCTestCase {
         do {
             let _ = try manager.receivePublicKey()
             XCTFail("Should throw exception")
-        } catch let error as PublicKeyManager.AddressManagerError {
-            XCTAssertEqual(error, PublicKeyManager.AddressManagerError.noUnusedPublicKey)
+        } catch let error as PublicKeyManager.PublicKeyManagerError {
+            XCTAssertEqual(error, PublicKeyManager.PublicKeyManagerError.noUnusedPublicKey)
         } catch {
             XCTFail("Unexpected exception thrown")
         }
@@ -370,7 +370,7 @@ class PublicKeyManagerTests: XCTestCase {
         do {
             _ = try manager.publicKey(byPath: "0/0")
             XCTFail("Expected exception")
-        } catch let error as PublicKeyManager.AddressManagerError {
+        } catch let error as PublicKeyManager.PublicKeyManagerError {
             XCTAssertEqual(error, .invalidPath)
         } catch {
             XCTFail("Unexpected exception")

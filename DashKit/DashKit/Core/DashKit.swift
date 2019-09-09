@@ -41,7 +41,6 @@ public class DashKit: AbstractKit {
         self.storage = storage
 
         let paymentAddressParser = PaymentAddressParser(validScheme: "dash", removeScheme: true)
-        let addressSelector = DashAddressSelector()
 
         let singleHasher = SingleHasher()   // Use single sha256 for hash
         let doubleShaHasher = DoubleShaHasher()     // Use doubleSha256 for hash
@@ -58,7 +57,6 @@ public class DashKit: AbstractKit {
                 .set(words: words)
                 .set(initialSyncApi: initialSyncApi)
                 .set(paymentAddressParser: paymentAddressParser)
-                .set(addressSelector: addressSelector)
                 .set(walletId: walletId)
                 .set(confirmationsThreshold: confirmationsThreshold)
                 .set(peerSize: 10)
@@ -139,7 +137,7 @@ public class DashKit: AbstractKit {
         bitcoinCore.add(peerTaskHandler: instantSend)
         bitcoinCore.add(inventoryItemsHandler: instantSend)
 // --------------------------------------
-
+        bitcoinCore.add(restoreKeyConverterForBip: .bip44)
     }
 
     private func cast(transactionInfos:[TransactionInfo]) -> [DashTransactionInfo] {

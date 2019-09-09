@@ -346,7 +346,7 @@ class TransactionBuilderTests: XCTestCase {
 
     func testBuildTransaction_noChangeAddress() {
         stub(mockAddressManager) { mock in
-            when(mock.changePublicKey()).thenThrow(PublicKeyManager.AddressManagerError.noUnusedPublicKey)
+            when(mock.changePublicKey()).thenThrow(PublicKeyManager.PublicKeyManagerError.noUnusedPublicKey)
         }
 
         do {

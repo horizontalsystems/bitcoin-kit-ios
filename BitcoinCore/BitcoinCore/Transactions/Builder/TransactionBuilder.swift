@@ -2,32 +2,23 @@ import HSCryptoKit
 
 class TransactionBuilder {
     enum BuildError: Error {
-        case noChangeAddress
         case feeMoreThanValue
     }
 
     private let unspentOutputSelector: IUnspentOutputSelector
-    private let unspentOutputProvider: IUnspentOutputProvider
-    private let publicKeyManager: IPublicKeyManager
-    private let addressConverter: IAddressConverter
     private let inputSigner: IInputSigner
     private let factory: IFactory
     private let transactionSizeCalculator: ITransactionSizeCalculator
-    private let bip: Bip
 
     var scriptBuilder: IScriptBuilder
 
-    init(unspentOutputSelector: IUnspentOutputSelector, unspentOutputProvider: IUnspentOutputProvider, publicKeyManager: IPublicKeyManager, addressConverter: IAddressConverter,
-         inputSigner: IInputSigner, scriptBuilder: IScriptBuilder, factory: IFactory, transactionSizeCalculator: ITransactionSizeCalculator, bip: Bip) {
+    init(unspentOutputSelector: IUnspentOutputSelector, inputSigner: IInputSigner, scriptBuilder: IScriptBuilder,
+         factory: IFactory, transactionSizeCalculator: ITransactionSizeCalculator) {
         self.unspentOutputSelector = unspentOutputSelector
-        self.unspentOutputProvider = unspentOutputProvider
-        self.publicKeyManager = publicKeyManager
-        self.addressConverter = addressConverter
         self.inputSigner = inputSigner
         self.scriptBuilder = scriptBuilder
         self.factory = factory
         self.transactionSizeCalculator = transactionSizeCalculator
-        self.bip = bip
     }
 
     private func input(fromUnspentOutput unspentOutput: UnspentOutput) throws -> InputToSign {
@@ -54,26 +45,21 @@ extension TransactionBuilder: ITransactionBuilder {
     // :fee method returns the fee for the given amount
     // If address given and it's valid, it returns the actual fee
     // Otherwise, it returns the estimated fee
-    func fee(for value: Int, feeRate: Int, senderPay: Bool, address: String? = nil) throws -> Int {
-        if let string = address, let _ = try? addressConverter.convert(address: string) {
+    func fee(for value: Int, feeRate: Int, senderPay: Bool, toAddress: Address?, changeAddress: Address) throws -> Int {
+        if let address = toAddress {
             // Actual fee
-            let transaction = try buildTransaction(value: value, feeRate: feeRate, senderPay: senderPay, toAddress: string)
+            let transaction = try buildTransaction(value: value, feeRate: feeRate, senderPay: senderPay, toAddress: address, changeAddress: changeAddress)
             return TransactionSerializer.serialize(transaction: transaction, withoutWitness: true).count * feeRate
         } else {
             // Estimated fee
             // Default to .p2pkh address
-            let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: .p2pkh, changeType: .p2pkh, senderPay: senderPay)
+            let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: changeAddress.scriptType, changeType: changeAddress.scriptType, senderPay: senderPay)
             return selectedOutputsInfo.fee
         }
     }
 
-    func buildTransaction(value: Int, feeRate: Int, senderPay: Bool, toAddress: String) throws -> FullTransaction {
-        guard let changePubKey = try? publicKeyManager.changePublicKey() else {
-            throw BuildError.noChangeAddress
-        }
-
-        let address = try addressConverter.convert(address: toAddress)
-        let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: address.scriptType, changeType: bip.scriptType, senderPay: senderPay)
+    func buildTransaction(value: Int, feeRate: Int, senderPay: Bool, toAddress: Address, changeAddress: Address) throws -> FullTransaction {
+        let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: toAddress.scriptType, changeType: changeAddress.scriptType, senderPay: senderPay)
 
         if !senderPay {
             guard selectedOutputsInfo.fee < value else {
@@ -94,11 +80,10 @@ extension TransactionBuilder: ITransactionBuilder {
         let sentValue = senderPay ? value + selectedOutputsInfo.fee : value
 
         // Add :to output
-        outputs.append(try output(withIndex: 0, address: address, value: receivedValue))
+        outputs.append(try output(withIndex: 0, address: toAddress, value: receivedValue))
 
         // Add :change output if needed
         if selectedOutputsInfo.addChangeOutput {
-            let changeAddress = try addressConverter.convert(publicKey: changePubKey, type: bip.scriptType)
             outputs.append(try output(withIndex: 1, address: changeAddress, value: selectedOutputsInfo.totalValue - sentValue))
         }
 
@@ -132,9 +117,7 @@ extension TransactionBuilder: ITransactionBuilder {
         return FullTransaction(header: transaction, inputs: inputsToSign.map{ $0.input }, outputs: outputs)
     }
 
-    func buildTransaction(from unspentOutput: UnspentOutput, to address: String, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction {
-        let address = try addressConverter.convert(address: address)
-
+    func buildTransaction(from unspentOutput: UnspentOutput, to address: Address, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction {
         // Calculate fee
         let emptySignature = Data(repeating: 0, count: TransactionSizeCalculator.signatureLength)
         let emptyPublicKey = Data(repeating: 0, count: TransactionSizeCalculator.pubKeyLength)
