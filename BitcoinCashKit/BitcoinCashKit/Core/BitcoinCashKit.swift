@@ -46,14 +46,12 @@ public class BitcoinCashKit: AbstractKit {
         self.storage = storage
 
         let paymentAddressParser = PaymentAddressParser(validScheme: validScheme, removeScheme: false)
-        let addressSelector = BitcoinCashAddressSelector()
 
         let bitcoinCore = try BitcoinCoreBuilder(minLogLevel: minLogLevel)
                 .set(network: network)
                 .set(initialSyncApi: initialSyncApi)
                 .set(words: words)
                 .set(paymentAddressParser: paymentAddressParser)
-                .set(addressSelector: addressSelector)
                 .set(walletId: walletId)
                 .set(confirmationsThreshold: confirmationsThreshold)
                 .set(peerSize: 10)
@@ -82,6 +80,8 @@ public class BitcoinCashKit: AbstractKit {
         case .testNet: ()
             // not use test validators
         }
+
+        bitcoinCore.add(restoreKeyConverterForBip: .bip44)
     }
 
 }

@@ -16,11 +16,11 @@ public class BitcoinCore {
     private let publicKeyManager: IPublicKeyManager
     private let watchedTransactionManager: IWatchedTransactionManager
     private let addressConverter: AddressConverterChain
+    private let restoreKeyConverterChain: RestoreKeyConverterChain
     private let unspentOutputSelector: UnspentOutputSelectorChain
     private let kitStateProvider: IKitStateProvider & ISyncStateListener
 
     private let scriptBuilder: ScriptBuilderChain
-    private let transactionBuilder: ITransactionBuilder
 
     private let transactionCreator: ITransactionCreator
     private let paymentAddressParser: IPaymentAddressParser
@@ -54,6 +54,10 @@ public class BitcoinCore {
 
     public func add(peerTaskHandler: IPeerTaskHandler) {
         peerTaskHandlerChain.add(handler: peerTaskHandler)
+    }
+
+    public func add(restoreKeyConverterForBip bip: Bip) {
+        restoreKeyConverterChain.add(converter: bip.restoreKeyConverter(addressConverter: addressConverter))
     }
 
     @discardableResult public func add(messageParser: IMessageParser) -> Self {
@@ -90,8 +94,9 @@ public class BitcoinCore {
     init(storage: IStorage, cache: OutputsCache, dataProvider: IDataProvider,
          peerGroup: IPeerGroup, initialBlockDownload: IInitialBlockDownload, bloomFilterLoader: BloomFilterLoader,
          syncedReadyPeerManager: ISyncedReadyPeerManager, transactionSyncer: ITransactionSyncer,
-         blockValidatorChain: BlockValidatorChain, addressManager: IPublicKeyManager, addressConverter: AddressConverterChain, unspentOutputSelector: UnspentOutputSelectorChain, kitStateProvider: IKitStateProvider & ISyncStateListener,
-         scriptBuilder: ScriptBuilderChain, transactionBuilder: ITransactionBuilder, transactionCreator: ITransactionCreator,
+         blockValidatorChain: BlockValidatorChain, publicKeyManager: IPublicKeyManager, addressConverter: AddressConverterChain, restoreKeyConverterChain: RestoreKeyConverterChain,
+         unspentOutputSelector: UnspentOutputSelectorChain, kitStateProvider: IKitStateProvider & ISyncStateListener,
+         scriptBuilder: ScriptBuilderChain, transactionCreator: ITransactionCreator,
          paymentAddressParser: IPaymentAddressParser, networkMessageParser: NetworkMessageParser, networkMessageSerializer: NetworkMessageSerializer,
          syncManager: SyncManager, watchedTransactionManager: IWatchedTransactionManager, bip: Bip) {
         self.storage = storage
@@ -103,12 +108,12 @@ public class BitcoinCore {
         self.syncedReadyPeerManager = syncedReadyPeerManager
         self.transactionSyncer = transactionSyncer
         self.blockValidatorChain = blockValidatorChain
-        self.publicKeyManager = addressManager
+        self.publicKeyManager = publicKeyManager
         self.addressConverter = addressConverter
+        self.restoreKeyConverterChain = restoreKeyConverterChain
         self.unspentOutputSelector = unspentOutputSelector
         self.kitStateProvider = kitStateProvider
         self.scriptBuilder = scriptBuilder
-        self.transactionBuilder = transactionBuilder
         self.transactionCreator = transactionCreator
         self.paymentAddressParser = paymentAddressParser
 
@@ -157,9 +162,7 @@ extension BitcoinCore {
     }
 
     public func send(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int) throws -> FullTransaction {
-        // TODO: convert to scriptWPKH when scriptType is P2WPKHSH ?
-        let address = try addressConverter.convert(keyHash: hash, type: scriptType)
-        return try send(to: address.stringValue, value: value, feeRate: feeRate)
+        return try transactionCreator.create(to: hash, scriptType: scriptType, value: value, feeRate: feeRate, senderPay: true)
     }
 
     func redeem(from unspentOutput: UnspentOutput, to address: String, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction {
@@ -175,7 +178,7 @@ extension BitcoinCore {
     }
 
     public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feeRate: Int) throws -> Int {
-        return try transactionBuilder.fee(for: value, feeRate: feeRate, senderPay: senderPay, address: toAddress)
+        return try transactionCreator.fee(for: value, feeRate: feeRate, senderPay: senderPay, address: toAddress)
     }
 
     public func receiveAddress() -> String {

@@ -129,8 +129,9 @@ public protocol IStorage {
     func publicKey(byPath: String) -> PublicKey?
 }
 
-public protocol IAddressSelector {
-    func getAddressVariants(addressConverter: IAddressConverter, publicKey: PublicKey) -> [String]
+public protocol IRestoreKeyConverter {
+    func keysForApiRestore(publicKey: PublicKey) -> [String]
+//    func bloomFilterElements(publicKey: PublicKey) -> [Data]
 }
 
 public protocol IPublicKeyManager {
@@ -339,14 +340,16 @@ public protocol ITransactionSyncer: class {
 }
 
 public protocol ITransactionCreator {
+    func fee(for value: Int, feeRate: Int, senderPay: Bool, address: String?) throws -> Int
     func create(to address: String, value: Int, feeRate: Int, senderPay: Bool) throws -> FullTransaction
+    func create(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int, senderPay: Bool) throws -> FullTransaction
     func create(from: UnspentOutput, to address: String, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction
 }
 
 protocol ITransactionBuilder {
-    func fee(for value: Int, feeRate: Int, senderPay: Bool, address: String?) throws -> Int
-    func buildTransaction(value: Int, feeRate: Int, senderPay: Bool, toAddress: String) throws -> FullTransaction
-    func buildTransaction(from: UnspentOutput, to: String, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction
+    func fee(for value: Int, feeRate: Int, senderPay: Bool, toAddress: Address?, changeAddress: Address) throws -> Int
+    func buildTransaction(value: Int, feeRate: Int, senderPay: Bool, toAddress: Address, changeAddress: Address) throws -> FullTransaction
+    func buildTransaction(from: UnspentOutput, to: Address, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction
 }
 
 protocol IBlockchain {

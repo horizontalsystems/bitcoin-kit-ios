@@ -40,7 +40,6 @@ public class BitcoinKit: AbstractKit {
         self.storage = storage
 
         let paymentAddressParser = PaymentAddressParser(validScheme: "bitcoin", removeScheme: true)
-        let addressSelector = BitcoinAddressSelector()
 
         let bitcoinCore = try BitcoinCoreBuilder(minLogLevel: minLogLevel)
                 .set(network: network)
@@ -48,7 +47,6 @@ public class BitcoinKit: AbstractKit {
                 .set(words: words)
                 .set(bip: bip)
                 .set(paymentAddressParser: paymentAddressParser)
-                .set(addressSelector: addressSelector)
                 .set(walletId: walletId)
                 .set(confirmationsThreshold: confirmationsThreshold)
                 .set(peerSize: 10)
@@ -76,6 +74,12 @@ public class BitcoinKit: AbstractKit {
         case .regTest, .testNet:
             bitcoinCore.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: blockHelper, heightInterval: BitcoinCore.heightInterval, targetTimespan: BitcoinCore.heightInterval * BitcoinCore.targetSpacing, maxTargetBits: BitcoinCore.maxTargetBits))
             bitcoinCore.add(blockValidator: LegacyTestNetDifficultyValidator(blockHelper: blockHelper, heightInterval: BitcoinCore.heightInterval, targetSpacing: BitcoinCore.targetSpacing, maxTargetBits: BitcoinCore.maxTargetBits))
+        }
+
+        bitcoinCore.add(restoreKeyConverterForBip: bip)
+        if bip == .bip44 {
+            bitcoinCore.add(restoreKeyConverterForBip: .bip49)
+            bitcoinCore.add(restoreKeyConverterForBip: .bip84)
         }
     }
 

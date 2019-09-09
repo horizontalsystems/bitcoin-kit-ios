@@ -61,7 +61,6 @@
 		58AAA99C55992149EBC964E0 /* DashExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA96578DB9BE7A8E1AA65 /* DashExtensions.swift */; };
 		58AAA9A24E2E28955B893151 /* QuorumSortedList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA879961D8A283F21BB9D /* QuorumSortedList.swift */; };
 		58AAAA13B65A94F50CDE64C1 /* ISLockMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA9C4B7A2015BBE7EEF4B /* ISLockMessage.swift */; };
-		58AAAA292D3A413E0E9F44A7 /* DashAddressSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA1A86BE6A17469E53400 /* DashAddressSelector.swift */; };
 		58AAAA59995E41B1661BBBAB /* MasternodeListDiffMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAB4372CC0F55CBBE60C9 /* MasternodeListDiffMessage.swift */; };
 		58AAAA8392E527FFED910B01 /* MainNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAA839FB2C7EA770A036D /* MainNet.swift */; };
 		58AAAA9B99A71DC2D87BBCDA /* InstantSend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA0399119E61DC3C34677 /* InstantSend.swift */; };
@@ -122,7 +121,6 @@
 		58AAA0731BC44688D2072C72 /* TransactionLockVoteManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionLockVoteManagerTests.swift; sourceTree = "<group>"; };
 		58AAA135CAE12BD33A6D7D2E /* ConfirmedUnspentOutputProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConfirmedUnspentOutputProvider.swift; sourceTree = "<group>"; };
 		58AAA1776A1D0A594FC7FD18 /* TransactionLockVoteMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionLockVoteMessage.swift; sourceTree = "<group>"; };
-		58AAA1A86BE6A17469E53400 /* DashAddressSelector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashAddressSelector.swift; sourceTree = "<group>"; };
 		58AAA1C1D2E2538CBC33B663 /* TransactionLockMessageParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionLockMessageParser.swift; sourceTree = "<group>"; };
 		58AAA2017DB5CEA5C9B9D720 /* DarkGravityWaveTestNetValidator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DarkGravityWaveTestNetValidator.swift; sourceTree = "<group>"; };
 		58AAA25F98854859029BE603 /* InstantTransactionState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstantTransactionState.swift; sourceTree = "<group>"; };
@@ -288,13 +286,6 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		3C7B97DDBAAB290971492CBC /* InitialSync */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = InitialSync;
-			sourceTree = "<group>";
-		};
 		58AAA07E0767C45516BDD9E6 /* Storage */ = {
 			isa = PBXGroup;
 			children = (
@@ -383,8 +374,6 @@
 		58AAA940CCEC533F3402FB59 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
-				3C7B97DDBAAB290971492CBC /* InitialSync */,
-				58AAA1A86BE6A17469E53400 /* DashAddressSelector.swift */,
 				58AAA135CAE12BD33A6D7D2E /* ConfirmedUnspentOutputProvider.swift */,
 			);
 			path = Managers;
@@ -794,7 +783,6 @@
 				58AAA5F7AF7CF8E3A909BD56 /* InstantTransactionHash.swift in Sources */,
 				58AAAE9A737EE5D91AD2884A /* InstantTransactionState.swift in Sources */,
 				58AAA1992857F107D48947E9 /* DashTransactionInfo.swift in Sources */,
-				58AAAA292D3A413E0E9F44A7 /* DashAddressSelector.swift in Sources */,
 				58AAA5020E3111ADB26B2261 /* ConfirmedUnspentOutputProvider.swift in Sources */,
 				58AAAA13B65A94F50CDE64C1 /* ISLockMessage.swift in Sources */,
 				58AAA65979EDF654C84E786F /* ISLockParser.swift in Sources */,

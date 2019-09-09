@@ -1,14 +1,12 @@
 import RxSwift
 
 class BlockHashFetcher {
-    private let addressSelector: IAddressSelector
-    private let addressConverter: IAddressConverter
+    private let restoreKeyConverter: IRestoreKeyConverter
     private let apiManager: ISyncTransactionApi
     private let helper: IBlockHashFetcherHelper
 
-    init(addressSelector: IAddressSelector, apiManager: ISyncTransactionApi, addressConverter: IAddressConverter, helper: IBlockHashFetcherHelper) {
-        self.addressSelector = addressSelector
-        self.addressConverter = addressConverter
+    init(restoreKeyConverter: IRestoreKeyConverter, apiManager: ISyncTransactionApi, helper: IBlockHashFetcherHelper) {
+        self.restoreKeyConverter = restoreKeyConverter
         self.apiManager = apiManager
         self.helper = helper
     }
@@ -19,7 +17,7 @@ extension BlockHashFetcher: IBlockHashFetcher {
 
     func getBlockHashes(publicKeys: [PublicKey]) -> Observable<(responses: [BlockHash], lastUsedIndex: Int)> {
         let addresses = publicKeys.map {
-            addressSelector.getAddressVariants(addressConverter: addressConverter, publicKey: $0)
+            restoreKeyConverter.keysForApiRestore(publicKey: $0)
         }
 
         return apiManager.getTransactions(addresses: addresses.flatMap { $0 }).map { [weak self] transactionResponses -> (responses: [BlockHash], lastUsedIndex: Int) in
