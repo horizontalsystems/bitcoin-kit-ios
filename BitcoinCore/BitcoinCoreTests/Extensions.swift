@@ -1,4 +1,5 @@
 import XCTest
+import Cuckoo
 @testable import BitcoinCore
 
 extension XCTestCase {
@@ -166,4 +167,18 @@ extension InputToSign: Equatable {
         return lhs.input == rhs.input && lhs.previousOutputPublicKey == rhs.previousOutputPublicKey
     }
 
+}
+
+func addressMatcher(_ address: Address) -> ParameterMatcher<Address> {
+    return ParameterMatcher<Address> { address.stringValue == $0.stringValue }
+}
+
+func addressMatcher(_ address: Address?) -> ParameterMatcher<Address?> {
+    return ParameterMatcher<Address?> { tested in
+        if let a1 = address, let a2 = tested {
+            return addressMatcher(a1).matches(a2)
+        } else {
+            return address == nil && tested == nil
+        }
+    }
 }
