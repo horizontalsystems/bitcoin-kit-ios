@@ -128,6 +128,14 @@ extension Input: Equatable {
 
 }
 
+extension Output: Equatable {
+
+    public static func ==(lhs: Output, rhs: Output) -> Bool {
+        return lhs.keyHash == rhs.keyHash && lhs.scriptType == rhs.scriptType && lhs.value == rhs.value && lhs.index == rhs.index
+    }
+
+}
+
 extension BlockHeader: Equatable {
 
     public static func ==(lhs: BlockHeader, rhs: BlockHeader) -> Bool {
@@ -148,6 +156,14 @@ extension UnspentOutput: Equatable {
 
     public static func ==(lhs: UnspentOutput, rhs: UnspentOutput) -> Bool {
         return lhs.output.value == rhs.output.value
+    }
+
+}
+
+extension InputToSign: Equatable {
+
+    public static func ==(lhs: InputToSign, rhs: InputToSign) -> Bool {
+        return lhs.input == rhs.input && lhs.previousOutputPublicKey == rhs.previousOutputPublicKey
     }
 
 }

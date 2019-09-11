@@ -54,6 +54,7 @@
 		2FA5D2239DF0C24C4CC6366B /* PeerHostManagerDelegateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D632A9EFB1F0CF2523DF /* PeerHostManagerDelegateTests.swift */; };
 		2FA5D26905936BB701998750 /* GetBlockHashesTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D65667DA8BFD91E91C8B /* GetBlockHashesTask.swift */; };
 		2FA5D2E6BA34E1A932C9C16B /* PublicKeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D5A9656117A6FD41E814 /* PublicKeyManager.swift */; };
+		2FA5D2E6CAD495129575C402 /* SegWitAddress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DF8081FB47483ABBA87E /* SegWitAddress.swift */; };
 		2FA5D371584B554068CCAD8E /* IPeerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D99586B15F4477D695F7 /* IPeerTests.swift */; };
 		2FA5D37E8B4A6D9B89410173 /* SendTransactionTaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D2DAB8485F5F9E2E23B6 /* SendTransactionTaskTests.swift */; };
 		2FA5D39FBC802B5EF03AD53A /* TransactionBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D11405173CD80A6B9904 /* TransactionBuilder.swift */; };
@@ -71,6 +72,7 @@
 		2FA5D5FB8B7F7B1E65A156BF /* GetMerkleBlocksTaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D2907674257196C4F586 /* GetMerkleBlocksTaskTests.swift */; };
 		2FA5D5FE71A528D363227585 /* PublicKeyManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D05FCBFFE93D46F8C292 /* PublicKeyManagerTests.swift */; };
 		2FA5D6129186D79E7C7DD57F /* IPeerTaskDelegateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DFB5B9A13478ACBB61EB /* IPeerTaskDelegateTests.swift */; };
+		2FA5D653017C871A9F2E387D /* TransactionFeeCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D23F2B71A6AC790350FF /* TransactionFeeCalculator.swift */; };
 		2FA5D65869320A18AFB8CE98 /* BlockHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DB1F056B264F829BFDDD /* BlockHash.swift */; };
 		2FA5D67384D58067F71CD6B2 /* InputSigner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DF9995FA7DD7556893F7 /* InputSigner.swift */; };
 		2FA5D6EC6F4A32E3489F89B0 /* TransactionMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D307095385625960B0A0 /* TransactionMessage.swift */; };
@@ -274,6 +276,7 @@
 		2FA5D11405173CD80A6B9904 /* TransactionBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionBuilder.swift; sourceTree = "<group>"; };
 		2FA5D131E769F7E4C62CC49F /* DirectoryHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DirectoryHelper.swift; sourceTree = "<group>"; };
 		2FA5D23A8EC7BB3569F51ABD /* AddressConverterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddressConverterTests.swift; sourceTree = "<group>"; };
+		2FA5D23F2B71A6AC790350FF /* TransactionFeeCalculator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionFeeCalculator.swift; sourceTree = "<group>"; };
 		2FA5D27387B0CF46C2B0A22A /* PeerManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerManagerTests.swift; sourceTree = "<group>"; };
 		2FA5D2907674257196C4F586 /* GetMerkleBlocksTaskTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetMerkleBlocksTaskTests.swift; sourceTree = "<group>"; };
 		2FA5D2DAB8485F5F9E2E23B6 /* SendTransactionTaskTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SendTransactionTaskTests.swift; sourceTree = "<group>"; };
@@ -322,6 +325,7 @@
 		2FA5DF037E951950A0F7FF03 /* SentTransaction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SentTransaction.swift; sourceTree = "<group>"; };
 		2FA5DF1470723462D2CF707B /* TransactionProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionProcessor.swift; sourceTree = "<group>"; };
 		2FA5DF41CAF034B375E58E7A /* IPeerGroupTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IPeerGroupTests.swift; sourceTree = "<group>"; };
+		2FA5DF8081FB47483ABBA87E /* SegWitAddress.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegWitAddress.swift; sourceTree = "<group>"; };
 		2FA5DF96100D81EACBBC87F6 /* PeerConnectionDelegateTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerConnectionDelegateTests.swift; sourceTree = "<group>"; };
 		2FA5DF9995FA7DD7556893F7 /* InputSigner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputSigner.swift; sourceTree = "<group>"; };
 		2FA5DF9ADB516A45C797889D /* PeerAddressManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerAddressManagerTests.swift; sourceTree = "<group>"; };
@@ -659,6 +663,7 @@
 				3C7B983C4EC7F79E44560A7C /* TransactionPublicKeySetter.swift */,
 				58AAAA7C33E2529A70D0E529 /* TransactionSizeCalculator.swift */,
 				D373EB82215A2A6C00124298 /* TransactionSyncer.swift */,
+				2FA5D23F2B71A6AC790350FF /* TransactionFeeCalculator.swift */,
 			);
 			path = Transactions;
 			sourceTree = "<group>";
@@ -805,6 +810,7 @@
 				2FA5DA9D7F78A26107F7209C /* InputSignerTests.swift */,
 				2FA5DDAE64200E386070668C /* TransactionBuilderTests.swift */,
 				58AAA422686CE355CACA11DF /* ScriptBuilderTests.swift */,
+				2FA5DF8081FB47483ABBA87E /* SegWitAddress.swift */,
 			);
 			path = Builder;
 			sourceTree = "<group>";
@@ -1458,6 +1464,8 @@
 				2FA5D87B923C2B78B5257957 /* Bip.swift in Sources */,
 				2FA5D97434F2504E5B4AC072 /* RestoreKeyConverter.swift in Sources */,
 				2FA5D761883BB2CCC770B790 /* IrregularOutputFinder.swift in Sources */,
+				2FA5D2E6CAD495129575C402 /* SegWitAddress.swift in Sources */,
+				2FA5D653017C871A9F2E387D /* TransactionFeeCalculator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

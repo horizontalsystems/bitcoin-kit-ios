@@ -194,10 +194,11 @@ public class BitcoinCoreBuilder {
         let inputSigner = InputSigner(hdWallet: hdWallet, network: network)
         let scriptBuilder = ScriptBuilderChain()
         let transactionSizeCalculator = TransactionSizeCalculator()
-        let transactionBuilder = TransactionBuilder(unspentOutputSelector: unspentOutputSelector, inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory, transactionSizeCalculator: transactionSizeCalculator)
+        let transactionBuilder = TransactionBuilder(inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory)
+        let transactionFeeCalculator = TransactionFeeCalculator(unspentOutputSelector: unspentOutputSelector, transactionSizeCalculator: transactionSizeCalculator, transactionBuilder: transactionBuilder)
         let transactionSender = TransactionSender(transactionSyncer: transactionSyncer, peerManager: peerManager, initialBlockDownload: initialBlockDownload, syncedReadyPeerManager: syncedReadyPeerManager, logger: logger)
-        let transactionCreator = TransactionCreator(transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, transactionSender: transactionSender, bloomFilterManager: bloomFilterManager,
-                addressConverter: addressConverter, publicKeyManager: publicKeyManager, bip: bip)
+        let transactionCreator = TransactionCreator(transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, transactionSender: transactionSender, transactionFeeCalculator: transactionFeeCalculator,
+                bloomFilterManager: bloomFilterManager, addressConverter: addressConverter, publicKeyManager: publicKeyManager, bip: bip)
 
         let syncManager = SyncManager(reachabilityManager: reachabilityManager, initialSyncer: initialSyncer, peerGroup: peerGroup)
 
@@ -217,6 +218,7 @@ public class BitcoinCoreBuilder {
                 kitStateProvider: kitStateProvider,
                 scriptBuilder: scriptBuilder,
                 transactionCreator: transactionCreator,
+                transactionFeeCalculator: transactionFeeCalculator,
                 paymentAddressParser: paymentAddressParser,
                 networkMessageParser: networkMessageParser,
                 networkMessageSerializer: networkMessageSerializer,
