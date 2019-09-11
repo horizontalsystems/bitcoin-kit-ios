@@ -3,22 +3,17 @@ import HSCryptoKit
 class TransactionBuilder {
     enum BuildError: Error {
         case feeMoreThanValue
+        case notSupportedScriptType
     }
 
-    private let unspentOutputSelector: IUnspentOutputSelector
     private let inputSigner: IInputSigner
+    private let scriptBuilder: IScriptBuilder
     private let factory: IFactory
-    private let transactionSizeCalculator: ITransactionSizeCalculator
 
-    var scriptBuilder: IScriptBuilder
-
-    init(unspentOutputSelector: IUnspentOutputSelector, inputSigner: IInputSigner, scriptBuilder: IScriptBuilder,
-         factory: IFactory, transactionSizeCalculator: ITransactionSizeCalculator) {
-        self.unspentOutputSelector = unspentOutputSelector
+    init(inputSigner: IInputSigner, scriptBuilder: IScriptBuilder, factory: IFactory) {
         self.inputSigner = inputSigner
         self.scriptBuilder = scriptBuilder
         self.factory = factory
-        self.transactionSizeCalculator = transactionSizeCalculator
     }
 
     private func input(fromUnspentOutput unspentOutput: UnspentOutput) throws -> InputToSign {
@@ -32,37 +27,18 @@ class TransactionBuilder {
         return factory.inputToSign(withPreviousOutput: unspentOutput, script: Data(), sequence: 0xFFFFFFFF)
     }
 
-    private func output(withIndex index: Int, address: Address, pubKey: PublicKey? = nil, value: Int) throws -> Output {
+    private func output(withIndex index: Int, address: Address, value: Int) throws -> Output {
         let script = try scriptBuilder.lockingScript(for: address)
-        let output = factory.output(withValue: value, index: index, lockingScript: script, type: address.scriptType, address: address.stringValue, keyHash: address.keyHash, publicKey: pubKey)
-        return output
+        return factory.output(withValue: value, index: index, lockingScript: script, type: address.scriptType, address: address.stringValue, keyHash: address.keyHash, publicKey: nil)
     }
 
 }
 
 extension TransactionBuilder: ITransactionBuilder {
 
-    // :fee method returns the fee for the given amount
-    // If address given and it's valid, it returns the actual fee
-    // Otherwise, it returns the estimated fee
-    func fee(for value: Int, feeRate: Int, senderPay: Bool, toAddress: Address?, changeAddress: Address) throws -> Int {
-        if let address = toAddress {
-            // Actual fee
-            let transaction = try buildTransaction(value: value, feeRate: feeRate, senderPay: senderPay, toAddress: address, changeAddress: changeAddress)
-            return TransactionSerializer.serialize(transaction: transaction, withoutWitness: true).count * feeRate
-        } else {
-            // Estimated fee
-            // Default to .p2pkh address
-            let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: changeAddress.scriptType, changeType: changeAddress.scriptType, senderPay: senderPay)
-            return selectedOutputsInfo.fee
-        }
-    }
-
-    func buildTransaction(value: Int, feeRate: Int, senderPay: Bool, toAddress: Address, changeAddress: Address) throws -> FullTransaction {
-        let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: toAddress.scriptType, changeType: changeAddress.scriptType, senderPay: senderPay)
-
+    func buildTransaction(value: Int, unspentOutputs: [UnspentOutput], fee: Int, senderPay: Bool, toAddress: Address, changeAddress: Address?) throws -> FullTransaction {
         if !senderPay {
-            guard selectedOutputsInfo.fee < value else {
+            guard fee < value else {
                 throw BuildError.feeMoreThanValue
             }
         }
@@ -71,20 +47,21 @@ extension TransactionBuilder: ITransactionBuilder {
         var outputs = [Output]()
 
         // Add inputs without unlocking scripts
-        for output in selectedOutputsInfo.unspentOutputs {
+        for output in unspentOutputs {
             inputsToSign.append(try input(fromUnspentOutput: output))
         }
 
         // Calculate fee
-        let receivedValue = senderPay ? value : value - selectedOutputsInfo.fee
-        let sentValue = senderPay ? value + selectedOutputsInfo.fee : value
+        let receivedValue = senderPay ? value : value - fee
+        let sentValue = senderPay ? value + fee : value
 
         // Add :to output
         outputs.append(try output(withIndex: 0, address: toAddress, value: receivedValue))
 
         // Add :change output if needed
-        if selectedOutputsInfo.addChangeOutput {
-            outputs.append(try output(withIndex: 1, address: changeAddress, value: selectedOutputsInfo.totalValue - sentValue))
+        if let changeAddress = changeAddress {
+            let totalValue = unspentOutputs.reduce(0) { $0 + $1.output.value }
+            outputs.append(try output(withIndex: 1, address: changeAddress, value: totalValue - sentValue))
         }
 
         // Build transaction
@@ -92,19 +69,21 @@ extension TransactionBuilder: ITransactionBuilder {
 
         // Sign inputs
         for i in 0..<inputsToSign.count {
-            let previousUnspentOutput = selectedOutputsInfo.unspentOutputs[i]
+            let previousUnspentOutput = unspentOutputs[i]
             let sigScriptData = try inputSigner.sigScriptData(transaction: transaction, inputsToSign: inputsToSign, outputs: outputs, index: i)
 
             var params = [Data]()
             switch previousUnspentOutput.output.scriptType {
+            case .p2pkh:
+                params.append(contentsOf: sigScriptData)
             case .p2wpkh:
                 transaction.segWit = true
-                inputsToSign[i].input.witnessData.append(contentsOf: sigScriptData)
+                inputsToSign[i].input.witnessData = sigScriptData
             case .p2wpkhSh:
                 transaction.segWit = true
-                inputsToSign[i].input.witnessData.append(contentsOf: sigScriptData)
+                inputsToSign[i].input.witnessData = sigScriptData
                 params.append(OpCode.scriptWPKH(previousUnspentOutput.publicKey.keyHash))
-            default: params.append(contentsOf: sigScriptData)
+            default: throw BuildError.notSupportedScriptType
             }
 
             inputsToSign[i].input.signatureScript = params.reduce(Data()) { $0 + OpCode.push($1) }
@@ -117,14 +96,10 @@ extension TransactionBuilder: ITransactionBuilder {
         return FullTransaction(header: transaction, inputs: inputsToSign.map{ $0.input }, outputs: outputs)
     }
 
-    func buildTransaction(from unspentOutput: UnspentOutput, to address: Address, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction {
-        // Calculate fee
-        let emptySignature = Data(repeating: 0, count: TransactionSizeCalculator.signatureLength)
-        let emptyPublicKey = Data(repeating: 0, count: TransactionSizeCalculator.pubKeyLength)
-
-        let transactionSize = transactionSizeCalculator.transactionSize(inputs: [unspentOutput.output.scriptType], outputScriptTypes: [address.scriptType]) +
-                signatureScriptFunction(emptySignature, emptyPublicKey).count
-        let fee = transactionSize * feeRate
+    func buildTransaction(from unspentOutput: UnspentOutput, to address: Address, fee: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction {
+        guard unspentOutput.output.scriptType == .p2sh else {
+            throw BuildError.notSupportedScriptType
+        }
 
         guard fee < unspentOutput.output.value else {
             throw BuildError.feeMoreThanValue

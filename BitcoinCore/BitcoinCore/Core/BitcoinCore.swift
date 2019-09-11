@@ -23,6 +23,7 @@ public class BitcoinCore {
     private let scriptBuilder: ScriptBuilderChain
 
     private let transactionCreator: ITransactionCreator
+    private let transactionFeeCalculator: ITransactionFeeCalculator
     private let paymentAddressParser: IPaymentAddressParser
 
     private let networkMessageSerializer: NetworkMessageSerializer
@@ -96,7 +97,7 @@ public class BitcoinCore {
          syncedReadyPeerManager: ISyncedReadyPeerManager, transactionSyncer: ITransactionSyncer,
          blockValidatorChain: BlockValidatorChain, publicKeyManager: IPublicKeyManager, addressConverter: AddressConverterChain, restoreKeyConverterChain: RestoreKeyConverterChain,
          unspentOutputSelector: UnspentOutputSelectorChain, kitStateProvider: IKitStateProvider & ISyncStateListener,
-         scriptBuilder: ScriptBuilderChain, transactionCreator: ITransactionCreator,
+         scriptBuilder: ScriptBuilderChain, transactionCreator: ITransactionCreator, transactionFeeCalculator: ITransactionFeeCalculator,
          paymentAddressParser: IPaymentAddressParser, networkMessageParser: NetworkMessageParser, networkMessageSerializer: NetworkMessageSerializer,
          syncManager: SyncManager, watchedTransactionManager: IWatchedTransactionManager, bip: Bip) {
         self.storage = storage
@@ -115,6 +116,7 @@ public class BitcoinCore {
         self.kitStateProvider = kitStateProvider
         self.scriptBuilder = scriptBuilder
         self.transactionCreator = transactionCreator
+        self.transactionFeeCalculator = transactionFeeCalculator
         self.paymentAddressParser = paymentAddressParser
 
         self.networkMessageParser = networkMessageParser
@@ -178,7 +180,11 @@ extension BitcoinCore {
     }
 
     public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feeRate: Int) throws -> Int {
-        return try transactionCreator.fee(for: value, feeRate: feeRate, senderPay: senderPay, address: toAddress)
+        let toAddress = try toAddress.map { try addressConverter.convert(address: $0) }
+        let changePubKey = try publicKeyManager.changePublicKey()
+        let changeAddress = try addressConverter.convert(publicKey: changePubKey, type: bip.scriptType)
+
+        return try transactionFeeCalculator.fee(for: value, feeRate: feeRate, senderPay: senderPay, toAddress: toAddress, changeAddress: changeAddress)
     }
 
     public func receiveAddress() -> String {

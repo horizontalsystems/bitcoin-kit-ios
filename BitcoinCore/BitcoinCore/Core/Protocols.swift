@@ -340,16 +340,20 @@ public protocol ITransactionSyncer: class {
 }
 
 public protocol ITransactionCreator {
-    func fee(for value: Int, feeRate: Int, senderPay: Bool, address: String?) throws -> Int
     func create(to address: String, value: Int, feeRate: Int, senderPay: Bool) throws -> FullTransaction
     func create(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int, senderPay: Bool) throws -> FullTransaction
     func create(from: UnspentOutput, to address: String, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction
 }
 
 protocol ITransactionBuilder {
+    func buildTransaction(value: Int, unspentOutputs: [UnspentOutput], fee: Int, senderPay: Bool, toAddress: Address, changeAddress: Address?) throws -> FullTransaction
+    func buildTransaction(from: UnspentOutput, to: Address, fee: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction
+}
+
+protocol ITransactionFeeCalculator {
     func fee(for value: Int, feeRate: Int, senderPay: Bool, toAddress: Address?, changeAddress: Address) throws -> Int
-    func buildTransaction(value: Int, feeRate: Int, senderPay: Bool, toAddress: Address, changeAddress: Address) throws -> FullTransaction
-    func buildTransaction(from: UnspentOutput, to: Address, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction
+    func feeWithUnspentOutputs(value: Int, feeRate: Int, toScriptType: ScriptType, changeScriptType: ScriptType, senderPay: Bool) throws -> SelectedUnspentOutputInfo
+    func fee(inputScriptType: ScriptType, outputScriptType: ScriptType, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) -> Int
 }
 
 protocol IBlockchain {
