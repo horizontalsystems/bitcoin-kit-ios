@@ -21,7 +21,10 @@ extension TransactionFeeCalculator: ITransactionFeeCalculator {
         if let address = toAddress {
             // Actual fee
             let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: address.scriptType, changeType: changeAddress.scriptType, senderPay: senderPay)
-            let transaction = try transactionBuilder.buildTransaction(value: value, unspentOutputs: selectedOutputsInfo.unspentOutputs, fee: selectedOutputsInfo.fee, senderPay: senderPay, toAddress: address, changeAddress: changeAddress)
+            let transaction = try transactionBuilder.buildTransaction(
+                    value: value, unspentOutputs: selectedOutputsInfo.unspentOutputs, fee: selectedOutputsInfo.fee, senderPay: senderPay,
+                    toAddress: address, changeAddress: selectedOutputsInfo.addChangeOutput ? changeAddress : nil
+            )
             return TransactionSerializer.serialize(transaction: transaction, withoutWitness: true).count * feeRate
         } else {
             // Estimated fee
