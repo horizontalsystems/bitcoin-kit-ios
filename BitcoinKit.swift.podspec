@@ -18,7 +18,7 @@ Pod::Spec.new do |spec|
   spec.ios.deployment_target = '11.0'
   spec.swift_version = '5'
 
-  spec.dependency 'BitcoinCore.swift', '~> 0.7.0'
+  spec.dependency 'BitcoinCore.swift', '~> 0.8.0'
   spec.dependency 'HSCryptoKit', '~> 1.4'
   spec.dependency 'HSHDWalletKit', '~> 1.2'
   spec.dependency 'Alamofire', '~> 4.0'
