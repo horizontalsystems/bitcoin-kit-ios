@@ -2,36 +2,24 @@ class TransactionFeeCalculator {
 
     private let unspentOutputSelector: IUnspentOutputSelector
     private let transactionSizeCalculator: ITransactionSizeCalculator
-    private let transactionBuilder: ITransactionBuilder
 
-    init(unspentOutputSelector: IUnspentOutputSelector, transactionSizeCalculator: ITransactionSizeCalculator, transactionBuilder: ITransactionBuilder) {
+    init(unspentOutputSelector: IUnspentOutputSelector, transactionSizeCalculator: ITransactionSizeCalculator) {
         self.unspentOutputSelector = unspentOutputSelector
         self.transactionSizeCalculator = transactionSizeCalculator
-        self.transactionBuilder = transactionBuilder
     }
 
 }
 
 extension TransactionFeeCalculator: ITransactionFeeCalculator {
 
-    // :fee method returns the fee for the given amount
-    // If address given and it's valid, it returns the actual fee
-    // Otherwise, it returns the estimated fee
     func fee(for value: Int, feeRate: Int, senderPay: Bool, toAddress: Address?, changeAddress: Address) throws -> Int {
+        var outputScriptType = changeAddress.scriptType
         if let address = toAddress {
-            // Actual fee
-            let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: address.scriptType, changeType: changeAddress.scriptType, senderPay: senderPay)
-            let transaction = try transactionBuilder.buildTransaction(
-                    value: value, unspentOutputs: selectedOutputsInfo.unspentOutputs, fee: selectedOutputsInfo.fee, senderPay: senderPay,
-                    toAddress: address, changeAddress: selectedOutputsInfo.addChangeOutput ? changeAddress : nil
-            )
-            return TransactionSerializer.serialize(transaction: transaction, withoutWitness: true).count * feeRate
-        } else {
-            // Estimated fee
-            // Default to .p2pkh address
-            let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: changeAddress.scriptType, changeType: changeAddress.scriptType, senderPay: senderPay)
-            return selectedOutputsInfo.fee
+            outputScriptType = address.scriptType
         }
+
+        let selectedOutputsInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: outputScriptType, changeType: changeAddress.scriptType, senderPay: senderPay)
+        return selectedOutputsInfo.fee
     }
 
     func feeWithUnspentOutputs(value: Int, feeRate: Int, toScriptType: ScriptType, changeScriptType: ScriptType, senderPay: Bool) throws -> SelectedUnspentOutputInfo {

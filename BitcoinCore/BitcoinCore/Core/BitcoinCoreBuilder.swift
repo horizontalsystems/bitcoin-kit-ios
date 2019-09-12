@@ -195,7 +195,7 @@ public class BitcoinCoreBuilder {
         let scriptBuilder = ScriptBuilderChain()
         let transactionSizeCalculator = TransactionSizeCalculator()
         let transactionBuilder = TransactionBuilder(inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory)
-        let transactionFeeCalculator = TransactionFeeCalculator(unspentOutputSelector: unspentOutputSelector, transactionSizeCalculator: transactionSizeCalculator, transactionBuilder: transactionBuilder)
+        let transactionFeeCalculator = TransactionFeeCalculator(unspentOutputSelector: unspentOutputSelector, transactionSizeCalculator: transactionSizeCalculator)
         let transactionSender = TransactionSender(transactionSyncer: transactionSyncer, peerManager: peerManager, initialBlockDownload: initialBlockDownload, syncedReadyPeerManager: syncedReadyPeerManager, logger: logger)
         let transactionCreator = TransactionCreator(transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, transactionSender: transactionSender, transactionFeeCalculator: transactionFeeCalculator,
                 bloomFilterManager: bloomFilterManager, addressConverter: addressConverter, publicKeyManager: publicKeyManager, bip: bip)
