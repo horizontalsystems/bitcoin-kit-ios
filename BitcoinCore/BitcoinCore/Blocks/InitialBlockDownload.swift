@@ -125,7 +125,13 @@ public class InitialBlockDownload {
         syncedPeers.append(peer)
 
         subject.onNext(.onPeerSynced(peer: peer))
-        syncStateListener.syncFinished()
+
+        if blockSyncer.localDownloadedBestBlockHeight >= peer.announcedLastBlockHeight {
+            // Some peers fail to send InventoryMessage within expected time
+            // and become 'synced' in InitialBlockDownload without sending all of their blocks.
+            // In such case, we shouldn't call 'syncFinished'
+            syncStateListener.syncFinished()
+        }
     }
 
     private func setPeerNotSynced(_ peer: IPeer) {
