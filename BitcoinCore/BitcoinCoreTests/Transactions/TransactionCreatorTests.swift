@@ -13,6 +13,7 @@ class TransactionCreatorTests: QuickSpec {
         let mockBloomFilterManager = MockIBloomFilterManager()
         let mockAddressConverter = MockIAddressConverter()
         let mockPublicKeyManager = MockIPublicKeyManager()
+        let mockStorage = MockIStorage()
 
         let transaction = TestData.p2pkhTransaction
         let changePublicKey = TestData.pubKey()
@@ -24,6 +25,7 @@ class TransactionCreatorTests: QuickSpec {
         let feeRate = 1000
         let senderPay = true
         let bip = Bip.bip44
+        let lastBlock = TestData.firstBlock
 
         var unspentOutputs: [UnspentOutput]!
         var selectedOutputsInfo: SelectedUnspentOutputInfo!
@@ -41,6 +43,9 @@ class TransactionCreatorTests: QuickSpec {
             ]
             selectedOutputsInfo = SelectedUnspentOutputInfo(unspentOutputs: unspentOutputs, totalValue: 100_000_000, fee: 1000, addChangeOutput: true)
 
+            stub(mockStorage) { mock in
+                when(mock.lastBlock.get).thenReturn(lastBlock)
+            }
             stub(mockTransactionFeeCalculator) { mock in
                 when(mock).feeWithUnspentOutputs(value: sendingValue, feeRate: any(), toScriptType: any(), changeScriptType: any(), senderPay: any()).thenReturn(selectedOutputsInfo)
             }
@@ -54,7 +59,7 @@ class TransactionCreatorTests: QuickSpec {
                 when(mock).changePublicKey().thenReturn(changePublicKey)
             }
             stub(mockTransactionBuilder) { mock in
-                when(mock.buildTransaction(value: any(), unspentOutputs: any(), fee: any(), senderPay: any(), toAddress: any(), changeAddress: any())).thenReturn(transaction)
+                when(mock.buildTransaction(value: any(), unspentOutputs: any(), fee: any(), senderPay: any(), toAddress: any(), changeAddress: any(), lastBlockHeight: any())).thenReturn(transaction)
             }
             stub(mockTransactionProcessor) { mock in
                 when(mock.processCreated(transaction: any())).thenDoNothing()
@@ -68,7 +73,7 @@ class TransactionCreatorTests: QuickSpec {
 
             creator = TransactionCreator(
                     transactionBuilder: mockTransactionBuilder, transactionProcessor: mockTransactionProcessor, transactionSender: mockTransactionSender, transactionFeeCalculator: mockTransactionFeeCalculator,
-                    bloomFilterManager: mockBloomFilterManager, addressConverter: mockAddressConverter, publicKeyManager: mockPublicKeyManager, bip: bip
+                    bloomFilterManager: mockBloomFilterManager, addressConverter: mockAddressConverter, publicKeyManager: mockPublicKeyManager, storage: mockStorage, bip: bip
             )
         }
 
@@ -100,7 +105,7 @@ class TransactionCreatorTests: QuickSpec {
                 }
 
                 it("creates transaction") {
-                    verify(mockTransactionBuilder).buildTransaction(value: sendingValue, unspentOutputs: equal(to: unspentOutputs), fee: selectedOutputsInfo.fee, senderPay: senderPay, toAddress: addressMatcher(toAddress), changeAddress: addressMatcher(changeAddress))
+                    verify(mockTransactionBuilder).buildTransaction(value: sendingValue, unspentOutputs: equal(to: unspentOutputs), fee: selectedOutputsInfo.fee, senderPay: senderPay, toAddress: addressMatcher(toAddress), changeAddress: addressMatcher(changeAddress), lastBlockHeight: lastBlock.height)
                     verify(mockTransactionProcessor).processCreated(transaction: equal(to: transaction))
                 }
 
@@ -125,8 +130,25 @@ class TransactionCreatorTests: QuickSpec {
                 it("creates transaction without change address") {
                     verify(mockPublicKeyManager, never()).changePublicKey()
                     verify(mockAddressConverter, never()).convert(publicKey: equal(to: changePublicKey), type: equal(to: bip.scriptType))
-                    verify(mockTransactionBuilder).buildTransaction(value: sendingValue, unspentOutputs: any(), fee: selectedOutputsInfo.fee, senderPay: senderPay, toAddress: addressMatcher(toAddress), changeAddress: addressMatcher(nil))
+                    verify(mockTransactionBuilder).buildTransaction(value: sendingValue, unspentOutputs: any(), fee: selectedOutputsInfo.fee, senderPay: senderPay, toAddress: addressMatcher(toAddress), changeAddress: addressMatcher(nil), lastBlockHeight: lastBlock.height)
                     verify(mockTransactionProcessor).processCreated(transaction: equal(to: transaction))
+                }
+            }
+
+            context("when lastBlock is nil") {
+                beforeEach {
+                    stub(mockTransactionSender) { mock in
+                        when(mock.verifyCanSend()).thenDoNothing()
+                    }
+                    stub(mockStorage) { mock in
+                        when(mock.lastBlock.get).thenReturn(nil)
+                    }
+
+                    _ = try! creator.create(to: toAddress.stringValue, value: sendingValue, feeRate: feeRate, senderPay: senderPay)
+                }
+
+                it("builds transactions with lastBlockHeight: 0") {
+                    verify(mockTransactionBuilder).buildTransaction(value: sendingValue, unspentOutputs: equal(to: unspentOutputs), fee: selectedOutputsInfo.fee, senderPay: senderPay, toAddress: addressMatcher(toAddress), changeAddress: addressMatcher(changeAddress), lastBlockHeight: 0)
                 }
             }
 
@@ -143,7 +165,7 @@ class TransactionCreatorTests: QuickSpec {
                 }
 
                 it("does create transaction") {
-                    verify(mockTransactionBuilder).buildTransaction(value: sendingValue, unspentOutputs: any(), fee: selectedOutputsInfo.fee, senderPay: senderPay, toAddress: addressMatcher(toAddress), changeAddress: addressMatcher(changeAddress))
+                    verify(mockTransactionBuilder).buildTransaction(value: sendingValue, unspentOutputs: any(), fee: selectedOutputsInfo.fee, senderPay: senderPay, toAddress: addressMatcher(toAddress), changeAddress: addressMatcher(changeAddress), lastBlockHeight: lastBlock.height)
                     verify(mockTransactionProcessor).processCreated(transaction: any())
                 }
 
@@ -191,7 +213,7 @@ class TransactionCreatorTests: QuickSpec {
                 verify(mockTransactionFeeCalculator).feeWithUnspentOutputs(value: sendingValue, feeRate: feeRate, toScriptType: equal(to: toAddress.scriptType), changeScriptType: equal(to: bip.scriptType), senderPay: senderPay)
                 verify(mockPublicKeyManager).changePublicKey()
                 verify(mockAddressConverter).convert(publicKey: equal(to: changePublicKey), type: equal(to: bip.scriptType))
-                verify(mockTransactionBuilder).buildTransaction(value: sendingValue, unspentOutputs: equal(to: unspentOutputs), fee: selectedOutputsInfo.fee, senderPay: senderPay, toAddress: addressMatcher(toAddress), changeAddress: addressMatcher(changeAddress))
+                verify(mockTransactionBuilder).buildTransaction(value: sendingValue, unspentOutputs: equal(to: unspentOutputs), fee: selectedOutputsInfo.fee, senderPay: senderPay, toAddress: addressMatcher(toAddress), changeAddress: addressMatcher(changeAddress), lastBlockHeight: lastBlock.height)
                 verify(mockTransactionProcessor).processCreated(transaction: equal(to: transaction))
                 verify(mockTransactionSender).send(pendingTransaction: equal(to: transaction))
             }
@@ -207,7 +229,7 @@ class TransactionCreatorTests: QuickSpec {
                     when(mock).fee(inputScriptType: any(), outputScriptType: any(), feeRate: any(), signatureScriptFunction: any()).thenReturn(fee)
                 }
                 stub(mockTransactionBuilder) { mock in
-                    when(mock).buildTransaction(from: any(), to: any(), fee: any(), signatureScriptFunction: any()).thenReturn(transaction)
+                    when(mock).buildTransaction(from: any(), to: any(), fee: any(), lastBlockHeight: any(), signatureScriptFunction: any()).thenReturn(transaction)
                 }
             }
 
@@ -233,12 +255,32 @@ class TransactionCreatorTests: QuickSpec {
                 }
 
                 it("creates transaction") {
-                    verify(mockTransactionBuilder).buildTransaction(from: equal(to: unspentOutput), to: addressMatcher(toAddress), fee: fee, signatureScriptFunction: any())
+                    verify(mockTransactionBuilder).buildTransaction(from: equal(to: unspentOutput), to: addressMatcher(toAddress), fee: fee, lastBlockHeight: lastBlock.height, signatureScriptFunction: any())
                     verify(mockTransactionProcessor).processCreated(transaction: equal(to: transaction))
                 }
 
                 it("sends transaction") {
                     verify(mockTransactionSender).send(pendingTransaction: equal(to: transaction))
+                }
+            }
+
+            context("when lastBlock is nil") {
+                beforeEach {
+                    stub(mockTransactionFeeCalculator) { mock in
+                        when(mock).fee(inputScriptType: any(), outputScriptType: any(), feeRate: any(), signatureScriptFunction: any()).thenReturn(fee)
+                    }
+                    stub(mockTransactionSender) { mock in
+                        when(mock.verifyCanSend()).thenDoNothing()
+                    }
+                    stub(mockStorage) { mock in
+                        when(mock.lastBlock.get).thenReturn(nil)
+                    }
+
+                    _ = try! creator.create(from: unspentOutput, to: toAddress.stringValue, feeRate: feeRate, signatureScriptFunction: signatureScriptFunction)
+                }
+
+                it("builds transactions with lastBlockHeight: 0") {
+                    verify(mockTransactionBuilder).buildTransaction(from: equal(to: unspentOutput), to: addressMatcher(toAddress), fee: fee, lastBlockHeight: 0, signatureScriptFunction: any())
                 }
             }
 
@@ -255,7 +297,7 @@ class TransactionCreatorTests: QuickSpec {
                 }
 
                 it("does create transaction") {
-                    verify(mockTransactionBuilder).buildTransaction(from: equal(to: unspentOutput), to: any(), fee: fee, signatureScriptFunction: any())
+                    verify(mockTransactionBuilder).buildTransaction(from: equal(to: unspentOutput), to: any(), fee: fee, lastBlockHeight: lastBlock.height, signatureScriptFunction: any())
                     verify(mockTransactionProcessor).processCreated(transaction: any())
                 }
 

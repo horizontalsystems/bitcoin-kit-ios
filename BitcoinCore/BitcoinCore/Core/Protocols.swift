@@ -346,8 +346,8 @@ public protocol ITransactionCreator {
 }
 
 protocol ITransactionBuilder {
-    func buildTransaction(value: Int, unspentOutputs: [UnspentOutput], fee: Int, senderPay: Bool, toAddress: Address, changeAddress: Address?) throws -> FullTransaction
-    func buildTransaction(from: UnspentOutput, to: Address, fee: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction
+    func buildTransaction(value: Int, unspentOutputs: [UnspentOutput], fee: Int, senderPay: Bool, toAddress: Address, changeAddress: Address?, lastBlockHeight: Int) throws -> FullTransaction
+    func buildTransaction(from: UnspentOutput, to: Address, fee: Int, lastBlockHeight: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction
 }
 
 protocol ITransactionFeeCalculator {

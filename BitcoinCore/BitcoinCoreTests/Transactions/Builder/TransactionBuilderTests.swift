@@ -19,12 +19,13 @@ class TransactionBuilderTests: QuickSpec {
         let signatureData = [randomBytes(length: 72), randomBytes(length: 64)]
         let sendingValue = 100_000_000
         let fee = 1000
+        let lastBlockHeight = 1000
 
         var builder: TransactionBuilder!
 
         beforeEach {
             stub(mockFactory) { mock in
-                when(mock).transaction(version: 1, lockTime: 0).thenReturn(Transaction(version: 1, lockTime: 0))
+                when(mock).transaction(version: 1, lockTime: lastBlockHeight).thenReturn(Transaction(version: 1, lockTime: lastBlockHeight))
                 when(mock).output(withValue: any(), index: any(), lockingScript: any(), type: any(), address: any(), keyHash: equal(to: toAddressPKH.keyHash), publicKey: isNil()).thenReturn(self.output(from: toAddressPKH))
                 when(mock).output(withValue: any(), index: any(), lockingScript: any(), type: any(), address: any(), keyHash: equal(to: changeAddressPKH.keyHash), publicKey: isNil()).thenReturn(self.output(from: changeAddressPKH))
                 when(mock).output(withValue: any(), index: any(), lockingScript: any(), type: any(), address: any(), keyHash: equal(to: toAddressSH.keyHash), publicKey: isNil()).thenReturn(self.output(from: toAddressSH))
@@ -73,7 +74,7 @@ class TransactionBuilderTests: QuickSpec {
 
             context("when unspentOutput is P2PKH, senderPay is true, addChangeOutput is true") {
                 beforeEach {
-                    fullTransaction = try! builder.buildTransaction(value: sendingValue, unspentOutputs: [unspentOutput], fee: fee, senderPay: true, toAddress: toAddressPKH, changeAddress: changeAddressPKH)
+                    fullTransaction = try! builder.buildTransaction(value: sendingValue, unspentOutputs: [unspentOutput], fee: fee, senderPay: true, toAddress: toAddressPKH, changeAddress: changeAddressPKH, lastBlockHeight: lastBlockHeight)
                 }
 
                 it("adds input from unspentOutput") {
@@ -116,7 +117,7 @@ class TransactionBuilderTests: QuickSpec {
 
             context("when changeAddress is nil") {
                 beforeEach {
-                    fullTransaction = try! builder.buildTransaction(value: sendingValue, unspentOutputs: [unspentOutput], fee: fee, senderPay: true, toAddress: toAddressPKH, changeAddress: nil)
+                    fullTransaction = try! builder.buildTransaction(value: sendingValue, unspentOutputs: [unspentOutput], fee: fee, senderPay: true, toAddress: toAddressPKH, changeAddress: nil, lastBlockHeight: lastBlockHeight)
                 }
 
                 it("adds 1 output for toAddress") {
@@ -133,7 +134,7 @@ class TransactionBuilderTests: QuickSpec {
             context("when senderPay is false") {
                 context("value is valid") {
                     beforeEach {
-                        fullTransaction = try! builder.buildTransaction(value: sendingValue, unspentOutputs: [unspentOutput], fee: fee, senderPay: false, toAddress: toAddressPKH, changeAddress: changeAddressPKH)
+                        fullTransaction = try! builder.buildTransaction(value: sendingValue, unspentOutputs: [unspentOutput], fee: fee, senderPay: false, toAddress: toAddressPKH, changeAddress: changeAddressPKH, lastBlockHeight: lastBlockHeight)
                     }
 
                     it("subtracts fee from value in receiver output") {
@@ -150,7 +151,7 @@ class TransactionBuilderTests: QuickSpec {
                 context("value less than fee") {
                     it("throws feeMoreThanValue exception") {
                         do {
-                            fullTransaction = try builder.buildTransaction(value: fee - 1, unspentOutputs: [unspentOutput], fee: fee, senderPay: false, toAddress: toAddressPKH, changeAddress: changeAddressPKH)
+                            fullTransaction = try builder.buildTransaction(value: fee - 1, unspentOutputs: [unspentOutput], fee: fee, senderPay: false, toAddress: toAddressPKH, changeAddress: changeAddressPKH, lastBlockHeight: lastBlockHeight)
                             fail("Expecting an exception")
                         } catch let error as TransactionBuilder.BuildError {
                             expect(error).to(equal(TransactionBuilder.BuildError.feeMoreThanValue))
@@ -163,7 +164,7 @@ class TransactionBuilderTests: QuickSpec {
 
             context("when toAddress and/or changeAddress types are P2SH or P2WPKH") {
                 beforeEach {
-                    fullTransaction = try! builder.buildTransaction(value: sendingValue, unspentOutputs: [unspentOutput], fee: fee, senderPay: true, toAddress: toAddressSH, changeAddress: changeAddressWPKH)
+                    fullTransaction = try! builder.buildTransaction(value: sendingValue, unspentOutputs: [unspentOutput], fee: fee, senderPay: true, toAddress: toAddressSH, changeAddress: changeAddressWPKH, lastBlockHeight: lastBlockHeight)
                 }
 
                 it("generates outputs considering address types") {
@@ -188,7 +189,7 @@ class TransactionBuilderTests: QuickSpec {
                         when(mock).inputToSign(withPreviousOutput: equal(to: unspentOutput), script: any(), sequence: any()).thenReturn(inputToSign)
                     }
 
-                    fullTransaction = try! builder.buildTransaction(value: sendingValue, unspentOutputs: [unspentOutput], fee: fee, senderPay: true, toAddress: toAddressPKH, changeAddress: changeAddressPKH)
+                    fullTransaction = try! builder.buildTransaction(value: sendingValue, unspentOutputs: [unspentOutput], fee: fee, senderPay: true, toAddress: toAddressPKH, changeAddress: changeAddressPKH, lastBlockHeight: lastBlockHeight)
                 }
 
                 it("sets P2WPKH unlocking script to witnessData") {
@@ -220,7 +221,7 @@ class TransactionBuilderTests: QuickSpec {
                         when(mock).inputToSign(withPreviousOutput: equal(to: unspentOutput), script: any(), sequence: any()).thenReturn(inputToSign)
                     }
 
-                    fullTransaction = try! builder.buildTransaction(value: sendingValue, unspentOutputs: [unspentOutput], fee: fee, senderPay: true, toAddress: toAddressPKH, changeAddress: changeAddressPKH)
+                    fullTransaction = try! builder.buildTransaction(value: sendingValue, unspentOutputs: [unspentOutput], fee: fee, senderPay: true, toAddress: toAddressPKH, changeAddress: changeAddressPKH, lastBlockHeight: lastBlockHeight)
                 }
 
                 it("sets P2WPKH unlocking script to witnessData") {
@@ -254,7 +255,7 @@ class TransactionBuilderTests: QuickSpec {
                     }
 
                     do {
-                        fullTransaction = try builder.buildTransaction(value: sendingValue, unspentOutputs: [unspentOutput], fee: fee, senderPay: true, toAddress: toAddressPKH, changeAddress: changeAddressPKH)
+                        fullTransaction = try builder.buildTransaction(value: sendingValue, unspentOutputs: [unspentOutput], fee: fee, senderPay: true, toAddress: toAddressPKH, changeAddress: changeAddressPKH, lastBlockHeight: lastBlockHeight)
                         fail("Expecting an exception")
                     } catch let error as TransactionBuilder.BuildError {
                         expect(error).to(equal(TransactionBuilder.BuildError.notSupportedScriptType))
@@ -310,7 +311,7 @@ class TransactionBuilderTests: QuickSpec {
 
             context("when fee is valid, unspent output type is P2SH") {
                 beforeEach {
-                    fullTransaction = try! builder.buildTransaction(from: unspentOutput, to: toAddressPKH, fee: fee, signatureScriptFunction: signatureScriptFunction)
+                    fullTransaction = try! builder.buildTransaction(from: unspentOutput, to: toAddressPKH, fee: fee, lastBlockHeight: lastBlockHeight, signatureScriptFunction: signatureScriptFunction)
                 }
 
 
@@ -347,7 +348,7 @@ class TransactionBuilderTests: QuickSpec {
             context("when fee is less than value") {
                 it("throws feeMoreThanValue exception") {
                     do {
-                        fullTransaction = try builder.buildTransaction(from: unspentOutput, to: toAddressPKH, fee: unspentOutput.output.value + 1, signatureScriptFunction: signatureScriptFunction)
+                        fullTransaction = try builder.buildTransaction(from: unspentOutput, to: toAddressPKH, fee: unspentOutput.output.value + 1, lastBlockHeight: lastBlockHeight, signatureScriptFunction: signatureScriptFunction)
                         fail("Expecting an exception")
                     } catch let error as TransactionBuilder.BuildError {
                         expect(error).to(equal(TransactionBuilder.BuildError.feeMoreThanValue))
@@ -367,7 +368,7 @@ class TransactionBuilderTests: QuickSpec {
                     )
 
                     do {
-                        fullTransaction = try builder.buildTransaction(from: unspentOutput, to: toAddressPKH, fee: fee, signatureScriptFunction: signatureScriptFunction)
+                        fullTransaction = try builder.buildTransaction(from: unspentOutput, to: toAddressPKH, fee: fee, lastBlockHeight: lastBlockHeight, signatureScriptFunction: signatureScriptFunction)
                         fail("Expecting an exception")
                     } catch let error as TransactionBuilder.BuildError {
                         expect(error).to(equal(TransactionBuilder.BuildError.notSupportedScriptType))
