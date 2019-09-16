@@ -36,7 +36,7 @@ class TransactionBuilder {
 
 extension TransactionBuilder: ITransactionBuilder {
 
-    func buildTransaction(value: Int, unspentOutputs: [UnspentOutput], fee: Int, senderPay: Bool, toAddress: Address, changeAddress: Address?) throws -> FullTransaction {
+    func buildTransaction(value: Int, unspentOutputs: [UnspentOutput], fee: Int, senderPay: Bool, toAddress: Address, changeAddress: Address?, lastBlockHeight: Int) throws -> FullTransaction {
         if !senderPay {
             guard fee < value else {
                 throw BuildError.feeMoreThanValue
@@ -65,7 +65,7 @@ extension TransactionBuilder: ITransactionBuilder {
         }
 
         // Build transaction
-        let transaction = factory.transaction(version: 1, lockTime: 0)
+        let transaction = factory.transaction(version: 1, lockTime: lastBlockHeight)
 
         // Sign inputs
         for i in 0..<inputsToSign.count {
@@ -96,7 +96,7 @@ extension TransactionBuilder: ITransactionBuilder {
         return FullTransaction(header: transaction, inputs: inputsToSign.map{ $0.input }, outputs: outputs)
     }
 
-    func buildTransaction(from unspentOutput: UnspentOutput, to address: Address, fee: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction {
+    func buildTransaction(from unspentOutput: UnspentOutput, to address: Address, fee: Int, lastBlockHeight: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction {
         guard unspentOutput.output.scriptType == .p2sh else {
             throw BuildError.notSupportedScriptType
         }
@@ -115,7 +115,7 @@ extension TransactionBuilder: ITransactionBuilder {
         let output = try self.output(withIndex: 0, address: address, value: receivedValue)
 
         // Build transaction
-        let transaction = factory.transaction(version: 1, lockTime: 0)
+        let transaction = factory.transaction(version: 1, lockTime: lastBlockHeight)
 
         // Sign inputs
         let sigScriptData = try inputSigner.sigScriptData(transaction: transaction, inputsToSign: [inputToSign], outputs: [output], index: 0)
