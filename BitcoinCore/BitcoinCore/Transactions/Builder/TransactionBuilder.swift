@@ -24,7 +24,11 @@ class TransactionBuilder {
             unspentOutput.output.keyHash?.removeFirst(2)
         }
 
-        return factory.inputToSign(withPreviousOutput: unspentOutput, script: Data(), sequence: 0xFFFFFFFF)
+        // Maximum nSequence value (0xFFFFFFFF) disables nLockTime.
+        // According to BIP-125, any value less than 0xFFFFFFFE makes a Replace-by-Fee(RBF) opted in.
+        let sequence = 0xFFFFFFFE
+
+        return factory.inputToSign(withPreviousOutput: unspentOutput, script: Data(), sequence: sequence)
     }
 
     private func output(withIndex index: Int, address: Address, value: Int) throws -> Output {
