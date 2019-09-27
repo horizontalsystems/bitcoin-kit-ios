@@ -19,6 +19,7 @@ class MainNet: INetwork {
 
     let dnsSeeds = [
         "seed.bitcoinabc.org",
+        "seed-abc.bitcoinforks.org",
     ]
 
     var bip44CheckpointBlock: Block {
