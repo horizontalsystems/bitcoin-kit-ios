@@ -19,6 +19,7 @@ class TestNet: INetwork {
 
     let dnsSeeds = [
         "testnet-seed.bitcoinabc.org",
+        "testnet-seed-abc.bitcoinforks.org"
     ]
 
     var bip44CheckpointBlock: Block {
