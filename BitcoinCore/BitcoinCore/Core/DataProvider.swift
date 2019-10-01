@@ -37,7 +37,7 @@ class DataProvider {
     }
 
     private func blockInfo(fromBlock block: Block) -> BlockInfo {
-        return BlockInfo(
+        BlockInfo(
                 headerHash: block.headerHash.reversedHex,
                 height: block.height,
                 timestamp: block.timestamp
@@ -100,13 +100,13 @@ extension DataProvider: IDataProvider {
         }
     }
 
-    var debugInfo: String {
+    func debugInfo(network: INetwork, scriptType: ScriptType, addressConverter: IAddressConverter) -> String {
         var lines = [String]()
 
         let pubKeys = storage.publicKeys().sorted(by: { $0.index < $1.index })
 
         for pubKey in pubKeys {
-            lines.append("acc: \(pubKey.account) - inx: \(pubKey.index) - ext: \(pubKey.external) : \((try! Base58AddressConverter(addressVersion: 0x00, addressScriptVersion: 0x05).convert(keyHash: pubKey.keyHash, type: .p2pkh)).stringValue)")
+            lines.append("acc: \(pubKey.account) - inx: \(pubKey.index) - ext: \(pubKey.external) : \((try! addressConverter.convert(keyHash: pubKey.keyHash, type: scriptType)).stringValue)")
         }
         lines.append("PUBLIC KEYS COUNT: \(pubKeys.count)")
         return lines.joined(separator: "\n")

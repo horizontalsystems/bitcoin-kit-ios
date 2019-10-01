@@ -79,7 +79,7 @@ open class AbstractKit {
     }
 
     open var debugInfo: String {
-        bitcoinCore.debugInfo
+        bitcoinCore.debugInfo(network: network)
     }
 
     open var statusInfo: [(String, Any)] {

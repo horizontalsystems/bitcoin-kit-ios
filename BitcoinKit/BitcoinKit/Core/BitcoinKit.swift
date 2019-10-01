@@ -83,18 +83,6 @@ public class BitcoinKit: AbstractKit {
         }
     }
 
-    override open var debugInfo: String {
-        var lines = [String](arrayLiteral: bitcoinCore.debugInfo)
-        let pubKeys = storage.publicKeys().sorted(by: { $0.index < $1.index })
-
-        lines.append("--------------- Bitcoin Segwit (zero program) addresses --------------------")
-        for pubKey in pubKeys {
-            lines.append("acc: \(pubKey.account) - inx: \(pubKey.index) - ext: \(pubKey.external) : \(try! bech32AddressConverter.convert(keyHash: Data([0x00, 0x14]) + pubKey.keyHash, type: .p2wpkh).stringValue)") 
-        }
-
-        return lines.joined(separator: "\n")
-    }
-
 }
 
 extension BitcoinKit {
@@ -112,7 +100,7 @@ extension BitcoinKit {
     }
 
     private static func databaseFileName(walletId: String, networkType: NetworkType) -> String {
-        return "\(walletId)-\(networkType.rawValue)"
+        "\(walletId)-\(networkType.rawValue)"
     }
 
 }

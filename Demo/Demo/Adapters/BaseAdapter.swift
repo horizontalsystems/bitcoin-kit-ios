@@ -16,7 +16,7 @@ class BaseAdapter {
     let transactionsSignal = Signal()
 
     var debugInfo: String {
-        return abstractKit.debugInfo
+        abstractKit.debugInfo
     }
 
     init(name: String, coinCode: String, abstractKit: AbstractKit) {
@@ -55,7 +55,7 @@ class BaseAdapter {
     }
 
     func transactionsSingle(fromHash: String?, limit: Int) -> Single<[TransactionRecord]> {
-        return abstractKit.transactions(fromHash: fromHash, limit: limit)
+        abstractKit.transactions(fromHash: fromHash, limit: limit)
                 .map { [weak self] transactions -> [TransactionRecord] in
                     return transactions.compactMap {
                         self?.transactionRecord(fromTransaction: $0)
@@ -68,19 +68,19 @@ class BaseAdapter {
 extension BaseAdapter {
 
     var lastBlockObservable: Observable<Void> {
-        return lastBlockSignal.asObservable().throttle(DispatchTimeInterval.milliseconds(200), scheduler: ConcurrentDispatchQueueScheduler(qos: .userInitiated))
+        lastBlockSignal.asObservable().throttle(DispatchTimeInterval.milliseconds(200), scheduler: ConcurrentDispatchQueueScheduler(qos: .userInitiated))
     }
 
     var syncStateObservable: Observable<Void> {
-        return syncStateSignal.asObservable().throttle(DispatchTimeInterval.milliseconds(200), scheduler: ConcurrentDispatchQueueScheduler(qos: .userInitiated))
+        syncStateSignal.asObservable().throttle(DispatchTimeInterval.milliseconds(200), scheduler: ConcurrentDispatchQueueScheduler(qos: .userInitiated))
     }
 
     var balanceObservable: Observable<Void> {
-        return balanceSignal.asObservable()
+        balanceSignal.asObservable()
     }
 
     var transactionsObservable: Observable<Void> {
-        return transactionsSignal.asObservable()
+        transactionsSignal.asObservable()
     }
 
     func start() {
@@ -90,19 +90,19 @@ extension BaseAdapter {
     }
 
     var balance: Decimal {
-        return Decimal(abstractKit.balance) / coinRate
+        Decimal(abstractKit.balance) / coinRate
     }
 
     var lastBlockInfo: BlockInfo? {
-        return abstractKit.lastBlockInfo
+        abstractKit.lastBlockInfo
     }
 
     var syncState: BitcoinCore.KitState {
-        return abstractKit.syncState
+        abstractKit.syncState
     }
 
     func receiveAddress() -> String {
-        return abstractKit.receiveAddress()
+        abstractKit.receiveAddress()
     }
 
     func validate(address: String) throws {
@@ -131,7 +131,7 @@ extension BaseAdapter {
     }
 
     func availableBalance(for address: String?) -> Decimal {
-        return max(0, balance - fee(for: balance, address: address))
+        max(0, balance - fee(for: balance, address: address))
     }
 
     func fee(for value: Decimal, address: String?) -> Decimal {

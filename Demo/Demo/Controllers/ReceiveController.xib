@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
-    <device id="retina4_7" orientation="portrait">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -22,13 +20,13 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Your Address:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lJJ-k1-zZg">
-                    <rect key="frame" x="20" y="40" width="335" height="18"/>
+                    <rect key="frame" x="20" y="20" width="335" height="18"/>
                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                     <color key="textColor" cocoaTouchSystemColor="scrollViewTexturedBackgroundColor"/>
                     <nil key="highlightedColor"/>
                 </label>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="middleTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SOD-d7-YsF">
-                    <rect key="frame" x="20" y="78" width="335" height="40"/>
+                    <rect key="frame" x="20" y="58" width="335" height="40"/>
                     <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="40" id="THV-1f-AsH"/>
@@ -38,7 +36,7 @@
                     <nil key="highlightedColor"/>
                 </label>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="a2A-Fu-Eqr">
-                    <rect key="frame" x="168" y="148" width="39" height="32"/>
+                    <rect key="frame" x="168" y="128" width="39" height="32"/>
                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                     <state key="normal" title="Copy"/>
                     <connections>
@@ -52,14 +50,13 @@
                 <constraint firstItem="lJJ-k1-zZg" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="20" id="HyB-ze-IQM"/>
                 <constraint firstItem="SOD-d7-YsF" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="20" id="JzL-V8-Y4x"/>
                 <constraint firstItem="a2A-Fu-Eqr" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="P9b-4Z-fWD"/>
-                <constraint firstItem="a2A-Fu-Eqr" firstAttribute="top" secondItem="SOD-d7-YsF" secondAttribute="bottom" constant="30" id="Pyw-fL-cnP"/>
                 <constraint firstItem="a2A-Fu-Eqr" firstAttribute="top" secondItem="SOD-d7-YsF" secondAttribute="bottom" constant="30" id="dxx-WS-rE4"/>
                 <constraint firstItem="lJJ-k1-zZg" firstAttribute="top" secondItem="fnl-2z-Ty3" secondAttribute="top" constant="20" id="gDf-iy-SWI"/>
                 <constraint firstItem="SOD-d7-YsF" firstAttribute="top" secondItem="lJJ-k1-zZg" secondAttribute="bottom" constant="20" id="k85-kX-66e"/>
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="SOD-d7-YsF" secondAttribute="trailing" constant="20" id="vsV-HG-LOo"/>
-                <constraint firstItem="a2A-Fu-Eqr" firstAttribute="top" secondItem="SOD-d7-YsF" secondAttribute="bottom" constant="60" id="vui-M1-LdE"/>
             </constraints>
             <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
+            <point key="canvasLocation" x="140" y="116"/>
         </view>
     </objects>
 </document>
