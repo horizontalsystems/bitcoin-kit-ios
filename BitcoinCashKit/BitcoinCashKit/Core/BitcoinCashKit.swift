@@ -101,7 +101,7 @@ extension BitcoinCashKit {
     }
 
     private static func databaseFileName(walletId: String, networkType: NetworkType) -> String {
-        return "\(walletId)-\(networkType.rawValue)"
+        "\(walletId)-\(networkType.rawValue)"
     }
 
 }

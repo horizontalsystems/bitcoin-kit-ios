@@ -432,7 +432,7 @@ protocol IDataProvider {
 
     var lastBlockInfo: BlockInfo? { get }
     var balance: Int { get }
-    var debugInfo: String { get }
+    func debugInfo(network: INetwork, scriptType: ScriptType, addressConverter: IAddressConverter) -> String
     func transactions(fromHash: String?, limit: Int?) -> Single<[TransactionInfo]>
 }
 

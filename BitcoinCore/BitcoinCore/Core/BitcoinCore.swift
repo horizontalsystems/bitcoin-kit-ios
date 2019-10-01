@@ -149,31 +149,31 @@ extension BitcoinCore {
 extension BitcoinCore {
 
     public var lastBlockInfo: BlockInfo? {
-        return dataProvider.lastBlockInfo
+        dataProvider.lastBlockInfo
     }
 
     public var balance: Int {
-        return dataProvider.balance
+        dataProvider.balance
     }
 
     public var syncState: BitcoinCore.KitState {
-        return kitStateProvider.syncState
+        kitStateProvider.syncState
     }
 
     public func transactions(fromHash: String? = nil, limit: Int? = nil) -> Single<[TransactionInfo]> {
-        return dataProvider.transactions(fromHash: fromHash, limit: limit)
+        dataProvider.transactions(fromHash: fromHash, limit: limit)
     }
 
     public func send(to address: String, value: Int, feeRate: Int) throws -> FullTransaction {
-        return try transactionCreator.create(to: address, value: value, feeRate: feeRate, senderPay: true)
+        try transactionCreator.create(to: address, value: value, feeRate: feeRate, senderPay: true)
     }
 
     public func send(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int) throws -> FullTransaction {
-        return try transactionCreator.create(to: hash, scriptType: scriptType, value: value, feeRate: feeRate, senderPay: true)
+        try transactionCreator.create(to: hash, scriptType: scriptType, value: value, feeRate: feeRate, senderPay: true)
     }
 
     func redeem(from unspentOutput: UnspentOutput, to address: String, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction {
-        return try transactionCreator.create(from: unspentOutput, to: address, feeRate: feeRate, signatureScriptFunction: signatureScriptFunction)
+        try transactionCreator.create(from: unspentOutput, to: address, feeRate: feeRate, signatureScriptFunction: signatureScriptFunction)
     }
 
     public func validate(address: String) throws {
@@ -181,7 +181,7 @@ extension BitcoinCore {
     }
 
     public func parse(paymentAddress: String) -> BitcoinPaymentData {
-        return paymentAddressParser.parse(paymentAddress: paymentAddress)
+        paymentAddressParser.parse(paymentAddress: paymentAddress)
     }
 
     public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feeRate: Int) throws -> Int {
@@ -202,19 +202,19 @@ extension BitcoinCore {
     }
 
     public func changePublicKey() throws -> PublicKey {
-        return try publicKeyManager.changePublicKey()
+        try publicKeyManager.changePublicKey()
     }
 
     public func receivePublicKey() throws -> PublicKey {
-        return try publicKeyManager.receivePublicKey()
+        try publicKeyManager.receivePublicKey()
     }
 
     func watch(transaction: BitcoinCore.TransactionFilter, delegate: IWatchedTransactionDelegate) {
         watchedTransactionManager.add(transactionFilter: transaction, delegatedTo: delegate)
     }
 
-    public var debugInfo: String {
-        return dataProvider.debugInfo
+    public func debugInfo(network: INetwork) -> String {
+        dataProvider.debugInfo(network: network, scriptType: bip.scriptType, addressConverter: addressConverter)
     }
 
     public var statusInfo: [(String, Any)] {

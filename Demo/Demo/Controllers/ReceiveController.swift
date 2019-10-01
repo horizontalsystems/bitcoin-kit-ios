@@ -18,8 +18,6 @@ class ReceiveController: UIViewController {
         addressLabel?.layer.cornerRadius = 8
         addressLabel?.clipsToBounds = true
 
-        segmentedControl.addTarget(self, action: #selector(onSegmentChanged), for: .valueChanged)
-
         Manager.shared.adapterSignal
                 .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
                 .observeOn(MainScheduler.instance)
@@ -29,6 +27,7 @@ class ReceiveController: UIViewController {
                 .disposed(by: disposeBag)
 
         updateAdapters()
+        segmentedControl.addTarget(self, action: #selector(onSegmentChanged), for: .valueChanged)
     }
 
     private func updateAdapters() {
@@ -54,6 +53,7 @@ class ReceiveController: UIViewController {
 
     @objc func onSegmentChanged() {
         updateAddress()
+        print("segment changed")
 
         if let adapter = currentAdapter {
             print(adapter.debugInfo)

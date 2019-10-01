@@ -141,15 +141,15 @@ public class DashKit: AbstractKit {
     }
 
     private func cast(transactionInfos:[TransactionInfo]) -> [DashTransactionInfo] {
-        return transactionInfos.compactMap { $0 as? DashTransactionInfo }
+        transactionInfos.compactMap { $0 as? DashTransactionInfo }
     }
 
     public override func send(to address: String, value: Int, feeRate: Int) throws -> FullTransaction {
-        return try super.send(to: address, value: value, feeRate: feeRate)
+        try super.send(to: address, value: value, feeRate: feeRate)
     }
 
     public func transactions(fromHash: String?, limit: Int?) -> Single<[DashTransactionInfo]> {
-        return super.transactions(fromHash: fromHash, limit: limit).map { self.cast(transactionInfos: $0) }
+        super.transactions(fromHash: fromHash, limit: limit).map { self.cast(transactionInfos: $0) }
     }
 
 }
@@ -212,7 +212,7 @@ extension DashKit {
     }
 
     private static func databaseFileName(walletId: String, networkType: NetworkType) -> String {
-        return "\(walletId)-\(networkType.rawValue)"
+        "\(walletId)-\(networkType.rawValue)"
     }
 
 }
