@@ -249,7 +249,7 @@ protocol IFactory {
     func peer(withHost host: String, logger: Logger?) -> IPeer
     func transaction(version: Int, lockTime: Int) -> Transaction
     func inputToSign(withPreviousOutput: UnspentOutput, script: Data, sequence: Int) -> InputToSign
-    func output(withValue value: Int, index: Int, lockingScript script: Data, type: ScriptType, address: String?, keyHash: Data?, publicKey: PublicKey?) -> Output
+    func output(withIndex index: Int, address: Address, value: Int, publicKey: PublicKey?) throws -> Output
     func bloomFilter(withElements: [Data]) -> BloomFilter
 }
 
@@ -346,7 +346,7 @@ public protocol ITransactionCreator {
 }
 
 protocol ITransactionBuilder {
-    func buildTransaction(value: Int, unspentOutputs: [UnspentOutput], fee: Int, senderPay: Bool, toAddress: Address, changeAddress: Address?, lastBlockHeight: Int) throws -> FullTransaction
+    func buildTransaction(toAddress: String, value: Int, feeRate: Int, senderPay: Bool, extraData: [String: [String: Any]]) throws -> FullTransaction
     func buildTransaction(from: UnspentOutput, to: Address, fee: Int, lastBlockHeight: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction
 }
 
