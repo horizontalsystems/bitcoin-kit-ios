@@ -141,8 +141,9 @@ public class BitcoinCoreBuilder {
         let doubleShaHasher = DoubleShaHasher()
         let merkleBranch = MerkleBranch(hasher: doubleShaHasher)
         let merkleBlockValidator = MerkleBlockValidator(maxBlockSize: network.maxBlockSize, merkleBranch: merkleBranch)
+        let scriptBuilder = ScriptBuilderChain()
 
-        let factory = Factory(network: network, networkMessageParser: networkMessageParser, networkMessageSerializer: networkMessageSerializer)
+        let factory = Factory(network: network, networkMessageParser: networkMessageParser, networkMessageSerializer: networkMessageSerializer, scriptBuilder: scriptBuilder)
 
         let publicKeyManager = PublicKeyManager.instance(storage: storage, hdWallet: hdWallet, restoreKeyConverter: restoreKeyConverterChain)
 
@@ -192,13 +193,17 @@ public class BitcoinCoreBuilder {
         let syncedReadyPeerManager = SyncedReadyPeerManager(peerGroup: peerGroup, initialBlockDownload: initialBlockDownload)
 
         let inputSigner = InputSigner(hdWallet: hdWallet, network: network)
-        let scriptBuilder = ScriptBuilderChain()
         let transactionSizeCalculator = TransactionSizeCalculator()
-        let transactionBuilder = TransactionBuilder(inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory)
+        let outputSetter = OutputSetter(addressConverter: addressConverter, factory: factory)
+        let inputSetter = InputSetter(unspentOutputSelector: unspentOutputSelector, addressConverter: addressConverter, publicKeyManager: publicKeyManager, factory: factory, changeScriptType: bip.scriptType)
+        let lockTimeSetter = LockTimeSetter(storage: storage)
+        let transactionSigner = TransactionSigner(inputSigner: inputSigner)
+        let transactionBuilder = TransactionBuilder(inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory,
+                outputSetter: outputSetter, inputSetter: inputSetter, lockTimeSetter: lockTimeSetter, signer: transactionSigner)
         let transactionFeeCalculator = TransactionFeeCalculator(unspentOutputSelector: unspentOutputSelector, transactionSizeCalculator: transactionSizeCalculator)
         let transactionSender = TransactionSender(transactionSyncer: transactionSyncer, peerManager: peerManager, initialBlockDownload: initialBlockDownload, syncedReadyPeerManager: syncedReadyPeerManager, logger: logger)
         let transactionCreator = TransactionCreator(transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, transactionSender: transactionSender, transactionFeeCalculator: transactionFeeCalculator,
-                bloomFilterManager: bloomFilterManager, addressConverter: addressConverter, publicKeyManager: publicKeyManager, storage: storage, bip: bip)
+                bloomFilterManager: bloomFilterManager, addressConverter: addressConverter, storage: storage)
 
         let syncManager = SyncManager(reachabilityManager: reachabilityManager, initialSyncer: initialSyncer, peerGroup: peerGroup)
 
