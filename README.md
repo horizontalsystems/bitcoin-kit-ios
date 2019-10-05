@@ -20,7 +20,7 @@ Bitcoin, BitcoinCash(ABC) and Dash wallet toolkit for Swift. This is a full impl
 ### BitcoinCashKit.swift
 - bech32 cashaddr addresses
 
-### DashKit.swfit
+### DashKit.swift
 - Instant send
 - LLMQ lock, Masternodes validation
 
@@ -56,7 +56,7 @@ let dashKit = DashKit(withWords: words, walletId: "dash-wallet-id", syncMode: .a
 
 All 3 *Kits* can be configured to work in `.mainNet` or `.testNet`. 
 
-##### `sycMode` paramater
+##### `sycMode` parameter
 *Kits* can restore existing wallet or create a new one. When restoring, it generates addresses for given wallet according to bip44 protocol, then it pulls all historical transactions for each of those addresses. This is done only once on initial sync. `syncMode` parameter defines where it pulls historical transactions from. When they are pulled, it continues to sync according to [SPV](https://en.bitcoinwiki.org/wiki/Simplified_Payment_Verification) protocol no matter which syncMode was used for initial sync. There are 3 modes available:
 
 - `.full`: Fully synchronizes from peer-to-peer network starting from the block when bip44 was introduced. This mode is the most private (since it fully complies with [SPV](https://en.bitcoinwiki.org/wiki/Simplified_Payment_Verification) protocol), but it takes approximately 2 hours to sync upto now (June 10, 2019).
@@ -304,7 +304,7 @@ All features of the library are used in example project. It can be referred as a
 
 ## Dependencies
 
-* [HSHDWalletKit](https://github.com/horizontalsystems/hd-wallet-kit-ios) - HD Wallet related features, mnemonic phrase geneartion.
+* [HSHDWalletKit](https://github.com/horizontalsystems/hd-wallet-kit-ios) - HD Wallet related features, mnemonic phrase generation.
 * [HSCryptoKit](https://github.com/horizontalsystems/crypto-kit-ios) - Crypto functions required for working with blockchain.
 
 ### Dash dependencies
