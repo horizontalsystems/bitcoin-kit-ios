@@ -253,11 +253,11 @@
 				58AAAEAEA95D4491C5E271B7 /* Models */,
 				58AAAB3ABD5FBE6562B9BDDF /* Network */,
 				58AAA07E0767C45516BDD9E6 /* Storage */,
+				58AAA940CCEC533F3402FB59 /* Managers */,
+				58AAAAAF21CFB5722D34E03B /* QuorumList */,
 				3A7A7D60226842DD0063D6AD /* DashKit.h */,
 				3A7A7D61226842DD0063D6AD /* Info.plist */,
 				58AAAC7FA40D103A60955173 /* DashKitErrors.swift */,
-				58AAA940CCEC533F3402FB59 /* Managers */,
-				58AAAAAF21CFB5722D34E03B /* QuorumList */,
 			);
 			path = DashKit;
 			sourceTree = "<group>";

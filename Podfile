@@ -49,6 +49,11 @@ target :DashKit do
     pod 'CryptoX11.swift', '~> 1.1'
 end
 
+target :Hodler do
+    project 'Hodler/Hodler'
+    kit_pods
+end
+
 target :Demo do
     project 'Demo/Demo'
     kit_pods
