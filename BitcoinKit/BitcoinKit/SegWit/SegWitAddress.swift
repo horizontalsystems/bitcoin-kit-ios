@@ -13,6 +13,11 @@ public class SegWitAddress: Address, Equatable {
         }
     }
 
+    public var lockingScript: Data {
+        // Data[0] - version byte, Data[1] - push keyHash
+        OpCode.push(Int(version)) + OpCode.push(keyHash)
+    }
+
     public init(type: AddressType, keyHash: Data, bech32: String, version: UInt8) {
         self.type = type
         self.keyHash = keyHash

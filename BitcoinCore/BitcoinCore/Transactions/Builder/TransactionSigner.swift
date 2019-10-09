@@ -21,21 +21,18 @@ class TransactionSigner {
                     index: index
             )
 
-            var params = [Data]()
             switch previousOutput.scriptType {
             case .p2pkh:
-                params.append(contentsOf: sigScriptData)
+                inputToSign.input.signatureScript = sigScriptData.reduce(Data()) { $0 + OpCode.push($1) }
             case .p2wpkh:
                 mutableTransaction.transaction.segWit = true
                 inputToSign.input.witnessData = sigScriptData
             case .p2wpkhSh:
                 mutableTransaction.transaction.segWit = true
                 inputToSign.input.witnessData = sigScriptData
-                params.append(OpCode.scriptWPKH(publicKey.keyHash))
+                inputToSign.input.signatureScript = OpCode.push(OpCode.scriptWPKH(publicKey.keyHash))
             default: throw SignError.notSupportedScriptType
             }
-
-            inputToSign.input.signatureScript = params.reduce(Data()) { $0 + OpCode.push($1) }
         }
     }
 

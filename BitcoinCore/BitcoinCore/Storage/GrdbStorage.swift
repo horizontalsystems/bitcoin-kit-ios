@@ -158,6 +158,12 @@ open class GrdbStorage {
             try db.execute(sql: "UPDATE \(Block.databaseTableName) SET \(Block.Columns.timestamp.name) = 1559256184 WHERE \(Block.Columns.height.name) == 578592 AND \(Block.Columns.timestamp.name) == 1559277784")
         }
 
+        migrator.registerMigration("addRedeemScriptToOutput") { db in
+            try db.alter(table: Output.databaseTableName) { t in
+                t.add(column: Output.Columns.redeemScript.name, .blob)
+            }
+        }
+
         return migrator
     }
 

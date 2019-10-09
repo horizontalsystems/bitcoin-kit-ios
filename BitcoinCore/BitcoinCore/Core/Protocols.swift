@@ -340,7 +340,7 @@ public protocol ITransactionSyncer: class {
 }
 
 public protocol ITransactionCreator {
-    func create(to address: String, value: Int, feeRate: Int, senderPay: Bool) throws -> FullTransaction
+    func create(to address: String, value: Int, feeRate: Int, senderPay: Bool, extraData: [String: [String: Any]]) throws -> FullTransaction
     func create(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int, senderPay: Bool) throws -> FullTransaction
     func create(from: UnspentOutput, to address: String, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction
 }
@@ -374,10 +374,6 @@ public protocol IBlockchainDataListener: class {
 
 protocol IInputSigner {
     func sigScriptData(transaction: Transaction, inputsToSign: [InputToSign], outputs: [Output], index: Int) throws -> [Data]
-}
-
-public protocol IScriptBuilder {
-    func lockingScript(for address: Address) throws -> Data
 }
 
 public protocol ITransactionSizeCalculator {
@@ -556,4 +552,13 @@ protocol IBloomFilterProvider: AnyObject {
 
 protocol IIrregularOutputFinder {
     func hasIrregularOutput(outputs: [Output]) -> Bool
+}
+
+public protocol IPlugin {
+    func processOutputs(mutableTransaction: MutableTransaction, extraData: [String: [String: Any]], addressConverter: IAddressConverter) throws
+}
+
+protocol IPluginManager {
+    func processOutputs(mutableTransaction: MutableTransaction, extraData: [String: [String: Any]]) throws
+    func add(plugin: IPlugin)
 }

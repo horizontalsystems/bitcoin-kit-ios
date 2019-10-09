@@ -1,5 +1,6 @@
 import BitcoinCore
 import HSHDWalletKit
+import Hodler
 import BigInt
 import HSCryptoKit
 import RxSwift
@@ -61,7 +62,6 @@ public class BitcoinKit: AbstractKit {
 
         // extending BitcoinCore
 
-        bitcoinCore.prepend(scriptBuilder: SegWitScriptBuilder())
         bitcoinCore.prepend(addressConverter: bech32AddressConverter)
 
         let blockHelper = BlockValidatorHelper(storage: storage)
@@ -77,6 +77,7 @@ public class BitcoinKit: AbstractKit {
         }
 
         bitcoinCore.add(restoreKeyConverterForBip: bip)
+        bitcoinCore.add(plugin: HodlerPlugin())
         if bip == .bip44 {
             bitcoinCore.add(restoreKeyConverterForBip: .bip49)
             bitcoinCore.add(restoreKeyConverterForBip: .bip84)

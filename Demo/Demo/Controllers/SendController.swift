@@ -7,6 +7,7 @@ class SendController: UIViewController {
     @IBOutlet weak var addressTextField: UITextField?
     @IBOutlet weak var amountTextField: UITextField?
     @IBOutlet weak var coinLabel: UILabel?
+    @IBOutlet weak var datePicker: UIDatePicker?
 
     private var adapters = [BaseAdapter]()
     private let segmentedControl = UISegmentedControl()
@@ -51,7 +52,7 @@ class SendController: UIViewController {
     @objc func onSegmentChanged() {
         coinLabel?.text = currentAdapter?.coinCode
     }
-
+    
     @IBAction func send() {
         guard let address = addressTextField?.text else {
             return
@@ -68,8 +69,13 @@ class SendController: UIViewController {
             show(error: "Invalid amount")
             return
         }
+        
+        var extraData = [String: [String: Any]]()
+        if let lockUntil = datePicker?.date {
+            extraData["hodler"] = ["locked_until": Int(lockUntil.timeIntervalSince1970)]
+        }
 
-        currentAdapter?.sendSingle(to: address, amount: amount)
+        currentAdapter?.sendSingle(to: address, amount: amount, extraData: extraData)
                 .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .userInitiated))
                 .observeOn(MainScheduler.instance)
                 .subscribe(onSuccess: { [weak self] _ in

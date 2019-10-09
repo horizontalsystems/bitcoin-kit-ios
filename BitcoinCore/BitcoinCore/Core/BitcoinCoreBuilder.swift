@@ -141,9 +141,8 @@ public class BitcoinCoreBuilder {
         let doubleShaHasher = DoubleShaHasher()
         let merkleBranch = MerkleBranch(hasher: doubleShaHasher)
         let merkleBlockValidator = MerkleBlockValidator(maxBlockSize: network.maxBlockSize, merkleBranch: merkleBranch)
-        let scriptBuilder = ScriptBuilderChain()
 
-        let factory = Factory(network: network, networkMessageParser: networkMessageParser, networkMessageSerializer: networkMessageSerializer, scriptBuilder: scriptBuilder)
+        let factory = Factory(network: network, networkMessageParser: networkMessageParser, networkMessageSerializer: networkMessageSerializer)
 
         let publicKeyManager = PublicKeyManager.instance(storage: storage, hdWallet: hdWallet, restoreKeyConverter: restoreKeyConverterChain)
 
@@ -192,13 +191,14 @@ public class BitcoinCoreBuilder {
                 peerManager: peerManager, logger: logger)
         let syncedReadyPeerManager = SyncedReadyPeerManager(peerGroup: peerGroup, initialBlockDownload: initialBlockDownload)
 
+        let pluginManager = PluginManager(addressConverter: addressConverter, storage: storage)
         let inputSigner = InputSigner(hdWallet: hdWallet, network: network)
         let transactionSizeCalculator = TransactionSizeCalculator()
-        let outputSetter = OutputSetter(addressConverter: addressConverter, factory: factory)
+        let outputSetter = OutputSetter(addressConverter: addressConverter, factory: factory, pluginManager: pluginManager)
         let inputSetter = InputSetter(unspentOutputSelector: unspentOutputSelector, addressConverter: addressConverter, publicKeyManager: publicKeyManager, factory: factory, changeScriptType: bip.scriptType)
         let lockTimeSetter = LockTimeSetter(storage: storage)
         let transactionSigner = TransactionSigner(inputSigner: inputSigner)
-        let transactionBuilder = TransactionBuilder(inputSigner: inputSigner, scriptBuilder: scriptBuilder, factory: factory,
+        let transactionBuilder = TransactionBuilder(inputSigner: inputSigner, factory: factory,
                 outputSetter: outputSetter, inputSetter: inputSetter, lockTimeSetter: lockTimeSetter, signer: transactionSigner)
         let transactionFeeCalculator = TransactionFeeCalculator(unspentOutputSelector: unspentOutputSelector, transactionSizeCalculator: transactionSizeCalculator)
         let transactionSender = TransactionSender(transactionSyncer: transactionSyncer, peerManager: peerManager, initialBlockDownload: initialBlockDownload, syncedReadyPeerManager: syncedReadyPeerManager, logger: logger)
@@ -221,13 +221,13 @@ public class BitcoinCoreBuilder {
                 restoreKeyConverterChain: restoreKeyConverterChain,
                 unspentOutputSelector: unspentOutputSelector,
                 kitStateProvider: kitStateProvider,
-                scriptBuilder: scriptBuilder,
                 transactionCreator: transactionCreator,
                 transactionFeeCalculator: transactionFeeCalculator,
                 paymentAddressParser: paymentAddressParser,
                 networkMessageParser: networkMessageParser,
                 networkMessageSerializer: networkMessageSerializer,
                 syncManager: syncManager,
+                pluginManager: pluginManager,
                 watchedTransactionManager: watchedTransactionManager,
                 bip: bip,
                 peerManager: peerManager)
@@ -245,7 +245,6 @@ public class BitcoinCoreBuilder {
         peerGroup.peerTaskHandler = bitcoinCore.peerTaskHandlerChain
         peerGroup.inventoryItemsHandler = bitcoinCore.inventoryItemsHandlerChain
 
-        bitcoinCore.prepend(scriptBuilder: ScriptBuilder())
         bitcoinCore.prepend(addressConverter: Base58AddressConverter(addressVersion: network.pubKeyHash, addressScriptVersion: network.scriptHash))
         bitcoinCore.prepend(unspentOutputSelector: UnspentOutputSelector(calculator: transactionSizeCalculator, provider: unspentOutputProvider))
         bitcoinCore.prepend(unspentOutputSelector: UnspentOutputSelectorSingleNoChange(calculator: transactionSizeCalculator, provider: unspentOutputProvider))

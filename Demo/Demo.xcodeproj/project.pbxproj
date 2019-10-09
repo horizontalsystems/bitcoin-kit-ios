@@ -28,6 +28,8 @@
 		11B35E1839CAFDB222A0C0F9 /* ReceiveController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 11B358E91CF03C12866AD4AE /* ReceiveController.xib */; };
 		11B35F8D7C73F41FD9794117 /* ReceiveController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B353F536D54E9ACBB7D575 /* ReceiveController.swift */; };
 		11B35FF483B731F3ECFCB582 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B355861438272F37EB7213 /* Configuration.swift */; };
+		D016AC75234CB51800E4F499 /* Hodler.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D016AC74234CB51800E4F499 /* Hodler.framework */; };
+		D016AC76234CB51800E4F499 /* Hodler.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D016AC74234CB51800E4F499 /* Hodler.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		D3285F4620BD158E00644076 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3285F4520BD158E00644076 /* AppDelegate.swift */; };
 		D3373DB220C52F640082BC4A /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = D3373DB120C52F640082BC4A /* LaunchScreen.xib */; };
 		D34BDCBA213E8CD5009D0AAC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D34BDCB9213E8CD5009D0AAC /* Assets.xcassets */; };
@@ -52,6 +54,7 @@
 				D3927BAC227AE928005094C4 /* BitcoinKit.framework in Embed Frameworks */,
 				D3927BAE227AE928005094C4 /* BitcoinCashKit.framework in Embed Frameworks */,
 				D3927BB7227AE94E005094C4 /* BitcoinCore.framework in Embed Frameworks */,
+				D016AC76234CB51800E4F499 /* Hodler.framework in Embed Frameworks */,
 				D3927BB0227AE928005094C4 /* DashKit.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -83,6 +86,7 @@
 		11B35FF4A84349CC48FD0E25 /* BaseAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseAdapter.swift; sourceTree = "<group>"; };
 		74FB4D641711D9479B8D4823 /* Pods-Demo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Demo.debug.xcconfig"; path = "../Pods/Target Support Files/Pods-Demo/Pods-Demo.debug.xcconfig"; sourceTree = "<group>"; };
 		9C192BE97FB56FE2283F4EA9 /* Pods-Demo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Demo.release.xcconfig"; path = "../Pods/Target Support Files/Pods-Demo/Pods-Demo.release.xcconfig"; sourceTree = "<group>"; };
+		D016AC74234CB51800E4F499 /* Hodler.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Hodler.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3285F4220BD158E00644076 /* Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Demo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3285F4520BD158E00644076 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D3285F5120BD158F00644076 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.info; path = Info.plist; sourceTree = "<group>"; };
@@ -104,6 +108,7 @@
 				D3927BAF227AE928005094C4 /* DashKit.framework in Frameworks */,
 				D3927BAD227AE928005094C4 /* BitcoinCashKit.framework in Frameworks */,
 				D3927BB6227AE94E005094C4 /* BitcoinCore.framework in Frameworks */,
+				D016AC75234CB51800E4F499 /* Hodler.framework in Frameworks */,
 				D3927BAA227AB3C9005094C4 /* Pods_Demo.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -172,6 +177,7 @@
 		95AD93BB0A2D5F5C4A435252 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D016AC74234CB51800E4F499 /* Hodler.framework */,
 				D3927BA3227AB3C9005094C4 /* BitcoinCashKit.framework */,
 				D3927BA5227AB3C9005094C4 /* BitcoinKit.framework */,
 				D3927BA7227AB3C9005094C4 /* DashKit.framework */,

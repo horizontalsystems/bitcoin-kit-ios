@@ -144,7 +144,7 @@ public class DashKit: AbstractKit {
         transactionInfos.compactMap { $0 as? DashTransactionInfo }
     }
 
-    public override func send(to address: String, value: Int, feeRate: Int) throws -> FullTransaction {
+    public override func send(to address: String, value: Int, feeRate: Int, extraData: [String: [String: Any]]) throws -> FullTransaction {
         try super.send(to: address, value: value, feeRate: feeRate)
     }
 

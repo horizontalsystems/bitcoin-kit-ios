@@ -30,6 +30,7 @@ public class OpCode {
     public static let _if: UInt8 = 0x63
     public static let _else: UInt8 = 0x67
     public static let endIf: UInt8 = 0x68
+    public static let op_return: UInt8 = 0x6a
 
     public static func value(fromPush code: UInt8) -> UInt8? {
         if code == 0 {

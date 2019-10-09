@@ -15,9 +15,9 @@ class InputSetter {
     }
 
     func setInputs(to mutableTransaction: MutableTransaction, feeRate: Int, senderPay: Bool) throws {
-        var value = mutableTransaction.paymentOutput.value
-        let extraDataOutputSize = mutableTransaction.extraDataOutputSize
-        let unspentOutputInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: mutableTransaction.paymentOutput.scriptType, changeType: changeScriptType, senderPay: senderPay)
+        let value = mutableTransaction.recipientValue
+        _ = mutableTransaction.extraDataOutputSize
+        let unspentOutputInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: mutableTransaction.recipientAddress.scriptType, changeType: changeScriptType, senderPay: senderPay)
         let unspentOutputs = unspentOutputInfo.unspentOutputs
 
         for unspentOutput in unspentOutputs {
@@ -36,21 +36,21 @@ class InputSetter {
             mutableTransaction.add(inputToSign: input)
         }
 
-        // change
+        // Calculate fee
         let fee = unspentOutputInfo.fee
-        var sentValue = value
+        let receivedValue = senderPay ? value : value - fee
+        let sentValue = senderPay ? value + fee : value
 
-        if !senderPay {
-            sentValue += fee
-            value -= fee
-            mutableTransaction.paymentOutput.value = value
-        }
+        // Set received value
+        mutableTransaction.recipientValue = receivedValue
 
+        // Add change output if needed
         if unspentOutputInfo.addChangeOutput {
             let changePubKey = try publicKeyManager.changePublicKey()
             let changeAddress = try addressConverter.convert(publicKey: changePubKey, type: changeScriptType)
 
-            mutableTransaction.changeOutput = try factory.output(withIndex: 1, address: changeAddress, value: unspentOutputInfo.totalValue - sentValue, publicKey: nil)
+            mutableTransaction.changeAddress = changeAddress
+            mutableTransaction.changeValue = unspentOutputInfo.totalValue - sentValue
         }
     }
 

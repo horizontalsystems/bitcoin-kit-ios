@@ -1,17 +1,19 @@
 class OutputSetter {
     private let addressConverter: IAddressConverter
     private let factory: IFactory
+    private let pluginManager: IPluginManager
 
-    init(addressConverter: IAddressConverter, factory: IFactory) {
+    init(addressConverter: IAddressConverter, factory: IFactory, pluginManager: IPluginManager) {
         self.addressConverter = addressConverter
         self.factory = factory
+        self.pluginManager = pluginManager
     }
 
-    func setOutputs(to transaction: MutableTransaction, toAddress: String, value: Int, extraData: [String: [String: Any]]) throws {
-        let address = try addressConverter.convert(address: toAddress)
-        transaction.paymentOutput = try factory.output(withIndex: 0, address: address, value: value, publicKey: nil)
+    func setOutputs(to mutableTransaction: MutableTransaction, toAddress: String, value: Int, extraData: [String: [String: Any]]) throws {
+        mutableTransaction.recipientAddress = try addressConverter.convert(address: toAddress)
+        mutableTransaction.recipientValue = value
 
-        // plugins.setOutputs(transaction, extraData)
+        try pluginManager.processOutputs(mutableTransaction: mutableTransaction, extraData: extraData)
     }
 
 }

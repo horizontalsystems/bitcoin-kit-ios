@@ -20,11 +20,9 @@
 		58AAA63A4D5CB80B7D260F71 /* MainNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA5DC79D60B7733E52BEC /* MainNet.swift */; };
 		58AAA64BD96CE9A79484D42E /* SegWitBech32AddressConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA79DC50FFF8761BAFD89 /* SegWitBech32AddressConverter.swift */; };
 		58AAA663ECDC727231CA8863 /* Bech32.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA97073BF8F4DCA68CBE1 /* Bech32.swift */; };
-		58AAA68E9670087996AA628F /* SegWitScriptBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAA628741DC6017350532 /* SegWitScriptBuilderTests.swift */; };
 		58AAA8268F45036A886ECECF /* BitcoinCoreCompatibility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAACDBF9DF3DCB75EE0BA6 /* BitcoinCoreCompatibility.swift */; };
 		58AAA9FF45FDE9548830D54F /* RegTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAACD1AA455F909A7E4378 /* RegTest.swift */; };
 		58AAAAAAA18E7D96FE94AADE /* BitcoinKitErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA3E253113621E4F2F704 /* BitcoinKitErrors.swift */; };
-		58AAAC2EE10933D65DA4B027 /* SegWitScriptBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAACD3F4604233235F3FDD /* SegWitScriptBuilder.swift */; };
 		58AAACDD4F0F73E5CD9E82A4 /* SegWitBech32.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAC5F67BD7DA7392C6D82 /* SegWitBech32.swift */; };
 		87CF6AFD0A939977303D4F38 /* Pods_BitcoinKitTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37709BCA1C4277BCD57A6208 /* Pods_BitcoinKitTests.framework */; };
 /* End PBXBuildFile section */
@@ -58,10 +56,8 @@
 		58AAA79DC50FFF8761BAFD89 /* SegWitBech32AddressConverter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegWitBech32AddressConverter.swift; sourceTree = "<group>"; };
 		58AAA8AA13E5099C73B8E79C /* GeneratedMocks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratedMocks.swift; sourceTree = "<group>"; };
 		58AAA97073BF8F4DCA68CBE1 /* Bech32.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bech32.swift; sourceTree = "<group>"; };
-		58AAAA628741DC6017350532 /* SegWitScriptBuilderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegWitScriptBuilderTests.swift; sourceTree = "<group>"; };
 		58AAAC5F67BD7DA7392C6D82 /* SegWitBech32.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegWitBech32.swift; sourceTree = "<group>"; };
 		58AAACD1AA455F909A7E4378 /* RegTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegTest.swift; sourceTree = "<group>"; };
-		58AAACD3F4604233235F3FDD /* SegWitScriptBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegWitScriptBuilder.swift; sourceTree = "<group>"; };
 		58AAACDBF9DF3DCB75EE0BA6 /* BitcoinCoreCompatibility.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinCoreCompatibility.swift; sourceTree = "<group>"; };
 		58AAAFAAC6AABE2400485238 /* Protocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Protocols.swift; sourceTree = "<group>"; };
 		66A9A33F4AB6913B8F8FEDF1 /* Pods-BitcoinKitTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BitcoinKitTests.debug.xcconfig"; path = "../Pods/Target Support Files/Pods-BitcoinKitTests/Pods-BitcoinKitTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -158,7 +154,6 @@
 			isa = PBXGroup;
 			children = (
 				58AAA5A526DD240851A5115F /* SegWitBech32AddressConverterTests.swift */,
-				58AAAA628741DC6017350532 /* SegWitScriptBuilderTests.swift */,
 			);
 			path = SegWit;
 			sourceTree = "<group>";
@@ -180,7 +175,6 @@
 				58AAA79DC50FFF8761BAFD89 /* SegWitBech32AddressConverter.swift */,
 				58AAA97073BF8F4DCA68CBE1 /* Bech32.swift */,
 				58AAA71716FABEBBE3FFAB45 /* SegWitAddress.swift */,
-				58AAACD3F4604233235F3FDD /* SegWitScriptBuilder.swift */,
 			);
 			path = SegWit;
 			sourceTree = "<group>";
@@ -391,7 +385,6 @@
 				58AAA0CFE31FD40385CDF506 /* Protocols.swift in Sources */,
 				58AAA663ECDC727231CA8863 /* Bech32.swift in Sources */,
 				58AAA323FA5EDE02F99E25AE /* SegWitAddress.swift in Sources */,
-				58AAAC2EE10933D65DA4B027 /* SegWitScriptBuilder.swift in Sources */,
 				58AAAAAAA18E7D96FE94AADE /* BitcoinKitErrors.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -402,7 +395,6 @@
 			files = (
 				58AAA4F949AA4261158F54B1 /* SegWitBech32AddressConverterTests.swift in Sources */,
 				58AAA3098471BB324159712D /* GeneratedMocks.swift in Sources */,
-				58AAA68E9670087996AA628F /* SegWitScriptBuilderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

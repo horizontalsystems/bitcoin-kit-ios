@@ -7,7 +7,6 @@ class TransactionBuilder {
     }
 
     private let inputSigner: IInputSigner
-    private let scriptBuilder: IScriptBuilder
     private let factory: IFactory
 
     private let outputSetter: OutputSetter
@@ -15,9 +14,8 @@ class TransactionBuilder {
     private let lockTimeSetter: LockTimeSetter
     private let signer: TransactionSigner
 
-    init(inputSigner: IInputSigner, scriptBuilder: IScriptBuilder, factory: IFactory, outputSetter: OutputSetter, inputSetter: InputSetter, lockTimeSetter: LockTimeSetter, signer: TransactionSigner) {
+    init(inputSigner: IInputSigner, factory: IFactory, outputSetter: OutputSetter, inputSetter: InputSetter, lockTimeSetter: LockTimeSetter, signer: TransactionSigner) {
         self.inputSigner = inputSigner
-        self.scriptBuilder = scriptBuilder
         self.factory = factory
 
         self.outputSetter = outputSetter
@@ -46,14 +44,14 @@ class TransactionBuilder {
 extension TransactionBuilder: ITransactionBuilder {
 
     func buildTransaction(toAddress: String, value: Int, feeRate: Int, senderPay: Bool, extraData: [String: [String: Any]]) throws -> FullTransaction {
-        let transaction = MutableTransaction()
+        let mutableTransaction = MutableTransaction()
 
-        try outputSetter.setOutputs(to: transaction, toAddress: toAddress, value: value, extraData: extraData)
-        try inputSetter.setInputs(to: transaction, feeRate: feeRate, senderPay: senderPay)
-        lockTimeSetter.setLockTime(to: transaction)
-        try signer.sign(mutableTransaction: transaction)
+        try outputSetter.setOutputs(to: mutableTransaction, toAddress: toAddress, value: value, extraData: extraData)
+        try inputSetter.setInputs(to: mutableTransaction, feeRate: feeRate, senderPay: senderPay)
+        lockTimeSetter.setLockTime(to: mutableTransaction)
+        try signer.sign(mutableTransaction: mutableTransaction)
 
-        return transaction.build()
+        return mutableTransaction.build()
     }
 
     func buildTransaction(from unspentOutput: UnspentOutput, to address: Address, fee: Int, lastBlockHeight: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction {
