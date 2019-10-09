@@ -7,6 +7,7 @@ public protocol Address: class {
     var scriptType: ScriptType { get }
     var keyHash: Data { get }
     var stringValue: String { get }
+    var lockingScript: Data { get }
 }
 
 extension Address {
@@ -24,6 +25,13 @@ class LegacyAddress: Address, Equatable {
     let type: AddressType
     let keyHash: Data
     let stringValue: String
+
+    var lockingScript: Data {
+        switch type {
+        case .pubKeyHash: return OpCode.p2pkhStart + OpCode.push(keyHash) + OpCode.p2pkhFinish
+        case .scriptHash: return OpCode.p2shStart + OpCode.push(keyHash) + OpCode.p2shFinish
+        }
+    }
 
     init(type: AddressType, keyHash: Data, base58: String) {
         self.type = type

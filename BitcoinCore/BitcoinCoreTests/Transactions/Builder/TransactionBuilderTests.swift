@@ -8,7 +8,6 @@ import Quick
 class TransactionBuilderTests: QuickSpec {
     override func spec() {
         let mockInputSigner = MockIInputSigner()
-        let mockScriptBuilder = MockIScriptBuilder()
         let mockFactory = MockIFactory()
 
         let toAddressPKH = LegacyAddress(type: .pubKeyHash, keyHash: randomBytes(length: 32), base58: "toAddressPKH")
@@ -32,11 +31,11 @@ class TransactionBuilderTests: QuickSpec {
                 when(mock).output(withValue: any(), index: any(), lockingScript: any(), type: any(), address: any(), keyHash: equal(to: changeAddressWPKH.keyHash), publicKey: isNil()).thenReturn(self.output(from: changeAddressWPKH))
             }
 
-            builder = TransactionBuilder(inputSigner: mockInputSigner, scriptBuilder: mockScriptBuilder, factory: mockFactory)
+            builder = TransactionBuilder(inputSigner: mockInputSigner, factory: mockFactory)
         }
 
         afterEach {
-            reset(mockInputSigner, mockScriptBuilder, mockFactory)
+            reset(mockInputSigner, mockFactory)
         }
 
         describe("#buildTransaction") {
@@ -58,9 +57,6 @@ class TransactionBuilderTests: QuickSpec {
 
                 stub(mockFactory) { mock in
                     when(mock).inputToSign(withPreviousOutput: equal(to: unspentOutput), script: any(), sequence: any()).thenReturn(inputToSign)
-                }
-                stub(mockScriptBuilder) { mock in
-                    when(mock).lockingScript(for: any()).thenReturn(Data())
                 }
                 stub(mockInputSigner) { mock in
                     when(mock).sigScriptData(transaction: any(), inputsToSign: any(), outputs: any(), index: any()).thenReturn(signatureData)
@@ -294,9 +290,6 @@ class TransactionBuilderTests: QuickSpec {
 
                 stub(mockFactory) { mock in
                     when(mock).inputToSign(withPreviousOutput: equal(to: unspentOutput), script: any(), sequence: any()).thenReturn(inputToSign)
-                }
-                stub(mockScriptBuilder) { mock in
-                    when(mock).lockingScript(for: any()).thenReturn(Data())
                 }
                 stub(mockInputSigner) { mock in
                     when(mock).sigScriptData(transaction: any(), inputsToSign: any(), outputs: any(), index: any()).thenReturn(signatureData)

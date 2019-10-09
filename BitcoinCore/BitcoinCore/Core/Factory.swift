@@ -2,13 +2,11 @@ class Factory: IFactory {
     private let network: INetwork
     private let networkMessageParser: INetworkMessageParser
     private let networkMessageSerializer: INetworkMessageSerializer
-    private let scriptBuilder: IScriptBuilder
 
-    init(network: INetwork, networkMessageParser: INetworkMessageParser, networkMessageSerializer: INetworkMessageSerializer, scriptBuilder: IScriptBuilder) {
+    init(network: INetwork, networkMessageParser: INetworkMessageParser, networkMessageSerializer: INetworkMessageSerializer) {
         self.network = network
         self.networkMessageParser = networkMessageParser
         self.networkMessageSerializer = networkMessageSerializer
-        self.scriptBuilder = scriptBuilder
     }
 
     func block(withHeader header: BlockHeader, previousBlock: Block) -> Block {
@@ -33,8 +31,7 @@ class Factory: IFactory {
     }
 
     func output(withIndex index: Int, address: Address, value: Int, publicKey: PublicKey?) throws -> Output {
-        let script = try scriptBuilder.lockingScript(for: address)
-        return Output(withValue: value, index: index, lockingScript: script, type: address.scriptType, address: address.stringValue, keyHash: address.keyHash, publicKey: publicKey)
+        Output(withValue: value, index: index, lockingScript: address.lockingScript, type: address.scriptType, address: address.stringValue, keyHash: address.keyHash, publicKey: publicKey)
     }
 
     func peer(withHost host: String, logger: Logger? = nil) -> IPeer {

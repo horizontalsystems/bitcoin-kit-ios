@@ -20,8 +20,6 @@ public class BitcoinCore {
     private let unspentOutputSelector: UnspentOutputSelectorChain
     private let kitStateProvider: IKitStateProvider & ISyncStateListener
 
-    private let scriptBuilder: ScriptBuilderChain
-
     private let transactionCreator: ITransactionCreator
     private let transactionFeeCalculator: ITransactionFeeCalculator
     private let paymentAddressParser: IPaymentAddressParser
@@ -30,6 +28,7 @@ public class BitcoinCore {
     private let networkMessageParser: NetworkMessageParser
 
     private let syncManager: SyncManager
+    private let pluginManager: IPluginManager
 
     private let bip: Bip
 
@@ -73,12 +72,12 @@ public class BitcoinCore {
         return self
     }
 
-    func publicKey(byPath path: String) throws -> PublicKey {
-        return try publicKeyManager.publicKey(byPath: path)
+    public func add(plugin: IPlugin) {
+        pluginManager.add(plugin: plugin)
     }
 
-    public func prepend(scriptBuilder: IScriptBuilder) {
-        self.scriptBuilder.prepend(scriptBuilder: scriptBuilder)
+    func publicKey(byPath path: String) throws -> PublicKey {
+        try publicKeyManager.publicKey(byPath: path)
     }
 
     public func prepend(addressConverter: IAddressConverter) {
@@ -99,9 +98,9 @@ public class BitcoinCore {
          syncedReadyPeerManager: ISyncedReadyPeerManager, transactionSyncer: ITransactionSyncer,
          blockValidatorChain: BlockValidatorChain, publicKeyManager: IPublicKeyManager, addressConverter: AddressConverterChain, restoreKeyConverterChain: RestoreKeyConverterChain,
          unspentOutputSelector: UnspentOutputSelectorChain, kitStateProvider: IKitStateProvider & ISyncStateListener,
-         scriptBuilder: ScriptBuilderChain, transactionCreator: ITransactionCreator, transactionFeeCalculator: ITransactionFeeCalculator,
+         transactionCreator: ITransactionCreator, transactionFeeCalculator: ITransactionFeeCalculator,
          paymentAddressParser: IPaymentAddressParser, networkMessageParser: NetworkMessageParser, networkMessageSerializer: NetworkMessageSerializer,
-         syncManager: SyncManager, watchedTransactionManager: IWatchedTransactionManager, bip: Bip,
+         syncManager: SyncManager, pluginManager: IPluginManager, watchedTransactionManager: IWatchedTransactionManager, bip: Bip,
          peerManager: IPeerManager) {
         self.storage = storage
         self.cache = cache
@@ -117,7 +116,6 @@ public class BitcoinCore {
         self.restoreKeyConverterChain = restoreKeyConverterChain
         self.unspentOutputSelector = unspentOutputSelector
         self.kitStateProvider = kitStateProvider
-        self.scriptBuilder = scriptBuilder
         self.transactionCreator = transactionCreator
         self.transactionFeeCalculator = transactionFeeCalculator
         self.paymentAddressParser = paymentAddressParser
@@ -126,6 +124,7 @@ public class BitcoinCore {
         self.networkMessageSerializer = networkMessageSerializer
 
         self.syncManager = syncManager
+        self.pluginManager = pluginManager
         self.watchedTransactionManager = watchedTransactionManager
         self.bip = bip
 
@@ -164,8 +163,8 @@ extension BitcoinCore {
         dataProvider.transactions(fromHash: fromHash, limit: limit)
     }
 
-    public func send(to address: String, value: Int, feeRate: Int) throws -> FullTransaction {
-        try transactionCreator.create(to: address, value: value, feeRate: feeRate, senderPay: true)
+    public func send(to address: String, value: Int, feeRate: Int, extraData: [String: [String: Any]] = [:]) throws -> FullTransaction {
+        try transactionCreator.create(to: address, value: value, feeRate: feeRate, senderPay: true, extraData: extraData)
     }
 
     public func send(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int) throws -> FullTransaction {

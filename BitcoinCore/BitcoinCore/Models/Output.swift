@@ -2,36 +2,18 @@ import Foundation
 import GRDB
 
 public enum ScriptType: Int, DatabaseValueConvertible {
-    case unknown, p2pkh, p2pk, p2multi, p2sh, p2wsh, p2wpkh, p2wpkhSh
+    case unknown, p2pkh, p2pk, p2multi, p2sh, p2wsh, p2wpkh, p2wpkhSh, nullData
 
     var size: Int {
         switch self {
-            case .p2pk: return 35
-            case .p2pkh: return 25
-            case .p2sh: return 23
-            case .p2wsh: return 34
-            case .p2wpkh: return 22
-            case .p2wpkhSh: return 23
-            default: return 0
-        }
-    }
-
-    var keyLength: UInt8 {
-        switch self {
-            case .p2pk: return 0x21
-            case .p2pkh: return 0x14
-            case .p2sh: return 0x14
-            case .p2wsh: return 0x20
-            case .p2wpkh: return 0x14
-            case .p2wpkhSh: return 0x14
-            default: return 0
-        }
-    }
-
-    var addressType: AddressType {
-        switch self {
-            case .p2sh, .p2wsh: return .scriptHash
-            default: return .pubKeyHash
+        case .p2pk: return 35
+        case .p2pkh: return 25
+        case .p2sh: return 23
+        case .p2wsh: return 34
+        case .p2wpkh: return 22
+        case .p2wpkhSh: return 23
+        case .nullData: return 26
+        default: return 0
         }
     }
 
@@ -78,6 +60,7 @@ public class Output: Record {
         case transactionHash
         case publicKeyPath
         case scriptType
+        case redeemScript
         case keyHash
         case address
     }
@@ -89,6 +72,7 @@ public class Output: Record {
         transactionHash = row[Columns.transactionHash]
         publicKeyPath = row[Columns.publicKeyPath]
         scriptType = row[Columns.scriptType]
+        redeemScript = row[Columns.redeemScript]
         keyHash = row[Columns.keyHash]
         address = row[Columns.address]
 
@@ -102,6 +86,7 @@ public class Output: Record {
         container[Columns.transactionHash] = transactionHash
         container[Columns.publicKeyPath] = publicKeyPath
         container[Columns.scriptType] = scriptType
+        container[Columns.redeemScript] = redeemScript
         container[Columns.keyHash] = keyHash
         container[Columns.address] = address
     }

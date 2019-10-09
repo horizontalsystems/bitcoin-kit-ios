@@ -13,6 +13,13 @@ public class CashAddress: Address, Equatable {
         }
     }
 
+    public var lockingScript: Data {
+        switch type {
+        case .pubKeyHash: return OpCode.p2pkhStart + OpCode.push(keyHash) + OpCode.p2pkhFinish
+        case .scriptHash: return OpCode.p2shStart + OpCode.push(keyHash) + OpCode.p2shFinish
+        }
+    }
+
     public init(type: AddressType, keyHash: Data, cashAddrBech32: String, version: UInt8) {
         self.type = type
         self.keyHash = keyHash
