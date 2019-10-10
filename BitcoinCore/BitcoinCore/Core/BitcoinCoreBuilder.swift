@@ -12,6 +12,7 @@ public class BitcoinCoreBuilder {
     private var paymentAddressParser: IPaymentAddressParser?
     private var walletId: String?
     private var initialSyncApi: ISyncTransactionApi?
+    private var plugins = [IPlugin]()
     private var logger: Logger
 
     private var blockHeaderHasher: IHasher?
@@ -90,6 +91,11 @@ public class BitcoinCoreBuilder {
         return self
     }
 
+    public func add(plugin: IPlugin) -> BitcoinCoreBuilder {
+        plugins.append(plugin)
+        return self
+    }
+
     public init(minLogLevel: Logger.Level = .verbose) {
         self.logger = Logger(network: network, minLogLevel: minLogLevel)
     }
@@ -124,12 +130,14 @@ public class BitcoinCoreBuilder {
         let restoreKeyConverterChain = RestoreKeyConverterChain()
         let pluginManager = PluginManager(addressConverter: addressConverter, scriptConverter: scriptConverter, storage: storage)
 
+        plugins.forEach { pluginManager.add(plugin: $0) }
+
 //        let dbName = "bitcoinkit-${network.javaClass}-$walletId"
 //        let database = KitDatabase.getInstance(context, dbName)
 //        let realmFactory = RealmFactory(dbName)
 //        let storage = Storage(database, realmFactory)
 //
-        let unspentOutputProvider = UnspentOutputProvider(storage: storage, confirmationsThreshold: confirmationsThreshold)
+        let unspentOutputProvider = UnspentOutputProvider(storage: storage, pluginManager: pluginManager, confirmationsThreshold: confirmationsThreshold)
         let transactionInfoConverter = self.transactionInfoConverter ?? TransactionInfoConverter(baseTransactionInfoConverter: BaseTransactionInfoConverter())
         let dataProvider = DataProvider(storage: storage, unspentOutputProvider: unspentOutputProvider, transactionInfoConverter: transactionInfoConverter)
 

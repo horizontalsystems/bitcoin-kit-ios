@@ -53,6 +53,7 @@ public class BitcoinKit: AbstractKit {
                 .set(peerSize: 10)
                 .set(syncMode: syncMode)
                 .set(storage: storage)
+                .add(plugin: HodlerPlugin())
                 .build()
 
         let scriptConverter = ScriptConverter()
@@ -77,7 +78,6 @@ public class BitcoinKit: AbstractKit {
         }
 
         bitcoinCore.add(restoreKeyConverterForBip: bip)
-        bitcoinCore.add(plugin: HodlerPlugin())
         if bip == .bip44 {
             bitcoinCore.add(restoreKeyConverterForBip: .bip49)
             bitcoinCore.add(restoreKeyConverterForBip: .bip84)

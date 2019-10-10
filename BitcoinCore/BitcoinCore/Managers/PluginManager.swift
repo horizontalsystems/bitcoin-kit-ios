@@ -39,4 +39,13 @@ extension PluginManager: IPluginManager {
             try plugin.processTransactionWithNullData(transaction: transaction, nullDataChunks: &iterator, storage: storage, addressConverter: addressConverter)
         }
     }
+
+    func isSpendable(output: Output) -> Bool {
+        guard let pluginId = output.pluginId, let plugin = plugins[pluginId] else {
+            return true
+        }
+
+        return (try? plugin.isSpendable(output: output)) ?? true
+    }
+
 }
