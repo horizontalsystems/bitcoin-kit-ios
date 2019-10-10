@@ -164,6 +164,13 @@ open class GrdbStorage {
             }
         }
 
+        migrator.registerMigration("addPluginInfoToOutput") { db in
+            try db.alter(table: Output.databaseTableName) { t in
+                t.add(column: Output.Columns.pluginId.name, .integer)
+                t.add(column: Output.Columns.pluginData.name, .text)
+            }
+        }
+
         return migrator
     }
 
@@ -511,8 +518,8 @@ extension GrdbStorage: IStorage {
             }
         }
 
-        var inputsByTransaction: [Data: [InputWithPreviousOutput]] = Dictionary(grouping: inputs, by: { $0.input.transactionHash })
-        var outputsByTransaction: [Data: [Output]] = Dictionary(grouping: outputs, by: { $0.transactionHash })
+        let inputsByTransaction: [Data: [InputWithPreviousOutput]] = Dictionary(grouping: inputs, by: { $0.input.transactionHash })
+        let outputsByTransaction: [Data: [Output]] = Dictionary(grouping: outputs, by: { $0.transactionHash })
         var results = [FullTransactionForInfo]()
 
         for transactionWithBlock in transactionsWithBlocks {

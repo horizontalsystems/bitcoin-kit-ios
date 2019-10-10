@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2FA5D676B12FF745A5911E40 /* HodlerData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D16242CA2BBD78ABA8F7 /* HodlerData.swift */; };
 		2FA5DDA7206D8B8B0881996E /* HolderPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D842CADC75745AFA6132 /* HolderPlugin.swift */; };
 		ABFFF88A886209596FE87ABE /* Pods_Hodler.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 07C4E7D9B6ADC34E17C2BC97 /* Pods_Hodler.framework */; };
 		D02C6C9723474D6100F48BD0 /* Hodler.h in Headers */ = {isa = PBXBuildFile; fileRef = D02C6C9523474D6100F48BD0 /* Hodler.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -30,6 +31,7 @@
 
 /* Begin PBXFileReference section */
 		07C4E7D9B6ADC34E17C2BC97 /* Pods_Hodler.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Hodler.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		2FA5D16242CA2BBD78ABA8F7 /* HodlerData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HodlerData.swift; sourceTree = "<group>"; };
 		2FA5D842CADC75745AFA6132 /* HolderPlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HolderPlugin.swift; sourceTree = "<group>"; };
 		CE692A61FBB18EF69F72A4E6 /* Pods-Hodler.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Hodler.debug.xcconfig"; path = "Target Support Files/Pods-Hodler/Pods-Hodler.debug.xcconfig"; sourceTree = "<group>"; };
 		D02C6C9223474D6100F48BD0 /* Hodler.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Hodler.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -66,6 +68,7 @@
 			isa = PBXGroup;
 			children = (
 				2FA5D842CADC75745AFA6132 /* HolderPlugin.swift */,
+				2FA5D16242CA2BBD78ABA8F7 /* HodlerData.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -214,6 +217,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2FA5DDA7206D8B8B0881996E /* HolderPlugin.swift in Sources */,
+				2FA5D676B12FF745A5911E40 /* HodlerData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

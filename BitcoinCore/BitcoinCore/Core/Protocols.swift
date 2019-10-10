@@ -340,13 +340,13 @@ public protocol ITransactionSyncer: class {
 }
 
 public protocol ITransactionCreator {
-    func create(to address: String, value: Int, feeRate: Int, senderPay: Bool, extraData: [String: [String: Any]]) throws -> FullTransaction
+    func create(to address: String, value: Int, feeRate: Int, senderPay: Bool, pluginData: [String: [String: Any]]) throws -> FullTransaction
     func create(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int, senderPay: Bool) throws -> FullTransaction
     func create(from: UnspentOutput, to address: String, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction
 }
 
 protocol ITransactionBuilder {
-    func buildTransaction(toAddress: String, value: Int, feeRate: Int, senderPay: Bool, extraData: [String: [String: Any]]) throws -> FullTransaction
+    func buildTransaction(toAddress: String, value: Int, feeRate: Int, senderPay: Bool, pluginData: [String: [String: Any]]) throws -> FullTransaction
     func buildTransaction(from: UnspentOutput, to: Address, fee: Int, lastBlockHeight: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction
 }
 
@@ -555,10 +555,13 @@ protocol IIrregularOutputFinder {
 }
 
 public protocol IPlugin {
-    func processOutputs(mutableTransaction: MutableTransaction, extraData: [String: [String: Any]], addressConverter: IAddressConverter) throws
+    var id: UInt8 { get }
+    func processOutputs(mutableTransaction: MutableTransaction, pluginData: [String: [String: Any]], addressConverter: IAddressConverter) throws
+    func processTransactionWithNullData(transaction: FullTransaction, nullDataChunks: inout IndexingIterator<[Chunk]>, storage: IStorage, addressConverter: IAddressConverter) throws
 }
 
 protocol IPluginManager {
-    func processOutputs(mutableTransaction: MutableTransaction, extraData: [String: [String: Any]]) throws
     func add(plugin: IPlugin)
+    func processOutputs(mutableTransaction: MutableTransaction, pluginData: [String: [String: Any]]) throws
+    func processTransactionWithNullData(transaction: FullTransaction, nullDataOutput: Output) throws
 }

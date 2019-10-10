@@ -7,7 +7,7 @@ public class MutableTransaction {
     var changeAddress: Address? = nil
     var changeValue = 0
 
-    private var extraData = [Int: Data]()
+    private var pluginData = [UInt8: Data]()
 
     var outputs: [Output] {
         var outputs = [Output]()
@@ -24,11 +24,11 @@ public class MutableTransaction {
             index += 1
         }
 
-        if !extraData.isEmpty {
+        if !pluginData.isEmpty {
             var data = Data([OpCode.op_return])
 
-            extraData.forEach { key, value in
-                data += OpCode.push(key) + value
+            pluginData.forEach { key, value in
+                data += Data([key]) + value
             }
 
             outputs.append(Output(withValue: 0, index: index, lockingScript: data, type: .nullData))
@@ -37,7 +37,7 @@ public class MutableTransaction {
         return outputs
     }
 
-    var extraDataOutputSize: Int {
+    var pluginDataOutputSize: Int {
         0
     }
 
@@ -47,8 +47,8 @@ public class MutableTransaction {
         transaction.isOutgoing = true
     }
 
-    public func add(extraData: Data, pluginId: Int) {
-        self.extraData[pluginId] = extraData
+    public func add(pluginData: Data, pluginId: UInt8) {
+        self.pluginData[pluginId] = pluginData
     }
 
     func add(inputToSign: InputToSign) {
