@@ -16,7 +16,7 @@ class InputSetter {
 
     func setInputs(to mutableTransaction: MutableTransaction, feeRate: Int, senderPay: Bool) throws {
         let value = mutableTransaction.recipientValue
-        _ = mutableTransaction.extraDataOutputSize
+        _ = mutableTransaction.pluginDataOutputSize
         let unspentOutputInfo = try unspentOutputSelector.select(value: value, feeRate: feeRate, outputScriptType: mutableTransaction.recipientAddress.scriptType, changeType: changeScriptType, senderPay: senderPay)
         let unspentOutputs = unspentOutputInfo.unspentOutputs
 

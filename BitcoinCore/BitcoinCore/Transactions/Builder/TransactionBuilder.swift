@@ -43,10 +43,10 @@ class TransactionBuilder {
 
 extension TransactionBuilder: ITransactionBuilder {
 
-    func buildTransaction(toAddress: String, value: Int, feeRate: Int, senderPay: Bool, extraData: [String: [String: Any]]) throws -> FullTransaction {
+    func buildTransaction(toAddress: String, value: Int, feeRate: Int, senderPay: Bool, pluginData: [String: [String: Any]]) throws -> FullTransaction {
         let mutableTransaction = MutableTransaction()
 
-        try outputSetter.setOutputs(to: mutableTransaction, toAddress: toAddress, value: value, extraData: extraData)
+        try outputSetter.setOutputs(to: mutableTransaction, toAddress: toAddress, value: value, pluginData: pluginData)
         try inputSetter.setInputs(to: mutableTransaction, feeRate: feeRate, senderPay: senderPay)
         lockTimeSetter.setLockTime(to: mutableTransaction)
         try signer.sign(mutableTransaction: mutableTransaction)

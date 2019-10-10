@@ -29,11 +29,14 @@ public class Output: Record {
     public var lockingScript: Data
     public var index: Int
     var transactionHash: Data
-    var publicKeyPath: String? = nil
+    public var publicKeyPath: String? = nil
     public var scriptType: ScriptType = .unknown
     public var redeemScript: Data? = nil
     public var keyHash: Data? = nil
     var address: String? = nil
+
+    public var pluginId: UInt8? = nil
+    public var pluginData: String? = nil
 
     public init(withValue value: Int, index: Int, lockingScript script: Data, transactionHash: Data = Data(), type: ScriptType = .unknown, redeemScript: Data? = nil, address: String? = nil, keyHash: Data? = nil, publicKey: PublicKey? = nil) {
         self.value = value
@@ -63,6 +66,8 @@ public class Output: Record {
         case redeemScript
         case keyHash
         case address
+        case pluginId
+        case pluginData
     }
 
     required init(row: Row) {
@@ -75,6 +80,8 @@ public class Output: Record {
         redeemScript = row[Columns.redeemScript]
         keyHash = row[Columns.keyHash]
         address = row[Columns.address]
+        pluginId = row[Columns.pluginId]
+        pluginData = row[Columns.pluginData]
 
         super.init(row: row)
     }
@@ -89,6 +96,8 @@ public class Output: Record {
         container[Columns.redeemScript] = redeemScript
         container[Columns.keyHash] = keyHash
         container[Columns.address] = address
+        container[Columns.pluginId] = pluginId
+        container[Columns.pluginData] = pluginData
     }
 
 }

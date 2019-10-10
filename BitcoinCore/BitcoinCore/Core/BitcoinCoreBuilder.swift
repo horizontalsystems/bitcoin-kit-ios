@@ -120,7 +120,9 @@ public class BitcoinCoreBuilder {
         }
 
         let addressConverter = AddressConverterChain()
+        let scriptConverter = ScriptConverter()
         let restoreKeyConverterChain = RestoreKeyConverterChain()
+        let pluginManager = PluginManager(addressConverter: addressConverter, scriptConverter: scriptConverter, storage: storage)
 
 //        let dbName = "bitcoinkit-${network.javaClass}-$walletId"
 //        let database = KitDatabase.getInstance(context, dbName)
@@ -148,10 +150,9 @@ public class BitcoinCoreBuilder {
 
         let myOutputsCache = OutputsCache.instance(storage: storage)
         let irregularOutputFinder = IrregularOutputFinder(storage: storage)
-        let scriptConverter = ScriptConverter()
         let transactionInputExtractor = TransactionInputExtractor(storage: storage, scriptConverter: scriptConverter, addressConverter: addressConverter, logger: logger)
         let transactionKeySetter = TransactionPublicKeySetter(storage: storage)
-        let transactionOutputExtractor = TransactionOutputExtractor(transactionKeySetter: transactionKeySetter, logger: logger)
+        let transactionOutputExtractor = TransactionOutputExtractor(transactionKeySetter: transactionKeySetter, pluginManager: pluginManager, logger: logger)
         let transactionAddressExtractor = TransactionOutputAddressExtractor(storage: storage, addressConverter: addressConverter)
         let transactionProcessor = TransactionProcessor(storage: storage,
                 outputExtractor: transactionOutputExtractor, inputExtractor: transactionInputExtractor,
@@ -191,7 +192,6 @@ public class BitcoinCoreBuilder {
                 peerManager: peerManager, logger: logger)
         let syncedReadyPeerManager = SyncedReadyPeerManager(peerGroup: peerGroup, initialBlockDownload: initialBlockDownload)
 
-        let pluginManager = PluginManager(addressConverter: addressConverter, storage: storage)
         let inputSigner = InputSigner(hdWallet: hdWallet, network: network)
         let transactionSizeCalculator = TransactionSizeCalculator()
         let outputSetter = OutputSetter(addressConverter: addressConverter, factory: factory, pluginManager: pluginManager)

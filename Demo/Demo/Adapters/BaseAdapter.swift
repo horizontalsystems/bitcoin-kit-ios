@@ -115,12 +115,12 @@ extension BaseAdapter {
         }
     }
 
-    func sendSingle(to address: String, amount: Decimal, extraData: [String: [String: Any]] = [:]) -> Single<Void> {
+    func sendSingle(to address: String, amount: Decimal, pluginData: [String: [String: Any]] = [:]) -> Single<Void> {
         let satoshiAmount = convertToSatoshi(value: amount)
 
         return Single.create { [unowned self] observer in
             do {
-                _ = try self.abstractKit.send(to: address, value: satoshiAmount, feeRate: self.feeRate, extraData: extraData)
+                _ = try self.abstractKit.send(to: address, value: satoshiAmount, feeRate: self.feeRate, pluginData: pluginData)
                 observer(.success(()))
             } catch {
                 observer(.error(error))

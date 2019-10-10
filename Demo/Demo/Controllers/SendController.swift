@@ -70,12 +70,12 @@ class SendController: UIViewController {
             return
         }
         
-        var extraData = [String: [String: Any]]()
+        var pluginData = [String: [String: Any]]()
         if let lockUntil = datePicker?.date {
-            extraData["hodler"] = ["locked_until": Int(lockUntil.timeIntervalSince1970)]
+            pluginData["hodler"] = ["locked_until": Int(lockUntil.timeIntervalSince1970)]
         }
 
-        currentAdapter?.sendSingle(to: address, amount: amount, extraData: extraData)
+        currentAdapter?.sendSingle(to: address, amount: amount, pluginData: pluginData)
                 .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .userInitiated))
                 .observeOn(MainScheduler.instance)
                 .subscribe(onSuccess: { [weak self] _ in
