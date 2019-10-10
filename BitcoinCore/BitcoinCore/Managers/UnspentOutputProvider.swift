@@ -1,16 +1,9 @@
 class UnspentOutputProvider {
     let storage: IStorage
+    let pluginManager: IPluginManager
     let confirmationsThreshold: Int
 
-    init(storage: IStorage, confirmationsThreshold: Int) {
-        self.storage = storage
-        self.confirmationsThreshold = confirmationsThreshold
-    }
-}
-
-extension UnspentOutputProvider: IUnspentOutputProvider {
-
-    var allUnspentOutputs: [UnspentOutput] {
+    private var confirmedOutputs: [UnspentOutput] {
         let lastBlockHeight = storage.lastBlock?.height ?? 0
 
         // Output must have a public key, that is, must belong to the user
@@ -30,6 +23,19 @@ extension UnspentOutputProvider: IUnspentOutputProvider {
 
                     return blockHeight <= lastBlockHeight - confirmationsThreshold + 1
                 })
+    }
+
+    init(storage: IStorage, pluginManager: IPluginManager, confirmationsThreshold: Int) {
+        self.storage = storage
+        self.pluginManager = pluginManager
+        self.confirmationsThreshold = confirmationsThreshold
+    }
+}
+
+extension UnspentOutputProvider: IUnspentOutputProvider {
+
+    var allUnspentOutputs: [UnspentOutput] {
+        confirmedOutputs.filter { pluginManager.isSpendable(output: $0.output) }
     }
 
 }
