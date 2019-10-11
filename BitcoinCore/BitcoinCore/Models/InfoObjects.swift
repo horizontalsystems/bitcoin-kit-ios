@@ -33,3 +33,12 @@ public struct BlockInfo {
     public let height: Int
     public let timestamp: Int?
 }
+
+public struct BalanceInfo : Equatable {
+    public let spendable: Int
+    public let unspendable: Int
+
+    public static func ==(lhs: BalanceInfo, rhs: BalanceInfo) -> Bool {
+        lhs.spendable == rhs.spendable && lhs.unspendable == rhs.unspendable
+    }
+}

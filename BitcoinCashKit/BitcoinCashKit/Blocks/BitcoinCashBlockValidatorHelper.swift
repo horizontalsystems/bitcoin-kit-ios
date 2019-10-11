@@ -12,7 +12,7 @@ class BitcoinCashBlockValidatorHelper: IBitcoinCashBlockValidatorHelper {
 
     func medianTimePast(block: Block) -> Int {
         let startIndex = block.height - medianTimeSpan + 1
-        var median = bitcoinCashStorage.timestamps(from: startIndex, to: block.height, ascending: true)
+        let median = bitcoinCashStorage.timestamps(from: startIndex, to: block.height, ascending: true)
         guard !median.isEmpty else {
             return block.timestamp
         }

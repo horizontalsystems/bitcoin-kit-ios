@@ -15,7 +15,7 @@ public class UnspentOutputSelectorSingleNoChange {
 extension UnspentOutputSelectorSingleNoChange: IUnspentOutputSelector {
 
     public func select(value: Int, feeRate: Int, outputScriptType: ScriptType = .p2pkh, changeType: ScriptType = .p2pkh, senderPay: Bool) throws -> SelectedUnspentOutputInfo {
-        let unspentOutputs = provider.allUnspentOutputs
+        let unspentOutputs = provider.spendableUtxo
 
         guard value > 0 else {
             throw BitcoinCoreErrors.UnspentOutputSelection.wrongValue

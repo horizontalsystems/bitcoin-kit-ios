@@ -13,7 +13,7 @@ class ConfirmedUnspentOutputProvider {
 
 extension ConfirmedUnspentOutputProvider: IUnspentOutputProvider {
 
-    var allUnspentOutputs: [UnspentOutput] {
+    var spendableUtxo: [UnspentOutput] {
         let lastBlockHeight = storage.lastBlock?.height ?? 0
 
         // Output must have a public key, that is, must belong to the user

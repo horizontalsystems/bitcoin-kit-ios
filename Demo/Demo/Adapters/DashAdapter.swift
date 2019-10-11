@@ -48,7 +48,7 @@ extension DashAdapter: DashKitDelegate {
         transactionsSignal.notify()
     }
 
-    func balanceUpdated(balance: Int) {
+    func balanceUpdated(balance: BalanceInfo) {
         balanceSignal.notify()
     }
 
