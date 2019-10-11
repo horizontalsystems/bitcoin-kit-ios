@@ -1,6 +1,7 @@
 class TransactionSigner {
     enum SignError: Error {
         case notSupportedScriptType
+        case noRedeemScript
     }
 
     private let inputSigner: IInputSigner
@@ -9,12 +10,16 @@ class TransactionSigner {
         self.inputSigner = inputSigner
     }
 
+    private func signatureScript(from sigScriptData: [Data]) -> Data {
+        sigScriptData.reduce(Data()) { $0 + OpCode.push($1) }
+    }
+
     func sign(mutableTransaction: MutableTransaction) throws {
         for (index, inputToSign) in mutableTransaction.inputsToSign.enumerated() {
             let previousOutput = inputToSign.previousOutput
             let publicKey = inputToSign.previousOutputPublicKey
 
-            let sigScriptData = try inputSigner.sigScriptData(
+            var sigScriptData = try inputSigner.sigScriptData(
                     transaction: mutableTransaction.transaction,
                     inputsToSign: mutableTransaction.inputsToSign,
                     outputs: mutableTransaction.outputs,
@@ -23,7 +28,7 @@ class TransactionSigner {
 
             switch previousOutput.scriptType {
             case .p2pkh:
-                inputToSign.input.signatureScript = sigScriptData.reduce(Data()) { $0 + OpCode.push($1) }
+                inputToSign.input.signatureScript = signatureScript(from: sigScriptData)
             case .p2wpkh:
                 mutableTransaction.transaction.segWit = true
                 inputToSign.input.witnessData = sigScriptData
@@ -31,6 +36,12 @@ class TransactionSigner {
                 mutableTransaction.transaction.segWit = true
                 inputToSign.input.witnessData = sigScriptData
                 inputToSign.input.signatureScript = OpCode.push(OpCode.scriptWPKH(publicKey.keyHash))
+            case .p2sh:
+                guard let redeemScript = previousOutput.redeemScript else {
+                    throw SignError.noRedeemScript
+                }
+                sigScriptData.append(redeemScript)
+                inputToSign.input.signatureScript = signatureScript(from: sigScriptData)
             default: throw SignError.notSupportedScriptType
             }
         }

@@ -48,4 +48,14 @@ extension PluginManager: IPluginManager {
         return (try? plugin.isSpendable(output: output)) ?? true
     }
 
+    func transactionLockTime(transaction: MutableTransaction) throws -> Int? {
+        let lockTimes: [Int] = try transaction.inputsToSign.compactMap { inputToSign in
+            try inputToSign.previousOutput.pluginId.flatMap { pluginId in
+                try plugins[pluginId]?.transactionLockTime(output: inputToSign.previousOutput)
+            }
+        }
+
+        return lockTimes.max()
+    }
+
 }

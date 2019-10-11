@@ -567,4 +567,5 @@ protocol IPluginManager {
     func processOutputs(mutableTransaction: MutableTransaction, pluginData: [String: [String: Any]]) throws
     func processTransactionWithNullData(transaction: FullTransaction, nullDataOutput: Output) throws
     func isSpendable(output: Output) -> Bool
+    func transactionLockTime(transaction: MutableTransaction) throws -> Int?
 }
