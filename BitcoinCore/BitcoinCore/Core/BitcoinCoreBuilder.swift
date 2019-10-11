@@ -204,7 +204,7 @@ public class BitcoinCoreBuilder {
         let transactionSizeCalculator = TransactionSizeCalculator()
         let outputSetter = OutputSetter(addressConverter: addressConverter, factory: factory, pluginManager: pluginManager)
         let inputSetter = InputSetter(unspentOutputSelector: unspentOutputSelector, addressConverter: addressConverter, publicKeyManager: publicKeyManager, factory: factory, changeScriptType: bip.scriptType)
-        let lockTimeSetter = LockTimeSetter(storage: storage)
+        let lockTimeSetter = LockTimeSetter(storage: storage, pluginManager: pluginManager)
         let transactionSigner = TransactionSigner(inputSigner: inputSigner)
         let transactionBuilder = TransactionBuilder(inputSigner: inputSigner, factory: factory,
                 outputSetter: outputSetter, inputSetter: inputSetter, lockTimeSetter: lockTimeSetter, signer: transactionSigner)

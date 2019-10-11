@@ -48,7 +48,7 @@ extension TransactionBuilder: ITransactionBuilder {
 
         try outputSetter.setOutputs(to: mutableTransaction, toAddress: toAddress, value: value, pluginData: pluginData)
         try inputSetter.setInputs(to: mutableTransaction, feeRate: feeRate, senderPay: senderPay)
-        lockTimeSetter.setLockTime(to: mutableTransaction)
+        try lockTimeSetter.setLockTime(to: mutableTransaction)
         try signer.sign(mutableTransaction: mutableTransaction)
 
         return mutableTransaction.build()
