@@ -8,12 +8,12 @@ class DataProvider {
     private let disposeBag = DisposeBag()
 
     private let storage: IStorage
-    private let unspentOutputProvider: IUnspentOutputProvider
+    private let balanceProvider: IBalanceProvider
     private let transactionInfoConverter: ITransactionInfoConverter
 
     private let balanceUpdateSubject = PublishSubject<Void>()
 
-    public var balance: Int = 0 {
+    public var balance: BalanceInfo {
         didSet {
             if !(oldValue == balance) {
                 delegate?.balanceUpdated(balance: balance)
@@ -24,15 +24,15 @@ class DataProvider {
 
     weak var delegate: IDataProviderDelegate?
 
-    init(storage: IStorage, unspentOutputProvider: IUnspentOutputProvider, transactionInfoConverter: ITransactionInfoConverter, throttleTimeMilliseconds: Int = 500) {
+    init(storage: IStorage, balanceProvider: IBalanceProvider, transactionInfoConverter: ITransactionInfoConverter, throttleTimeMilliseconds: Int = 500) {
         self.storage = storage
-        self.unspentOutputProvider = unspentOutputProvider
+        self.balanceProvider = balanceProvider
         self.transactionInfoConverter = transactionInfoConverter
-        self.balance = unspentOutputProvider.allUnspentOutputs.map { $0.output.value }.reduce(0, +)
+        self.balance = balanceProvider.balanceInfo
         self.lastBlockInfo = storage.lastBlock.map { blockInfo(fromBlock: $0) }
 
         balanceUpdateSubject.throttle(DispatchTimeInterval.milliseconds(throttleTimeMilliseconds), scheduler: ConcurrentDispatchQueueScheduler(qos: .background)).subscribe(onNext: { [weak self] in
-            self?.balance = unspentOutputProvider.allUnspentOutputs.map { $0.output.value }.reduce(0, +)
+            self?.balance = balanceProvider.balanceInfo
         }).disposed(by: disposeBag)
     }
 
@@ -84,7 +84,7 @@ extension DataProvider: IBlockchainDataListener {
 extension DataProvider: IDataProvider {
 
     func transactions(fromHash: String?, limit: Int?) -> Single<[TransactionInfo]> {
-        return Single.create { observer in
+        Single.create { observer in
             var fromTimestamp: Int? = nil
             var fromOrder: Int? = nil
 

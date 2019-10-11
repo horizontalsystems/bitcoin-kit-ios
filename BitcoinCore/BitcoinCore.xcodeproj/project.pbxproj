@@ -12,7 +12,7 @@
 		11B35333093D726EC8ECA159 /* BlockSyncerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B352A955F667DC0C23CE1C /* BlockSyncerTests.swift */; };
 		11B3534C9529906826754D6E /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B3501384C4274027587EB4 /* Protocols.swift */; };
 		11B3536E9A39907FCA035C33 /* GrdbStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B3543D7114E1FE55B2DCC3 /* GrdbStorage.swift */; };
-		11B35377C00CCB8EEED57179 /* TransactionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B357C9E6B02801B0422881 /* TransactionInfo.swift */; };
+		11B35377C00CCB8EEED57179 /* InfoObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B357C9E6B02801B0422881 /* InfoObjects.swift */; };
 		11B3543B9CDA61125C2B7D78 /* ApiManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B3597DE3169FD250A982D5 /* ApiManager.swift */; };
 		11B35464997EBBD3B20BDEBB /* Input.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35352F3DA4C26A552C62B /* Input.swift */; };
 		11B35468A2ACF4B8534BB719 /* DataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B3525D146F1119A0A9128A /* DataProvider.swift */; };
@@ -256,7 +256,7 @@
 		11B355C0072CA13ADBAC1351 /* VarInt.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VarInt.swift; sourceTree = "<group>"; };
 		11B356D308DCF4BB33D9F488 /* ServiceFlags.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServiceFlags.swift; sourceTree = "<group>"; };
 		11B356EF3A4749163293CCA3 /* BlockSyncer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BlockSyncer.swift; path = ../Blocks/BlockSyncer.swift; sourceTree = "<group>"; };
-		11B357C9E6B02801B0422881 /* TransactionInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionInfo.swift; sourceTree = "<group>"; };
+		11B357C9E6B02801B0422881 /* InfoObjects.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InfoObjects.swift; sourceTree = "<group>"; };
 		11B358481D7E7EB156912F52 /* StateManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StateManager.swift; sourceTree = "<group>"; };
 		11B358F56F6298016B1A8AFD /* TestData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestData.swift; sourceTree = "<group>"; };
 		11B3590614D2772B1436542A /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
@@ -654,7 +654,7 @@
 				2FA5DF037E951950A0F7FF03 /* SentTransaction.swift */,
 				58AAAA63CA9758D7D97E1416 /* SigHashType.swift */,
 				11B35C67DB63EF992C380513 /* Transaction.swift */,
-				11B357C9E6B02801B0422881 /* TransactionInfo.swift */,
+				11B357C9E6B02801B0422881 /* InfoObjects.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1400,7 +1400,7 @@
 				2FA5D4F27E10A609FF81950E /* UnknownMessage.swift in Sources */,
 				58AAAD1C062938F07E90EA9D /* Address.swift in Sources */,
 				2FA5D9ED521660FA5EEF360E /* MerkleBlock.swift in Sources */,
-				11B35377C00CCB8EEED57179 /* TransactionInfo.swift in Sources */,
+				11B35377C00CCB8EEED57179 /* InfoObjects.swift in Sources */,
 				2FA5D19E18DC7528778D26F0 /* PeerAddress.swift in Sources */,
 				11B35823EEDAE4C578F2EA02 /* RequestTransactionsTask.swift in Sources */,
 				11B35567A6F0430D0A95A389 /* PeerTask.swift in Sources */,

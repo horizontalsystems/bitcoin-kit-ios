@@ -388,7 +388,11 @@ public protocol IUnspentOutputSelector {
 }
 
 public protocol IUnspentOutputProvider {
-    var allUnspentOutputs: [UnspentOutput] { get }
+    var spendableUtxo: [UnspentOutput] { get }
+}
+
+public protocol IBalanceProvider {
+    var balanceInfo: BalanceInfo { get }
 }
 
 public protocol IBlockSyncer: class {
@@ -427,7 +431,7 @@ protocol IDataProvider {
     var delegate: IDataProviderDelegate? { get set }
 
     var lastBlockInfo: BlockInfo? { get }
-    var balance: Int { get }
+    var balance: BalanceInfo { get }
     func debugInfo(network: INetwork, scriptType: ScriptType, addressConverter: IAddressConverter) -> String
     func transactions(fromHash: String?, limit: Int?) -> Single<[TransactionInfo]>
 }
@@ -435,7 +439,7 @@ protocol IDataProvider {
 protocol IDataProviderDelegate: class {
     func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo])
     func transactionsDeleted(hashes: [String])
-    func balanceUpdated(balance: Int)
+    func balanceUpdated(balance: BalanceInfo)
     func lastBlockInfoUpdated(lastBlockInfo: BlockInfo)
 }
 

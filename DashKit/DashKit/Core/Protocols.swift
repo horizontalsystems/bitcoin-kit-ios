@@ -51,7 +51,7 @@ protocol IDashPeer: IPeer {
 public protocol DashKitDelegate: class {
     func transactionsUpdated(inserted: [DashTransactionInfo], updated: [DashTransactionInfo])
     func transactionsDeleted(hashes: [String])
-    func balanceUpdated(balance: Int)
+    func balanceUpdated(balance: BalanceInfo)
     func lastBlockInfoUpdated(lastBlockInfo: BlockInfo)
     func kitStateUpdated(state: BitcoinCore.KitState)
 }

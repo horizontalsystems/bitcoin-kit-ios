@@ -3,7 +3,7 @@ class UnspentOutputProvider {
     let pluginManager: IPluginManager
     let confirmationsThreshold: Int
 
-    private var confirmedOutputs: [UnspentOutput] {
+    private var confirmedUtxo: [UnspentOutput] {
         let lastBlockHeight = storage.lastBlock?.height ?? 0
 
         // Output must have a public key, that is, must belong to the user
@@ -25,6 +25,10 @@ class UnspentOutputProvider {
                 })
     }
 
+    private var unspendableUtxo: [UnspentOutput] {
+        confirmedUtxo.filter { !pluginManager.isSpendable(output: $0.output) }
+    }
+
     init(storage: IStorage, pluginManager: IPluginManager, confirmationsThreshold: Int) {
         self.storage = storage
         self.pluginManager = pluginManager
@@ -34,8 +38,19 @@ class UnspentOutputProvider {
 
 extension UnspentOutputProvider: IUnspentOutputProvider {
 
-    var allUnspentOutputs: [UnspentOutput] {
-        confirmedOutputs.filter { pluginManager.isSpendable(output: $0.output) }
+    var spendableUtxo: [UnspentOutput] {
+        confirmedUtxo.filter { pluginManager.isSpendable(output: $0.output) }
+    }
+
+}
+
+extension UnspentOutputProvider: IBalanceProvider {
+
+    var balanceInfo: BalanceInfo {
+        let spendable =  spendableUtxo.map { $0.output.value }.reduce(0, +)
+        let unspendable = unspendableUtxo.map { $0.output.value }.reduce(0, +)
+
+        return BalanceInfo(spendable: spendable, unspendable: unspendable)
     }
 
 }

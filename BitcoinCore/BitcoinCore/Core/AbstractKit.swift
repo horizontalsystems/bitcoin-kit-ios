@@ -22,7 +22,7 @@ open class AbstractKit {
         bitcoinCore.lastBlockInfo
     }
 
-    open var balance: Int {
+    open var balance: BalanceInfo {
         bitcoinCore.balance
     }
 

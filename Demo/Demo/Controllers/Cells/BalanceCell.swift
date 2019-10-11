@@ -40,14 +40,16 @@ class BalanceCell: UITableViewCell {
                     Sync state:
                     Last block:
 
-                    Balance:
+                    Spendable balance:
+                    Unspendable balance:
                     """, alignment: .left, label: titleLabel)
 
         set(string: """
                     \(syncStateString)
                     \(lastBlockHeightString)
                     \(lastBlockDateString)
-                    \(adapter.balance) \(adapter.coinCode)
+                    \(adapter.spendableBalance) \(adapter.coinCode)
+                    \(adapter.unspendableBalance) \(adapter.coinCode)
                     """, alignment: .right, label: valueLabel)
     }
 

@@ -89,8 +89,12 @@ extension BaseAdapter {
         }
     }
 
-    var balance: Decimal {
-        Decimal(abstractKit.balance) / coinRate
+    var spendableBalance: Decimal {
+        Decimal(abstractKit.balance.spendable) / coinRate
+    }
+
+    var unspendableBalance: Decimal {
+        Decimal(abstractKit.balance.unspendable) / coinRate
     }
 
     var lastBlockInfo: BlockInfo? {
@@ -131,7 +135,7 @@ extension BaseAdapter {
     }
 
     func availableBalance(for address: String?) -> Decimal {
-        max(0, balance - fee(for: balance, address: address))
+        max(0, spendableBalance - fee(for: spendableBalance, address: address))
     }
 
     func fee(for value: Decimal, address: String?) -> Decimal {

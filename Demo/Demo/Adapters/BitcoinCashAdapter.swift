@@ -28,7 +28,7 @@ extension BitcoinCashAdapter: BitcoinCoreDelegate {
         transactionsSignal.notify()
     }
 
-    func balanceUpdated(balance: Int) {
+    func balanceUpdated(balance: BalanceInfo) {
         balanceSignal.notify()
     }
 

@@ -151,7 +151,7 @@ extension BitcoinCore {
         dataProvider.lastBlockInfo
     }
 
-    public var balance: Int {
+    public var balance: BalanceInfo {
         dataProvider.balance
     }
 
@@ -252,7 +252,7 @@ extension BitcoinCore: IDataProviderDelegate {
         }
     }
 
-    func balanceUpdated(balance: Int) {
+    func balanceUpdated(balance: BalanceInfo) {
         delegateQueue.async { [weak self] in
             if let kit = self {
                 kit.delegate?.balanceUpdated(balance: balance)
@@ -281,7 +281,7 @@ extension BitcoinCore: IKitStateProviderDelegate {
 public protocol BitcoinCoreDelegate: class {
     func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo])
     func transactionsDeleted(hashes: [String])
-    func balanceUpdated(balance: Int)
+    func balanceUpdated(balance: BalanceInfo)
     func lastBlockInfoUpdated(lastBlockInfo: BlockInfo)
     func kitStateUpdated(state: BitcoinCore.KitState)
 }
@@ -290,7 +290,7 @@ extension BitcoinCoreDelegate {
 
     public func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo]) {}
     public func transactionsDeleted(hashes: [String]) {}
-    public func balanceUpdated(balance: Int) {}
+    public func balanceUpdated(balance: BalanceInfo) {}
     public func lastBlockInfoUpdated(lastBlockInfo: BlockInfo) {}
     public func kitStateUpdated(state: BitcoinCore.KitState) {}
 

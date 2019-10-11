@@ -167,7 +167,7 @@ extension DashKit: BitcoinCoreDelegate {
         delegate?.transactionsDeleted(hashes: hashes)
     }
 
-    public func balanceUpdated(balance: Int) {
+    public func balanceUpdated(balance: BalanceInfo) {
         delegate?.balanceUpdated(balance: balance)
     }
 
