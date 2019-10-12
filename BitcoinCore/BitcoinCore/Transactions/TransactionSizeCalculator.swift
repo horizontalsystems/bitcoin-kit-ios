@@ -1,4 +1,4 @@
-public class TransactionSizeCalculator: ITransactionSizeCalculator {
+public class TransactionSizeCalculator {
     static let legacyTx = 16 + 4 + 4 + 16          //40 Version + number of inputs + number of outputs + locktime
     static let legacyWitnessData = 1               //1 Only 0x00 for legacy input
     static let witnessData = 1 + signatureLength + pubKeyLength   //108 Number of stack items for input + Size of stack item 0 + Stack item 0, signature + Size of stack item 1 + Stack item 1, pubkey
@@ -10,7 +10,18 @@ public class TransactionSizeCalculator: ITransactionSizeCalculator {
 
     public init() {}
 
+    private func outputSize(lockingScriptSize: Int) -> Int {
+        8 + 1 + lockingScriptSize            // spentValue + scriptLength + script
+    }
+}
+
+extension TransactionSizeCalculator: ITransactionSizeCalculator {
+
     public func transactionSize(inputs: [ScriptType], outputScriptTypes: [ScriptType]) -> Int {      // in real bytes upped to int
+        transactionSize(inputs: inputs, outputScriptTypes: outputScriptTypes, pluginDataOutputSize: 0)
+    }
+
+    public func transactionSize(inputs: [ScriptType], outputScriptTypes: [ScriptType], pluginDataOutputSize: Int) -> Int {      // in real bytes upped to int
         var segWit = false
         var inputWeight = 0
 
@@ -28,15 +39,17 @@ public class TransactionSizeCalculator: ITransactionSizeCalculator {
             }
         }
 
-        let outputWeight = outputScriptTypes.reduce(0) { $0 + outputSize(type: $1) } * 4      // to vbytes
+        var outputWeight: Int = outputScriptTypes.reduce(0) { $0 + outputSize(type: $1) } * 4 // in vbytes
+        if pluginDataOutputSize > 0 {
+            outputWeight += outputSize(lockingScriptSize: pluginDataOutputSize) * 4
+        }
         let txWeight = segWit ? TransactionSizeCalculator.witnessTx : TransactionSizeCalculator.legacyTx
 
         return toBytes(fee: txWeight + inputWeight + outputWeight)
     }
 
     public func outputSize(type: ScriptType) -> Int {              // in real bytes
-        let outputTxSize: Int = 8 + 1 + Int(type.size) // spentValue + scriptLength + script
-        return outputTxSize
+        outputSize(lockingScriptSize: Int(type.size))
     }
 
     public func  inputSize(type: ScriptType) -> Int {              // in real bytes
@@ -59,7 +72,7 @@ public class TransactionSizeCalculator: ITransactionSizeCalculator {
     }
 
     public func toBytes(fee: Int) -> Int {
-        return fee / 4 + (fee % 4 == 0 ? 0 : 1)
+        fee / 4 + (fee % 4 == 0 ? 0 : 1)
     }
 
 }

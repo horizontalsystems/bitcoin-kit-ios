@@ -54,8 +54,8 @@ open class AbstractKit {
         bitcoinCore.parse(paymentAddress: paymentAddress)
     }
 
-    open func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feeRate: Int) throws -> Int {
-        try bitcoinCore.fee(for: value, toAddress: toAddress, senderPay: senderPay, feeRate: feeRate)
+    open func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feeRate: Int, pluginData: [String: [String: Any]] = [:]) throws -> Int {
+        try bitcoinCore.fee(for: value, toAddress: toAddress, senderPay: senderPay, feeRate: feeRate, pluginData: pluginData)
     }
 
     open func receiveAddress() -> String {

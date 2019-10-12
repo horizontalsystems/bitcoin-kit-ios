@@ -12,7 +12,6 @@ public enum ScriptType: Int, DatabaseValueConvertible {
         case .p2wsh: return 34
         case .p2wpkh: return 22
         case .p2wpkhSh: return 23
-        case .nullData: return 26
         default: return 0
         }
     }

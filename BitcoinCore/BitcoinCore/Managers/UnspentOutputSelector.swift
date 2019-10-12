@@ -30,7 +30,7 @@ public class UnspentOutputSelector {
 
 extension UnspentOutputSelector: IUnspentOutputSelector {
 
-    public func select(value: Int, feeRate: Int, outputScriptType: ScriptType = .p2pkh, changeType: ScriptType = .p2pkh, senderPay: Bool) throws -> SelectedUnspentOutputInfo {
+    public func select(value: Int, feeRate: Int, outputScriptType: ScriptType = .p2pkh, changeType: ScriptType = .p2pkh, senderPay: Bool, pluginDataOutputSize: Int) throws -> SelectedUnspentOutputInfo {
         let unspentOutputs = provider.spendableUtxo
 
         guard value > 0 else {
@@ -66,7 +66,7 @@ extension UnspentOutputSelector: IUnspentOutputSelector {
                     totalValue -= outputValueToExclude
                 }
             }
-            lastCalculatedFee = calculator.transactionSize(inputs: selectedOutputScriptTypes, outputScriptTypes: [outputScriptType]) * feeRate
+            lastCalculatedFee = calculator.transactionSize(inputs: selectedOutputScriptTypes, outputScriptTypes: [outputScriptType], pluginDataOutputSize: pluginDataOutputSize) * feeRate
             if senderPay {
                 fee = lastCalculatedFee
             }
@@ -83,7 +83,7 @@ extension UnspentOutputSelector: IUnspentOutputSelector {
         // if total selected unspentOutputs value more than value and fee for transaction with change output + change input -> add fee for change output and mark as need change address
         var addChangeOutput = false
         if totalValue > value + lastCalculatedFee + (senderPay ? dust : 0) {
-            lastCalculatedFee = calculator.transactionSize(inputs: selectedOutputScriptTypes, outputScriptTypes: [outputScriptType, changeType]) * feeRate
+            lastCalculatedFee = calculator.transactionSize(inputs: selectedOutputScriptTypes, outputScriptTypes: [outputScriptType, changeType], pluginDataOutputSize: pluginDataOutputSize) * feeRate
             addChangeOutput = true
         } else if senderPay {
             lastCalculatedFee = totalValue - value
