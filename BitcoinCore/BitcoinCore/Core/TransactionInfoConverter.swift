@@ -6,7 +6,7 @@ open class TransactionInfoConverter: ITransactionInfoConverter {
     }
 
     public func transactionInfo(fromTransaction transactionForInfo: FullTransactionForInfo) -> TransactionInfo {
-        return baseTransactionInfoConverter.transactionInfo(fromTransaction: transactionForInfo)
+        baseTransactionInfoConverter.transactionInfo(fromTransaction: transactionForInfo)
     }
 
 }

@@ -183,12 +183,8 @@ extension BitcoinCore {
         paymentAddressParser.parse(paymentAddress: paymentAddress)
     }
 
-    public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feeRate: Int) throws -> Int {
-        let toAddress = try toAddress.map { try addressConverter.convert(address: $0) }
-        let changePubKey = try publicKeyManager.changePublicKey()
-        let changeAddress = try addressConverter.convert(publicKey: changePubKey, type: bip.scriptType)
-
-        return try transactionFeeCalculator.fee(for: value, feeRate: feeRate, senderPay: senderPay, toAddress: toAddress, changeAddress: changeAddress)
+    public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feeRate: Int, pluginData: [String: [String: Any]] = [:]) throws -> Int {
+        try transactionFeeCalculator.fee(for: value, feeRate: feeRate, senderPay: senderPay, toAddress: toAddress, pluginData: pluginData)
     }
 
     public func receiveAddress() -> String {

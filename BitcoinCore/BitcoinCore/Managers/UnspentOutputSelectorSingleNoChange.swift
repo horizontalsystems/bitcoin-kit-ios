@@ -14,7 +14,7 @@ public class UnspentOutputSelectorSingleNoChange {
 
 extension UnspentOutputSelectorSingleNoChange: IUnspentOutputSelector {
 
-    public func select(value: Int, feeRate: Int, outputScriptType: ScriptType = .p2pkh, changeType: ScriptType = .p2pkh, senderPay: Bool) throws -> SelectedUnspentOutputInfo {
+    public func select(value: Int, feeRate: Int, outputScriptType: ScriptType = .p2pkh, changeType: ScriptType = .p2pkh, senderPay: Bool, pluginDataOutputSize: Int) throws -> SelectedUnspentOutputInfo {
         let unspentOutputs = provider.spendableUtxo
 
         guard value > 0 else {
@@ -28,7 +28,7 @@ extension UnspentOutputSelectorSingleNoChange: IUnspentOutputSelector {
         // try to find 1 unspent output with exactly matching value
         for unspentOutput in unspentOutputs {
             let output = unspentOutput.output
-            let fee = calculator.transactionSize(inputs: [output.scriptType], outputScriptTypes: [outputScriptType]) * feeRate
+            let fee = calculator.transactionSize(inputs: [output.scriptType], outputScriptTypes: [outputScriptType], pluginDataOutputSize: pluginDataOutputSize) * feeRate
             let totalFee = senderPay ? fee : 0
             if (value + totalFee <= output.value) && (value + totalFee + dust > output.value) {
                 return SelectedUnspentOutputInfo(unspentOutputs: [unspentOutput], totalValue: output.value, fee: senderPay ? (output.value - value) : fee, addChangeOutput: false)
