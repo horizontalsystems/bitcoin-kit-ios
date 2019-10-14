@@ -36,6 +36,7 @@ public class Output: Record {
 
     public var pluginId: UInt8? = nil
     public var pluginData: String? = nil
+    public var signatureScriptFunction: (([Data]) -> Data)? = nil
 
     public init(withValue value: Int, index: Int, lockingScript script: Data, transactionHash: Data = Data(), type: ScriptType = .unknown, redeemScript: Data? = nil, address: String? = nil, keyHash: Data? = nil, publicKey: PublicKey? = nil) {
         self.value = value

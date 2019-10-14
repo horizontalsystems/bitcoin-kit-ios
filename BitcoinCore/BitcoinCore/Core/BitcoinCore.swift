@@ -168,11 +168,12 @@ extension BitcoinCore {
     }
 
     public func send(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int) throws -> FullTransaction {
-        try transactionCreator.create(to: hash, scriptType: scriptType, value: value, feeRate: feeRate, senderPay: true)
+        let toAddress = try addressConverter.convert(keyHash: hash, type: scriptType)
+        return try transactionCreator.create(to: toAddress.stringValue, value: value, feeRate: feeRate, senderPay: true, pluginData: [:])
     }
 
-    func redeem(from unspentOutput: UnspentOutput, to address: String, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction {
-        try transactionCreator.create(from: unspentOutput, to: address, feeRate: feeRate, signatureScriptFunction: signatureScriptFunction)
+    func redeem(from unspentOutput: UnspentOutput, to address: String, feeRate: Int) throws -> FullTransaction {
+        try transactionCreator.create(from: unspentOutput, to: address, feeRate: feeRate)
     }
 
     public func validate(address: String) throws {

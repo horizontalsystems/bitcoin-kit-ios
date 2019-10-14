@@ -341,18 +341,16 @@ public protocol ITransactionSyncer: class {
 
 public protocol ITransactionCreator {
     func create(to address: String, value: Int, feeRate: Int, senderPay: Bool, pluginData: [String: [String: Any]]) throws -> FullTransaction
-    func create(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int, senderPay: Bool) throws -> FullTransaction
-    func create(from: UnspentOutput, to address: String, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction
+    func create(from: UnspentOutput, to address: String, feeRate: Int) throws -> FullTransaction
 }
 
 protocol ITransactionBuilder {
     func buildTransaction(toAddress: String, value: Int, feeRate: Int, senderPay: Bool, pluginData: [String: [String: Any]]) throws -> FullTransaction
-    func buildTransaction(from: UnspentOutput, to: Address, fee: Int, lastBlockHeight: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction
+    func buildTransaction(from: UnspentOutput, toAddress: String, feeRate: Int) throws -> FullTransaction
 }
 
 protocol ITransactionFeeCalculator {
     func fee(for value: Int, feeRate: Int, senderPay: Bool, toAddress: String?, pluginData: [String: [String: Any]]) throws -> Int
-    func fee(inputScriptType: ScriptType, outputScriptType: ScriptType, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) -> Int
 }
 
 protocol IBlockchain {

@@ -6,20 +6,13 @@ class TransactionCreator {
     private let transactionBuilder: ITransactionBuilder
     private let transactionProcessor: ITransactionProcessor
     private let transactionSender: ITransactionSender
-    private let transactionFeeCalculator: ITransactionFeeCalculator
     private let bloomFilterManager: IBloomFilterManager
-    private let addressConverter: IAddressConverter
-    private let storage: IStorage
 
-    init(transactionBuilder: ITransactionBuilder, transactionProcessor: ITransactionProcessor, transactionSender: ITransactionSender, transactionFeeCalculator: ITransactionFeeCalculator,
-         bloomFilterManager: IBloomFilterManager, addressConverter: IAddressConverter, storage: IStorage) {
+    init(transactionBuilder: ITransactionBuilder, transactionProcessor: ITransactionProcessor, transactionSender: ITransactionSender, bloomFilterManager: IBloomFilterManager) {
         self.transactionBuilder = transactionBuilder
         self.transactionProcessor = transactionProcessor
         self.transactionSender = transactionSender
-        self.transactionFeeCalculator = transactionFeeCalculator
         self.bloomFilterManager = bloomFilterManager
-        self.addressConverter = addressConverter
-        self.storage = storage
     }
 
     private func processAndSend(transaction: FullTransaction) throws {
@@ -51,15 +44,8 @@ extension TransactionCreator: ITransactionCreator {
         return transaction
     }
 
-    func create(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int, senderPay: Bool) throws -> FullTransaction {
-        let toAddress = try addressConverter.convert(keyHash: hash, type: scriptType)
-        return try create(to: toAddress.stringValue, value: value, feeRate: feeRate, senderPay: senderPay)
-    }
-
-    func create(from unspentOutput: UnspentOutput, to address: String, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction {
-        let toAddress = try addressConverter.convert(address: address)
-        let fee = transactionFeeCalculator.fee(inputScriptType: unspentOutput.output.scriptType, outputScriptType: toAddress.scriptType, feeRate: feeRate, signatureScriptFunction: signatureScriptFunction)
-        let transaction = try transactionBuilder.buildTransaction(from: unspentOutput, to: toAddress, fee: fee, lastBlockHeight: storage.lastBlock?.height ?? 0, signatureScriptFunction: signatureScriptFunction)
+    func create(from unspentOutput: UnspentOutput, to address: String, feeRate: Int) throws -> FullTransaction {
+        let transaction = try transactionBuilder.buildTransaction(from: unspentOutput, toAddress: address, feeRate: feeRate)
 
         try processAndSend(transaction: transaction)
         return transaction

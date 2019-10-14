@@ -41,10 +41,10 @@ public class MutableTransaction {
         pluginData.count > 0 ? 1 + pluginData.reduce(into: 0) { $0 += 1 + $1.value.count } : 0                // OP_RETURN (PLUGIN_ID PLUGIN_DATA)
     }
 
-    init() {
+    init(outgoing: Bool = true) {
         transaction.status = .new
         transaction.isMine = true
-        transaction.isOutgoing = true
+        transaction.isOutgoing = outgoing
     }
 
     public func add(pluginData: Data, pluginId: UInt8) {

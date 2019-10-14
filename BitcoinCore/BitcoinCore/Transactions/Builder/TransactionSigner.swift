@@ -40,8 +40,15 @@ class TransactionSigner {
                 guard let redeemScript = previousOutput.redeemScript else {
                     throw SignError.noRedeemScript
                 }
-                sigScriptData.append(redeemScript)
-                inputToSign.input.signatureScript = signatureScript(from: sigScriptData)
+
+                if let signatureScriptFunction = previousOutput.signatureScriptFunction {
+                    // non-standard P2SH signature script
+                    inputToSign.input.signatureScript = signatureScriptFunction(sigScriptData)
+                } else {
+                    // standard (signature, publicKey, redeemScript) signature script
+                    sigScriptData.append(redeemScript)
+                    inputToSign.input.signatureScript = signatureScript(from: sigScriptData)
+                }
             default: throw SignError.notSupportedScriptType
             }
         }
