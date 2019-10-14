@@ -1,42 +1,16 @@
 import HSCryptoKit
 
 class TransactionBuilder {
-    enum BuildError: Error {
-        case feeMoreThanValue
-        case notSupportedScriptType
-    }
-
-    private let inputSigner: IInputSigner
-    private let factory: IFactory
-
     private let outputSetter: OutputSetter
     private let inputSetter: InputSetter
     private let lockTimeSetter: LockTimeSetter
     private let signer: TransactionSigner
 
-    init(inputSigner: IInputSigner, factory: IFactory, outputSetter: OutputSetter, inputSetter: InputSetter, lockTimeSetter: LockTimeSetter, signer: TransactionSigner) {
-        self.inputSigner = inputSigner
-        self.factory = factory
-
+    init(outputSetter: OutputSetter, inputSetter: InputSetter, lockTimeSetter: LockTimeSetter, signer: TransactionSigner) {
         self.outputSetter = outputSetter
         self.inputSetter = inputSetter
         self.lockTimeSetter = lockTimeSetter
         self.signer = signer
-    }
-
-    private func input(fromUnspentOutput unspentOutput: UnspentOutput) throws -> InputToSign {
-        if unspentOutput.output.scriptType == .p2wpkh {
-            // todo: refactoring version byte!
-            // witness key hashes stored with program byte and push code to determine
-            // version (current only 0), but for sign we need only public kee hash
-            unspentOutput.output.keyHash?.removeFirst(2)
-        }
-
-        // Maximum nSequence value (0xFFFFFFFF) disables nLockTime.
-        // According to BIP-125, any value less than 0xFFFFFFFE makes a Replace-by-Fee(RBF) opted in.
-        let sequence = 0xFFFFFFFE
-
-        return factory.inputToSign(withPreviousOutput: unspentOutput, script: Data(), sequence: sequence)
     }
 
 }
@@ -54,36 +28,15 @@ extension TransactionBuilder: ITransactionBuilder {
         return mutableTransaction.build()
     }
 
-    func buildTransaction(from unspentOutput: UnspentOutput, to address: Address, fee: Int, lastBlockHeight: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction {
-        guard unspentOutput.output.scriptType == .p2sh else {
-            throw BuildError.notSupportedScriptType
-        }
+    func buildTransaction(from unspentOutput: UnspentOutput, toAddress: String, feeRate: Int) throws -> FullTransaction {
+        let mutableTransaction = MutableTransaction(outgoing: false)
 
-        guard fee < unspentOutput.output.value else {
-            throw BuildError.feeMoreThanValue
-        }
+        try outputSetter.setOutputs(to: mutableTransaction, toAddress: toAddress, value: unspentOutput.output.value, pluginData: [:])
+        try inputSetter.setInputs(to: mutableTransaction, fromUnspentOutput: unspentOutput, feeRate: feeRate)
+        try lockTimeSetter.setLockTime(to: mutableTransaction)
+        try signer.sign(mutableTransaction: mutableTransaction)
 
-        // Add input without unlocking scripts
-        let inputToSign = try input(fromUnspentOutput: unspentOutput)
-
-        // Calculate receiveValue
-        let receivedValue = unspentOutput.output.value - fee
-
-        // Add :to output
-        let output = try factory.output(withIndex: 0, address: address, value: receivedValue, publicKey: nil)
-
-        // Build transaction
-        let transaction = factory.transaction(version: 1, lockTime: lastBlockHeight)
-
-        // Sign inputs
-        let sigScriptData = try inputSigner.sigScriptData(transaction: transaction, inputsToSign: [inputToSign], outputs: [output], index: 0)
-        inputToSign.input.signatureScript = signatureScriptFunction(sigScriptData[0], sigScriptData[1])
-
-        transaction.status = .new
-        transaction.isMine = true
-        transaction.isOutgoing = false
-
-        return FullTransaction(header: transaction, inputs: [inputToSign.input], outputs: [output])
+        return mutableTransaction.build()
     }
 
 }

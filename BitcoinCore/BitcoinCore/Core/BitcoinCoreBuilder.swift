@@ -203,15 +203,13 @@ public class BitcoinCoreBuilder {
         let inputSigner = InputSigner(hdWallet: hdWallet, network: network)
         let transactionSizeCalculator = TransactionSizeCalculator()
         let outputSetter = OutputSetter(addressConverter: addressConverter, factory: factory, pluginManager: pluginManager)
-        let inputSetter = InputSetter(unspentOutputSelector: unspentOutputSelector, addressConverter: addressConverter, publicKeyManager: publicKeyManager, factory: factory, changeScriptType: bip.scriptType)
+        let inputSetter = InputSetter(unspentOutputSelector: unspentOutputSelector, transactionSizeCalculator: transactionSizeCalculator, addressConverter: addressConverter, publicKeyManager: publicKeyManager, factory: factory, changeScriptType: bip.scriptType)
         let lockTimeSetter = LockTimeSetter(storage: storage, pluginManager: pluginManager)
         let transactionSigner = TransactionSigner(inputSigner: inputSigner)
-        let transactionBuilder = TransactionBuilder(inputSigner: inputSigner, factory: factory, outputSetter: outputSetter, inputSetter: inputSetter, lockTimeSetter: lockTimeSetter, signer: transactionSigner)
-        let transactionFeeCalculator = TransactionFeeCalculator(unspentOutputSelector: unspentOutputSelector, transactionSizeCalculator: transactionSizeCalculator, outputSetter: outputSetter, inputSetter: inputSetter,
-                addressConverter: addressConverter, publicKeyManager: publicKeyManager, changeScriptType: bip.scriptType)
+        let transactionBuilder = TransactionBuilder(outputSetter: outputSetter, inputSetter: inputSetter, lockTimeSetter: lockTimeSetter, signer: transactionSigner)
+        let transactionFeeCalculator = TransactionFeeCalculator(outputSetter: outputSetter, inputSetter: inputSetter, addressConverter: addressConverter, publicKeyManager: publicKeyManager, changeScriptType: bip.scriptType)
         let transactionSender = TransactionSender(transactionSyncer: transactionSyncer, peerManager: peerManager, initialBlockDownload: initialBlockDownload, syncedReadyPeerManager: syncedReadyPeerManager, logger: logger)
-        let transactionCreator = TransactionCreator(transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, transactionSender: transactionSender, transactionFeeCalculator: transactionFeeCalculator,
-                bloomFilterManager: bloomFilterManager, addressConverter: addressConverter, storage: storage)
+        let transactionCreator = TransactionCreator(transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, transactionSender: transactionSender, bloomFilterManager: bloomFilterManager)
 
         let syncManager = SyncManager(reachabilityManager: reachabilityManager, initialSyncer: initialSyncer, peerGroup: peerGroup)
 

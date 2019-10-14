@@ -42,8 +42,8 @@ open class AbstractKit {
         try bitcoinCore.send(to: hash, scriptType: scriptType, value: value, feeRate: feeRate)
     }
 
-    public func redeem(from unspentOutput: UnspentOutput, to address: String, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction {
-        try bitcoinCore.redeem(from: unspentOutput, to: address, feeRate: feeRate, signatureScriptFunction: signatureScriptFunction)
+    public func redeem(from unspentOutput: UnspentOutput, to address: String, feeRate: Int) throws -> FullTransaction {
+        try bitcoinCore.redeem(from: unspentOutput, to: address, feeRate: feeRate)
     }
 
     open func validate(address: String) throws {
