@@ -2,12 +2,14 @@ class PluginManager {
     private let addressConverter: IAddressConverter
     private let scriptConverter: IScriptConverter
     private let storage: IStorage
+    private let blockMedianTimeHelper: IBlockMedianTimeHelper
     private var plugins = [UInt8: IPlugin]()
 
-    init(addressConverter: IAddressConverter, scriptConverter: IScriptConverter, storage: IStorage) {
+    init(addressConverter: IAddressConverter, scriptConverter: IScriptConverter, storage: IStorage, blockMedianTimeHelper: IBlockMedianTimeHelper) {
         self.addressConverter = addressConverter
         self.scriptConverter = scriptConverter
         self.storage = storage
+        self.blockMedianTimeHelper = blockMedianTimeHelper
     }
 
 }
@@ -45,7 +47,11 @@ extension PluginManager: IPluginManager {
             return true
         }
 
-        return (try? plugin.isSpendable(output: output)) ?? true
+        guard let blockMedianTime = blockMedianTimeHelper.medianTimePast else {
+            return false
+        }
+
+        return (try? plugin.isSpendable(output: output, medianTime: blockMedianTime)) ?? true
     }
 
     func transactionLockTime(transaction: MutableTransaction) throws -> Int? {

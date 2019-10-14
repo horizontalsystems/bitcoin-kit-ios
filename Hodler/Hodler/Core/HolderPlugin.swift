@@ -63,10 +63,8 @@ extension HodlerPlugin: IPlugin {
         }
     }
 
-    public func isSpendable(output: Output) throws -> Bool {
-        let lockedUntilTimestamp = try transactionLockTime(output: output)
-
-        return lockedUntilTimestamp < Int(Date().timeIntervalSince1970)
+    public func isSpendable(output: Output, medianTime: Int) throws -> Bool {
+        try transactionLockTime(output: output) < medianTime
     }
 
     public func transactionLockTime(output: Output) throws -> Int {

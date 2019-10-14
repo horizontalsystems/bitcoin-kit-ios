@@ -97,7 +97,7 @@ public protocol IStorage {
     func add(block: Block) throws
     func delete(blocks: [Block]) throws
     func unstaleAllBlocks() throws
-
+    func timestamps(from startHeight: Int, to endHeight: Int) -> [Int]
 
     func transactionExists(byHash: Data) -> Bool
     func transaction(byHash: Data) -> Transaction?
@@ -562,7 +562,7 @@ public protocol IPlugin {
     var id: UInt8 { get }
     func processOutputs(mutableTransaction: MutableTransaction, pluginData: [String: [String: Any]], addressConverter: IAddressConverter) throws
     func processTransactionWithNullData(transaction: FullTransaction, nullDataChunks: inout IndexingIterator<[Chunk]>, storage: IStorage, addressConverter: IAddressConverter) throws
-    func isSpendable(output: Output) throws -> Bool
+    func isSpendable(output: Output, medianTime: Int) throws -> Bool
     func transactionLockTime(output: Output) throws -> Int
 }
 
@@ -572,4 +572,9 @@ protocol IPluginManager {
     func processTransactionWithNullData(transaction: FullTransaction, nullDataOutput: Output) throws
     func isSpendable(output: Output) -> Bool
     func transactionLockTime(transaction: MutableTransaction) throws -> Int?
+}
+
+public protocol IBlockMedianTimeHelper {
+    var medianTimePast: Int? { get }
+    func medianTimePast(block: Block) -> Int?
 }

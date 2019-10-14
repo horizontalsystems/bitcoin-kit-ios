@@ -26,7 +26,6 @@
 		58AAAAD670B7A3FF24536C5D /* BitcoinCashBlockValidatorHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAFB6910240896F05DDCC /* BitcoinCashBlockValidatorHelper.swift */; };
 		58AAAB634B23381028A6C7CB /* MainNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAAAD5C6DDFC33925EE8C /* MainNet.swift */; };
 		58AAAD74B7FE72CAF43B79F6 /* ForkValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA7DC6022240F242A0314 /* ForkValidator.swift */; };
-		58AAAD9D0EB5FA1CBA66A950 /* BitcoinCashGrdbStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAAF413EE4D9619180856F /* BitcoinCashGrdbStorage.swift */; };
 		58AAADD7442B53496B179FF2 /* EDAValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA6F67B9BCCEB9212EF94 /* EDAValidator.swift */; };
 		58AAADEDA8BDDCE00C8300D1 /* BitcoinCashKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA27CDC60669D4447320C /* BitcoinCashKit.swift */; };
 		58AAAEC09B3582BE2C6EAE3A /* TestNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AAA600D45B8BDA5F96433F /* TestNet.swift */; };
@@ -70,7 +69,6 @@
 		58AAADE9D67250202CFD7373 /* DAAValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DAAValidatorTests.swift; sourceTree = "<group>"; };
 		58AAAE58DE2E10255CD84550 /* DAAValidator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DAAValidator.swift; sourceTree = "<group>"; };
 		58AAAE93C44463A5D9297539 /* BitcoinCoreCompatibility.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinCoreCompatibility.swift; sourceTree = "<group>"; };
-		58AAAF413EE4D9619180856F /* BitcoinCashGrdbStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinCashGrdbStorage.swift; sourceTree = "<group>"; };
 		58AAAF4B712339BE0A296D8B /* ForkValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ForkValidatorTests.swift; sourceTree = "<group>"; };
 		58AAAF54D4B5DE9187D77429 /* EDAValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EDAValidatorTests.swift; sourceTree = "<group>"; };
 		58AAAFB6910240896F05DDCC /* BitcoinCashBlockValidatorHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinCashBlockValidatorHelper.swift; sourceTree = "<group>"; };
@@ -129,7 +127,6 @@
 				58AAAE4FC18678BDC8990B26 /* Blocks */,
 				58AAA9B8B9C2CD7BE720AD34 /* Core */,
 				58AAA8763996C7D71EEDD2A7 /* Network */,
-				58AAA71B1D2679E9B65B9B6B /* Storage */,
 				3A7A7D3C226842CB0063D6AD /* BitcoinCashKit.h */,
 				3A7A7D3D226842CB0063D6AD /* Info.plist */,
 				58AAAFEA2E4DC8964564A738 /* Bech32 */,
@@ -167,14 +164,6 @@
 				58AAA6A735B4CB392E2643A0 /* BitcoinCashValidatorHelperTests.swift */,
 			);
 			path = Blocks;
-			sourceTree = "<group>";
-		};
-		58AAA71B1D2679E9B65B9B6B /* Storage */ = {
-			isa = PBXGroup;
-			children = (
-				58AAAF413EE4D9619180856F /* BitcoinCashGrdbStorage.swift */,
-			);
-			path = Storage;
 			sourceTree = "<group>";
 		};
 		58AAA8763996C7D71EEDD2A7 /* Network */ = {
@@ -447,7 +436,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				58AAADEDA8BDDCE00C8300D1 /* BitcoinCashKit.swift in Sources */,
-				58AAAD9D0EB5FA1CBA66A950 /* BitcoinCashGrdbStorage.swift in Sources */,
 				58AAA4B27824731070116037 /* DAAValidator.swift in Sources */,
 				58AAADD7442B53496B179FF2 /* EDAValidator.swift in Sources */,
 				58AAAAD670B7A3FF24536C5D /* BitcoinCashBlockValidatorHelper.swift in Sources */,

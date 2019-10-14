@@ -1,19 +1,29 @@
 import BitcoinCore
 import BigInt
 
-class EDAValidator: IBlockValidator {
+class EDAValidator {
     private let difficultyEncoder: IBitcoinCashDifficultyEncoder
     private let blockHelper: IBitcoinCashBlockValidatorHelper
+    private let blockMedianTimeHelper: IBlockMedianTimeHelper
     private let maxTargetBits: Int
     private let firstCheckpointHeight: Int
 
-    init(encoder: IBitcoinCashDifficultyEncoder, blockHelper: IBitcoinCashBlockValidatorHelper, maxTargetBits: Int, firstCheckpointHeight: Int) {
+    init(encoder: IBitcoinCashDifficultyEncoder, blockHelper: IBitcoinCashBlockValidatorHelper, blockMedianTimeHelper: IBlockMedianTimeHelper, maxTargetBits: Int, firstCheckpointHeight: Int) {
         difficultyEncoder = encoder
         self.blockHelper = blockHelper
+        self.blockMedianTimeHelper = blockMedianTimeHelper
 
         self.maxTargetBits = maxTargetBits
         self.firstCheckpointHeight = firstCheckpointHeight
     }
+
+    private func medianTimePast(block: Block) -> Int {
+        blockMedianTimeHelper.medianTimePast(block: block) ?? block.height
+    }
+
+}
+
+extension EDAValidator: IBlockValidator {
 
     func validate(block: Block, previousBlock: Block) throws {
         guard previousBlock.height >= firstCheckpointHeight + 6 else {
@@ -29,7 +39,7 @@ class EDAValidator: IBlockValidator {
         guard let cursorBlock = blockHelper.previous(for: previousBlock, count: 6) else {
             throw BitcoinCoreErrors.BlockValidation.noPreviousBlock
         }
-        let mpt6blocks = blockHelper.medianTimePast(block: previousBlock) - blockHelper.medianTimePast(block: cursorBlock)
+        let mpt6blocks = medianTimePast(block: previousBlock) - medianTimePast(block: cursorBlock)
         if(mpt6blocks >= 12 * 3600) {
             let decodedBits = difficultyEncoder.decodeCompact(bits: previousBlock.bits)
             let pow = decodedBits >> 2
@@ -47,7 +57,7 @@ class EDAValidator: IBlockValidator {
     }
 
     func isBlockValidatable(block: Block, previousBlock: Block) -> Bool {
-        return true
+        true
     }
 
 }
