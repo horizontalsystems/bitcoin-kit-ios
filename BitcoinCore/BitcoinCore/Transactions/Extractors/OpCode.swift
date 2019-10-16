@@ -27,6 +27,7 @@ public class OpCode {
     public static let checkMultiSig: UInt8 = 0xAE
     public static let checkMultiSigVerify: UInt8 = 0xAF
     public static let checkLockTimeVerify: UInt8 = 0xB1
+    public static let checkSequenceVerify: UInt8 = 0xB2
     public static let _if: UInt8 = 0x63
     public static let _else: UInt8 = 0x67
     public static let endIf: UInt8 = 0x68

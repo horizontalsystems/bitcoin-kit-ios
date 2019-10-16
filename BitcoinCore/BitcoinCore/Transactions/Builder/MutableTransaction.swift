@@ -1,5 +1,5 @@
 public class MutableTransaction {
-    var transaction = Transaction(version: 1, lockTime: 0)
+    var transaction = Transaction(version: 2, lockTime: 0)
     var inputsToSign = [InputToSign]()
 
     public var recipientAddress: Address!

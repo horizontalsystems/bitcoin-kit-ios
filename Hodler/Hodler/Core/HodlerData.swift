@@ -1,5 +1,5 @@
 class HodlerData {
-    let lockedUntilTimestamp: Int
+    let lockTimeInterval: HodlerPlugin.LockTimeInterval
     let addressString: String
 
     static func parse(serialized: String) throws -> HodlerData {
@@ -9,24 +9,24 @@ class HodlerData {
             throw HodlerPluginError.invalidHodlerData
         }
 
-        let lockedUntilTimestampStr = String(parts[0])
+        let lockTimeIntervalStr = String(parts[0])
         let addressString = String(parts[1])
 
-        guard let lockedUntilTimestamp = Int(lockedUntilTimestampStr) else {
+        guard let int16 = UInt16(lockTimeIntervalStr), let lockTimeInterval = HodlerPlugin.LockTimeInterval(rawValue: int16) else {
             throw HodlerPluginError.invalidHodlerData
         }
 
 
-        return HodlerData(lockedUntilTimestamp: lockedUntilTimestamp, addressString: addressString)
+        return HodlerData(lockTimeInterval: lockTimeInterval, addressString: addressString)
     }
 
-    init(lockedUntilTimestamp: Int, addressString: String) {
-        self.lockedUntilTimestamp = lockedUntilTimestamp
+    init(lockTimeInterval: HodlerPlugin.LockTimeInterval, addressString: String) {
+        self.lockTimeInterval = lockTimeInterval
         self.addressString = addressString
     }
 
     func toString() -> String {
-        "\(lockedUntilTimestamp)|\(addressString)"
+        "\(lockTimeInterval.rawValue)|\(addressString)"
     }
 
 }

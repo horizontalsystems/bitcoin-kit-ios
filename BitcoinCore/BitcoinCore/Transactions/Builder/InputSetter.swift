@@ -9,15 +9,17 @@ class InputSetter {
     private let addressConverter: IAddressConverter
     private let publicKeyManager: IPublicKeyManager
     private let factory: IFactory
+    private let pluginManager: IPluginManager
     private let changeScriptType: ScriptType
 
     init(unspentOutputSelector: IUnspentOutputSelector, transactionSizeCalculator: ITransactionSizeCalculator, addressConverter: IAddressConverter, publicKeyManager: IPublicKeyManager,
-         factory: IFactory, changeScriptType: ScriptType) {
+         factory: IFactory, pluginManager: IPluginManager, changeScriptType: ScriptType) {
         self.unspentOutputSelector = unspentOutputSelector
         self.transactionSizeCalculator = transactionSizeCalculator
         self.addressConverter = addressConverter
         self.publicKeyManager = publicKeyManager
         self.factory = factory
+        self.pluginManager = pluginManager
         self.changeScriptType = changeScriptType
     }
 
@@ -65,6 +67,8 @@ class InputSetter {
             mutableTransaction.changeAddress = changeAddress
             mutableTransaction.changeValue = unspentOutputInfo.totalValue - sentValue
         }
+
+        try pluginManager.processInputs(mutableTransaction: mutableTransaction)
     }
 
     func setInputs(to mutableTransaction: MutableTransaction, fromUnspentOutput unspentOutput: UnspentOutput, feeRate: Int) throws {

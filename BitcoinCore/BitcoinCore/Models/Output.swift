@@ -27,7 +27,7 @@ public class Output: Record {
     public var value: Int
     public var lockingScript: Data
     public var index: Int
-    var transactionHash: Data
+    public var transactionHash: Data
     public var publicKeyPath: String? = nil
     public var scriptType: ScriptType = .unknown
     public var redeemScript: Data? = nil
@@ -53,7 +53,7 @@ public class Output: Record {
     }
 
     override open class var databaseTableName: String {
-        return "outputs"
+        "outputs"
     }
 
     enum Columns: String, ColumnExpression, CaseIterable {

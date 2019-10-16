@@ -22,7 +22,7 @@ extension TransactionBuilder: ITransactionBuilder {
 
         try outputSetter.setOutputs(to: mutableTransaction, toAddress: toAddress, value: value, pluginData: pluginData)
         try inputSetter.setInputs(to: mutableTransaction, feeRate: feeRate, senderPay: senderPay)
-        try lockTimeSetter.setLockTime(to: mutableTransaction)
+        lockTimeSetter.setLockTime(to: mutableTransaction)
         try signer.sign(mutableTransaction: mutableTransaction)
 
         return mutableTransaction.build()
@@ -33,7 +33,7 @@ extension TransactionBuilder: ITransactionBuilder {
 
         try outputSetter.setOutputs(to: mutableTransaction, toAddress: toAddress, value: unspentOutput.output.value, pluginData: [:])
         try inputSetter.setInputs(to: mutableTransaction, fromUnspentOutput: unspentOutput, feeRate: feeRate)
-        try lockTimeSetter.setLockTime(to: mutableTransaction)
+        lockTimeSetter.setLockTime(to: mutableTransaction)
         try signer.sign(mutableTransaction: mutableTransaction)
 
         return mutableTransaction.build()
