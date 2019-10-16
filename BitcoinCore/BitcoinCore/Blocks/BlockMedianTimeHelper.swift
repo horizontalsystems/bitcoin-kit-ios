@@ -25,4 +25,15 @@ extension BlockMedianTimeHelper: IBlockMedianTimeHelper {
         return median[median.count / 2]
     }
 
+    // Returns (an approximate medianTimePast of a block in which given transaction is included) PLUS ~1 hour.
+    // This is not an accurate medianTimePast, it always returns a timestamp nearly 7 blocks ahead.
+    // But this is quite enough in our case since we're setting relative time-locks for at least 1 month
+    public func medianTimePast(transactionHash: Data) -> Int? {
+        guard let transaction = storage.transaction(byHash: transactionHash) else {
+            return nil
+        }
+
+        return transaction.timestamp
+    }
+
 }

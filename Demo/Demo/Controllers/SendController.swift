@@ -1,5 +1,6 @@
 import UIKit
 import RxSwift
+import Hodler
 
 class SendController: UIViewController {
     private let disposeBag = DisposeBag()
@@ -9,7 +10,11 @@ class SendController: UIViewController {
     @IBOutlet weak var coinLabel: UILabel?
     @IBOutlet weak var feeLabel: UILabel?
     @IBOutlet weak var timeLockSwitch: UISwitch?
-    @IBOutlet weak var datePicker: UIDatePicker?
+    @IBOutlet weak var picker: UIPickerView?
+
+    private var timeIntervalStrings = ["Hour", "Month", "Half Year", "Year"]
+    private var timeIntervals: [HodlerPlugin.LockTimeInterval] = [.hour, .month, .halfYear, .year]
+    private var selectedTimeInterval: HodlerPlugin.LockTimeInterval = .hour
 
     private var adapters = [BaseAdapter]()
     private let segmentedControl = UISegmentedControl()
@@ -19,6 +24,8 @@ class SendController: UIViewController {
         super.viewDidLoad()
 
         segmentedControl.addTarget(self, action: #selector(onSegmentChanged), for: .valueChanged)
+        picker?.dataSource = self
+        picker?.delegate = self
 
         Manager.shared.adapterSignal
                 .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
@@ -65,8 +72,8 @@ class SendController: UIViewController {
         }
         
         var pluginData = [String: [String: Any]]()
-        if let lockUntil = datePicker?.date, timeLockEnabled {
-            pluginData["hodler"] = ["locked_until": Int(lockUntil.timeIntervalSince1970)]
+        if timeLockEnabled {
+            pluginData["hodler"] = ["lockTimeInterval": self.selectedTimeInterval]
         }
         
         if let fee = currentAdapter?.fee(for: amount, address: address, pluginData: pluginData) {
@@ -98,10 +105,6 @@ class SendController: UIViewController {
         updateFee()
     }
     
-    @IBAction func datePickerChanged(_ sender: Any) {
-        updateFee()
-    }
-
     @IBAction func send() {
         guard let address = addressTextField?.text else {
             return
@@ -120,8 +123,8 @@ class SendController: UIViewController {
         }
         
         var pluginData = [String: [String: Any]]()
-        if let lockUntil = datePicker?.date, timeLockEnabled {
-            pluginData["hodler"] = ["locked_until": Int(lockUntil.timeIntervalSince1970)]
+        if timeLockEnabled {
+            pluginData["hodler"] = ["lockTimeInterval": self.selectedTimeInterval]
         }
 
         currentAdapter?.sendSingle(to: address, amount: amount, pluginData: pluginData)
@@ -158,4 +161,32 @@ class SendController: UIViewController {
         return adapters[segmentedControl.selectedSegmentIndex]
     }
 
+}
+
+extension SendController: UIPickerViewDataSource {
+    public func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        1
+    }
+
+    public func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        timeIntervals.count
+    }
+}
+
+extension SendController: UIPickerViewDelegate {
+    public func pickerView(_ pickerView: UIPickerView, widthForComponent component: Int) -> CGFloat {
+        130
+    }
+
+    public func pickerView(_ pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
+        30
+    }
+
+    public func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        timeIntervalStrings[row]
+    }
+
+    public func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        selectedTimeInterval = timeIntervals[row]
+    }
 }

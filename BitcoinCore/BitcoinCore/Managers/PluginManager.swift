@@ -26,6 +26,16 @@ extension PluginManager: IPluginManager {
         }
     }
 
+    func processInputs(mutableTransaction: MutableTransaction) throws {
+        for inputToSign in mutableTransaction.inputsToSign {
+            guard let pluginId = inputToSign.previousOutput.pluginId, let plugin = plugins[pluginId] else {
+                continue
+            }
+
+            inputToSign.input.sequence = try plugin.inputSequence(output: inputToSign.previousOutput)
+        }
+    }
+
     func processTransactionWithNullData(transaction: FullTransaction, nullDataOutput: Output) throws {
         let script = try scriptConverter.decode(data: nullDataOutput.lockingScript)
         var iterator = script.chunks.makeIterator()
@@ -47,21 +57,7 @@ extension PluginManager: IPluginManager {
             return true
         }
 
-        guard let blockMedianTime = blockMedianTimeHelper.medianTimePast else {
-            return false
-        }
-
-        return (try? plugin.isSpendable(output: output, medianTime: blockMedianTime)) ?? true
-    }
-
-    func transactionLockTime(transaction: MutableTransaction) throws -> Int? {
-        let lockTimes: [Int] = try transaction.inputsToSign.compactMap { inputToSign in
-            try inputToSign.previousOutput.pluginId.flatMap { pluginId in
-                try plugins[pluginId]?.transactionLockTime(output: inputToSign.previousOutput)
-            }
-        }
-
-        return lockTimes.max()
+        return (try? plugin.isSpendable(output: output, blockMedianTimeHelper: blockMedianTimeHelper)) ?? true
     }
 
 }
