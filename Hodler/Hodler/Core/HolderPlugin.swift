@@ -40,12 +40,13 @@ public class HodlerPlugin {
         try HodlerData.parse(serialized: output.pluginData).lockTimeInterval
     }
 
-    private func inputLockTime(output: Output, blockMedianTimeHelper: IBlockMedianTimeHelper) throws -> Int {
-        guard let previousOutputMedianTime = blockMedianTimeHelper.medianTimePast(transactionHash: output.transactionHash) else {
-            throw HodlerPluginError.invalidHodlerData
-        }
+    private func inputLockTime(unspentOutput: UnspentOutput, blockMedianTimeHelper: IBlockMedianTimeHelper) throws -> Int {
+        // Use (an approximate medianTimePast of a block in which given transaction is included) PLUS ~1 hour.
+        // This is not an accurate medianTimePast, it is always a timestamp nearly 7 blocks ahead.
+        // But this is quite enough in our case since we're setting relative time-locks for at least 1 month
+        let previousOutputMedianTime = unspentOutput.transaction.timestamp
 
-        let lockTimeInterval = try lockTimeIntervalFrom(output: output)
+        let lockTimeInterval = try lockTimeIntervalFrom(output: unspentOutput.output)
 
         return previousOutputMedianTime + Int(lockTimeInterval.rawValue) * sequenceTimeSecondsGranularity
     }
@@ -103,13 +104,12 @@ extension HodlerPlugin: IPlugin {
         }
     }
 
-    public func isSpendable(output: Output, blockMedianTimeHelper: IBlockMedianTimeHelper) throws -> Bool {
+    public func isSpendable(unspentOutput: UnspentOutput, blockMedianTimeHelper: IBlockMedianTimeHelper) throws -> Bool {
         guard let lastBlockMedianTime = blockMedianTimeHelper.medianTimePast else {
             return false
         }
 
-
-        return try inputLockTime(output: output, blockMedianTimeHelper: blockMedianTimeHelper) < lastBlockMedianTime
+        return try inputLockTime(unspentOutput: unspentOutput, blockMedianTimeHelper: blockMedianTimeHelper) < lastBlockMedianTime
     }
 
     public func inputSequence(output: Output) throws -> Int {

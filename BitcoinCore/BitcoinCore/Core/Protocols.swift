@@ -561,7 +561,7 @@ public protocol IPlugin {
     var id: UInt8 { get }
     func processOutputs(mutableTransaction: MutableTransaction, pluginData: [UInt8: [String: Any]], addressConverter: IAddressConverter) throws
     func processTransactionWithNullData(transaction: FullTransaction, nullDataChunks: inout IndexingIterator<[Chunk]>, storage: IStorage, addressConverter: IAddressConverter) throws
-    func isSpendable(output: Output, blockMedianTimeHelper: IBlockMedianTimeHelper) throws -> Bool
+    func isSpendable(unspentOutput: UnspentOutput, blockMedianTimeHelper: IBlockMedianTimeHelper) throws -> Bool
     func inputSequence(output: Output) throws -> Int
     func parsePluginData(from: Output) throws -> [String: Any]
 }
@@ -571,12 +571,11 @@ public protocol IPluginManager {
     func processOutputs(mutableTransaction: MutableTransaction, pluginData: [UInt8: [String: Any]]) throws
     func processInputs(mutableTransaction: MutableTransaction) throws
     func processTransactionWithNullData(transaction: FullTransaction, nullDataOutput: Output) throws
-    func isSpendable(output: Output) -> Bool
+    func isSpendable(unspentOutput: UnspentOutput) -> Bool
     func parsePluginData(from: Output) -> [UInt8: [String: Any]]?
 }
 
 public protocol IBlockMedianTimeHelper {
     var medianTimePast: Int? { get }
     func medianTimePast(block: Block) -> Int?
-    func medianTimePast(transactionHash: Data) -> Int?
 }

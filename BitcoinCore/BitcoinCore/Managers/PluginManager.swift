@@ -52,12 +52,12 @@ extension PluginManager: IPluginManager {
         }
     }
 
-    func isSpendable(output: Output) -> Bool {
-        guard let pluginId = output.pluginId, let plugin = plugins[pluginId] else {
+    func isSpendable(unspentOutput: UnspentOutput) -> Bool {
+        guard let pluginId = unspentOutput.output.pluginId, let plugin = plugins[pluginId] else {
             return true
         }
 
-        return (try? plugin.isSpendable(output: output, blockMedianTimeHelper: blockMedianTimeHelper)) ?? true
+        return (try? plugin.isSpendable(unspentOutput: unspentOutput, blockMedianTimeHelper: blockMedianTimeHelper)) ?? true
     }
 
     public func parsePluginData(from output: Output) -> [UInt8: [String: Any]]? {
