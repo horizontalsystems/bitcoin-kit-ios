@@ -224,7 +224,8 @@ public class BitcoinCoreBuilder {
                 networkMessageSerializer: networkMessageSerializer,
                 syncManager: syncManager,
                 watchedTransactionManager: watchedTransactionManager,
-                bip: bip)
+                bip: bip,
+                peerManager: peerManager)
 
         initialSyncer.delegate = syncManager
         bloomFilterManager.delegate = bloomFilterLoader

@@ -19,31 +19,31 @@ open class AbstractKit {
     }
 
     open var lastBlockInfo: BlockInfo? {
-        return bitcoinCore.lastBlockInfo
+        bitcoinCore.lastBlockInfo
     }
 
     open var balance: Int {
-        return bitcoinCore.balance
+        bitcoinCore.balance
     }
 
     open var syncState: BitcoinCore.KitState {
-        return bitcoinCore.syncState
+        bitcoinCore.syncState
     }
 
     open func transactions(fromHash: String? = nil, limit: Int? = nil) -> Single<[TransactionInfo]> {
-        return bitcoinCore.transactions(fromHash: fromHash, limit: limit)
+        bitcoinCore.transactions(fromHash: fromHash, limit: limit)
     }
 
     open func send(to address: String, value: Int, feeRate: Int) throws -> FullTransaction {
-        return try bitcoinCore.send(to: address, value: value, feeRate: feeRate)
+        try bitcoinCore.send(to: address, value: value, feeRate: feeRate)
     }
 
     public func send(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int) throws -> FullTransaction {
-        return try bitcoinCore.send(to: hash, scriptType: scriptType, value: value, feeRate: feeRate)
+        try bitcoinCore.send(to: hash, scriptType: scriptType, value: value, feeRate: feeRate)
     }
 
     public func redeem(from unspentOutput: UnspentOutput, to address: String, feeRate: Int, signatureScriptFunction: (Data, Data) -> Data) throws -> FullTransaction {
-        return try bitcoinCore.redeem(from: unspentOutput, to: address, feeRate: feeRate, signatureScriptFunction: signatureScriptFunction)
+        try bitcoinCore.redeem(from: unspentOutput, to: address, feeRate: feeRate, signatureScriptFunction: signatureScriptFunction)
     }
 
     open func validate(address: String) throws {
@@ -51,27 +51,27 @@ open class AbstractKit {
     }
 
     open func parse(paymentAddress: String) -> BitcoinPaymentData {
-        return bitcoinCore.parse(paymentAddress: paymentAddress)
+        bitcoinCore.parse(paymentAddress: paymentAddress)
     }
 
     open func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feeRate: Int) throws -> Int {
-        return try bitcoinCore.fee(for: value, toAddress: toAddress, senderPay: senderPay, feeRate: feeRate)
+        try bitcoinCore.fee(for: value, toAddress: toAddress, senderPay: senderPay, feeRate: feeRate)
     }
 
     open func receiveAddress() -> String {
-        return bitcoinCore.receiveAddress()
+        bitcoinCore.receiveAddress()
     }
 
     open func changePublicKey() throws -> PublicKey {
-        return try bitcoinCore.changePublicKey()
+        try bitcoinCore.changePublicKey()
     }
 
     open func receivePublicKey() throws -> PublicKey {
-        return try bitcoinCore.receivePublicKey()
+        try bitcoinCore.receivePublicKey()
     }
 
     public func publicKey(byPath path: String) throws -> PublicKey {
-        return try bitcoinCore.publicKey(byPath: path)
+        try bitcoinCore.publicKey(byPath: path)
     }
 
     open func watch(transaction: BitcoinCore.TransactionFilter, delegate: IWatchedTransactionDelegate) {
@@ -79,7 +79,11 @@ open class AbstractKit {
     }
 
     open var debugInfo: String {
-        return bitcoinCore.debugInfo
+        bitcoinCore.debugInfo
+    }
+
+    open var statusInfo: [(String, Any)] {
+        bitcoinCore.statusInfo
     }
 
 }
