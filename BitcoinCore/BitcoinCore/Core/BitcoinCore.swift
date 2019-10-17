@@ -223,7 +223,12 @@ extension BitcoinCore {
 
         status.append(contentsOf:
             peerManager.connected().enumerated().map { (index, peer) in
-                ("peer \(index + 1)", initialBlockDownload.isSynced(peer: peer) ? "synced" : "not synced")
+                var peerStatus = [(String, Any)]()
+                peerStatus.append(("status", initialBlockDownload.isSynced(peer: peer) ? "synced" : "not synced"))
+                peerStatus.append(("host", peer.host))
+                peerStatus.append(("best block", peer.announcedLastBlockHeight))
+
+                return ("peer \(index + 1)", peerStatus)
             }
         )
 
