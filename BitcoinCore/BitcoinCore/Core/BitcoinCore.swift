@@ -33,6 +33,8 @@ public class BitcoinCore {
 
     private let bip: Bip
 
+    private let peerManager: IPeerManager
+
     // START: Extending
 
     public let peerGroup: IPeerGroup
@@ -99,7 +101,8 @@ public class BitcoinCore {
          unspentOutputSelector: UnspentOutputSelectorChain, kitStateProvider: IKitStateProvider & ISyncStateListener,
          scriptBuilder: ScriptBuilderChain, transactionCreator: ITransactionCreator, transactionFeeCalculator: ITransactionFeeCalculator,
          paymentAddressParser: IPaymentAddressParser, networkMessageParser: NetworkMessageParser, networkMessageSerializer: NetworkMessageSerializer,
-         syncManager: SyncManager, watchedTransactionManager: IWatchedTransactionManager, bip: Bip) {
+         syncManager: SyncManager, watchedTransactionManager: IWatchedTransactionManager, bip: Bip,
+         peerManager: IPeerManager) {
         self.storage = storage
         self.cache = cache
         self.dataProvider = dataProvider
@@ -125,6 +128,8 @@ public class BitcoinCore {
         self.syncManager = syncManager
         self.watchedTransactionManager = watchedTransactionManager
         self.bip = bip
+
+        self.peerManager = peerManager
     }
 
 }
@@ -210,6 +215,19 @@ extension BitcoinCore {
 
     public var debugInfo: String {
         return dataProvider.debugInfo
+    }
+
+    public var statusInfo: [(String, Any)] {
+        var status = [(String, Any)]()
+        status.append(("synced until", ((lastBlockInfo?.timestamp.map { Double($0) })?.map { Date(timeIntervalSince1970: $0) }) ?? "n/a"))
+
+        status.append(contentsOf:
+            peerManager.connected().enumerated().map { (index, peer) in
+                ("peer \(index + 1)", initialBlockDownload.isSynced(peer: peer) ? "synced" : "not synced")
+            }
+        )
+
+        return status
     }
 
 }
