@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
-    <device id="retina4_7" orientation="portrait">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="15400" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15404"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -16,17 +14,17 @@
             <rect key="frame" x="0.0" y="0.0" width="375" height="220"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
-                <rect key="frame" x="0.0" y="0.0" width="375" height="219.5"/>
+                <rect key="frame" x="0.0" y="0.0" width="375" height="220"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eve-jd-t5e">
-                        <rect key="frame" x="16" y="11" width="343" height="198"/>
-                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eve-jd-t5e">
+                        <rect key="frame" x="15" y="11" width="345" height="198"/>
+                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="12"/>
                         <color key="textColor" cocoaTouchSystemColor="scrollViewTexturedBackgroundColor"/>
                         <nil key="highlightedColor"/>
                     </label>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="right" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FM2-bN-YiH">
-                        <rect key="frame" x="16" y="11" width="343" height="198"/>
+                        <rect key="frame" x="15" y="11" width="345" height="198"/>
                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="12"/>
                         <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <nil key="highlightedColor"/>
@@ -40,15 +38,15 @@
                     </label>
                 </subviews>
                 <constraints>
-                    <constraint firstItem="eve-jd-t5e" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="topMargin" id="4bC-XX-zHh"/>
+                    <constraint firstItem="eve-jd-t5e" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="11" id="0n5-8E-3bM"/>
                     <constraint firstAttribute="trailingMargin" secondItem="eve-jd-t5e" secondAttribute="trailing" id="BtJ-2Y-c1D"/>
                     <constraint firstItem="Axc-gL-fEp" firstAttribute="centerX" secondItem="H2p-sc-9uM" secondAttribute="centerX" id="Ipf-Ma-gzQ"/>
                     <constraint firstItem="Axc-gL-fEp" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="MSF-oe-ZVI"/>
-                    <constraint firstItem="FM2-bN-YiH" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="topMargin" id="SHo-cO-mmc"/>
                     <constraint firstItem="FM2-bN-YiH" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leadingMargin" id="SfP-ot-naW"/>
                     <constraint firstItem="eve-jd-t5e" firstAttribute="bottom" secondItem="H2p-sc-9uM" secondAttribute="bottomMargin" id="USh-SZ-uL8"/>
                     <constraint firstItem="eve-jd-t5e" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leadingMargin" id="XLc-sa-aVe"/>
                     <constraint firstAttribute="bottomMargin" secondItem="FM2-bN-YiH" secondAttribute="bottom" id="dZV-yq-y63"/>
+                    <constraint firstItem="FM2-bN-YiH" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="11" id="hzp-tW-7as"/>
                     <constraint firstAttribute="trailingMargin" secondItem="FM2-bN-YiH" secondAttribute="trailing" id="uol-bH-j0a"/>
                 </constraints>
             </tableViewCellContentView>

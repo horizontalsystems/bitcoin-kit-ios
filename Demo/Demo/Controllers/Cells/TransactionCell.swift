@@ -1,5 +1,6 @@
 import Foundation
 import UIKit
+import Hodler
 
 class TransactionCell: UITableViewCell {
     static let dateFormatter: DateFormatter = {
@@ -33,6 +34,12 @@ class TransactionCell: UITableViewCell {
             if to.mine {
                 string += " (mine)"
             }
+            if let pluginData = to.pluginData, let hodlerData = pluginData[HodlerPlugin.id],
+               let lockTimeInterval = hodlerData["lockTimeInterval"] as? HodlerPlugin.LockTimeInterval, let address = hodlerData["address"] as? String {
+                let lockedUntil = transaction.timestamp + (Double(lockTimeInterval.rawValue) * 512)
+                string += "\nLocked Until: \(TransactionCell.dateFormatter.string(from: Date(timeIntervalSince1970: lockedUntil)))  <-"
+                string += "\nOriginal: \(format(hash: address))  <-"
+            }
             return string
         }
 
@@ -45,7 +52,7 @@ class TransactionCell: UITableViewCell {
                     Block:
                     Confirmations:
                     \(from.map { _ in "From:" }.joined(separator: "\n"))
-                    \(to.map { _ in "To:" }.joined(separator: "\n"))
+                    \(transaction.to.map { "To:\(String(repeating: "\n", count: TransactionCell.rowsCount(address: $0)))" }.joined(separator: ""))
                     """, alignment: .left, label: titleLabel)
 
         set(string: """
@@ -81,6 +88,32 @@ class TransactionCell: UITableViewCell {
         }
 
         return "\(hash[..<hash.index(hash.startIndex, offsetBy: 10)])...\(hash[hash.index(hash.endIndex, offsetBy: -10)...])"
+    }
+
+}
+
+extension TransactionCell {
+    
+    static func rowsCount(address: TransactionAddress) -> Int {
+        var rowsCount = 1
+
+        if let pluginData = address.pluginData, let hodlerData = pluginData[HodlerPlugin.id],
+           let _ = hodlerData["lockTimeInterval"] as? HodlerPlugin.LockTimeInterval, let _ = hodlerData["address"] as? String {
+            rowsCount += 2
+        }
+        
+        return rowsCount
+    }
+
+    static func rowHeight(for transaction: TransactionRecord) -> Int {
+        let addressRowsCount = transaction.to.reduce(0) { $0 + rowsCount(address: $1) }
+        var height = (addressRowsCount + 7) * 22 + 10
+
+        if transaction.transactionExtraType != nil {
+            height += 20
+        }
+
+        return height
     }
 
 }

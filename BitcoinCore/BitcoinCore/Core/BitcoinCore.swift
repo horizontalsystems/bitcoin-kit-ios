@@ -163,7 +163,7 @@ extension BitcoinCore {
         dataProvider.transactions(fromHash: fromHash, limit: limit)
     }
 
-    public func send(to address: String, value: Int, feeRate: Int, pluginData: [String: [String: Any]] = [:]) throws -> FullTransaction {
+    public func send(to address: String, value: Int, feeRate: Int, pluginData: [UInt8: [String: Any]] = [:]) throws -> FullTransaction {
         try transactionCreator.create(to: address, value: value, feeRate: feeRate, senderPay: true, pluginData: pluginData)
     }
 
@@ -184,7 +184,7 @@ extension BitcoinCore {
         paymentAddressParser.parse(paymentAddress: paymentAddress)
     }
 
-    public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feeRate: Int, pluginData: [String: [String: Any]] = [:]) throws -> Int {
+    public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feeRate: Int, pluginData: [UInt8: [String: Any]] = [:]) throws -> Int {
         try transactionFeeCalculator.fee(for: value, feeRate: feeRate, senderPay: senderPay, toAddress: toAddress, pluginData: pluginData)
     }
 

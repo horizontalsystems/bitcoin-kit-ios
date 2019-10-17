@@ -80,7 +80,7 @@ class TransactionsController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        220
+        CGFloat(TransactionCell.rowHeight(for: transactions[indexPath.row]))
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

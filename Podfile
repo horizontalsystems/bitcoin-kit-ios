@@ -10,6 +10,7 @@ project 'BitcoinCore/BitcoinCore'
 project 'BitcoinKit/BitcoinKit'
 project 'BitcoinCashKit/BitcoinCashKit'
 project 'DashKit/DashKit'
+project 'Hodler/Hodler'
 
 def internal_pods
   pod 'HSCryptoKit', '~> 1.4'

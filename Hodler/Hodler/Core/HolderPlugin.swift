@@ -8,6 +8,8 @@ enum HodlerPluginError: Error {
 }
 
 public class HodlerPlugin {
+    public static let id: UInt8 = OpCode.push(1)[0]
+    public var id: UInt8 { HodlerPlugin.id }
 
     public enum LockTimeInterval: UInt16 {
         case hour = 7           //  60 * 60 / 512
@@ -18,7 +20,6 @@ public class HodlerPlugin {
 
     private let sequenceTimeSecondsGranularity = 512
     private let relativeLockTimeLockMask: UInt32 = 0x400000 // (1 << 22)
-    public let id: UInt8 = OpCode.push(1)[0]
 
     public init() {}
 
@@ -36,11 +37,7 @@ public class HodlerPlugin {
     }
 
     private func lockTimeIntervalFrom(output: Output) throws -> LockTimeInterval {
-        guard let pluginData = output.pluginData else {
-            throw HodlerPluginError.invalidHodlerData
-        }
-
-        return try HodlerData.parse(serialized: pluginData).lockTimeInterval
+        try HodlerData.parse(serialized: output.pluginData).lockTimeInterval
     }
 
     private func inputLockTime(output: Output, blockMedianTimeHelper: IBlockMedianTimeHelper) throws -> Int {
@@ -63,8 +60,8 @@ public class HodlerPlugin {
 
 extension HodlerPlugin: IPlugin {
     
-    public func processOutputs(mutableTransaction: MutableTransaction, pluginData: [String: [String: Any]], addressConverter: IAddressConverter) throws {
-        guard let hodlerData = pluginData["hodler"], let timeLockParam = hodlerData["lockTimeInterval"], let lockTimeInterval = timeLockParam as? LockTimeInterval else {
+    public func processOutputs(mutableTransaction: MutableTransaction, pluginData: [UInt8: [String: Any]], addressConverter: IAddressConverter) throws {
+        guard let hodlerData = pluginData[id], let timeLockParam = hodlerData["lockTimeInterval"], let lockTimeInterval = timeLockParam as? LockTimeInterval else {
             return
         }
 
@@ -117,6 +114,12 @@ extension HodlerPlugin: IPlugin {
 
     public func inputSequence(output: Output) throws -> Int {
         Int(sequence(from: try lockTimeIntervalFrom(output: output)))
+    }
+
+    public func parsePluginData(from output: Output) throws -> [String: Any] {
+        let hodlerData = try HodlerData.parse(serialized: output.pluginData)
+
+        return ["lockTimeInterval": hodlerData.lockTimeInterval, "address": hodlerData.addressString]
     }
 
 }

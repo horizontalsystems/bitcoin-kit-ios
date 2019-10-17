@@ -27,11 +27,11 @@ class BaseAdapter {
 
     func transactionRecord(fromTransaction transaction: TransactionInfo) -> TransactionRecord {
         let fromAddresses = transaction.from.map {
-            TransactionAddress(address: $0.address, mine: $0.mine)
+            TransactionAddress(address: $0.address, mine: $0.mine, pluginData: $0.pluginData)
         }
 
         let toAddresses = transaction.to.map {
-            TransactionAddress(address: $0.address, mine: $0.mine)
+            TransactionAddress(address: $0.address, mine: $0.mine, pluginData: $0.pluginData)
         }
 
         return TransactionRecord(
@@ -119,7 +119,7 @@ extension BaseAdapter {
         }
     }
 
-    func sendSingle(to address: String, amount: Decimal, pluginData: [String: [String: Any]] = [:]) -> Single<Void> {
+    func sendSingle(to address: String, amount: Decimal, pluginData: [UInt8: [String: Any]] = [:]) -> Single<Void> {
         let satoshiAmount = convertToSatoshi(value: amount)
 
         return Single.create { [unowned self] observer in
@@ -138,7 +138,7 @@ extension BaseAdapter {
         max(0, spendableBalance - fee(for: spendableBalance, address: address))
     }
 
-    func fee(for value: Decimal, address: String?, pluginData: [String: [String: Any]] = [:]) -> Decimal {
+    func fee(for value: Decimal, address: String?, pluginData: [UInt8: [String: Any]] = [:]) -> Decimal {
         do {
             let amount = convertToSatoshi(value: value)
             let fee = try abstractKit.fee(for: amount, toAddress: address, senderPay: true, feeRate: feeRate, pluginData: pluginData)
