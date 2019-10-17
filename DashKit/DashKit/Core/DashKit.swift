@@ -50,7 +50,7 @@ public class DashKit: AbstractKit {
         let instantTransactionState = InstantTransactionState()
         let instantTransactionManager = InstantTransactionManager(storage: storage, instantSendFactory: instantSendFactory, instantTransactionState: instantTransactionState)
 
-        dashTransactionInfoConverter = DashTransactionInfoConverter(baseTransactionInfoConverter: BaseTransactionInfoConverter(), instantTransactionManager: instantTransactionManager)
+        dashTransactionInfoConverter = DashTransactionInfoConverter(instantTransactionManager: instantTransactionManager)
 
         let bitcoinCore = try BitcoinCoreBuilder(minLogLevel: minLogLevel)
                 .set(network: network)
@@ -144,7 +144,7 @@ public class DashKit: AbstractKit {
         transactionInfos.compactMap { $0 as? DashTransactionInfo }
     }
 
-    public override func send(to address: String, value: Int, feeRate: Int, pluginData: [String: [String: Any]]) throws -> FullTransaction {
+    public override func send(to address: String, value: Int, feeRate: Int, pluginData: [UInt8: [String: Any]]) throws -> FullTransaction {
         try super.send(to: address, value: value, feeRate: feeRate)
     }
 

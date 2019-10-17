@@ -340,17 +340,17 @@ public protocol ITransactionSyncer: class {
 }
 
 public protocol ITransactionCreator {
-    func create(to address: String, value: Int, feeRate: Int, senderPay: Bool, pluginData: [String: [String: Any]]) throws -> FullTransaction
+    func create(to address: String, value: Int, feeRate: Int, senderPay: Bool, pluginData: [UInt8: [String: Any]]) throws -> FullTransaction
     func create(from: UnspentOutput, to address: String, feeRate: Int) throws -> FullTransaction
 }
 
 protocol ITransactionBuilder {
-    func buildTransaction(toAddress: String, value: Int, feeRate: Int, senderPay: Bool, pluginData: [String: [String: Any]]) throws -> FullTransaction
+    func buildTransaction(toAddress: String, value: Int, feeRate: Int, senderPay: Bool, pluginData: [UInt8: [String: Any]]) throws -> FullTransaction
     func buildTransaction(from: UnspentOutput, toAddress: String, feeRate: Int) throws -> FullTransaction
 }
 
 protocol ITransactionFeeCalculator {
-    func fee(for value: Int, feeRate: Int, senderPay: Bool, toAddress: String?, pluginData: [String: [String: Any]]) throws -> Int
+    func fee(for value: Int, feeRate: Int, senderPay: Bool, toAddress: String?, pluginData: [UInt8: [String: Any]]) throws -> Int
 }
 
 protocol IBlockchain {
@@ -422,6 +422,7 @@ public protocol ITransactionInfo: class {
 }
 
 public protocol ITransactionInfoConverter {
+    var baseTransactionInfoConverter: IBaseTransactionInfoConverter! { get set }
     func transactionInfo(fromTransaction transactionForInfo: FullTransactionForInfo) -> TransactionInfo
 }
 
@@ -558,18 +559,20 @@ protocol IIrregularOutputFinder {
 
 public protocol IPlugin {
     var id: UInt8 { get }
-    func processOutputs(mutableTransaction: MutableTransaction, pluginData: [String: [String: Any]], addressConverter: IAddressConverter) throws
+    func processOutputs(mutableTransaction: MutableTransaction, pluginData: [UInt8: [String: Any]], addressConverter: IAddressConverter) throws
     func processTransactionWithNullData(transaction: FullTransaction, nullDataChunks: inout IndexingIterator<[Chunk]>, storage: IStorage, addressConverter: IAddressConverter) throws
     func isSpendable(output: Output, blockMedianTimeHelper: IBlockMedianTimeHelper) throws -> Bool
     func inputSequence(output: Output) throws -> Int
+    func parsePluginData(from: Output) throws -> [String: Any]
 }
 
-protocol IPluginManager {
+public protocol IPluginManager {
     func add(plugin: IPlugin)
-    func processOutputs(mutableTransaction: MutableTransaction, pluginData: [String: [String: Any]]) throws
+    func processOutputs(mutableTransaction: MutableTransaction, pluginData: [UInt8: [String: Any]]) throws
     func processInputs(mutableTransaction: MutableTransaction) throws
     func processTransactionWithNullData(transaction: FullTransaction, nullDataOutput: Output) throws
     func isSpendable(output: Output) -> Bool
+    func parsePluginData(from: Output) -> [UInt8: [String: Any]]?
 }
 
 public protocol IBlockMedianTimeHelper {

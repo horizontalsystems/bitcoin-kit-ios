@@ -20,7 +20,7 @@ extension PluginManager: IPluginManager {
         plugins[plugin.id] = plugin
     }
 
-    func processOutputs(mutableTransaction: MutableTransaction, pluginData: [String: [String: Any]]) throws {
+    func processOutputs(mutableTransaction: MutableTransaction, pluginData: [UInt8: [String: Any]]) throws {
         for (_, plugin) in plugins {
             try plugin.processOutputs(mutableTransaction: mutableTransaction, pluginData: pluginData, addressConverter: addressConverter)
         }
@@ -58,6 +58,15 @@ extension PluginManager: IPluginManager {
         }
 
         return (try? plugin.isSpendable(output: output, blockMedianTimeHelper: blockMedianTimeHelper)) ?? true
+    }
+
+    public func parsePluginData(from output: Output) -> [UInt8: [String: Any]]? {
+        guard let pluginId = output.pluginId, let plugin = plugins[pluginId],
+              let parsedData = try? plugin.parsePluginData(from: output) else {
+            return nil
+        }
+
+        return [plugin.id: parsedData]
     }
 
 }

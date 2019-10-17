@@ -109,9 +109,6 @@ public class BitcoinCoreBuilder {
         } else {
             throw BuildError.noSeedData
         }
-//        guard let walletId = self.walletId else {
-//            throw BuildError.noWalletId
-//        }
         guard let network = self.network else {
             throw BuildError.noNetwork
         }
@@ -132,13 +129,9 @@ public class BitcoinCoreBuilder {
 
         plugins.forEach { pluginManager.add(plugin: $0) }
 
-//        let dbName = "bitcoinkit-${network.javaClass}-$walletId"
-//        let database = KitDatabase.getInstance(context, dbName)
-//        let realmFactory = RealmFactory(dbName)
-//        let storage = Storage(database, realmFactory)
-//
         let unspentOutputProvider = UnspentOutputProvider(storage: storage, pluginManager: pluginManager, confirmationsThreshold: confirmationsThreshold)
-        let transactionInfoConverter = self.transactionInfoConverter ?? TransactionInfoConverter(baseTransactionInfoConverter: BaseTransactionInfoConverter())
+        var transactionInfoConverter = self.transactionInfoConverter ?? TransactionInfoConverter()
+        transactionInfoConverter.baseTransactionInfoConverter = BaseTransactionInfoConverter(pluginManager: pluginManager)
         let dataProvider = DataProvider(storage: storage, balanceProvider: unspentOutputProvider, transactionInfoConverter: transactionInfoConverter)
 
         let reachabilityManager = ReachabilityManager()

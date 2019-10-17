@@ -21,7 +21,7 @@ class TransactionFeeCalculator {
 
 extension TransactionFeeCalculator: ITransactionFeeCalculator {
 
-    func fee(for value: Int, feeRate: Int, senderPay: Bool, toAddress: String?, pluginData: [String: [String: Any]] = [:]) throws -> Int {
+    func fee(for value: Int, feeRate: Int, senderPay: Bool, toAddress: String?, pluginData: [UInt8: [String: Any]] = [:]) throws -> Int {
         let mutableTransaction = MutableTransaction()
 
         try outputSetter.setOutputs(to: mutableTransaction, toAddress: toAddress ?? (try sampleAddress()), value: value, pluginData: pluginData)

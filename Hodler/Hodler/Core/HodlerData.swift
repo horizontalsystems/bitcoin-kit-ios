@@ -2,7 +2,11 @@ class HodlerData {
     let lockTimeInterval: HodlerPlugin.LockTimeInterval
     let addressString: String
 
-    static func parse(serialized: String) throws -> HodlerData {
+    static func parse(serialized: String?) throws -> HodlerData {
+        guard let serialized = serialized else {
+            throw HodlerPluginError.invalidHodlerData
+        }
+
         let parts = serialized.split(separator: "|")
 
         guard parts.count == 2 else {

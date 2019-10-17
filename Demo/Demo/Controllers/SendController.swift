@@ -71,9 +71,9 @@ class SendController: UIViewController {
             return
         }
         
-        var pluginData = [String: [String: Any]]()
+        var pluginData = [UInt8: [String: Any]]()
         if timeLockEnabled {
-            pluginData["hodler"] = ["lockTimeInterval": self.selectedTimeInterval]
+            pluginData[HodlerPlugin.id] = ["lockTimeInterval": self.selectedTimeInterval]
         }
         
         if let fee = currentAdapter?.fee(for: amount, address: address, pluginData: pluginData) {
@@ -122,9 +122,9 @@ class SendController: UIViewController {
             return
         }
         
-        var pluginData = [String: [String: Any]]()
+        var pluginData = [UInt8: [String: Any]]()
         if timeLockEnabled {
-            pluginData["hodler"] = ["lockTimeInterval": self.selectedTimeInterval]
+            pluginData[HodlerPlugin.id] = ["lockTimeInterval": self.selectedTimeInterval]
         }
 
         currentAdapter?.sendSingle(to: address, amount: amount, pluginData: pluginData)
