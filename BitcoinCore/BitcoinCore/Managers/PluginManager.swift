@@ -5,11 +5,14 @@ class PluginManager {
     private let blockMedianTimeHelper: IBlockMedianTimeHelper
     private var plugins = [UInt8: IPlugin]()
 
-    init(addressConverter: IAddressConverter, scriptConverter: IScriptConverter, storage: IStorage, blockMedianTimeHelper: IBlockMedianTimeHelper) {
+    private let logger: Logger?
+
+    init(addressConverter: IAddressConverter, scriptConverter: IScriptConverter, storage: IStorage, blockMedianTimeHelper: IBlockMedianTimeHelper, logger: Logger? = nil) {
         self.addressConverter = addressConverter
         self.scriptConverter = scriptConverter
         self.storage = storage
         self.blockMedianTimeHelper = blockMedianTimeHelper
+        self.logger = logger
     }
 
 }
@@ -37,18 +40,22 @@ extension PluginManager: IPluginManager {
     }
 
     func processTransactionWithNullData(transaction: FullTransaction, nullDataOutput: Output) throws {
-        let script = try scriptConverter.decode(data: nullDataOutput.lockingScript)
-        var iterator = script.chunks.makeIterator()
+        do {
+            let script = try scriptConverter.decode(data: nullDataOutput.lockingScript)
+            var iterator = script.chunks.makeIterator()
 
-        // the first byte OP_RETURN
-        _ = iterator.next()
+            // the first byte OP_RETURN
+            _ = iterator.next()
 
-        while let pluginId = iterator.next() {
-            guard let plugin = plugins[pluginId.opCode] else {
-                break
+            while let pluginId = iterator.next() {
+                guard let plugin = plugins[pluginId.opCode] else {
+                    break
+                }
+
+                try plugin.processTransactionWithNullData(transaction: transaction, nullDataChunks: &iterator, storage: storage, addressConverter: addressConverter)
             }
-
-            try plugin.processTransactionWithNullData(transaction: transaction, nullDataChunks: &iterator, storage: storage, addressConverter: addressConverter)
+        } catch {
+            logger?.error(error)
         }
     }
 
