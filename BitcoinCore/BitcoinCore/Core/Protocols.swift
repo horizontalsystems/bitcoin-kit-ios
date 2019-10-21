@@ -579,3 +579,20 @@ public protocol IBlockMedianTimeHelper {
     var medianTimePast: Int? { get }
     func medianTimePast(block: Block) -> Int?
 }
+
+protocol IOutputSetter {
+    func setOutputs(to mutableTransaction: MutableTransaction, toAddress: String, value: Int, pluginData: [UInt8: [String: Any]]) throws
+}
+
+protocol IInputSetter {
+    func setInputs(to mutableTransaction: MutableTransaction, feeRate: Int, senderPay: Bool) throws
+    func setInputs(to mutableTransaction: MutableTransaction, fromUnspentOutput unspentOutput: UnspentOutput, feeRate: Int) throws
+}
+
+protocol ILockTimeSetter {
+    func setLockTime(to mutableTransaction: MutableTransaction)
+}
+
+protocol ITransactionSigner {
+    func sign(mutableTransaction: MutableTransaction) throws
+}

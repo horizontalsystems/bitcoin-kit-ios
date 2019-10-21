@@ -38,6 +38,10 @@ class InputSetter {
         return factory.inputToSign(withPreviousOutput: unspentOutput, script: Data(), sequence: sequence)
     }
 
+}
+
+extension InputSetter: IInputSetter {
+
     func setInputs(to mutableTransaction: MutableTransaction, feeRate: Int, senderPay: Bool) throws {
         let value = mutableTransaction.recipientValue
         let unspentOutputInfo = try unspentOutputSelector.select(

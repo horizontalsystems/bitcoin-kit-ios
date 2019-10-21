@@ -53,7 +53,7 @@ class InputSignerTests: XCTestCase {
             XCTFail("Unexpected error")
         }
 
-        let signature = Data(hex: "3045022100a635a44b9565e9d8141c62217cebd2bf80cd6fc1a63bc3007942ead85c567d0b022027aa6e7cb692cce1604ce624299c8981e0ed22286e47ef64d58c16436bcb9add01")!
+        let signature = Data(hex: "3045022100d845739e4f2355acf785e4f379d736cd4aa303e2613f168a9248e3147a5cf376022045b876d3274a8fb43a80c7866d0790d10537798a49709e035e6fbea054ff277b01")!
         XCTAssertEqual(resultSignature.count, 2)
         XCTAssertEqual(resultSignature[0], signature)
         XCTAssertEqual(resultSignature[1], publicKey.raw)

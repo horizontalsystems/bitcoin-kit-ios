@@ -4,11 +4,11 @@ import BigInt
 class EDAValidator {
     private let difficultyEncoder: IBitcoinCashDifficultyEncoder
     private let blockHelper: IBitcoinCashBlockValidatorHelper
-    private let blockMedianTimeHelper: IBlockMedianTimeHelper
+    private let blockMedianTimeHelper: IBitcoinCashBlockMedianTimeHelper
     private let maxTargetBits: Int
     private let firstCheckpointHeight: Int
 
-    init(encoder: IBitcoinCashDifficultyEncoder, blockHelper: IBitcoinCashBlockValidatorHelper, blockMedianTimeHelper: IBlockMedianTimeHelper, maxTargetBits: Int, firstCheckpointHeight: Int) {
+    init(encoder: IBitcoinCashDifficultyEncoder, blockHelper: IBitcoinCashBlockValidatorHelper, blockMedianTimeHelper: IBitcoinCashBlockMedianTimeHelper, maxTargetBits: Int, firstCheckpointHeight: Int) {
         difficultyEncoder = encoder
         self.blockHelper = blockHelper
         self.blockMedianTimeHelper = blockMedianTimeHelper

@@ -9,11 +9,25 @@
 /* Begin PBXBuildFile section */
 		2FA5D676B12FF745A5911E40 /* HodlerData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D16242CA2BBD78ABA8F7 /* HodlerData.swift */; };
 		2FA5DDA7206D8B8B0881996E /* HolderPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D842CADC75745AFA6132 /* HolderPlugin.swift */; };
+		2FA5DFD7EB28DC948E522511 /* HodlerPluginTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DD5BC8908C5BD7499253 /* HodlerPluginTests.swift */; };
 		ABFFF88A886209596FE87ABE /* Pods_Hodler.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 07C4E7D9B6ADC34E17C2BC97 /* Pods_Hodler.framework */; };
+		ADAC11033A5B9A94EA20AB8D /* Pods_HodlerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D5E42D558B4D582487B021C2 /* Pods_HodlerTests.framework */; };
 		D02C6C9723474D6100F48BD0 /* Hodler.h in Headers */ = {isa = PBXBuildFile; fileRef = D02C6C9523474D6100F48BD0 /* Hodler.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D02C6C9F23474DC100F48BD0 /* BitcoinCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D02C6C9E23474DC100F48BD0 /* BitcoinCore.framework */; };
 		D02C6CA023474DC100F48BD0 /* BitcoinCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D02C6C9E23474DC100F48BD0 /* BitcoinCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		D0BC93842358957C009E5EB0 /* HodlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0BC93832358957C009E5EB0 /* HodlerTests.swift */; };
+		D0BC93862358957C009E5EB0 /* Hodler.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D02C6C9223474D6100F48BD0 /* Hodler.framework */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D0BC93872358957C009E5EB0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D02C6C8923474D6100F48BD0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D02C6C9123474D6100F48BD0;
+			remoteInfo = Hodler;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		D02C6CA123474DC100F48BD0 /* Embed Frameworks */ = {
@@ -33,11 +47,18 @@
 		07C4E7D9B6ADC34E17C2BC97 /* Pods_Hodler.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Hodler.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2FA5D16242CA2BBD78ABA8F7 /* HodlerData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HodlerData.swift; sourceTree = "<group>"; };
 		2FA5D842CADC75745AFA6132 /* HolderPlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HolderPlugin.swift; sourceTree = "<group>"; };
+		2FA5DD5BC8908C5BD7499253 /* HodlerPluginTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HodlerPluginTests.swift; sourceTree = "<group>"; };
+		B7CCED1D7FE0793D3696B855 /* Pods-HodlerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HodlerTests.release.xcconfig"; path = "Target Support Files/Pods-HodlerTests/Pods-HodlerTests.release.xcconfig"; sourceTree = "<group>"; };
+		C1DD6FB9D389489929EE98DB /* Pods-HodlerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HodlerTests.debug.xcconfig"; path = "Target Support Files/Pods-HodlerTests/Pods-HodlerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		CE692A61FBB18EF69F72A4E6 /* Pods-Hodler.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Hodler.debug.xcconfig"; path = "Target Support Files/Pods-Hodler/Pods-Hodler.debug.xcconfig"; sourceTree = "<group>"; };
 		D02C6C9223474D6100F48BD0 /* Hodler.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Hodler.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D02C6C9523474D6100F48BD0 /* Hodler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Hodler.h; sourceTree = "<group>"; };
 		D02C6C9623474D6100F48BD0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D02C6C9E23474DC100F48BD0 /* BitcoinCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = BitcoinCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0BC93812358957C009E5EB0 /* HodlerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HodlerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0BC93832358957C009E5EB0 /* HodlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HodlerTests.swift; sourceTree = "<group>"; };
+		D0BC93852358957C009E5EB0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D5E42D558B4D582487B021C2 /* Pods_HodlerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_HodlerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD6943476E2FC056D4EE29F1 /* Pods-Hodler.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Hodler.release.xcconfig"; path = "Target Support Files/Pods-Hodler/Pods-Hodler.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -51,6 +72,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D0BC937E2358957C009E5EB0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D0BC93862358957C009E5EB0 /* Hodler.framework in Frameworks */,
+				ADAC11033A5B9A94EA20AB8D /* Pods_HodlerTests.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -59,6 +89,8 @@
 			children = (
 				CE692A61FBB18EF69F72A4E6 /* Pods-Hodler.debug.xcconfig */,
 				DD6943476E2FC056D4EE29F1 /* Pods-Hodler.release.xcconfig */,
+				C1DD6FB9D389489929EE98DB /* Pods-HodlerTests.debug.xcconfig */,
+				B7CCED1D7FE0793D3696B855 /* Pods-HodlerTests.release.xcconfig */,
 			);
 			name = Pods;
 			path = ../Pods;
@@ -77,6 +109,7 @@
 			isa = PBXGroup;
 			children = (
 				D02C6C9423474D6100F48BD0 /* Hodler */,
+				D0BC93822358957C009E5EB0 /* HodlerTests */,
 				D02C6C9323474D6100F48BD0 /* Products */,
 				D02C6C9D23474DC100F48BD0 /* Frameworks */,
 				122CBAE4DF275A8763B9FED9 /* Pods */,
@@ -87,6 +120,7 @@
 			isa = PBXGroup;
 			children = (
 				D02C6C9223474D6100F48BD0 /* Hodler.framework */,
+				D0BC93812358957C009E5EB0 /* HodlerTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -106,8 +140,19 @@
 			children = (
 				D02C6C9E23474DC100F48BD0 /* BitcoinCore.framework */,
 				07C4E7D9B6ADC34E17C2BC97 /* Pods_Hodler.framework */,
+				D5E42D558B4D582487B021C2 /* Pods_HodlerTests.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D0BC93822358957C009E5EB0 /* HodlerTests */ = {
+			isa = PBXGroup;
+			children = (
+				D0BC93832358957C009E5EB0 /* HodlerTests.swift */,
+				D0BC93852358957C009E5EB0 /* Info.plist */,
+				2FA5DD5BC8908C5BD7499253 /* HodlerPluginTests.swift */,
+			);
+			path = HodlerTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -144,17 +189,41 @@
 			productReference = D02C6C9223474D6100F48BD0 /* Hodler.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		D0BC93802358957C009E5EB0 /* HodlerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D0BC938B2358957C009E5EB0 /* Build configuration list for PBXNativeTarget "HodlerTests" */;
+			buildPhases = (
+				9ECFE61243679A8C9C9FFD1F /* [CP] Check Pods Manifest.lock */,
+				D0BC937D2358957C009E5EB0 /* Sources */,
+				D0BC937E2358957C009E5EB0 /* Frameworks */,
+				D0BC937F2358957C009E5EB0 /* Resources */,
+				6CAD5402F5E2130A73607BEF /* [CP] Embed Pods Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D0BC93882358957C009E5EB0 /* PBXTargetDependency */,
+			);
+			name = HodlerTests;
+			productName = HodlerTests;
+			productReference = D0BC93812358957C009E5EB0 /* HodlerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		D02C6C8923474D6100F48BD0 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 1110;
 				LastUpgradeCheck = 1100;
 				ORGANIZATIONNAME = "Horizontal Systems";
 				TargetAttributes = {
 					D02C6C9123474D6100F48BD0 = {
 						CreatedOnToolsVersion = 11.0;
+					};
+					D0BC93802358957C009E5EB0 = {
+						CreatedOnToolsVersion = 11.1;
 					};
 				};
 			};
@@ -172,6 +241,7 @@
 			projectRoot = "";
 			targets = (
 				D02C6C9123474D6100F48BD0 /* Hodler */,
+				D0BC93802358957C009E5EB0 /* HodlerTests */,
 			);
 		};
 /* End PBXProject section */
@@ -184,9 +254,55 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D0BC937F2358957C009E5EB0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		6CAD5402F5E2130A73607BEF /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-HodlerTests/Pods-HodlerTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-HodlerTests/Pods-HodlerTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-HodlerTests/Pods-HodlerTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		9ECFE61243679A8C9C9FFD1F /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-HodlerTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 		B5B5F860A345A8A39CF70A98 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -221,7 +337,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D0BC937D2358957C009E5EB0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D0BC93842358957C009E5EB0 /* HodlerTests.swift in Sources */,
+				2FA5DFD7EB28DC948E522511 /* HodlerPluginTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D0BC93882358957C009E5EB0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D02C6C9123474D6100F48BD0 /* Hodler */;
+			targetProxy = D0BC93872358957C009E5EB0 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		D02C6C9823474D6100F48BD0 /* Debug */ = {
@@ -275,7 +408,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -332,7 +465,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -396,6 +529,44 @@
 			};
 			name = Release;
 		};
+		D0BC93892358957C009E5EB0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C1DD6FB9D389489929EE98DB /* Pods-HodlerTests.debug.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = HC4MCAXJ66;
+				INFOPLIST_FILE = HodlerTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = io.horizontalsystems.HodlerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D0BC938A2358957C009E5EB0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B7CCED1D7FE0793D3696B855 /* Pods-HodlerTests.release.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = HC4MCAXJ66;
+				INFOPLIST_FILE = HodlerTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = io.horizontalsystems.HodlerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -413,6 +584,15 @@
 			buildConfigurations = (
 				D02C6C9B23474D6100F48BD0 /* Debug */,
 				D02C6C9C23474D6100F48BD0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D0BC938B2358957C009E5EB0 /* Build configuration list for PBXNativeTarget "HodlerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D0BC93892358957C009E5EB0 /* Debug */,
+				D0BC938A2358957C009E5EB0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

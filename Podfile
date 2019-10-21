@@ -100,3 +100,10 @@ target :DashKitTests do
     pod 'CryptoBLS.swift', '~> 1.1'
     pod 'CryptoX11.swift', '~> 1.1'
 end
+
+target :HodlerTests do
+  project 'Hodler/Hodler'
+
+  internal_pods
+  test_pods
+end

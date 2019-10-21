@@ -13,19 +13,19 @@ extension XCTestCase {
 }
 
 public func equalErrors(_ lhs: Error?, _ rhs: Error?) -> Bool {
-    return lhs?.reflectedString == rhs?.reflectedString
+    lhs?.reflectedString == rhs?.reflectedString
 }
 
 
 public extension Error {
     var reflectedString: String {
         // NOTE 1: We can just use the standard reflection for our case
-        return String(reflecting: self)
+        String(reflecting: self)
     }
 
     // Same typed Equality
     func isEqual(to: Self) -> Bool {
-        return self.reflectedString == to.reflectedString
+        self.reflectedString == to.reflectedString
     }
 
 }
@@ -33,7 +33,7 @@ public extension Error {
 extension Block {
 
     var header: BlockHeader {
-        return BlockHeader(
+        BlockHeader(
                 version: version, headerHash: headerHash, previousBlockHeaderHash: previousBlockHash, merkleRoot: merkleRoot,
                 timestamp: timestamp, bits: bits, nonce: nonce
         )
@@ -76,7 +76,7 @@ extension BitcoinCoreErrors.UnspentOutputSelection: Equatable {
 extension BlockInfo: Equatable {
 
     public static func ==(lhs: BlockInfo, rhs: BlockInfo) -> Bool {
-        return lhs.headerHash == rhs.headerHash && lhs.height == rhs.height && lhs.timestamp == rhs.timestamp
+        lhs.headerHash == rhs.headerHash && lhs.height == rhs.height && lhs.timestamp == rhs.timestamp
     }
 
 }
@@ -84,7 +84,7 @@ extension BlockInfo: Equatable {
 extension TransactionInfo: Equatable {
 
     public static func ==(lhs: TransactionInfo, rhs: TransactionInfo) -> Bool {
-        return lhs.transactionHash == rhs.transactionHash
+        lhs.transactionHash == rhs.transactionHash
     }
 
 }
@@ -92,7 +92,7 @@ extension TransactionInfo: Equatable {
 extension PeerAddress: Equatable {
 
     public static func ==(lhs: PeerAddress, rhs: PeerAddress) -> Bool {
-        return lhs.ip == rhs.ip
+        lhs.ip == rhs.ip
     }
 
 }
@@ -100,7 +100,7 @@ extension PeerAddress: Equatable {
 extension PublicKey: Equatable {
 
     public static func ==(lhs: PublicKey, rhs: PublicKey) -> Bool {
-        return lhs.path == rhs.path
+        lhs.path == rhs.path
     }
 
 }
@@ -108,7 +108,7 @@ extension PublicKey: Equatable {
 extension Block: Equatable {
 
     public static func ==(lhs: Block, rhs: Block) -> Bool {
-        return lhs.headerHash == rhs.headerHash
+        lhs.headerHash == rhs.headerHash
     }
 
 }
@@ -116,7 +116,7 @@ extension Block: Equatable {
 extension Transaction: Equatable {
 
     public static func ==(lhs: Transaction, rhs: Transaction) -> Bool {
-        return lhs.dataHash == rhs.dataHash
+        lhs.dataHash == rhs.dataHash
     }
 
 }
@@ -124,7 +124,7 @@ extension Transaction: Equatable {
 extension Input: Equatable {
 
     public static func ==(lhs: Input, rhs: Input) -> Bool {
-        return lhs.previousOutputIndex == rhs.previousOutputIndex && lhs.previousOutputTxHash == rhs.previousOutputTxHash
+        lhs.previousOutputIndex == rhs.previousOutputIndex && lhs.previousOutputTxHash == rhs.previousOutputTxHash
     }
 
 }
@@ -132,7 +132,7 @@ extension Input: Equatable {
 extension Output: Equatable {
 
     public static func ==(lhs: Output, rhs: Output) -> Bool {
-        return lhs.keyHash == rhs.keyHash && lhs.scriptType == rhs.scriptType && lhs.value == rhs.value && lhs.index == rhs.index
+        lhs.keyHash == rhs.keyHash && lhs.scriptType == rhs.scriptType && lhs.value == rhs.value && lhs.index == rhs.index
     }
 
 }
@@ -140,7 +140,7 @@ extension Output: Equatable {
 extension BlockHeader: Equatable {
 
     public static func ==(lhs: BlockHeader, rhs: BlockHeader) -> Bool {
-        return lhs.previousBlockHeaderHash == rhs.previousBlockHeaderHash && lhs.headerHash == rhs.headerHash && lhs.merkleRoot == rhs.merkleRoot
+        lhs.previousBlockHeaderHash == rhs.previousBlockHeaderHash && lhs.headerHash == rhs.headerHash && lhs.merkleRoot == rhs.merkleRoot
     }
 
 }
@@ -148,7 +148,7 @@ extension BlockHeader: Equatable {
 extension FullTransaction: Equatable {
 
     public static func ==(lhs: FullTransaction, rhs: FullTransaction) -> Bool {
-        return TransactionSerializer.serialize(transaction: lhs) == TransactionSerializer.serialize(transaction: rhs)
+        TransactionSerializer.serialize(transaction: lhs) == TransactionSerializer.serialize(transaction: rhs)
     }
 
 }
@@ -156,7 +156,7 @@ extension FullTransaction: Equatable {
 extension UnspentOutput: Equatable {
 
     public static func ==(lhs: UnspentOutput, rhs: UnspentOutput) -> Bool {
-        return lhs.output.value == rhs.output.value
+        lhs.output.value == rhs.output.value
     }
 
 }
@@ -164,17 +164,17 @@ extension UnspentOutput: Equatable {
 extension InputToSign: Equatable {
 
     public static func ==(lhs: InputToSign, rhs: InputToSign) -> Bool {
-        return lhs.input == rhs.input && lhs.previousOutputPublicKey == rhs.previousOutputPublicKey
+        lhs.input == rhs.input && lhs.previousOutputPublicKey == rhs.previousOutputPublicKey
     }
 
 }
 
 func addressMatcher(_ address: Address) -> ParameterMatcher<Address> {
-    return ParameterMatcher<Address> { address.stringValue == $0.stringValue }
+    ParameterMatcher<Address> { address.stringValue == $0.stringValue }
 }
 
 func addressMatcher(_ address: Address?) -> ParameterMatcher<Address?> {
-    return ParameterMatcher<Address?> { tested in
+    ParameterMatcher<Address?> { tested in
         if let a1 = address, let a2 = tested {
             return addressMatcher(a1).matches(a2)
         } else {

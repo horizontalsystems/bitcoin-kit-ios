@@ -23,10 +23,10 @@ class UnspentOutputSelectorSingleNoChangeTests: QuickSpec {
             stub(mockTransactionSizeCalculator) { mock in
                 when(mock.inputSize(type: any())).thenReturn(10)
                 when(mock.outputSize(type: any())).thenReturn(2)
-                when(mock.transactionSize(inputs: any(), outputScriptTypes: any())).thenReturn(100)
+                when(mock.transactionSize(inputs: any(), outputScriptTypes: any(), pluginDataOutputSize: any())).thenReturn(100)
             }
             stub(mockUnspentOutputProvider) { mock in
-                when(mock.allUnspentOutputs.get).thenReturn(outputs)
+                when(mock.spendableUtxo.get).thenReturn(outputs)
             }
             selector = UnspentOutputSelectorSingleNoChange(calculator: mockTransactionSizeCalculator, provider: mockUnspentOutputProvider)
         }
@@ -40,7 +40,7 @@ class UnspentOutputSelectorSingleNoChangeTests: QuickSpec {
             it("selects exactly output") {
                 let testBlock: ((Int, Int, Int, Bool, UnspentOutput) -> ()) = { value, feeRate, fee, senderPay, unspentOutput in
                     do {
-                        let selectedOutputs = try selector.select(value: value, feeRate: feeRate, outputScriptType: .p2pkh, changeType: .p2pkh, senderPay: senderPay)
+                        let selectedOutputs = try selector.select(value: value, feeRate: feeRate, outputScriptType: .p2pkh, changeType: .p2pkh, senderPay: senderPay, pluginDataOutputSize: 0)
                         expect(selectedOutputs.unspentOutputs).to(equal([unspentOutput]))
                         expect(selectedOutputs.totalValue).to(equal(unspentOutput.output.value))
                         expect(selectedOutputs.fee).to(equal(fee))

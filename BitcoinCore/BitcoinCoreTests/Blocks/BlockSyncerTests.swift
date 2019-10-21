@@ -132,7 +132,7 @@ class BlockSyncerTests: QuickSpec {
                         }
 
                         it("saves bip44CheckpointBlock to storage") {
-                            BlockSyncer.checkpointBlock(network: mockNetwork, syncMode: .full, storage: mockStorage)
+                            _ = BlockSyncer.checkpointBlock(network: mockNetwork, syncMode: .full, storage: mockStorage)
                             verify(mockStorage).save(block: sameInstance(as: bip44CheckpointBlock))
                         }
                     }
@@ -143,7 +143,7 @@ class BlockSyncerTests: QuickSpec {
                         }
 
                         it("saves lastCheckpointBlock to storage") {
-                            BlockSyncer.checkpointBlock(network: mockNetwork, syncMode: .api, storage: mockStorage)
+                            _ = BlockSyncer.checkpointBlock(network: mockNetwork, syncMode: .api, storage: mockStorage)
                             verify(mockStorage).save(block: sameInstance(as: lastCheckpointBlock))
                         }
                     }

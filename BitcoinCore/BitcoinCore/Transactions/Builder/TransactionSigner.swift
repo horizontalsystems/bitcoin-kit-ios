@@ -11,8 +11,14 @@ class TransactionSigner {
     }
 
     private func signatureScript(from sigScriptData: [Data]) -> Data {
-        sigScriptData.reduce(Data()) { $0 + OpCode.push($1) }
+        sigScriptData.reduce(Data()) {
+            $0 + OpCode.push($1)
+        }
     }
+
+}
+
+extension TransactionSigner: ITransactionSigner {
 
     func sign(mutableTransaction: MutableTransaction) throws {
         for (index, inputToSign) in mutableTransaction.inputsToSign.enumerated() {
