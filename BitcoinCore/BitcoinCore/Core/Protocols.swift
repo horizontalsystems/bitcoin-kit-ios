@@ -564,6 +564,7 @@ public protocol IPlugin {
     func isSpendable(unspentOutput: UnspentOutput, blockMedianTimeHelper: IBlockMedianTimeHelper) throws -> Bool
     func inputSequence(output: Output) throws -> Int
     func parsePluginData(from: Output) throws -> [String: Any]
+    func keysForApiRestore(publicKey: PublicKey, addressConverter: IAddressConverter) throws -> [String]
 }
 
 public protocol IPluginManager {
