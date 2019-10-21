@@ -149,7 +149,7 @@ class TestData {
         ]
         let outputs = [
             Output(withValue: 10792000, index: 0 , lockingScript: Data(hex: "76a9141ec865abcb88cec71c484d4dadec3d7dc0271a7b88ac")!, type: .p2pkh, keyHash: Data()),
-            Output(withValue: 0, index: 0, lockingScript: Data(hex: "6a4c500000b919000189658af37cd16dbd16e4186ea13c5d8e1f40c5b5a0958326067dd923b8fc8f0767f62eb9a7fd57df4f3e775a96ca5b5eabf5057dff98997a3bbd011366703f5e45075f397f7f3c8465da")!, type: .p2pk, keyHash: Data()),
+            Output(withValue: 0, index: 0, lockingScript: Data(hex: "76a9141ec865abcb88cec71c484d4dadec3d7dc0271a7b88ac76a9141ec865abcb88cec71c484d4dadec3d7dc0271a7b88ac")!, type: .p2pk, keyHash: Data()),
         ]
 
         return FullTransaction(header: transaction, inputs: inputs, outputs: outputs)

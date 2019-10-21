@@ -9,6 +9,10 @@ class OutputSetter {
         self.pluginManager = pluginManager
     }
 
+}
+
+extension OutputSetter: IOutputSetter {
+
     func setOutputs(to mutableTransaction: MutableTransaction, toAddress: String, value: Int, pluginData: [UInt8: [String: Any]]) throws {
         mutableTransaction.recipientAddress = try addressConverter.convert(address: toAddress)
         mutableTransaction.recipientValue = value

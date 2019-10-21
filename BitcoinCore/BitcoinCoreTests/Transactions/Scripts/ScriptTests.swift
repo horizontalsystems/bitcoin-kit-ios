@@ -24,7 +24,7 @@ class ScriptTests: XCTestCase {
         let script = Script(with: data, chunks: [Chunk(scriptData: data, index: 0, payloadRange: 1..<2), Chunk(scriptData: data, index: 2), Chunk(scriptData: data, index: 3)])
 
         do {
-            try script.validate(opCodes: Data(bytes: [0x01, 0x45, 0x67]))
+            try script.validate(opCodes: Data([0x01, 0x45, 0x67]))
         } catch let error {
             XCTFail("\(error) Exception Thrown")
         }
@@ -34,7 +34,7 @@ class ScriptTests: XCTestCase {
         let script = Script(with: data, chunks: [Chunk(scriptData: data, index: 2), Chunk(scriptData: data, index: 3)])
 
         do {
-            try script.validate(opCodes: Data(bytes: [0x01, 0x45, 0x67]))
+            try script.validate(opCodes: Data([0x01, 0x45, 0x67]))
         } catch let error as ScriptError {
             XCTAssertEqual(error, ScriptError.wrongScriptLength)
         } catch {
@@ -46,7 +46,7 @@ class ScriptTests: XCTestCase {
         let script = Script(with: data, chunks: [Chunk(scriptData: data, index: 0, payloadRange: 1..<2), Chunk(scriptData: data, index: 2), Chunk(scriptData: data, index: 3)])
 
         do {
-            try script.validate(opCodes: Data(bytes: [0x07, 0x33, 0x67]))
+            try script.validate(opCodes: Data([0x07, 0x33, 0x67]))
         } catch let error as ScriptError {
             XCTAssertEqual(error, ScriptError.wrongSequence)
         } catch {

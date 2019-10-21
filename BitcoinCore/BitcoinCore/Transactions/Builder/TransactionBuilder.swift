@@ -1,12 +1,12 @@
 import HSCryptoKit
 
 class TransactionBuilder {
-    private let outputSetter: OutputSetter
-    private let inputSetter: InputSetter
-    private let lockTimeSetter: LockTimeSetter
+    private let outputSetter: IOutputSetter
+    private let inputSetter: IInputSetter
+    private let lockTimeSetter: ILockTimeSetter
     private let signer: TransactionSigner
 
-    init(outputSetter: OutputSetter, inputSetter: InputSetter, lockTimeSetter: LockTimeSetter, signer: TransactionSigner) {
+    init(outputSetter: IOutputSetter, inputSetter: IInputSetter, lockTimeSetter: ILockTimeSetter, signer: TransactionSigner) {
         self.outputSetter = outputSetter
         self.inputSetter = inputSetter
         self.lockTimeSetter = lockTimeSetter

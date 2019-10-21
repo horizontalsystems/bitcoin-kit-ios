@@ -6,6 +6,7 @@ class TransactionOutputExtractorTests: XCTestCase {
     private var extractor: TransactionOutputExtractor!
 
     private var mockPublicKeySetter: MockITransactionPublicKeySetter!
+    private var mockPluginManager: MockIPluginManager!
 
     private var transaction: FullTransaction!
 
@@ -13,16 +14,21 @@ class TransactionOutputExtractorTests: XCTestCase {
         super.setUp()
 
         mockPublicKeySetter = MockITransactionPublicKeySetter()
+        mockPluginManager = MockIPluginManager()
         stub(mockPublicKeySetter) { mock in
             when(mock.set(output: any())).thenReturn(false)
         }
+        stub(mockPluginManager) { mock in
+            when(mock.processTransactionWithNullData(transaction: any(), nullDataOutput: any())).thenDoNothing()
+        }
 
-        extractor = TransactionOutputExtractor(transactionKeySetter: mockPublicKeySetter)
+        extractor = TransactionOutputExtractor(transactionKeySetter: mockPublicKeySetter, pluginManager: mockPluginManager)
         transaction = TestData.p2pkhTransaction
     }
 
     override func tearDown() {
         mockPublicKeySetter = nil
+        mockPluginManager = nil
 
         extractor = nil
         transaction = nil
@@ -78,6 +84,16 @@ class TransactionOutputExtractorTests: XCTestCase {
         extractor.extract(transaction: transaction)
         XCTAssertEqual(transaction.outputs[0].keyHash, keyHash)
         XCTAssertEqual(transaction.outputs[0].scriptType, ScriptType.p2wpkh)
+    }
+
+    func testExtractNullData() {
+        let keyHash = Data(hex: "6a51020100147288e43af7997b486f5d2e4ac50bab99b9187807")!
+        transaction.outputs[0].lockingScript = keyHash
+
+        extractor.extract(transaction: transaction)
+        XCTAssertEqual(transaction.outputs[0].keyHash, keyHash)
+        XCTAssertEqual(transaction.outputs[0].scriptType, ScriptType.nullData)
+        verify(mockPluginManager).processTransactionWithNullData(transaction: equal(to: transaction), nullDataOutput: equal(to: transaction.outputs[0]))
     }
 
 }

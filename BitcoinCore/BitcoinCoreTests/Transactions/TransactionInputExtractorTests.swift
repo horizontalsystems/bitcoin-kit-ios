@@ -78,7 +78,7 @@ class TransactionInputExtractorTests: XCTestCase {
         let signatureScript = Data(hex: "1600148749115073ad59a6f3587f1f9e468adedf01473f")!
 
         let script = Script(with: address.keyHash, chunks: [Chunk(scriptData: redeemData, index: 0, payloadRange: 0..<4)])
-        let redeemScript = Script(with: address.keyHash, chunks: [Chunk(scriptData: Data(bytes: [OpCode.checkSig]), index: 0), Chunk(scriptData: Data(bytes: [OpCode.endIf]), index: 0)])
+        let redeemScript = Script(with: address.keyHash, chunks: [Chunk(scriptData: Data([OpCode.checkSig]), index: 0), Chunk(scriptData: Data([OpCode.endIf]), index: 0)])
         stub(scriptConverter) { mock in
             when(mock.decode(data: equal(to: signatureScript))).thenReturn(script)
             when(mock.decode(data: equal(to: redeemData))).thenReturn(redeemScript)

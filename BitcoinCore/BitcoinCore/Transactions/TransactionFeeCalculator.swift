@@ -1,12 +1,12 @@
 class TransactionFeeCalculator {
 
-    private let outputSetter: OutputSetter
-    private let inputSetter: InputSetter
+    private let outputSetter: IOutputSetter
+    private let inputSetter: IInputSetter
     private let addressConverter: IAddressConverter
     private let publicKeyManager: IPublicKeyManager
     private let changeScriptType: ScriptType
 
-    init(outputSetter: OutputSetter, inputSetter: InputSetter, addressConverter: IAddressConverter, publicKeyManager: IPublicKeyManager, changeScriptType: ScriptType) {
+    init(outputSetter: IOutputSetter, inputSetter: IInputSetter, addressConverter: IAddressConverter, publicKeyManager: IPublicKeyManager, changeScriptType: ScriptType) {
         self.outputSetter = outputSetter
         self.inputSetter = inputSetter
         self.addressConverter = addressConverter

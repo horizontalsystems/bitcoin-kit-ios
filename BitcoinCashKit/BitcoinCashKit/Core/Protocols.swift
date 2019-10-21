@@ -30,3 +30,8 @@ protocol IBlockValidatorHelperWrapper {
     func previous(for block: Block, count: Int) -> Block?
     func previousWindow(for block: Block, count: Int) -> [Block]?
 }
+
+protocol IBitcoinCashBlockMedianTimeHelper {
+    var medianTimePast: Int? { get }
+    func medianTimePast(block: Block) -> Int?
+}

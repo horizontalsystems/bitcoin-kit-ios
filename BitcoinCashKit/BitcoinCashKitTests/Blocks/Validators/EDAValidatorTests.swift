@@ -8,6 +8,7 @@ class EDAValidatorTests: XCTestCase {
     private var validator: EDAValidator!
     private var mockDifficultyEncoder: MockIBitcoinCashDifficultyEncoder!
     private var mockBlockHelper: MockIBitcoinCashBlockValidatorHelper!
+    private var mockMedianTimeHelper: MockIBitcoinCashBlockMedianTimeHelper!
 
     private var block: Block!
     private var candidate: Block!
@@ -17,8 +18,9 @@ class EDAValidatorTests: XCTestCase {
 
         mockDifficultyEncoder = MockIBitcoinCashDifficultyEncoder()
         mockBlockHelper = MockIBitcoinCashBlockValidatorHelper()
+        mockMedianTimeHelper = MockIBitcoinCashBlockMedianTimeHelper()
 
-        validator = EDAValidator(encoder: mockDifficultyEncoder, blockHelper: mockBlockHelper, maxTargetBits: 0x1d00ffff, firstCheckpointHeight: 0)
+        validator = EDAValidator(encoder: mockDifficultyEncoder, blockHelper: mockBlockHelper, blockMedianTimeHelper: mockMedianTimeHelper, maxTargetBits: 0x1d00ffff, firstCheckpointHeight: 0)
 
         block = TestData.firstBlock
         candidate = TestData.secondBlock
@@ -28,6 +30,7 @@ class EDAValidatorTests: XCTestCase {
         validator = nil
         mockDifficultyEncoder = nil
         mockBlockHelper = nil
+        mockMedianTimeHelper = nil
 
         block = nil
         candidate = nil
