@@ -11,7 +11,7 @@ public class HodlerPlugin {
     public static let id: UInt8 = OpCode.push(1)[0]
     public var id: UInt8 { HodlerPlugin.id }
 
-    public enum LockTimeInterval: UInt16 {
+    public enum LockTimeInterval: UInt16, CaseIterable {
         case hour = 7           //  60 * 60 / 512
         case month = 5063       //  30 * 24 * 60 * 60 / 512
         case halfYear = 30881   // 183 * 24 * 60 * 60 / 512
@@ -120,6 +120,15 @@ extension HodlerPlugin: IPlugin {
         let hodlerData = try HodlerData.parse(serialized: output.pluginData)
 
         return ["lockTimeInterval": hodlerData.lockTimeInterval, "address": hodlerData.addressString]
+    }
+
+    public func keysForApiRestore(publicKey: PublicKey, addressConverter: IAddressConverter) throws -> [String] {
+        try LockTimeInterval.allCases.map { lockTimeInterval in
+            let redeemScript = cltvRedeemScript(lockTimeInterval: lockTimeInterval, publicKeyHash: publicKey.keyHash)
+            let redeemScriptHash = CryptoKit.sha256ripemd160(redeemScript)
+
+            return try addressConverter.convert(keyHash: redeemScriptHash, type: .p2sh).stringValue
+        }
     }
 
 }
