@@ -125,7 +125,7 @@ public class BitcoinCoreBuilder {
         let addressConverter = AddressConverterChain()
         let scriptConverter = ScriptConverter()
         let restoreKeyConverterChain = RestoreKeyConverterChain()
-        let pluginManager = PluginManager(addressConverter: addressConverter, scriptConverter: scriptConverter, storage: storage, blockMedianTimeHelper: BlockMedianTimeHelper(storage: storage))
+        let pluginManager = PluginManager(addressConverter: addressConverter, scriptConverter: scriptConverter, storage: storage, blockMedianTimeHelper: BlockMedianTimeHelper(storage: storage), logger: logger)
 
         plugins.forEach { pluginManager.add(plugin: $0) }
         restoreKeyConverterChain.add(converter: pluginManager)
