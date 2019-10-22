@@ -563,7 +563,7 @@ public protocol IPlugin {
     func processTransactionWithNullData(transaction: FullTransaction, nullDataChunks: inout IndexingIterator<[Chunk]>) throws
     func isSpendable(unspentOutput: UnspentOutput) throws -> Bool
     func inputSequenceNumber(output: Output) throws -> Int
-    func parsePluginData(from: Output) throws -> [String: Any]
+    func parsePluginData(from: Output, transactionTimestamp: Int) throws -> [String: Any]
     func keysForApiRestore(publicKey: PublicKey) throws -> [String]
 }
 
@@ -573,7 +573,7 @@ public protocol IPluginManager {
     func processInputs(mutableTransaction: MutableTransaction) throws
     func processTransactionWithNullData(transaction: FullTransaction, nullDataOutput: Output) throws
     func isSpendable(unspentOutput: UnspentOutput) -> Bool
-    func parsePluginData(from: Output) -> [UInt8: [String: Any]]?
+    func parsePluginData(from: Output, transactionTimestamp: Int) -> [UInt8: [String: Any]]?
 }
 
 public protocol IBlockMedianTimeHelper {

@@ -15,6 +15,7 @@ public class BaseTransactionInfoConverter: IBaseTransactionInfoConverter {
         var fromAddresses = [TransactionAddressInfo]()
         var toAddresses = [TransactionAddressInfo]()
         var hasOnlyMyInputs = true
+        let transactionTimestamp = transactionForInfo.transactionWithBlock.transaction.timestamp
 
         for inputWithPreviousOutput in transactionForInfo.inputsWithPreviousOutputs {
             var mine = false
@@ -40,7 +41,7 @@ public class BaseTransactionInfoConverter: IBaseTransactionInfoConverter {
             }
 
             if let address = output.address {
-                toAddresses.append(TransactionAddressInfo(address: address, mine: mine, pluginData: pluginManager.parsePluginData(from: output)))
+                toAddresses.append(TransactionAddressInfo(address: address, mine: mine, pluginData: pluginManager.parsePluginData(from: output, transactionTimestamp: transactionTimestamp)))
             }
         }
 
@@ -61,7 +62,7 @@ public class BaseTransactionInfoConverter: IBaseTransactionInfoConverter {
                 amount: amount,
                 fee: resolvedFee,
                 blockHeight: transactionForInfo.transactionWithBlock.blockHeight,
-                timestamp: transactionForInfo.transactionWithBlock.transaction.timestamp
+                timestamp: transactionTimestamp
         )
     }
 
