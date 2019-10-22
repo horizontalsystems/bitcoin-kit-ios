@@ -35,9 +35,8 @@ class TransactionCell: UITableViewCell {
                 string += " (mine)"
             }
             if let pluginData = to.pluginData, let hodlerData = pluginData[HodlerPlugin.id],
-               let lockTimeInterval = hodlerData["lockTimeInterval"] as? HodlerPlugin.LockTimeInterval, let address = hodlerData["address"] as? String {
-                let lockedUntil = transaction.timestamp + (Double(lockTimeInterval.rawValue) * 512)
-                string += "\nLocked Until: \(TransactionCell.dateFormatter.string(from: Date(timeIntervalSince1970: lockedUntil)))  <-"
+               let approximateUnlockTime = hodlerData["approximateUnlockTime"] as? Int, let address = hodlerData["address"] as? String {
+                string += "\nLocked Until: \(TransactionCell.dateFormatter.string(from: Date(timeIntervalSince1970: Double(approximateUnlockTime))))  <-"
                 string += "\nOriginal: \(format(hash: address))  <-"
             }
             return string
@@ -106,8 +105,8 @@ extension TransactionCell {
     }
 
     static func rowHeight(for transaction: TransactionRecord) -> Int {
-        let addressRowsCount = transaction.to.reduce(0) { $0 + rowsCount(address: $1) }
-        var height = (addressRowsCount + 7) * 22 + 10
+        let addressRowsCount = transaction.to.reduce(0) { $0 + rowsCount(address: $1) } + transaction.from.count
+        var height = (addressRowsCount + 7) * 20 + 10
 
         if transaction.transactionExtraType != nil {
             height += 20

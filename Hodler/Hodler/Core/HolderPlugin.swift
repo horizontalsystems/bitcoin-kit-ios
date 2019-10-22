@@ -133,10 +133,15 @@ extension HodlerPlugin: IPlugin {
         Int((try lockTimeIntervalFrom(output: output)).sequenceNumber)
     }
 
-    public func parsePluginData(from output: Output) throws -> [String: Any] {
+    public func parsePluginData(from output: Output, transactionTimestamp: Int) throws -> [String: Any] {
         let hodlerData = try HodlerData.parse(serialized: output.pluginData)
 
-        return ["lockTimeInterval": hodlerData.lockTimeInterval, "address": hodlerData.addressString]
+        // When checking if UTXO is spendable we use the best block median time.
+        // The median time is 6 blocks earlier which is approximately equal to 1 hour.
+        // Here we add 1 hour to show the time when this UTXO will be spendable
+        let approximateUnlockTime = transactionTimestamp + hodlerData.lockTimeInterval.valueInSeconds + 3600
+
+        return ["lockTimeInterval": hodlerData.lockTimeInterval, "approximateUnlockTime": approximateUnlockTime, "address": hodlerData.addressString]
     }
 
     public func keysForApiRestore(publicKey: PublicKey) throws -> [String] {

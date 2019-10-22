@@ -77,9 +77,9 @@ extension PluginManager: IPluginManager {
         return (try? plugin.isSpendable(unspentOutput: unspentOutput)) ?? true
     }
 
-    public func parsePluginData(from output: Output) -> [UInt8: [String: Any]]? {
+    public func parsePluginData(from output: Output, transactionTimestamp: Int) -> [UInt8: [String: Any]]? {
         guard let pluginId = output.pluginId, let plugin = plugins[pluginId],
-              let parsedData = try? plugin.parsePluginData(from: output) else {
+              let parsedData = try? plugin.parsePluginData(from: output, transactionTimestamp: transactionTimestamp) else {
             return nil
         }
 
