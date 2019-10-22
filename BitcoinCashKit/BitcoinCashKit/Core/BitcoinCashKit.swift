@@ -22,8 +22,6 @@ public class BitcoinCashKit: AbstractKit {
         }
     }
 
-    private let storage: IStorage
-
     public init(withWords words: [String], walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) throws {
         let network: INetwork
         let initialSyncApiUrl: String
@@ -43,8 +41,6 @@ public class BitcoinCashKit: AbstractKit {
 
         let databaseFilePath = try DirectoryHelper.directoryURL(for: BitcoinCashKit.name).appendingPathComponent(BitcoinCashKit.databaseFileName(walletId: walletId, networkType: networkType)).path
         let storage = GrdbStorage(databaseFilePath: databaseFilePath)
-        self.storage = storage
-
         let paymentAddressParser = PaymentAddressParser(validScheme: validScheme, removeScheme: false)
 
         let bitcoinCore = try BitcoinCoreBuilder(minLogLevel: minLogLevel)

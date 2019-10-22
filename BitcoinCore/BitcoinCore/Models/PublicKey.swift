@@ -17,7 +17,7 @@ public class PublicKey: Record {
     public let keyHash: Data
     public let scriptHashForP2WPKH: Data
 
-    init(withAccount account: Int, index: Int, external: Bool, hdPublicKeyData data: Data) {
+    public init(withAccount account: Int, index: Int, external: Bool, hdPublicKeyData data: Data) {
         self.account = account
         self.index = index
         self.external = external
