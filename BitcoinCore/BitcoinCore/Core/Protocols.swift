@@ -559,12 +559,12 @@ protocol IIrregularOutputFinder {
 
 public protocol IPlugin {
     var id: UInt8 { get }
-    func processOutputs(mutableTransaction: MutableTransaction, pluginData: [UInt8: [String: Any]], addressConverter: IAddressConverter) throws
-    func processTransactionWithNullData(transaction: FullTransaction, nullDataChunks: inout IndexingIterator<[Chunk]>, storage: IStorage, addressConverter: IAddressConverter) throws
-    func isSpendable(unspentOutput: UnspentOutput, blockMedianTimeHelper: IBlockMedianTimeHelper) throws -> Bool
-    func inputSequence(output: Output) throws -> Int
+    func processOutputs(mutableTransaction: MutableTransaction, pluginData: [String: Any]) throws
+    func processTransactionWithNullData(transaction: FullTransaction, nullDataChunks: inout IndexingIterator<[Chunk]>) throws
+    func isSpendable(unspentOutput: UnspentOutput) throws -> Bool
+    func inputSequenceNumber(output: Output) throws -> Int
     func parsePluginData(from: Output) throws -> [String: Any]
-    func keysForApiRestore(publicKey: PublicKey, addressConverter: IAddressConverter) throws -> [String]
+    func keysForApiRestore(publicKey: PublicKey) throws -> [String]
 }
 
 public protocol IPluginManager {

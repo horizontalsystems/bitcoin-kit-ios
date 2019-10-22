@@ -12,7 +12,7 @@ public protocol Address: class {
 
 extension Address {
 
-    var scriptType: ScriptType {
+    public var scriptType: ScriptType {
         switch type {
             case .pubKeyHash: return .p2pkh
             case .scriptHash: return .p2sh
@@ -21,25 +21,25 @@ extension Address {
 
 }
 
-class LegacyAddress: Address, Equatable {
-    let type: AddressType
-    let keyHash: Data
-    let stringValue: String
+public class LegacyAddress: Address, Equatable {
+    public let type: AddressType
+    public let keyHash: Data
+    public let stringValue: String
 
-    var lockingScript: Data {
+    public var lockingScript: Data {
         switch type {
         case .pubKeyHash: return OpCode.p2pkhStart + OpCode.push(keyHash) + OpCode.p2pkhFinish
         case .scriptHash: return OpCode.p2shStart + OpCode.push(keyHash) + OpCode.p2shFinish
         }
     }
 
-    init(type: AddressType, keyHash: Data, base58: String) {
+    public init(type: AddressType, keyHash: Data, base58: String) {
         self.type = type
         self.keyHash = keyHash
         self.stringValue = base58
     }
 
-    static func ==<T: Address>(lhs: LegacyAddress, rhs: T) -> Bool {
+    public static func ==<T: Address>(lhs: LegacyAddress, rhs: T) -> Bool {
         guard let rhs = rhs as? LegacyAddress else {
             return false
         }

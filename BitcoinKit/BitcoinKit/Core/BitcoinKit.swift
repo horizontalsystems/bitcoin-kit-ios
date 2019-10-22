@@ -10,9 +10,6 @@ public class BitcoinKit: AbstractKit {
 
     public enum NetworkType: String, CaseIterable { case mainNet, testNet, regTest }
 
-    private let storage: IStorage
-    private let bech32AddressConverter: IAddressConverter
-
     public weak var delegate: BitcoinCoreDelegate? {
         didSet {
             bitcoinCore.delegate = delegate
@@ -38,11 +35,16 @@ public class BitcoinKit: AbstractKit {
 
         let databaseFilePath = try DirectoryHelper.directoryURL(for: BitcoinKit.name).appendingPathComponent(BitcoinKit.databaseFileName(walletId: walletId, networkType: networkType)).path
         let storage = GrdbStorage(databaseFilePath: databaseFilePath)
-        self.storage = storage
 
         let paymentAddressParser = PaymentAddressParser(validScheme: "bitcoin", removeScheme: true)
+        let scriptConverter = ScriptConverter()
+        let bech32AddressConverter = SegWitBech32AddressConverter(prefix: network.bech32PrefixPattern, scriptConverter: scriptConverter)
 
-        let bitcoinCore = try BitcoinCoreBuilder(minLogLevel: minLogLevel)
+        let bitcoinCoreBuilder = BitcoinCoreBuilder(minLogLevel: minLogLevel)
+
+        let hodler = HodlerPlugin(addressConverter: bitcoinCoreBuilder.addressConverter, blockMedianTimeHelper: BlockMedianTimeHelper(storage: storage), publicKeyStorage: storage)
+        
+        let bitcoinCore = try bitcoinCoreBuilder
                 .set(network: network)
                 .set(initialSyncApi: initialSyncApi)
                 .set(words: words)
@@ -53,11 +55,8 @@ public class BitcoinKit: AbstractKit {
                 .set(peerSize: 10)
                 .set(syncMode: syncMode)
                 .set(storage: storage)
-                .add(plugin: HodlerPlugin())
+                .add(plugin: hodler)
                 .build()
-
-        let scriptConverter = ScriptConverter()
-        bech32AddressConverter = SegWitBech32AddressConverter(prefix: network.bech32PrefixPattern, scriptConverter: scriptConverter)
 
         super.init(bitcoinCore: bitcoinCore, network: network)
 

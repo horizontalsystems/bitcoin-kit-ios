@@ -4,6 +4,9 @@ import HSHDWalletKit
 public class BitcoinCoreBuilder {
     public enum BuildError: Error { case noSeedData, noWalletId, noNetwork, noPaymentAddressParser, noAddressSelector, noStorage, noInitialSyncApi }
 
+    // chains
+    public let addressConverter = AddressConverterChain()
+
     // required parameters
     private var seed: Data?
     private var words: [String]?
@@ -122,10 +125,9 @@ public class BitcoinCoreBuilder {
             throw BuildError.noInitialSyncApi
         }
 
-        let addressConverter = AddressConverterChain()
         let scriptConverter = ScriptConverter()
         let restoreKeyConverterChain = RestoreKeyConverterChain()
-        let pluginManager = PluginManager(addressConverter: addressConverter, scriptConverter: scriptConverter, storage: storage, blockMedianTimeHelper: BlockMedianTimeHelper(storage: storage), logger: logger)
+        let pluginManager = PluginManager(scriptConverter: scriptConverter, logger: logger)
 
         plugins.forEach { pluginManager.add(plugin: $0) }
         restoreKeyConverterChain.add(converter: pluginManager)
