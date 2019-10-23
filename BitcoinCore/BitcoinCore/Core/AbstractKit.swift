@@ -34,7 +34,7 @@ open class AbstractKit {
         bitcoinCore.transactions(fromHash: fromHash, limit: limit)
     }
 
-    open func send(to address: String, value: Int, feeRate: Int, pluginData: [UInt8: [String: Any]] = [:]) throws -> FullTransaction {
+    open func send(to address: String, value: Int, feeRate: Int, pluginData: [UInt8: IPluginData] = [:]) throws -> FullTransaction {
         try bitcoinCore.send(to: address, value: value, feeRate: feeRate, pluginData: pluginData)
     }
 
@@ -54,7 +54,7 @@ open class AbstractKit {
         bitcoinCore.parse(paymentAddress: paymentAddress)
     }
 
-    open func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feeRate: Int, pluginData: [UInt8: [String: Any]] = [:]) throws -> Int {
+    open func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feeRate: Int, pluginData: [UInt8: IPluginData] = [:]) throws -> Int {
         try bitcoinCore.fee(for: value, toAddress: toAddress, senderPay: senderPay, feeRate: feeRate, pluginData: pluginData)
     }
 

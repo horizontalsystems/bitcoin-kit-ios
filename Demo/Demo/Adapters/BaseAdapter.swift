@@ -119,7 +119,7 @@ extension BaseAdapter {
         }
     }
 
-    func sendSingle(to address: String, amount: Decimal, pluginData: [UInt8: [String: Any]] = [:]) -> Single<Void> {
+    func sendSingle(to address: String, amount: Decimal, pluginData: [UInt8: IPluginData] = [:]) -> Single<Void> {
         let satoshiAmount = convertToSatoshi(value: amount)
 
         return Single.create { [unowned self] observer in
@@ -138,7 +138,7 @@ extension BaseAdapter {
         max(0, spendableBalance - fee(for: spendableBalance, address: address))
     }
 
-    func fee(for value: Decimal, address: String?, pluginData: [UInt8: [String: Any]] = [:]) -> Decimal {
+    func fee(for value: Decimal, address: String?, pluginData: [UInt8: IPluginData] = [:]) -> Decimal {
         do {
             let amount = convertToSatoshi(value: value)
             let fee = try abstractKit.fee(for: amount, toAddress: address, senderPay: true, feeRate: feeRate, pluginData: pluginData)

@@ -34,10 +34,9 @@ class TransactionCell: UITableViewCell {
             if to.mine {
                 string += " (mine)"
             }
-            if let pluginData = to.pluginData, let hodlerData = pluginData[HodlerPlugin.id],
-               let approximateUnlockTime = hodlerData["approximateUnlockTime"] as? Int, let address = hodlerData["address"] as? String {
-                string += "\nLocked Until: \(TransactionCell.dateFormatter.string(from: Date(timeIntervalSince1970: Double(approximateUnlockTime))))  <-"
-                string += "\nOriginal: \(format(hash: address))  <-"
+            if let pluginData = to.pluginData, let hodlerPluginData = pluginData[HodlerPlugin.id], let hodlerData = hodlerPluginData as? HodlerOutputData {
+                string += "\nLocked Until: \(TransactionCell.dateFormatter.string(from: Date(timeIntervalSince1970: Double(hodlerData.approximateUnlockTime!))))  <-"
+                string += "\nOriginal: \(format(hash: hodlerData.addressString))  <-"
             }
             return string
         }
@@ -96,8 +95,7 @@ extension TransactionCell {
     static func rowsCount(address: TransactionAddress) -> Int {
         var rowsCount = 1
 
-        if let pluginData = address.pluginData, let hodlerData = pluginData[HodlerPlugin.id],
-           let _ = hodlerData["lockTimeInterval"] as? HodlerPlugin.LockTimeInterval, let _ = hodlerData["address"] as? String {
+        if let pluginData = address.pluginData, let hodlerData = pluginData[HodlerPlugin.id], let _ = hodlerData as? HodlerOutputData {
             rowsCount += 2
         }
         

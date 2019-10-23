@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2FA5D676B12FF745A5911E40 /* HodlerData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D16242CA2BBD78ABA8F7 /* HodlerData.swift */; };
+		2FA5D676B12FF745A5911E40 /* HodlerOutputData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D16242CA2BBD78ABA8F7 /* HodlerOutputData.swift */; };
 		2FA5DB215A38A4F6277888A0 /* BitcoinCoreCompatibility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D1B1BA629A90DD6D5518 /* BitcoinCoreCompatibility.swift */; };
 		2FA5DDA7206D8B8B0881996E /* HolderPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D842CADC75745AFA6132 /* HolderPlugin.swift */; };
 		2FA5DEA1754CDB45EC4A9121 /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DCF61FBD89DA0929333A /* Protocols.swift */; };
@@ -47,7 +47,7 @@
 
 /* Begin PBXFileReference section */
 		07C4E7D9B6ADC34E17C2BC97 /* Pods_Hodler.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Hodler.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		2FA5D16242CA2BBD78ABA8F7 /* HodlerData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HodlerData.swift; sourceTree = "<group>"; };
+		2FA5D16242CA2BBD78ABA8F7 /* HodlerOutputData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HodlerOutputData.swift; sourceTree = "<group>"; };
 		2FA5D1B1BA629A90DD6D5518 /* BitcoinCoreCompatibility.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinCoreCompatibility.swift; sourceTree = "<group>"; };
 		2FA5D842CADC75745AFA6132 /* HolderPlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HolderPlugin.swift; sourceTree = "<group>"; };
 		2FA5DCF61FBD89DA0929333A /* Protocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Protocols.swift; sourceTree = "<group>"; };
@@ -104,7 +104,7 @@
 			isa = PBXGroup;
 			children = (
 				2FA5D842CADC75745AFA6132 /* HolderPlugin.swift */,
-				2FA5D16242CA2BBD78ABA8F7 /* HodlerData.swift */,
+				2FA5D16242CA2BBD78ABA8F7 /* HodlerOutputData.swift */,
 				2FA5D1B1BA629A90DD6D5518 /* BitcoinCoreCompatibility.swift */,
 				2FA5DCF61FBD89DA0929333A /* Protocols.swift */,
 			);
@@ -359,7 +359,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2FA5DDA7206D8B8B0881996E /* HolderPlugin.swift in Sources */,
-				2FA5D676B12FF745A5911E40 /* HodlerData.swift in Sources */,
+				2FA5D676B12FF745A5911E40 /* HodlerOutputData.swift in Sources */,
 				2FA5DB215A38A4F6277888A0 /* BitcoinCoreCompatibility.swift in Sources */,
 				2FA5DEA1754CDB45EC4A9121 /* Protocols.swift in Sources */,
 			);

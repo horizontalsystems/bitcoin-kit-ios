@@ -57,7 +57,7 @@ public class HodlerPlugin {
     }
 
     private func lockTimeIntervalFrom(output: Output) throws -> LockTimeInterval {
-        try HodlerData.parse(serialized: output.pluginData).lockTimeInterval
+        try HodlerOutputData.parse(serialized: output.pluginData).lockTimeInterval
     }
 
     private func inputLockTime(unspentOutput: UnspentOutput) throws -> Int {
@@ -78,8 +78,8 @@ public class HodlerPlugin {
 
 extension HodlerPlugin: IPlugin {
     
-    public func processOutputs(mutableTransaction: MutableTransaction, pluginData: [String: Any]) throws {
-        guard let timeLockParam = pluginData["lockTimeInterval"], let lockTimeInterval = timeLockParam as? LockTimeInterval else {
+    public func processOutputs(mutableTransaction: MutableTransaction, pluginData: IPluginData) throws {
+        guard let hodlerData = pluginData as? HodlerData else {
             throw HodlerPluginError.invalidData
         }
 
@@ -87,12 +87,12 @@ extension HodlerPlugin: IPlugin {
             throw HodlerPluginError.unsupportedAddress
         }
 
-        let redeemScript = csvRedeemScript(lockTimeInterval: lockTimeInterval, publicKeyHash: recipientAddress.keyHash)
+        let redeemScript = csvRedeemScript(lockTimeInterval: hodlerData.lockTimeInterval, publicKeyHash: recipientAddress.keyHash)
         let scriptHash = CryptoKit.sha256ripemd160(redeemScript)
         let newAddress = try addressConverter.convert(keyHash: scriptHash, type: .p2sh)
 
         mutableTransaction.recipientAddress = newAddress
-        mutableTransaction.add(pluginData: OpCode.push(lockTimeInterval.valueInTwoBytes) + OpCode.push(recipientAddress.keyHash), pluginId: id)
+        mutableTransaction.add(pluginData: OpCode.push(hodlerData.lockTimeInterval.valueInTwoBytes) + OpCode.push(recipientAddress.keyHash), pluginId: id)
     }
 
     public func processTransactionWithNullData(transaction: FullTransaction, nullDataChunks: inout IndexingIterator<[Chunk]>) throws {
@@ -109,7 +109,7 @@ extension HodlerPlugin: IPlugin {
         }
 
         output.pluginId = id
-        output.pluginData = HodlerData(
+        output.pluginData = HodlerOutputData(
                 lockTimeInterval: lockTimeInterval,
                 addressString: (try addressConverter.convert(keyHash: publicKeyHash, type: .p2pkh).stringValue)
         ).toString()
@@ -133,15 +133,15 @@ extension HodlerPlugin: IPlugin {
         Int((try lockTimeIntervalFrom(output: output)).sequenceNumber)
     }
 
-    public func parsePluginData(from output: Output, transactionTimestamp: Int) throws -> [String: Any] {
-        let hodlerData = try HodlerData.parse(serialized: output.pluginData)
+    public func parsePluginData(from output: Output, transactionTimestamp: Int) throws -> IPluginOutputData {
+        let hodlerOutputData = try HodlerOutputData.parse(serialized: output.pluginData)
 
         // When checking if UTXO is spendable we use the best block median time.
         // The median time is 6 blocks earlier which is approximately equal to 1 hour.
         // Here we add 1 hour to show the time when this UTXO will be spendable
-        let approximateUnlockTime = transactionTimestamp + hodlerData.lockTimeInterval.valueInSeconds + 3600
+        hodlerOutputData.approximateUnlockTime = transactionTimestamp + hodlerOutputData.lockTimeInterval.valueInSeconds + 3600
 
-        return ["lockTimeInterval": hodlerData.lockTimeInterval, "approximateUnlockTime": approximateUnlockTime, "address": hodlerData.addressString]
+        return hodlerOutputData
     }
 
     public func keysForApiRestore(publicKey: PublicKey) throws -> [String] {

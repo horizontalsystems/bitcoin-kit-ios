@@ -47,7 +47,7 @@ class HodlerPluginTests: QuickSpec {
 
             context("when pluginData is valid") {
                 beforeEach {
-                    try! hodler.processOutputs(mutableTransaction: mutableTransaction, pluginData: ["lockTimeInterval": HodlerPlugin.LockTimeInterval.hour])
+                    try! hodler.processOutputs(mutableTransaction: mutableTransaction, pluginData: HodlerData(lockTimeInterval: HodlerPlugin.LockTimeInterval.hour))
                 }
 
                 it("generates correct scriptHash") {
@@ -73,7 +73,7 @@ class HodlerPluginTests: QuickSpec {
             context("invalid hodler data") {
                 it("throws invalidData") {
                     do {
-                        try hodler.processOutputs(mutableTransaction: mutableTransaction, pluginData: ["lockTimeInterval": "HOUR"])
+                        try hodler.processOutputs(mutableTransaction: mutableTransaction, pluginData: OtherPluginData())
                         fail("Exception expected")
                     } catch let error as HodlerPluginError {
                         expect(error).to(equal(HodlerPluginError.invalidData))
@@ -87,7 +87,7 @@ class HodlerPluginTests: QuickSpec {
                 it("throws unsupportedAddress") {
                     mutableTransaction.recipientAddress = p2shAddress
                     do {
-                        try hodler.processOutputs(mutableTransaction: mutableTransaction, pluginData: ["lockTimeInterval": HodlerPlugin.LockTimeInterval.hour])
+                        try hodler.processOutputs(mutableTransaction: mutableTransaction, pluginData: HodlerData(lockTimeInterval: HodlerPlugin.LockTimeInterval.hour))
                         fail("Exception expected")
                     } catch let error as HodlerPluginError {
                         expect(error).to(equal(HodlerPluginError.unsupportedAddress))
@@ -230,4 +230,7 @@ class HodlerPluginTests: QuickSpec {
         OpCode.push(Data([0x07, 0x00, 0x40])) + Data([OpCode.checkSequenceVerify, OpCode.drop]) + OpCode.p2pkhStart + OpCode.push(publicKeyHash) + OpCode.p2pkhFinish
     }
 
+}
+
+class OtherPluginData: IPluginData {
 }

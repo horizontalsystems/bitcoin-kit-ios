@@ -19,5 +19,5 @@ struct TransactionRecord {
 struct TransactionAddress {
     let address: String
     let mine: Bool
-    let pluginData: [UInt8: [String: Any]]?
+    let pluginData: [UInt8: Any]?
 }
