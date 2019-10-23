@@ -17,7 +17,7 @@ class TransactionBuilder {
 
 extension TransactionBuilder: ITransactionBuilder {
 
-    func buildTransaction(toAddress: String, value: Int, feeRate: Int, senderPay: Bool, pluginData: [UInt8: [String: Any]]) throws -> FullTransaction {
+    func buildTransaction(toAddress: String, value: Int, feeRate: Int, senderPay: Bool, pluginData: [UInt8: IPluginData]) throws -> FullTransaction {
         let mutableTransaction = MutableTransaction()
 
         try outputSetter.setOutputs(to: mutableTransaction, toAddress: toAddress, value: value, pluginData: pluginData)

@@ -52,7 +52,7 @@ end
 
 target :Hodler do
     project 'Hodler/Hodler'
-    pod 'HSCryptoKit', '~> 1.4'
+    kit_pods
 end
 
 target :Demo do
@@ -104,6 +104,6 @@ end
 target :HodlerTests do
   project 'Hodler/Hodler'
 
-  pod 'HSCryptoKit', '~> 1.4'
+  internal_pods
   test_pods
 end

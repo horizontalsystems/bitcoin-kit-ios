@@ -340,17 +340,17 @@ public protocol ITransactionSyncer: class {
 }
 
 public protocol ITransactionCreator {
-    func create(to address: String, value: Int, feeRate: Int, senderPay: Bool, pluginData: [UInt8: [String: Any]]) throws -> FullTransaction
+    func create(to address: String, value: Int, feeRate: Int, senderPay: Bool, pluginData: [UInt8: IPluginData]) throws -> FullTransaction
     func create(from: UnspentOutput, to address: String, feeRate: Int) throws -> FullTransaction
 }
 
 protocol ITransactionBuilder {
-    func buildTransaction(toAddress: String, value: Int, feeRate: Int, senderPay: Bool, pluginData: [UInt8: [String: Any]]) throws -> FullTransaction
+    func buildTransaction(toAddress: String, value: Int, feeRate: Int, senderPay: Bool, pluginData: [UInt8: IPluginData]) throws -> FullTransaction
     func buildTransaction(from: UnspentOutput, toAddress: String, feeRate: Int) throws -> FullTransaction
 }
 
 protocol ITransactionFeeCalculator {
-    func fee(for value: Int, feeRate: Int, senderPay: Bool, toAddress: String?, pluginData: [UInt8: [String: Any]]) throws -> Int
+    func fee(for value: Int, feeRate: Int, senderPay: Bool, toAddress: String?, pluginData: [UInt8: IPluginData]) throws -> Int
 }
 
 protocol IBlockchain {
@@ -559,21 +559,21 @@ protocol IIrregularOutputFinder {
 
 public protocol IPlugin {
     var id: UInt8 { get }
-    func processOutputs(mutableTransaction: MutableTransaction, pluginData: [String: Any]) throws
+    func processOutputs(mutableTransaction: MutableTransaction, pluginData: IPluginData) throws
     func processTransactionWithNullData(transaction: FullTransaction, nullDataChunks: inout IndexingIterator<[Chunk]>) throws
     func isSpendable(unspentOutput: UnspentOutput) throws -> Bool
     func inputSequenceNumber(output: Output) throws -> Int
-    func parsePluginData(from: Output, transactionTimestamp: Int) throws -> [String: Any]
+    func parsePluginData(from: Output, transactionTimestamp: Int) throws -> IPluginOutputData
     func keysForApiRestore(publicKey: PublicKey) throws -> [String]
 }
 
 public protocol IPluginManager {
     func add(plugin: IPlugin)
-    func processOutputs(mutableTransaction: MutableTransaction, pluginData: [UInt8: [String: Any]]) throws
+    func processOutputs(mutableTransaction: MutableTransaction, pluginData: [UInt8: IPluginData]) throws
     func processInputs(mutableTransaction: MutableTransaction) throws
     func processTransactionWithNullData(transaction: FullTransaction, nullDataOutput: Output) throws
     func isSpendable(unspentOutput: UnspentOutput) -> Bool
-    func parsePluginData(from: Output, transactionTimestamp: Int) -> [UInt8: [String: Any]]?
+    func parsePluginData(from: Output, transactionTimestamp: Int) -> [UInt8: IPluginOutputData]?
 }
 
 public protocol IBlockMedianTimeHelper {
@@ -582,7 +582,7 @@ public protocol IBlockMedianTimeHelper {
 }
 
 protocol IOutputSetter {
-    func setOutputs(to mutableTransaction: MutableTransaction, toAddress: String, value: Int, pluginData: [UInt8: [String: Any]]) throws
+    func setOutputs(to mutableTransaction: MutableTransaction, toAddress: String, value: Int, pluginData: [UInt8: IPluginData]) throws
 }
 
 protocol IInputSetter {
@@ -596,4 +596,10 @@ protocol ILockTimeSetter {
 
 protocol ITransactionSigner {
     func sign(mutableTransaction: MutableTransaction) throws
+}
+
+public protocol IPluginData {
+}
+
+public protocol IPluginOutputData {
 }

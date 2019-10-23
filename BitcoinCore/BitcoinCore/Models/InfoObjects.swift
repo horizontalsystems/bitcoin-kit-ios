@@ -26,7 +26,7 @@ open class TransactionInfo: ITransactionInfo {
 public struct TransactionAddressInfo {
     public let address: String
     public let mine: Bool
-    public let pluginData: [UInt8: [String: Any]]?
+    public let pluginData: [UInt8: IPluginOutputData]?
 }
 
 public struct BlockInfo {

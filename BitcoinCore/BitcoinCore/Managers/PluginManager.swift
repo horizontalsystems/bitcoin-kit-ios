@@ -21,7 +21,7 @@ extension PluginManager: IPluginManager {
         plugins[plugin.id] = plugin
     }
 
-    func processOutputs(mutableTransaction: MutableTransaction, pluginData: [UInt8: [String: Any]]) throws {
+    func processOutputs(mutableTransaction: MutableTransaction, pluginData: [UInt8: IPluginData]) throws {
         for (key, data) in pluginData {
             guard let plugin = plugins[key] else {
                 throw PluginError.pluginNotFound
@@ -77,7 +77,7 @@ extension PluginManager: IPluginManager {
         return (try? plugin.isSpendable(unspentOutput: unspentOutput)) ?? true
     }
 
-    public func parsePluginData(from output: Output, transactionTimestamp: Int) -> [UInt8: [String: Any]]? {
+    public func parsePluginData(from output: Output, transactionTimestamp: Int) -> [UInt8: IPluginOutputData]? {
         guard let pluginId = output.pluginId, let plugin = plugins[pluginId],
               let parsedData = try? plugin.parsePluginData(from: output, transactionTimestamp: transactionTimestamp) else {
             return nil

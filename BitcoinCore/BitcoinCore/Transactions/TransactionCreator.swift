@@ -31,7 +31,7 @@ class TransactionCreator {
 
 extension TransactionCreator: ITransactionCreator {
 
-    func create(to address: String, value: Int, feeRate: Int, senderPay: Bool, pluginData: [UInt8: [String: Any]] = [:]) throws -> FullTransaction {
+    func create(to address: String, value: Int, feeRate: Int, senderPay: Bool, pluginData: [UInt8: IPluginData] = [:]) throws -> FullTransaction {
         let transaction = try transactionBuilder.buildTransaction(
                 toAddress: address,
                 value: value,

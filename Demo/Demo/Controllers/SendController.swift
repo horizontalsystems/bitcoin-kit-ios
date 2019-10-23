@@ -1,6 +1,7 @@
 import UIKit
 import RxSwift
 import Hodler
+import BitcoinCore
 
 class SendController: UIViewController {
     private let disposeBag = DisposeBag()
@@ -71,9 +72,9 @@ class SendController: UIViewController {
             return
         }
         
-        var pluginData = [UInt8: [String: Any]]()
+        var pluginData = [UInt8: IPluginData]()
         if timeLockEnabled {
-            pluginData[HodlerPlugin.id] = ["lockTimeInterval": self.selectedTimeInterval]
+            pluginData[HodlerPlugin.id] = HodlerData(lockTimeInterval: self.selectedTimeInterval)
         }
         
         if let fee = currentAdapter?.fee(for: amount, address: address, pluginData: pluginData) {
@@ -122,9 +123,9 @@ class SendController: UIViewController {
             return
         }
         
-        var pluginData = [UInt8: [String: Any]]()
+        var pluginData = [UInt8: IPluginData]()
         if timeLockEnabled {
-            pluginData[HodlerPlugin.id] = ["lockTimeInterval": self.selectedTimeInterval]
+            pluginData[HodlerPlugin.id] = HodlerData(lockTimeInterval: self.selectedTimeInterval)
         }
 
         currentAdapter?.sendSingle(to: address, amount: amount, pluginData: pluginData)
