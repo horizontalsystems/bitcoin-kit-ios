@@ -69,7 +69,7 @@ public class HodlerPlugin {
         return previousOutputMedianTime + (try lockTimeIntervalFrom(output: unspentOutput.output)).valueInSeconds
     }
 
-    private func cltvRedeemScript(lockTimeInterval: LockTimeInterval, publicKeyHash: Data) -> Data {
+    private func csvRedeemScript(lockTimeInterval: LockTimeInterval, publicKeyHash: Data) -> Data {
         OpCode.push(lockTimeInterval.valueInThreeBytes) + Data([OpCode.checkSequenceVerify, OpCode.drop]) + OpCode.p2pkhStart + OpCode.push(publicKeyHash) + OpCode.p2pkhFinish
     }
 
@@ -87,7 +87,7 @@ extension HodlerPlugin: IPlugin {
             throw HodlerPluginError.unsupportedAddress
         }
 
-        let redeemScript = cltvRedeemScript(lockTimeInterval: lockTimeInterval, publicKeyHash: recipientAddress.keyHash)
+        let redeemScript = csvRedeemScript(lockTimeInterval: lockTimeInterval, publicKeyHash: recipientAddress.keyHash)
         let scriptHash = CryptoKit.sha256ripemd160(redeemScript)
         let newAddress = try addressConverter.convert(keyHash: scriptHash, type: .p2sh)
 
@@ -101,7 +101,7 @@ extension HodlerPlugin: IPlugin {
             throw HodlerPluginError.invalidData
         }
 
-        let redeemScript = cltvRedeemScript(lockTimeInterval: lockTimeInterval, publicKeyHash: publicKeyHash)
+        let redeemScript = csvRedeemScript(lockTimeInterval: lockTimeInterval, publicKeyHash: publicKeyHash)
         let redeemScriptHash = CryptoKit.sha256ripemd160(redeemScript)
 
         guard let output = transaction.outputs.first(where: { $0.keyHash == redeemScriptHash }) else {
@@ -146,7 +146,7 @@ extension HodlerPlugin: IPlugin {
 
     public func keysForApiRestore(publicKey: PublicKey) throws -> [String] {
         try LockTimeInterval.allCases.map { lockTimeInterval in
-            let redeemScript = cltvRedeemScript(lockTimeInterval: lockTimeInterval, publicKeyHash: publicKey.keyHash)
+            let redeemScript = csvRedeemScript(lockTimeInterval: lockTimeInterval, publicKeyHash: publicKey.keyHash)
             let redeemScriptHash = CryptoKit.sha256ripemd160(redeemScript)
 
             return try addressConverter.convert(keyHash: redeemScriptHash, type: .p2sh).stringValue
