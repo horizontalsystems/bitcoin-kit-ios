@@ -59,9 +59,9 @@ extension BitcoinCore.KitState: Equatable {
 
 }
 
-extension BitcoinCoreErrors.UnspentOutputSelection: Equatable {
+extension BitcoinCoreErrors.SendValueErrors: Equatable {
 
-    public static func ==(lhs: BitcoinCoreErrors.UnspentOutputSelection, rhs: BitcoinCoreErrors.UnspentOutputSelection) -> Bool {
+    public static func ==(lhs: BitcoinCoreErrors.SendValueErrors, rhs: BitcoinCoreErrors.SendValueErrors) -> Bool {
         switch (lhs, rhs) {
         case (.wrongValue, .wrongValue): return true
         case (.emptyOutputs, .emptyOutputs): return true

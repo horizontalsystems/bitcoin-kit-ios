@@ -4,7 +4,7 @@ public class TransactionSizeCalculator {
     static let witnessData = 1 + signatureLength + pubKeyLength   //108 Number of stack items for input + Size of stack item 0 + Stack item 0, signature + Size of stack item 1 + Stack item 1, pubkey
     static let witnessTx = legacyTx + 1 + 1        //42 SegWit marker + SegWit flag
 
-    static let signatureLength = 74 + 1     // signature length plus pushByte
+    static let signatureLength = 72 + 1     // signature length plus pushByte
     static let pubKeyLength = 33 + 1         // pubKey length plus pushByte
     static let p2wpkhShLength = 22 + 1          // 0014<20byte-scriptHash> plus pushByte
 

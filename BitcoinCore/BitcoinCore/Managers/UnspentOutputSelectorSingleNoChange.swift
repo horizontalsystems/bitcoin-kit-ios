@@ -18,10 +18,10 @@ extension UnspentOutputSelectorSingleNoChange: IUnspentOutputSelector {
         let unspentOutputs = provider.spendableUtxo
 
         guard value > 0 else {
-            throw BitcoinCoreErrors.UnspentOutputSelection.wrongValue
+            throw BitcoinCoreErrors.SendValueErrors.wrongValue
         }
         guard !unspentOutputs.isEmpty else {
-            throw BitcoinCoreErrors.UnspentOutputSelection.emptyOutputs
+            throw BitcoinCoreErrors.SendValueErrors.emptyOutputs
         }
         let dust = (calculator.inputSize(type: changeType) + calculator.outputSize(type: changeType)) * feeRate // fee needed for make changeOutput, we use only p2pkh for change output
 
@@ -35,7 +35,7 @@ extension UnspentOutputSelectorSingleNoChange: IUnspentOutputSelector {
             }
         }
 
-        throw BitcoinCoreErrors.UnspentOutputSelection.notEnough(maxFee: 0)
+        throw BitcoinCoreErrors.SendValueErrors.notEnough(maxFee: 0)
     }
 
 }

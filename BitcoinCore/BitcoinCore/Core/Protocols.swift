@@ -378,7 +378,12 @@ public protocol ITransactionSizeCalculator {
     func transactionSize(inputs: [ScriptType], outputScriptTypes: [ScriptType], pluginDataOutputSize: Int) -> Int
     func outputSize(type: ScriptType) -> Int
     func inputSize(type: ScriptType) -> Int
+    func witnessSize(type: ScriptType) -> Int
     func toBytes(fee: Int) -> Int
+}
+
+protocol IDustCalculator {
+    func dust(type: ScriptType) -> Int
 }
 
 public protocol IUnspentOutputSelector {

@@ -83,8 +83,8 @@ class UnspentOutputSelectorTests: XCTestCase {
         do {
             _ = try unspentOutputSelector.select(value: 31001, feeRate: 1, senderPay: false, pluginDataOutputSize: 0)
             XCTFail("Wrong value summary!")
-        } catch let error as BitcoinCoreErrors.UnspentOutputSelection {
-            XCTAssertEqual(error, BitcoinCoreErrors.UnspentOutputSelection.notEnough(maxFee: 0))
+        } catch let error as BitcoinCoreErrors.SendValueErrors {
+            XCTAssertEqual(error, BitcoinCoreErrors.SendValueErrors.notEnough(maxFee: 0))
         } catch {
             XCTFail("Unexpected \(error) error!")
         }
@@ -94,8 +94,8 @@ class UnspentOutputSelectorTests: XCTestCase {
         do {
             _ = try unspentOutputSelector.select(value: 30901, feeRate: 1, senderPay: true, pluginDataOutputSize: 0)
             XCTFail("Wrong value summary!")
-        } catch let error as BitcoinCoreErrors.UnspentOutputSelection {
-            XCTAssertEqual(error, BitcoinCoreErrors.UnspentOutputSelection.notEnough(maxFee: 100))
+        } catch let error as BitcoinCoreErrors.SendValueErrors {
+            XCTAssertEqual(error, BitcoinCoreErrors.SendValueErrors.notEnough(maxFee: 100))
         } catch {
             XCTFail("Unexpected \(error) error!")
         }
@@ -108,8 +108,8 @@ class UnspentOutputSelectorTests: XCTestCase {
         do {
             _ = try unspentOutputSelector.select(value: 100, feeRate: 1, senderPay: false, pluginDataOutputSize: 0)
             XCTFail("Wrong value summary!")
-        } catch let error as BitcoinCoreErrors.UnspentOutputSelection {
-            XCTAssertEqual(error, BitcoinCoreErrors.UnspentOutputSelection.emptyOutputs)
+        } catch let error as BitcoinCoreErrors.SendValueErrors {
+            XCTAssertEqual(error, BitcoinCoreErrors.SendValueErrors.emptyOutputs)
         } catch {
             XCTFail("Unexpected \(error) error!")
         }

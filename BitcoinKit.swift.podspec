@@ -19,6 +19,7 @@ Pod::Spec.new do |spec|
   spec.swift_version = '5'
 
   spec.dependency 'BitcoinCore.swift', '~> 0.9.0'
+  spec.dependency 'Hodler.swift', '~> 0.1.0'
   spec.dependency 'HSCryptoKit', '~> 1.4'
   spec.dependency 'HSHDWalletKit', '~> 1.2'
   spec.dependency 'Alamofire', '~> 4.0'

@@ -45,6 +45,7 @@ public class BitcoinCashKit: AbstractKit {
 
         let bitcoinCore = try BitcoinCoreBuilder(minLogLevel: minLogLevel)
                 .set(network: network)
+                .set(dustRelayTxFee: 1000)  // https://github.com/Bitcoin-ABC/bitcoin-abc/blob/master/src/policy/policy.h#L78
                 .set(initialSyncApi: initialSyncApi)
                 .set(words: words)
                 .set(paymentAddressParser: paymentAddressParser)
