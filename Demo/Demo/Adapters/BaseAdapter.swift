@@ -2,7 +2,7 @@ import BitcoinCore
 import RxSwift
 
 class BaseAdapter {
-    var feeRate: Int { return 10 }
+    var feeRate: Int { return 3 }
     private let coinRate: Decimal = pow(10, 8)
 
     let name: String
@@ -141,7 +141,7 @@ extension BaseAdapter {
     func fee(for value: Decimal, address: String?, pluginData: [UInt8: IPluginData] = [:]) -> Decimal {
         do {
             let amount = convertToSatoshi(value: value)
-            let fee = try abstractKit.fee(for: amount, toAddress: address, senderPay: true, feeRate: feeRate, pluginData: pluginData)
+            let fee = try abstractKit.fee(for: amount, toAddress: address, feeRate: feeRate, pluginData: pluginData)
             return Decimal(fee) / coinRate
         } catch BitcoinCoreErrors.SendValueErrors.notEnough(let maxFee) {
             return Decimal(maxFee) / coinRate

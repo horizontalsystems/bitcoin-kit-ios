@@ -51,9 +51,9 @@ public class BitcoinCoreErrors {
     }
 
     public enum SendValueErrors: Error {
-        case wrongValue
         case dust
         case emptyOutputs
+        case singleNoChangeOutputNotFound
         case notEnough(maxFee: Int)
     }
 

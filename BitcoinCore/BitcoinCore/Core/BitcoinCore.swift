@@ -184,8 +184,8 @@ extension BitcoinCore {
         paymentAddressParser.parse(paymentAddress: paymentAddress)
     }
 
-    public func fee(for value: Int, toAddress: String? = nil, senderPay: Bool, feeRate: Int, pluginData: [UInt8: IPluginData] = [:]) throws -> Int {
-        try transactionFeeCalculator.fee(for: value, feeRate: feeRate, senderPay: senderPay, toAddress: toAddress, pluginData: pluginData)
+    public func fee(for value: Int, toAddress: String? = nil, feeRate: Int, pluginData: [UInt8: IPluginData] = [:]) throws -> Int {
+        try transactionFeeCalculator.fee(for: value, feeRate: feeRate, senderPay: true, toAddress: toAddress, pluginData: pluginData)
     }
 
     public func receiveAddress() -> String {

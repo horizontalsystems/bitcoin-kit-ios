@@ -10,16 +10,18 @@ class InputSetter {
     private let publicKeyManager: IPublicKeyManager
     private let factory: IFactory
     private let pluginManager: IPluginManager
+    private let dustCalculator: IDustCalculator
     private let changeScriptType: ScriptType
 
     init(unspentOutputSelector: IUnspentOutputSelector, transactionSizeCalculator: ITransactionSizeCalculator, addressConverter: IAddressConverter, publicKeyManager: IPublicKeyManager,
-         factory: IFactory, pluginManager: IPluginManager, changeScriptType: ScriptType) {
+         factory: IFactory, pluginManager: IPluginManager, dustCalculator: IDustCalculator, changeScriptType: ScriptType) {
         self.unspentOutputSelector = unspentOutputSelector
         self.transactionSizeCalculator = transactionSizeCalculator
         self.addressConverter = addressConverter
         self.publicKeyManager = publicKeyManager
         self.factory = factory
         self.pluginManager = pluginManager
+        self.dustCalculator = dustCalculator
         self.changeScriptType = changeScriptType
     }
 
@@ -44,10 +46,11 @@ extension InputSetter: IInputSetter {
 
     func setInputs(to mutableTransaction: MutableTransaction, feeRate: Int, senderPay: Bool) throws {
         let value = mutableTransaction.recipientValue
+        let dust = dustCalculator.dust(type: changeScriptType)
         let unspentOutputInfo = try unspentOutputSelector.select(
                 value: value, feeRate: feeRate,
                 outputScriptType: mutableTransaction.recipientAddress.scriptType, changeType: changeScriptType,
-                senderPay: senderPay, pluginDataOutputSize: mutableTransaction.pluginDataOutputSize
+                senderPay: senderPay, dust: dust, pluginDataOutputSize: mutableTransaction.pluginDataOutputSize
         )
         let unspentOutputs = unspentOutputInfo.unspentOutputs
 
@@ -55,21 +58,15 @@ extension InputSetter: IInputSetter {
             mutableTransaction.add(inputToSign: try input(fromUnspentOutput: unspentOutput))
         }
 
-        // Calculate fee
-        let fee = unspentOutputInfo.fee
-        let receivedValue = senderPay ? value : value - fee
-        let sentValue = senderPay ? value + fee : value
-
-        // Set received value
-        mutableTransaction.recipientValue = receivedValue
+        mutableTransaction.recipientValue = unspentOutputInfo.recipientValue
 
         // Add change output if needed
-        if unspentOutputInfo.addChangeOutput {
+        if let changeValue = unspentOutputInfo.changeValue {
             let changePubKey = try publicKeyManager.changePublicKey()
             let changeAddress = try addressConverter.convert(publicKey: changePubKey, type: changeScriptType)
 
             mutableTransaction.changeAddress = changeAddress
-            mutableTransaction.changeValue = unspentOutputInfo.totalValue - sentValue
+            mutableTransaction.changeValue = changeValue
         }
 
         try pluginManager.processInputs(mutableTransaction: mutableTransaction)

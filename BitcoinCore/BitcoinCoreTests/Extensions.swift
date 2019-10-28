@@ -63,8 +63,9 @@ extension BitcoinCoreErrors.SendValueErrors: Equatable {
 
     public static func ==(lhs: BitcoinCoreErrors.SendValueErrors, rhs: BitcoinCoreErrors.SendValueErrors) -> Bool {
         switch (lhs, rhs) {
-        case (.wrongValue, .wrongValue): return true
+        case (.dust, .dust): return true
         case (.emptyOutputs, .emptyOutputs): return true
+        case (.singleNoChangeOutputNotFound, .singleNoChangeOutputNotFound): return true
         case let (.notEnough(lMaxFee),   .notEnough(rMaxFee)): return lMaxFee == rMaxFee
         default:
             return false
