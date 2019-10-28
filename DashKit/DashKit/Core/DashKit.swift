@@ -54,6 +54,7 @@ public class DashKit: AbstractKit {
 
         let bitcoinCore = try BitcoinCoreBuilder(minLogLevel: minLogLevel)
                 .set(network: network)
+                .set(dustRelayTxFee: 1000) // https://github.com/dashpay/dash/blob/master/src/policy/policy.h#L36
                 .set(words: words)
                 .set(initialSyncApi: initialSyncApi)
                 .set(paymentAddressParser: paymentAddressParser)

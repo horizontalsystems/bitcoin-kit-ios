@@ -2,7 +2,7 @@ import Foundation
 import HSHDWalletKit
 
 public class BitcoinCoreBuilder {
-    public enum BuildError: Error { case noSeedData, noWalletId, noNetwork, noPaymentAddressParser, noAddressSelector, noStorage, noInitialSyncApi }
+    public enum BuildError: Error { case noSeedData, noWalletId, noNetwork, noDustRelayTxFee, noPaymentAddressParser, noAddressSelector, noStorage, noInitialSyncApi }
 
     // chains
     public let addressConverter = AddressConverterChain()
@@ -12,6 +12,7 @@ public class BitcoinCoreBuilder {
     private var words: [String]?
     private var bip: Bip = .bip44
     private var network: INetwork?
+    private var dustRelayTxFee: Int?
     private var paymentAddressParser: IPaymentAddressParser?
     private var walletId: String?
     private var initialSyncApi: ISyncTransactionApi?
@@ -46,6 +47,11 @@ public class BitcoinCoreBuilder {
 
     public func set(network: INetwork) -> BitcoinCoreBuilder {
         self.network = network
+        return self
+    }
+
+    public func set(dustRelayTxFee: Int) -> BitcoinCoreBuilder {
+        self.dustRelayTxFee = dustRelayTxFee
         return self
     }
 
@@ -114,6 +120,9 @@ public class BitcoinCoreBuilder {
         }
         guard let network = self.network else {
             throw BuildError.noNetwork
+        }
+        guard let dustRelayTxFee = self.dustRelayTxFee else {
+            throw BuildError.noDustRelayTxFee
         }
         guard let paymentAddressParser = self.paymentAddressParser else {
             throw BuildError.noPaymentAddressParser
@@ -198,7 +207,8 @@ public class BitcoinCoreBuilder {
 
         let inputSigner = InputSigner(hdWallet: hdWallet, network: network)
         let transactionSizeCalculator = TransactionSizeCalculator()
-        let outputSetter = OutputSetter(addressConverter: addressConverter, factory: factory, pluginManager: pluginManager)
+        let dustCalculator = DustCalculator(dustRelayTxFee: dustRelayTxFee, sizeCalculator: transactionSizeCalculator)
+        let outputSetter = OutputSetter(addressConverter: addressConverter, factory: factory, pluginManager: pluginManager, dustCalculator: dustCalculator)
         let inputSetter = InputSetter(unspentOutputSelector: unspentOutputSelector, transactionSizeCalculator: transactionSizeCalculator, addressConverter: addressConverter, publicKeyManager: publicKeyManager, factory: factory, pluginManager: pluginManager, changeScriptType: bip.scriptType)
         let lockTimeSetter = LockTimeSetter(storage: storage)
         let transactionSigner = TransactionSigner(inputSigner: inputSigner)

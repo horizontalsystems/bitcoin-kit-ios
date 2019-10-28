@@ -14,12 +14,12 @@
       location = "group:DashKit/DashKit.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:Hodler/Hodler.xcodeproj">
-   </FileRef>
-   <FileRef
       location = "group:Demo/Demo.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:Pods/Pods.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Hodler/Hodler.xcodeproj">
    </FileRef>
 </Workspace>
