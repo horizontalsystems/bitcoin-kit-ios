@@ -34,7 +34,7 @@ extension TransactionSizeCalculator: ITransactionSizeCalculator {
 
         inputs.forEach { input in
             inputWeight += inputSize(type: input) * 4      // to vbytes
-            if input.witness {
+            if segWit {
                 inputWeight += witnessSize(type: input)
             }
         }

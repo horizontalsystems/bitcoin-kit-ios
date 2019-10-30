@@ -26,7 +26,7 @@ class TransactionSizeCalculatorTests: XCTestCase {
 
         XCTAssertEqual(calculator.transactionSize(inputs: [.p2wpkh], outputScriptTypes: [.p2pkh]), 113) // 1-in 1-out witness tx
         XCTAssertEqual(calculator.transactionSize(inputs: [.p2wpkhSh], outputScriptTypes: [.p2pkh]), 136) // 1-in 1-out (sh) witness tx
-        XCTAssertEqual(calculator.transactionSize(inputs: [.p2wpkh, .p2pkh], outputScriptTypes: [.p2pkh]), 261) // 2-in 1-out witness tx
+        XCTAssertEqual(calculator.transactionSize(inputs: [.p2wpkh, .p2pkh, .p2pkh, .p2pkh], outputScriptTypes: [.p2pkh]), 558) // 4-in 1-out witness tx
     }
 
     func testInputSize() {
