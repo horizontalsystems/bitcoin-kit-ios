@@ -22,6 +22,8 @@ class TestNet: INetwork {
         "testnet-seed-abc.bitcoinforks.org"
     ]
 
+    let dustRelayTxFee = 1000    // https://github.com/Bitcoin-ABC/bitcoin-abc/blob/master/src/policy/policy.h#L78
+
     var bip44CheckpointBlock: Block {
         return Block(
                 withHeader: BlockHeader(
