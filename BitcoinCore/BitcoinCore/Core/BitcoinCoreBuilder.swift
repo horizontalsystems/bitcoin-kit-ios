@@ -226,6 +226,7 @@ public class BitcoinCoreBuilder {
                 kitStateProvider: kitStateProvider,
                 transactionCreator: transactionCreator,
                 transactionFeeCalculator: transactionFeeCalculator,
+                dustCalculator: dustCalculator,
                 paymentAddressParser: paymentAddressParser,
                 networkMessageParser: networkMessageParser,
                 networkMessageSerializer: networkMessageSerializer,

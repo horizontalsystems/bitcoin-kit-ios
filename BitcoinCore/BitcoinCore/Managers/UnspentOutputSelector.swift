@@ -82,7 +82,7 @@ extension UnspentOutputSelector: IUnspentOutputSelector {
 
         // if all unspentOutputs are selected and total value less than needed, then throw error
         if totalValue < sentValue {
-            throw BitcoinCoreErrors.SendValueErrors.notEnough(maxFee: senderPay ? fee : 0)
+            throw BitcoinCoreErrors.SendValueErrors.notEnough
         }
 
         let changeOutputHavingTransactionFee = calculator.transactionSize(inputs: selectedOutputScriptTypes, outputScriptTypes: [outputScriptType, changeType], pluginDataOutputSize: pluginDataOutputSize) * feeRate

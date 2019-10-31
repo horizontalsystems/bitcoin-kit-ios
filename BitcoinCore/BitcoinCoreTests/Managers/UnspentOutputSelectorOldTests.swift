@@ -83,7 +83,7 @@ class UnspentOutputSelectorOldTests: XCTestCase {
             _ = try unspentOutputSelector.select(value: 31001, feeRate: 1, senderPay: false, dust: dust, pluginDataOutputSize: 0)
             XCTFail("Wrong value summary!")
         } catch let error as BitcoinCoreErrors.SendValueErrors {
-            XCTAssertEqual(error, BitcoinCoreErrors.SendValueErrors.notEnough(maxFee: 0))
+            XCTAssertEqual(error, BitcoinCoreErrors.SendValueErrors.notEnough)
         } catch {
             XCTFail("Unexpected \(error) error!")
         }
@@ -94,7 +94,7 @@ class UnspentOutputSelectorOldTests: XCTestCase {
             _ = try unspentOutputSelector.select(value: 30901, feeRate: 1, senderPay: true, dust: dust, pluginDataOutputSize: 0)
             XCTFail("Wrong value summary!")
         } catch let error as BitcoinCoreErrors.SendValueErrors {
-            XCTAssertEqual(error, BitcoinCoreErrors.SendValueErrors.notEnough(maxFee: 100))
+            XCTAssertEqual(error, BitcoinCoreErrors.SendValueErrors.notEnough)
         } catch {
             XCTFail("Unexpected \(error) error!")
         }

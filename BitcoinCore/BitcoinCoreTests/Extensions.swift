@@ -66,7 +66,7 @@ extension BitcoinCoreErrors.SendValueErrors: Equatable {
         case (.dust, .dust): return true
         case (.emptyOutputs, .emptyOutputs): return true
         case (.singleNoChangeOutputNotFound, .singleNoChangeOutputNotFound): return true
-        case let (.notEnough(lMaxFee),   .notEnough(rMaxFee)): return lMaxFee == rMaxFee
+        case let (.notEnough,   .notEnough): return true
         default:
             return false
         }
