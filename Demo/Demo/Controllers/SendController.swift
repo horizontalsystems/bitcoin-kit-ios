@@ -55,16 +55,14 @@ class SendController: UIViewController {
     }
     
     private func updateFee() {
-        guard let address = addressTextField?.text else {
-            feeLabel?.text = "Fee: "
-            return
-        }
-
-        do {
-            try currentAdapter?.validate(address: address)
-        } catch {
-            feeLabel?.text = "Fee: "
-            return
+        var address: String? = nil
+        
+        if let addressStr = addressTextField?.text {
+            do {
+                try currentAdapter?.validate(address: addressStr)
+                address = addressStr
+            } catch {
+            }
         }
 
         guard let amountString = amountTextField?.text, let amount = Decimal(string: amountString) else {
@@ -106,6 +104,45 @@ class SendController: UIViewController {
         updateFee()
     }
     
+    @IBAction func setMaxAmount() {
+        var address: String? = nil
+        
+        if let addressStr = addressTextField?.text {
+            do {
+                try currentAdapter?.validate(address: addressStr)
+                address = addressStr
+            } catch {
+            }
+        }
+
+        var pluginData = [UInt8: IPluginData]()
+        if timeLockEnabled {
+            pluginData[HodlerPlugin.id] = HodlerData(lockTimeInterval: self.selectedTimeInterval)
+        }
+        
+        if let maxAmount = currentAdapter?.availableBalance(for: address, pluginData: pluginData) {
+            amountTextField?.text = "\(maxAmount)"
+            onAmountEditEnded(0)
+        }
+    }
+    
+    @IBAction func setMinAmount() {
+        var address: String? = nil
+        
+        if let addressStr = addressTextField?.text {
+            do {
+                try currentAdapter?.validate(address: addressStr)
+                address = addressStr
+            } catch {
+            }
+        }
+
+        if let minAmount = currentAdapter?.minSpendableAmount(for: address) {
+            amountTextField?.text = "\(minAmount)"
+            onAmountEditEnded(0)
+        }
+    }
+
     @IBAction func send() {
         guard let address = addressTextField?.text else {
             return

@@ -134,8 +134,13 @@ extension BaseAdapter {
         }
     }
 
-    func availableBalance(for address: String?) -> Decimal {
-        max(0, spendableBalance - fee(for: spendableBalance, address: address))
+    func availableBalance(for address: String?, pluginData: [UInt8: IPluginData] = [:]) -> Decimal {
+        let amount = (try? abstractKit.maxSpendableValue(toAddress: address, feeRate: feeRate, pluginData: pluginData)) ?? 0
+        return Decimal(amount) / coinRate
+    }
+
+    func minSpendableAmount(for address: String?) -> Decimal {
+        Decimal(abstractKit.minSpendableValue(toAddress: address)) / coinRate
     }
 
     func fee(for value: Decimal, address: String?, pluginData: [UInt8: IPluginData] = [:]) -> Decimal {
@@ -143,8 +148,6 @@ extension BaseAdapter {
             let amount = convertToSatoshi(value: value)
             let fee = try abstractKit.fee(for: amount, toAddress: address, feeRate: feeRate, pluginData: pluginData)
             return Decimal(fee) / coinRate
-        } catch BitcoinCoreErrors.SendValueErrors.notEnough(let maxFee) {
-            return Decimal(maxFee) / coinRate
         } catch {
             return 0
         }

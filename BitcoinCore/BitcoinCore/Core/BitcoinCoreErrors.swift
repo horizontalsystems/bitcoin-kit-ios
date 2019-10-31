@@ -54,7 +54,7 @@ public class BitcoinCoreErrors {
         case dust
         case emptyOutputs
         case singleNoChangeOutputNotFound
-        case notEnough(maxFee: Int)
+        case notEnough
     }
 
     public enum Unexpected: Error {

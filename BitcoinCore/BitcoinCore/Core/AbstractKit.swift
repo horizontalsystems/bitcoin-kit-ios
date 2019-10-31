@@ -58,6 +58,14 @@ open class AbstractKit {
         try bitcoinCore.fee(for: value, toAddress: toAddress, feeRate: feeRate, pluginData: pluginData)
     }
 
+    open func maxSpendableValue(toAddress: String? = nil, feeRate: Int, pluginData: [UInt8: IPluginData] = [:]) throws -> Int {
+        try bitcoinCore.maxSpendableValue(toAddress: toAddress, feeRate: feeRate, pluginData: pluginData)
+    }
+
+    public func minSpendableValue(toAddress: String? = nil) -> Int {
+        bitcoinCore.minSpendableValue(toAddress: toAddress)
+    }
+
     open func receiveAddress() -> String {
         bitcoinCore.receiveAddress()
     }

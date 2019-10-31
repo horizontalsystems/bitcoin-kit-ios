@@ -120,7 +120,7 @@ class UnspentOutputSelectorTests: QuickSpec {
                         _ = try selector.select(value: outputs.reduce(0) { $0 + $1.output.value } - fee + 1, feeRate: feeRate, outputScriptType: .p2pkh, changeType: .p2pkh, senderPay: true, dust: dust, pluginDataOutputSize: 0)
                         fail("Exception expected")
                     } catch let error as BitcoinCoreErrors.SendValueErrors {
-                        expect(error).to(equal(BitcoinCoreErrors.SendValueErrors.notEnough(maxFee: fee)))
+                        expect(error).to(equal(BitcoinCoreErrors.SendValueErrors.notEnough))
                     } catch {
                         fail("Unexpected error")
                     }
@@ -187,7 +187,7 @@ class UnspentOutputSelectorTests: QuickSpec {
                         _ = try selector.select(value: outputs.reduce(0) { $0 + $1.output.value } + 1, feeRate: feeRate, outputScriptType: .p2pkh, changeType: .p2pkh, senderPay: false, dust: dust, pluginDataOutputSize: 0)
                         fail("Exception expected")
                     } catch let error as BitcoinCoreErrors.SendValueErrors {
-                        expect(error).to(equal(BitcoinCoreErrors.SendValueErrors.notEnough(maxFee: 0)))
+                        expect(error).to(equal(BitcoinCoreErrors.SendValueErrors.notEnough))
                     } catch {
                         fail("Unexpected error")
                     }

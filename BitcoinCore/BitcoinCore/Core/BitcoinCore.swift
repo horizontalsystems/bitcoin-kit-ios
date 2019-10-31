@@ -22,6 +22,7 @@ public class BitcoinCore {
 
     private let transactionCreator: ITransactionCreator
     private let transactionFeeCalculator: ITransactionFeeCalculator
+    private let dustCalculator: IDustCalculator
     private let paymentAddressParser: IPaymentAddressParser
 
     private let networkMessageSerializer: NetworkMessageSerializer
@@ -98,7 +99,7 @@ public class BitcoinCore {
          syncedReadyPeerManager: ISyncedReadyPeerManager, transactionSyncer: ITransactionSyncer,
          blockValidatorChain: BlockValidatorChain, publicKeyManager: IPublicKeyManager, addressConverter: AddressConverterChain, restoreKeyConverterChain: RestoreKeyConverterChain,
          unspentOutputSelector: UnspentOutputSelectorChain, kitStateProvider: IKitStateProvider & ISyncStateListener,
-         transactionCreator: ITransactionCreator, transactionFeeCalculator: ITransactionFeeCalculator,
+         transactionCreator: ITransactionCreator, transactionFeeCalculator: ITransactionFeeCalculator, dustCalculator: IDustCalculator,
          paymentAddressParser: IPaymentAddressParser, networkMessageParser: NetworkMessageParser, networkMessageSerializer: NetworkMessageSerializer,
          syncManager: SyncManager, pluginManager: IPluginManager, watchedTransactionManager: IWatchedTransactionManager, bip: Bip,
          peerManager: IPeerManager) {
@@ -118,6 +119,7 @@ public class BitcoinCore {
         self.kitStateProvider = kitStateProvider
         self.transactionCreator = transactionCreator
         self.transactionFeeCalculator = transactionFeeCalculator
+        self.dustCalculator = dustCalculator
         self.paymentAddressParser = paymentAddressParser
 
         self.networkMessageParser = networkMessageParser
@@ -186,6 +188,20 @@ extension BitcoinCore {
 
     public func fee(for value: Int, toAddress: String? = nil, feeRate: Int, pluginData: [UInt8: IPluginData] = [:]) throws -> Int {
         try transactionFeeCalculator.fee(for: value, feeRate: feeRate, senderPay: true, toAddress: toAddress, pluginData: pluginData)
+    }
+
+    public func maxSpendableValue(toAddress: String? = nil, feeRate: Int, pluginData: [UInt8: IPluginData] = [:]) throws -> Int {
+        let sendAllFee = try transactionFeeCalculator.fee(for: balance.spendable, feeRate: feeRate, senderPay: false, toAddress: toAddress, pluginData: pluginData)
+        return max(0, balance.spendable - sendAllFee)
+    }
+
+    public func minSpendableValue(toAddress: String? = nil) -> Int {
+        var scriptType = ScriptType.p2pkh
+        if let addressStr = toAddress, let address = try? addressConverter.convert(address: addressStr) {
+            scriptType = address.scriptType
+        }
+
+        return dustCalculator.dust(type: scriptType)
     }
 
     public func receiveAddress() -> String {
