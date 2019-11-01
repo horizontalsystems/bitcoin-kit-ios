@@ -204,6 +204,10 @@ extension BitcoinCore {
         return dustCalculator.dust(type: scriptType)
     }
 
+    public func maxSpendLimit(pluginData: [UInt8: IPluginData]) throws -> Int? {
+        try pluginManager.maxSpendLimit(pluginData: pluginData)
+    }
+
     public func receiveAddress() -> String {
         guard let publicKey = try? publicKeyManager.receivePublicKey(),
               let address = try? addressConverter.convert(publicKey: publicKey, type: bip.scriptType) else {

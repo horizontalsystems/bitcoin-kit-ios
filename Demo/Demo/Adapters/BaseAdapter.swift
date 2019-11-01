@@ -139,6 +139,14 @@ extension BaseAdapter {
         return Decimal(amount) / coinRate
     }
 
+    func maxSpendLimit(pluginData: [UInt8: IPluginData]) -> Int? {
+        do {
+            return try abstractKit.maxSpendLimit(pluginData: pluginData)
+        } catch {
+            return 0
+        }
+    }
+
     func minSpendableAmount(for address: String?) -> Decimal {
         Decimal(abstractKit.minSpendableValue(toAddress: address)) / coinRate
     }

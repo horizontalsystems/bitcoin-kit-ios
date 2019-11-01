@@ -5,9 +5,12 @@ import HSCryptoKit
 enum HodlerPluginError: Error {
     case unsupportedAddress
     case invalidData
+    case lockedValueLimitExceeded
 }
 
 public class HodlerPlugin {
+    public static let lockedValueLimit = 50_000_000 // 0.5 BTC
+
     public enum LockTimeInterval: UInt16, CaseIterable {
         case hour = 7           //  60 * 60 / 512
         case month = 5063       //  30 * 24 * 60 * 60 / 512
@@ -36,6 +39,7 @@ public class HodlerPlugin {
 
     public static let id: UInt8 = OpCode.push(1)[0]
     public var id: UInt8 { HodlerPlugin.id }
+    public var maxSpendLimit: Int? { HodlerPlugin.lockedValueLimit }
 
     private let addressConverter: IHodlerAddressConverter
     private let blockMedianTimeHelper: IHodlerBlockMedianTimeHelper
@@ -85,6 +89,10 @@ extension HodlerPlugin: IPlugin {
 
         guard let recipientAddress = mutableTransaction.recipientAddress, recipientAddress.scriptType == .p2pkh else {
             throw HodlerPluginError.unsupportedAddress
+        }
+
+        guard mutableTransaction.recipientValue <= HodlerPlugin.lockedValueLimit else {
+            throw HodlerPluginError.lockedValueLimitExceeded
         }
 
         let redeemScript = csvRedeemScript(lockTimeInterval: hodlerData.lockTimeInterval, publicKeyHash: recipientAddress.keyHash)

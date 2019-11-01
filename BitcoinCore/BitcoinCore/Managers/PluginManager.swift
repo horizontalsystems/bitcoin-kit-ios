@@ -17,6 +17,16 @@ class PluginManager {
 
 extension PluginManager: IPluginManager {
 
+    func maxSpendLimit(pluginData: [UInt8: IPluginData]) throws -> Int? {
+        try pluginData.flatMap({ key, data in
+            guard let plugin = plugins[key] else {
+                throw PluginError.pluginNotFound
+            }
+
+            return plugin.maxSpendLimit
+        }).min()
+    }
+
     func add(plugin: IPlugin) {
         plugins[plugin.id] = plugin
     }
