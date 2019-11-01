@@ -3,7 +3,7 @@ public class MutableTransaction {
     var inputsToSign = [InputToSign]()
 
     public var recipientAddress: Address!
-    var recipientValue = 0
+    public var recipientValue = 0
     var changeAddress: Address? = nil
     var changeValue = 0
 
