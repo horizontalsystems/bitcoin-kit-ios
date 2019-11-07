@@ -55,9 +55,7 @@ class ReceiveController: UIViewController {
         updateAddress()
         print("segment changed")
 
-        if let adapter = currentAdapter {
-            print(adapter.debugInfo)
-        }
+        currentAdapter?.printDebugs()
     }
     func updateAddress() {
         addressLabel?.text = "  \(currentAdapter?.receiveAddress() ?? "")  "

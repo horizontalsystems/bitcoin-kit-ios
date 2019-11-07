@@ -34,6 +34,7 @@ public class BitcoinCore {
     private let bip: Bip
 
     private let peerManager: IPeerManager
+    private let errorStorage: ErrorStorage
 
     // START: Extending
 
@@ -102,7 +103,7 @@ public class BitcoinCore {
          transactionCreator: ITransactionCreator, transactionFeeCalculator: ITransactionFeeCalculator, dustCalculator: IDustCalculator,
          paymentAddressParser: IPaymentAddressParser, networkMessageParser: NetworkMessageParser, networkMessageSerializer: NetworkMessageSerializer,
          syncManager: SyncManager, pluginManager: IPluginManager, watchedTransactionManager: IWatchedTransactionManager, bip: Bip,
-         peerManager: IPeerManager) {
+         peerManager: IPeerManager, errorStorage: ErrorStorage) {
         self.storage = storage
         self.cache = cache
         self.dataProvider = dataProvider
@@ -131,6 +132,7 @@ public class BitcoinCore {
         self.bip = bip
 
         self.peerManager = peerManager
+        self.errorStorage = errorStorage
     }
 
 }
@@ -236,6 +238,7 @@ extension BitcoinCore {
     public var statusInfo: [(String, Any)] {
         var status = [(String, Any)]()
         status.append(("synced until", ((lastBlockInfo?.timestamp.map { Double($0) })?.map { Date(timeIntervalSince1970: $0) }) ?? "n/a"))
+        status.append(("errors", errorStorage.errors))
 
         status.append(contentsOf:
             peerManager.connected().enumerated().map { (index, peer) in

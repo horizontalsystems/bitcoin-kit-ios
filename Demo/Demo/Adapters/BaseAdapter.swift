@@ -15,10 +15,6 @@ class BaseAdapter {
     let balanceSignal = Signal()
     let transactionsSignal = Signal()
 
-    var debugInfo: String {
-        abstractKit.debugInfo
-    }
-
     init(name: String, coinCode: String, abstractKit: AbstractKit) {
         self.name = name
         self.coinCode = coinCode
@@ -161,6 +157,12 @@ extension BaseAdapter {
         } catch {
             return 0
         }
+    }
+
+    func printDebugs() {
+        print(abstractKit.debugInfo)
+        print()
+        print(abstractKit.statusInfo)
     }
 
 }
