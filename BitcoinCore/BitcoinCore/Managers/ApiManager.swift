@@ -4,10 +4,10 @@ import Alamofire
 import ObjectMapper
 
 enum ApiError: Error {
-    case invalidRequest
-    case mappingError
-    case noConnection
-    case serverError(status: Int, data: Any?)
+    case invalidRequest(url: String)
+    case mappingError(url: String)
+    case noConnection(url: String)
+    case serverError(url: String, status: Int, data: Any?)
 }
 
 class RequestRouter: URLRequestConvertible {
@@ -23,7 +23,7 @@ class RequestRouter: URLRequestConvertible {
     }
 
     func asURLRequest() throws -> URLRequest {
-        return try encoding.encode(request, with: parameters)
+        try encoding.encode(request, with: parameters)
     }
 
 }
@@ -54,28 +54,28 @@ public class ApiManager {
     }
 
     public func observable<T>(forRequest request: URLRequestConvertible, mapper: @escaping (Any) -> T?) -> Observable<T> {
-        return self.observable(forRequest: request)
+        self.observable(forRequest: request)
                 .flatMap { dataResponse -> Observable<T> in
                     switch dataResponse.result {
                     case .success(let result):
                         if let value = mapper(result) {
                             return Observable.just(value)
                         } else {
-                            return Observable.error(ApiError.mappingError)
+                            return Observable.error(ApiError.mappingError(url: request.description))
                         }
                     case .failure:
                         if let response = dataResponse.response {
                             let data = dataResponse.data.flatMap { try? JSONSerialization.jsonObject(with: $0, options: .allowFragments) }
-                            return Observable.error(ApiError.serverError(status: response.statusCode, data: data))
+                            return Observable.error(ApiError.serverError(url: request.description, status: response.statusCode, data: data))
                         } else {
-                            return Observable.error(ApiError.noConnection)
+                            return Observable.error(ApiError.noConnection(url: request.description))
                         }
                     }
                 }
     }
 
     public func observable<T: ImmutableMappable>(forRequest request: URLRequestConvertible) -> Observable<[T]> {
-        return observable(forRequest: request, mapper: { json in
+        observable(forRequest: request, mapper: { json in
             if let jsonArray = json as? [[String: Any]] {
                 return jsonArray.compactMap { try? T(JSONObject: $0) }
             }
@@ -84,7 +84,7 @@ public class ApiManager {
     }
 
     public func observable<T: ImmutableMappable>(forRequest request: URLRequestConvertible) -> Observable<T> {
-        return observable(forRequest: request, mapper: { json in
+        observable(forRequest: request, mapper: { json in
             if let jsonObject = json as? [String: Any], let object = try? T(JSONObject: jsonObject) {
                 return object
             }
@@ -94,7 +94,7 @@ public class ApiManager {
 
     private func observable(forRequest request: URLRequestConvertible) -> Observable<DataResponse<Any>> {
         let observable = Observable<DataResponse<Any>>.create { observer in
-            self.logger?.debug("API OUT: \(request.urlRequest?.httpMethod ?? "") \(request.urlRequest?.url?.absoluteString ?? "")")
+            self.logger?.debug("API OUT: \(request.description)")
 
             let requestReference = Alamofire.request(request)
                     .validate()

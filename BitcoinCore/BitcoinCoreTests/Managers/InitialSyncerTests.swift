@@ -78,7 +78,7 @@ class InitialSyncerTests: QuickSpec {
                 context("when blockDiscovery fails to fetch block hashes") {
                     beforeEach {
                         stub(mockBlockDiscovery) { mock in
-                            when(mock.discoverBlockHashes(account: 0, external: true)).thenReturn(Observable.error(ApiError.noConnection))
+                            when(mock.discoverBlockHashes(account: 0, external: true)).thenReturn(Observable.error(ApiError.noConnection(url: "")))
                             when(mock.discoverBlockHashes(account: 0, external: false)).thenReturn(Observable.just((externalKeys, externalBlockHashes)))
                         }
 

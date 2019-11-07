@@ -180,7 +180,8 @@ public class BitcoinCoreBuilder {
 
         let stateManager = StateManager(storage: storage, restoreFromApi: network.syncableFromApi && syncMode == BitcoinCore.SyncMode.api)
 
-        let initialSyncer = InitialSyncer(storage: storage, listener: kitStateProvider, stateManager: stateManager, blockDiscovery: blockDiscovery, publicKeyManager: publicKeyManager, logger: logger)
+        let errorStorage = ErrorStorage()
+        let initialSyncer = InitialSyncer(storage: storage, listener: kitStateProvider, stateManager: stateManager, blockDiscovery: blockDiscovery, publicKeyManager: publicKeyManager, logger: logger, errorStorage: errorStorage)
 
         let bloomFilterLoader = BloomFilterLoader(bloomFilterManager: bloomFilterManager, peerManager: peerManager)
         let watchedTransactionManager = WatchedTransactionManager()
@@ -234,7 +235,8 @@ public class BitcoinCoreBuilder {
                 pluginManager: pluginManager,
                 watchedTransactionManager: watchedTransactionManager,
                 bip: bip,
-                peerManager: peerManager)
+                peerManager: peerManager,
+                errorStorage: errorStorage)
 
         initialSyncer.delegate = syncManager
         bloomFilterManager.delegate = bloomFilterLoader
