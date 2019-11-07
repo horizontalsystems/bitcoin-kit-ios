@@ -84,9 +84,11 @@ extension BaseAdapter {
     }
 
     func start() {
-        DispatchQueue.global(qos: .userInitiated).async {
-            self.abstractKit.start()
-        }
+        self.abstractKit.start()
+    }
+
+    func refresh() {
+        self.abstractKit.start()
     }
 
     var spendableBalance: Decimal {

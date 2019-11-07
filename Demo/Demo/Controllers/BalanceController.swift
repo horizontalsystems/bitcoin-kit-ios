@@ -59,6 +59,14 @@ class BalanceController: UITableViewController {
 
     @objc func start() {
         Manager.shared.adapters.forEach { $0.start() }
+        if let button = navigationItem.rightBarButtonItem as? UIBarButtonItem {
+            button.title = "Refresh"
+            button.action = #selector(refresh)
+        }
+    }
+
+    @objc func refresh() {
+        Manager.shared.adapters.forEach { $0.refresh() }
     }
 
     @IBAction func showDebugInfo() {
