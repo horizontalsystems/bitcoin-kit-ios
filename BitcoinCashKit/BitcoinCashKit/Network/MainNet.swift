@@ -25,7 +25,7 @@ class MainNet: INetwork {
     let dustRelayTxFee = 1000    // https://github.com/Bitcoin-ABC/bitcoin-abc/blob/master/src/policy/policy.h#L78
 
     var bip44CheckpointBlock: Block {
-        return Block(
+        Block(
                 withHeader: BlockHeader(
                         version: 2,
                         headerHash: "00000000000000003decdbb5f3811eab3148fbc29d3610528eb3b50d9ee5723f".reversedData!,
@@ -39,17 +39,17 @@ class MainNet: INetwork {
     }
 
     var lastCheckpointBlock: Block {
-        return Block(
+        Block(
                 withHeader: BlockHeader(
                         version: 536870912,
-                        headerHash: "00000000000000000376c7174b3d07ca1797dbbda4247e0df02147a8748489e8".reversedData!,
-                        previousBlockHeaderHash: "000000000000000000553bfbe09e381b8bf90aaf5918aec2a9ca04cbb380de4c".reversedData!,
-                        merkleRoot: "eddba5abfaf472c82adfdb0585eb672fbcb142b4ca485d00e76afd9e71184991".reversedData!,
-                        timestamp: 1566454348,
-                        bits: 0x18039165,
-                        nonce: 2279816485
+                        headerHash: "00000000000000000252f670239ac6c123c321a54ca8fb0f853b86a48bf41b58".reversedData!,
+                        previousBlockHeaderHash: "00000000000000000264b391cca605b0dcebcb22e4c7b243240db68586ec72ca".reversedData!,
+                        merkleRoot: "efdce6583f7b16f3dcb585625ec0c2eb1fdb81aef0e3e3bd5cdd0ae2154e645f".reversedData!,
+                        timestamp: 1573034827,
+                        bits: 402835824,
+                        nonce: 1099862827
                 ),
-                height: 596855)
+                height: 607845)
     }
 
 }

@@ -27,7 +27,7 @@ class MainNet: INetwork {
     let dustRelayTxFee = 3000 // https://github.com/bitcoin/bitcoin/blob/c536dfbcb00fb15963bf5d507b7017c241718bf6/src/policy/policy.h#L50
 
     var bip44CheckpointBlock: Block {
-        return Block(
+        Block(
                 withHeader: BlockHeader(
                         version: 2,
                         headerHash: "00000000000000003decdbb5f3811eab3148fbc29d3610528eb3b50d9ee5723f".reversedData!,
@@ -41,17 +41,17 @@ class MainNet: INetwork {
     }
 
     var lastCheckpointBlock: Block {
-        return Block(
+        Block(
                 withHeader: BlockHeader(
-                        version: 549453824,
-                        headerHash: "0000000000000000000bab9600a8e7593e2b13ea061c88f1c107a282ee75830b".reversedData!,
-                        previousBlockHeaderHash: "00000000000000000016e0dd8fe86bf34feaa611b4c52180b6822b5ad31b68ff".reversedData!,
-                        merkleRoot: "e99b5d4feb6d70c056022b579c3ed70d249e66a1cd2fde6b06fa52dc68b9e480".reversedData!,
-                        timestamp: 1566161382,
-                        bits: 387687377,
-                        nonce: 5141340
+                        version: 536879104,
+                        headerHash: "0000000000000000000983a15a2735b4f37861c4019d97200820cd190f28dba5".reversedData!,
+                        previousBlockHeaderHash: "0000000000000000000676463abf3771ea01e0f8c948d1c93658a1d82d95df5a".reversedData!,
+                        merkleRoot: "24415cca3979b6f1b6a19c63160bf732030b1031b5615d98efe8c2cee083175e".reversedData!,
+                        timestamp: 1571866973,
+                        bits: 387223263,
+                        nonce: 1093878582
                 ),
-                height: 590688)
+                height: 600768)
     }
 
 }
