@@ -566,6 +566,7 @@ protocol IIrregularOutputFinder {
 public protocol IPlugin {
     var id: UInt8 { get }
     var maxSpendLimit: Int? { get }
+    func validate(address: Address) throws
     func processOutputs(mutableTransaction: MutableTransaction, pluginData: IPluginData) throws
     func processTransactionWithNullData(transaction: FullTransaction, nullDataChunks: inout IndexingIterator<[Chunk]>) throws
     func isSpendable(unspentOutput: UnspentOutput) throws -> Bool
@@ -575,6 +576,7 @@ public protocol IPlugin {
 }
 
 public protocol IPluginManager {
+    func validate(address: Address, pluginData: [UInt8: IPluginData]) throws
     func maxSpendLimit(pluginData: [UInt8: IPluginData]) throws -> Int?
     func add(plugin: IPlugin)
     func processOutputs(mutableTransaction: MutableTransaction, pluginData: [UInt8: IPluginData]) throws

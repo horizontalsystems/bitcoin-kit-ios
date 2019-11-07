@@ -180,8 +180,8 @@ extension BitcoinCore {
         try transactionCreator.create(from: unspentOutput, to: address, feeRate: feeRate)
     }
 
-    public func validate(address: String) throws {
-        _ = try addressConverter.convert(address: address)
+    public func validate(address: String, pluginData: [UInt8: IPluginData] = [:]) throws {
+        try pluginManager.validate(address: try addressConverter.convert(address: address), pluginData: pluginData)
     }
 
     public func parse(paymentAddress: String) -> BitcoinPaymentData {
