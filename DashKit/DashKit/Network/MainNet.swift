@@ -28,7 +28,7 @@ class MainNet: INetwork {
     let dustRelayTxFee = 1000 // https://github.com/dashpay/dash/blob/master/src/policy/policy.h#L36
 
     var bip44CheckpointBlock: Block {
-        return Block(
+        Block(
                 withHeader: BlockHeader(
                         version: 1,
                         headerHash: "00000ffd590b1485b3caadc19b22e6379c733355108f107a430458cdf3407ab6".reversedData!,
@@ -41,17 +41,17 @@ class MainNet: INetwork {
                 height: 0)
     }
     var lastCheckpointBlock: Block {
-        return Block(
+        Block(
                 withHeader: BlockHeader(
                         version: 536870912,
-                        headerHash: "0000000000000007025cba534229ad1aea320e71396c81a567ee73d1d4d08dbd".reversedData!,
-                        previousBlockHeaderHash: "000000000000000a80683bb332ddb2d29d2404addd6b84ba4ec574d3347726c6".reversedData!,
-                        merkleRoot: "f9f9916a421d732ac78661fad94f8b605c57cd6653f533fd2460912950147e6b".reversedData!,
-                        timestamp: 1566523466,
-                        bits: 421091794,
-                        nonce: 565120927
+                        headerHash: "000000000000000087895fde87f60ba1eebf761a962f1a74ded6d5499b0b6660".reversedData!,
+                        previousBlockHeaderHash: "0000000000000010751b0e9a8deb7d6589a339a3ffcb756d2d10f0cf203f5a1c".reversedData!,
+                        merkleRoot: "ed933d1c7e48da67e96b2822edbb4c76fe8fe19b71241fc8bb51c6035fbf91d5".reversedData!,
+                        timestamp: 1573116504,
+                        bits: 420940927,
+                        nonce: 1081860501
                 ),
-                height: 1125153)
+                height: 1166976)
     }
 
 }
