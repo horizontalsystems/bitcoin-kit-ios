@@ -46,8 +46,8 @@ open class AbstractKit {
         try bitcoinCore.redeem(from: unspentOutput, to: address, feeRate: feeRate)
     }
 
-    open func validate(address: String) throws {
-        try bitcoinCore.validate(address: address)
+    open func validate(address: String, pluginData: [UInt8: IPluginData] = [:]) throws {
+        try bitcoinCore.validate(address: address, pluginData: pluginData)
     }
 
     open func parse(paymentAddress: String) -> BitcoinPaymentData {

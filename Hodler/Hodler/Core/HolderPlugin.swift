@@ -81,7 +81,13 @@ public class HodlerPlugin {
 
 
 extension HodlerPlugin: IPlugin {
-    
+
+    public func validate(address: Address) throws {
+        if address.scriptType != .p2pkh {
+            throw HodlerPluginError.unsupportedAddress
+        }
+    }
+
     public func processOutputs(mutableTransaction: MutableTransaction, pluginData: IPluginData) throws {
         guard let hodlerData = pluginData as? HodlerData else {
             throw HodlerPluginError.invalidData

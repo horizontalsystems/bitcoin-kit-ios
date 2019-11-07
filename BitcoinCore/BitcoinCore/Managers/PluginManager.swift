@@ -17,6 +17,16 @@ class PluginManager {
 
 extension PluginManager: IPluginManager {
 
+    func validate(address: Address, pluginData: [UInt8: IPluginData]) throws {
+        for (key, data) in pluginData {
+            guard let plugin = plugins[key] else {
+                throw PluginError.pluginNotFound
+            }
+
+            try plugin.validate(address: address)
+        }
+    }
+
     func maxSpendLimit(pluginData: [UInt8: IPluginData]) throws -> Int? {
         try pluginData.flatMap({ key, data in
             guard let plugin = plugins[key] else {
