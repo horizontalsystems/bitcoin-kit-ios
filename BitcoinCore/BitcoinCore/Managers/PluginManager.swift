@@ -56,13 +56,16 @@ extension PluginManager: IPluginManager {
     }
 
     func processTransactionWithNullData(transaction: FullTransaction, nullDataOutput: Output) throws {
+        guard let script = try? scriptConverter.decode(data: nullDataOutput.lockingScript) else {
+            return
+        }
+
+        var iterator = script.chunks.makeIterator()
+
+        // the first byte OP_RETURN
+        _ = iterator.next()
+
         do {
-            let script = try scriptConverter.decode(data: nullDataOutput.lockingScript)
-            var iterator = script.chunks.makeIterator()
-
-            // the first byte OP_RETURN
-            _ = iterator.next()
-
             while let pluginId = iterator.next() {
                 guard let plugin = plugins[pluginId.opCode] else {
                     break
