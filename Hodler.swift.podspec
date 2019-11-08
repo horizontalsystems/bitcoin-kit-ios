@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
   spec.name = 'Hodler.swift'
   spec.module_name = 'Hodler'
-  spec.version = '0.1.0'
+  spec.version = '0.9.0'
   spec.summary = 'Hodler library for Swift'
   spec.description = <<-DESC
                        Hodler plugin enables to send/receive/spend time-locked transactions.
