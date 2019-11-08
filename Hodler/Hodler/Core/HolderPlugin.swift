@@ -2,7 +2,7 @@ import Foundation
 import BitcoinCore
 import HSCryptoKit
 
-enum HodlerPluginError: Error {
+public enum HodlerPluginError: Error {
     case unsupportedAddress
     case invalidData
     case lockedValueLimitExceeded
