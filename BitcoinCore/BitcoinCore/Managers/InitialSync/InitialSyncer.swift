@@ -59,21 +59,16 @@ class InitialSyncer {
     }
 
     private func handle(forAccount account: Int, keys: [PublicKey], blockHashes: [BlockHash]) {
-        do {
-            logger?.debug("Account \(account) has \(keys.count) keys and \(blockHashes.count) blocks")
-            try publicKeyManager.addKeys(keys: keys)
+        logger?.debug("Account \(account) has \(keys.count) keys and \(blockHashes.count) blocks")
+        publicKeyManager.addKeys(keys: keys)
 
-            // If gap shift is found
-            if blockHashes.isEmpty {
-                stateManager.restored = true
-                delegate?.syncingFinished()
-            } else {
-                storage.add(blockHashes: blockHashes)
-                sync(forAccount: account + 1)
-            }
-
-        } catch {
-            handle(error: error)
+        // If gap shift is found
+        if blockHashes.isEmpty {
+            stateManager.restored = true
+            delegate?.syncingFinished()
+        } else {
+            storage.add(blockHashes: blockHashes)
+            sync(forAccount: account + 1)
         }
     }
 

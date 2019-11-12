@@ -138,7 +138,7 @@ public protocol IPublicKeyManager {
     func changePublicKey() throws -> PublicKey
     func receivePublicKey() throws -> PublicKey
     func fillGap() throws
-    func addKeys(keys: [PublicKey]) throws
+    func addKeys(keys: [PublicKey])
     func gapShifts() -> Bool
     func publicKey(byPath: String) throws -> PublicKey
 }
