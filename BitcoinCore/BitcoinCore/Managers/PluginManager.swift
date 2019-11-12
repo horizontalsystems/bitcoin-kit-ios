@@ -18,7 +18,7 @@ class PluginManager {
 extension PluginManager: IPluginManager {
 
     func validate(address: Address, pluginData: [UInt8: IPluginData]) throws {
-        for (key, data) in pluginData {
+        for (key, _) in pluginData {
             guard let plugin = plugins[key] else {
                 throw PluginError.pluginNotFound
             }
