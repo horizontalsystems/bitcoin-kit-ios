@@ -75,7 +75,7 @@ class InitialSyncer {
     private func handle(error: Error) {
         stop()
         logger?.error(error)
-        errorStorage?.add(error: error)
+        errorStorage?.add(apiError: error)
         listener.syncStopped()
     }
 
