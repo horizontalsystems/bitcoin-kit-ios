@@ -53,7 +53,7 @@ extension TransactionOutputExtractor: ITransactionExtractor {
                 // parse P2WPKH transaction output
                 payload = lockingScript.subdata(in: 0..<lockingScriptCount)
                 validScriptType = .p2wpkh
-            } else if lockingScript[0] == OpCode.op_return {                                        // nullData output
+            } else if lockingScriptCount > 0 && lockingScript[0] == OpCode.op_return {              // nullData output
                 payload = lockingScript.subdata(in: 0..<lockingScriptCount)
                 validScriptType = .nullData
                 nullDataOutput = output
