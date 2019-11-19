@@ -24,7 +24,7 @@ protocol IDashTransactionSizeCalculator {
 }
 
 protocol IDashTransactionSyncer {
-    func handle(transactions: [FullTransaction])
+    func handleRelayed(transactions: [FullTransaction])
 }
 
 protocol IDashPeer: IPeer {

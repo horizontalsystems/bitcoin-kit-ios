@@ -15,7 +15,8 @@ public class BaseTransactionInfoConverter: IBaseTransactionInfoConverter {
         var fromAddresses = [TransactionAddressInfo]()
         var toAddresses = [TransactionAddressInfo]()
         var hasOnlyMyInputs = true
-        let transactionTimestamp = transactionForInfo.transactionWithBlock.transaction.timestamp
+        let transaction = transactionForInfo.transactionWithBlock.transaction
+        let transactionTimestamp = transaction.timestamp
 
         for inputWithPreviousOutput in transactionForInfo.inputsWithPreviousOutputs {
             var mine = false
@@ -55,14 +56,15 @@ public class BaseTransactionInfoConverter: IBaseTransactionInfoConverter {
         }
 
         return T(
-                transactionHash: transactionForInfo.transactionWithBlock.transaction.dataHash.reversedHex,
-                transactionIndex: transactionForInfo.transactionWithBlock.transaction.order,
+                transactionHash: transaction.dataHash.reversedHex,
+                transactionIndex: transaction.order,
                 from: fromAddresses,
                 to: toAddresses,
                 amount: amount,
                 fee: resolvedFee,
                 blockHeight: transactionForInfo.transactionWithBlock.blockHeight,
-                timestamp: transactionTimestamp
+                timestamp: transactionTimestamp,
+                status: transaction.status
         )
     }
 

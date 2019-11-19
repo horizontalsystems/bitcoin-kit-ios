@@ -7,8 +7,8 @@ class InstantTransactionSyncer: IDashTransactionSyncer {
         self.transactionSyncer = transactionSyncer
     }
 
-    func handle(transactions: [FullTransaction]) {
-        transactionSyncer.handle(transactions: transactions)
+    func handleRelayed(transactions: [FullTransaction]) {
+        transactionSyncer.handleRelayed(transactions: transactions)
     }
 
 }

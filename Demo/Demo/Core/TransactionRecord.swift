@@ -2,6 +2,7 @@ import Foundation
 
 struct TransactionRecord {
     let transactionHash: String
+    let status: TransactionStatus
     let transactionIndex: Int
 
     let amount: Decimal
@@ -20,4 +21,8 @@ struct TransactionAddress {
     let address: String
     let mine: Bool
     let pluginData: [UInt8: Any]?
+}
+
+enum TransactionStatus: Int {
+    case new, relayed, invalid
 }

@@ -9,8 +9,10 @@ open class TransactionInfo: ITransactionInfo {
     public let fee: Int?
     public let blockHeight: Int?
     public let timestamp: Int
+    public let status: TransactionStatus
 
-    public required init(transactionHash: String, transactionIndex: Int, from: [TransactionAddressInfo], to: [TransactionAddressInfo], amount: Int, fee: Int?, blockHeight: Int?, timestamp: Int) {
+    public required init(transactionHash: String, transactionIndex: Int, from: [TransactionAddressInfo], to: [TransactionAddressInfo], amount: Int, fee: Int?, blockHeight: Int?,
+                         timestamp: Int, status: TransactionStatus) {
         self.transactionHash = transactionHash
         self.transactionIndex = transactionIndex
         self.from = from
@@ -19,6 +21,7 @@ open class TransactionInfo: ITransactionInfo {
         self.fee = fee
         self.blockHeight = blockHeight
         self.timestamp = timestamp
+        self.status = status
     }
 
 }

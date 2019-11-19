@@ -43,7 +43,8 @@ class GetBlockHashesTask: PeerTask {
         if let requester = requester {
             requester.send(message: GetBlocksMessage(protocolVersion: requester.protocolVersion, headerHashes: blockLocatorHashes))
         }
-        resetTimer()
+
+        super.start()
     }
 
     override func handle(message: IMessage) throws -> Bool {

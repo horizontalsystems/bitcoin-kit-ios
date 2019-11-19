@@ -4,15 +4,17 @@ public class SyncedReadyPeerManager {
     private let disposeBag = DisposeBag()
     private let peerGroup: IPeerGroup
     private let initialBlockDownload: IInitialBlockDownload
+    private let peerManager: IPeerManager
     private var peerStates = [String: Bool]()
 
-    private let peerSyncedAndReadySubject = PublishSubject<IPeer>()
+    private let peerSyncedAndReadySubject = Signal()
     private let peersQueue: DispatchQueue
 
-    init(peerGroup: IPeerGroup, initialBlockDownload: IInitialBlockDownload,
+    init(peerGroup: IPeerGroup, initialBlockDownload: IInitialBlockDownload, peerManager: IPeerManager,
          peersQueue: DispatchQueue = DispatchQueue(label: "SyncedReadyPeerManager Local Queue", qos: .userInitiated)) {
         self.peerGroup = peerGroup
         self.initialBlockDownload = initialBlockDownload
+        self.peerManager = peerManager
         self.peersQueue = peersQueue
     }
 
@@ -22,9 +24,8 @@ public class SyncedReadyPeerManager {
             self.peerStates[peer.host] = state
 
             if oldState != state {
-                if state {
-                    self.peerSyncedAndReadySubject.onNext(peer)
-                } else {
+                if state && self.peerManager.connected().count == self.initialBlockDownload.syncedPeers.count {
+                    self.peerSyncedAndReadySubject.notify()
                 }
             }
         }
@@ -61,13 +62,13 @@ public class SyncedReadyPeerManager {
 extension SyncedReadyPeerManager: ISyncedReadyPeerManager {
 
     public var peers: [IPeer] {
-        return initialBlockDownload.syncedPeers.filter {
+        initialBlockDownload.syncedPeers.filter {
             self.peerGroup.isReady(peer: $0)
         }
     }
 
-    public var observable: Observable<IPeer> {
-        return peerSyncedAndReadySubject.asObservable()
+    public var observable: Observable<Void> {
+        peerSyncedAndReadySubject.asObservable()
     }
 
 }

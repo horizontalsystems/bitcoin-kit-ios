@@ -14,7 +14,8 @@ class RequestLlmqInstantLocksTask: PeerTask {
     override func start() {
         let items = hashes.map { hash in InventoryItem(type: DashInventoryType.msgIsLock.rawValue, hash: hash) }
         requester?.send(message: GetDataMessage(inventoryItems: items))
-        resetTimer()
+
+        super.start()
     }
 
     override func handle(message: IMessage) -> Bool {

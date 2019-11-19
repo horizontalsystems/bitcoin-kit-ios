@@ -52,12 +52,8 @@ extension MempoolTransactions : IPeerTaskHandler {
     func handleCompletedTask(peer: IPeer, task: PeerTask) -> Bool {
         switch task {
         case let task as RequestTransactionsTask:
-            transactionSyncer.handle(transactions: task.transactions)
+            transactionSyncer.handleRelayed(transactions: task.transactions)
             removeFromRequestedTransactions(peerHost: peer.host, transactionHashes: task.transactions.map { $0.header.dataHash })
-            return true
-
-        case let task as SendTransactionTask:
-            transactionSyncer.handle(sentTransaction: task.transaction)
             return true
 
         default: return false
@@ -65,6 +61,7 @@ extension MempoolTransactions : IPeerTaskHandler {
     }
 
 }
+
 extension MempoolTransactions : IInventoryItemsHandler {
 
     func handleInventoryItems(peer: IPeer, inventoryItems: [InventoryItem]) {

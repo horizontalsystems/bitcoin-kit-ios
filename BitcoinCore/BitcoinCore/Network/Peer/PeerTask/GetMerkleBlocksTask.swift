@@ -52,7 +52,8 @@ class GetMerkleBlocksTask: PeerTask {
 
         requester?.send(message: GetDataMessage(inventoryItems: items))
         resumeWaiting()
-        resetTimer()
+
+        super.start()
     }
 
     override func handle(message: IMessage) throws -> Bool {

@@ -19,6 +19,8 @@ class RequestTransactionsTask: PeerTask {
         }
 
         requester?.send(message: GetDataMessage(inventoryItems: items))
+
+        super.start()
     }
 
     override func handle(message: IMessage) throws -> Bool {

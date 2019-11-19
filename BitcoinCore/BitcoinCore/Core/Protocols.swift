@@ -119,6 +119,7 @@ public protocol IStorage {
 
     func sentTransaction(byHash: Data) -> SentTransaction?
     func update(sentTransaction: SentTransaction)
+    func delete(sentTransaction: SentTransaction)
     func add(sentTransaction: SentTransaction)
 
     func publicKeys() -> [PublicKey]
@@ -334,9 +335,9 @@ protocol ITransactionPublicKeySetter {
 }
 
 public protocol ITransactionSyncer: class {
-    func pendingTransactions() -> [FullTransaction]
-    func handle(transactions: [FullTransaction])
-    func handle(sentTransaction transaction: FullTransaction)
+    func newTransactions() -> [FullTransaction]
+    func handleRelayed(transactions: [FullTransaction])
+    func handleInvalid(transactionHash: Data)
     func shouldRequestTransaction(hash: Data) -> Bool
 }
 
@@ -424,7 +425,7 @@ protocol IKitStateProviderDelegate: class {
 }
 
 public protocol ITransactionInfo: class {
-    init(transactionHash: String, transactionIndex: Int, from: [TransactionAddressInfo], to: [TransactionAddressInfo], amount: Int, fee: Int?, blockHeight: Int?, timestamp: Int)
+    init(transactionHash: String, transactionIndex: Int, from: [TransactionAddressInfo], to: [TransactionAddressInfo], amount: Int, fee: Int?, blockHeight: Int?, timestamp: Int, status: TransactionStatus)
 }
 
 public protocol ITransactionInfoConverter {
@@ -523,7 +524,7 @@ public protocol IInitialBlockDownload {
 
 public protocol ISyncedReadyPeerManager {
     var peers: [IPeer] { get }
-    var observable: Observable<IPeer> { get }
+    var observable: Observable<Void> { get }
 }
 
 public protocol IInventoryItemsHandler: class {
@@ -537,6 +538,16 @@ public protocol IPeerTaskHandler: class {
 protocol ITransactionSender {
     func verifyCanSend() throws
     func send(pendingTransaction: FullTransaction) throws
+}
+
+protocol ITransactionSendTimerDelegate: class {
+    func timePassed()
+}
+
+protocol ITransactionSendTimer {
+    var delegate: ITransactionSendTimerDelegate? { get set }
+    func startIfNotRunning()
+    func stop()
 }
 
 protocol IMerkleBlockHandler: AnyObject {

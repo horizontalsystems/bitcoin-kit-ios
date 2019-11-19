@@ -53,7 +53,6 @@ class ReceiveController: UIViewController {
 
     @objc func onSegmentChanged() {
         updateAddress()
-        print("segment changed")
 
         currentAdapter?.printDebugs()
     }

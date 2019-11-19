@@ -3,31 +3,34 @@ import RxSwift
 class TransactionSender {
     private let disposeBag = DisposeBag()
 
-    var transactionSyncer: ITransactionSyncer
-    var peerManager: IPeerManager
-    var initialBlockDownload: IInitialBlockDownload
-    var syncedReadyPeerManager: ISyncedReadyPeerManager
-    var logger: Logger?
+    private let transactionSyncer: ITransactionSyncer
+    private let syncedReadyPeerManager: ISyncedReadyPeerManager
+    private let storage: IStorage
+    private let timer: ITransactionSendTimer
+    private let logger: Logger?
+    private let queue: DispatchQueue
 
-    init(transactionSyncer: ITransactionSyncer, peerManager: IPeerManager, initialBlockDownload: IInitialBlockDownload, syncedReadyPeerManager: ISyncedReadyPeerManager, logger: Logger? = nil) {
+    private let maxRetriesCount: Int
+    private let retriesPeriod: Double // seconds
+    private let totalRetriesPeriod: Double // seconds
+
+    init(transactionSyncer: ITransactionSyncer, syncedReadyPeerManager: ISyncedReadyPeerManager, storage: IStorage, timer: ITransactionSendTimer,
+         logger: Logger? = nil, queue: DispatchQueue = DispatchQueue(label: "Transaction Sender Queue", qos: .background),
+         maxRetriesCount: Int = 2, retriesPeriod: Double = 60, totalRetriesPeriod: Double = 60 * 60 * 24) {
         self.transactionSyncer = transactionSyncer
-        self.peerManager = peerManager
-        self.initialBlockDownload = initialBlockDownload
         self.syncedReadyPeerManager = syncedReadyPeerManager
+        self.storage = storage
+        self.timer = timer
         self.logger = logger
+        self.queue = queue
+        self.maxRetriesCount = maxRetriesCount
+        self.retriesPeriod = retriesPeriod
+        self.totalRetriesPeriod = totalRetriesPeriod
     }
 
     private func peersToSendTo() throws -> [IPeer] {
-        guard peerManager.connected().count > 0 else {
-            throw BitcoinCoreErrors.TransactionSendError.noConnectedPeers
-        }
-
-        guard initialBlockDownload.hasSyncedPeer else {
-            throw BitcoinCoreErrors.TransactionSendError.peersNotSynced
-        }
-
         let peers = syncedReadyPeerManager.peers
-        guard peers.count > 0 else {
+        guard !peers.isEmpty else {
             throw BitcoinCoreErrors.TransactionSendError.peersNotSynced
         }
 
@@ -42,26 +45,77 @@ class TransactionSender {
         return peersToSendTo
     }
 
+    private func transactionsToSend(from transactions: [FullTransaction]) -> [FullTransaction] {
+        transactions.filter { transaction in
+            if let sentTransaction = storage.sentTransaction(byHash: transaction.header.dataHash) {
+                return sentTransaction.retriesCount < self.maxRetriesCount &&
+                        sentTransaction.lastSendTime < CACurrentMediaTime() - self.retriesPeriod &&
+                        sentTransaction.firstSendTime > CACurrentMediaTime() - self.totalRetriesPeriod
+            } else {
+                return true
+            }
+        }
+    }
+
+    private func transactionSendSuccess(sentTransaction transaction: FullTransaction) {
+        guard let sentTransaction = storage.sentTransaction(byHash: transaction.header.dataHash),
+              !sentTransaction.sendSuccess else {
+            return
+        }
+
+        sentTransaction.retriesCount = sentTransaction.retriesCount + 1
+        sentTransaction.sendSuccess = true
+
+        if sentTransaction.retriesCount >= maxRetriesCount { // Also check for totalRetriesPeriod
+            transactionSyncer.handleInvalid(transactionHash: transaction.header.dataHash)
+            // Also remove SentTransaction on successful send
+            storage.delete(sentTransaction: sentTransaction)
+        } else {
+            storage.update(sentTransaction: sentTransaction)
+        }
+    }
+
+    private func transactionSendStart(transaction: FullTransaction) {
+        if let sentTransaction = storage.sentTransaction(byHash: transaction.header.dataHash) {
+            sentTransaction.lastSendTime = CACurrentMediaTime()
+            sentTransaction.sendSuccess = false
+            storage.update(sentTransaction: sentTransaction)
+        } else {
+            storage.add(sentTransaction: SentTransaction(dataHash: transaction.header.dataHash))
+        }
+    }
+
     private func send(transactions: [FullTransaction], toPeers peers: [IPeer]) {
-        for peer in peers {
-            for transaction in transactions {
+        timer.startIfNotRunning()
+
+        for transaction in transactions {
+            transactionSendStart(transaction: transaction)
+
+            for peer in peers {
                 peer.add(task: SendTransactionTask(transaction: transaction))
             }
         }
     }
 
-    private func onPeerSyncedAndReady(peer: IPeer) {
-        guard peerManager.connected().count == initialBlockDownload.syncedPeers.count else {
+    private func sendPendingTransactions() {
+        var transactions = transactionSyncer.newTransactions()
+
+        guard !transactions.isEmpty else {
+            timer.stop()
             return
         }
 
-        let transactions = transactionSyncer.pendingTransactions()
+        transactions = transactionsToSend(from: transactions)
 
-        guard transactions.count > 0, let peers = try? peersToSendTo() else {
+        guard !transactions.isEmpty else {
             return
         }
 
-        send(transactions: transactionSyncer.pendingTransactions(), toPeers: peers)
+        guard let peers = try? peersToSendTo() else {
+            return
+        }
+
+        send(transactions: transactions, toPeers: peers)
     }
 
 }
@@ -75,14 +129,44 @@ extension TransactionSender: ITransactionSender {
     func send(pendingTransaction: FullTransaction) throws {
         let peers = try peersToSendTo()
 
-        send(transactions: [pendingTransaction], toPeers: peers)
+        queue.async {
+            self.send(transactions: [pendingTransaction], toPeers: peers)
+        }
     }
 
-    func subscribeTo(observable: Observable<IPeer>) {
+    func subscribeTo(observable: Observable<Void>) {
         observable.subscribe(onNext: { [weak self] in
-                    self?.onPeerSyncedAndReady(peer: $0)
+                    self?.queue.async {
+                        self?.sendPendingTransactions()
+                    }
                 })
                 .disposed(by: disposeBag)
+    }
+
+}
+
+extension TransactionSender: ITransactionSendTimerDelegate {
+
+    func timePassed() {
+        queue.async {
+            self.sendPendingTransactions()
+        }
+    }
+
+}
+
+extension TransactionSender : IPeerTaskHandler {
+
+    func handleCompletedTask(peer: IPeer, task: PeerTask) -> Bool {
+        switch task {
+        case let task as SendTransactionTask:
+            queue.async {
+                self.transactionSendSuccess(sentTransaction: task.transaction)
+            }
+            return true
+
+        default: return false
+        }
     }
 
 }

@@ -171,6 +171,12 @@ open class GrdbStorage {
             }
         }
 
+        migrator.registerMigration("addSendSuccessToSentTransaction") { db in
+            try db.alter(table: SentTransaction.databaseTableName) { t in
+                t.add(column: SentTransaction.Columns.sendSuccess.name, .boolean)
+            }
+        }
+
         return migrator
     }
 
@@ -723,6 +729,12 @@ extension GrdbStorage: IStorage {
     public func update(sentTransaction: SentTransaction) {
         _ = try! dbPool.write { db in
             try sentTransaction.update(db)
+        }
+    }
+
+    public func delete(sentTransaction: SentTransaction) {
+        _ = try! dbPool.write { db in
+            try sentTransaction.delete(db)
         }
     }
 
