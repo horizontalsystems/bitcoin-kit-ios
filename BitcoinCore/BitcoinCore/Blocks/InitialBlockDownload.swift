@@ -26,11 +26,11 @@ public class InitialBlockDownload {
     private var blockHashesSyncedStates = [String: Bool]()
 
     private var selectNewPeer = false
-    private var syncPeer: IPeer?
     private let peersQueue: DispatchQueue
     private let logger: Logger?
 
     public var syncedPeers = [IPeer]()
+    public var syncPeer: IPeer?
 
     init(blockSyncer: IBlockSyncer, peerManager: IPeerManager, merkleBlockValidator: IMerkleBlockValidator, syncStateListener: ISyncStateListener,
          peersQueue: DispatchQueue = DispatchQueue(label: "InitialBlockDownload Local Queue", qos: .userInitiated),

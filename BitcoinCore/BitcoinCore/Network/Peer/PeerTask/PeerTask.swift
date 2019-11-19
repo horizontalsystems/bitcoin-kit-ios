@@ -14,6 +14,8 @@ open class PeerTask {
         self.dateGenerator = dateGenerator
     }
 
+    open var state: String { "" }
+
     open func start() {
     }
 

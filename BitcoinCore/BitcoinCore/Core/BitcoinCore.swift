@@ -243,6 +243,7 @@ extension BitcoinCore {
     public var statusInfo: [(String, Any)] {
         var status = [(String, Any)]()
         status.append(("synced until", ((lastBlockInfo?.timestamp.map { Double($0) })?.map { Date(timeIntervalSince1970: $0) }) ?? "n/a"))
+        status.append(("syncing peer", initialBlockDownload.syncPeer?.host ?? "n/a"))
         status.append(("errors", errorStorage.errors))
 
         status.append(contentsOf:
@@ -251,6 +252,15 @@ extension BitcoinCore {
                 peerStatus.append(("status", initialBlockDownload.isSynced(peer: peer) ? "synced" : "not synced"))
                 peerStatus.append(("host", peer.host))
                 peerStatus.append(("best block", peer.announcedLastBlockHeight))
+
+                let tasks = peer.tasks
+                if tasks.isEmpty {
+                    peerStatus.append(("tasks", "no tasks"))
+                } else {
+                    peerStatus.append(("tasks", tasks.map { task in 
+                        (String(describing: task), task.state)
+                    }))
+                }
 
                 return ("peer \(index + 1)", peerStatus)
             }

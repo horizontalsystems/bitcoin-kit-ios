@@ -222,13 +222,6 @@
 			path = Blocks;
 			sourceTree = "<group>";
 		};
-		58AAAE936FB46FD1053E8F21 /* InitialSync */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = InitialSync;
-			sourceTree = "<group>";
-		};
 		58AAAFEA2E4DC8964564A738 /* Bech32 */ = {
 			isa = PBXGroup;
 			children = (
