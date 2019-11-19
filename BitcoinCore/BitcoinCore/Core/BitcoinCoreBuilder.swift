@@ -195,7 +195,7 @@ public class BitcoinCoreBuilder {
         let peerGroup = PeerGroup(factory: factory, reachabilityManager: reachabilityManager,
                 peerAddressManager: peerAddressManager, peerCount: peerCount, localDownloadedBestBlockHeight: blockSyncer.localDownloadedBestBlockHeight,
                 peerManager: peerManager, logger: logger)
-        let syncedReadyPeerManager = SyncedReadyPeerManager(peerGroup: peerGroup, initialBlockDownload: initialBlockDownload)
+        let syncedReadyPeerManager = SyncedReadyPeerManager(peerGroup: peerGroup, initialBlockDownload: initialBlockDownload, peerManager: peerManager)
 
         let inputSigner = InputSigner(hdWallet: hdWallet, network: network)
         let transactionSizeCalculator = TransactionSizeCalculator()
@@ -206,7 +206,8 @@ public class BitcoinCoreBuilder {
         let transactionSigner = TransactionSigner(inputSigner: inputSigner)
         let transactionBuilder = TransactionBuilder(outputSetter: outputSetter, inputSetter: inputSetter, lockTimeSetter: lockTimeSetter, signer: transactionSigner)
         let transactionFeeCalculator = TransactionFeeCalculator(outputSetter: outputSetter, inputSetter: inputSetter, addressConverter: addressConverter, publicKeyManager: publicKeyManager, changeScriptType: bip.scriptType)
-        let transactionSender = TransactionSender(transactionSyncer: transactionSyncer, peerManager: peerManager, initialBlockDownload: initialBlockDownload, syncedReadyPeerManager: syncedReadyPeerManager, logger: logger)
+        let transactionSendTimer = TransactionSendTimer(interval: 60)
+        let transactionSender = TransactionSender(transactionSyncer: transactionSyncer, syncedReadyPeerManager: syncedReadyPeerManager, storage: storage, timer: transactionSendTimer, logger: logger)
         let transactionCreator = TransactionCreator(transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, transactionSender: transactionSender, bloomFilterManager: bloomFilterManager)
 
         let syncManager = SyncManager(reachabilityManager: reachabilityManager, initialSyncer: initialSyncer, peerGroup: peerGroup)
@@ -243,6 +244,7 @@ public class BitcoinCoreBuilder {
         dataProvider.delegate = bitcoinCore
         kitStateProvider.delegate = bitcoinCore
         transactionProcessor.transactionListener = watchedTransactionManager
+        transactionSendTimer.delegate = transactionSender
 
         bloomFilterManager.add(provider: watchedTransactionManager)
         bloomFilterManager.add(provider: publicKeyManager)
@@ -292,6 +294,7 @@ public class BitcoinCoreBuilder {
         transactionSender.subscribeTo(observable: syncedReadyPeerManager.observable)
 
 
+        bitcoinCore.add(peerTaskHandler: transactionSender)
         bitcoinCore.add(peerTaskHandler: mempoolTransactions)
         bitcoinCore.add(inventoryItemsHandler: mempoolTransactions)
 

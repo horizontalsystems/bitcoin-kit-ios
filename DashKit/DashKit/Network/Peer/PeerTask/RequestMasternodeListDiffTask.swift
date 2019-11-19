@@ -15,6 +15,8 @@ class RequestMasternodeListDiffTask: PeerTask {
         let message = GetMasternodeListDiffMessage(baseBlockHash: baseBlockHash, blockHash: blockHash)
 
         requester?.send(message: message)
+
+        super.start()
     }
 
     override func handle(message: IMessage) -> Bool {

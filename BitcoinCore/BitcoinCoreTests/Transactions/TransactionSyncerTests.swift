@@ -55,7 +55,7 @@ class TransactionSyncerTests: QuickSpec {
                             when(mock.inputs(transactionHash: equal(to: fullTransaction.header.dataHash))).thenReturn(fullTransaction.inputs)
                             when(mock.outputs(transactionHash: equal(to: fullTransaction.header.dataHash))).thenReturn(fullTransaction.outputs)
                         }
-                        let transactions = syncer.pendingTransactions()
+                        let transactions = syncer.newTransactions()
 
                         expect(transactions.count).to(equal(1))
                         expect(transactions.first!.header.dataHash).to(equal(fullTransaction.header.dataHash))
@@ -79,7 +79,7 @@ class TransactionSyncerTests: QuickSpec {
                                 when(mock.outputs(transactionHash: equal(to: fullTransaction.header.dataHash))).thenReturn(fullTransaction.outputs)
                             }
 
-                            let transactions = syncer.pendingTransactions()
+                            let transactions = syncer.newTransactions()
                             expect(transactions.count).to(equal(1))
                             expect(transactions.first!.header.dataHash).to(equal(fullTransaction.header.dataHash))
                         }
@@ -88,21 +88,21 @@ class TransactionSyncerTests: QuickSpec {
                     context("when sent too many times") {
                         it("doesn't return transaction") {
                             sentTransaction.retriesCount = maxRetriesCount
-                            expect(syncer.pendingTransactions()).to(beEmpty())
+                            expect(syncer.newTransactions()).to(beEmpty())
                         }
                     }
 
                     context("when sent too often") {
                         it("doesn't return transaction") {
                             sentTransaction.lastSendTime = CACurrentMediaTime()
-                            expect(syncer.pendingTransactions()).to(beEmpty())
+                            expect(syncer.newTransactions()).to(beEmpty())
                         }
                     }
 
                     context("when sent too often in totalRetriesPeriod period") {
                         it("doesn't return transaction") {
                             sentTransaction.firstSendTime = CACurrentMediaTime() - totalRetriesPeriod - 1
-                            expect(syncer.pendingTransactions()).to(beEmpty())
+                            expect(syncer.newTransactions()).to(beEmpty())
                         }
                     }
                 }
@@ -113,7 +113,7 @@ class TransactionSyncerTests: QuickSpec {
                     stub(mockStorage) { mock in
                         when(mock.newTransactions()).thenReturn([])
                     }
-                    expect(syncer.pendingTransactions()).to(beEmpty())
+                    expect(syncer.newTransactions()).to(beEmpty())
                 }
             }
         }
@@ -128,7 +128,7 @@ class TransactionSyncerTests: QuickSpec {
                         when(mock.sentTransaction(byHash: equal(to: fullTransaction.header.dataHash))).thenReturn(nil)
                     }
 
-                    syncer.handle(sentTransaction: fullTransaction)
+                    syncer.transactionSendSuccess(sentTransaction: fullTransaction)
 
                     let argumentCaptor = ArgumentCaptor<SentTransaction>()
                     verify(mockStorage).add(sentTransaction: argumentCaptor.capture())
@@ -149,7 +149,7 @@ class TransactionSyncerTests: QuickSpec {
                         when(mock.sentTransaction(byHash: equal(to: fullTransaction.header.dataHash))).thenReturn(sentTransaction)
                     }
 
-                    syncer.handle(sentTransaction: fullTransaction)
+                    syncer.transactionSendSuccess(sentTransaction: fullTransaction)
 
                     let argumentCaptor = ArgumentCaptor<SentTransaction>()
                     verify(mockStorage).update(sentTransaction: argumentCaptor.capture())
@@ -165,7 +165,7 @@ class TransactionSyncerTests: QuickSpec {
                         when(mock.newTransaction(byHash: equal(to: fullTransaction.header.dataHash))).thenReturn(nil)
                     }
 
-                    syncer.handle(sentTransaction: fullTransaction)
+                    syncer.transactionSendSuccess(sentTransaction: fullTransaction)
 
                     verify(mockStorage, never()).add(sentTransaction: any())
                     verify(mockStorage, never()).update(sentTransaction: any())
@@ -176,7 +176,7 @@ class TransactionSyncerTests: QuickSpec {
         describe("#handle(transactions:)") {
             context("when empty array is given") {
                 it("doesn't do anything") {
-                    syncer.handle(transactions: [])
+                    syncer.handleRelayed(transactions: [])
 
                     verify(mockTransactionProcessor, never()).processReceived(transactions: any(), inBlock: any(), skipCheckBloomFilter: any())
                     verify(mockAddressManager, never()).fillGap()
@@ -192,7 +192,7 @@ class TransactionSyncerTests: QuickSpec {
                             when(mock.processReceived(transactions: equal(to: transactions), inBlock: any(), skipCheckBloomFilter: any())).thenThrow(BloomFilterManager.BloomFilterExpired())
                         }
 
-                        syncer.handle(transactions: transactions)
+                        syncer.handleRelayed(transactions: transactions)
                         verify(mockTransactionProcessor).processReceived(transactions: equal(to: transactions), inBlock: equal(to: nil), skipCheckBloomFilter: equal(to: false))
                         verify(mockAddressManager).fillGap()
                     }
@@ -204,7 +204,7 @@ class TransactionSyncerTests: QuickSpec {
                             when(mock.processReceived(transactions: equal(to: transactions), inBlock: any(), skipCheckBloomFilter: equal(to: false))).thenDoNothing()
                         }
 
-                        syncer.handle(transactions: transactions)
+                        syncer.handleRelayed(transactions: transactions)
                         verify(mockTransactionProcessor).processReceived(transactions: equal(to: transactions), inBlock: equal(to: nil), skipCheckBloomFilter: equal(to: false))
                         verify(mockAddressManager, never()).fillGap()
                     }

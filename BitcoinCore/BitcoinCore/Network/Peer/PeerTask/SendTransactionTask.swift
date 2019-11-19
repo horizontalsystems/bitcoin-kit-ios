@@ -3,10 +3,15 @@ import Foundation
 class SendTransactionTask: PeerTask {
 
     var transaction: FullTransaction
+    private let allowedIdleTime: TimeInterval
 
-    init(transaction: FullTransaction) {
+    init(transaction: FullTransaction, allowedIdleTime: TimeInterval = 30, dateGenerator: @escaping () -> Date = Date.init) {
         self.transaction = transaction
+        self.allowedIdleTime = allowedIdleTime
+
+        super.init(dateGenerator: dateGenerator)
     }
+
     override var state: String {
         "transaction: \(transaction.header.dataHash.reversedHex)"
     }
@@ -17,6 +22,8 @@ class SendTransactionTask: PeerTask {
         ])
 
         requester?.send(message: message)
+
+        super.start()
     }
 
     override func handle(message: IMessage) throws -> Bool {
@@ -34,6 +41,14 @@ class SendTransactionTask: PeerTask {
         }
 
         return handled
+    }
+
+    override func checkTimeout() {
+        if let lastActiveTime = lastActiveTime {
+            if dateGenerator().timeIntervalSince1970 - lastActiveTime > allowedIdleTime {
+                delegate?.handle(completedTask: self)
+            }
+        }
     }
 
     private func handle(getDataInventoryItem item: InventoryItem) -> Bool {

@@ -17,10 +17,11 @@ open class PeerTask {
     open var state: String { "" }
 
     open func start() {
+        resetTimer()
     }
 
     open func handle(message: IMessage) throws -> Bool {
-        return false
+        false
     }
 
     open func checkTimeout() {

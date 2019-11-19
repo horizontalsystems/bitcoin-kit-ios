@@ -5,22 +5,24 @@ public class SentTransaction: Record {
     var firstSendTime: Double
     var lastSendTime: Double
     var retriesCount: Int
+    var sendSuccess: Bool
 
-    init(dataHash: Data, firstSendTime: Double, lastSendTime: Double, retriesCount: Int) {
+    init(dataHash: Data, firstSendTime: Double, lastSendTime: Double, retriesCount: Int, sendSuccess: Bool) {
         self.dataHash = dataHash
         self.firstSendTime = firstSendTime
         self.lastSendTime = lastSendTime
         self.retriesCount = retriesCount
+        self.sendSuccess = sendSuccess
 
         super.init()
     }
 
     override open class var databaseTableName: String {
-        return "sentTransactions"
+        "sentTransactions"
     }
 
     convenience init(dataHash: Data) {
-        self.init(dataHash: dataHash, firstSendTime: CACurrentMediaTime(), lastSendTime: CACurrentMediaTime(), retriesCount: 0)
+        self.init(dataHash: dataHash, firstSendTime: CACurrentMediaTime(), lastSendTime: CACurrentMediaTime(), retriesCount: 0, sendSuccess: false)
     }
 
     enum Columns: String, ColumnExpression {
@@ -28,6 +30,7 @@ public class SentTransaction: Record {
         case firstSendTime
         case lastSendTime
         case retriesCount
+        case sendSuccess
     }
 
     required init(row: Row) {
@@ -35,6 +38,7 @@ public class SentTransaction: Record {
         firstSendTime = row[Columns.firstSendTime]
         lastSendTime = row[Columns.lastSendTime]
         retriesCount = row[Columns.retriesCount]
+        sendSuccess = row[Columns.sendSuccess]
 
         super.init(row: row)
     }
@@ -44,6 +48,7 @@ public class SentTransaction: Record {
         container[Columns.firstSendTime] = firstSendTime
         container[Columns.lastSendTime] = lastSendTime
         container[Columns.retriesCount] = retriesCount
+        container[Columns.sendSuccess] = sendSuccess
     }
 
 }

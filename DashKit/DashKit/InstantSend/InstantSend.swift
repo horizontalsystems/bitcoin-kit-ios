@@ -53,7 +53,7 @@ extension InstantSend: IPeerTaskHandler {
     }
 
     private func handle(transactions: [FullTransaction]) {
-        transactionSyncer.handle(transactions: transactions)
+        transactionSyncer.handleRelayed(transactions: transactions)
 
         for transaction in transactions {
             transactionLockVoteHandler.handle(transaction: transaction)

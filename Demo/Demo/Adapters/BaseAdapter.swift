@@ -32,6 +32,7 @@ class BaseAdapter {
 
         return TransactionRecord(
                 transactionHash: transaction.transactionHash,
+                status: TransactionStatus(rawValue: transaction.status.rawValue) ?? TransactionStatus.new,
                 transactionIndex: transaction.transactionIndex,
                 amount: Decimal(transaction.amount) / coinRate,
                 fee: transaction.fee.map { Decimal($0) / coinRate },

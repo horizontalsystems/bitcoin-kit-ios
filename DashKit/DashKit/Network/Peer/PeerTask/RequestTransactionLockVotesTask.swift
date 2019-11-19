@@ -14,7 +14,8 @@ class RequestTransactionLockVotesTask: PeerTask {
     override func start() {
         let items = hashes.map { hash in InventoryItem(type: DashInventoryType.msgTxLockVote.rawValue, hash: hash) }
         requester?.send(message: GetDataMessage(inventoryItems: items))
-        resetTimer()
+
+        super.start()
     }
 
     override func handle(message: IMessage) -> Bool {

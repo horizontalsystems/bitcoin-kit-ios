@@ -28,7 +28,7 @@ extension PluginManager: IPluginManager {
     }
 
     func maxSpendLimit(pluginData: [UInt8: IPluginData]) throws -> Int? {
-        try pluginData.flatMap({ key, data in
+        try pluginData.compactMap({ key, data in
             guard let plugin = plugins[key] else {
                 throw PluginError.pluginNotFound
             }
