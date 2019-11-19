@@ -181,6 +181,7 @@ public protocol IPeer: class {
     var ready: Bool { get }
     var connected: Bool { get }
     var connectionTime: Double { get }
+    var tasks: [PeerTask] { get }
     func connect()
     func disconnect(error: Error?)
     func add(task: PeerTask)
@@ -513,6 +514,7 @@ public protocol IMessageSerializer {
 }
 
 public protocol IInitialBlockDownload {
+    var syncPeer: IPeer? { get }
     var hasSyncedPeer: Bool { get }
     var observable: Observable<InitialBlockDownloadEvent> { get }
     var syncedPeers: [IPeer] { get }

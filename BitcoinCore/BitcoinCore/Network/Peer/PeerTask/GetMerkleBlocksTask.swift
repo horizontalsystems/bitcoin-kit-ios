@@ -41,6 +41,10 @@ class GetMerkleBlocksTask: PeerTask {
         super.init(dateGenerator: dateGenerator)
     }
 
+    override var state: String {
+        "minMerkleBlocksCount: \(minMerkleBlocksCount); minTransactionsCount: \(minTransactionsCount); minTransactionsSize: \(minTransactionsSize)"
+    }
+
     override func start() {
         let items = blockHashes.map { blockHash in
             InventoryItem(type: InventoryItem.ObjectType.filteredBlockMessage.rawValue, hash: blockHash.headerHash)

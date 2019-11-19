@@ -19,11 +19,11 @@ class Peer {
 
     private let connection: IPeerConnection
     private let connectionTimeoutManager: IConnectionTimeoutManager
-    private var tasks: [PeerTask] = []
 
     private let network: INetwork
     private let logger: Logger?
 
+    var tasks: [PeerTask] = []
     var announcedLastBlockHeight: Int32 = 0
     var localBestBlockHeight: Int32 = 0
     // TODO seems like property connected is not needed. It is always true in PeerManager. Need to check it and remove

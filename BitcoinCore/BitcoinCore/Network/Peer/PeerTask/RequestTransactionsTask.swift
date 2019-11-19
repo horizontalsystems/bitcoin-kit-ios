@@ -9,6 +9,10 @@ class RequestTransactionsTask: PeerTask {
         self.hashes = hashes
     }
 
+    override var state: String {
+        "hashesCount: \(hashes.count); receivedTransactionsCount: \(transactions.count)"
+    }
+
     override func start() {
         let items = hashes.map { hash in
             InventoryItem(type: InventoryItem.ObjectType.transaction.rawValue, hash: hash)
