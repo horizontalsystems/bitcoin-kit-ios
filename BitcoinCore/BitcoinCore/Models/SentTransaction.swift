@@ -2,14 +2,12 @@ import GRDB
 
 public class SentTransaction: Record {
     let dataHash: Data
-    var firstSendTime: Double
     var lastSendTime: Double
     var retriesCount: Int
     var sendSuccess: Bool
 
-    init(dataHash: Data, firstSendTime: Double, lastSendTime: Double, retriesCount: Int, sendSuccess: Bool) {
+    init(dataHash: Data, lastSendTime: Double, retriesCount: Int, sendSuccess: Bool) {
         self.dataHash = dataHash
-        self.firstSendTime = firstSendTime
         self.lastSendTime = lastSendTime
         self.retriesCount = retriesCount
         self.sendSuccess = sendSuccess
@@ -22,12 +20,11 @@ public class SentTransaction: Record {
     }
 
     convenience init(dataHash: Data) {
-        self.init(dataHash: dataHash, firstSendTime: CACurrentMediaTime(), lastSendTime: CACurrentMediaTime(), retriesCount: 0, sendSuccess: false)
+        self.init(dataHash: dataHash, lastSendTime: CACurrentMediaTime(), retriesCount: 0, sendSuccess: false)
     }
 
     enum Columns: String, ColumnExpression {
         case dataHash
-        case firstSendTime
         case lastSendTime
         case retriesCount
         case sendSuccess
@@ -35,7 +32,6 @@ public class SentTransaction: Record {
 
     required init(row: Row) {
         dataHash = row[Columns.dataHash]
-        firstSendTime = row[Columns.firstSendTime]
         lastSendTime = row[Columns.lastSendTime]
         retriesCount = row[Columns.retriesCount]
         sendSuccess = row[Columns.sendSuccess]
@@ -45,7 +41,6 @@ public class SentTransaction: Record {
 
     override open func encode(to container: inout PersistenceContainer) {
         container[Columns.dataHash] = dataHash
-        container[Columns.firstSendTime] = firstSendTime
         container[Columns.lastSendTime] = lastSendTime
         container[Columns.retriesCount] = retriesCount
         container[Columns.sendSuccess] = sendSuccess

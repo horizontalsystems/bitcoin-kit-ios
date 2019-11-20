@@ -45,7 +45,6 @@ open class GrdbStorage {
         migrator.registerMigration("createSentTransactions") { db in
             try db.create(table: SentTransaction.databaseTableName) { t in
                 t.column(SentTransaction.Columns.dataHash.name, .text).notNull()
-                t.column(SentTransaction.Columns.firstSendTime.name, .double).notNull()
                 t.column(SentTransaction.Columns.lastSendTime.name, .double).notNull()
                 t.column(SentTransaction.Columns.retriesCount.name, .integer).notNull()
 

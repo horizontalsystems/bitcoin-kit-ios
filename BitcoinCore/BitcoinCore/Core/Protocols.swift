@@ -338,7 +338,7 @@ protocol ITransactionPublicKeySetter {
 public protocol ITransactionSyncer: class {
     func newTransactions() -> [FullTransaction]
     func handleRelayed(transactions: [FullTransaction])
-    func handleInvalid(transactionHash: Data)
+    func handleInvalid(transactionWithHash: Data)
     func shouldRequestTransaction(hash: Data) -> Bool
 }
 
@@ -539,7 +539,7 @@ public protocol IPeerTaskHandler: class {
 protocol ITransactionSender {
     func verifyCanSend() throws
     func send(pendingTransaction: FullTransaction) throws
-    func markTransactionsSent(transactions: [FullTransaction])
+    func transactionsRelayed(transactions: [FullTransaction])
 }
 
 protocol ITransactionSendTimerDelegate: class {

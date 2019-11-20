@@ -44,8 +44,8 @@ extension TransactionSyncer: ITransactionSyncer {
         }
     }
 
-    public func handleInvalid(transactionHash: Data) {
-        transactionProcessor.processInvalid(transactionWithHash: transactionHash)
+    public func handleInvalid(transactionWithHash hash: Data) {
+        transactionProcessor.processInvalid(transactionWithHash: hash)
     }
 
     public func shouldRequestTransaction(hash: Data) -> Bool {
