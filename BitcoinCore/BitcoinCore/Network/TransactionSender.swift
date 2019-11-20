@@ -16,7 +16,7 @@ class TransactionSender {
 
     init(transactionSyncer: ITransactionSyncer, syncedReadyPeerManager: ISyncedReadyPeerManager, storage: IStorage, timer: ITransactionSendTimer,
          logger: Logger? = nil, queue: DispatchQueue = DispatchQueue(label: "Transaction Sender Queue", qos: .background),
-         maxRetriesCount: Int = 2, retriesPeriod: Double = 60, totalRetriesPeriod: Double = 60 * 60 * 24) {
+         maxRetriesCount: Int = 3, retriesPeriod: Double = 60, totalRetriesPeriod: Double = 60 * 60 * 24) {
         self.transactionSyncer = transactionSyncer
         self.syncedReadyPeerManager = syncedReadyPeerManager
         self.storage = storage
