@@ -12,11 +12,10 @@ class TransactionSender {
 
     private let maxRetriesCount: Int
     private let retriesPeriod: Double // seconds
-    private let totalRetriesPeriod: Double // seconds
 
     init(transactionSyncer: ITransactionSyncer, syncedReadyPeerManager: ISyncedReadyPeerManager, storage: IStorage, timer: ITransactionSendTimer,
          logger: Logger? = nil, queue: DispatchQueue = DispatchQueue(label: "Transaction Sender Queue", qos: .background),
-         maxRetriesCount: Int = 3, retriesPeriod: Double = 60, totalRetriesPeriod: Double = 60 * 60 * 24) {
+         maxRetriesCount: Int = 3, retriesPeriod: Double = 60) {
         self.transactionSyncer = transactionSyncer
         self.syncedReadyPeerManager = syncedReadyPeerManager
         self.storage = storage
@@ -25,7 +24,6 @@ class TransactionSender {
         self.queue = queue
         self.maxRetriesCount = maxRetriesCount
         self.retriesPeriod = retriesPeriod
-        self.totalRetriesPeriod = totalRetriesPeriod
     }
 
     private func peersToSendTo() throws -> [IPeer] {
@@ -48,9 +46,7 @@ class TransactionSender {
     private func transactionsToSend(from transactions: [FullTransaction]) -> [FullTransaction] {
         transactions.filter { transaction in
             if let sentTransaction = storage.sentTransaction(byHash: transaction.header.dataHash) {
-                return sentTransaction.retriesCount < self.maxRetriesCount &&
-                        sentTransaction.lastSendTime < CACurrentMediaTime() - self.retriesPeriod &&
-                        sentTransaction.firstSendTime > CACurrentMediaTime() - self.totalRetriesPeriod
+                return sentTransaction.retriesCount < self.maxRetriesCount && sentTransaction.lastSendTime < CACurrentMediaTime() - self.retriesPeriod
             } else {
                 return true
             }
@@ -66,8 +62,8 @@ class TransactionSender {
         sentTransaction.retriesCount = sentTransaction.retriesCount + 1
         sentTransaction.sendSuccess = true
 
-        if sentTransaction.retriesCount >= maxRetriesCount { // Also check for totalRetriesPeriod
-            transactionSyncer.handleInvalid(transactionHash: transaction.header.dataHash)
+        if sentTransaction.retriesCount >= maxRetriesCount {
+            transactionSyncer.handleInvalid(transactionWithHash: transaction.header.dataHash)
             storage.delete(sentTransaction: sentTransaction)
         } else {
             storage.update(sentTransaction: sentTransaction)
@@ -133,10 +129,12 @@ extension TransactionSender: ITransactionSender {
         }
     }
 
-    func markTransactionsSent(transactions: [FullTransaction]) {
-        for transaction in transactions {
-            if let sentTransaction = storage.sentTransaction(byHash: transaction.header.dataHash) {
-                storage.delete(sentTransaction: sentTransaction)
+    func transactionsRelayed(transactions: [FullTransaction]) {
+        queue.async {
+            for transaction in transactions {
+                if let sentTransaction = self.storage.sentTransaction(byHash: transaction.header.dataHash) {
+                    self.storage.delete(sentTransaction: sentTransaction)
+                }
             }
         }
     }

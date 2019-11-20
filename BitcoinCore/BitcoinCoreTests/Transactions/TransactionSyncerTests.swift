@@ -9,17 +9,10 @@ class TransactionSyncerTests: QuickSpec {
         let mockStorage = MockIStorage()
         let mockTransactionProcessor = MockITransactionProcessor()
         let mockAddressManager = MockIPublicKeyManager()
-        let maxRetriesCount = 3
-        let retriesPeriod: Double = 60
-        let totalRetriesPeriod: Double = 60 * 60 * 24
 
         var syncer: TransactionSyncer!
 
         beforeEach {
-            stub(mockStorage) { mock in
-                when(mock.add(sentTransaction: any())).thenDoNothing()
-                when(mock.update(sentTransaction: any())).thenDoNothing()
-            }
             stub(mockTransactionProcessor) { mock in
                 when(mock.processReceived(transactions: any(), inBlock: any(), skipCheckBloomFilter: any())).thenDoNothing()
             }
@@ -27,9 +20,7 @@ class TransactionSyncerTests: QuickSpec {
                 when(mock.fillGap()).thenDoNothing()
             }
 
-            syncer = TransactionSyncer(
-                    storage: mockStorage, processor: mockTransactionProcessor, publicKeyManager: mockAddressManager,
-                    maxRetriesCount: maxRetriesCount, retriesPeriod: retriesPeriod, totalRetriesPeriod: totalRetriesPeriod)
+            syncer = TransactionSyncer(storage: mockStorage, processor: mockTransactionProcessor, publicKeyManager: mockAddressManager)
         }
 
         afterEach {
@@ -48,63 +39,16 @@ class TransactionSyncerTests: QuickSpec {
                     }
                 }
 
-                context("when it wasn't sent") {
-                    it("returns transaction") {
-                        stub(mockStorage) { mock in
-                            when(mock.sentTransaction(byHash: equal(to: fullTransaction.header.dataHash))).thenReturn(nil)
-                            when(mock.inputs(transactionHash: equal(to: fullTransaction.header.dataHash))).thenReturn(fullTransaction.inputs)
-                            when(mock.outputs(transactionHash: equal(to: fullTransaction.header.dataHash))).thenReturn(fullTransaction.outputs)
-                        }
-                        let transactions = syncer.newTransactions()
-
-                        expect(transactions.count).to(equal(1))
-                        expect(transactions.first!.header.dataHash).to(equal(fullTransaction.header.dataHash))
+                it("returns transaction") {
+                    stub(mockStorage) { mock in
+                        when(mock.sentTransaction(byHash: equal(to: fullTransaction.header.dataHash))).thenReturn(nil)
+                        when(mock.inputs(transactionHash: equal(to: fullTransaction.header.dataHash))).thenReturn(fullTransaction.inputs)
+                        when(mock.outputs(transactionHash: equal(to: fullTransaction.header.dataHash))).thenReturn(fullTransaction.outputs)
                     }
-                }
+                    let transactions = syncer.newTransactions()
 
-                context("when it was sent") {
-                    let sentTransaction = SentTransaction(dataHash: fullTransaction.header.dataHash)
-                    sentTransaction.lastSendTime = CACurrentMediaTime() - retriesPeriod - 1
-                    sentTransaction.retriesCount = 0
-                    beforeEach {
-                        stub(mockStorage) { mock in
-                            when(mock.sentTransaction(byHash: equal(to: fullTransaction.header.dataHash))).thenReturn(sentTransaction)
-                        }
-                    }
-
-                    context("when sent not too many times or too frequently") {
-                        it("returns transaction") {
-                            stub(mockStorage) { mock in
-                                when(mock.inputs(transactionHash: equal(to: fullTransaction.header.dataHash))).thenReturn(fullTransaction.inputs)
-                                when(mock.outputs(transactionHash: equal(to: fullTransaction.header.dataHash))).thenReturn(fullTransaction.outputs)
-                            }
-
-                            let transactions = syncer.newTransactions()
-                            expect(transactions.count).to(equal(1))
-                            expect(transactions.first!.header.dataHash).to(equal(fullTransaction.header.dataHash))
-                        }
-                    }
-
-                    context("when sent too many times") {
-                        it("doesn't return transaction") {
-                            sentTransaction.retriesCount = maxRetriesCount
-                            expect(syncer.newTransactions()).to(beEmpty())
-                        }
-                    }
-
-                    context("when sent too often") {
-                        it("doesn't return transaction") {
-                            sentTransaction.lastSendTime = CACurrentMediaTime()
-                            expect(syncer.newTransactions()).to(beEmpty())
-                        }
-                    }
-
-                    context("when sent too often in totalRetriesPeriod period") {
-                        it("doesn't return transaction") {
-                            sentTransaction.firstSendTime = CACurrentMediaTime() - totalRetriesPeriod - 1
-                            expect(syncer.newTransactions()).to(beEmpty())
-                        }
-                    }
+                    expect(transactions.count).to(equal(1))
+                    expect(transactions.first!.header.dataHash).to(equal(fullTransaction.header.dataHash))
                 }
             }
 
@@ -118,62 +62,7 @@ class TransactionSyncerTests: QuickSpec {
             }
         }
 
-        describe("#handle(sentTransaction:)") {
-            let fullTransaction = TestData.p2pkhTransaction
-
-            context("when SentTransaction does not exist") {
-                it("adds new SentTransaction object") {
-                    stub(mockStorage) { mock in
-                        when(mock.newTransaction(byHash: equal(to: fullTransaction.header.dataHash))).thenReturn(fullTransaction.header)
-                        when(mock.sentTransaction(byHash: equal(to: fullTransaction.header.dataHash))).thenReturn(nil)
-                    }
-
-                    syncer.transactionSendSuccess(sentTransaction: fullTransaction)
-
-                    let argumentCaptor = ArgumentCaptor<SentTransaction>()
-                    verify(mockStorage).add(sentTransaction: argumentCaptor.capture())
-                    let sentTransaction = argumentCaptor.value!
-
-                    expect(sentTransaction.dataHash).to(equal(fullTransaction.header.dataHash))
-                }
-            }
-
-            context("when SentTransaction exists") {
-                var sentTransaction = SentTransaction(dataHash: fullTransaction.header.dataHash)
-                sentTransaction.firstSendTime = sentTransaction.firstSendTime - 100
-                sentTransaction.lastSendTime = sentTransaction.lastSendTime - 100
-
-                it("updates existing SentTransaction object") {
-                    stub(mockStorage) { mock in
-                        when(mock.newTransaction(byHash: equal(to: fullTransaction.header.dataHash))).thenReturn(fullTransaction.header)
-                        when(mock.sentTransaction(byHash: equal(to: fullTransaction.header.dataHash))).thenReturn(sentTransaction)
-                    }
-
-                    syncer.transactionSendSuccess(sentTransaction: fullTransaction)
-
-                    let argumentCaptor = ArgumentCaptor<SentTransaction>()
-                    verify(mockStorage).update(sentTransaction: argumentCaptor.capture())
-                    sentTransaction = argumentCaptor.value!
-
-                    expect(sentTransaction.dataHash).to(equal(fullTransaction.header.dataHash))
-                }
-            }
-
-            context("when Transaction doesn't exist") {
-                it("neither adds new nor updates existing") {
-                    stub(mockStorage) { mock in
-                        when(mock.newTransaction(byHash: equal(to: fullTransaction.header.dataHash))).thenReturn(nil)
-                    }
-
-                    syncer.transactionSendSuccess(sentTransaction: fullTransaction)
-
-                    verify(mockStorage, never()).add(sentTransaction: any())
-                    verify(mockStorage, never()).update(sentTransaction: any())
-                }
-            }
-        }
-
-        describe("#handle(transactions:)") {
+        describe("#handleRelayed(transactions:)") {
             context("when empty array is given") {
                 it("doesn't do anything") {
                     syncer.handleRelayed(transactions: [])
@@ -187,7 +76,7 @@ class TransactionSyncerTests: QuickSpec {
                 let transactions = [TestData.p2pkhTransaction]
 
                 context("when need to update bloom filter") {
-                    it("fills addresses gap and regenerates bloom filter") {
+                    it("fills addresses gap") {
                         stub(mockTransactionProcessor) { mock in
                             when(mock.processReceived(transactions: equal(to: transactions), inBlock: any(), skipCheckBloomFilter: any())).thenThrow(BloomFilterManager.BloomFilterExpired())
                         }
@@ -199,7 +88,7 @@ class TransactionSyncerTests: QuickSpec {
                 }
 
                 context("when don't need to update bloom filter") {
-                    it("doesn't run address fillGap and doesn't regenerate bloom filter") {
+                    it("doesn't run address fillGap") {
                         stub(mockTransactionProcessor) { mock in
                             when(mock.processReceived(transactions: equal(to: transactions), inBlock: any(), skipCheckBloomFilter: equal(to: false))).thenDoNothing()
                         }
@@ -210,6 +99,18 @@ class TransactionSyncerTests: QuickSpec {
                     }
                 }
 
+            }
+        }
+
+        describe("#handleInvalid(transactionWithHash:)") {
+            it("calls processes invalid transaction") {
+                let hash = Data(repeating: 0, count: 32)
+                stub(mockTransactionProcessor) { mock in
+                    when(mock.processInvalid(transactionWithHash: equal(to: hash))).thenDoNothing()
+                }
+
+                syncer.handleInvalid(transactionWithHash: hash)
+                verify(mockTransactionProcessor).processInvalid(transactionWithHash: equal(to: hash))
             }
         }
 

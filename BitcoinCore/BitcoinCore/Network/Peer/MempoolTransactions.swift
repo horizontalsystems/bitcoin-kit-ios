@@ -56,7 +56,7 @@ extension MempoolTransactions : IPeerTaskHandler {
         case let task as RequestTransactionsTask:
             transactionSyncer.handleRelayed(transactions: task.transactions)
             removeFromRequestedTransactions(peerHost: peer.host, transactionHashes: task.transactions.map { $0.header.dataHash })
-            transactionSender.markTransactionsSent(transactions: task.transactions)
+            transactionSender.transactionsRelayed(transactions: task.transactions)
             return true
 
         default: return false
