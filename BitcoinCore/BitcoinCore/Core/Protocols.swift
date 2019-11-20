@@ -539,6 +539,7 @@ public protocol IPeerTaskHandler: class {
 protocol ITransactionSender {
     func verifyCanSend() throws
     func send(pendingTransaction: FullTransaction) throws
+    func markTransactionsSent(transactions: [FullTransaction])
 }
 
 protocol ITransactionSendTimerDelegate: class {

@@ -173,7 +173,6 @@ public class BitcoinCoreBuilder {
         let peerManager = PeerManager()
         let unspentOutputSelector = UnspentOutputSelectorChain()
         let transactionSyncer = TransactionSyncer(storage: storage, processor: transactionProcessor, publicKeyManager: publicKeyManager)
-        let mempoolTransactions = MempoolTransactions(transactionSyncer: transactionSyncer)
 
         let blockHashFetcher = BlockHashFetcher(restoreKeyConverter: restoreKeyConverterChain, apiManager: initialSyncApi, helper: BlockHashFetcherHelper())
         let blockDiscovery = BlockDiscoveryBatch(network: network, wallet: hdWallet, blockHashFetcher: blockHashFetcher, logger: logger)
@@ -209,6 +208,7 @@ public class BitcoinCoreBuilder {
         let transactionSendTimer = TransactionSendTimer(interval: 60)
         let transactionSender = TransactionSender(transactionSyncer: transactionSyncer, syncedReadyPeerManager: syncedReadyPeerManager, storage: storage, timer: transactionSendTimer, logger: logger)
         let transactionCreator = TransactionCreator(transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, transactionSender: transactionSender, bloomFilterManager: bloomFilterManager)
+        let mempoolTransactions = MempoolTransactions(transactionSyncer: transactionSyncer, transactionSender: transactionSender)
 
         let syncManager = SyncManager(reachabilityManager: reachabilityManager, initialSyncer: initialSyncer, peerGroup: peerGroup)
 

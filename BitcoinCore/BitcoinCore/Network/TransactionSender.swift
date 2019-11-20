@@ -68,7 +68,6 @@ class TransactionSender {
 
         if sentTransaction.retriesCount >= maxRetriesCount { // Also check for totalRetriesPeriod
             transactionSyncer.handleInvalid(transactionHash: transaction.header.dataHash)
-            // Also remove SentTransaction on successful send
             storage.delete(sentTransaction: sentTransaction)
         } else {
             storage.update(sentTransaction: sentTransaction)
@@ -131,6 +130,14 @@ extension TransactionSender: ITransactionSender {
 
         queue.async {
             self.send(transactions: [pendingTransaction], toPeers: peers)
+        }
+    }
+
+    func markTransactionsSent(transactions: [FullTransaction]) {
+        for transaction in transactions {
+            if let sentTransaction = storage.sentTransaction(byHash: transaction.header.dataHash) {
+                storage.delete(sentTransaction: sentTransaction)
+            }
         }
     }
 
