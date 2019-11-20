@@ -680,7 +680,7 @@ extension GrdbStorage: IStorage {
                       INNER JOIN publicKeys ON outputs.publicKeyPath = publicKeys.path
                       INNER JOIN transactions ON outputs.transactionHash = transactions.dataHash
                       LEFT JOIN blocks ON transactions.blockHash = blocks.headerHash
-                      WHERE outputs.scriptType != \(ScriptType.unknown.rawValue)
+                      WHERE transactions.status != \(TransactionStatus.invalid.rawValue) AND outputs.scriptType != \(ScriptType.unknown.rawValue)
                       """
             let rows = try Row.fetchCursor(db, sql: sql, adapter: adapter)
 
