@@ -3,10 +3,12 @@ import RxSwift
 class MempoolTransactions {
     private let disposeBag = DisposeBag()
     private let transactionSyncer: ITransactionSyncer
+    private let transactionSender: ITransactionSender
     private var requestedTransactions = [String: [Data]]()
 
-    init(transactionSyncer: ITransactionSyncer) {
+    init(transactionSyncer: ITransactionSyncer, transactionSender: ITransactionSender) {
         self.transactionSyncer = transactionSyncer
+        self.transactionSender = transactionSender
     }
 
     private func addToRequestTransactions(peerHost: String, transactionHashes: [Data]) {
@@ -54,6 +56,7 @@ extension MempoolTransactions : IPeerTaskHandler {
         case let task as RequestTransactionsTask:
             transactionSyncer.handleRelayed(transactions: task.transactions)
             removeFromRequestedTransactions(peerHost: peer.host, transactionHashes: task.transactions.map { $0.header.dataHash })
+            transactionSender.markTransactionsSent(transactions: task.transactions)
             return true
 
         default: return false
