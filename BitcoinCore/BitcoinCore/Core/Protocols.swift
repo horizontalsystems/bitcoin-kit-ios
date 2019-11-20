@@ -312,6 +312,7 @@ protocol IOutputsCache: class {
 }
 
 public protocol ITransactionProcessor: class {
+    func processInvalid(transactionWithHash: Data)
     var listener: IBlockchainDataListener? { get set }
 
     func processReceived(transactions: [FullTransaction], inBlock block: Block?, skipCheckBloomFilter: Bool) throws

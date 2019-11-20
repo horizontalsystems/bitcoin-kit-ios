@@ -119,4 +119,14 @@ extension TransactionProcessor: ITransactionProcessor {
         }
     }
 
+    public func processInvalid(transactionWithHash hash: Data) {
+        guard let transaction = storage.transaction(byHash: hash) else {
+            return
+        }
+
+        transaction.status = .invalid
+        try? storage.update(transaction: transaction)
+        listener?.onUpdate(updated: [transaction], inserted: [], inBlock: nil)
+    }
+
 }
