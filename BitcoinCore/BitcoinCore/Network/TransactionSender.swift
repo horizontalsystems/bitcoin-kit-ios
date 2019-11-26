@@ -46,7 +46,7 @@ class TransactionSender {
     private func transactionsToSend(from transactions: [FullTransaction]) -> [FullTransaction] {
         transactions.filter { transaction in
             if let sentTransaction = storage.sentTransaction(byHash: transaction.header.dataHash) {
-                return sentTransaction.retriesCount < self.maxRetriesCount && sentTransaction.lastSendTime < CACurrentMediaTime() - self.retriesPeriod
+                return sentTransaction.lastSendTime < CACurrentMediaTime() - self.retriesPeriod
             } else {
                 return true
             }
@@ -63,7 +63,7 @@ class TransactionSender {
         sentTransaction.sendSuccess = true
 
         if sentTransaction.retriesCount >= maxRetriesCount {
-            transactionSyncer.handleInvalid(transactionWithHash: transaction.header.dataHash)
+            transactionSyncer.handleInvalid(fullTransaction: transaction)
             storage.delete(sentTransaction: sentTransaction)
         } else {
             storage.update(sentTransaction: sentTransaction)

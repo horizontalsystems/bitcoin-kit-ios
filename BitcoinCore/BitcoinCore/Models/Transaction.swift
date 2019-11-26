@@ -2,7 +2,7 @@ import Foundation
 import HSCryptoKit
 import GRDB
 
-public enum TransactionStatus: Int, DatabaseValueConvertible { case new, relayed, invalid }
+public enum TransactionStatus: Int, DatabaseValueConvertible, Codable { case new, relayed, invalid }
 
 public class Transaction: Record {
     public var dataHash: Data
@@ -28,7 +28,7 @@ public class Transaction: Record {
 
 
     override open class var databaseTableName: String {
-        return "transactions"
+        "transactions"
     }
 
     enum Columns: String, ColumnExpression, CaseIterable {

@@ -8,6 +8,7 @@ class TransactionProcessor {
     private let outputsCache: IOutputsCache
     private let publicKeyManager: IPublicKeyManager
     private let irregularOutputFinder: IIrregularOutputFinder
+    private let transactionInfoConverter: ITransactionInfoConverter
 
     weak var listener: IBlockchainDataListener?
     weak var transactionListener: ITransactionListener?
@@ -16,7 +17,7 @@ class TransactionProcessor {
     private let queue: DispatchQueue
 
     init(storage: IStorage, outputExtractor: ITransactionExtractor, inputExtractor: ITransactionExtractor, outputsCache: IOutputsCache,
-         outputAddressExtractor: ITransactionOutputAddressExtractor, addressManager: IPublicKeyManager, irregularOutputFinder: IIrregularOutputFinder,
+         outputAddressExtractor: ITransactionOutputAddressExtractor, addressManager: IPublicKeyManager, irregularOutputFinder: IIrregularOutputFinder, transactionInfoConverter: ITransactionInfoConverter,
          listener: IBlockchainDataListener? = nil, dateGenerator: @escaping () -> Date = Date.init, queue: DispatchQueue = DispatchQueue(label: "Transactions", qos: .background
     )) {
         self.storage = storage
@@ -26,6 +27,7 @@ class TransactionProcessor {
         self.outputsCache = outputsCache
         self.publicKeyManager = addressManager
         self.irregularOutputFinder = irregularOutputFinder
+        self.transactionInfoConverter = transactionInfoConverter
         self.listener = listener
         self.dateGenerator = dateGenerator
         self.queue = queue
@@ -119,14 +121,17 @@ extension TransactionProcessor: ITransactionProcessor {
         }
     }
 
-    public func processInvalid(transactionWithHash hash: Data) {
-        guard let transaction = storage.transaction(byHash: hash) else {
+    public func processInvalid(transactionHash: Data) {
+        guard let fullTransactionInfo = storage.fullTransactionInfo(byHash: transactionHash) else {
             return
         }
 
+        let transaction = fullTransactionInfo.transactionWithBlock.transaction
         transaction.status = .invalid
-        try? storage.update(transaction: transaction)
+
+        let transactionInfo = transactionInfoConverter.transactionInfo(fromTransaction: fullTransactionInfo)
+
+        try? storage.invalidate(transaction: transaction, transactionInfo: transactionInfo)
         listener?.onUpdate(updated: [transaction], inserted: [], inBlock: nil)
     }
-
 }

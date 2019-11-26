@@ -20,7 +20,8 @@ struct TransactionRecord {
 struct TransactionAddress {
     let address: String
     let mine: Bool
-    let pluginData: [UInt8: Any]?
+    let pluginId: UInt8?
+    let pluginData: Any?
 }
 
 enum TransactionStatus: Int {
