@@ -244,6 +244,7 @@ extension BitcoinCore {
         var status = [(String, Any)]()
         status.append(("synced until", ((lastBlockInfo?.timestamp.map { Double($0) })?.map { Date(timeIntervalSince1970: $0) }) ?? "n/a"))
         status.append(("syncing peer", initialBlockDownload.syncPeer?.host ?? "n/a"))
+        status.append(("derivation", bip.description))
         status.append(("errors", errorStorage.errors))
 
         status.append(contentsOf:
