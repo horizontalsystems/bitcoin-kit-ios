@@ -176,6 +176,22 @@ open class GrdbStorage {
             }
         }
 
+        migrator.registerMigration("createInvalidTransactions") { db in
+            try db.create(table: InvalidTransaction.databaseTableName) { t in
+                t.column(Transaction.Columns.dataHash.name, .text).notNull()
+                t.column(Transaction.Columns.version.name, .integer).notNull()
+                t.column(Transaction.Columns.lockTime.name, .integer).notNull()
+                t.column(Transaction.Columns.timestamp.name, .integer).notNull()
+                t.column(Transaction.Columns.order.name, .integer).notNull()
+                t.column(Transaction.Columns.blockHash.name, .text)
+                t.column(Transaction.Columns.isMine.name, .boolean)
+                t.column(Transaction.Columns.isOutgoing.name, .boolean)
+                t.column(Transaction.Columns.status.name, .integer)
+                t.column(Transaction.Columns.segWit.name, .boolean)
+                t.column(InvalidTransaction.Columns.transactionInfoJson.name, .blob)
+            }
+        }
+
         return migrator
     }
 
@@ -510,7 +526,7 @@ extension GrdbStorage: IStorage {
     }
 
     public func fullInfo(forTransactions transactionsWithBlocks: [TransactionWithBlock]) -> [FullTransactionForInfo] {
-        let transactionHashes: [Data] = transactionsWithBlocks.map({ $0.transaction.dataHash })
+        let transactionHashes: [Data] = transactionsWithBlocks.filter({ $0.transaction.status != .invalid }).map({ $0.transaction.dataHash })
         var inputs = [InputWithPreviousOutput]()
         var outputs = [Output]()
 
@@ -558,6 +574,7 @@ extension GrdbStorage: IStorage {
     }
 
     public func fullTransactionInfo(byHash hash: Data) -> FullTransactionForInfo? {
+        print("fullTransactionsInfo byHash")
         var transaction: TransactionWithBlock? = nil
 
         try! dbPool.read { db in
@@ -569,7 +586,7 @@ extension GrdbStorage: IStorage {
 
             let sql = """
                       SELECT transactions.*, blocks.height as blockHeight
-                      FROM transactions
+                      FROM (SELECT transactions.*, x'' AS transactionInfoJson FROM transactions UNION ALL SELECT * FROM invalid_transactions) AS transactions
                       LEFT JOIN blocks ON transactions.blockHash = blocks.headerHash
                       WHERE transactions.dataHash = \("x'" + hash.hex + "'")                    
                       """
@@ -592,7 +609,7 @@ extension GrdbStorage: IStorage {
         var transactions = [TransactionWithBlock]()
 
         try! dbPool.read { db in
-            let transactionC = Transaction.Columns.allCases.count
+            let transactionC = Transaction.Columns.allCases.count + 2
 
             let adapter = ScopeAdapter([
                 "transaction": RangeRowAdapter(0..<transactionC)
@@ -600,7 +617,7 @@ extension GrdbStorage: IStorage {
 
             var sql = """
                       SELECT transactions.*, blocks.height as blockHeight
-                      FROM transactions
+                      FROM (SELECT transactions.*, x'' AS transactionInfoJson FROM transactions UNION ALL SELECT * FROM invalid_transactions) AS transactions
                       LEFT JOIN blocks ON transactions.blockHash = blocks.headerHash
                       """
 
@@ -617,7 +634,17 @@ extension GrdbStorage: IStorage {
             let rows = try Row.fetchCursor(db, sql: sql, adapter: adapter)
 
             while let row = try rows.next() {
-                transactions.append(TransactionWithBlock(transaction: row["transaction"], blockHeight: row["blockHeight"]))
+                let status: TransactionStatus = row[Transaction.Columns.status]
+                let transaction: Transaction
+
+                if status == .invalid {
+                    let invalidTransaction: InvalidTransaction = row["transaction"] 
+                    transaction = invalidTransaction
+                } else {
+                    transaction = row["transaction"]
+                }
+
+                transactions.append(TransactionWithBlock(transaction: transaction, blockHeight: row["blockHeight"]))
             }
 
         }
@@ -679,7 +706,7 @@ extension GrdbStorage: IStorage {
                       INNER JOIN publicKeys ON outputs.publicKeyPath = publicKeys.path
                       INNER JOIN transactions ON outputs.transactionHash = transactions.dataHash
                       LEFT JOIN blocks ON transactions.blockHash = blocks.headerHash
-                      WHERE transactions.status != \(TransactionStatus.invalid.rawValue) AND outputs.scriptType != \(ScriptType.unknown.rawValue)
+                      WHERE outputs.scriptType != \(ScriptType.unknown.rawValue)
                       """
             let rows = try Row.fetchCursor(db, sql: sql, adapter: adapter)
 
@@ -717,6 +744,29 @@ extension GrdbStorage: IStorage {
         }
     }
 
+    public func invalidate(transaction: Transaction, transactionInfo: TransactionInfo) throws {
+        try! dbPool.writeInTransaction { db in
+            var transactionInfoJson = Data()
+            if let jsonData = try? JSONEncoder.init().encode(transactionInfo) {
+                transactionInfoJson = jsonData
+            }
+
+            let invalidTransaction = InvalidTransaction(
+                    dataHash: transaction.dataHash, version: transaction.version, lockTime: transaction.lockTime, timestamp: transaction.timestamp,
+                    order: transaction.order, blockHash: transaction.blockHash, isMine: transaction.isMine, isOutgoing: transaction.isOutgoing,
+                    status: transaction.status, segWit: transaction.segWit,
+                    transactionInfoJson: transactionInfoJson
+            )
+
+            try invalidTransaction.insert(db)
+
+            try Input.filter(Input.Columns.transactionHash == transaction.dataHash).deleteAll(db)
+            try Output.filter(Output.Columns.transactionHash == transaction.dataHash).deleteAll(db)
+            try transaction.delete(db)
+
+            return .commit
+        }
+    }
 
     // SentTransaction
     public func sentTransaction(byHash hash: Data) -> SentTransaction? {
@@ -782,6 +832,7 @@ extension GrdbStorage: IStorage {
                       SELECT publicKeys.*, outputs.transactionHash
                       FROM publicKeys
                       LEFT JOIN outputs ON publicKeys.path = outputs.publicKeyPath
+                      GROUP BY publicKeys.path 
                       """
 
             let rows = try Row.fetchCursor(db, sql: sql, adapter: adapter)

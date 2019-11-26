@@ -128,6 +128,7 @@ public protocol IStorage {
     func add(publicKeys: [PublicKey])
     func publicKeysWithUsedState() -> [PublicKeyWithUsedState]
     func publicKey(byPath: String) -> PublicKey?
+    func invalidate(transaction: Transaction, transactionInfo: TransactionInfo) throws
 }
 
 public protocol IRestoreKeyConverter {
@@ -312,11 +313,11 @@ protocol IOutputsCache: class {
 }
 
 public protocol ITransactionProcessor: class {
-    func processInvalid(transactionWithHash: Data)
     var listener: IBlockchainDataListener? { get set }
 
     func processReceived(transactions: [FullTransaction], inBlock block: Block?, skipCheckBloomFilter: Bool) throws
     func processCreated(transaction: FullTransaction) throws
+    func processInvalid(transactionHash: Data)
 }
 
 protocol ITransactionExtractor {
@@ -338,7 +339,7 @@ protocol ITransactionPublicKeySetter {
 public protocol ITransactionSyncer: class {
     func newTransactions() -> [FullTransaction]
     func handleRelayed(transactions: [FullTransaction])
-    func handleInvalid(transactionWithHash: Data)
+    func handleInvalid(fullTransaction: FullTransaction)
     func shouldRequestTransaction(hash: Data) -> Bool
 }
 
@@ -481,11 +482,11 @@ public protocol IMerkleBranch: class {
 }
 
 public extension INetwork {
-    var protocolVersion: Int32 { return 70015 }
+    var protocolVersion: Int32 { 70015 }
 
-    var maxBlockSize: UInt32 { return 1_000_000 }
-    var serviceFullNode: UInt64 { return 1 }
-    var bloomFilter: Int32 { return 70000 }
+    var maxBlockSize: UInt32 { 1_000_000 }
+    var serviceFullNode: UInt64 { 1 }
+    var bloomFilter: Int32 { 70000 }
 
 }
 
@@ -586,7 +587,7 @@ public protocol IPlugin {
     func processTransactionWithNullData(transaction: FullTransaction, nullDataChunks: inout IndexingIterator<[Chunk]>) throws
     func isSpendable(unspentOutput: UnspentOutput) throws -> Bool
     func inputSequenceNumber(output: Output) throws -> Int
-    func parsePluginData(from: Output, transactionTimestamp: Int) throws -> IPluginOutputData
+    func parsePluginData(from: String, transactionTimestamp: Int) throws -> IPluginOutputData
     func keysForApiRestore(publicKey: PublicKey) throws -> [String]
 }
 
@@ -598,7 +599,7 @@ public protocol IPluginManager {
     func processInputs(mutableTransaction: MutableTransaction) throws
     func processTransactionWithNullData(transaction: FullTransaction, nullDataOutput: Output) throws
     func isSpendable(unspentOutput: UnspentOutput) -> Bool
-    func parsePluginData(from: Output, transactionTimestamp: Int) -> [UInt8: IPluginOutputData]?
+    func parsePluginData(fromPlugin: UInt8, pluginDataString: String, transactionTimestamp: Int) -> IPluginOutputData?
 }
 
 public protocol IBlockMedianTimeHelper {

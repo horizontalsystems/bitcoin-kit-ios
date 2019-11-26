@@ -11,7 +11,7 @@ public enum HodlerPluginError: Error {
 public class HodlerPlugin {
     public static let lockedValueLimit = 50_000_000 // 0.5 BTC
 
-    public enum LockTimeInterval: UInt16, CaseIterable {
+    public enum LockTimeInterval: UInt16, CaseIterable, Codable {
         case hour = 7           //  60 * 60 / 512
         case month = 5063       //  30 * 24 * 60 * 60 / 512
         case halfYear = 30881   // 183 * 24 * 60 * 60 / 512
@@ -147,8 +147,8 @@ extension HodlerPlugin: IPlugin {
         Int((try lockTimeIntervalFrom(output: output)).sequenceNumber)
     }
 
-    public func parsePluginData(from output: Output, transactionTimestamp: Int) throws -> IPluginOutputData {
-        let hodlerOutputData = try HodlerOutputData.parse(serialized: output.pluginData)
+    public func parsePluginData(from pluginData: String, transactionTimestamp: Int) throws -> IPluginOutputData {
+        let hodlerOutputData = try HodlerOutputData.parse(serialized: pluginData)
 
         // When checking if UTXO is spendable we use the best block median time.
         // The median time is 6 blocks earlier which is approximately equal to 1 hour.

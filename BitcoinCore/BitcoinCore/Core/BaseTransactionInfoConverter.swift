@@ -10,6 +10,10 @@ public class BaseTransactionInfoConverter: IBaseTransactionInfoConverter {
     }
 
     public func transactionInfo<T: TransactionInfo>(fromTransaction transactionForInfo: FullTransactionForInfo) -> T {
+        if let invalidTransactionInfo: T = transactionInfo(fromInvalidTransaction: transactionForInfo) {
+            return invalidTransactionInfo
+        }
+
         var totalMineInput: Int = 0
         var totalMineOutput: Int = 0
         var fromAddresses = [TransactionAddressInfo]()
@@ -29,7 +33,7 @@ public class BaseTransactionInfoConverter: IBaseTransactionInfoConverter {
             }
 
             if let address = inputWithPreviousOutput.input.address {
-                fromAddresses.append(TransactionAddressInfo(address: address, mine: mine, pluginData: nil))
+                fromAddresses.append(TransactionAddressInfo(address: address, mine: mine))
             }
         }
 
@@ -42,7 +46,15 @@ public class BaseTransactionInfoConverter: IBaseTransactionInfoConverter {
             }
 
             if let address = output.address {
-                toAddresses.append(TransactionAddressInfo(address: address, mine: mine, pluginData: pluginManager.parsePluginData(from: output, transactionTimestamp: transactionTimestamp)))
+                let addressInfo = TransactionAddressInfo(address: address, mine: mine)
+
+                if let pluginId = output.pluginId, let pluginDataString = output.pluginData {
+                    addressInfo.pluginId = pluginId
+                    addressInfo.pluginDataString = pluginDataString
+                    addressInfo.pluginData = pluginManager.parsePluginData(fromPlugin: pluginId, pluginDataString: pluginDataString, transactionTimestamp: transactionTimestamp)
+                }
+
+                toAddresses.append(addressInfo)
             }
         }
 
@@ -66,6 +78,24 @@ public class BaseTransactionInfoConverter: IBaseTransactionInfoConverter {
                 timestamp: transactionTimestamp,
                 status: transaction.status
         )
+    }
+
+    private func transactionInfo<T: TransactionInfo>(fromInvalidTransaction transactionForInfo: FullTransactionForInfo) -> T? {
+        guard let invalidTransaction = transactionForInfo.transactionWithBlock.transaction as? InvalidTransaction else {
+            return nil
+        }
+
+        guard let transactionInfo: T = try? JSONDecoder.init().decode(T.self, from: invalidTransaction.transactionInfoJson) else {
+            return nil
+        }
+
+        for addressInfo in transactionInfo.to {
+            if let pluginId = addressInfo.pluginId, let pluginDataString = addressInfo.pluginDataString {
+                addressInfo.pluginData = pluginManager.parsePluginData(fromPlugin: pluginId, pluginDataString: pluginDataString, transactionTimestamp: invalidTransaction.timestamp)
+            }
+        }
+
+        return transactionInfo
     }
 
 }

@@ -1,6 +1,6 @@
 import Foundation
 
-open class TransactionInfo: ITransactionInfo {
+open class TransactionInfo: ITransactionInfo, Codable {
     public let transactionHash: String
     public let transactionIndex: Int
     public let from: [TransactionAddressInfo]
@@ -26,10 +26,23 @@ open class TransactionInfo: ITransactionInfo {
 
 }
 
-public struct TransactionAddressInfo {
+public class TransactionAddressInfo: Codable {
     public let address: String
     public let mine: Bool
-    public let pluginData: [UInt8: IPluginOutputData]?
+    public var pluginId: UInt8? = nil
+    public var pluginData: IPluginOutputData? = nil
+
+    var pluginDataString: String? = nil
+
+    private enum CodingKeys: String, CodingKey {
+        case address, mine, pluginId, pluginDataString
+    }
+
+    public init(address: String, mine: Bool) {
+        self.address = address
+        self.mine = mine
+    }
+
 }
 
 public struct BlockInfo {
