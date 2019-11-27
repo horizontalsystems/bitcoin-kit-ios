@@ -574,7 +574,6 @@ extension GrdbStorage: IStorage {
     }
 
     public func fullTransactionInfo(byHash hash: Data) -> FullTransactionForInfo? {
-        print("fullTransactionsInfo byHash")
         var transaction: TransactionWithBlock? = nil
 
         try! dbPool.read { db in
@@ -652,6 +651,19 @@ extension GrdbStorage: IStorage {
         return fullInfo(forTransactions: transactions)
     }
 
+    public func moveTransactionsTo(invalidTransactions: [InvalidTransaction]) throws {
+        try! dbPool.writeInTransaction { db in
+            for invalidTransaction in invalidTransactions {
+                try invalidTransaction.insert(db)
+
+                try Input.filter(Input.Columns.transactionHash == invalidTransaction.dataHash).deleteAll(db)
+                try Output.filter(Output.Columns.transactionHash == invalidTransaction.dataHash).deleteAll(db)
+                try Transaction.filter(Transaction.Columns.dataHash == invalidTransaction.dataHash).deleteAll(db)
+            }
+
+            return .commit
+        }
+    }
 
     // Inputs and Outputs
 
@@ -744,27 +756,9 @@ extension GrdbStorage: IStorage {
         }
     }
 
-    public func invalidate(transaction: Transaction, transactionInfo: TransactionInfo) throws {
-        try! dbPool.writeInTransaction { db in
-            var transactionInfoJson = Data()
-            if let jsonData = try? JSONEncoder.init().encode(transactionInfo) {
-                transactionInfoJson = jsonData
-            }
-
-            let invalidTransaction = InvalidTransaction(
-                    dataHash: transaction.dataHash, version: transaction.version, lockTime: transaction.lockTime, timestamp: transaction.timestamp,
-                    order: transaction.order, blockHash: transaction.blockHash, isMine: transaction.isMine, isOutgoing: transaction.isOutgoing,
-                    status: transaction.status, segWit: transaction.segWit,
-                    transactionInfoJson: transactionInfoJson
-            )
-
-            try invalidTransaction.insert(db)
-
-            try Input.filter(Input.Columns.transactionHash == transaction.dataHash).deleteAll(db)
-            try Output.filter(Output.Columns.transactionHash == transaction.dataHash).deleteAll(db)
-            try transaction.delete(db)
-
-            return .commit
+    public func inputsUsingOutputs(withTransactionHash transactionHash: Data) -> [Input] {
+        try! dbPool.read { db in
+            try Input.filter(Input.Columns.previousOutputTxHash == transactionHash).fetchAll(db)
         }
     }
 
