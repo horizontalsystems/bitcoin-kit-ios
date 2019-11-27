@@ -471,6 +471,30 @@ extension GrdbStorage: IStorage {
         }
     }
 
+    public func validOrInvalidTransaction(byHash hash: Data, timestamp: Int) -> Transaction? {
+        try! dbPool.read { db in
+            let transactionC = Transaction.Columns.allCases.count
+
+            let adapter = ScopeAdapter([
+                "transaction": RangeRowAdapter(0..<transactionC)
+            ])
+
+            let sql = """
+                      SELECT transactions.* 
+                      FROM (SELECT transactions.*, x'' AS transactionInfoJson FROM transactions UNION ALL SELECT * FROM invalid_transactions) AS transactions 
+                      WHERE transactions.dataHash = ? AND timestamp = ? 
+                      """
+
+            let rows = try Row.fetchCursor(db, sql: sql, arguments: [hash, timestamp], adapter: adapter)
+
+            if let row = try rows.next() {
+                return row["transaction"]
+            }
+
+            return nil
+        }
+    }
+
     public func transactionExists(byHash hash: Data) -> Bool {
         transaction(byHash: hash) != nil
     }

@@ -128,8 +128,9 @@ class TransactionsController: UITableViewController {
         loading = true
 
         let fromHash = transactions.last?.transactionHash
+        let fromTimestamp = transactions.last.flatMap { Int($0.timestamp) }
 
-        currentAdapter?.transactionsSingle(fromHash: fromHash, limit: limit)
+        currentAdapter?.transactionsSingle(fromHash: fromHash, fromTimestamp: fromTimestamp, limit: limit)
                 .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
                 .observeOn(MainScheduler.instance)
                 .subscribe(onSuccess: { [weak self] transactions in

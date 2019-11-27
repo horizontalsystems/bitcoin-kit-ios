@@ -83,17 +83,18 @@ extension DataProvider: IBlockchainDataListener {
 
 extension DataProvider: IDataProvider {
 
-    func transactions(fromHash: String?, limit: Int?) -> Single<[TransactionInfo]> {
+    func transactions(fromHash: String?, fromTimestamp: Int?, limit: Int?) -> Single<[TransactionInfo]> {
         Single.create { observer in
-            var fromTimestamp: Int? = nil
-            var fromOrder: Int? = nil
+            var resolvedTimestamp: Int? = nil
+            var resolvedOrder: Int? = nil
 
-            if let fromHash = fromHash, let fromHashData = Data(hex: fromHash), let fromTransaction = self.storage.transaction(byHash: Data(fromHashData.reversed())) {
-                fromTimestamp = fromTransaction.timestamp
-                fromOrder = fromTransaction.order
+            if let fromHash = fromHash, let fromHashData = Data(hex: fromHash), let fromTimestamp = fromTimestamp,
+               let transaction = self.storage.validOrInvalidTransaction(byHash: Data(fromHashData.reversed()), timestamp: fromTimestamp) {
+                resolvedTimestamp = transaction.timestamp
+                resolvedOrder = transaction.order
             }
 
-            let transactions = self.storage.fullTransactionsInfo(fromTimestamp: fromTimestamp, fromOrder: fromOrder, limit: limit)
+            let transactions = self.storage.fullTransactionsInfo(fromTimestamp: resolvedTimestamp, fromOrder: resolvedOrder, limit: limit)
 
             observer(.success(transactions.map() { self.transactionInfoConverter.transactionInfo(fromTransaction: $0) }))
             return Disposables.create()

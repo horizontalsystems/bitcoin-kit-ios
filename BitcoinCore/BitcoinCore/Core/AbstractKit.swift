@@ -30,8 +30,8 @@ open class AbstractKit {
         bitcoinCore.syncState
     }
 
-    open func transactions(fromHash: String? = nil, limit: Int? = nil) -> Single<[TransactionInfo]> {
-        bitcoinCore.transactions(fromHash: fromHash, limit: limit)
+    open func transactions(fromHash: String? = nil, fromTimestamp: Int? = nil, limit: Int? = nil) -> Single<[TransactionInfo]> {
+        bitcoinCore.transactions(fromHash: fromHash, fromTimestamp: fromTimestamp, limit: limit)
     }
 
     open func send(to address: String, value: Int, feeRate: Int, pluginData: [UInt8: IPluginData] = [:]) throws -> FullTransaction {

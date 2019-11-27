@@ -101,6 +101,7 @@ public protocol IStorage {
 
     func transactionExists(byHash: Data) -> Bool
     func transaction(byHash: Data) -> Transaction?
+    func validOrInvalidTransaction(byHash: Data, timestamp: Int) -> Transaction?
     func transactions(ofBlock: Block) -> [Transaction]
     func newTransactions() -> [Transaction]
     func newTransaction(byHash: Data) -> Transaction?
@@ -442,7 +443,7 @@ protocol IDataProvider {
     var lastBlockInfo: BlockInfo? { get }
     var balance: BalanceInfo { get }
     func debugInfo(network: INetwork, scriptType: ScriptType, addressConverter: IAddressConverter) -> String
-    func transactions(fromHash: String?, limit: Int?) -> Single<[TransactionInfo]>
+    func transactions(fromHash: String?, fromTimestamp: Int?, limit: Int?) -> Single<[TransactionInfo]>
 }
 
 protocol IDataProviderDelegate: class {

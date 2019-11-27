@@ -104,13 +104,14 @@ class TransactionSyncerTests: QuickSpec {
 
         describe("#handleInvalid(transactionWithHash:)") {
             it("calls processes invalid transaction") {
-                let hash = Data(repeating: 0, count: 32)
+                let fullTransaction = TestData.p2pkhTransaction
+
                 stub(mockTransactionProcessor) { mock in
-                    when(mock.processInvalid(transactionWithHash: equal(to: hash))).thenDoNothing()
+                    when(mock.processInvalid(transactionHash: equal(to: fullTransaction.header.dataHash))).thenDoNothing()
                 }
 
-                syncer.handleInvalid(transactionWithHash: hash)
-                verify(mockTransactionProcessor).processInvalid(transactionWithHash: equal(to: hash))
+                syncer.handleInvalid(fullTransaction: fullTransaction)
+                verify(mockTransactionProcessor).processInvalid(transactionHash: equal(to: fullTransaction.header.dataHash))
             }
         }
 
