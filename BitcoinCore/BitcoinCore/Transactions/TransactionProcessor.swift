@@ -122,16 +122,45 @@ extension TransactionProcessor: ITransactionProcessor {
     }
 
     public func processInvalid(transactionHash: Data) {
-        guard let fullTransactionInfo = storage.fullTransactionInfo(byHash: transactionHash) else {
+        let invalidTransactionsFullInfo = descendantTransactionsFullInfo(of: transactionHash)
+
+        guard !invalidTransactionsFullInfo.isEmpty else {
             return
         }
 
-        let transaction = fullTransactionInfo.transactionWithBlock.transaction
-        transaction.status = .invalid
+        let invalidTransactions: [InvalidTransaction] = invalidTransactionsFullInfo.map { transactionFullInfo in
+            transactionFullInfo.transactionWithBlock.transaction.status = .invalid
+            let transactionInfo = transactionInfoConverter.transactionInfo(fromTransaction: transactionFullInfo)
+            var transactionInfoJson = Data()
+            if let jsonData = try? JSONEncoder.init().encode(transactionInfo) {
+                transactionInfoJson = jsonData
+            }
 
-        let transactionInfo = transactionInfoConverter.transactionInfo(fromTransaction: fullTransactionInfo)
+            let transaction = transactionFullInfo.transactionWithBlock.transaction
 
-        try? storage.invalidate(transaction: transaction, transactionInfo: transactionInfo)
-        listener?.onUpdate(updated: [transaction], inserted: [], inBlock: nil)
+            return InvalidTransaction(
+                    dataHash: transaction.dataHash, version: transaction.version, lockTime: transaction.lockTime, timestamp: transaction.timestamp,
+                    order: transaction.order, blockHash: transaction.blockHash, isMine: transaction.isMine, isOutgoing: transaction.isOutgoing,
+                    status: transaction.status, segWit: transaction.segWit,
+                    transactionInfoJson: transactionInfoJson
+            )
+        }
+
+
+        try? storage.moveTransactionsTo(invalidTransactions: invalidTransactions)
+        listener?.onUpdate(updated: invalidTransactionsFullInfo.map { $0.transactionWithBlock.transaction }, inserted: [], inBlock: nil)
     }
+
+    private func descendantTransactionsFullInfo(of transactionHash: Data) -> [FullTransactionForInfo] {
+        guard let fullTransactionInfo = storage.fullTransactionInfo(byHash: transactionHash) else {
+            return []
+        }
+
+        return storage
+                .inputsUsingOutputs(withTransactionHash: transactionHash)
+                .reduce(into: [fullTransactionInfo]) { list, input in
+                    list.append(contentsOf: descendantTransactionsFullInfo(of: input.transactionHash))
+                }
+    }
+
 }

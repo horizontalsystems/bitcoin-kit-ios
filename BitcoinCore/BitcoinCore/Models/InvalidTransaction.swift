@@ -2,7 +2,7 @@ import Foundation
 import HSCryptoKit
 import GRDB
 
-class InvalidTransaction: Transaction {
+public class InvalidTransaction: Transaction {
 
     let transactionInfoJson: Data
 

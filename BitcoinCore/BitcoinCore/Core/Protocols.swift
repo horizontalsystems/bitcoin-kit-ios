@@ -110,12 +110,14 @@ public protocol IStorage {
     func fullInfo(forTransactions: [TransactionWithBlock]) -> [FullTransactionForInfo]
     func fullTransactionsInfo(fromTimestamp: Int?, fromOrder: Int?, limit: Int?) -> [FullTransactionForInfo]
     func fullTransactionInfo(byHash hash: Data) -> FullTransactionForInfo?
+    func moveTransactionsTo(invalidTransactions: [InvalidTransaction]) throws
 
     func outputsWithPublicKeys() -> [OutputWithPublicKey]
     func unspentOutputs() -> [UnspentOutput]
     func inputs(transactionHash: Data) -> [Input]
     func outputs(transactionHash: Data) -> [Output]
     func previousOutput(ofInput: Input) -> Output?
+    func inputsUsingOutputs(withTransactionHash: Data) -> [Input]
 
     func sentTransaction(byHash: Data) -> SentTransaction?
     func update(sentTransaction: SentTransaction)
@@ -128,7 +130,6 @@ public protocol IStorage {
     func add(publicKeys: [PublicKey])
     func publicKeysWithUsedState() -> [PublicKeyWithUsedState]
     func publicKey(byPath: String) -> PublicKey?
-    func invalidate(transaction: Transaction, transactionInfo: TransactionInfo) throws
 }
 
 public protocol IRestoreKeyConverter {
