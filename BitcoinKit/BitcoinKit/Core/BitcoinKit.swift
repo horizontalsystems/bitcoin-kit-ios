@@ -33,7 +33,7 @@ public class BitcoinKit: AbstractKit {
         }
         let initialSyncApi = BCoinApi(url: initialSyncApiUrl)
 
-        let databaseFilePath = try DirectoryHelper.directoryURL(for: BitcoinKit.name).appendingPathComponent(BitcoinKit.databaseFileName(walletId: walletId, networkType: networkType)).path
+        let databaseFilePath = try DirectoryHelper.directoryURL(for: BitcoinKit.name).appendingPathComponent(BitcoinKit.databaseFileName(walletId: walletId, networkType: networkType, bip: bip, syncMode: syncMode)).path
         let storage = GrdbStorage(databaseFilePath: databaseFilePath)
 
         let paymentAddressParser = PaymentAddressParser(validScheme: "bitcoin", removeScheme: true)
@@ -88,19 +88,11 @@ public class BitcoinKit: AbstractKit {
 extension BitcoinKit {
 
     public static func clear(exceptFor walletIdsToExclude: [String] = []) throws {
-        var excludedFileNames = [String]()
-
-        for walletId in walletIdsToExclude {
-            for type in NetworkType.allCases {
-                excludedFileNames.append(databaseFileName(walletId: walletId, networkType: type))
-            }
-        }
-
-        try DirectoryHelper.removeAll(inDirectory: BitcoinKit.name, except: excludedFileNames)
+        try DirectoryHelper.removeAll(inDirectory: BitcoinKit.name, except: walletIdsToExclude)
     }
 
-    private static func databaseFileName(walletId: String, networkType: NetworkType) -> String {
-        "\(walletId)-\(networkType.rawValue)"
+    private static func databaseFileName(walletId: String, networkType: NetworkType, bip: Bip, syncMode: BitcoinCore.SyncMode) -> String {
+        "\(walletId)-\(networkType.rawValue)-\(bip.description)-\(syncMode)"
     }
 
 }

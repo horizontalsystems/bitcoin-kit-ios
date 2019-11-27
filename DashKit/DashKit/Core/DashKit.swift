@@ -36,7 +36,7 @@ public class DashKit: AbstractKit {
 
         let logger = Logger(network: network, minLogLevel: minLogLevel)
 
-        let databaseFilePath = try DirectoryHelper.directoryURL(for: DashKit.name).appendingPathComponent(DashKit.databaseFileName(walletId: walletId, networkType: networkType)).path
+        let databaseFilePath = try DirectoryHelper.directoryURL(for: DashKit.name).appendingPathComponent(DashKit.databaseFileName(walletId: walletId, networkType: networkType, syncMode: syncMode)).path
         let storage = DashGrdbStorage(databaseFilePath: databaseFilePath)
         self.storage = storage
 
@@ -200,19 +200,11 @@ extension DashKit: IInstantTransactionDelegate {
 extension DashKit {
 
     public static func clear(exceptFor walletIdsToExclude: [String] = []) throws {
-        var excludedFileNames = [String]()
-
-        for walletId in walletIdsToExclude {
-            for type in NetworkType.allCases {
-                excludedFileNames.append(databaseFileName(walletId: walletId, networkType: type))
-            }
-        }
-
-        try DirectoryHelper.removeAll(inDirectory: DashKit.name, except: excludedFileNames)
+        try DirectoryHelper.removeAll(inDirectory: DashKit.name, except: walletIdsToExclude)
     }
 
-    private static func databaseFileName(walletId: String, networkType: NetworkType) -> String {
-        "\(walletId)-\(networkType.rawValue)"
+    private static func databaseFileName(walletId: String, networkType: NetworkType, syncMode: BitcoinCore.SyncMode) -> String {
+        "\(walletId)-\(networkType.rawValue)-\(syncMode)"
     }
 
 }
