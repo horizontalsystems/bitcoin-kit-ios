@@ -12,6 +12,7 @@ class TransactionProcessorTests: XCTestCase {
     private var mockBlockchainDataListener: MockIBlockchainDataListener!
     private var mockTransactionListener: MockITransactionListener!
     private var mockIrregularOutputFinder: MockIIrregularOutputFinder!
+    private var mockTransactionInfoConverter: MockITransactionInfoConverter!
 
     private var generatedDate: Date!
     private var dateGenerator: (() -> Date)!
@@ -35,6 +36,7 @@ class TransactionProcessorTests: XCTestCase {
         mockBlockchainDataListener = MockIBlockchainDataListener()
         mockTransactionListener = MockITransactionListener()
         mockIrregularOutputFinder = MockIIrregularOutputFinder()
+        mockTransactionInfoConverter = MockITransactionInfoConverter()
 
         stub(mockStorage) { mock in
             when(mock.transaction(byHash: any())).thenReturn(nil)
@@ -73,7 +75,7 @@ class TransactionProcessorTests: XCTestCase {
         transactionProcessor = TransactionProcessor(
                 storage: mockStorage, outputExtractor: mockOutputExtractor, inputExtractor: mockInputExtractor, outputsCache: mockOutputsCache,
                 outputAddressExtractor: mockOutputAddressExtractor, addressManager: mockAddressManager, irregularOutputFinder: mockIrregularOutputFinder,
-                listener: mockBlockchainDataListener, dateGenerator: dateGenerator
+                transactionInfoConverter: mockTransactionInfoConverter, listener: mockBlockchainDataListener, dateGenerator: dateGenerator
         )
         transactionProcessor.transactionListener = mockTransactionListener
     }

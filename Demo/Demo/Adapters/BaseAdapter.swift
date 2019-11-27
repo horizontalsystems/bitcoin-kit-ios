@@ -51,10 +51,10 @@ class BaseAdapter {
         return NSDecimalNumber(decimal: coinValue).rounding(accordingToBehavior: handler).intValue
     }
 
-    func transactionsSingle(fromHash: String?, limit: Int) -> Single<[TransactionRecord]> {
-        abstractKit.transactions(fromHash: fromHash, limit: limit)
+    func transactionsSingle(fromHash: String?, fromTimestamp: Int?, limit: Int) -> Single<[TransactionRecord]> {
+        abstractKit.transactions(fromHash: fromHash, fromTimestamp: fromTimestamp, limit: limit)
                 .map { [weak self] transactions -> [TransactionRecord] in
-                    return transactions.compactMap {
+                    transactions.compactMap {
                         self?.transactionRecord(fromTransaction: $0)
                     }
                 }

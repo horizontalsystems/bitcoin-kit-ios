@@ -15,10 +15,10 @@ class DashAdapter: BaseAdapter {
         dashKit.delegate = self
     }
 
-    override func transactionsSingle(fromHash: String?, limit: Int) -> Single<[TransactionRecord]> {
-        return dashKit.transactions(fromHash: fromHash, limit: limit)
+    override func transactionsSingle(fromHash: String?, fromTimestamp: Int?, limit: Int) -> Single<[TransactionRecord]> {
+        dashKit.transactions(fromHash: fromHash, fromTimestamp: fromTimestamp, limit: limit)
                 .map { [weak self] transactions -> [TransactionRecord] in
-                    return transactions.compactMap {
+                    transactions.compactMap {
                         self?.transactionRecord(fromTransaction: $0)
                     }
                 }
