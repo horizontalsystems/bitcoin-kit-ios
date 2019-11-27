@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
   spec.name = 'DashKit.swift'
   spec.module_name = 'DashKit'
-  spec.version = '0.9.0'
+  spec.version = '0.10.0'
   spec.summary = 'Dash library for Swift'
   spec.description = <<-DESC
                        DashKit implements Dash protocol in Swift.
@@ -18,7 +18,7 @@ Pod::Spec.new do |spec|
   spec.ios.deployment_target = '11.0'
   spec.swift_version = '5'
 
-  spec.dependency 'BitcoinCore.swift', '~> 0.9.0'
+  spec.dependency 'BitcoinCore.swift', '~> 0.10.0'
   spec.dependency 'HSCryptoKit', '~> 1.4'
   spec.dependency 'HSHDWalletKit', '~> 1.2'
   spec.dependency 'CryptoBLS.swift', '~> 1.1'
