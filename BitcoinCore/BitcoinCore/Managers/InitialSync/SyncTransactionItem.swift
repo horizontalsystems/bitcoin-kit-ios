@@ -26,9 +26,9 @@ open class SyncTransactionItem: ImmutableMappable {
 
 open class SyncTransactionOutputItem: ImmutableMappable {
     public let script: String
-    public let address: String
+    public let address: String?
 
-    public init(script: String, address: String) {
+    public init(script: String, address: String?) {
         self.script = script
         self.address = address
     }
