@@ -152,7 +152,7 @@ extension TransactionProcessor: ITransactionProcessor {
     }
 
     private func descendantTransactionsFullInfo(of transactionHash: Data) -> [FullTransactionForInfo] {
-        guard let fullTransactionInfo = storage.fullTransactionInfo(byHash: transactionHash) else {
+        guard let fullTransactionInfo = storage.transactionFullInfo(byHash: transactionHash) else {
             return []
         }
 

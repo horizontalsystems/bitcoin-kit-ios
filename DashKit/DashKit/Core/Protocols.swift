@@ -95,7 +95,7 @@ protocol IDashStorage {
     func unspentOutputs() -> [UnspentOutput]
 
     func transactionExists(byHash: Data) -> Bool
-    func fullTransactionInfo(byHash hash: Data) -> FullTransactionForInfo?
+    func transactionFullInfo(byHash hash: Data) -> FullTransactionForInfo?
 }
 
 protocol IInstantSendFactory {

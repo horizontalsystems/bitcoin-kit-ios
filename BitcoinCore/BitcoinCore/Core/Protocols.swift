@@ -109,8 +109,8 @@ public protocol IStorage {
     func add(transaction: FullTransaction) throws
     func update(transaction: Transaction) throws
     func fullInfo(forTransactions: [TransactionWithBlock]) -> [FullTransactionForInfo]
-    func fullTransactionsInfo(fromTimestamp: Int?, fromOrder: Int?, limit: Int?) -> [FullTransactionForInfo]
-    func fullTransactionInfo(byHash hash: Data) -> FullTransactionForInfo?
+    func validOrInvalidTransactionsFullInfo(fromTimestamp: Int?, fromOrder: Int?, limit: Int?) -> [FullTransactionForInfo]
+    func transactionFullInfo(byHash hash: Data) -> FullTransactionForInfo?
     func moveTransactionsTo(invalidTransactions: [InvalidTransaction]) throws
 
     func outputsWithPublicKeys() -> [OutputWithPublicKey]
