@@ -597,7 +597,7 @@ extension GrdbStorage: IStorage {
         return results
     }
 
-    public func fullTransactionInfo(byHash hash: Data) -> FullTransactionForInfo? {
+    public func transactionFullInfo(byHash hash: Data) -> FullTransactionForInfo? {
         var transaction: TransactionWithBlock? = nil
 
         try! dbPool.read { db in
@@ -609,7 +609,7 @@ extension GrdbStorage: IStorage {
 
             let sql = """
                       SELECT transactions.*, blocks.height as blockHeight
-                      FROM (SELECT transactions.*, x'' AS transactionInfoJson FROM transactions UNION ALL SELECT * FROM invalid_transactions) AS transactions
+                      FROM transactions
                       LEFT JOIN blocks ON transactions.blockHash = blocks.headerHash
                       WHERE transactions.dataHash = \("x'" + hash.hex + "'")                    
                       """
@@ -628,7 +628,7 @@ extension GrdbStorage: IStorage {
         return fullInfo(forTransactions: [transactionWithBlock]).first
     }
 
-    public func fullTransactionsInfo(fromTimestamp: Int?, fromOrder: Int?, limit: Int?) -> [FullTransactionForInfo] {
+    public func validOrInvalidTransactionsFullInfo(fromTimestamp: Int?, fromOrder: Int?, limit: Int?) -> [FullTransactionForInfo] {
         var transactions = [TransactionWithBlock]()
 
         try! dbPool.read { db in

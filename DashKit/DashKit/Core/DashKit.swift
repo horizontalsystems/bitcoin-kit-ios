@@ -184,7 +184,7 @@ extension DashKit: BitcoinCoreDelegate {
 extension DashKit: IInstantTransactionDelegate {
 
     public func onUpdateInstant(transactionHash: Data) {
-        guard let transaction = storage.fullTransactionInfo(byHash: transactionHash) else {
+        guard let transaction = storage.transactionFullInfo(byHash: transactionHash) else {
             return
         }
         let transactionInfo = dashTransactionInfoConverter.transactionInfo(fromTransaction: transaction)

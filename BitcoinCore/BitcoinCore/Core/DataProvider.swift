@@ -94,7 +94,7 @@ extension DataProvider: IDataProvider {
                 resolvedOrder = transaction.order
             }
 
-            let transactions = self.storage.fullTransactionsInfo(fromTimestamp: resolvedTimestamp, fromOrder: resolvedOrder, limit: limit)
+            let transactions = self.storage.validOrInvalidTransactionsFullInfo(fromTimestamp: resolvedTimestamp, fromOrder: resolvedOrder, limit: limit)
 
             observer(.success(transactions.map() { self.transactionInfoConverter.transactionInfo(fromTransaction: $0) }))
             return Disposables.create()
