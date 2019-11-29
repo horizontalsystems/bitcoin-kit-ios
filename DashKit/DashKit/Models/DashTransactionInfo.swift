@@ -7,8 +7,8 @@ public class DashTransactionInfo: TransactionInfo {
         case instantTx
     }
 
-    public required init(transactionHash: String, transactionIndex: Int, from: [TransactionAddressInfo], to: [TransactionAddressInfo], amount: Int, fee: Int?, blockHeight: Int?, timestamp: Int, status: TransactionStatus) {
-        super.init(transactionHash: transactionHash, transactionIndex: transactionIndex, from: from, to: to, amount: amount, fee: fee, blockHeight: blockHeight, timestamp: timestamp, status: status)
+    public required init(uid: String, transactionHash: String, transactionIndex: Int, from: [TransactionAddressInfo], to: [TransactionAddressInfo], amount: Int, fee: Int?, blockHeight: Int?, timestamp: Int, status: TransactionStatus) {
+        super.init(uid: uid, transactionHash: transactionHash, transactionIndex: transactionIndex, from: from, to: to, amount: amount, fee: fee, blockHeight: blockHeight, timestamp: timestamp, status: status)
     }
 
     public required init(from decoder: Decoder) throws {

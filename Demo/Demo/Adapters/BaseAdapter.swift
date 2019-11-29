@@ -31,6 +31,7 @@ class BaseAdapter {
         }
 
         return TransactionRecord(
+                uid: transaction.uid,
                 transactionHash: transaction.transactionHash,
                 status: TransactionStatus(rawValue: transaction.status.rawValue) ?? TransactionStatus.new,
                 transactionIndex: transaction.transactionIndex,
@@ -51,8 +52,8 @@ class BaseAdapter {
         return NSDecimalNumber(decimal: coinValue).rounding(accordingToBehavior: handler).intValue
     }
 
-    func transactionsSingle(fromHash: String?, fromTimestamp: Int?, limit: Int) -> Single<[TransactionRecord]> {
-        abstractKit.transactions(fromHash: fromHash, fromTimestamp: fromTimestamp, limit: limit)
+    func transactionsSingle(fromUid: String?, limit: Int) -> Single<[TransactionRecord]> {
+        abstractKit.transactions(fromUid: fromUid, limit: limit)
                 .map { [weak self] transactions -> [TransactionRecord] in
                     transactions.compactMap {
                         self?.transactionRecord(fromTransaction: $0)

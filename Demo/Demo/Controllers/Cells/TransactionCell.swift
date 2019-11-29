@@ -42,6 +42,7 @@ class TransactionCell: UITableViewCell {
         }
 
         set(string: """
+                    UID:
                     Tx Hash:
                     Tx Status:
                     Tx Index:
@@ -55,6 +56,7 @@ class TransactionCell: UITableViewCell {
                     """, alignment: .left, label: titleLabel)
 
         set(string: """
+                    \(format(hash: transaction.uid))
                     \(format(hash: transaction.transactionHash))
                     \(transaction.status)
                     \(transaction.transactionIndex)
@@ -106,7 +108,7 @@ extension TransactionCell {
 
     static func rowHeight(for transaction: TransactionRecord) -> Int {
         let addressRowsCount = transaction.to.reduce(0) { $0 + rowsCount(address: $1) } + transaction.from.count
-        var height = (addressRowsCount + 7) * 22 + 10
+        var height = (addressRowsCount + 8) * 22 + 10
 
         if transaction.transactionExtraType != nil {
             height += 20

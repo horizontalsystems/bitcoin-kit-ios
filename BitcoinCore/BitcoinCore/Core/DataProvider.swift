@@ -77,13 +77,12 @@ extension DataProvider: IBlockchainDataListener {
 
 extension DataProvider: IDataProvider {
 
-    func transactions(fromHash: String?, fromTimestamp: Int?, limit: Int?) -> Single<[TransactionInfo]> {
+    func transactions(fromUid: String?, limit: Int?) -> Single<[TransactionInfo]> {
         Single.create { observer in
             var resolvedTimestamp: Int? = nil
             var resolvedOrder: Int? = nil
 
-            if let fromHash = fromHash, let fromHashData = Data(hex: fromHash), let fromTimestamp = fromTimestamp,
-               let transaction = self.storage.validOrInvalidTransaction(byHash: Data(fromHashData.reversed()), timestamp: fromTimestamp) {
+            if let fromUid = fromUid, let transaction = self.storage.validOrInvalidTransaction(byUid: fromUid) {
                 resolvedTimestamp = transaction.timestamp
                 resolvedOrder = transaction.order
             }

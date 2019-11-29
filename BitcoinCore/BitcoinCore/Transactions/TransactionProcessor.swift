@@ -140,7 +140,7 @@ extension TransactionProcessor: ITransactionProcessor {
             let transaction = transactionFullInfo.transactionWithBlock.transaction
 
             return InvalidTransaction(
-                    dataHash: transaction.dataHash, version: transaction.version, lockTime: transaction.lockTime, timestamp: transaction.timestamp,
+                    uid: transaction.uid, dataHash: transaction.dataHash, version: transaction.version, lockTime: transaction.lockTime, timestamp: transaction.timestamp,
                     order: transaction.order, blockHash: transaction.blockHash, isMine: transaction.isMine, isOutgoing: transaction.isOutgoing,
                     status: transaction.status, segWit: transaction.segWit,
                     transactionInfoJson: transactionInfoJson

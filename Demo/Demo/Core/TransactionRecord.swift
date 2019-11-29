@@ -1,6 +1,7 @@
 import Foundation
 
 struct TransactionRecord {
+    let uid: String
     let transactionHash: String
     let status: TransactionStatus
     let transactionIndex: Int

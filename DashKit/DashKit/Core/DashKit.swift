@@ -148,8 +148,8 @@ public class DashKit: AbstractKit {
         try super.send(to: address, value: value, feeRate: feeRate)
     }
 
-    public func transactions(fromHash: String?, fromTimestamp: Int?, limit: Int?) -> Single<[DashTransactionInfo]> {
-        super.transactions(fromHash: fromHash, fromTimestamp: fromTimestamp, limit: limit).map { self.cast(transactionInfos: $0) }
+    public func transactions(fromUid: String?, limit: Int?) -> Single<[DashTransactionInfo]> {
+        super.transactions(fromUid: fromUid, limit: limit).map { self.cast(transactionInfos: $0) }
     }
 
 }

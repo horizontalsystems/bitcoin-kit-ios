@@ -6,11 +6,12 @@ public class InvalidTransaction: Transaction {
 
     let transactionInfoJson: Data
 
-    init(dataHash: Data, version: Int, lockTime: Int, timestamp: Int, order: Int, blockHash: Data?, isMine: Bool, isOutgoing: Bool, status: TransactionStatus, segWit: Bool, transactionInfoJson: Data) {
+    init(uid: String, dataHash: Data, version: Int, lockTime: Int, timestamp: Int, order: Int, blockHash: Data?, isMine: Bool, isOutgoing: Bool, status: TransactionStatus, segWit: Bool, transactionInfoJson: Data) {
         self.transactionInfoJson = transactionInfoJson
 
         super.init()
 
+        self.uid = uid
         self.dataHash = dataHash
         self.version = version
         self.lockTime = lockTime

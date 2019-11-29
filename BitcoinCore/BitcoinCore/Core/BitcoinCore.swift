@@ -163,8 +163,8 @@ extension BitcoinCore {
         kitStateProvider.syncState
     }
 
-    public func transactions(fromHash: String? = nil, fromTimestamp: Int? = nil, limit: Int? = nil) -> Single<[TransactionInfo]> {
-        dataProvider.transactions(fromHash: fromHash, fromTimestamp: fromTimestamp, limit: limit)
+    public func transactions(fromUid: String? = nil, limit: Int? = nil) -> Single<[TransactionInfo]> {
+        dataProvider.transactions(fromUid: fromUid, limit: limit)
     }
 
     public func send(to address: String, value: Int, feeRate: Int, pluginData: [UInt8: IPluginData] = [:]) throws -> FullTransaction {

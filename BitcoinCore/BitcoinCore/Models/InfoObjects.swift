@@ -1,6 +1,7 @@
 import Foundation
 
 open class TransactionInfo: ITransactionInfo, Codable {
+    public let uid: String
     public let transactionHash: String
     public let transactionIndex: Int
     public let from: [TransactionAddressInfo]
@@ -11,8 +12,9 @@ open class TransactionInfo: ITransactionInfo, Codable {
     public let timestamp: Int
     public let status: TransactionStatus
 
-    public required init(transactionHash: String, transactionIndex: Int, from: [TransactionAddressInfo], to: [TransactionAddressInfo], amount: Int, fee: Int?, blockHeight: Int?,
+    public required init(uid: String, transactionHash: String, transactionIndex: Int, from: [TransactionAddressInfo], to: [TransactionAddressInfo], amount: Int, fee: Int?, blockHeight: Int?,
                          timestamp: Int, status: TransactionStatus) {
+        self.uid = uid
         self.transactionHash = transactionHash
         self.transactionIndex = transactionIndex
         self.from = from
