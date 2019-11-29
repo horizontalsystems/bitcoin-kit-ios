@@ -49,12 +49,6 @@ class DataProvider {
 extension DataProvider: IBlockchainDataListener {
 
     func onUpdate(updated: [Transaction], inserted: [Transaction], inBlock block: Block?) {
-        var blocks = [Block]()
-
-        if let block = block {
-            blocks.append(block)
-        }
-
         delegate?.transactionsUpdated(
                 inserted: storage.fullInfo(forTransactions: inserted.map { TransactionWithBlock(transaction: $0, blockHeight: block?.height) }).map { transactionInfoConverter.transactionInfo(fromTransaction: $0) },
                 updated: storage.fullInfo(forTransactions: updated.map { TransactionWithBlock(transaction: $0, blockHeight: block?.height) }).map { transactionInfoConverter.transactionInfo(fromTransaction: $0) }
