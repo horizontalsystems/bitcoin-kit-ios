@@ -5,6 +5,7 @@ import GRDB
 public enum TransactionStatus: Int, DatabaseValueConvertible, Codable { case new, relayed, invalid }
 
 public class Transaction: Record {
+    public var uid: String
     public var dataHash: Data
     public var version: Int
     public var lockTime: Int
@@ -22,6 +23,7 @@ public class Transaction: Record {
         self.timestamp = timestamp ?? Int(Date().timeIntervalSince1970)
         self.order = 0
         self.dataHash = Data()
+        self.uid = UUID().uuidString
 
         super.init()
     }
@@ -32,6 +34,7 @@ public class Transaction: Record {
     }
 
     enum Columns: String, ColumnExpression, CaseIterable {
+        case uid
         case dataHash
         case version
         case lockTime
@@ -45,6 +48,7 @@ public class Transaction: Record {
     }
 
     required init(row: Row) {
+        uid = row[Columns.uid]
         dataHash = row[Columns.dataHash]
         version = row[Columns.version]
         lockTime = row[Columns.lockTime]
@@ -60,6 +64,7 @@ public class Transaction: Record {
     }
 
     override open func encode(to container: inout PersistenceContainer) {
+        container[Columns.uid] = uid
         container[Columns.dataHash] = dataHash
         container[Columns.version] = version
         container[Columns.lockTime] = lockTime

@@ -68,6 +68,7 @@ public class BaseTransactionInfoConverter: IBaseTransactionInfoConverter {
         }
 
         return T(
+                uid: transaction.uid,
                 transactionHash: transaction.dataHash.reversedHex,
                 transactionIndex: transaction.order,
                 from: fromAddresses,

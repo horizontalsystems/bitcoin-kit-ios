@@ -90,6 +90,7 @@ open class GrdbStorage {
 
         migrator.registerMigration("createTransactions") { db in
             try db.create(table: Transaction.databaseTableName) { t in
+                t.column(Transaction.Columns.uid.name, .text).notNull()
                 t.column(Transaction.Columns.dataHash.name, .text).notNull()
                 t.column(Transaction.Columns.version.name, .integer).notNull()
                 t.column(Transaction.Columns.lockTime.name, .integer).notNull()
@@ -178,6 +179,7 @@ open class GrdbStorage {
 
         migrator.registerMigration("createInvalidTransactions") { db in
             try db.create(table: InvalidTransaction.databaseTableName) { t in
+                t.column(Transaction.Columns.uid.name, .text).notNull()
                 t.column(Transaction.Columns.dataHash.name, .text).notNull()
                 t.column(Transaction.Columns.version.name, .integer).notNull()
                 t.column(Transaction.Columns.lockTime.name, .integer).notNull()
@@ -471,7 +473,7 @@ extension GrdbStorage: IStorage {
         }
     }
 
-    public func validOrInvalidTransaction(byHash hash: Data, timestamp: Int) -> Transaction? {
+    public func validOrInvalidTransaction(byUid uid: String) -> Transaction? {
         try! dbPool.read { db in
             let transactionC = Transaction.Columns.allCases.count
 
@@ -482,10 +484,10 @@ extension GrdbStorage: IStorage {
             let sql = """
                       SELECT transactions.* 
                       FROM (SELECT transactions.*, x'' AS transactionInfoJson FROM transactions UNION ALL SELECT * FROM invalid_transactions) AS transactions 
-                      WHERE transactions.dataHash = ? AND timestamp = ? 
+                      WHERE transactions.uid = ? 
                       """
 
-            let rows = try Row.fetchCursor(db, sql: sql, arguments: [hash, timestamp], adapter: adapter)
+            let rows = try Row.fetchCursor(db, sql: sql, arguments: [uid], adapter: adapter)
 
             if let row = try rows.next() {
                 return row["transaction"]
