@@ -128,8 +128,9 @@ extension TransactionProcessor: ITransactionProcessor {
             return
         }
 
+        invalidTransactionsFullInfo.forEach { $0.transactionWithBlock.transaction.status = .invalid }
+
         let invalidTransactions: [InvalidTransaction] = invalidTransactionsFullInfo.map { transactionFullInfo in
-            transactionFullInfo.transactionWithBlock.transaction.status = .invalid
             let transactionInfo = transactionInfoConverter.transactionInfo(fromTransaction: transactionFullInfo)
             var transactionInfoJson = Data()
             if let jsonData = try? JSONEncoder.init().encode(transactionInfo) {
@@ -148,7 +149,7 @@ extension TransactionProcessor: ITransactionProcessor {
 
 
         try? storage.moveTransactionsTo(invalidTransactions: invalidTransactions)
-        listener?.onUpdate(updated: invalidTransactionsFullInfo.map { $0.transactionWithBlock.transaction }, inserted: [], inBlock: nil)
+        listener?.onUpdate(updated: invalidTransactions, inserted: [], inBlock: nil)
     }
 
     private func descendantTransactionsFullInfo(of transactionHash: Data) -> [FullTransactionForInfo] {
