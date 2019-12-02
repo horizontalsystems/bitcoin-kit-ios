@@ -125,8 +125,7 @@ extension HodlerPlugin: IPlugin {
         output.pluginId = id
         output.pluginData = HodlerOutputData(
                 lockTimeInterval: lockTimeInterval,
-                addressString: (try addressConverter.convert(keyHash: publicKeyHash, type: .p2pkh).stringValue),
-                lockedValue: output.value
+                addressString: (try addressConverter.convert(keyHash: publicKeyHash, type: .p2pkh).stringValue)
         ).toString()
 
         if let publicKey = publicKeyStorage.publicKey(byRawOrKeyHash: publicKeyHash) {

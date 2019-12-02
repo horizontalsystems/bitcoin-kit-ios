@@ -3,7 +3,6 @@ import BitcoinCore
 public class HodlerOutputData: IPluginOutputData {
     public let lockTimeInterval: HodlerPlugin.LockTimeInterval
     public let addressString: String
-    public let lockedValue: Int
     public var approximateUnlockTime: Int? = nil
 
     static func parse(serialized: String?) throws -> HodlerOutputData {
@@ -13,31 +12,28 @@ public class HodlerOutputData: IPluginOutputData {
 
         let parts = serialized.split(separator: "|")
 
-        guard parts.count == 3 else {
+        guard parts.count == 2 else {
             throw HodlerPluginError.invalidData
         }
 
         let lockTimeIntervalStr = String(parts[0])
         let addressString = String(parts[1])
-        let lockedValueString = String(parts[2])
 
-        guard let int16 = UInt16(lockTimeIntervalStr), let lockTimeInterval = HodlerPlugin.LockTimeInterval(rawValue: int16),
-              let lockedValue = Int(lockedValueString) else {
+        guard let int16 = UInt16(lockTimeIntervalStr), let lockTimeInterval = HodlerPlugin.LockTimeInterval(rawValue: int16) else {
             throw HodlerPluginError.invalidData
         }
 
 
-        return HodlerOutputData(lockTimeInterval: lockTimeInterval, addressString: addressString, lockedValue: lockedValue)
+        return HodlerOutputData(lockTimeInterval: lockTimeInterval, addressString: addressString)
     }
 
-    init(lockTimeInterval: HodlerPlugin.LockTimeInterval, addressString: String, lockedValue: Int) {
+    init(lockTimeInterval: HodlerPlugin.LockTimeInterval, addressString: String) {
         self.lockTimeInterval = lockTimeInterval
         self.addressString = addressString
-        self.lockedValue = lockedValue
     }
 
     func toString() -> String {
-        "\(lockTimeInterval.rawValue)|\(addressString)|\(lockedValue)"
+        "\(lockTimeInterval.rawValue)|\(addressString)"
     }
 
 }
