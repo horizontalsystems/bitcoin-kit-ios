@@ -24,7 +24,10 @@ class TransactionCell: UITableViewCell {
         let from = transaction.from.map { from -> String in
             var string = format(hash: from.address)
             if from.mine {
-                string += " (mine)"
+                string += "(mine)"
+            }
+            if let value = from.value {
+                string += "(\(value))"
             }
             return string
         }
@@ -32,7 +35,13 @@ class TransactionCell: UITableViewCell {
         let to = transaction.to.map { to -> String in
             var string = format(hash: to.address)
             if to.mine {
-                string += " (mine)"
+                string += "(mine)"
+            }
+            if let value = to.value {
+                string += "(\(value))"
+            }
+            if to.changeOutput {
+                string += "(change)"
             }
             if let pluginId = to.pluginId, let pluginData = to.pluginData, pluginId == HodlerPlugin.id, let hodlerData = pluginData as? HodlerOutputData {
                 string += "\nLocked Until: \(TransactionCell.dateFormatter.string(from: Date(timeIntervalSince1970: Double(hodlerData.approximateUnlockTime!))))  <-"
@@ -108,7 +117,7 @@ extension TransactionCell {
 
     static func rowHeight(for transaction: TransactionRecord) -> Int {
         let addressRowsCount = transaction.to.reduce(0) { $0 + rowsCount(address: $1) } + transaction.from.count
-        var height = (addressRowsCount + 8) * 22 + 10
+        var height = (addressRowsCount + 8) * 21 + 10
 
         if transaction.transactionExtraType != nil {
             height += 20

@@ -28,7 +28,8 @@ public class Output: Record {
     public var lockingScript: Data
     public var index: Int
     public var transactionHash: Data
-    public var publicKeyPath: String? = nil
+    private(set) var publicKeyPath: String? = nil
+    private(set) var changeOutput: Bool = false
     public var scriptType: ScriptType = .unknown
     public var redeemScript: Data? = nil
     public var keyHash: Data? = nil
@@ -37,6 +38,11 @@ public class Output: Record {
     public var pluginId: UInt8? = nil
     public var pluginData: String? = nil
     public var signatureScriptFunction: (([Data]) -> Data)? = nil
+
+    public func set(publicKey: PublicKey) {
+        self.publicKeyPath = publicKey.path
+        self.changeOutput = !publicKey.external
+    }
 
     public init(withValue value: Int, index: Int, lockingScript script: Data, transactionHash: Data = Data(), type: ScriptType = .unknown, redeemScript: Data? = nil, address: String? = nil, keyHash: Data? = nil, publicKey: PublicKey? = nil) {
         self.value = value
@@ -47,9 +53,12 @@ public class Output: Record {
         self.redeemScript = redeemScript
         self.address = address
         self.keyHash = keyHash
-        self.publicKeyPath = publicKey?.path
 
         super.init()
+
+        if let publicKey = publicKey {
+            set(publicKey: publicKey)
+        }
     }
 
     override open class var databaseTableName: String {
@@ -62,6 +71,7 @@ public class Output: Record {
         case index
         case transactionHash
         case publicKeyPath
+        case changeOutput
         case scriptType
         case redeemScript
         case keyHash
@@ -76,6 +86,7 @@ public class Output: Record {
         index = row[Columns.index]
         transactionHash = row[Columns.transactionHash]
         publicKeyPath = row[Columns.publicKeyPath]
+        changeOutput = row[Columns.changeOutput]
         scriptType = row[Columns.scriptType]
         redeemScript = row[Columns.redeemScript]
         keyHash = row[Columns.keyHash]
@@ -92,6 +103,7 @@ public class Output: Record {
         container[Columns.index] = index
         container[Columns.transactionHash] = transactionHash
         container[Columns.publicKeyPath] = publicKeyPath
+        container[Columns.changeOutput] = changeOutput
         container[Columns.scriptType] = scriptType
         container[Columns.redeemScript] = redeemScript
         container[Columns.keyHash] = keyHash
