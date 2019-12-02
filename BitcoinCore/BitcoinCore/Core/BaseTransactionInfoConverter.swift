@@ -14,67 +14,41 @@ public class BaseTransactionInfoConverter: IBaseTransactionInfoConverter {
             return invalidTransactionInfo
         }
 
-        var totalMineInput: Int = 0
-        var totalMineOutput: Int = 0
-        var fromAddresses = [TransactionAddressInfo]()
-        var toAddresses = [TransactionAddressInfo]()
-        var hasOnlyMyInputs = true
+        var inputsInfo = [TransactionInputInfo]()
+        var outputsInfo = [TransactionOutputInfo]()
         let transaction = transactionForInfo.transactionWithBlock.transaction
         let transactionTimestamp = transaction.timestamp
 
         for inputWithPreviousOutput in transactionForInfo.inputsWithPreviousOutputs {
             var mine = false
+            var value: Int? = nil
 
             if let previousOutput = inputWithPreviousOutput.previousOutput, previousOutput.publicKeyPath != nil {
-                totalMineInput += previousOutput.value
+                value = previousOutput.value
                 mine = true
-            } else {
-                hasOnlyMyInputs = false
             }
 
-            if let address = inputWithPreviousOutput.input.address {
-                fromAddresses.append(TransactionAddressInfo(address: address, mine: mine))
-            }
+            inputsInfo.append(TransactionInputInfo(mine: mine, address: inputWithPreviousOutput.input.address, value: value))
         }
 
         for output in transactionForInfo.outputs {
-            var mine = false
+            let outputInfo = TransactionOutputInfo(mine: output.publicKeyPath != nil, changeOutput: output.changeOutput, value: output.value, address: output.address)
 
-            if output.publicKeyPath != nil {
-                totalMineOutput += output.value
-                mine = true
+            if let pluginId = output.pluginId, let pluginDataString = output.pluginData {
+                outputInfo.pluginId = pluginId
+                outputInfo.pluginDataString = pluginDataString
+                outputInfo.pluginData = pluginManager.parsePluginData(fromPlugin: pluginId, pluginDataString: pluginDataString, transactionTimestamp: transactionTimestamp)
             }
 
-            if let address = output.address {
-                let addressInfo = TransactionAddressInfo(address: address, mine: mine)
-
-                if let pluginId = output.pluginId, let pluginDataString = output.pluginData {
-                    addressInfo.pluginId = pluginId
-                    addressInfo.pluginDataString = pluginDataString
-                    addressInfo.pluginData = pluginManager.parsePluginData(fromPlugin: pluginId, pluginDataString: pluginDataString, transactionTimestamp: transactionTimestamp)
-                }
-
-                toAddresses.append(addressInfo)
-            }
-        }
-
-        var amount = totalMineOutput - totalMineInput
-
-        var resolvedFee: Int? = nil
-        if hasOnlyMyInputs {
-            let fee = totalMineInput - transactionForInfo.outputs.reduce(0) { totalOutput, output in totalOutput + output.value }
-            amount += fee
-            resolvedFee = fee
+            outputsInfo.append(outputInfo)
         }
 
         return T(
                 uid: transaction.uid,
                 transactionHash: transaction.dataHash.reversedHex,
                 transactionIndex: transaction.order,
-                from: fromAddresses,
-                to: toAddresses,
-                amount: amount,
-                fee: resolvedFee,
+                inputs: inputsInfo,
+                outputs: outputsInfo,
                 blockHeight: transactionForInfo.transactionWithBlock.blockHeight,
                 timestamp: transactionTimestamp,
                 status: transaction.status
@@ -90,7 +64,7 @@ public class BaseTransactionInfoConverter: IBaseTransactionInfoConverter {
             return nil
         }
 
-        for addressInfo in transactionInfo.to {
+        for addressInfo in transactionInfo.outputs {
             if let pluginId = addressInfo.pluginId, let pluginDataString = addressInfo.pluginDataString {
                 addressInfo.pluginData = pluginManager.parsePluginData(fromPlugin: pluginId, pluginDataString: pluginDataString, transactionTimestamp: invalidTransaction.timestamp)
             }

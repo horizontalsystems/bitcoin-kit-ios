@@ -4,23 +4,19 @@ open class TransactionInfo: ITransactionInfo, Codable {
     public let uid: String
     public let transactionHash: String
     public let transactionIndex: Int
-    public let from: [TransactionAddressInfo]
-    public let to: [TransactionAddressInfo]
-    public let amount: Int
-    public let fee: Int?
+    public let inputs: [TransactionInputInfo]
+    public let outputs: [TransactionOutputInfo]
     public let blockHeight: Int?
     public let timestamp: Int
     public let status: TransactionStatus
 
-    public required init(uid: String, transactionHash: String, transactionIndex: Int, from: [TransactionAddressInfo], to: [TransactionAddressInfo], amount: Int, fee: Int?, blockHeight: Int?,
+    public required init(uid: String, transactionHash: String, transactionIndex: Int, inputs: [TransactionInputInfo], outputs: [TransactionOutputInfo], blockHeight: Int?,
                          timestamp: Int, status: TransactionStatus) {
         self.uid = uid
         self.transactionHash = transactionHash
         self.transactionIndex = transactionIndex
-        self.from = from
-        self.to = to
-        self.amount = amount
-        self.fee = fee
+        self.inputs = inputs
+        self.outputs = outputs
         self.blockHeight = blockHeight
         self.timestamp = timestamp
         self.status = status
@@ -28,21 +24,38 @@ open class TransactionInfo: ITransactionInfo, Codable {
 
 }
 
-public class TransactionAddressInfo: Codable {
-    public let address: String
+public class TransactionInputInfo: Codable {
     public let mine: Bool
+    public let address: String?
+    public let value: Int?
+
+    public init(mine: Bool, address: String?, value: Int?) {
+        self.mine = mine
+        self.address = address
+        self.value = value
+    }
+
+}
+
+public class TransactionOutputInfo: Codable {
+    public let mine: Bool
+    public let changeOutput: Bool
+    public let value: Int
+    public let address: String?
     public var pluginId: UInt8? = nil
     public var pluginData: IPluginOutputData? = nil
 
     var pluginDataString: String? = nil
 
     private enum CodingKeys: String, CodingKey {
-        case address, mine, pluginId, pluginDataString
+        case mine, changeOutput, value, address, pluginId, pluginDataString
     }
 
-    public init(address: String, mine: Bool) {
-        self.address = address
+    public init(mine: Bool, changeOutput: Bool, value: Int, address: String?) {
         self.mine = mine
+        self.changeOutput = changeOutput
+        self.value = value
+        self.address = address
     }
 
 }

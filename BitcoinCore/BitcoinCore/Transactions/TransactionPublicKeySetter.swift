@@ -18,14 +18,14 @@ extension TransactionPublicKeySetter: ITransactionPublicKeySetter {
             }
             if output.scriptType == .p2sh {
                 if let publicKey = storage.publicKey(byScriptHashForP2WPKH: correctKey) {
-                    output.publicKeyPath = publicKey.path
+                    output.set(publicKey: publicKey)
                     output.keyHash = publicKey.keyHash
                     output.scriptType = .p2wpkhSh
                     return true
                 }
             }
             if let publicKey = storage.publicKey(byRawOrKeyHash: correctKey) {
-                output.publicKeyPath = publicKey.path
+                output.set(publicKey: publicKey)
                 return true
             }
         }

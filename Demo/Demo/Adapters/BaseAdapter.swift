@@ -2,7 +2,7 @@ import BitcoinCore
 import RxSwift
 
 class BaseAdapter {
-    var feeRate: Int { return 3 }
+    var feeRate: Int { 3 }
     private let coinRate: Decimal = pow(10, 8)
 
     let name: String
@@ -22,12 +22,41 @@ class BaseAdapter {
     }
 
     func transactionRecord(fromTransaction transaction: TransactionInfo) -> TransactionRecord {
-        let fromAddresses = transaction.from.map {
-            TransactionAddress(address: $0.address, mine: $0.mine, pluginId: $0.pluginId, pluginData: $0.pluginData)
+        var totalMineInput: Int = 0
+        var totalMineOutput: Int = 0
+        var fromAddresses = [TransactionAddress]()
+        var toAddresses = [TransactionAddress]()
+        var hasOnlyMyInputs = true
+
+        for input in transaction.inputs {
+            if let value = input.value {
+                totalMineInput += value
+            } else {
+                hasOnlyMyInputs = false
+            }
+
+            if let address = input.address {
+                fromAddresses.append(TransactionAddress(address: address, mine: input.mine, value: input.value, changeOutput: false, pluginId: nil, pluginData: nil))
+            }
         }
 
-        let toAddresses = transaction.to.map {
-            TransactionAddress(address: $0.address, mine: $0.mine, pluginId: $0.pluginId, pluginData: $0.pluginData)
+        for output in transaction.outputs {
+            if output.mine {
+                totalMineOutput += output.value
+            }
+
+            if let address = output.address {
+                toAddresses.append(TransactionAddress(address: address, mine: output.mine, value: output.value, changeOutput: output.changeOutput, pluginId: output.pluginId, pluginData: output.pluginData))
+            }
+        }
+
+        var amount = totalMineOutput - totalMineInput
+
+        var resolvedFee: Int? = nil
+        if hasOnlyMyInputs {
+            let fee = totalMineInput - transaction.outputs.reduce(0) { totalOutput, output in totalOutput + output.value }
+            amount += fee
+            resolvedFee = fee
         }
 
         return TransactionRecord(
@@ -35,8 +64,8 @@ class BaseAdapter {
                 transactionHash: transaction.transactionHash,
                 status: TransactionStatus(rawValue: transaction.status.rawValue) ?? TransactionStatus.new,
                 transactionIndex: transaction.transactionIndex,
-                amount: Decimal(transaction.amount) / coinRate,
-                fee: transaction.fee.map { Decimal($0) / coinRate },
+                amount: Decimal(amount) / coinRate,
+                fee: resolvedFee.map { Decimal($0) / coinRate },
                 timestamp: Double(transaction.timestamp),
                 from: fromAddresses,
                 to: toAddresses,

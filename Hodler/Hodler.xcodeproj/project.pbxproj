@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		2FA5D676B12FF745A5911E40 /* HodlerOutputData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D16242CA2BBD78ABA8F7 /* HodlerOutputData.swift */; };
 		2FA5DB215A38A4F6277888A0 /* BitcoinCoreCompatibility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D1B1BA629A90DD6D5518 /* BitcoinCoreCompatibility.swift */; };
-		2FA5DDA7206D8B8B0881996E /* HolderPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D842CADC75745AFA6132 /* HolderPlugin.swift */; };
+		2FA5DDA7206D8B8B0881996E /* HodlerPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D842CADC75745AFA6132 /* HodlerPlugin.swift */; };
 		2FA5DEA1754CDB45EC4A9121 /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DCF61FBD89DA0929333A /* Protocols.swift */; };
 		2FA5DFD7EB28DC948E522511 /* HodlerPluginTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DD5BC8908C5BD7499253 /* HodlerPluginTests.swift */; };
 		ABFFF88A886209596FE87ABE /* Pods_Hodler.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 07C4E7D9B6ADC34E17C2BC97 /* Pods_Hodler.framework */; };
@@ -49,7 +49,7 @@
 		07C4E7D9B6ADC34E17C2BC97 /* Pods_Hodler.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Hodler.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2FA5D16242CA2BBD78ABA8F7 /* HodlerOutputData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HodlerOutputData.swift; sourceTree = "<group>"; };
 		2FA5D1B1BA629A90DD6D5518 /* BitcoinCoreCompatibility.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinCoreCompatibility.swift; sourceTree = "<group>"; };
-		2FA5D842CADC75745AFA6132 /* HolderPlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HolderPlugin.swift; sourceTree = "<group>"; };
+		2FA5D842CADC75745AFA6132 /* HodlerPlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HodlerPlugin.swift; sourceTree = "<group>"; };
 		2FA5DCF61FBD89DA0929333A /* Protocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Protocols.swift; sourceTree = "<group>"; };
 		2FA5DD5BC8908C5BD7499253 /* HodlerPluginTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HodlerPluginTests.swift; sourceTree = "<group>"; };
 		B7CCED1D7FE0793D3696B855 /* Pods-HodlerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HodlerTests.release.xcconfig"; path = "Target Support Files/Pods-HodlerTests/Pods-HodlerTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -103,7 +103,7 @@
 		2FA5D7257FBCFEC95241C2CF /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				2FA5D842CADC75745AFA6132 /* HolderPlugin.swift */,
+				2FA5D842CADC75745AFA6132 /* HodlerPlugin.swift */,
 				2FA5D16242CA2BBD78ABA8F7 /* HodlerOutputData.swift */,
 				2FA5D1B1BA629A90DD6D5518 /* BitcoinCoreCompatibility.swift */,
 				2FA5DCF61FBD89DA0929333A /* Protocols.swift */,
@@ -358,7 +358,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2FA5DDA7206D8B8B0881996E /* HolderPlugin.swift in Sources */,
+				2FA5DDA7206D8B8B0881996E /* HodlerPlugin.swift in Sources */,
 				2FA5D676B12FF745A5911E40 /* HodlerOutputData.swift in Sources */,
 				2FA5DB215A38A4F6277888A0 /* BitcoinCoreCompatibility.swift in Sources */,
 				2FA5DEA1754CDB45EC4A9121 /* Protocols.swift in Sources */,

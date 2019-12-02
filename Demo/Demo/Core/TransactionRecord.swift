@@ -21,6 +21,8 @@ struct TransactionRecord {
 struct TransactionAddress {
     let address: String
     let mine: Bool
+    let value: Int?
+    let changeOutput: Bool
     let pluginId: UInt8?
     let pluginData: Any?
 }

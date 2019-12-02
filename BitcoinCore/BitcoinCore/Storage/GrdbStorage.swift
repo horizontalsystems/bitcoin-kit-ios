@@ -130,6 +130,7 @@ open class GrdbStorage {
                 t.column(Output.Columns.index.name, .integer).notNull()
                 t.column(Output.Columns.transactionHash.name, .text).notNull()
                 t.column(Output.Columns.publicKeyPath.name, .text)
+                t.column(Output.Columns.changeOutput.name, .boolean)
                 t.column(Output.Columns.scriptType.name, .integer)
                 t.column(Output.Columns.keyHash.name, .blob)
                 t.column(Output.Columns.address.name, .text)
