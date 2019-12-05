@@ -6,17 +6,19 @@ open class TransactionInfo: ITransactionInfo, Codable {
     public let transactionIndex: Int
     public let inputs: [TransactionInputInfo]
     public let outputs: [TransactionOutputInfo]
+    public let fee: Int?
     public let blockHeight: Int?
     public let timestamp: Int
     public let status: TransactionStatus
 
-    public required init(uid: String, transactionHash: String, transactionIndex: Int, inputs: [TransactionInputInfo], outputs: [TransactionOutputInfo], blockHeight: Int?,
-                         timestamp: Int, status: TransactionStatus) {
+    public required init(uid: String, transactionHash: String, transactionIndex: Int, inputs: [TransactionInputInfo], outputs: [TransactionOutputInfo],
+                         fee: Int?, blockHeight: Int?, timestamp: Int, status: TransactionStatus) {
         self.uid = uid
         self.transactionHash = transactionHash
         self.transactionIndex = transactionIndex
         self.inputs = inputs
         self.outputs = outputs
+        self.fee = fee
         self.blockHeight = blockHeight
         self.timestamp = timestamp
         self.status = status
