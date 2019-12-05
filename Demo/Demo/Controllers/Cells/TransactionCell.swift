@@ -13,6 +13,7 @@ class TransactionCell: UITableViewCell {
     @IBOutlet weak var titleLabel: UILabel?
     @IBOutlet weak var valueLabel: UILabel?
     @IBOutlet weak var transactionTypeLabel: UILabel?
+    private let coinRate: Decimal = pow(10, 8)
 
     func bind(transaction: TransactionRecord, coinCode: String, lastBlockHeight: Int?) {
         var confirmations = "n/a"
@@ -22,26 +23,26 @@ class TransactionCell: UITableViewCell {
         }
 
         let from = transaction.from.map { from -> String in
-            var string = format(hash: from.address)
+            var string = from.address.flatMap { format(hash: $0) } ?? "Unknown address"
             if from.mine {
                 string += "(mine)"
             }
             if let value = from.value {
-                string += "(\(value))"
+                string += "(\(Decimal(value) / coinRate))"
             }
             return string
         }
 
         let to = transaction.to.map { to -> String in
-            var string = format(hash: to.address)
+            var string = to.address.flatMap { format(hash: $0) } ?? "Unknown address"
             if to.mine {
                 string += "(mine)"
             }
-            if let value = to.value {
-                string += "(\(value))"
-            }
             if to.changeOutput {
                 string += "(change)"
+            }
+            if let value = to.value {
+                string += "(\(Decimal(value) / coinRate))"
             }
             if let pluginId = to.pluginId, let pluginData = to.pluginData, pluginId == HodlerPlugin.id, let hodlerData = pluginData as? HodlerOutputData {
                 string += "\nLocked Until: \(TransactionCell.dateFormatter.string(from: Date(timeIntervalSince1970: Double(hodlerData.approximateUnlockTime!))))  <-"
@@ -51,11 +52,11 @@ class TransactionCell: UITableViewCell {
         }
 
         set(string: """
-                    UID:
                     Tx Hash:
                     Tx Status:
                     Tx Index:
                     Date:
+                    Type:
                     Amount:
                     Fee:
                     Block:
@@ -65,11 +66,11 @@ class TransactionCell: UITableViewCell {
                     """, alignment: .left, label: titleLabel)
 
         set(string: """
-                    \(format(hash: transaction.uid))
                     \(format(hash: transaction.transactionHash))
                     \(transaction.status)
                     \(transaction.transactionIndex)
-                    \(TransactionCell.dateFormatter.string(from: Date(timeIntervalSince1970: transaction.timestamp)))
+                    \(TransactionCell.dateFormatter.string(from: transaction.date))
+                    \(transaction.type.description)
                     \(transaction.amount) \(coinCode)
                     \(transaction.fee?.description ?? "") \(coinCode)
                     \(transaction.blockHeight.map { "# \($0)" } ?? "n/a")
@@ -98,14 +99,14 @@ class TransactionCell: UITableViewCell {
             return hash
         }
 
-        return "\(hash[..<hash.index(hash.startIndex, offsetBy: 10)])...\(hash[hash.index(hash.endIndex, offsetBy: -10)...])"
+        return "\(hash[..<hash.index(hash.startIndex, offsetBy: 8)])...\(hash[hash.index(hash.endIndex, offsetBy: -2)...])"
     }
 
 }
 
 extension TransactionCell {
     
-    static func rowsCount(address: TransactionAddress) -> Int {
+    static func rowsCount(address: TransactionInputOutput) -> Int {
         var rowsCount = 1
 
         if let pluginId = address.pluginId, pluginId == HodlerPlugin.id {

@@ -1,5 +1,6 @@
 import BitcoinCore
 import RxSwift
+import Hodler
 
 class BaseAdapter {
     var feeRate: Int { 3 }
@@ -22,55 +23,98 @@ class BaseAdapter {
     }
 
     func transactionRecord(fromTransaction transaction: TransactionInfo) -> TransactionRecord {
-        var totalMineInput: Int = 0
-        var totalMineOutput: Int = 0
-        var fromAddresses = [TransactionAddress]()
-        var toAddresses = [TransactionAddress]()
-        var hasOnlyMyInputs = true
+        var myInputsTotalValue: Int = 0
+        var myOutputsTotalValue: Int = 0
+        var myChangeOutputsTotalValue: Int = 0
+        var outputsTotalValue: Int = 0
+        var allInputsMine = true
+
+//        var lockInfo: (lockedUntil: Date, originalAddress: String)?
+        var type: TransactionType
+        var from = [TransactionInputOutput]()
+        var to = [TransactionInputOutput]()
+//        var anyNotMineFromAddress: String?
+//        var anyNotMineToAddress: String?
 
         for input in transaction.inputs {
-            if let value = input.value {
-                totalMineInput += value
+            if input.mine {
+                if let value = input.value {
+                    myInputsTotalValue += value
+                }
             } else {
-                hasOnlyMyInputs = false
+                allInputsMine = false
             }
 
-            if let address = input.address {
-                fromAddresses.append(TransactionAddress(address: address, mine: input.mine, value: input.value, changeOutput: false, pluginId: nil, pluginData: nil))
-            }
+            from.append(TransactionInputOutput(
+                    mine: input.mine, address: input.address, value: input.value,
+                    changeOutput: false, pluginId: nil, pluginData: nil
+            ))
+
+//            if anyNotMineFromAddress == nil, let address = input.address {
+//                anyNotMineFromAddress = input.address
+//            }
         }
 
         for output in transaction.outputs {
+            guard output.value > 0 else {
+                continue
+            }
+            
+            outputsTotalValue += output.value
+
             if output.mine {
-                totalMineOutput += output.value
+                myOutputsTotalValue += output.value
+                if output.changeOutput {
+                    myChangeOutputsTotalValue += output.value
+                }
             }
 
-            if let address = output.address {
-                toAddresses.append(TransactionAddress(address: address, mine: output.mine, value: output.value, changeOutput: output.changeOutput, pluginId: output.pluginId, pluginData: output.pluginData))
-            }
+            to.append(TransactionInputOutput(
+                    mine: output.mine, address: output.address, value: output.value,
+                    changeOutput: output.changeOutput, pluginId: output.pluginId, pluginData: output.pluginData
+            ))
+
+//            if let pluginId = output.pluginId, pluginId == HodlerPlugin.id,
+//               let hodlerOutputData = output.pluginData as? HodlerOutputData,
+//               let approximateUnlockTime = hodlerOutputData.approximateUnlockTime {
+//
+//                lockInfo = (lockedUntil: Date(timeIntervalSince1970: Double(approximateUnlockTime)), originalAddress: hodlerOutputData.addressString)
+//            }
+//            if anyNotMineToAddress == nil, let address = output.address {
+//                anyNotMineToAddress = output.address
+//            }
         }
 
-        var amount = totalMineOutput - totalMineInput
+        var amount = myOutputsTotalValue - myInputsTotalValue
 
-        var resolvedFee: Int? = nil
-        if hasOnlyMyInputs {
-            let fee = totalMineInput - transaction.outputs.reduce(0) { totalOutput, output in totalOutput + output.value }
+        if allInputsMine, let fee = transaction.fee {
             amount += fee
-            resolvedFee = fee
         }
+
+        if amount > 0 {
+            type = .incoming
+        } else if amount < 0 {
+            type = .outgoing
+        } else {
+            type = .sentToSelf(enteredAmount: Decimal(myOutputsTotalValue - myChangeOutputsTotalValue) / coinRate)
+        }
+
+//        let from = type == .incoming ? anyNotMineFromAddress : nil
+//        let to = type == .outgoing ? anyNotMineToAddress : nil
 
         return TransactionRecord(
                 uid: transaction.uid,
                 transactionHash: transaction.transactionHash,
-                status: TransactionStatus(rawValue: transaction.status.rawValue) ?? TransactionStatus.new,
                 transactionIndex: transaction.transactionIndex,
-                amount: Decimal(amount) / coinRate,
-                fee: resolvedFee.map { Decimal($0) / coinRate },
-                timestamp: Double(transaction.timestamp),
-                from: fromAddresses,
-                to: toAddresses,
+                interTransactionIndex: 0,
+                status: TransactionStatus(rawValue: transaction.status.rawValue) ?? TransactionStatus.new,
+                type: type,
                 blockHeight: transaction.blockHeight,
-                transactionExtraType: nil
+                amount: Decimal(abs(amount)) / coinRate,
+                fee: transaction.fee.map { Decimal($0) / coinRate },
+                date: Date(timeIntervalSince1970: Double(transaction.timestamp)),
+                from: from,
+                to: to
         )
     }
 

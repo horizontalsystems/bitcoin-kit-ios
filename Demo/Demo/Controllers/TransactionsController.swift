@@ -102,7 +102,7 @@ class TransactionsController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        UIPasteboard.general.setValue(transactions[indexPath.row].transactionHash, forPasteboardType: "public.plain-text")
+        UIPasteboard.general.setValue(transactions[indexPath.row].uid, forPasteboardType: "public.plain-text")
         print(transactions[indexPath.row].transactionHash)
 
         let alert = UIAlertController(title: "Success", message: "Transaction Hash copied", preferredStyle: .alert)
@@ -127,7 +127,7 @@ class TransactionsController: UITableViewController {
 
         loading = true
 
-        let fromUid = transactions.last?.transactionHash
+        let fromUid = transactions.last?.uid
 
         currentAdapter?.transactionsSingle(fromUid: fromUid, limit: limit)
                 .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))

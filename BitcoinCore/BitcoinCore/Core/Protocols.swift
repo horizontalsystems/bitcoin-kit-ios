@@ -429,7 +429,7 @@ protocol IKitStateProviderDelegate: class {
 }
 
 public protocol ITransactionInfo: class {
-    init(uid: String, transactionHash: String, transactionIndex: Int, inputs: [TransactionInputInfo], outputs: [TransactionOutputInfo], blockHeight: Int?, timestamp: Int, status: TransactionStatus)
+    init(uid: String, transactionHash: String, transactionIndex: Int, inputs: [TransactionInputInfo], outputs: [TransactionOutputInfo], fee: Int?, blockHeight: Int?, timestamp: Int, status: TransactionStatus)
 }
 
 public protocol ITransactionInfoConverter {
