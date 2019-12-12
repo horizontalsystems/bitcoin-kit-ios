@@ -1,30 +1,35 @@
-Pod::Spec.new do |spec|
-  spec.name = 'BitcoinKit.swift'
-  spec.module_name = 'BitcoinKit'
-  spec.version = '0.10.0'
-  spec.summary = 'Bitcoin library for Swift'
-  spec.description = <<-DESC
-                       BitcoinKit implements Bitcoin protocol in Swift.
-                       ```
-                    DESC
-  spec.homepage = 'https://github.com/horizontalsystems/bitcoin-kit-ios'
-  spec.license = { :type => 'Apache 2.0', :file => 'LICENSE' }
-  spec.author = { 'Horizontal Systems' => 'hsdao@protonmail.ch' }
-  spec.social_media_url = 'http://horizontalsystems.io/'
+Pod::Spec.new do |s|
+  s.name             = 'BitcoinKit.swift'
+  s.module_name      = 'BitcoinKit'
+  s.version          = '0.11.0'
+  s.summary          = 'Bitcoin library for Swift.'
 
-  spec.requires_arc = true
-  spec.source = { git: 'https://github.com/horizontalsystems/bitcoin-kit-ios.git', tag: "#{spec.version}" }
-  spec.source_files = 'BitcoinKit/BitcoinKit/**/*.{h,m,swift}'
-  spec.ios.deployment_target = '11.0'
-  spec.swift_version = '5'
+  s.description      = <<-DESC
+BitcoinKit implements Bitcoin protocol in Swift.
+                       DESC
 
-  spec.dependency 'BitcoinCore.swift', '~> 0.10.0'
-  spec.dependency 'Hodler.swift', '~> 0.10.0'
-  spec.dependency 'HSCryptoKit', '~> 1.4'
-  spec.dependency 'HSHDWalletKit', '~> 1.2'
-  spec.dependency 'Alamofire', '~> 4.0'
-  spec.dependency 'ObjectMapper', '~> 3.0'
-  spec.dependency 'RxSwift', '~> 5.0'
-  spec.dependency 'BigInt', '~> 4.0'
-  spec.dependency 'GRDB.swift', '~> 4.0'
+  s.homepage         = 'https://github.com/horizontalsystems/bitcoin-kit-ios'
+  s.license          = { :type => 'MIT', :file => 'LICENSE' }
+  s.author           = { 'Horizontal Systems' => 'hsdao@protonmail.ch' }
+  s.source           = { git: 'https://github.com/horizontalsystems/bitcoin-kit-ios.git', tag: "#{s.version}" }
+  s.social_media_url = 'http://horizontalsystems.io/'
+
+  s.ios.deployment_target = '11.0'
+  s.swift_version = '5'
+
+  s.source_files = 'BitcoinKit/Classes/**/*'
+
+  s.requires_arc = true
+
+  s.dependency 'BitcoinCore.swift', '~> 0.11.0'
+  s.dependency 'Hodler.swift', '~> 0.11.0'
+  s.dependency 'OpenSslKit.swift', '~> 1.0'
+  s.dependency 'Secp256k1Kit.swift', '~> 1.0'
+  s.dependency 'HSHDWalletKit', '~> 1.3'
+
+  s.dependency 'Alamofire', '~> 4.0'
+  s.dependency 'ObjectMapper', '~> 3.0'
+  s.dependency 'RxSwift', '~> 5.0'
+  s.dependency 'BigInt', '~> 4.0'
+  s.dependency 'GRDB.swift', '~> 4.0'
 end
