@@ -300,16 +300,18 @@ $ pod install
 
 All features of the library are used in example project. It can be referred as a starting point for usage of the library.
 
-* [Example Project](https://github.com/horizontalsystems/bitcoin-kit-ios/tree/master/HSBitcoinKitDemo)
+* [Example Project](https://github.com/horizontalsystems/bitcoin-kit-ios/tree/master/Example)
 
 ## Dependencies
 
 * [HSHDWalletKit](https://github.com/horizontalsystems/hd-wallet-kit-ios) - HD Wallet related features, mnemonic phrase generation.
-* [HSCryptoKit](https://github.com/horizontalsystems/crypto-kit-ios) - Crypto functions required for working with blockchain.
+* [OpenSslKit.swift](https://github.com/horizontalsystems/open-ssl-kit-ios) - Crypto functions required for working with blockchain.
+* [Secp256k1Kit.swift](https://github.com/horizontalsystems/secp256k1-kit-ios) - Crypto functions required for working with blockchain.
 
 ### Dash dependencies
-* [CryptoBLS.swift](https://github.com/horizontalsystems/crypto-bls-ios)
-* [CryptoX11.swift](https://github.com/horizontalsystems/crypto-x11-ios)
+
+* [BlsKit.swift](https://github.com/horizontalsystems/bls-kit-ios)
+* [X11Kit.swift](https://github.com/horizontalsystems/x11-kit-ios)
 
 ## License
 

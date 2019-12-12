@@ -1,6 +1,8 @@
+# OS X
+.DS_Store
+
 # Xcode
-.bundle/
-build/*
+build/
 *.pbxuser
 !default.pbxuser
 *.mode1v3
@@ -9,24 +11,17 @@ build/*
 !default.mode2v3
 *.perspectivev3
 !default.perspectivev3
-!default.xcworkspace
-xcuserdata
+xcuserdata/
+*.xccheckout
 profile
 *.moved-aside
-Pods/*
-!Podfile.lock
-.idea/
-.DS_Store
-/.irb-history
-/screenshot_*.png
+DerivedData
+*.hmap
+*.ipa
 
-history_bash.txt
+# Bundler
+.bundle
 
-#Fastlane
-
-fastlane/report.xml
-fastlane/README.md
-
-# Cuckoo
-
+Pods/
+.idea
 GeneratedMocks.swift

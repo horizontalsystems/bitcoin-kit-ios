@@ -1,23 +1,27 @@
-Pod::Spec.new do |spec|
-  spec.name = 'Hodler.swift'
-  spec.module_name = 'Hodler'
-  spec.version = '0.10.0'
-  spec.summary = 'Hodler library for Swift'
-  spec.description = <<-DESC
-                       Hodler plugin enables to send/receive/spend time-locked transactions.
-                       ```
-                    DESC
-  spec.homepage = 'https://github.com/horizontalsystems/bitcoin-kit-ios'
-  spec.license = { :type => 'Apache 2.0', :file => 'LICENSE' }
-  spec.author = { 'Horizontal Systems' => 'hsdao@protonmail.ch' }
-  spec.social_media_url = 'http://horizontalsystems.io/'
+Pod::Spec.new do |s|
+  s.name             = 'Hodler.swift'
+  s.module_name      = 'Hodler'
+  s.version          = '0.11.0'
+  s.summary          = 'Hodler library for Swift.'
 
-  spec.requires_arc = true
-  spec.source = { git: 'https://github.com/horizontalsystems/bitcoin-kit-ios.git', tag: "#{spec.version}" }
-  spec.source_files = 'Hodler/Hodler/**/*.{h,m,mm,swift}'
-  spec.ios.deployment_target = '11.0'
-  spec.swift_version = '5'
+  s.description      = <<-DESC
+Hodler plugin enables to send/receive/spend time-locked transactions.
+                       DESC
 
-  spec.dependency 'BitcoinCore.swift', '~> 0.10.0'
-  spec.dependency 'HSCryptoKit', '~> 1.4'
+  s.homepage         = 'https://github.com/horizontalsystems/bitcoin-kit-ios'
+  s.license          = { :type => 'MIT', :file => 'LICENSE' }
+  s.author           = { 'Horizontal Systems' => 'hsdao@protonmail.ch' }
+  s.source           = { git: 'https://github.com/horizontalsystems/bitcoin-kit-ios.git', tag: "#{s.version}" }
+  s.social_media_url = 'http://horizontalsystems.io/'
+
+  s.ios.deployment_target = '11.0'
+  s.swift_version = '5'
+
+  s.source_files = 'Hodler/Classes/**/*'
+
+  s.requires_arc = true
+
+  s.dependency 'BitcoinCore.swift', '~> 0.11.0'
+  s.dependency 'OpenSslKit.swift', '~> 1.0'
+  s.dependency 'Secp256k1Kit.swift', '~> 1.0'
 end
