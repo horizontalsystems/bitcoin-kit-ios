@@ -1,5 +1,5 @@
 import UIKit
-import HSHDWalletKit
+import HdWalletKit
 
 class WordsController: UIViewController {
 

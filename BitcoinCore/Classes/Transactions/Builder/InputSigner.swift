@@ -1,4 +1,4 @@
-import HSHDWalletKit
+import HdWalletKit
 import OpenSslKit
 import Secp256k1Kit
 

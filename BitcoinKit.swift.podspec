@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name             = 'BitcoinKit.swift'
   s.module_name      = 'BitcoinKit'
-  s.version          = '0.11.0'
+  s.version          = '0.12.0'
   s.summary          = 'Bitcoin library for Swift.'
 
   s.description      = <<-DESC
@@ -21,15 +21,15 @@ BitcoinKit implements Bitcoin protocol in Swift.
 
   s.requires_arc = true
 
-  s.dependency 'BitcoinCore.swift', '~> 0.11.0'
-  s.dependency 'Hodler.swift', '~> 0.11.0'
+  s.dependency 'BitcoinCore.swift', '~> 0.12.0'
+  s.dependency 'Hodler.swift', '~> 0.12.0'
   s.dependency 'OpenSslKit.swift', '~> 1.0'
   s.dependency 'Secp256k1Kit.swift', '~> 1.0'
-  s.dependency 'HSHDWalletKit', '~> 1.3'
+  s.dependency 'HdWalletKit.swift', '~> 1.4'
 
   s.dependency 'Alamofire', '~> 4.0'
   s.dependency 'ObjectMapper', '~> 3.0'
   s.dependency 'RxSwift', '~> 5.0'
-  s.dependency 'BigInt', '~> 4.0'
+  s.dependency 'BigInt', '~> 5.0'
   s.dependency 'GRDB.swift', '~> 4.0'
 end
