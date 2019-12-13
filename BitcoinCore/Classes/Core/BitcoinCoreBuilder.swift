@@ -1,5 +1,5 @@
 import Foundation
-import HSHDWalletKit
+import HdWalletKit
 
 public class BitcoinCoreBuilder {
     public enum BuildError: Error { case noSeedData, noWalletId, noNetwork, noPaymentAddressParser, noAddressSelector, noStorage, noInitialSyncApi }

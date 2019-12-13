@@ -1,4 +1,4 @@
-import HSHDWalletKit
+import HdWalletKit
 import RxSwift
 
 class InitialSyncer {
