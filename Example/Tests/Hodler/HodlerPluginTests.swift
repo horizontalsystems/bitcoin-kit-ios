@@ -84,15 +84,28 @@ class HodlerPluginTests: QuickSpec {
             }
 
             context("recipientAddress not p2pkh") {
-                it("throws unsupportedAddress") {
-                    mutableTransaction.recipientAddress = p2shAddress
-                    do {
-                        try hodler.processOutputs(mutableTransaction: mutableTransaction, pluginData: HodlerData(lockTimeInterval: HodlerPlugin.LockTimeInterval.hour))
-                        fail("Exception expected")
-                    } catch let error as HodlerPluginError {
-                        expect(error).to(equal(HodlerPluginError.unsupportedAddress))
-                    } catch {
-                        fail("Unexpected exception")
+                context("skipChecks is false") {
+                    it("throws unsupportedAddress") {
+                        mutableTransaction.recipientAddress = p2shAddress
+                        do {
+                            try hodler.processOutputs(mutableTransaction: mutableTransaction, pluginData: HodlerData(lockTimeInterval: HodlerPlugin.LockTimeInterval.hour))
+                            fail("Exception expected")
+                        } catch let error as HodlerPluginError {
+                            expect(error).to(equal(HodlerPluginError.unsupportedAddress))
+                        } catch {
+                            fail("Unexpected exception")
+                        }
+                    }
+                }
+
+                context("skipChecks is true") {
+                    it("doesn't throw unsupportedAddress") {
+                        mutableTransaction.recipientAddress = p2shAddress
+                        do {
+                            try hodler.processOutputs(mutableTransaction: mutableTransaction, pluginData: HodlerData(lockTimeInterval: HodlerPlugin.LockTimeInterval.hour))
+                        } catch {
+                            fail("Unexpected exception")
+                        }
                     }
                 }
             }

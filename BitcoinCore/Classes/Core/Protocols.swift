@@ -584,7 +584,7 @@ public protocol IPlugin {
     var id: UInt8 { get }
     var maxSpendLimit: Int? { get }
     func validate(address: Address) throws
-    func processOutputs(mutableTransaction: MutableTransaction, pluginData: IPluginData) throws
+    func processOutputs(mutableTransaction: MutableTransaction, pluginData: IPluginData, skipChecks: Bool) throws
     func processTransactionWithNullData(transaction: FullTransaction, nullDataChunks: inout IndexingIterator<[Chunk]>) throws
     func isSpendable(unspentOutput: UnspentOutput) throws -> Bool
     func inputSequenceNumber(output: Output) throws -> Int
@@ -596,7 +596,7 @@ public protocol IPluginManager {
     func validate(address: Address, pluginData: [UInt8: IPluginData]) throws
     func maxSpendLimit(pluginData: [UInt8: IPluginData]) throws -> Int?
     func add(plugin: IPlugin)
-    func processOutputs(mutableTransaction: MutableTransaction, pluginData: [UInt8: IPluginData]) throws
+    func processOutputs(mutableTransaction: MutableTransaction, pluginData: [UInt8: IPluginData], skipChecks: Bool) throws
     func processInputs(mutableTransaction: MutableTransaction) throws
     func processTransactionWithNullData(transaction: FullTransaction, nullDataOutput: Output) throws
     func isSpendable(unspentOutput: UnspentOutput) -> Bool
@@ -609,7 +609,7 @@ public protocol IBlockMedianTimeHelper {
 }
 
 protocol IOutputSetter {
-    func setOutputs(to mutableTransaction: MutableTransaction, toAddress: String, value: Int, pluginData: [UInt8: IPluginData]) throws
+    func setOutputs(to mutableTransaction: MutableTransaction, toAddress: String, value: Int, pluginData: [UInt8: IPluginData], skipChecks: Bool) throws
 }
 
 protocol IInputSetter {

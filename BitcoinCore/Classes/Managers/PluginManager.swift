@@ -41,13 +41,13 @@ extension PluginManager: IPluginManager {
         plugins[plugin.id] = plugin
     }
 
-    func processOutputs(mutableTransaction: MutableTransaction, pluginData: [UInt8: IPluginData]) throws {
+    func processOutputs(mutableTransaction: MutableTransaction, pluginData: [UInt8: IPluginData], skipChecks: Bool = false) throws {
         for (key, data) in pluginData {
             guard let plugin = plugins[key] else {
                 throw PluginError.pluginNotFound
             }
 
-            try plugin.processOutputs(mutableTransaction: mutableTransaction, pluginData: data)
+            try plugin.processOutputs(mutableTransaction: mutableTransaction, pluginData: data, skipChecks: skipChecks)
         }
     }
 

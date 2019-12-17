@@ -4,6 +4,7 @@ import OpenSslKit
 
 public enum HodlerPluginError: Error {
     case unsupportedAddress
+    case addressNotGiven
     case invalidData
     case lockedValueLimitExceeded
 }
@@ -88,17 +89,23 @@ extension HodlerPlugin: IPlugin {
         }
     }
 
-    public func processOutputs(mutableTransaction: MutableTransaction, pluginData: IPluginData) throws {
+    public func processOutputs(mutableTransaction: MutableTransaction, pluginData: IPluginData, skipChecks: Bool = false) throws {
         guard let hodlerData = pluginData as? HodlerData else {
             throw HodlerPluginError.invalidData
         }
 
-        guard let recipientAddress = mutableTransaction.recipientAddress, recipientAddress.scriptType == .p2pkh else {
-            throw HodlerPluginError.unsupportedAddress
+        guard let recipientAddress = mutableTransaction.recipientAddress else {
+            throw HodlerPluginError.addressNotGiven
         }
 
-        guard mutableTransaction.recipientValue <= HodlerPlugin.lockedValueLimit else {
-            throw HodlerPluginError.lockedValueLimitExceeded
+        if !skipChecks {
+            guard recipientAddress.scriptType == .p2pkh else {
+                throw HodlerPluginError.unsupportedAddress
+            }
+
+            guard mutableTransaction.recipientValue <= HodlerPlugin.lockedValueLimit else {
+                throw HodlerPluginError.lockedValueLimitExceeded
+            }
         }
 
         let redeemScript = csvRedeemScript(lockTimeInterval: hodlerData.lockTimeInterval, publicKeyHash: recipientAddress.keyHash)
