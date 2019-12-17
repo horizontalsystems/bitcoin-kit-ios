@@ -99,7 +99,7 @@ extension DataProvider: IDataProvider {
         let pubKeys = storage.publicKeys().sorted(by: { $0.index < $1.index })
 
         for pubKey in pubKeys {
-            lines.append("acc: \(pubKey.account) - inx: \(pubKey.index) - ext: \(pubKey.external) : \((try! addressConverter.convert(keyHash: pubKey.keyHash, type: scriptType)).stringValue)")
+            lines.append("acc: \(pubKey.account) - inx: \(pubKey.index) - ext: \(pubKey.external) : \((try! addressConverter.convert(publicKey: pubKey, type: scriptType)).stringValue)")
         }
         lines.append("PUBLIC KEYS COUNT: \(pubKeys.count)")
         return lines.joined(separator: "\n")
