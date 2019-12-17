@@ -13,11 +13,11 @@ class OutputSetter {
 
 extension OutputSetter: IOutputSetter {
 
-    func setOutputs(to mutableTransaction: MutableTransaction, toAddress: String, value: Int, pluginData: [UInt8: IPluginData]) throws {
+    func setOutputs(to mutableTransaction: MutableTransaction, toAddress: String, value: Int, pluginData: [UInt8: IPluginData], skipChecks: Bool = false) throws {
         mutableTransaction.recipientAddress = try addressConverter.convert(address: toAddress)
         mutableTransaction.recipientValue = value
 
-        try pluginManager.processOutputs(mutableTransaction: mutableTransaction, pluginData: pluginData)
+        try pluginManager.processOutputs(mutableTransaction: mutableTransaction, pluginData: pluginData, skipChecks: skipChecks)
     }
 
 }

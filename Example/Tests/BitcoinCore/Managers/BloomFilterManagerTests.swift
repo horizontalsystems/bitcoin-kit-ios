@@ -2,7 +2,7 @@ import Quick
 import Nimble
 import XCTest
 import Cuckoo
-import HSHDWalletKit
+import HdWalletKit
 @testable import BitcoinCore
 
 class BloomFilterManagerTests: QuickSpec {

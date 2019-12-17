@@ -24,7 +24,7 @@ extension TransactionFeeCalculator: ITransactionFeeCalculator {
     func fee(for value: Int, feeRate: Int, senderPay: Bool, toAddress: String?, pluginData: [UInt8: IPluginData] = [:]) throws -> Int {
         let mutableTransaction = MutableTransaction()
 
-        try outputSetter.setOutputs(to: mutableTransaction, toAddress: toAddress ?? (try sampleAddress()), value: value, pluginData: pluginData)
+        try outputSetter.setOutputs(to: mutableTransaction, toAddress: toAddress ?? (try sampleAddress()), value: value, pluginData: pluginData, skipChecks: true)
         try inputSetter.setInputs(to: mutableTransaction, feeRate: feeRate, senderPay: senderPay)
 
         let inputsTotalValue = mutableTransaction.inputsToSign.reduce(0) { total, input in total + input.previousOutput.value }
