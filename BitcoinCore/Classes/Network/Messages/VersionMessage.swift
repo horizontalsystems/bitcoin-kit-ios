@@ -23,15 +23,15 @@ struct VersionMessage: IMessage {
     let relay: Bool?
 
     func hasBlockChain(network: INetwork) -> Bool {
-        return (services & network.serviceFullNode) == network.serviceFullNode
+        (services & network.serviceFullNode) == network.serviceFullNode
     }
 
     func supportsBloomFilter(network: INetwork) -> Bool {
-        return version >= network.bloomFilter
+        (version > 70000 && version < 70011) || (version > 70000 && ServiceFlags(rawValue: services).contains(ServiceFlags.bloom))
     }
 
     var description: String {
-        return "\(version) --- \(userAgent?.value ?? "") --- \(ServiceFlags(rawValue: services)) -- \(String(describing: startHeight ?? 0))"
+        "\(version) --- \(userAgent?.value ?? "") --- \(ServiceFlags(rawValue: services)) -- \(String(describing: startHeight ?? 0))"
     }
 
 }

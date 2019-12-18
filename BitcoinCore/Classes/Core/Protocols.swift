@@ -487,8 +487,6 @@ public extension INetwork {
 
     var maxBlockSize: UInt32 { 1_000_000 }
     var serviceFullNode: UInt64 { 1 }
-    var bloomFilter: Int32 { 70000 }
-
 }
 
 public protocol IMessage {
