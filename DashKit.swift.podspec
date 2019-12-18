@@ -11,7 +11,7 @@ DashKit implements Dash protocol in Swift.
   s.homepage         = 'https://github.com/horizontalsystems/bitcoin-kit-ios'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Horizontal Systems' => 'hsdao@protonmail.ch' }
-  s.source           = { git: 'https://github.com/horizontalsystems/bitcoin-kit-ios.git', tag: "#{s.version}" }
+  s.source           = { git: 'https://github.com/horizontalsystems/bitcoin-kit-ios.git', tag: "dash-#{s.version}" }
   s.social_media_url = 'http://horizontalsystems.io/'
 
   s.ios.deployment_target = '11.0'
