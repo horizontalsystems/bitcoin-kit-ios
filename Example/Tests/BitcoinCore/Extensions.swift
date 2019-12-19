@@ -183,3 +183,7 @@ func addressMatcher(_ address: Address?) -> ParameterMatcher<Address?> {
         }
     }
 }
+
+func outputs(withScriptTypes scriptTypes: [ScriptType]) -> [Output] {
+    scriptTypes.map { Output(withValue: 0, index: 0, lockingScript: Data(), type: $0) }
+}

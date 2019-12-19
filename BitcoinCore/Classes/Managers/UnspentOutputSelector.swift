@@ -43,7 +43,6 @@ extension UnspentOutputSelector: IUnspentOutputSelector {
 
         // select unspentOutputs with least value until we get needed value
         var selectedOutputs = [UnspentOutput]()
-        var selectedOutputScriptTypes = [ScriptType]()
         var totalValue = 0
         var recipientValue = 0
         var sentValue = 0
@@ -51,7 +50,6 @@ extension UnspentOutputSelector: IUnspentOutputSelector {
 
         for unspentOutput in sortedOutputs {
             selectedOutputs.append(unspentOutput)
-            selectedOutputScriptTypes.append(unspentOutput.output.scriptType)
             totalValue += unspentOutput.output.value
 
             if let outputsLimit = outputsLimit {
@@ -60,11 +58,10 @@ extension UnspentOutputSelector: IUnspentOutputSelector {
                         continue
                     }
                     selectedOutputs.remove(at: 0)
-                    selectedOutputScriptTypes.remove(at: 0)
                     totalValue -= outputValueToExclude
                 }
             }
-            fee = calculator.transactionSize(inputs: selectedOutputScriptTypes, outputScriptTypes: [outputScriptType], pluginDataOutputSize: pluginDataOutputSize) * feeRate
+            fee = calculator.transactionSize(previousOutputs: selectedOutputs.map { $0.output }, outputScriptTypes: [outputScriptType], pluginDataOutputSize: pluginDataOutputSize) * feeRate
 
             recipientValue = senderPay ? value : value - fee
             sentValue = senderPay ? value + fee : value
@@ -85,7 +82,7 @@ extension UnspentOutputSelector: IUnspentOutputSelector {
             throw BitcoinCoreErrors.SendValueErrors.notEnough
         }
 
-        let changeOutputHavingTransactionFee = calculator.transactionSize(inputs: selectedOutputScriptTypes, outputScriptTypes: [outputScriptType, changeType], pluginDataOutputSize: pluginDataOutputSize) * feeRate
+        let changeOutputHavingTransactionFee = calculator.transactionSize(previousOutputs: selectedOutputs.map { $0.output }, outputScriptTypes: [outputScriptType, changeType], pluginDataOutputSize: pluginDataOutputSize) * feeRate
         let withChangeRecipientValue = senderPay ? value : value - changeOutputHavingTransactionFee
         let withChangeSentValue = senderPay ? value + changeOutputHavingTransactionFee : value
         // if selected UTXOs total value >= recipientValue(toOutput value) + fee(for transaction with change output) + dust(minimum changeOutput value)

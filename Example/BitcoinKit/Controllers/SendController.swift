@@ -76,7 +76,7 @@ class SendController: UIViewController {
         }
         
         if let fee = currentAdapter?.fee(for: amount, address: address, pluginData: pluginData) {
-            feeLabel?.text = "Fee: \(fee)"
+            feeLabel?.text = "Fee: \(fee.formattedAmount)"
         }
     }
 
@@ -186,7 +186,7 @@ class SendController: UIViewController {
     }
 
     private func showSuccess(address: String, amount: Decimal) {
-        let alert = UIAlertController(title: "Success", message: "\(amount.description) sent to \(address)", preferredStyle: .alert)
+        let alert = UIAlertController(title: "Success", message: "\(amount.formattedAmount) sent to \(address)", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .cancel))
         present(alert, animated: true)
     }

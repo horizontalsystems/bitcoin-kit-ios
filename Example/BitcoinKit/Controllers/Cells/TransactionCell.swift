@@ -28,7 +28,7 @@ class TransactionCell: UITableViewCell {
                 string += "(mine)"
             }
             if let value = from.value {
-                string += "(\(Decimal(value) / coinRate))"
+                string += "(\((Decimal(value) / coinRate).formattedAmount))"
             }
             return string
         }
@@ -42,7 +42,7 @@ class TransactionCell: UITableViewCell {
                 string += "(change)"
             }
             if let value = to.value {
-                string += "(\(Decimal(value) / coinRate))"
+                string += "(\((Decimal(value) / coinRate).formattedAmount))"
             }
             if let pluginId = to.pluginId, let pluginData = to.pluginData, pluginId == HodlerPlugin.id, let hodlerData = pluginData as? HodlerOutputData {
                 string += "\nLocked Until: \(TransactionCell.dateFormatter.string(from: Date(timeIntervalSince1970: Double(hodlerData.approximateUnlockTime!))))  <-"
@@ -71,8 +71,8 @@ class TransactionCell: UITableViewCell {
                     \(transaction.transactionIndex)
                     \(TransactionCell.dateFormatter.string(from: transaction.date))
                     \(transaction.type.description)
-                    \(transaction.amount) \(coinCode)
-                    \(transaction.fee?.description ?? "") \(coinCode)
+                    \(transaction.amount.formattedAmount) \(coinCode)
+                    \(transaction.fee?.formattedAmount ?? "") \(coinCode)
                     \(transaction.blockHeight.map { "# \($0)" } ?? "n/a")
                     \(confirmations)
                     \(from.joined(separator: "\n"))

@@ -36,7 +36,7 @@ enum TransactionType {
         switch self {
         case .incoming: return "incoming"
         case .outgoing: return "outgoing"
-        case .sentToSelf(let possibleEnteredAmount): return "sentToSelf: \(possibleEnteredAmount)"
+        case .sentToSelf(let possibleEnteredAmount): return "sentToSelf: \(possibleEnteredAmount.formattedAmount)"
         }
     }
 

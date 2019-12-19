@@ -48,8 +48,8 @@ class BalanceCell: UITableViewCell {
                     \(syncStateString)
                     \(lastBlockHeightString)
                     \(lastBlockDateString)
-                    \(adapter.spendableBalance) \(adapter.coinCode)
-                    \(adapter.unspendableBalance) \(adapter.coinCode)
+                    \(adapter.spendableBalance.formattedAmount) \(adapter.coinCode)
+                    \(adapter.unspendableBalance.formattedAmount) \(adapter.coinCode)
                     """, alignment: .right, label: valueLabel)
     }
 

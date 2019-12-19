@@ -47,8 +47,8 @@ class UnspentOutputSelectorTests: QuickSpec {
             stub(mockTransactionSizeCalculator) { mock in
                 when(mock.inputSize(type: any())).thenReturn(10)
                 when(mock.outputSize(type: any())).thenReturn(2)
-                when(mock.transactionSize(inputs: any(), outputScriptTypes: equal(to: [.p2pkh]), pluginDataOutputSize: any())).thenReturn(fee)
-                when(mock.transactionSize(inputs: any(), outputScriptTypes: equal(to: [.p2pkh, .p2pkh]), pluginDataOutputSize: any())).thenReturn(feeWithChangeOutput)
+                when(mock.transactionSize(previousOutputs: any(), outputScriptTypes: equal(to: [.p2pkh]), pluginDataOutputSize: any())).thenReturn(fee)
+                when(mock.transactionSize(previousOutputs: any(), outputScriptTypes: equal(to: [.p2pkh, .p2pkh]), pluginDataOutputSize: any())).thenReturn(feeWithChangeOutput)
             }
             stub(mockUnspentOutputProvider) { mock in
                 when(mock.spendableUtxo.get).thenReturn(outputs)

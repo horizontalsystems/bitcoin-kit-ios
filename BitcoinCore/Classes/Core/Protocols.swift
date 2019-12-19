@@ -379,8 +379,8 @@ protocol IInputSigner {
 }
 
 public protocol ITransactionSizeCalculator {
-    func transactionSize(inputs: [ScriptType], outputScriptTypes: [ScriptType]) -> Int
-    func transactionSize(inputs: [ScriptType], outputScriptTypes: [ScriptType], pluginDataOutputSize: Int) -> Int
+    func transactionSize(previousOutputs: [Output], outputScriptTypes: [ScriptType]) -> Int
+    func transactionSize(previousOutputs: [Output], outputScriptTypes: [ScriptType], pluginDataOutputSize: Int) -> Int
     func outputSize(type: ScriptType) -> Int
     func inputSize(type: ScriptType) -> Int
     func witnessSize(type: ScriptType) -> Int

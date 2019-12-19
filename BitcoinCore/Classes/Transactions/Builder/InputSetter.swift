@@ -78,14 +78,7 @@ extension InputSetter: IInputSetter {
         }
 
         // Calculate fee
-        let emptySignature = Data(repeating: 0, count: TransactionSizeCalculator.signatureLength)
-        let emptyPublicKey = Data(repeating: 0, count: TransactionSizeCalculator.pubKeyLength)
-
-        var transactionSize = transactionSizeCalculator.transactionSize(inputs: [unspentOutput.output.scriptType], outputScriptTypes: [mutableTransaction.recipientAddress.scriptType], pluginDataOutputSize: 0)
-        if let signatureScriptFunction = unspentOutput.output.signatureScriptFunction {
-            transactionSize += signatureScriptFunction([emptySignature, emptyPublicKey]).count
-        }
-
+        let transactionSize = transactionSizeCalculator.transactionSize(previousOutputs: [unspentOutput.output], outputScriptTypes: [mutableTransaction.recipientAddress.scriptType], pluginDataOutputSize: 0)
         let fee = transactionSize * feeRate
 
         guard fee < unspentOutput.output.value else {
