@@ -27,7 +27,7 @@ extension UnspentOutputSelectorSingleNoChange: IUnspentOutputSelector {
         // try to find 1 unspent output with exactly matching value
         for unspentOutput in unspentOutputs {
             let output = unspentOutput.output
-            let fee = calculator.transactionSize(inputs: [output.scriptType], outputScriptTypes: [outputScriptType], pluginDataOutputSize: pluginDataOutputSize) * feeRate
+            let fee = calculator.transactionSize(previousOutputs: [output], outputScriptTypes: [outputScriptType], pluginDataOutputSize: pluginDataOutputSize) * feeRate
 
             let recipientValue = senderPay ? value : value - fee
             let sentValue = senderPay ? value + fee : value

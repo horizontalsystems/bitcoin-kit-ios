@@ -21,7 +21,7 @@ class UnspentOutputSelectorOldTests: XCTestCase {
         stub(mockTransactionSizeCalculator) { mock in
             when(mock.inputSize(type: any())).thenReturn(10)
             when(mock.outputSize(type: any())).thenReturn(2)
-            when(mock.transactionSize(inputs: any(), outputScriptTypes: any(), pluginDataOutputSize: 0)).thenReturn(100)
+            when(mock.transactionSize(previousOutputs: any(), outputScriptTypes: any(), pluginDataOutputSize: 0)).thenReturn(100)
         }
         unspentOutputSelector = UnspentOutputSelector(calculator: mockTransactionSizeCalculator, provider: mockUnspentOutputProvider)
 
