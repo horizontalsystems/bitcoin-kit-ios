@@ -3,6 +3,8 @@ import BitcoinCore
 class RegTest: INetwork {
 
     let name = "bitcoin-reg-test"
+    let bundleName = "BitcoinKit"
+
     let pubKeyHash: UInt8 = 0x6f
     let privateKey: UInt8 = 0xef
     let scriptHash: UInt8 = 0xc4

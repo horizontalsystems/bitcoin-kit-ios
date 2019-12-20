@@ -3,6 +3,7 @@ import BitcoinCore
 class TestNet: INetwork {
 
     let name = "bitcoin-cash-test-net"
+    let bundleName = "BitcoinCashKit"
 
     let maxBlockSize: UInt32 = 32 * 1024 * 1024
     let pubKeyHash: UInt8 = 0x6f

@@ -5,6 +5,7 @@ class MainNet: INetwork {
     let protocolVersion: Int32 = 70214
 
     let name = "dash-main-net"
+    let bundleName = "DashKit"
 
     let maxBlockSize: UInt32 = 2_000_000_000
     let pubKeyHash: UInt8 = 0x4c

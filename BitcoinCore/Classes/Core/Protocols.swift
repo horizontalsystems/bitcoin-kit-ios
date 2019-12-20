@@ -456,6 +456,7 @@ public protocol INetwork: class {
     var maxBlockSize: UInt32 { get }
     var protocolVersion: Int32 { get }
     var name: String { get }
+    var bundleName: String { get }
     var pubKeyHash: UInt8 { get }
     var privateKey: UInt8 { get }
     var scriptHash: UInt8 { get }

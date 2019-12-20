@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name             = 'BitcoinKit.swift'
   s.module_name      = 'BitcoinKit'
-  s.version          = '0.12.2'
+  s.version          = '0.12.3'
   s.summary          = 'Bitcoin library for Swift.'
 
   s.description      = <<-DESC
@@ -18,11 +18,11 @@ BitcoinKit implements Bitcoin protocol in Swift.
   s.swift_version = '5'
 
   s.source_files = 'BitcoinKit/Classes/**/*'
-  s.resource_bundle = { 'Checkpoints' => 'BitcoinKit/Assets/Checkpoints/*' }
+  s.resource_bundle = { 'BitcoinKit' => 'BitcoinKit/Assets/Checkpoints/*' }
 
   s.requires_arc = true
 
-  s.dependency 'BitcoinCore.swift', '~> 0.12.2'
+  s.dependency 'BitcoinCore.swift', '~> 0.12.3'
   s.dependency 'Hodler.swift', '~> 0.12.1'
   s.dependency 'OpenSslKit.swift', '~> 1.0'
   s.dependency 'Secp256k1Kit.swift', '~> 1.0'
