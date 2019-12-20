@@ -18,6 +18,7 @@ DashKit implements Dash protocol in Swift.
   s.swift_version = '5'
 
   s.source_files = 'DashKit/Classes/**/*'
+  s.resource_bundle = { 'Checkpoints' => 'DashKit/Assets/Checkpoints/*' }
 
   s.requires_arc = true
 

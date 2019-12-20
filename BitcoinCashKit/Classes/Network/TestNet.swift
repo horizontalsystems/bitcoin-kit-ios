@@ -38,18 +38,4 @@ class TestNet: INetwork {
                 height: 199584)
     }
 
-    var lastCheckpointBlock: Block {
-        Block(
-                withHeader: BlockHeader(
-                        version: 536870912,
-                        headerHash: "0000000017dbffd594e34e02b1033a37da40056a0cf8f4fd3bb8f373336ebc4e".reversedData!,
-                        previousBlockHeaderHash: "00000000000942fa7c29649a86241e4311a84536861c42cf617fda2682fe855e".reversedData!,
-                        merkleRoot: "bb8410c2a763ea3aa4cb6d2679b8a6a2887afe377f5ba28f1af5a3d52bba7e83".reversedData!,
-                        timestamp: 1573097953,
-                        bits: 486604799,
-                        nonce: 3758956418
-                        ),
-                height: 1339023)
-    }
-
 }

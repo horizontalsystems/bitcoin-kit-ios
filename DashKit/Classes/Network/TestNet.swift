@@ -3,7 +3,7 @@ import BitcoinCore
 class TestNet: INetwork {
     let protocolVersion: Int32 = 70214
 
-    let name = "dash-main-net"
+    let name = "dash-test-net"
 
     let maxBlockSize: UInt32 = 1_000_000_000
     let pubKeyHash: UInt8 = 0x8c
@@ -37,20 +37,6 @@ class TestNet: INetwork {
                     nonce: 2083236893
             ),
             height: 0)
-    }
-
-    var lastCheckpointBlock: Block {
-        Block(
-                withHeader: BlockHeader(
-                        version: 536870912,
-                        headerHash: "000008fd74af527d0278b11ebdfed0e729e5cb97009e0cf1d60ae2559bf19b5a".reversedData!,
-                        previousBlockHeaderHash: "000007bec14c122412335571908232996015c0eb49cb475796fac40154853b8f".reversedData!,
-                        merkleRoot: "c018ec01fe4187701059d959e443cb7b653672106d727cd1a2e73bc1dc9ef69b".reversedData!,
-                        timestamp: 1573118434,
-                        bits: 504216786,
-                        nonce: 8013
-                ),
-                height: 206472)
     }
 
 }

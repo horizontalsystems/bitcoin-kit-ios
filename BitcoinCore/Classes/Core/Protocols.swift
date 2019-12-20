@@ -482,13 +482,6 @@ public protocol IMerkleBranch: class {
     func calculateMerkleRoot(txCount: Int, hashes: [Data], flags: [UInt8]) throws -> (merkleRoot: Data, matchedHashes: [Data])
 }
 
-public extension INetwork {
-    var protocolVersion: Int32 { 70015 }
-
-    var maxBlockSize: UInt32 { 1_000_000 }
-    var serviceFullNode: UInt64 { 1 }
-}
-
 public protocol IMessage {
     var description: String { get }
 }

@@ -18,6 +18,7 @@ BitcoinCashKit implements BitcoinCash protocol in Swift. It is an implementation
   s.swift_version = '5'
 
   s.source_files = 'BitcoinCashKit/Classes/**/*'
+  s.resource_bundle = { 'Checkpoints' => 'BitcoinCashKit/Assets/Checkpoints/*' }
 
   s.requires_arc = true
 
