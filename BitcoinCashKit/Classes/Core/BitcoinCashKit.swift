@@ -29,11 +29,11 @@ public class BitcoinCashKit: AbstractKit {
         switch networkType {
             case .mainNet:
                 network = MainNet()
-                initialSyncApiUrl = "https://blockdozer.com/api/"
+                initialSyncApiUrl = "https://bch.coin.space/api/"
                 validScheme = "bitcoincash"
             case .testNet:
                 network = TestNet()
-                initialSyncApiUrl = "https://tbch.blockdozer.com/api/"
+                initialSyncApiUrl = "https://tbch.blockdozer.com/api/" //not working
                 validScheme = "bchtest"
         }
         let initialSyncApi = InsightApi(url: initialSyncApiUrl)
@@ -58,6 +58,7 @@ public class BitcoinCashKit: AbstractKit {
 
         // extending BitcoinCore
         let bech32 = CashBech32AddressConverter(prefix: network.bech32PrefixPattern)
+        let base58 = Base58AddressConverter(addressVersion: network.pubKeyHash, addressScriptVersion: network.scriptHash)
         bitcoinCore.prepend(addressConverter: bech32)
 
         let coreBlockHelper = BlockValidatorHelper(storage: storage)
@@ -76,7 +77,8 @@ public class BitcoinCashKit: AbstractKit {
             // not use test validators
         }
 
-        bitcoinCore.add(restoreKeyConverterForBip: .bip44)
+
+        bitcoinCore.add(restoreKeyConverter: Bip44RestoreKeyConverter(addressConverter: base58))
     }
 
 }

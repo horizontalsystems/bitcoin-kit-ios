@@ -38,6 +38,7 @@ public class BitcoinKit: AbstractKit {
         let paymentAddressParser = PaymentAddressParser(validScheme: "bitcoin", removeScheme: true)
         let scriptConverter = ScriptConverter()
         let bech32AddressConverter = SegWitBech32AddressConverter(prefix: network.bech32PrefixPattern, scriptConverter: scriptConverter)
+        let base58AddressConverter = Base58AddressConverter(addressVersion: network.pubKeyHash, addressScriptVersion: network.scriptHash)
 
         let bitcoinCoreBuilder = BitcoinCoreBuilder(minLogLevel: minLogLevel)
 
@@ -75,10 +76,15 @@ public class BitcoinKit: AbstractKit {
             bitcoinCore.add(blockValidator: LegacyTestNetDifficultyValidator(blockHelper: blockHelper, heightInterval: BitcoinCore.heightInterval, targetSpacing: BitcoinCore.targetSpacing, maxTargetBits: BitcoinCore.maxTargetBits))
         }
 
-        bitcoinCore.add(restoreKeyConverterForBip: bip)
-        if bip == .bip44 {
-            bitcoinCore.add(restoreKeyConverterForBip: .bip49)
-            bitcoinCore.add(restoreKeyConverterForBip: .bip84)
+        switch bip {
+        case .bip44:
+            bitcoinCore.add(restoreKeyConverter: Bip44RestoreKeyConverter(addressConverter: base58AddressConverter))
+            bitcoinCore.add(restoreKeyConverter: Bip49RestoreKeyConverter(addressConverter: base58AddressConverter))
+            bitcoinCore.add(restoreKeyConverter: Bip84RestoreKeyConverter(addressConverter: bech32AddressConverter))
+        case .bip49:
+            bitcoinCore.add(restoreKeyConverter: Bip49RestoreKeyConverter(addressConverter: base58AddressConverter))
+        case .bip84:
+            bitcoinCore.add(restoreKeyConverter: Bip84RestoreKeyConverter(addressConverter: bech32AddressConverter))
         }
     }
 

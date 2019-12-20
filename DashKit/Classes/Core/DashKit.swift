@@ -136,7 +136,8 @@ public class DashKit: AbstractKit {
         bitcoinCore.add(peerTaskHandler: instantSend)
         bitcoinCore.add(inventoryItemsHandler: instantSend)
 // --------------------------------------
-        bitcoinCore.add(restoreKeyConverterForBip: .bip44)
+        let base58AddressConverter = Base58AddressConverter(addressVersion: network.pubKeyHash, addressScriptVersion: network.scriptHash)
+        bitcoinCore.add(restoreKeyConverter: Bip44RestoreKeyConverter(addressConverter: base58AddressConverter))
     }
 
     private func cast(transactionInfos:[TransactionInfo]) -> [DashTransactionInfo] {

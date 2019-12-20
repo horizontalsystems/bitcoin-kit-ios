@@ -1,16 +1,16 @@
 import OpenSslKit
 
-class Base58AddressConverter: IAddressConverter {
+public class Base58AddressConverter: IAddressConverter {
     private static let checkSumLength = 4
     private let addressVersion: UInt8
     private let addressScriptVersion: UInt8
 
-    init(addressVersion: UInt8, addressScriptVersion: UInt8) {
+    public init(addressVersion: UInt8, addressScriptVersion: UInt8) {
         self.addressVersion = addressVersion
         self.addressScriptVersion = addressScriptVersion
     }
 
-    func convert(address: String) throws -> Address {
+    public func convert(address: String) throws -> Address {
         // check length of address to avoid wrong converting
         guard address.count >= 26 && address.count <= 35 else {
             throw BitcoinCoreErrors.AddressConversion.invalidAddressLength
@@ -39,7 +39,7 @@ class Base58AddressConverter: IAddressConverter {
         return LegacyAddress(type: type, keyHash: keyHash, base58: address)
     }
 
-    func convert(keyHash: Data, type: ScriptType) throws -> Address {
+    public func convert(keyHash: Data, type: ScriptType) throws -> Address {
         let version: UInt8
         let addressType: AddressType
 
@@ -61,7 +61,7 @@ class Base58AddressConverter: IAddressConverter {
         return LegacyAddress(type: addressType, keyHash: keyHash, base58: base58)
     }
 
-    func convert(publicKey: PublicKey, type: ScriptType) throws -> Address {
+    public func convert(publicKey: PublicKey, type: ScriptType) throws -> Address {
         let keyHash = type == .p2wpkhSh ? publicKey.scriptHashForP2WPKH : publicKey.keyHash
         return try convert(keyHash: keyHash, type: type)
     }
