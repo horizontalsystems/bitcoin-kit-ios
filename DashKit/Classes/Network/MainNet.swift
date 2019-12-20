@@ -40,18 +40,5 @@ class MainNet: INetwork {
                 ),
                 height: 0)
     }
-    var lastCheckpointBlock: Block {
-        Block(
-                withHeader: BlockHeader(
-                        version: 536870912,
-                        headerHash: "000000000000000087895fde87f60ba1eebf761a962f1a74ded6d5499b0b6660".reversedData!,
-                        previousBlockHeaderHash: "0000000000000010751b0e9a8deb7d6589a339a3ffcb756d2d10f0cf203f5a1c".reversedData!,
-                        merkleRoot: "ed933d1c7e48da67e96b2822edbb4c76fe8fe19b71241fc8bb51c6035fbf91d5".reversedData!,
-                        timestamp: 1573116504,
-                        bits: 420940927,
-                        nonce: 1081860501
-                ),
-                height: 1166976)
-    }
 
 }

@@ -863,6 +863,7 @@
 				607FACCC1AFB9204008FA782 /* Sources */,
 				607FACCD1AFB9204008FA782 /* Frameworks */,
 				607FACCE1AFB9204008FA782 /* Resources */,
+				CBACB7D2806000B2E6B7D92D /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -882,6 +883,7 @@
 				607FACE11AFB9204008FA782 /* Sources */,
 				607FACE21AFB9204008FA782 /* Frameworks */,
 				607FACE31AFB9204008FA782 /* Resources */,
+				73F6CD24266C8DEFDA100A12 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -920,6 +922,7 @@
 				D39EA39F23A123FF00FF23B7 /* Sources */,
 				D39EA3A123A123FF00FF23B7 /* Frameworks */,
 				D39EA3A323A123FF00FF23B7 /* Resources */,
+				2F8AFF29D42B269D1BE10D3E /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -939,6 +942,7 @@
 				D39EA3AE23A1240C00FF23B7 /* Sources */,
 				D39EA3B023A1240C00FF23B7 /* Frameworks */,
 				D39EA3B223A1240C00FF23B7 /* Resources */,
+				CA02FDE0341145E1B5A15696 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -1104,6 +1108,24 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		2F8AFF29D42B269D1BE10D3E /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-BitcoinCashKitTests/Pods-BitcoinCashKitTests-resources.sh",
+				"${PODS_CONFIGURATION_BUILD_DIR}/BitcoinCashKit.swift/Checkpoints.bundle",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Checkpoints.bundle",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BitcoinCashKitTests/Pods-BitcoinCashKitTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		393739D2DB22DC4B9F04D4C3 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1148,6 +1170,24 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		73F6CD24266C8DEFDA100A12 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-BitcoinKitTests/Pods-BitcoinKitTests-resources.sh",
+				"${PODS_CONFIGURATION_BUILD_DIR}/BitcoinKit.swift/Checkpoints.bundle",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Checkpoints.bundle",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BitcoinKitTests/Pods-BitcoinKitTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		AA3C1258195C13A83DF8BDFE /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1190,6 +1230,44 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		CA02FDE0341145E1B5A15696 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-DashKitTests/Pods-DashKitTests-resources.sh",
+				"${PODS_CONFIGURATION_BUILD_DIR}/DashKit.swift/Checkpoints.bundle",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Checkpoints.bundle",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-DashKitTests/Pods-DashKitTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		CBACB7D2806000B2E6B7D92D /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-BitcoinKitExample/Pods-BitcoinKitExample-resources.sh",
+				"${PODS_CONFIGURATION_BUILD_DIR}/BitcoinCashKit.swift/Checkpoints.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/BitcoinKit.swift/Checkpoints.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/DashKit.swift/Checkpoints.bundle",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Checkpoints.bundle",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BitcoinKitExample/Pods-BitcoinKitExample-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		D39EA3D423A2021100FF23B7 /* Cuckoo */ = {

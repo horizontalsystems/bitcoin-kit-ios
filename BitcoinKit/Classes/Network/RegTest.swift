@@ -25,7 +25,7 @@ class RegTest: INetwork {
     let dustRelayTxFee = 3000 // https://github.com/bitcoin/bitcoin/blob/c536dfbcb00fb15963bf5d507b7017c241718bf6/src/policy/policy.h#L50
 
     var bip44CheckpointBlock: Block {
-        return Block(
+        Block(
                 withHeader: BlockHeader(
                         version: 1,
                         headerHash: Data(repeating: 0, count: 32),
@@ -39,7 +39,7 @@ class RegTest: INetwork {
     }
 
     var lastCheckpointBlock: Block {
-        return Block(
+        Block(
                 withHeader: BlockHeader(
                         version: 1,
                         headerHash: Data(repeating: 0, count: 32),
