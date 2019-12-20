@@ -56,7 +56,16 @@ extension InsightApi: ISyncTransactionApi {
 
         required public init(map: Map) throws {
             totalItems = try map.value("totalItems")
-            from = try map.value("from")
+            var fromInt: Int?
+            if let fromString: String = try? map.value("from") {
+                fromInt = Int(fromString)
+            } else {
+                fromInt = try? map.value("from")
+            }
+            guard let from = fromInt else {
+                throw MapError(key: "from", currentValue: "n/a", reason: "can't parse from value")
+            }
+            self.from = from
             to = try map.value("to")
             transactionItems = try map.value("items")
         }

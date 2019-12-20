@@ -8,7 +8,6 @@ public class BitcoinCore {
     public static let targetSpacing = 10 * 60                                  // Time to mining one block ( 10 min. Bitcoin )
     public static let maxTargetBits = 0x1d00ffff                               // Initially and max. target difficulty for blocks
 
-
     private let storage: IStorage
     private let cache: OutputsCache
     private var dataProvider: IDataProvider
@@ -59,8 +58,8 @@ public class BitcoinCore {
         peerTaskHandlerChain.add(handler: peerTaskHandler)
     }
 
-    public func add(restoreKeyConverterForBip bip: Bip) {
-        restoreKeyConverterChain.add(converter: bip.restoreKeyConverter(addressConverter: addressConverter))
+    public func add(restoreKeyConverter: IRestoreKeyConverter) {
+        restoreKeyConverterChain.add(converter: restoreKeyConverter)
     }
 
     @discardableResult public func add(messageParser: IMessageParser) -> Self {

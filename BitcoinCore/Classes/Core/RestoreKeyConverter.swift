@@ -26,11 +26,11 @@ class RestoreKeyConverterChain : IRestoreKeyConverter {
 
 }
 
-class Bip44RestoreKeyConverter {
+public class Bip44RestoreKeyConverter {
 
     let addressConverter: IAddressConverter
 
-    init(addressConverter: IAddressConverter) {
+    public init(addressConverter: IAddressConverter) {
         self.addressConverter = addressConverter
     }
 
@@ -38,23 +38,23 @@ class Bip44RestoreKeyConverter {
 
 extension Bip44RestoreKeyConverter : IRestoreKeyConverter {
 
-    func keysForApiRestore(publicKey: PublicKey) -> [String] {
+    public func keysForApiRestore(publicKey: PublicKey) -> [String] {
         let legacyAddress = try? addressConverter.convert(publicKey: publicKey, type: .p2pkh).stringValue
 
         return [legacyAddress].compactMap { $0 }
     }
 
-    func bloomFilterElements(publicKey: PublicKey) -> [Data] {
-        return [publicKey.keyHash, publicKey.raw]
+    public func bloomFilterElements(publicKey: PublicKey) -> [Data] {
+        [publicKey.keyHash, publicKey.raw]
     }
 
 }
 
-class Bip49RestoreKeyConverter {
+public class Bip49RestoreKeyConverter {
 
     let addressConverter: IAddressConverter
 
-    init(addressConverter: IAddressConverter) {
+    public init(addressConverter: IAddressConverter) {
         self.addressConverter = addressConverter
     }
 
@@ -62,24 +62,24 @@ class Bip49RestoreKeyConverter {
 
 extension Bip49RestoreKeyConverter : IRestoreKeyConverter {
 
-    func keysForApiRestore(publicKey: PublicKey) -> [String] {
+    public func keysForApiRestore(publicKey: PublicKey) -> [String] {
         let wpkhShAddress = try? addressConverter.convert(publicKey: publicKey, type: .p2wpkhSh).stringValue
 
         return [wpkhShAddress].compactMap { $0 }
     }
 
-    func bloomFilterElements(publicKey: PublicKey) -> [Data] {
-        return [publicKey.scriptHashForP2WPKH]
+    public func bloomFilterElements(publicKey: PublicKey) -> [Data] {
+        [publicKey.scriptHashForP2WPKH]
     }
 
 }
 
 
-class Bip84RestoreKeyConverter {
+public class Bip84RestoreKeyConverter {
 
     let addressConverter: IAddressConverter
 
-    init(addressConverter: IAddressConverter) {
+    public init(addressConverter: IAddressConverter) {
         self.addressConverter = addressConverter
     }
 
@@ -87,14 +87,14 @@ class Bip84RestoreKeyConverter {
 
 extension Bip84RestoreKeyConverter : IRestoreKeyConverter {
 
-    func keysForApiRestore(publicKey: PublicKey) -> [String] {
+    public func keysForApiRestore(publicKey: PublicKey) -> [String] {
         let segwitAddress = try? addressConverter.convert(publicKey: publicKey, type: .p2wpkh).stringValue
 
         return [segwitAddress].compactMap { $0 }
     }
 
-    func bloomFilterElements(publicKey: PublicKey) -> [Data] {
-        return [publicKey.keyHash]
+    public func bloomFilterElements(publicKey: PublicKey) -> [Data] {
+        [publicKey.keyHash]
     }
 
 }
