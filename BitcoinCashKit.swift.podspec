@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name             = 'BitcoinCashKit.swift'
   s.module_name      = 'BitcoinCashKit'
-  s.version          = '0.12.2'
+  s.version          = '0.12.3'
   s.summary          = 'BitcoinCash library for Swift.'
 
   s.description      = <<-DESC
@@ -18,11 +18,11 @@ BitcoinCashKit implements BitcoinCash protocol in Swift. It is an implementation
   s.swift_version = '5'
 
   s.source_files = 'BitcoinCashKit/Classes/**/*'
-  s.resource_bundle = { 'Checkpoints' => 'BitcoinCashKit/Assets/Checkpoints/*' }
+  s.resource_bundle = { 'BitcoinCashKit' => 'BitcoinCashKit/Assets/Checkpoints/*' }
 
   s.requires_arc = true
 
-  s.dependency 'BitcoinCore.swift', '~> 0.12.2'
+  s.dependency 'BitcoinCore.swift', '~> 0.12.3'
   s.dependency 'OpenSslKit.swift', '~> 1.0'
   s.dependency 'Secp256k1Kit.swift', '~> 1.0'
   s.dependency 'HdWalletKit.swift', '~> 1.4'

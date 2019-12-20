@@ -8,7 +8,7 @@ public extension INetwork {
     var lastCheckpointBlock: Block {
         let podBundle = Bundle(for: type(of: self))
 
-        guard let checkpointsBundleURL = podBundle.url(forResource: "Checkpoints", withExtension: "bundle"),
+        guard let checkpointsBundleURL = podBundle.url(forResource: bundleName, withExtension: "bundle"),
               let checkpointsBundle = Bundle(url: checkpointsBundleURL),
               let fileURL = checkpointsBundle.url(forResource: name, withExtension: "checkpoint"),
               let string = try? String(contentsOf: fileURL, encoding: .utf8),

@@ -4,6 +4,8 @@ class TestNet: INetwork {
     private static let testNetDiffDate = 1329264000 // February 16th 2012
 
     let name = "bitcoin-test-net"
+    let bundleName = "BitcoinKit"
+
     let pubKeyHash: UInt8 = 0x6f
     let privateKey: UInt8 = 0xef
     let scriptHash: UInt8 = 0xc4

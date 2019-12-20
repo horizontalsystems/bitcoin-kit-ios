@@ -4,6 +4,7 @@ class TestNet: INetwork {
     let protocolVersion: Int32 = 70214
 
     let name = "dash-test-net"
+    let bundleName = "DashKit"
 
     let maxBlockSize: UInt32 = 1_000_000_000
     let pubKeyHash: UInt8 = 0x8c

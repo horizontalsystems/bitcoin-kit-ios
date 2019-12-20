@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name             = 'DashKit.swift'
   s.module_name      = 'DashKit'
-  s.version          = '0.12.2'
+  s.version          = '0.12.3'
   s.summary          = 'Dash library for Swift.'
 
   s.description      = <<-DESC
@@ -18,11 +18,11 @@ DashKit implements Dash protocol in Swift.
   s.swift_version = '5'
 
   s.source_files = 'DashKit/Classes/**/*'
-  s.resource_bundle = { 'Checkpoints' => 'DashKit/Assets/Checkpoints/*' }
+  s.resource_bundle = { 'DashKit' => 'DashKit/Assets/Checkpoints/*' }
 
   s.requires_arc = true
 
-  s.dependency 'BitcoinCore.swift', '~> 0.12.2'
+  s.dependency 'BitcoinCore.swift', '~> 0.12.3'
   s.dependency 'OpenSslKit.swift', '~> 1.0'
   s.dependency 'Secp256k1Kit.swift', '~> 1.0'
   s.dependency 'BlsKit.swift', '~> 1.0'
