@@ -5,34 +5,43 @@ class MempoolTransactions {
     private let transactionSyncer: ITransactionSyncer
     private let transactionSender: ITransactionSender
     private var requestedTransactions = [String: [Data]]()
+    private let peersQueue: DispatchQueue
 
-    init(transactionSyncer: ITransactionSyncer, transactionSender: ITransactionSender) {
+    init(transactionSyncer: ITransactionSyncer, transactionSender: ITransactionSender,
+         peersQueue: DispatchQueue = DispatchQueue(label: "MempoolTransactions Local Queue", qos: .userInitiated)) {
         self.transactionSyncer = transactionSyncer
         self.transactionSender = transactionSender
+        self.peersQueue = peersQueue
     }
 
     private func addToRequestTransactions(peerHost: String, transactionHashes: [Data]) {
-        if (!requestedTransactions.contains { key, _ in key == peerHost }) {
-            requestedTransactions[peerHost] = [Data]()
+        peersQueue.async {
+            if (!self.requestedTransactions.contains { key, _ in key == peerHost }) {
+                self.requestedTransactions[peerHost] = [Data]()
+            }
+            self.requestedTransactions[peerHost]?.append(contentsOf: transactionHashes)
         }
-        requestedTransactions[peerHost]?.append(contentsOf: transactionHashes)
     }
 
     private func removeFromRequestedTransactions(peerHost: String, transactionHashes: [Data]) {
-        transactionHashes.forEach { transactionHash in
-            if let index = requestedTransactions[peerHost]?.firstIndex(of: transactionHash) {
-                requestedTransactions[peerHost]?.remove(at: index)
+        peersQueue.async {
+            transactionHashes.forEach { transactionHash in
+                if let index = self.requestedTransactions[peerHost]?.firstIndex(of: transactionHash) {
+                    self.requestedTransactions[peerHost]?.remove(at: index)
+                }
             }
         }
     }
 
     private func isTransactionRequested(hash: Data) -> Bool {
-        for hashes in requestedTransactions {
-            if hashes.value.contains(hash) {
-                return true
+        peersQueue.sync {
+            for hashes in self.requestedTransactions {
+                if hashes.value.contains(hash) {
+                    return true
+                }
             }
+            return false
         }
-        return false
     }
 
     func subscribeTo(observable: Observable<PeerGroupEvent>) {
@@ -88,7 +97,9 @@ extension MempoolTransactions : IInventoryItemsHandler {
 extension MempoolTransactions {
 
     private func onPeerDisconnect(peer: IPeer, error: Error?) {
-        requestedTransactions[peer.host] = nil
+        peersQueue.async {
+            self.requestedTransactions[peer.host] = nil
+        }
     }
 
 }
