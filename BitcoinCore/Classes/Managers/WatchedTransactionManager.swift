@@ -16,7 +16,7 @@ class WatchedTransactionManager {
     private let queue: DispatchQueue
     weak var bloomFilterManager: IBloomFilterManager?
 
-    init(queue: DispatchQueue = DispatchQueue(label: "WatchedTransactionManager Queue", qos: .background)) {
+    init(queue: DispatchQueue = DispatchQueue(label: "io.horizontalsystems.bitcoin-core.watched-transactions-manager", qos: .background)) {
         self.queue = queue
     }
 
