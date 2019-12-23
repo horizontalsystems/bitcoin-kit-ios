@@ -14,7 +14,7 @@ class TransactionSender {
     private let retriesPeriod: Double // seconds
 
     init(transactionSyncer: ITransactionSyncer, syncedReadyPeerManager: ISyncedReadyPeerManager, storage: IStorage, timer: ITransactionSendTimer,
-         logger: Logger? = nil, queue: DispatchQueue = DispatchQueue(label: "Transaction Sender Queue", qos: .background),
+         logger: Logger? = nil, queue: DispatchQueue = DispatchQueue(label: "io.horizontalsystems.bitcoin-core.transaction-sender", qos: .background),
          maxRetriesCount: Int = 3, retriesPeriod: Double = 60) {
         self.transactionSyncer = transactionSyncer
         self.syncedReadyPeerManager = syncedReadyPeerManager

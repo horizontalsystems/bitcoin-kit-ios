@@ -11,7 +11,7 @@ public class SyncedReadyPeerManager {
     private let peersQueue: DispatchQueue
 
     init(peerGroup: IPeerGroup, initialBlockDownload: IInitialBlockDownload, peerManager: IPeerManager,
-         peersQueue: DispatchQueue = DispatchQueue(label: "SyncedReadyPeerManager Local Queue", qos: .userInitiated)) {
+         peersQueue: DispatchQueue = DispatchQueue(label: "io.horizontalsystems.bitcoin-core.synced-ready-peer-manager", qos: .userInitiated)) {
         self.peerGroup = peerGroup
         self.initialBlockDownload = initialBlockDownload
         self.peerManager = peerManager

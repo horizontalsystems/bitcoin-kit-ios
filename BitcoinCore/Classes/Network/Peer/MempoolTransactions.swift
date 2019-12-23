@@ -8,7 +8,7 @@ class MempoolTransactions {
     private let peersQueue: DispatchQueue
 
     init(transactionSyncer: ITransactionSyncer, transactionSender: ITransactionSender,
-         peersQueue: DispatchQueue = DispatchQueue(label: "MempoolTransactions Local Queue", qos: .userInitiated)) {
+         peersQueue: DispatchQueue = DispatchQueue(label: "io.horizontalsystems.bitcoin-core.mempool-transactions", qos: .userInitiated)) {
         self.transactionSyncer = transactionSyncer
         self.transactionSender = transactionSender
         self.peersQueue = peersQueue

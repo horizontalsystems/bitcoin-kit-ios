@@ -6,7 +6,7 @@ class SyncManager {
     private let reachabilityManager: IReachabilityManager
     private let initialSyncer: IInitialSyncer
     private let peerGroup: IPeerGroup
-    private let queue = DispatchQueue(label: "SyncManagerQueue", qos: .background)
+    private let queue = DispatchQueue(label: "io.horizontalsystems.bitcoin-core.sync-manager", qos: .background)
 
     init(reachabilityManager: IReachabilityManager, initialSyncer: IInitialSyncer, peerGroup: IPeerGroup) {
         self.reachabilityManager = reachabilityManager

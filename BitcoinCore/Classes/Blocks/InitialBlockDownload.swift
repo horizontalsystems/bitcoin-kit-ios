@@ -33,7 +33,7 @@ public class InitialBlockDownload {
     public var syncPeer: IPeer?
 
     init(blockSyncer: IBlockSyncer, peerManager: IPeerManager, merkleBlockValidator: IMerkleBlockValidator, syncStateListener: ISyncStateListener,
-         peersQueue: DispatchQueue = DispatchQueue(label: "InitialBlockDownload Local Queue", qos: .userInitiated),
+         peersQueue: DispatchQueue = DispatchQueue(label: "io.horizontalsystems.bitcoin-core.initial-block-download", qos: .userInitiated),
          scheduler: SchedulerType = SerialDispatchQueueScheduler(qos: .background),
          logger: Logger? = nil) {
         self.blockSyncer = blockSyncer

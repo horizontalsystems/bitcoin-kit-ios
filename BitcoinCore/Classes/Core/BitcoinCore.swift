@@ -90,7 +90,7 @@ public class BitcoinCore {
 
     // END: Extending
 
-    public var delegateQueue = DispatchQueue(label: "bitcoin_delegate_queue")
+    public var delegateQueue = DispatchQueue(label: "io.horizontalsystems.bitcoin-core.bitcoin-core-delegate-queue")
     public weak var delegate: BitcoinCoreDelegate?
 
     init(storage: IStorage, cache: OutputsCache, dataProvider: IDataProvider,

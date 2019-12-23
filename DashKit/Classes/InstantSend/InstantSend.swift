@@ -11,7 +11,7 @@ class InstantSend {
     private let instantSendLockHandler: IInstantSendLockHandler
     private let logger: Logger?
 
-    init(transactionSyncer: IDashTransactionSyncer, transactionLockVoteHandler: ITransactionLockVoteHandler, instantSendLockHandler: IInstantSendLockHandler, dispatchQueue: DispatchQueue = DispatchQueue(label: "DashInstantSend", qos: .userInitiated), logger: Logger? = nil) {
+    init(transactionSyncer: IDashTransactionSyncer, transactionLockVoteHandler: ITransactionLockVoteHandler, instantSendLockHandler: IInstantSendLockHandler, dispatchQueue: DispatchQueue = DispatchQueue(label: "io.horizontalsystems.dash-kit.instant-send", qos: .userInitiated), logger: Logger? = nil) {
         self.transactionSyncer = transactionSyncer
         self.transactionLockVoteHandler = transactionLockVoteHandler
         self.instantSendLockHandler = instantSendLockHandler
