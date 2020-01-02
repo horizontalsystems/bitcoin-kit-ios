@@ -191,7 +191,20 @@ open class GrdbStorage {
                 t.column(Transaction.Columns.isOutgoing.name, .boolean)
                 t.column(Transaction.Columns.status.name, .integer)
                 t.column(Transaction.Columns.segWit.name, .boolean)
-                t.column(InvalidTransaction.Columns.transactionInfoJson.name, .blob)
+                t.column(Transaction.Columns.transactionInfoJson.name, .blob)
+            }
+        }
+
+        migrator.registerMigration("addConflictingTxHashAndTxInfoToTransaction") { db in
+            try db.alter(table: Transaction.databaseTableName) { t in
+                t.add(column: Transaction.Columns.transactionInfoJson.name, .blob).defaults(to: Data())
+                t.add(column: Transaction.Columns.conflictingTxHash.name, .text)
+            }
+        }
+
+        migrator.registerMigration("addConflictingTxHashToInvalidTransaction") { db in
+            try db.alter(table: InvalidTransaction.databaseTableName) { t in
+                t.add(column: Transaction.Columns.conflictingTxHash.name, .text)
             }
         }
 
@@ -474,6 +487,14 @@ extension GrdbStorage: IStorage {
         }
     }
 
+    public func conflictingTransactions(for transaction: FullTransaction) -> [Transaction] {
+        let storageInputs = transaction.inputs.compactMap { input in
+            inputsUsing(previousOutputTxHash: input.previousOutputTxHash, previousOutputIndex: input.previousOutputIndex)
+                    .filter { $0.transactionHash != transaction.header.dataHash }.first
+        }
+        return storageInputs.compactMap { self.transaction(byHash: $0.transactionHash) }
+    }
+
     public func validOrInvalidTransaction(byUid uid: String) -> Transaction? {
         try! dbPool.read { db in
             let transactionC = Transaction.Columns.allCases.count
@@ -484,7 +505,7 @@ extension GrdbStorage: IStorage {
 
             let sql = """
                       SELECT transactions.* 
-                      FROM (SELECT transactions.*, x'' AS transactionInfoJson FROM transactions UNION ALL SELECT * FROM invalid_transactions) AS transactions 
+                      FROM (SELECT * FROM invalid_transactions UNION ALL SELECT transactions.*, x'' AS transactionInfoJson FROM transactions) AS transactions
                       WHERE transactions.uid = ? 
                       """
 
@@ -635,7 +656,7 @@ extension GrdbStorage: IStorage {
         var transactions = [TransactionWithBlock]()
 
         try! dbPool.read { db in
-            let transactionC = Transaction.Columns.allCases.count + 2
+            let transactionC = Transaction.Columns.allCases.count + 1
 
             let adapter = ScopeAdapter([
                 "transaction": RangeRowAdapter(0..<transactionC)
@@ -643,7 +664,7 @@ extension GrdbStorage: IStorage {
 
             var sql = """
                       SELECT transactions.*, blocks.height as blockHeight
-                      FROM (SELECT transactions.*, x'' AS transactionInfoJson FROM transactions UNION ALL SELECT * FROM invalid_transactions) AS transactions
+                      FROM (SELECT * FROM invalid_transactions UNION ALL SELECT transactions.* FROM transactions) AS transactions
                       LEFT JOIN blocks ON transactions.blockHash = blocks.headerHash
                       """
 
@@ -786,6 +807,14 @@ extension GrdbStorage: IStorage {
     public func inputsUsingOutputs(withTransactionHash transactionHash: Data) -> [Input] {
         try! dbPool.read { db in
             try Input.filter(Input.Columns.previousOutputTxHash == transactionHash).fetchAll(db)
+        }
+    }
+
+    private func inputsUsing(previousOutputTxHash: Data, previousOutputIndex: Int) -> [Input] {
+        try! dbPool.read { db in
+            try Input.filter(Input.Columns.previousOutputTxHash == previousOutputTxHash)
+                    .filter(Input.Columns.previousOutputIndex == previousOutputIndex)
+                    .fetchAll(db)
         }
     }
 

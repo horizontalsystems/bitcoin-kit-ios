@@ -100,6 +100,7 @@ public protocol IStorage {
 
     func transactionExists(byHash: Data) -> Bool
     func transaction(byHash: Data) -> Transaction?
+    func conflictingTransactions(for transaction: FullTransaction) -> [Transaction]
     func validOrInvalidTransaction(byUid: String) -> Transaction?
     func transactions(ofBlock: Block) -> [Transaction]
     func newTransactions() -> [Transaction]
@@ -321,6 +322,10 @@ public protocol ITransactionProcessor: class {
     func processInvalid(transactionHash: Data)
 }
 
+protocol ITransactionMediator {
+    func resolve(receivedTransaction transaction: FullTransaction, conflictingTransactions: [Transaction]) -> ConflictResolution
+}
+
 protocol ITransactionExtractor {
     func extract(transaction: FullTransaction)
 }
@@ -428,7 +433,7 @@ protocol IKitStateProviderDelegate: class {
 }
 
 public protocol ITransactionInfo: class {
-    init(uid: String, transactionHash: String, transactionIndex: Int, inputs: [TransactionInputInfo], outputs: [TransactionOutputInfo], fee: Int?, blockHeight: Int?, timestamp: Int, status: TransactionStatus)
+    init(uid: String, transactionHash: String, transactionIndex: Int, inputs: [TransactionInputInfo], outputs: [TransactionOutputInfo], fee: Int?, blockHeight: Int?, timestamp: Int, status: TransactionStatus, conflictingHash: String?)
 }
 
 public protocol ITransactionInfoConverter {

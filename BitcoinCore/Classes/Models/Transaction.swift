@@ -15,6 +15,8 @@ public class Transaction: Record {
     public var isOutgoing: Bool = false
     public var status: TransactionStatus = .relayed
     public var segWit: Bool = false
+    public var conflictingTxHash: Data? = nil
+    public var transactionInfoJson: Data = Data()
 
     public init(version: Int = 0, lockTime: Int = 0, timestamp: Int? = nil) {
         self.version = version
@@ -44,6 +46,8 @@ public class Transaction: Record {
         case isOutgoing
         case status
         case segWit
+        case conflictingTxHash
+        case transactionInfoJson
     }
 
     required init(row: Row) {
@@ -58,6 +62,8 @@ public class Transaction: Record {
         isOutgoing = row[Columns.isOutgoing]
         status = row[Columns.status]
         segWit = row[Columns.segWit]
+        conflictingTxHash = row[Columns.conflictingTxHash]
+        transactionInfoJson = row[Columns.transactionInfoJson]
 
         super.init(row: row)
     }
@@ -74,6 +80,8 @@ public class Transaction: Record {
         container[Columns.isOutgoing] = isOutgoing
         container[Columns.status] = status
         container[Columns.segWit] = segWit
+        container[Columns.conflictingTxHash] = conflictingTxHash
+        container[Columns.transactionInfoJson] = transactionInfoJson
     }
 
 }

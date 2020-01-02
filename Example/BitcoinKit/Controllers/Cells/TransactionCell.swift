@@ -60,6 +60,7 @@ class TransactionCell: UITableViewCell {
                     Amount:
                     Fee:
                     Block:
+                    ConflictingHash:
                     Confirmations:
                     \(from.map { _ in "From:" }.joined(separator: "\n"))
                     \(transaction.to.map { "To:\(String(repeating: "\n", count: TransactionCell.rowsCount(address: $0)))" }.joined(separator: ""))
@@ -74,6 +75,7 @@ class TransactionCell: UITableViewCell {
                     \(transaction.amount.formattedAmount) \(coinCode)
                     \(transaction.fee?.formattedAmount ?? "") \(coinCode)
                     \(transaction.blockHeight.map { "# \($0)" } ?? "n/a")
+                    \(format(hash: transaction.conflictingHash ?? "n/a"))
                     \(confirmations)
                     \(from.joined(separator: "\n"))
                     \(to.joined(separator: "\n"))

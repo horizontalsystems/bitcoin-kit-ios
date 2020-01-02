@@ -9,6 +9,7 @@ class TransactionProcessor {
     private let publicKeyManager: IPublicKeyManager
     private let irregularOutputFinder: IIrregularOutputFinder
     private let transactionInfoConverter: ITransactionInfoConverter
+    private let transactionMediator: ITransactionMediator
 
     weak var listener: IBlockchainDataListener?
     weak var transactionListener: ITransactionListener?
@@ -17,7 +18,8 @@ class TransactionProcessor {
     private let queue: DispatchQueue
 
     init(storage: IStorage, outputExtractor: ITransactionExtractor, inputExtractor: ITransactionExtractor, outputsCache: IOutputsCache,
-         outputAddressExtractor: ITransactionOutputAddressExtractor, addressManager: IPublicKeyManager, irregularOutputFinder: IIrregularOutputFinder, transactionInfoConverter: ITransactionInfoConverter,
+         outputAddressExtractor: ITransactionOutputAddressExtractor, addressManager: IPublicKeyManager, irregularOutputFinder: IIrregularOutputFinder,
+         transactionInfoConverter: ITransactionInfoConverter, transactionMediator: ITransactionMediator,
          listener: IBlockchainDataListener? = nil, dateGenerator: @escaping () -> Date = Date.init, queue: DispatchQueue = DispatchQueue(label: "io.horizontalsystems.bitcoin-core.transaction-processor", qos: .background
     )) {
         self.storage = storage
@@ -28,6 +30,7 @@ class TransactionProcessor {
         self.publicKeyManager = addressManager
         self.irregularOutputFinder = irregularOutputFinder
         self.transactionInfoConverter = transactionInfoConverter
+        self.transactionMediator = transactionMediator
         self.listener = listener
         self.dateGenerator = dateGenerator
         self.queue = queue
@@ -77,8 +80,13 @@ extension TransactionProcessor: ITransactionProcessor {
                         continue
                     }
                     self.relay(transaction: existingTransaction, withOrder: index, inBlock: block)
+
+                    if block != nil {
+                        existingTransaction.conflictingTxHash = nil
+                    }
                     try self.storage.update(transaction: existingTransaction)
                     updated.append(existingTransaction)
+
                     continue
                 }
 
@@ -87,9 +95,25 @@ extension TransactionProcessor: ITransactionProcessor {
 
                 if transaction.header.isMine {
                     self.relay(transaction: transaction.header, withOrder: index, inBlock: block)
-                    try self.storage.add(transaction: transaction)
 
-                    inserted.append(transaction.header)
+                    let conflictingTransactions = storage.conflictingTransactions(for: transaction)
+
+                    let resolution = transactionMediator.resolve(receivedTransaction: transaction, conflictingTransactions: conflictingTransactions)
+                    switch resolution {
+                    case .ignore:
+                        try conflictingTransactions.forEach {
+                            try storage.update(transaction: $0)
+                        }
+                        updated.append(contentsOf: conflictingTransactions)
+
+                    case .accept:
+                        conflictingTransactions.forEach {
+                            processInvalid(transactionHash: $0.dataHash)
+                        }
+
+                        try self.storage.add(transaction: transaction)
+                        inserted.append(transaction.header)
+                    }
 
                     if !skipCheckBloomFilter {
                         needToUpdateBloomFilter = needToUpdateBloomFilter || self.publicKeyManager.gapShifts() || self.irregularOutputFinder.hasIrregularOutput(outputs: transaction.outputs)
@@ -142,8 +166,7 @@ extension TransactionProcessor: ITransactionProcessor {
             return InvalidTransaction(
                     uid: transaction.uid, dataHash: transaction.dataHash, version: transaction.version, lockTime: transaction.lockTime, timestamp: transaction.timestamp,
                     order: transaction.order, blockHash: transaction.blockHash, isMine: transaction.isMine, isOutgoing: transaction.isOutgoing,
-                    status: transaction.status, segWit: transaction.segWit,
-                    transactionInfoJson: transactionInfoJson
+                    status: transaction.status, segWit: transaction.segWit, conflictingTxHash: transaction.conflictingTxHash, transactionInfoJson: transactionInfoJson
             )
         }
 

@@ -161,7 +161,7 @@ public class BitcoinCoreBuilder {
         let transactionProcessor = TransactionProcessor(storage: storage,
                 outputExtractor: transactionOutputExtractor, inputExtractor: transactionInputExtractor,
                 outputsCache: myOutputsCache, outputAddressExtractor: transactionAddressExtractor,
-                addressManager: publicKeyManager, irregularOutputFinder: irregularOutputFinder, transactionInfoConverter: transactionInfoConverter, listener: dataProvider)
+                addressManager: publicKeyManager, irregularOutputFinder: irregularOutputFinder, transactionInfoConverter: transactionInfoConverter, transactionMediator: TransactionMediator(), listener: dataProvider)
 
         let kitStateProvider = KitStateProvider()
 

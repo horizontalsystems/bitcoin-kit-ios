@@ -62,7 +62,8 @@ public class BaseTransactionInfoConverter: IBaseTransactionInfoConverter {
                 fee: allInputsHaveValue ? inputsTotalValue - outputsTotalValue : nil,
                 blockHeight: transactionForInfo.transactionWithBlock.blockHeight,
                 timestamp: transactionTimestamp,
-                status: transaction.status
+                status: transaction.status,
+                conflictingHash: transaction.conflictingTxHash?.reversedHex
         )
     }
 
