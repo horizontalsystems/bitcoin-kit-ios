@@ -10,9 +10,10 @@ open class TransactionInfo: ITransactionInfo, Codable {
     public let blockHeight: Int?
     public let timestamp: Int
     public let status: TransactionStatus
+    public let conflictingHash: String?
 
     public required init(uid: String, transactionHash: String, transactionIndex: Int, inputs: [TransactionInputInfo], outputs: [TransactionOutputInfo],
-                         fee: Int?, blockHeight: Int?, timestamp: Int, status: TransactionStatus) {
+                         fee: Int?, blockHeight: Int?, timestamp: Int, status: TransactionStatus, conflictingHash: String?) {
         self.uid = uid
         self.transactionHash = transactionHash
         self.transactionIndex = transactionIndex
@@ -22,6 +23,7 @@ open class TransactionInfo: ITransactionInfo, Codable {
         self.blockHeight = blockHeight
         self.timestamp = timestamp
         self.status = status
+        self.conflictingHash = conflictingHash
     }
 
 }

@@ -13,6 +13,7 @@ struct TransactionRecord {
     let date: Date
     let from: [TransactionInputOutput]
     let to: [TransactionInputOutput]
+    let conflictingHash: String?
     var transactionExtraType: String?
 }
 

@@ -114,7 +114,8 @@ class BaseAdapter {
                 fee: transaction.fee.map { Decimal($0) / coinRate },
                 date: Date(timeIntervalSince1970: Double(transaction.timestamp)),
                 from: from,
-                to: to
+                to: to,
+                conflictingHash: transaction.conflictingHash
         )
     }
 
