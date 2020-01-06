@@ -505,7 +505,7 @@ extension GrdbStorage: IStorage {
 
             let sql = """
                       SELECT transactions.* 
-                      FROM (SELECT * FROM invalid_transactions UNION ALL SELECT transactions.*, x'' AS transactionInfoJson FROM transactions) AS transactions
+                      FROM (SELECT * FROM invalid_transactions UNION ALL SELECT transactions.* FROM transactions) AS transactions
                       WHERE transactions.uid = ? 
                       """
 
