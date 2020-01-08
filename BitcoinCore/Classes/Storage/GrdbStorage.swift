@@ -531,6 +531,16 @@ extension GrdbStorage: IStorage {
         }.map { $0.dataHash }
     }
 
+    public func incomingPendingTransactionsExist() -> Bool {
+        try! dbPool.read { db in
+            try Transaction
+                    .filter(Transaction.Columns.blockHash == nil)
+                    .filter(Transaction.Columns.isMine == true)
+                    .filter(Transaction.Columns.isOutgoing == false)
+                    .fetchCount(db) > 0
+        }
+    }
+
     public func inputs(byHashes hashes: [Data]) -> [Input] {
         try! dbPool.read { db in
             try Input.filter(hashes.contains(Input.Columns.transactionHash)).fetchAll(db)
