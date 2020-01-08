@@ -487,6 +487,12 @@ extension GrdbStorage: IStorage {
         }
     }
 
+    public func invalidTransaction(byHash hash: Data) -> InvalidTransaction? {
+        try! dbPool.read { db in
+            try InvalidTransaction.filter(Transaction.Columns.dataHash == hash).fetchOne(db)
+        }
+    }
+
     public func conflictingTransactions(for transaction: FullTransaction) -> [Transaction] {
         let storageInputs = transaction.inputs.compactMap { input in
             inputsUsing(previousOutputTxHash: input.previousOutputTxHash, previousOutputIndex: input.previousOutputIndex)
@@ -516,6 +522,18 @@ extension GrdbStorage: IStorage {
             }
 
             return nil
+        }
+    }
+
+    public func incomingPendingTransactionHashes() -> [Data] {
+        try! dbPool.read { db in
+            try Transaction.filter(Transaction.Columns.blockHash == nil).filter(Transaction.Columns.isOutgoing == false).fetchAll(db)
+        }.map { $0.dataHash }
+    }
+
+    public func inputs(byHashes hashes: [Data]) -> [Input] {
+        try! dbPool.read { db in
+            try Input.filter(hashes.contains(Input.Columns.transactionHash)).fetchAll(db)
         }
     }
 

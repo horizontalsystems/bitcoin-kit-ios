@@ -151,6 +151,7 @@ public class BitcoinCoreBuilder {
         let factory = Factory(network: network, networkMessageParser: networkMessageParser, networkMessageSerializer: networkMessageSerializer)
 
         let publicKeyManager = PublicKeyManager.instance(storage: storage, hdWallet: hdWallet, restoreKeyConverter: restoreKeyConverterChain)
+        let pendingOutpointsProvider = PendingOutpointsProvider(storage: storage)
 
         let myOutputsCache = OutputsCache.instance(storage: storage)
         let irregularOutputFinder = IrregularOutputFinder(storage: storage)
@@ -248,6 +249,7 @@ public class BitcoinCoreBuilder {
 
         bloomFilterManager.add(provider: watchedTransactionManager)
         bloomFilterManager.add(provider: publicKeyManager)
+        bloomFilterManager.add(provider: pendingOutpointsProvider)
         bloomFilterManager.add(provider: irregularOutputFinder)
 
         peerGroup.peerTaskHandler = bitcoinCore.peerTaskHandlerChain

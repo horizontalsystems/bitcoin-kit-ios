@@ -1,5 +1,19 @@
 import RxSwift
 
+private struct NotMineTransaction: Hashable {
+    let hash: Data
+    let inBlock: Bool
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(hash)
+        hasher.combine(inBlock)
+    }
+
+    static func ==(lhs: NotMineTransaction, rhs: NotMineTransaction) -> Bool {
+         lhs.hash == rhs.hash && lhs.inBlock == rhs.inBlock
+    }
+}
+
 class TransactionProcessor {
     private let storage: IStorage
     private let outputExtractor: ITransactionExtractor
@@ -16,6 +30,8 @@ class TransactionProcessor {
 
     private let dateGenerator: () -> Date
     private let queue: DispatchQueue
+
+    private var notMineTransactions = Set<NotMineTransaction>()
 
     init(storage: IStorage, outputExtractor: ITransactionExtractor, inputExtractor: ITransactionExtractor, outputsCache: IOutputsCache,
          outputAddressExtractor: ITransactionOutputAddressExtractor, addressManager: IPublicKeyManager, irregularOutputFinder: IIrregularOutputFinder,
@@ -68,6 +84,7 @@ class TransactionProcessor {
 extension TransactionProcessor: ITransactionProcessor {
 
     func processReceived(transactions: [FullTransaction], inBlock block: Block?, skipCheckBloomFilter: Bool) throws {
+        let inBlock = block != nil
         var needToUpdateBloomFilter = false
 
         var updated = [Transaction]()
@@ -75,13 +92,21 @@ extension TransactionProcessor: ITransactionProcessor {
 
         try queue.sync {
             for (index, transaction) in transactions.inTopologicalOrder().enumerated() {
+                let probablyNotMineTransaction = NotMineTransaction(hash: transaction.header.dataHash, inBlock: inBlock)
+                if notMineTransactions.contains(probablyNotMineTransaction) {                                                // already processed this transaction with same state
+                    continue
+                }
+
+                if storage.invalidTransaction(byHash: transaction.header.dataHash) != nil {                                  // if some peer send us transaction after it's invalidated, we must ignore it
+                    continue
+                }
                 if let existingTransaction = self.storage.transaction(byHash: transaction.header.dataHash) {
                     if existingTransaction.blockHash != nil && block == nil {
                         continue
                     }
                     self.relay(transaction: existingTransaction, withOrder: index, inBlock: block)
 
-                    if block != nil {
+                    if inBlock {
                         existingTransaction.conflictingTxHash = nil
                     }
                     try self.storage.update(transaction: existingTransaction)
@@ -108,7 +133,7 @@ extension TransactionProcessor: ITransactionProcessor {
 
                     case .accept:
                         conflictingTransactions.forEach {
-                            processInvalid(transactionHash: $0.dataHash)
+                            processInvalid(transactionHash: $0.dataHash, conflictingTxHash: transaction.header.dataHash)
                         }
 
                         try self.storage.add(transaction: transaction)
@@ -116,8 +141,42 @@ extension TransactionProcessor: ITransactionProcessor {
                     }
 
                     if !skipCheckBloomFilter {
-                        needToUpdateBloomFilter = needToUpdateBloomFilter || self.publicKeyManager.gapShifts() || self.irregularOutputFinder.hasIrregularOutput(outputs: transaction.outputs)
+                        needToUpdateBloomFilter = needToUpdateBloomFilter ||
+                                                  !transaction.header.isOutgoing ||                                           // need update outpoints for incoming tx to check double spend txs
+                                                  self.publicKeyManager.gapShifts() ||
+                                                  self.irregularOutputFinder.hasIrregularOutput(outputs: transaction.outputs)
                     }
+                } else {
+                    notMineTransactions.insert(probablyNotMineTransaction)                                                   // add notMine tx hash to set
+
+                    let pendingTxHashes = storage.incomingPendingTransactionHashes()
+                    if pendingTxHashes.isEmpty {
+                        continue
+                    }
+
+                    let conflictingTransactionHashes = storage
+                            .inputs(byHashes: pendingTxHashes)
+                            .filter { input in
+                                transaction.inputs.contains { $0.previousOutputIndex == input.previousOutputIndex && $0.previousOutputTxHash == input.previousOutputTxHash }
+                            }
+                            .map { $0.transactionHash }
+                    if conflictingTransactionHashes.isEmpty {                                               // handle if transaction has conflicting inputs, otherwise it's false-positive tx
+                        continue
+                    }
+
+                    try Array(Set(conflictingTransactionHashes))                                            // make unique elements
+                            .compactMap { storage.transaction(byHash: $0) }                                 // get transactions for each input
+                            .filter { $0.blockHash == nil }                                                 // exclude all transactions in blocks
+                            .forEach {                                                                      // update conflicting transactions
+                                if !inBlock {                                                               // if coming other tx is pending only update conflict status
+                                    $0.conflictingTxHash = transaction.header.dataHash
+                                    try storage.update(transaction: $0)
+                                    updated.append($0)
+                                } else {                                                                    // if coming other tx in block invalidate our tx
+                                    needToUpdateBloomFilter = true
+                                    processInvalid(transactionHash: $0.dataHash, conflictingTxHash: transaction.header.dataHash)
+                                }
+                            }
                 }
             }
         }
@@ -145,14 +204,17 @@ extension TransactionProcessor: ITransactionProcessor {
         }
     }
 
-    public func processInvalid(transactionHash: Data) {
+    public func processInvalid(transactionHash: Data, conflictingTxHash: Data?) {
         let invalidTransactionsFullInfo = descendantTransactionsFullInfo(of: transactionHash)
 
         guard !invalidTransactionsFullInfo.isEmpty else {
             return
         }
 
-        invalidTransactionsFullInfo.forEach { $0.transactionWithBlock.transaction.status = .invalid }
+        invalidTransactionsFullInfo.forEach {
+            $0.transactionWithBlock.transaction.status = .invalid
+            $0.transactionWithBlock.transaction.conflictingTxHash = conflictingTxHash
+        }
 
         let invalidTransactions: [InvalidTransaction] = invalidTransactionsFullInfo.map { transactionFullInfo in
             let transactionInfo = transactionInfoConverter.transactionInfo(fromTransaction: transactionFullInfo)
