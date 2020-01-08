@@ -85,6 +85,8 @@ extension TransactionProcessor: ITransactionProcessor {
 
     func processReceived(transactions: [FullTransaction], inBlock block: Block?, skipCheckBloomFilter: Bool) throws {
         let inBlock = block != nil
+        let existPending = !inBlock || storage.incomingPendingTransactionsExist()
+
         var needToUpdateBloomFilter = false
 
         var updated = [Transaction]()
@@ -140,14 +142,15 @@ extension TransactionProcessor: ITransactionProcessor {
                         inserted.append(transaction.header)
                     }
 
+                    let checkDoubleSpend = !transaction.header.isOutgoing && !inBlock
                     if !skipCheckBloomFilter {
                         needToUpdateBloomFilter = needToUpdateBloomFilter ||
-                                                  !transaction.header.isOutgoing ||                                           // need update outpoints for incoming tx to check double spend txs
+                                                  checkDoubleSpend ||
                                                   self.publicKeyManager.gapShifts() ||
                                                   self.irregularOutputFinder.hasIrregularOutput(outputs: transaction.outputs)
                     }
-                } else {
-                    notMineTransactions.insert(probablyNotMineTransaction)                                                   // add notMine tx hash to set
+                } else if existPending {
+                    notMineTransactions.insert(probablyNotMineTransaction)                                  // add notMine tx hash to set
 
                     let pendingTxHashes = storage.incomingPendingTransactionHashes()
                     if pendingTxHashes.isEmpty {

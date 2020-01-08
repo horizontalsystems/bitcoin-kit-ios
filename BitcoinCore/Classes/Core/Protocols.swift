@@ -104,6 +104,7 @@ public protocol IStorage {
     func conflictingTransactions(for transaction: FullTransaction) -> [Transaction]
     func validOrInvalidTransaction(byUid: String) -> Transaction?
     func incomingPendingTransactionHashes() -> [Data]
+    func incomingPendingTransactionsExist() -> Bool
     func inputs(byHashes hashes: [Data]) -> [Input]
     func transactions(ofBlock: Block) -> [Transaction]
     func newTransactions() -> [Transaction]
