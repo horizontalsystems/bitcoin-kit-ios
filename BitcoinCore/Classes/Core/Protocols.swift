@@ -100,8 +100,11 @@ public protocol IStorage {
 
     func transactionExists(byHash: Data) -> Bool
     func transaction(byHash: Data) -> Transaction?
+    func invalidTransaction(byHash: Data) -> InvalidTransaction?
     func conflictingTransactions(for transaction: FullTransaction) -> [Transaction]
     func validOrInvalidTransaction(byUid: String) -> Transaction?
+    func incomingPendingTransactionHashes() -> [Data]
+    func inputs(byHashes hashes: [Data]) -> [Input]
     func transactions(ofBlock: Block) -> [Transaction]
     func newTransactions() -> [Transaction]
     func newTransaction(byHash: Data) -> Transaction?
@@ -319,7 +322,7 @@ public protocol ITransactionProcessor: class {
 
     func processReceived(transactions: [FullTransaction], inBlock block: Block?, skipCheckBloomFilter: Bool) throws
     func processCreated(transaction: FullTransaction) throws
-    func processInvalid(transactionHash: Data)
+    func processInvalid(transactionHash: Data, conflictingTxHash: Data?)
 }
 
 protocol ITransactionMediator {
