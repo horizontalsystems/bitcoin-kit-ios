@@ -69,8 +69,10 @@ class TransactionProcessor {
 
     private func relay(transaction: Transaction, withOrder order: Int, inBlock block: Block?) {
         transaction.blockHash = block?.headerHash
+        if let block = block  {
+            transaction.timestamp = block.timestamp
+        }
         transaction.status = .relayed
-        transaction.timestamp = block?.timestamp ?? Int(dateGenerator().timeIntervalSince1970)
         transaction.order = order
 
         if let block = block, !block.hasTransactions {
@@ -103,7 +105,7 @@ extension TransactionProcessor: ITransactionProcessor {
                     continue
                 }
                 if let existingTransaction = self.storage.transaction(byHash: transaction.header.dataHash) {
-                    if existingTransaction.blockHash != nil && block == nil {
+                    if existingTransaction.blockHash != nil || (existingTransaction.status == .relayed && !inBlock) {       // if transaction already in block or transaction comes again from memPool we don't need update it
                         continue
                     }
                     self.relay(transaction: existingTransaction, withOrder: index, inBlock: block)
