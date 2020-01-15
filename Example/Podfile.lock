@@ -11,7 +11,7 @@ PODS:
     - OpenSslKit.swift (~> 1.0)
     - RxSwift (~> 5.0)
     - Secp256k1Kit.swift (~> 1.0)
-  - BitcoinCore.swift (0.13.4):
+  - BitcoinCore.swift (0.13.6):
     - Alamofire (~> 4.0)
     - BigInt (~> 5.0)
     - GRDB.swift (~> 4.0)
@@ -35,7 +35,7 @@ PODS:
   - Cuckoo (1.3.0):
     - Cuckoo/Swift (= 1.3.0)
   - Cuckoo/Swift (1.3.0)
-  - DashKit.swift (0.13.2):
+  - DashKit.swift (0.13.3):
     - Alamofire (~> 4.0)
     - BigInt (~> 5.0)
     - BitcoinCore.swift (~> 0.13.2)
@@ -47,9 +47,9 @@ PODS:
     - RxSwift (~> 5.0)
     - Secp256k1Kit.swift (~> 1.0)
     - X11Kit.swift (~> 1.0)
-  - GRDB.swift (4.6.2):
-    - GRDB.swift/standard (= 4.6.2)
-  - GRDB.swift/standard (4.6.2)
+  - GRDB.swift (4.8.1):
+    - GRDB.swift/standard (= 4.8.1)
+  - GRDB.swift/standard (4.8.1)
   - HdWalletKit.swift (1.4):
     - OpenSslKit.swift (~> 1.0)
     - Secp256k1Kit.swift (~> 1.0)
@@ -57,7 +57,7 @@ PODS:
     - BitcoinCore.swift (~> 0.13.2)
     - OpenSslKit.swift (~> 1.0)
     - Secp256k1Kit.swift (~> 1.0)
-  - Nimble (8.0.4)
+  - Nimble (8.0.5)
   - ObjectMapper (3.5.1)
   - OpenSslKit.swift (1.0)
   - Quick (2.2.0)
@@ -111,15 +111,15 @@ SPEC CHECKSUMS:
   Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
   BigInt: 74b4d88367b0e819d9f77393549226d36faeb0d8
   BitcoinCashKit.swift: 91e981ddc6e663d598130c65a1e756393058a2e7
-  BitcoinCore.swift: 129ac8ac87099b124177167d53f9c360f5d85e8e
+  BitcoinCore.swift: b2498d398bbf39b1d568980deaf1fe372df509dc
   BitcoinKit.swift: 1d216c95eed1a8fcfa997e4d86fe10559d84f56c
   BlsKit.swift: 533e494e0068f9ad2cf211a31fe9279f688af123
   Cuckoo: 4045c5a8ce378c919c20c5ff3d6dd11ded0ec699
-  DashKit.swift: 246552f3d918b885c563bd65cc66990fe8dcdd75
-  GRDB.swift: 258520e10b49ff55307cbb0bec701af0742ae621
+  DashKit.swift: 6ee100d9c2f847c7564c5bf5cfbfbd738393c92b
+  GRDB.swift: 6cd628021154e2d1d6a39d3a9a3ab3e8af55547f
   HdWalletKit.swift: 45af883b0aa722a56ed9a0de82121ba6c43cce3f
   Hodler.swift: 19c22fbea5f44cc6479df18fbc8c29233e9a5c2d
-  Nimble: 18d5360282923225d62b09d781f63abc1a0111fc
+  Nimble: 4ab1aeb9b45553c75b9687196b0fa0713170a332
   ObjectMapper: 70187b8941977c62ccfb423caf6b50be405cabf0
   OpenSslKit.swift: 6e699e0d69fae6b306eaca0b8971c59bc45546ab
   Quick: 7fb19e13be07b5dfb3b90d4f9824c855a11af40e
