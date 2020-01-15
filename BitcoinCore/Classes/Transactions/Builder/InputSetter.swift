@@ -52,7 +52,7 @@ extension InputSetter: IInputSetter {
                 outputScriptType: mutableTransaction.recipientAddress.scriptType, changeType: changeScriptType,
                 senderPay: senderPay, dust: dust, pluginDataOutputSize: mutableTransaction.pluginDataOutputSize
         )
-        let unspentOutputs = unspentOutputInfo.unspentOutputs
+        let unspentOutputs = unspentOutputInfo.unspentOutputs.sorted(by: Bip69.inputComparator)
 
         for unspentOutput in unspentOutputs {
             mutableTransaction.add(inputToSign: try input(fromUnspentOutput: unspentOutput))
