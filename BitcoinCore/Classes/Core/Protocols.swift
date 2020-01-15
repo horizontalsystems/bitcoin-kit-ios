@@ -327,7 +327,7 @@ public protocol ITransactionProcessor: class {
 }
 
 protocol ITransactionMediator {
-    func resolve(receivedTransaction transaction: FullTransaction, conflictingTransactions: [Transaction]) -> ConflictResolution
+    func resolve(receivedTransaction transaction: FullTransaction, conflictingTransactions: [Transaction], updatingTransactions: inout [Transaction]) -> ConflictResolution
 }
 
 protocol ITransactionExtractor {
