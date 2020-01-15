@@ -1,7 +1,7 @@
 extension Data: Comparable {
 
     public static func <(lhs: Data, rhs: Data) -> Bool {
-        guard lhs.count == lhs.count else {
+        guard lhs.count == rhs.count else {
             return lhs.count < rhs.count
         }
 

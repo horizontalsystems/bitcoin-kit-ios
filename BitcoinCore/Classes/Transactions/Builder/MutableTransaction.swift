@@ -34,7 +34,7 @@ public class MutableTransaction {
             outputs.append(Output(withValue: 0, index: index, lockingScript: data, type: .nullData))
         }
 
-        return outputs
+        return outputs.sorted(by: Bip69.outputComparator)
     }
 
     var pluginDataOutputSize: Int {

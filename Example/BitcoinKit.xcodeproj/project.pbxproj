@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1A564D56C3A051FF606AC76B /* Bip69Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A56412D624E0604F48AEECE /* Bip69Tests.swift */; };
 		2FA5D47CFAEB8DB143F27645 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DACF4DE83AC5FE512D28 /* Extensions.swift */; };
 		3A713DE3E57894A08D0D7BCA /* libPods-BitcoinKitExample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8533447FA6137FF0AD1A8653 /* libPods-BitcoinKitExample.a */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
@@ -136,6 +137,7 @@
 
 /* Begin PBXFileReference section */
 		1029C270FEFAD935F7997EBE /* Pods-BitcoinKit_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BitcoinKit_Example.release.xcconfig"; path = "Target Support Files/Pods-BitcoinKit_Example/Pods-BitcoinKit_Example.release.xcconfig"; sourceTree = "<group>"; };
+		1A56412D624E0604F48AEECE /* Bip69Tests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bip69Tests.swift; sourceTree = "<group>"; };
 		2FA5DACF4DE83AC5FE512D28 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		5ABDFB9CD579008DADA21D5E /* Pods-BitcoinKit_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BitcoinKit_Example.debug.xcconfig"; path = "Target Support Files/Pods-BitcoinKit_Example/Pods-BitcoinKit_Example.debug.xcconfig"; sourceTree = "<group>"; };
 		5F2017BF6B8CE56A1B7B7DF7 /* libPods-BitcoinCoreTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-BitcoinCoreTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -717,6 +719,7 @@
 				D39EA41323A2094800FF23B7 /* AddressConverterTests.swift */,
 				D39EA41423A2094800FF23B7 /* PaymentAddressParserTests.swift */,
 				D39EA41523A2094800FF23B7 /* MerkleBranchTests.swift */,
+				1A56412D624E0604F48AEECE /* Bip69Tests.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -1489,6 +1492,7 @@
 				D39EA44623A2094800FF23B7 /* UnspentOutputSelectorSingleNoChangeTests.swift in Sources */,
 				D39EA42E23A2094800FF23B7 /* BlockchainTests.swift in Sources */,
 				D39EA43723A2094800FF23B7 /* SendTransactionTaskTests.swift in Sources */,
+				1A564D56C3A051FF606AC76B /* Bip69Tests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
