@@ -494,11 +494,15 @@ extension GrdbStorage: IStorage {
     }
 
     public func conflictingTransactions(for transaction: FullTransaction) -> [Transaction] {
-        let storageInputs = transaction.inputs.compactMap { input in
+        let storageTransactionHashes = transaction.inputs.compactMap { input in
             inputsUsing(previousOutputTxHash: input.previousOutputTxHash, previousOutputIndex: input.previousOutputIndex)
-                    .filter { $0.transactionHash != transaction.header.dataHash }.first
+                    .filter { $0.transactionHash != transaction.header.dataHash }.first?.transactionHash
         }
-        return storageInputs.compactMap { self.transaction(byHash: $0.transactionHash) }
+        guard !storageTransactionHashes.isEmpty else {
+            return []
+        }
+
+        return Array(Set(storageTransactionHashes)).compactMap { self.transaction(byHash: $0) }
     }
 
     public func validOrInvalidTransaction(byUid uid: String) -> Transaction? {

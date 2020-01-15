@@ -127,16 +127,17 @@ extension TransactionProcessor: ITransactionProcessor {
 
                     let conflictingTransactions = storage.conflictingTransactions(for: transaction)
 
-                    let resolution = transactionMediator.resolve(receivedTransaction: transaction, conflictingTransactions: conflictingTransactions)
+                    var needToUpdate = [Transaction]()
+                    let resolution = transactionMediator.resolve(receivedTransaction: transaction, conflictingTransactions: conflictingTransactions, updatingTransactions: &needToUpdate)
                     switch resolution {
                     case .ignore:
-                        try conflictingTransactions.forEach {
+                        try needToUpdate.forEach {
                             try storage.update(transaction: $0)
                         }
-                        updated.append(contentsOf: conflictingTransactions)
+                        updated.append(contentsOf: needToUpdate)
 
                     case .accept:
-                        conflictingTransactions.forEach {
+                        needToUpdate.forEach {
                             processInvalid(transactionHash: $0.dataHash, conflictingTxHash: transaction.header.dataHash)
                         }
 
@@ -218,7 +219,9 @@ extension TransactionProcessor: ITransactionProcessor {
 
         invalidTransactionsFullInfo.forEach {
             $0.transactionWithBlock.transaction.status = .invalid
-            $0.transactionWithBlock.transaction.conflictingTxHash = conflictingTxHash
+            if let conflictingTxHash = conflictingTxHash {
+                $0.transactionWithBlock.transaction.conflictingTxHash = conflictingTxHash
+            }
         }
 
         let invalidTransactions: [InvalidTransaction] = invalidTransactionsFullInfo.map { transactionFullInfo in
@@ -229,7 +232,6 @@ extension TransactionProcessor: ITransactionProcessor {
             }
 
             let transaction = transactionFullInfo.transactionWithBlock.transaction
-
             return InvalidTransaction(
                     uid: transaction.uid, dataHash: transaction.dataHash, version: transaction.version, lockTime: transaction.lockTime, timestamp: transaction.timestamp,
                     order: transaction.order, blockHash: transaction.blockHash, isMine: transaction.isMine, isOutgoing: transaction.isOutgoing,
