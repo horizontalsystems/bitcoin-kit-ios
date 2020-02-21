@@ -12,16 +12,12 @@ public class MutableTransaction {
     var outputs: [Output] {
         var outputs = [Output]()
 
-        var index = 0
-
         if let address = recipientAddress {
-            outputs.append(Output(withValue: recipientValue, index: index, lockingScript: address.lockingScript, type: address.scriptType, address: address.stringValue, keyHash: address.keyHash))
-            index += 1
+            outputs.append(Output(withValue: recipientValue, index: 0, lockingScript: address.lockingScript, type: address.scriptType, address: address.stringValue, keyHash: address.keyHash))
         }
 
         if let address = changeAddress {
-            outputs.append(Output(withValue: changeValue, index: index, lockingScript: address.lockingScript, type: address.scriptType, address: address.stringValue, keyHash: address.keyHash))
-            index += 1
+            outputs.append(Output(withValue: changeValue, index: 0, lockingScript: address.lockingScript, type: address.scriptType, address: address.stringValue, keyHash: address.keyHash))
         }
 
         if !pluginData.isEmpty {
@@ -31,10 +27,16 @@ public class MutableTransaction {
                 data += Data([key]) + value
             }
 
-            outputs.append(Output(withValue: 0, index: index, lockingScript: data, type: .nullData))
+            outputs.append(Output(withValue: 0, index: 0, lockingScript: data, type: .nullData))
         }
 
-        return outputs.sorted(by: Bip69.outputComparator)
+        outputs.sort(by: Bip69.outputComparator)
+
+        outputs.enumerated().forEach { index, transactionOutput in
+            transactionOutput.index = index
+        }
+
+        return outputs
     }
 
     var pluginDataOutputSize: Int {
