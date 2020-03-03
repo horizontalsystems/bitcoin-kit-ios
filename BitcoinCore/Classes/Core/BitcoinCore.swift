@@ -42,13 +42,8 @@ public class BitcoinCore {
     public let transactionSyncer: ITransactionSyncer
 
     let bloomFilterLoader: BloomFilterLoader
-    let blockValidatorChain: BlockValidatorChain
     let inventoryItemsHandlerChain = InventoryItemsHandlerChain()
     let peerTaskHandlerChain = PeerTaskHandlerChain()
-
-    public func add(blockValidator: IBlockValidator) {
-        blockValidatorChain.add(blockValidator: blockValidator)
-    }
 
     public func add(inventoryItemsHandler: IInventoryItemsHandler) {
         inventoryItemsHandlerChain.add(handler: inventoryItemsHandler)
@@ -96,7 +91,7 @@ public class BitcoinCore {
     init(storage: IStorage, cache: OutputsCache, dataProvider: IDataProvider,
          peerGroup: IPeerGroup, initialBlockDownload: IInitialBlockDownload, bloomFilterLoader: BloomFilterLoader,
          syncedReadyPeerManager: ISyncedReadyPeerManager, transactionSyncer: ITransactionSyncer,
-         blockValidatorChain: BlockValidatorChain, publicKeyManager: IPublicKeyManager, addressConverter: AddressConverterChain, restoreKeyConverterChain: RestoreKeyConverterChain,
+         publicKeyManager: IPublicKeyManager, addressConverter: AddressConverterChain, restoreKeyConverterChain: RestoreKeyConverterChain,
          unspentOutputSelector: UnspentOutputSelectorChain, kitStateProvider: IKitStateProvider & ISyncStateListener,
          transactionCreator: ITransactionCreator, transactionFeeCalculator: ITransactionFeeCalculator, dustCalculator: IDustCalculator,
          paymentAddressParser: IPaymentAddressParser, networkMessageParser: NetworkMessageParser, networkMessageSerializer: NetworkMessageSerializer,
@@ -110,7 +105,6 @@ public class BitcoinCore {
         self.bloomFilterLoader = bloomFilterLoader
         self.syncedReadyPeerManager = syncedReadyPeerManager
         self.transactionSyncer = transactionSyncer
-        self.blockValidatorChain = blockValidatorChain
         self.publicKeyManager = publicKeyManager
         self.addressConverter = addressConverter
         self.restoreKeyConverterChain = restoreKeyConverterChain

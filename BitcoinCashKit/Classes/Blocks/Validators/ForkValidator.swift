@@ -1,6 +1,6 @@
 import BitcoinCore
 
-class ForkValidator: IBlockValidator {
+class ForkValidator: IBlockChainedValidator {
     private let concreteValidator: IBitcoinCashBlockValidator
     private let forkHeight: Int
     private let expectedBlockHash: Data
@@ -12,7 +12,7 @@ class ForkValidator: IBlockValidator {
     }
 
     func validate(block: Block, previousBlock: Block) throws {
-        if block.height == forkHeight, block.headerHash != expectedBlockHash {
+        if block.headerHash != expectedBlockHash {
             throw BitcoinCoreErrors.BlockValidation.wrongHeaderHash
         }
 
@@ -20,7 +20,7 @@ class ForkValidator: IBlockValidator {
     }
 
     func isBlockValidatable(block: Block, previousBlock: Block) -> Bool {
-        return true
+        block.height == forkHeight
     }
 
 }

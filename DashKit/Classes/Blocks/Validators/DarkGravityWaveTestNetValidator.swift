@@ -1,6 +1,6 @@
 import BitcoinCore
 
-class DarkGravityWaveTestNetValidator: IBlockValidator {
+class DarkGravityWaveTestNetValidator: IBlockChainedValidator {
     private let difficultyEncoder: IDashDifficultyEncoder
 
     private let targetSpacing: Int

@@ -19,6 +19,7 @@ public class BitcoinCoreBuilder {
     private var logger: Logger
 
     private var blockHeaderHasher: IHasher?
+    private var blockValidator: IBlockValidator?
     private var transactionInfoConverter: ITransactionInfoConverter?
 
     // parameters with default values
@@ -81,6 +82,11 @@ public class BitcoinCoreBuilder {
 
     public func set(blockHeaderHasher: IHasher) -> BitcoinCoreBuilder {
         self.blockHeaderHasher = blockHeaderHasher
+        return self
+    }
+
+    public func set(blockValidator: IBlockValidator) -> BitcoinCoreBuilder {
+        self.blockValidator = blockValidator
         return self
     }
 
@@ -186,8 +192,7 @@ public class BitcoinCoreBuilder {
         let bloomFilterLoader = BloomFilterLoader(bloomFilterManager: bloomFilterManager, peerManager: peerManager)
         let watchedTransactionManager = WatchedTransactionManager()
 
-        let blockValidatorChain = BlockValidatorChain(proofOfWorkValidator: ProofOfWorkValidator(difficultyEncoder: DifficultyEncoder()))
-        let blockchain = Blockchain(storage: storage, blockValidator: blockValidatorChain, factory: factory, listener: dataProvider)
+        let blockchain = Blockchain(storage: storage, blockValidator: blockValidator, factory: factory, listener: dataProvider)
         let checkpointBlock = BlockSyncer.checkpointBlock(network: network, syncMode: syncMode, storage: storage)
         let blockSyncer = BlockSyncer.instance(storage: storage, checkpointBlock: checkpointBlock, factory: factory, listener: kitStateProvider, transactionProcessor: transactionProcessor, blockchain: blockchain, publicKeyManager: publicKeyManager, logger: logger)
         let initialBlockDownload = InitialBlockDownload(blockSyncer: blockSyncer, peerManager: peerManager, merkleBlockValidator: merkleBlockValidator, syncStateListener: kitStateProvider, logger: logger)
@@ -221,7 +226,6 @@ public class BitcoinCoreBuilder {
                 bloomFilterLoader: bloomFilterLoader,
                 syncedReadyPeerManager: syncedReadyPeerManager,
                 transactionSyncer: transactionSyncer,
-                blockValidatorChain: blockValidatorChain,
                 publicKeyManager: publicKeyManager,
                 addressConverter: addressConverter,
                 restoreKeyConverterChain: restoreKeyConverterChain,

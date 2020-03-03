@@ -42,6 +42,29 @@ public class BitcoinCashKit: AbstractKit {
         let storage = GrdbStorage(databaseFilePath: databaseFilePath)
         let paymentAddressParser = PaymentAddressParser(validScheme: validScheme, removeScheme: false)
 
+        let difficultyEncoder = DifficultyEncoder()
+
+        let blockValidatorSet = BlockValidatorSet()
+        blockValidatorSet.add(blockValidator: ProofOfWorkValidator(difficultyEncoder: difficultyEncoder))
+
+        let blockValidatorChain = BlockValidatorChain()
+        let coreBlockHelper = BlockValidatorHelper(storage: storage)
+        let blockHelper = BitcoinCashBlockValidatorHelper(coreBlockValidatorHelper: coreBlockHelper)
+
+        let daaValidator = DAAValidator(encoder: difficultyEncoder, blockHelper: blockHelper, targetSpacing: BitcoinCashKit.targetSpacing, heightInterval: BitcoinCashKit.heightInterval, firstCheckpointHeight: network.lastCheckpointBlock.height)
+
+        switch networkType {
+        case .mainNet:
+            blockValidatorChain.add(blockValidator: ForkValidator(concreteValidator: daaValidator, forkHeight: BitcoinCashKit.svChainForkHeight, expectedBlockHash: BitcoinCashKit.abcChainForkBlockHash))
+            blockValidatorChain.add(blockValidator: daaValidator)
+            blockValidatorChain.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: coreBlockHelper, heightInterval: BitcoinCore.heightInterval, targetTimespan: BitcoinCore.targetSpacing * BitcoinCore.heightInterval, maxTargetBits: BitcoinCore.maxTargetBits))
+            blockValidatorChain.add(blockValidator: EDAValidator(encoder: difficultyEncoder, blockHelper: blockHelper, blockMedianTimeHelper: BlockMedianTimeHelper(storage: storage), maxTargetBits: BitcoinCore.maxTargetBits, firstCheckpointHeight: network.bip44CheckpointBlock.height))
+        case .testNet: ()
+                // not use test validators
+        }
+
+        blockValidatorSet.add(blockValidator: blockValidatorChain)
+
         let bitcoinCore = try BitcoinCoreBuilder(minLogLevel: minLogLevel)
                 .set(network: network)
                 .set(initialSyncApi: initialSyncApi)
@@ -52,6 +75,7 @@ public class BitcoinCashKit: AbstractKit {
                 .set(peerSize: 10)
                 .set(syncMode: syncMode)
                 .set(storage: storage)
+                .set(blockValidator: blockValidatorSet)
                 .build()
 
         super.init(bitcoinCore: bitcoinCore, network: network)
@@ -60,23 +84,6 @@ public class BitcoinCashKit: AbstractKit {
         let bech32 = CashBech32AddressConverter(prefix: network.bech32PrefixPattern)
         let base58 = Base58AddressConverter(addressVersion: network.pubKeyHash, addressScriptVersion: network.scriptHash)
         bitcoinCore.prepend(addressConverter: bech32)
-
-        let coreBlockHelper = BlockValidatorHelper(storage: storage)
-        let blockHelper = BitcoinCashBlockValidatorHelper(coreBlockValidatorHelper: coreBlockHelper)
-        let difficultyEncoder = DifficultyEncoder()
-
-        let daaValidator = DAAValidator(encoder: difficultyEncoder, blockHelper: blockHelper, targetSpacing: BitcoinCashKit.targetSpacing, heightInterval: BitcoinCashKit.heightInterval, firstCheckpointHeight: network.lastCheckpointBlock.height)
-
-        switch networkType {
-        case .mainNet:
-            bitcoinCore.add(blockValidator: ForkValidator(concreteValidator: daaValidator, forkHeight: BitcoinCashKit.svChainForkHeight, expectedBlockHash: BitcoinCashKit.abcChainForkBlockHash))
-            bitcoinCore.add(blockValidator: daaValidator)
-            bitcoinCore.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: coreBlockHelper, heightInterval: BitcoinCore.heightInterval, targetTimespan: BitcoinCore.targetSpacing * BitcoinCore.heightInterval, maxTargetBits: BitcoinCore.maxTargetBits))
-            bitcoinCore.add(blockValidator: EDAValidator(encoder: difficultyEncoder, blockHelper: blockHelper, blockMedianTimeHelper: BlockMedianTimeHelper(storage: storage), maxTargetBits: BitcoinCore.maxTargetBits, firstCheckpointHeight: network.bip44CheckpointBlock.height))
-        case .testNet: ()
-            // not use test validators
-        }
-
 
         bitcoinCore.add(restoreKeyConverter: Bip44RestoreKeyConverter(addressConverter: base58))
     }

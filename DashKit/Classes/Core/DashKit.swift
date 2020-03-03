@@ -51,6 +51,25 @@ public class DashKit: AbstractKit {
 
         dashTransactionInfoConverter = DashTransactionInfoConverter(instantTransactionManager: instantTransactionManager)
 
+        let difficultyEncoder = DifficultyEncoder()
+
+        let blockValidatorSet = BlockValidatorSet()
+        blockValidatorSet.add(blockValidator: ProofOfWorkValidator(difficultyEncoder: difficultyEncoder))
+
+        let blockValidatorChain = BlockValidatorChain()
+        let blockHelper = BlockValidatorHelper(storage: storage)
+
+        let targetTimespan = DashKit.heightInterval * DashKit.targetSpacing                 // Time to mining all 24 blocks in circle
+        switch networkType {
+        case .mainNet:
+            blockValidatorChain.add(blockValidator: DarkGravityWaveValidator(encoder: difficultyEncoder, blockHelper: blockHelper, heightInterval: DashKit.heightInterval , targetTimeSpan: targetTimespan, maxTargetBits: DashKit.maxTargetBits, firstCheckpointHeight: network.lastCheckpointBlock.height, powDGWHeight: 68589))
+        case .testNet:
+            blockValidatorChain.add(blockValidator: DarkGravityWaveTestNetValidator(difficultyEncoder: difficultyEncoder, targetSpacing: DashKit.targetSpacing, targetTimeSpan: targetTimespan, maxTargetBits: DashKit.maxTargetBits, powDGWHeight: 4002))
+            blockValidatorChain.add(blockValidator: DarkGravityWaveValidator(encoder: difficultyEncoder, blockHelper: blockHelper, heightInterval: DashKit.heightInterval, targetTimeSpan: targetTimespan, maxTargetBits: DashKit.maxTargetBits, firstCheckpointHeight: network.lastCheckpointBlock.height, powDGWHeight: 4002))
+        }
+
+        blockValidatorSet.add(blockValidator: blockValidatorChain)
+
         let bitcoinCore = try BitcoinCoreBuilder(minLogLevel: minLogLevel)
                 .set(network: network)
                 .set(words: words)
@@ -63,6 +82,7 @@ public class DashKit: AbstractKit {
                 .set(syncMode: syncMode)
                 .set(blockHeaderHasher: x11Hasher)
                 .set(transactionInfoConverter: dashTransactionInfoConverter)
+                .set(blockValidator: blockValidatorSet)
                 .build()
         super.init(bitcoinCore: bitcoinCore, network: network)
         bitcoinCore.delegate = self
@@ -78,18 +98,6 @@ public class DashKit: AbstractKit {
                 .add(messageParser: ISLockParser(hasher: doubleShaHasher))
 
         bitcoinCore.add(messageSerializer: GetMasternodeListDiffMessageSerializer())
-
-        let blockHelper = BlockValidatorHelper(storage: storage)
-        let difficultyEncoder = DifficultyEncoder()
-
-        let targetTimespan = DashKit.heightInterval * DashKit.targetSpacing                 // Time to mining all 24 blocks in circle
-        switch networkType {
-        case .mainNet:
-            bitcoinCore.add(blockValidator: DarkGravityWaveValidator(encoder: difficultyEncoder, blockHelper: blockHelper, heightInterval: DashKit.heightInterval , targetTimeSpan: targetTimespan, maxTargetBits: DashKit.maxTargetBits, firstCheckpointHeight: network.lastCheckpointBlock.height, powDGWHeight: 68589))
-        case .testNet:
-            bitcoinCore.add(blockValidator: DarkGravityWaveTestNetValidator(difficultyEncoder: difficultyEncoder, targetSpacing: DashKit.targetSpacing, targetTimeSpan: targetTimespan, maxTargetBits: DashKit.maxTargetBits, powDGWHeight: 4002))
-            bitcoinCore.add(blockValidator: DarkGravityWaveValidator(encoder: difficultyEncoder, blockHelper: blockHelper, heightInterval: DashKit.heightInterval, targetTimeSpan: targetTimespan, maxTargetBits: DashKit.maxTargetBits, firstCheckpointHeight: network.lastCheckpointBlock.height, powDGWHeight: 4002))
-        }
 
         let merkleBranch = MerkleBranch(hasher: doubleShaHasher)
 

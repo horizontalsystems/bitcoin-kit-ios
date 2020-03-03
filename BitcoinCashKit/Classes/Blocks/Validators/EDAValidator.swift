@@ -23,7 +23,7 @@ class EDAValidator {
 
 }
 
-extension EDAValidator: IBlockValidator {
+extension EDAValidator: IBlockChainedValidator {
 
     func validate(block: Block, previousBlock: Block) throws {
         guard previousBlock.height >= firstCheckpointHeight + 6 else {

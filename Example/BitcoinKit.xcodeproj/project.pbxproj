@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		11B35F729A8303254F2CC2A7 /* LitecoinAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35784074A8A389B0C3A6F /* LitecoinAdapter.swift */; };
 		1A564D56C3A051FF606AC76B /* Bip69Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A56412D624E0604F48AEECE /* Bip69Tests.swift */; };
 		1A564F07A30BCD9D357CB960 /* MutableTransactionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A56436E5E862A9A35F6FE41 /* MutableTransactionTests.swift */; };
 		2FA5D47CFAEB8DB143F27645 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DACF4DE83AC5FE512D28 /* Extensions.swift */; };
@@ -15,6 +16,7 @@
 		6BADE51A1F50100CE1EA2E77 /* libPods-DashKitTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 68064D100A6B89360F422ACD /* libPods-DashKitTests.a */; };
 		CCEE7A41B8D1161D30ECF667 /* libPods-BitcoinKitTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 61760DF10CCBAC95608DF73F /* libPods-BitcoinKitTests.a */; };
 		CED3DF3255F84A325E377749 /* libPods-HodlerTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AEBF785A9D87D74223787CA0 /* libPods-HodlerTests.a */; };
+		D369A2F3240E51AB00D6FE1E /* SegWitBech32AddressConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35B0FC1EF59DDBB427A25 /* SegWitBech32AddressConverterTests.swift */; };
 		D36AAA9523A2125D0065B32B /* BitcoinCashAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA7C23A2125D0065B32B /* BitcoinCashAdapter.swift */; };
 		D36AAA9623A2125D0065B32B /* DashAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA7D23A2125D0065B32B /* DashAdapter.swift */; };
 		D36AAA9723A2125E0065B32B /* BitcoinAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA7E23A2125D0065B32B /* BitcoinAdapter.swift */; };
@@ -38,7 +40,6 @@
 		D36AAAA923A2125E0065B32B /* Signal.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA9323A2125D0065B32B /* Signal.swift */; };
 		D36AAAAA23A2125E0065B32B /* TransactionRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA9423A2125D0065B32B /* TransactionRecord.swift */; };
 		D36AAAAC23A212E30065B32B /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = D36AAAAB23A212E30065B32B /* LaunchScreen.xib */; };
-		D39EA3D323A12E5B00FF23B7 /* SegWitBech32AddressConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3D223A12E5A00FF23B7 /* SegWitBech32AddressConverterTests.swift */; };
 		D39EA3D623A2053700FF23B7 /* GeneratedMocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3D523A2053700FF23B7 /* GeneratedMocks.swift */; };
 		D39EA42823A2094800FF23B7 /* KitStateProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3D923A2094700FF23B7 /* KitStateProviderTests.swift */; };
 		D39EA42923A2094800FF23B7 /* BlockSyncerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3DA23A2094700FF23B7 /* BlockSyncerTests.swift */; };
@@ -138,6 +139,8 @@
 
 /* Begin PBXFileReference section */
 		1029C270FEFAD935F7997EBE /* Pods-BitcoinKit_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BitcoinKit_Example.release.xcconfig"; path = "Target Support Files/Pods-BitcoinKit_Example/Pods-BitcoinKit_Example.release.xcconfig"; sourceTree = "<group>"; };
+		11B35784074A8A389B0C3A6F /* LitecoinAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LitecoinAdapter.swift; sourceTree = "<group>"; };
+		11B35B0FC1EF59DDBB427A25 /* SegWitBech32AddressConverterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegWitBech32AddressConverterTests.swift; sourceTree = "<group>"; };
 		1A56412D624E0604F48AEECE /* Bip69Tests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bip69Tests.swift; sourceTree = "<group>"; };
 		1A56436E5E862A9A35F6FE41 /* MutableTransactionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MutableTransactionTests.swift; sourceTree = "<group>"; };
 		2FA5DACF4DE83AC5FE512D28 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
@@ -164,6 +167,7 @@
 		C45B20346E834C6B8A93D7EC /* Pods-BitcoinKitTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BitcoinKitTests.release.xcconfig"; path = "Target Support Files/Pods-BitcoinKitTests/Pods-BitcoinKitTests.release.xcconfig"; sourceTree = "<group>"; };
 		CA5C17E35989902FCC31411F /* BitcoinKit.swift.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file.podspec; name = BitcoinKit.swift.podspec; path = ../BitcoinKit.swift.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		CC223B703634B83592B29EE5 /* Pods-BitcoinCashKitTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BitcoinCashKitTests.debug.xcconfig"; path = "Target Support Files/Pods-BitcoinCashKitTests/Pods-BitcoinCashKitTests.debug.xcconfig"; sourceTree = "<group>"; };
+		D369A2F22409238F00D6FE1E /* LitecoinKit.swift.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; name = LitecoinKit.swift.podspec; path = ../LitecoinKit.swift.podspec; sourceTree = "<group>"; };
 		D36AAA7C23A2125D0065B32B /* BitcoinCashAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinCashAdapter.swift; sourceTree = "<group>"; };
 		D36AAA7D23A2125D0065B32B /* DashAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashAdapter.swift; sourceTree = "<group>"; };
 		D36AAA7E23A2125D0065B32B /* BitcoinAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinAdapter.swift; sourceTree = "<group>"; };
@@ -200,7 +204,6 @@
 		D39EA3CC23A124B900FF23B7 /* BitcoinKitTests.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = BitcoinKitTests.plist; sourceTree = "<group>"; };
 		D39EA3CE23A124C000FF23B7 /* HodlerTests.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = HodlerTests.plist; sourceTree = "<group>"; };
 		D39EA3D023A124CA00FF23B7 /* DashKitTests.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = DashKitTests.plist; sourceTree = "<group>"; };
-		D39EA3D223A12E5A00FF23B7 /* SegWitBech32AddressConverterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegWitBech32AddressConverterTests.swift; sourceTree = "<group>"; };
 		D39EA3D523A2053700FF23B7 /* GeneratedMocks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratedMocks.swift; sourceTree = "<group>"; };
 		D39EA3D923A2094700FF23B7 /* KitStateProviderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KitStateProviderTests.swift; sourceTree = "<group>"; };
 		D39EA3DA23A2094700FF23B7 /* BlockSyncerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockSyncerTests.swift; sourceTree = "<group>"; };
@@ -398,6 +401,7 @@
 				D39EA3FE23A2094700FF23B7 /* Managers */,
 				D39EA3E223A2094700FF23B7 /* Network */,
 				D39EA41823A2094800FF23B7 /* Transactions */,
+				11B35EB8AB33382E0F0DE3C5 /* SegWit */,
 				D39EA3FB23A2094700FF23B7 /* Extensions.swift */,
 				D39EA40D23A2094700FF23B7 /* TestData.swift */,
 				D39EA40E23A2094700FF23B7 /* GeneratedMocks.swift */,
@@ -408,10 +412,17 @@
 		11B35B706250BEAB6C3A01AD /* BitcoinKit */ = {
 			isa = PBXGroup;
 			children = (
-				D39EA3D223A12E5A00FF23B7 /* SegWitBech32AddressConverterTests.swift */,
 				D39EA3D523A2053700FF23B7 /* GeneratedMocks.swift */,
 			);
 			path = BitcoinKit;
+			sourceTree = "<group>";
+		};
+		11B35EB8AB33382E0F0DE3C5 /* SegWit */ = {
+			isa = PBXGroup;
+			children = (
+				11B35B0FC1EF59DDBB427A25 /* SegWitBech32AddressConverterTests.swift */,
+			);
+			path = SegWit;
 			sourceTree = "<group>";
 		};
 		607FACC71AFB9204008FA782 = {
@@ -495,6 +506,7 @@
 				CA5C17E35989902FCC31411F /* BitcoinKit.swift.podspec */,
 				D39EA38223A113EF00FF23B7 /* BitcoinCashKit.swift.podspec */,
 				D39EA38023A113EF00FF23B7 /* DashKit.swift.podspec */,
+				D369A2F22409238F00D6FE1E /* LitecoinKit.swift.podspec */,
 				D39EA37F23A113EF00FF23B7 /* Hodler.swift.podspec */,
 				F9F3077F37128BE5E33206CB /* README.md */,
 				A4262CF9BB9B657C6BD94DDA /* LICENSE */,
@@ -545,6 +557,7 @@
 				D36AAA7D23A2125D0065B32B /* DashAdapter.swift */,
 				D36AAA7E23A2125D0065B32B /* BitcoinAdapter.swift */,
 				D36AAA7F23A2125D0065B32B /* BaseAdapter.swift */,
+				11B35784074A8A389B0C3A6F /* LitecoinAdapter.swift */,
 			);
 			path = Adapters;
 			sourceTree = "<group>";
@@ -1266,12 +1279,14 @@
 				"${PODS_CONFIGURATION_BUILD_DIR}/BitcoinCashKit.swift/BitcoinCashKit.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/BitcoinKit.swift/BitcoinKit.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/DashKit.swift/DashKit.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/LitecoinKit.swift/LitecoinKit.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/BitcoinCashKit.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/BitcoinKit.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DashKit.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/LitecoinKit.bundle",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -1415,6 +1430,7 @@
 				D36AAA9623A2125D0065B32B /* DashAdapter.swift in Sources */,
 				D36AAA9523A2125D0065B32B /* BitcoinCashAdapter.swift in Sources */,
 				2FA5D47CFAEB8DB143F27645 /* Extensions.swift in Sources */,
+				11B35F729A8303254F2CC2A7 /* LitecoinAdapter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1422,7 +1438,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D39EA3D323A12E5B00FF23B7 /* SegWitBech32AddressConverterTests.swift in Sources */,
 				D39EA3D623A2053700FF23B7 /* GeneratedMocks.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1494,6 +1509,7 @@
 				D39EA45823A2094800FF23B7 /* PaymentAddressParserTests.swift in Sources */,
 				D39EA44623A2094800FF23B7 /* UnspentOutputSelectorSingleNoChangeTests.swift in Sources */,
 				D39EA42E23A2094800FF23B7 /* BlockchainTests.swift in Sources */,
+				D369A2F3240E51AB00D6FE1E /* SegWitBech32AddressConverterTests.swift in Sources */,
 				D39EA43723A2094800FF23B7 /* SendTransactionTaskTests.swift in Sources */,
 				1A564D56C3A051FF606AC76B /* Bip69Tests.swift in Sources */,
 				1A564F07A30BCD9D357CB960 /* MutableTransactionTests.swift in Sources */,

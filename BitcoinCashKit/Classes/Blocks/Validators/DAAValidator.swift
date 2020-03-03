@@ -1,7 +1,7 @@
 import BitcoinCore
 import BigInt
 
-class DAAValidator: IBlockValidator {
+class DAAValidator: IBlockChainedValidator {
     private let largestHash = BigInt(1) << 256
     private let consensusDaaForkHeight = 504030                             // 2017 November 13, 14:06 GMT
 
@@ -65,7 +65,7 @@ class DAAValidator: IBlockValidator {
     }
 
     func isBlockValidatable(block: Block, previousBlock: Block) -> Bool {
-        return previousBlock.height >= consensusDaaForkHeight // https://news.bitcoin.com/bitcoin-cash-network-completes-a-successful-hard-fork/
+        previousBlock.height >= consensusDaaForkHeight // https://news.bitcoin.com/bitcoin-cash-network-completes-a-successful-hard-fork/
     }
 
 }

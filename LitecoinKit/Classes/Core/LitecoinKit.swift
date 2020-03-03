@@ -1,13 +1,12 @@
 import BitcoinCore
 import HdWalletKit
-import Hodler
 import BigInt
 import RxSwift
 
-public class BitcoinKit: AbstractKit {
-    private static let name = "BitcoinKit"
+public class LitecoinKit: AbstractKit {
+    private static let name = "LitecoinKit"
 
-    public enum NetworkType: String, CaseIterable { case mainNet, testNet, regTest }
+    public enum NetworkType: String, CaseIterable { case mainNet, testNet }
 
     public weak var delegate: BitcoinCoreDelegate? {
         didSet {
@@ -22,48 +21,41 @@ public class BitcoinKit: AbstractKit {
         switch networkType {
             case .mainNet:
                 network = MainNet()
-                initialSyncApiUrl = "https://btc.horizontalsystems.xyz/apg"
+                initialSyncApiUrl = ""
             case .testNet:
                 network = TestNet()
-                initialSyncApiUrl = "http://btc-testnet.horizontalsystems.xyz/apg"
-            case .regTest:
-                network = RegTest()
                 initialSyncApiUrl = ""
         }
         let initialSyncApi = BCoinApi(url: initialSyncApiUrl)
 
-        let databaseFilePath = try DirectoryHelper.directoryURL(for: BitcoinKit.name).appendingPathComponent(BitcoinKit.databaseFileName(walletId: walletId, networkType: networkType, bip: bip, syncMode: syncMode)).path
+        let databaseFilePath = try DirectoryHelper.directoryURL(for: LitecoinKit.name).appendingPathComponent(LitecoinKit.databaseFileName(walletId: walletId, networkType: networkType, bip: bip, syncMode: syncMode)).path
         let storage = GrdbStorage(databaseFilePath: databaseFilePath)
 
-        let paymentAddressParser = PaymentAddressParser(validScheme: "bitcoin", removeScheme: true)
+        let paymentAddressParser = PaymentAddressParser(validScheme: "litecoin", removeScheme: true)
         let scriptConverter = ScriptConverter()
         let bech32AddressConverter = SegWitBech32AddressConverter(prefix: network.bech32PrefixPattern, scriptConverter: scriptConverter)
         let base58AddressConverter = Base58AddressConverter(addressVersion: network.pubKeyHash, addressScriptVersion: network.scriptHash)
 
-        let bitcoinCoreBuilder = BitcoinCoreBuilder(minLogLevel: minLogLevel)
-
         let difficultyEncoder = DifficultyEncoder()
 
         let blockValidatorSet = BlockValidatorSet()
-        blockValidatorSet.add(blockValidator: ProofOfWorkValidator(difficultyEncoder: difficultyEncoder))
+//        blockValidatorSet.add(blockValidator: ProofOfWorkValidator(difficultyEncoder: difficultyEncoder))
 
         let blockValidatorChain = BlockValidatorChain()
         let blockHelper = BlockValidatorHelper(storage: storage)
 
         switch networkType {
-        case .mainNet:
-            blockValidatorChain.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: blockHelper, heightInterval: BitcoinCore.heightInterval, targetTimespan: BitcoinCore.heightInterval * BitcoinCore.targetSpacing, maxTargetBits: BitcoinCore.maxTargetBits))
-            blockValidatorChain.add(blockValidator: BitsValidator())
-        case .regTest, .testNet:
-            blockValidatorChain.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: blockHelper, heightInterval: BitcoinCore.heightInterval, targetTimespan: BitcoinCore.heightInterval * BitcoinCore.targetSpacing, maxTargetBits: BitcoinCore.maxTargetBits))
-            blockValidatorChain.add(blockValidator: LegacyTestNetDifficultyValidator(blockHelper: blockHelper, heightInterval: BitcoinCore.heightInterval, targetSpacing: BitcoinCore.targetSpacing, maxTargetBits: BitcoinCore.maxTargetBits))
+        case .mainNet: ()
+//            blockValidatorChain.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: blockHelper, heightInterval: BitcoinCore.heightInterval, targetTimespan: BitcoinCore.heightInterval * BitcoinCore.targetSpacing, maxTargetBits: BitcoinCore.maxTargetBits))
+//            blockValidatorChain.add(blockValidator: BitsValidator())
+        case .testNet: ()
+//            blockValidatorChain.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: blockHelper, heightInterval: BitcoinCore.heightInterval, targetTimespan: BitcoinCore.heightInterval * BitcoinCore.targetSpacing, maxTargetBits: BitcoinCore.maxTargetBits))
+//            blockValidatorChain.add(blockValidator: LegacyTestNetDifficultyValidator(blockHelper: blockHelper, heightInterval: BitcoinCore.heightInterval, targetSpacing: BitcoinCore.targetSpacing, maxTargetBits: BitcoinCore.maxTargetBits))
         }
 
         blockValidatorSet.add(blockValidator: blockValidatorChain)
 
-        let hodler = HodlerPlugin(addressConverter: bitcoinCoreBuilder.addressConverter, blockMedianTimeHelper: BlockMedianTimeHelper(storage: storage), publicKeyStorage: storage)
-        
-        let bitcoinCore = try bitcoinCoreBuilder
+        let bitcoinCore = try BitcoinCoreBuilder(minLogLevel: minLogLevel)
                 .set(network: network)
                 .set(initialSyncApi: initialSyncApi)
                 .set(words: words)
@@ -75,7 +67,6 @@ public class BitcoinKit: AbstractKit {
                 .set(syncMode: syncMode)
                 .set(storage: storage)
                 .set(blockValidator: blockValidatorSet)
-                .add(plugin: hodler)
                 .build()
 
         super.init(bitcoinCore: bitcoinCore, network: network)
@@ -98,10 +89,10 @@ public class BitcoinKit: AbstractKit {
 
 }
 
-extension BitcoinKit {
+extension LitecoinKit {
 
     public static func clear(exceptFor walletIdsToExclude: [String] = []) throws {
-        try DirectoryHelper.removeAll(inDirectory: BitcoinKit.name, except: walletIdsToExclude)
+        try DirectoryHelper.removeAll(inDirectory: LitecoinKit.name, except: walletIdsToExclude)
     }
 
     private static func databaseFileName(walletId: String, networkType: NetworkType, bip: Bip, syncMode: BitcoinCore.SyncMode) -> String {

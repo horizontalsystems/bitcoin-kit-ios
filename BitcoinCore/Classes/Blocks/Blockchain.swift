@@ -1,11 +1,11 @@
 class Blockchain {
     private let storage: IStorage
-    private let blockValidator: IBlockValidator
+    private var blockValidator: IBlockValidator?
     private let factory: IFactory
     weak var listener: IBlockchainDataListener?
     private var previousBlock: Block?
 
-    init(storage: IStorage, blockValidator: IBlockValidator, factory: IFactory, listener: IBlockchainDataListener? = nil) {
+    init(storage: IStorage, blockValidator: IBlockValidator?, factory: IFactory, listener: IBlockchainDataListener? = nil) {
         self.storage = storage
         self.blockValidator = blockValidator
         self.factory = factory
@@ -28,7 +28,7 @@ extension Blockchain: IBlockchain {
 
         // Validate and chain new blocks
         let block = factory.block(withHeader: merkleBlock.header, previousBlock: previousBlock)
-        try blockValidator.validate(block: block, previousBlock: previousBlock)
+        try blockValidator?.validate(block: block, previousBlock: previousBlock)
         block.stale = true
 
         try storage.add(block: block)
