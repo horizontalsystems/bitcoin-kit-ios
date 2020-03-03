@@ -1,32 +1,30 @@
 Pod::Spec.new do |s|
-  s.name             = 'DashKit.swift'
-  s.module_name      = 'DashKit'
+  s.name             = 'LitecoinKit.swift'
+  s.module_name      = 'LitecoinKit'
   s.version          = '0.14'
-  s.summary          = 'Dash library for Swift.'
+  s.summary          = 'Litecoin library for Swift.'
 
   s.description      = <<-DESC
-DashKit implements Dash protocol in Swift.
+LitecoinKit implements Litecoin protocol in Swift.
                        DESC
 
   s.homepage         = 'https://github.com/horizontalsystems/bitcoin-kit-ios'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Horizontal Systems' => 'hsdao@protonmail.ch' }
-  s.source           = { git: 'https://github.com/horizontalsystems/bitcoin-kit-ios.git', tag: "dash-#{s.version}" }
+  s.source           = { git: 'https://github.com/horizontalsystems/bitcoin-kit-ios.git', tag: "litecoin-#{s.version}" }
   s.social_media_url = 'http://horizontalsystems.io/'
 
   s.ios.deployment_target = '11.0'
   s.swift_version = '5'
 
-  s.source_files = 'DashKit/Classes/**/*'
-  s.resource_bundle = { 'DashKit' => 'DashKit/Assets/Checkpoints/*' }
+  s.source_files = 'LitecoinKit/Classes/**/*'
+  s.resource_bundle = { 'LitecoinKit' => 'LitecoinKit/Assets/Checkpoints/*' }
 
   s.requires_arc = true
 
   s.dependency 'BitcoinCore.swift', '~> 0.14'
   s.dependency 'OpenSslKit.swift', '~> 1.0'
   s.dependency 'Secp256k1Kit.swift', '~> 1.0'
-  s.dependency 'BlsKit.swift', '~> 1.0'
-  s.dependency 'X11Kit.swift', '~> 1.0'
   s.dependency 'HdWalletKit.swift', '~> 1.4'
 
   s.dependency 'Alamofire', '~> 4.0'

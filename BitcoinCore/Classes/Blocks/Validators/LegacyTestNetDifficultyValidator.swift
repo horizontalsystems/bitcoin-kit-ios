@@ -1,7 +1,7 @@
 import Foundation
 import BigInt
 
-public class LegacyTestNetDifficultyValidator: IBlockValidator {
+public class LegacyTestNetDifficultyValidator: IBlockChainedValidator {
     private let diffDate = 1329264000 // February 16th 2012
 
     private let heightInterval: Int

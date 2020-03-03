@@ -1,16 +1,15 @@
 import XCTest
 import Cuckoo
 @testable import BitcoinCore
-@testable import BitcoinKit
 
 class SegWitBech32AddressConverterTests: XCTestCase {
     private var segWitBech32Converter: SegWitBech32AddressConverter!
-    private var mockScriptConverter: MockIBitcoinScriptConverter!
+    private var mockScriptConverter: MockIScriptConverter!
     private let prefix = "tb1"
 
     override func setUp() {
         super.setUp()
-        mockScriptConverter = MockIBitcoinScriptConverter()
+        mockScriptConverter = MockIScriptConverter()
         segWitBech32Converter = SegWitBech32AddressConverter(prefix: "bc", scriptConverter: mockScriptConverter)
     }
 

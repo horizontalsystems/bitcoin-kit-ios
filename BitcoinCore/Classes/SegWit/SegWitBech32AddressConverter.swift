@@ -1,15 +1,13 @@
-import BitcoinCore
-
-class SegWitBech32AddressConverter: IAddressConverter {
+public class SegWitBech32AddressConverter: IAddressConverter {
     private let prefix: String
-    private let scriptConverter: IBitcoinScriptConverter
+    private let scriptConverter: IScriptConverter
 
-    init(prefix: String, scriptConverter: IBitcoinScriptConverter) {
+    public init(prefix: String, scriptConverter: IScriptConverter) {
         self.prefix = prefix
         self.scriptConverter = scriptConverter
     }
 
-    func convert(address: String) throws -> Address {
+    public func convert(address: String) throws -> Address {
         if let segWitData = try? SegWitBech32.decode(hrp: prefix, addr: address) {
             var type: AddressType = .pubKeyHash
             if segWitData.version == 0 {
@@ -23,7 +21,7 @@ class SegWitBech32AddressConverter: IAddressConverter {
         throw BitcoinCoreErrors.AddressConversion.unknownAddressType
     }
 
-    func convert(keyHash: Data, type: ScriptType) throws -> Address {
+    public func convert(keyHash: Data, type: ScriptType) throws -> Address {
         let script = try scriptConverter.decode(data: keyHash)
         guard script.chunks.count == 2,
               let versionCode = script.chunks.first?.opCode,
@@ -43,8 +41,8 @@ class SegWitBech32AddressConverter: IAddressConverter {
         return SegWitAddress(type: addressType, keyHash: keyHash, bech32: bech32, version: versionByte)
     }
 
-    func convert(publicKey: PublicKey, type: ScriptType) throws -> Address {
-        return try convert(keyHash: OpCode.scriptWPKH(publicKey.keyHash), type: type)
+    public func convert(publicKey: PublicKey, type: ScriptType) throws -> Address {
+        try convert(keyHash: OpCode.scriptWPKH(publicKey.keyHash), type: type)
     }
 
 }

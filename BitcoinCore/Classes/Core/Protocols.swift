@@ -16,11 +16,10 @@ public protocol IBlockValidatorHelper {
 
 public protocol IBlockValidator: class {
     func validate(block: Block, previousBlock: Block) throws
-    func isBlockValidatable(block: Block, previousBlock: Block) -> Bool
 }
 
-protocol IBlockValidatorFactory {
-    func validator(for validatorType: BlockValidatorType) -> IBlockValidator
+public protocol IBlockChainedValidator: IBlockValidator {
+    func isBlockValidatable(block: Block, previousBlock: Block) -> Bool
 }
 
 protocol IHDWallet {

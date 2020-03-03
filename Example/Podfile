@@ -6,6 +6,7 @@ target 'BitcoinKitExample' do
   pod 'BitcoinKit.swift', :path => '../'
   pod 'BitcoinCashKit.swift', :path => '../'
   pod 'DashKit.swift', :path => '../'
+  pod 'LitecoinKit.swift', :path => '../'
   pod 'Hodler.swift', :path => '../'
 end
 

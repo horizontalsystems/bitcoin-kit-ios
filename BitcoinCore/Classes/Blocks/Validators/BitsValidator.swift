@@ -1,6 +1,6 @@
 import Foundation
 
-public class BitsValidator: IBlockValidator {
+public class BitsValidator: IBlockChainedValidator {
 
     public init() {}
 

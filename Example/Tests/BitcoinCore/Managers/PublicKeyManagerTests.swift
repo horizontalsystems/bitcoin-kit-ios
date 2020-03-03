@@ -267,7 +267,7 @@ class PublicKeyManagerTests: XCTestCase {
             getPublicKey(withAccount: 0, index: 0, chain: .external),
         ]
 
-        try! manager.addKeys(keys: keys)
+        manager.addKeys(keys: keys)
         verify(mockStorage).add(publicKeys: equal(to: keys))
     }
 

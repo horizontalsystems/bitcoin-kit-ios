@@ -1,7 +1,7 @@
 import BitcoinCore
 import BigInt
 
-class DarkGravityWaveValidator: IBlockValidator {
+class DarkGravityWaveValidator: IBlockChainedValidator {
     private let difficultyEncoder: IDashDifficultyEncoder
     private let blockHelper: IDashBlockValidatorHelper
 

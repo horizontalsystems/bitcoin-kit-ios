@@ -9,7 +9,6 @@
 //  https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki
 //  Inspired by Pieter Wuille C++ implementation
 
-import  BitcoinCore
 import Foundation
 
 /// Segregated Witness Address encoder/decoder
