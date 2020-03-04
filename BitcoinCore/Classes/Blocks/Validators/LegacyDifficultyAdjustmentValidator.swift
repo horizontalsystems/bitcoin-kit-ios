@@ -44,7 +44,7 @@ public class LegacyDifficultyAdjustmentValidator: IBlockChainedValidator {
     }
 
     public func isBlockValidatable(block: Block, previousBlock: Block) -> Bool {
-        return block.height % heightInterval == 0
+        block.height % heightInterval == 0
     }
 
 }

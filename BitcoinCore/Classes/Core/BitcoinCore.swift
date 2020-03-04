@@ -4,10 +4,6 @@ import BigInt
 import RxSwift
 
 public class BitcoinCore {
-    public static let heightInterval = 2016                                    // Default block count in difficulty change circle ( Bitcoin )
-    public static let targetSpacing = 10 * 60                                  // Time to mining one block ( 10 min. Bitcoin )
-    public static let maxTargetBits = 0x1d00ffff                               // Initially and max. target difficulty for blocks
-
     private let storage: IStorage
     private let cache: OutputsCache
     private var dataProvider: IDataProvider

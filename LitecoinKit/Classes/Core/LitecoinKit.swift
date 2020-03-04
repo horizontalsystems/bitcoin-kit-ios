@@ -4,6 +4,10 @@ import BigInt
 import RxSwift
 
 public class LitecoinKit: AbstractKit {
+    private static let heightInterval = 2016                                    // Default block count in difficulty change circle
+    private static let targetSpacing = Int(2.5 * 60)                            // Time to mining one block
+    private static let maxTargetBits = 0x1e0fffff                               // Initially and max. target difficulty for blocks
+
     private static let name = "LitecoinKit"
 
     public enum NetworkType: String, CaseIterable { case mainNet, testNet }
@@ -45,13 +49,21 @@ public class LitecoinKit: AbstractKit {
         let blockValidatorChain = BlockValidatorChain()
         let blockHelper = BlockValidatorHelper(storage: storage)
 
+        let difficultyAdjustmentValidator = LegacyDifficultyAdjustmentValidator(
+                encoder: difficultyEncoder,
+                blockValidatorHelper: blockHelper,
+                heightInterval: LitecoinKit.heightInterval,
+                targetTimespan: LitecoinKit.heightInterval * LitecoinKit.targetSpacing,
+                maxTargetBits: LitecoinKit.maxTargetBits
+        )
+
         switch networkType {
         case .mainNet: ()
-//            blockValidatorChain.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: blockHelper, heightInterval: BitcoinCore.heightInterval, targetTimespan: BitcoinCore.heightInterval * BitcoinCore.targetSpacing, maxTargetBits: BitcoinCore.maxTargetBits))
+//            blockValidatorChain.add(blockValidator: difficultyAdjustmentValidator)
 //            blockValidatorChain.add(blockValidator: BitsValidator())
         case .testNet: ()
-//            blockValidatorChain.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: blockHelper, heightInterval: BitcoinCore.heightInterval, targetTimespan: BitcoinCore.heightInterval * BitcoinCore.targetSpacing, maxTargetBits: BitcoinCore.maxTargetBits))
-//            blockValidatorChain.add(blockValidator: LegacyTestNetDifficultyValidator(blockHelper: blockHelper, heightInterval: BitcoinCore.heightInterval, targetSpacing: BitcoinCore.targetSpacing, maxTargetBits: BitcoinCore.maxTargetBits))
+//            blockValidatorChain.add(blockValidator: difficultyAdjustmentValidator)
+//            blockValidatorChain.add(blockValidator: LegacyTestNetDifficultyValidator(blockHelper: blockHelper, heightInterval: LitecoinKit.heightInterval, targetSpacing: LitecoinKit.targetSpacing, maxTargetBits: LitecoinKit.maxTargetBits))
         }
 
         blockValidatorSet.add(blockValidator: blockValidatorChain)

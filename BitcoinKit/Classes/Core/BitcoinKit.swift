@@ -5,6 +5,10 @@ import BigInt
 import RxSwift
 
 public class BitcoinKit: AbstractKit {
+    private static let heightInterval = 2016                                    // Default block count in difficulty change circle ( Bitcoin )
+    private static let targetSpacing = 10 * 60                                  // Time to mining one block ( 10 min. Bitcoin )
+    private static let maxTargetBits = 0x1d00ffff                               // Initially and max. target difficulty for blocks
+
     private static let name = "BitcoinKit"
 
     public enum NetworkType: String, CaseIterable { case mainNet, testNet, regTest }
@@ -52,11 +56,11 @@ public class BitcoinKit: AbstractKit {
 
         switch networkType {
         case .mainNet:
-            blockValidatorChain.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: blockHelper, heightInterval: BitcoinCore.heightInterval, targetTimespan: BitcoinCore.heightInterval * BitcoinCore.targetSpacing, maxTargetBits: BitcoinCore.maxTargetBits))
+            blockValidatorChain.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: blockHelper, heightInterval: BitcoinKit.heightInterval, targetTimespan: BitcoinKit.heightInterval * BitcoinKit.targetSpacing, maxTargetBits: BitcoinKit.maxTargetBits))
             blockValidatorChain.add(blockValidator: BitsValidator())
         case .regTest, .testNet:
-            blockValidatorChain.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: blockHelper, heightInterval: BitcoinCore.heightInterval, targetTimespan: BitcoinCore.heightInterval * BitcoinCore.targetSpacing, maxTargetBits: BitcoinCore.maxTargetBits))
-            blockValidatorChain.add(blockValidator: LegacyTestNetDifficultyValidator(blockHelper: blockHelper, heightInterval: BitcoinCore.heightInterval, targetSpacing: BitcoinCore.targetSpacing, maxTargetBits: BitcoinCore.maxTargetBits))
+            blockValidatorChain.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: blockHelper, heightInterval: BitcoinKit.heightInterval, targetTimespan: BitcoinKit.heightInterval * BitcoinKit.targetSpacing, maxTargetBits: BitcoinKit.maxTargetBits))
+            blockValidatorChain.add(blockValidator: LegacyTestNetDifficultyValidator(blockHelper: blockHelper, heightInterval: BitcoinKit.heightInterval, targetSpacing: BitcoinKit.targetSpacing, maxTargetBits: BitcoinKit.maxTargetBits))
         }
 
         blockValidatorSet.add(blockValidator: blockValidatorChain)
