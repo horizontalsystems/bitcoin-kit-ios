@@ -58,12 +58,12 @@ public class LitecoinKit: AbstractKit {
         )
 
         switch networkType {
-        case .mainNet: ()
-//            blockValidatorChain.add(blockValidator: difficultyAdjustmentValidator)
-//            blockValidatorChain.add(blockValidator: BitsValidator())
-        case .testNet: ()
-//            blockValidatorChain.add(blockValidator: difficultyAdjustmentValidator)
-//            blockValidatorChain.add(blockValidator: LegacyTestNetDifficultyValidator(blockHelper: blockHelper, heightInterval: LitecoinKit.heightInterval, targetSpacing: LitecoinKit.targetSpacing, maxTargetBits: LitecoinKit.maxTargetBits))
+        case .mainNet:
+            blockValidatorChain.add(blockValidator: difficultyAdjustmentValidator)
+            blockValidatorChain.add(blockValidator: BitsValidator())
+        case .testNet:
+            blockValidatorChain.add(blockValidator: difficultyAdjustmentValidator)
+            blockValidatorChain.add(blockValidator: LegacyTestNetDifficultyValidator(blockHelper: blockHelper, heightInterval: LitecoinKit.heightInterval, targetSpacing: LitecoinKit.targetSpacing, maxTargetBits: LitecoinKit.maxTargetBits))
         }
 
         blockValidatorSet.add(blockValidator: blockValidatorChain)

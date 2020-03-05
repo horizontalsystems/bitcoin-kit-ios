@@ -2,7 +2,7 @@ class BlockSyncer {
     private let storage: IStorage
 
     private let listener: ISyncStateListener
-    private let checkpointBlock: Block
+    private let checkpoint: Checkpoint
     private let factory: IFactory
     private let transactionProcessor: ITransactionProcessor
     private let blockchain: IBlockchain
@@ -13,11 +13,11 @@ class BlockSyncer {
 
     private let logger: Logger?
 
-    init(storage: IStorage, checkpointBlock: Block, factory: IFactory, listener: ISyncStateListener, transactionProcessor: ITransactionProcessor,
+    init(storage: IStorage, checkpoint: Checkpoint, factory: IFactory, listener: ISyncStateListener, transactionProcessor: ITransactionProcessor,
          blockchain: IBlockchain, publicKeyManager: IPublicKeyManager, hashCheckpointThreshold: Int, logger: Logger?, state: BlockSyncerState
     ) {
         self.storage = storage
-        self.checkpointBlock = checkpointBlock
+        self.checkpoint = checkpoint
         self.factory = factory
         self.transactionProcessor = transactionProcessor
         self.blockchain = blockchain
@@ -45,7 +45,10 @@ class BlockSyncer {
     }
 
     private func clearPartialBlocks() throws {
-        let blockReversedHashes = storage.blockHashHeaderHashes(except: checkpointBlock.headerHash)
+        var excludedHashes = [checkpoint.block.headerHash]
+        checkpoint.additionalBlocks.forEach { excludedHashes.append($0.headerHash) }
+
+        let blockReversedHashes = storage.blockHashHeaderHashes(except: excludedHashes)
 
         let blocksToDelete = storage.blocks(byHexes: blockReversedHashes)
         try blockchain.deleteBlocks(blocks: blocksToDelete)
@@ -101,7 +104,7 @@ extension BlockSyncer: IBlockSyncer {
         }
 
         if blockLocatorHashes.isEmpty {
-            for block in storage.blocks(heightGreaterThan: checkpointBlock.height, sortedBy: Block.Columns.height, limit: 10) {
+            for block in storage.blocks(heightGreaterThan: checkpoint.block.height, sortedBy: Block.Columns.height, limit: 10) {
                 blockLocatorHashes.append(block.headerHash)
             }
         }
@@ -111,7 +114,7 @@ extension BlockSyncer: IBlockSyncer {
                 blockLocatorHashes.append(peerLastBlock.headerHash)
             }
         } else {
-            blockLocatorHashes.append(checkpointBlock.headerHash)
+            blockLocatorHashes.append(checkpoint.block.headerHash)
         }
 
         return blockLocatorHashes
@@ -162,11 +165,11 @@ extension BlockSyncer: IBlockSyncer {
 
 extension BlockSyncer {
 
-    public static func instance(storage: IStorage, checkpointBlock: Block, factory: IFactory, listener: ISyncStateListener,
+    public static func instance(storage: IStorage, checkpoint: Checkpoint, factory: IFactory, listener: ISyncStateListener,
                                 transactionProcessor: ITransactionProcessor, blockchain: IBlockchain, publicKeyManager: IPublicKeyManager,
                                 hashCheckpointThreshold: Int = 100, logger: Logger? = nil, state: BlockSyncerState = BlockSyncerState()) -> BlockSyncer {
 
-        let syncer = BlockSyncer(storage: storage, checkpointBlock: checkpointBlock, factory: factory, listener: listener, transactionProcessor: transactionProcessor,
+        let syncer = BlockSyncer(storage: storage, checkpoint: checkpoint, factory: factory, listener: listener, transactionProcessor: transactionProcessor,
                 blockchain: blockchain, publicKeyManager: publicKeyManager, hashCheckpointThreshold: hashCheckpointThreshold, logger: logger, state: state)
 
         listener.initialBestBlockHeightUpdated(height: syncer.localDownloadedBestBlockHeight)
@@ -174,26 +177,34 @@ extension BlockSyncer {
         return syncer
     }
 
-    public static func checkpointBlock(network: INetwork, syncMode: BitcoinCore.SyncMode, storage: IStorage) -> Block {
+    public static func resolveCheckpoint(network: INetwork, syncMode: BitcoinCore.SyncMode, storage: IStorage) -> Checkpoint {
         let lastBlock = storage.lastBlock
-        let checkpointBlock: Block
+        let checkpoint: Checkpoint
 
         if syncMode == .full {
-            checkpointBlock = network.bip44CheckpointBlock
-        } else if let block = lastBlock, block.height < network.lastCheckpointBlock.height {
-            // When app is updated there may be case when the last block in DB is earlier than new checkpoint block.
-            // In this case we set the very first checkpoint block for bip44,
-            // since it surely will be earlier than the last block in DB
-            checkpointBlock = network.bip44CheckpointBlock
+            checkpoint = network.bip44Checkpoint
         } else {
-            checkpointBlock = network.lastCheckpointBlock
+            let lastCheckpoint = network.lastCheckpoint
+
+            if let block = lastBlock, block.height < lastCheckpoint.block.height {
+                // When app is updated there may be case when the last block in DB is earlier than new checkpoint block.
+                // In this case we set the very first checkpoint block for bip44,
+                // since it surely will be earlier than the last block in DB
+                checkpoint = network.bip44Checkpoint
+            } else {
+                checkpoint = lastCheckpoint
+            }
         }
 
         if lastBlock == nil {
-            storage.save(block: checkpointBlock)
+            storage.save(block: checkpoint.block)
+
+            for block in checkpoint.additionalBlocks {
+                storage.save(block: block)
+            }
         }
 
-        return checkpointBlock
+        return checkpoint
     }
 
 }

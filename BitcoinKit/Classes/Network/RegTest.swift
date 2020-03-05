@@ -1,8 +1,6 @@
 import BitcoinCore
 
 class RegTest: INetwork {
-
-    let name = "bitcoin-reg-test"
     let bundleName = "BitcoinKit"
 
     let pubKeyHash: UInt8 = 0x6f
@@ -25,33 +23,4 @@ class RegTest: INetwork {
     ]
 
     let dustRelayTxFee = 3000 // https://github.com/bitcoin/bitcoin/blob/c536dfbcb00fb15963bf5d507b7017c241718bf6/src/policy/policy.h#L50
-
-    var bip44CheckpointBlock: Block {
-        Block(
-                withHeader: BlockHeader(
-                        version: 1,
-                        headerHash: Data(repeating: 0, count: 32),
-                        previousBlockHeaderHash: Data(repeating: 0, count: 32),
-                        merkleRoot: "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b".reversedData!,
-                        timestamp: 1296688602,
-                        bits: 545259519,
-                        nonce: 2
-                ),
-                height: 0)
-    }
-
-    var lastCheckpointBlock: Block {
-        Block(
-                withHeader: BlockHeader(
-                        version: 1,
-                        headerHash: Data(repeating: 0, count: 32),
-                        previousBlockHeaderHash: Data(repeating: 0, count: 32),
-                        merkleRoot: "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b".reversedData!,
-                        timestamp: 1296688602,
-                        bits: 545259519,
-                        nonce: 2
-                ),
-                height: 0)
-    }
-
 }

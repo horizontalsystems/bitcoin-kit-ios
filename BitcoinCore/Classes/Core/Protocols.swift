@@ -69,7 +69,7 @@ public protocol IStorage {
 
     var blockchainBlockHashes: [BlockHash] { get }
     var lastBlockchainBlockHash: BlockHash? { get }
-    func blockHashHeaderHashes(except: Data) -> [String]
+    func blockHashHeaderHashes(except: [Data]) -> [String]
     var blockHashHeaderHashes: [Data] { get }
     var lastBlockHash: BlockHash? { get }
     func blockHashesSortedBySequenceAndHeight(limit: Int) -> [BlockHash]
@@ -463,7 +463,6 @@ protocol IDataProviderDelegate: class {
 public protocol INetwork: class {
     var maxBlockSize: UInt32 { get }
     var protocolVersion: Int32 { get }
-    var name: String { get }
     var bundleName: String { get }
     var pubKeyHash: UInt8 { get }
     var privateKey: UInt8 { get }
@@ -475,8 +474,8 @@ public protocol INetwork: class {
     var port: UInt32 { get }
     var dnsSeeds: [String] { get }
     var dustRelayTxFee: Int { get }
-    var bip44CheckpointBlock: Block { get }
-    var lastCheckpointBlock: Block { get }
+    var bip44Checkpoint: Checkpoint { get }
+    var lastCheckpoint: Checkpoint { get }
     var coinType: UInt32 { get }
     var sigHash: SigHashType { get }
     var syncableFromApi: Bool { get }
