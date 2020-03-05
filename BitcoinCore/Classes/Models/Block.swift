@@ -2,12 +2,12 @@ import GRDB
 
 public class Block: Record {
 
-    var version: Int
-    var previousBlockHash: Data
+    public var version: Int
+    public var previousBlockHash: Data
     public var merkleRoot: Data
     public var timestamp: Int
     public var bits: Int
-    var nonce: Int
+    public var nonce: Int
 
     public var headerHash: Data
     public var height: Int

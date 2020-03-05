@@ -39,7 +39,8 @@ public class LitecoinKit: AbstractKit {
         let difficultyEncoder = DifficultyEncoder()
 
         let blockValidatorSet = BlockValidatorSet()
-//        blockValidatorSet.add(blockValidator: ProofOfWorkValidator(difficultyEncoder: difficultyEncoder))
+        let scryptHasher = ScryptHasher()
+        blockValidatorSet.add(blockValidator: ProofOfWorkValidator(hasher: scryptHasher, difficultyEncoder: difficultyEncoder))
 
         let blockValidatorChain = BlockValidatorChain()
         let blockHelper = BlockValidatorHelper(storage: storage)
