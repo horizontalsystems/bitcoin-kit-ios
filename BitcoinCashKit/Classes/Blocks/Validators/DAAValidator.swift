@@ -9,22 +9,16 @@ class DAAValidator: IBlockChainedValidator {
     private let blockHelper: IBitcoinCashBlockValidatorHelper
     private let targetSpacing: Int
     private let heightInterval: Int
-    private let firstCheckpointHeight: Int
 
-    init(encoder: IDifficultyEncoder, blockHelper: IBitcoinCashBlockValidatorHelper, targetSpacing: Int, heightInterval: Int, firstCheckpointHeight: Int) {
+    init(encoder: IDifficultyEncoder, blockHelper: IBitcoinCashBlockValidatorHelper, targetSpacing: Int, heightInterval: Int) {
         difficultyEncoder = encoder
         self.blockHelper = blockHelper
 
         self.targetSpacing = targetSpacing
         self.heightInterval = heightInterval
-        self.firstCheckpointHeight = firstCheckpointHeight
     }
 
     func validate(block: Block, previousBlock: Block) throws {
-        guard previousBlock.height >= firstCheckpointHeight + self.heightInterval + 4 else {
-            return                                                                              // we must trust first 147 blocks from checkpoint, because can't calculate it's bits
-        }
-
         var blocks = blockHelper.previousWindow(for: previousBlock, count: 146) ?? [Block]()                                        // get all blocks without previousBlock needed for found suitable and range window
 
         guard !blocks.isEmpty else {

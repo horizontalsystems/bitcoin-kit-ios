@@ -54,14 +54,14 @@ public class BitcoinCashKit: AbstractKit {
         let coreBlockHelper = BlockValidatorHelper(storage: storage)
         let blockHelper = BitcoinCashBlockValidatorHelper(coreBlockValidatorHelper: coreBlockHelper)
 
-        let daaValidator = DAAValidator(encoder: difficultyEncoder, blockHelper: blockHelper, targetSpacing: BitcoinCashKit.targetSpacing, heightInterval: BitcoinCashKit.heightInterval, firstCheckpointHeight: network.lastCheckpointBlock.height)
+        let daaValidator = DAAValidator(encoder: difficultyEncoder, blockHelper: blockHelper, targetSpacing: BitcoinCashKit.targetSpacing, heightInterval: BitcoinCashKit.heightInterval)
 
         switch networkType {
         case .mainNet:
             blockValidatorChain.add(blockValidator: ForkValidator(concreteValidator: daaValidator, forkHeight: BitcoinCashKit.svChainForkHeight, expectedBlockHash: BitcoinCashKit.abcChainForkBlockHash))
             blockValidatorChain.add(blockValidator: daaValidator)
             blockValidatorChain.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: coreBlockHelper, heightInterval: BitcoinCashKit.legacyHeightInterval, targetTimespan: BitcoinCashKit.legacyTargetSpacing * BitcoinCashKit.legacyHeightInterval, maxTargetBits: BitcoinCashKit.legacyMaxTargetBits))
-            blockValidatorChain.add(blockValidator: EDAValidator(encoder: difficultyEncoder, blockHelper: blockHelper, blockMedianTimeHelper: BlockMedianTimeHelper(storage: storage), maxTargetBits: BitcoinCashKit.legacyMaxTargetBits, firstCheckpointHeight: network.bip44CheckpointBlock.height))
+            blockValidatorChain.add(blockValidator: EDAValidator(encoder: difficultyEncoder, blockHelper: blockHelper, blockMedianTimeHelper: BlockMedianTimeHelper(storage: storage), maxTargetBits: BitcoinCashKit.legacyMaxTargetBits))
         case .testNet: ()
                 // not use test validators
         }

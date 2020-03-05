@@ -306,9 +306,11 @@ extension GrdbStorage: IStorage {
         }
     }
 
-    public func blockHashHeaderHashes(except excludedHash: Data) -> [String] {
+    public func blockHashHeaderHashes(except excludedHashes: [Data]) -> [String] {
         try! dbPool.read { db in
-            let rows = try Row.fetchCursor(db, sql: "SELECT headerHash from blockHashes WHERE headerHash != ?", arguments: [excludedHash])
+            let hashesExpression = excludedHashes.map { _ in "?" }.joined(separator: ",")
+            let hashesArgs = StatementArguments(excludedHashes)
+            let rows = try Row.fetchCursor(db, sql: "SELECT headerHash from blockHashes WHERE headerHash NOT IN (\(hashesExpression))", arguments: hashesArgs)
             var hexes = [String]()
 
             while let row = try rows.next() {

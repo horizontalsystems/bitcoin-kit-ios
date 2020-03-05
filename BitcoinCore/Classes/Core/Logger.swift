@@ -91,9 +91,9 @@ public class Logger {
 
         var str = ""
         if let network = network {
-            str = "\(network.name) "
+            str = "\(String(describing: type(of: network))) "
         } else if let network = self.network {
-            str = "\(network.name) "
+            str = "\(String(describing: type(of: network))) "
         }
 
         str = str + "\(dateFormatter.string(from: Date())) \(colors[level]!)[\(threadName())]"

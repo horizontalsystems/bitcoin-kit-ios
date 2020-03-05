@@ -9,11 +9,11 @@ class BlockDiscoveryBatch {
     private let maxHeight: Int
     private let gapLimit: Int
 
-    init(network: INetwork, wallet: IHDWallet, blockHashFetcher: IBlockHashFetcher, logger: Logger? = nil) {
+    init(checkpoint: Checkpoint, wallet: IHDWallet, blockHashFetcher: IBlockHashFetcher, logger: Logger? = nil) {
         self.wallet = wallet
         self.blockHashFetcher = blockHashFetcher
 
-        maxHeight = network.lastCheckpointBlock.height
+        maxHeight = checkpoint.block.height
         gapLimit = wallet.gapLimit
     }
 
