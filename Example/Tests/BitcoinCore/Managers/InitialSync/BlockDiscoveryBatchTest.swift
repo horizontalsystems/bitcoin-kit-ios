@@ -8,9 +8,10 @@ import RxBlocking
 
 class BlockDiscoveryBatchTest: XCTestCase {
 
-    private var mockNetwork: MockINetwork!
     private var mockWallet: MockIHDWallet!
     private var mockBlockHashFetcher: MockIBlockHashFetcher!
+
+    private let checkpoint = TestData.checkpoint
 
     private var blockDiscovery: BlockDiscoveryBatch!
 
@@ -24,7 +25,6 @@ class BlockDiscoveryBatchTest: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        mockNetwork = MockINetwork()
         mockWallet = MockIHDWallet()
         mockBlockHashFetcher = MockIBlockHashFetcher()
 
@@ -32,16 +32,11 @@ class BlockDiscoveryBatchTest: XCTestCase {
             when(mock.gapLimit.get).thenReturn(3)
         }
 
-        stub(mockNetwork) {mock in
-            when(mock.lastCheckpointBlock.get).thenReturn(TestData.checkpointBlock)
-        }
-
-        blockDiscovery = BlockDiscoveryBatch(network: mockNetwork, wallet: mockWallet, blockHashFetcher: mockBlockHashFetcher, logger: nil)
+        blockDiscovery = BlockDiscoveryBatch(checkpoint: checkpoint, wallet: mockWallet, blockHashFetcher: mockBlockHashFetcher, logger: nil)
     }
 
     override func tearDown() {
         mockWallet = nil
-        mockNetwork = nil
         mockBlockHashFetcher = nil
 
         blockDiscovery = nil

@@ -46,9 +46,13 @@ class ForkValidatorTests: QuickSpec {
         }
 
         describe("#isBlockValidatable") {
-            it("return always true") {
+            it("returns true when fork height is not equal") {
                 let validatable = validator.isBlockValidatable(block: block, previousBlock: prevBlock)
                 expect(validatable).to(beTrue())
+            }
+            it("returns false when fork height is equal") {
+                let validatable = validator.isBlockValidatable(block: prevBlock, previousBlock: prevBlock)
+                expect(validatable).to(beFalse())
             }
         }
         describe("#validate") {
@@ -80,16 +84,6 @@ class ForkValidatorTests: QuickSpec {
                     do {
                         try validator.validate(block: block, previousBlock: prevBlock)
                         verify(mockBlockValidator).validate(block: equal(to: block), previousBlock: equal(to: prevBlock))
-                    } catch {
-                        XCTFail("Must no throwing error")
-                    }
-                }
-            }
-            context("when block has another height") {
-                it("checks block hash and call concrete validate") {
-                    do {
-                        try validator.validate(block: prevBlock, previousBlock: prevBlock)
-                        verify(mockBlockValidator).validate(block: equal(to: prevBlock), previousBlock: equal(to: prevBlock))
                     } catch {
                         XCTFail("Must no throwing error")
                     }

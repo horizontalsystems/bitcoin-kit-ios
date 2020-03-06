@@ -2,6 +2,11 @@ public struct Checkpoint {
     public let block: Block
     public let additionalBlocks: [Block]
 
+    public init(block: Block, additionalBlocks: [Block]) {
+        self.block = block
+        self.additionalBlocks = additionalBlocks
+    }
+
     public init(podBundle: Bundle, bundleName: String, filename: String) throws {
         guard let checkpointsBundleURL = podBundle.url(forResource: bundleName, withExtension: "bundle") else {
             throw ParseError.invalidBundleUrl

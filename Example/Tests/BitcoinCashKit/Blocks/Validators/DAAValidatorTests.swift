@@ -62,7 +62,7 @@ class DAAValidatorTests: XCTestCase {
             when(mock.suitableBlockIndex(for: equal(to: [blocks[1], blocks[2], blocks[3]].reversed()))).thenReturn(1)
         }
 
-        validator = DAAValidator(encoder: DifficultyEncoder(), blockHelper: mockBlockHelper, targetSpacing: 600, heightInterval: 144, firstCheckpointHeight: 544320 - 1 - 148) // previous block height - 148
+        validator = DAAValidator(encoder: DifficultyEncoder(), blockHelper: mockBlockHelper, targetSpacing: 600, heightInterval: 144)
     }
 
     override func tearDown() {
