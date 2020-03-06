@@ -14,7 +14,7 @@ class BlockSyncerTests: QuickSpec {
         let mockAddressManager = MockIPublicKeyManager()
         let mockState = MockBlockSyncerState()
 
-        let checkpointBlock = TestData.checkpointBlock
+        let checkpoint = TestData.checkpoint
         var syncer: BlockSyncer!
 
         beforeEach {
@@ -47,30 +47,30 @@ class BlockSyncerTests: QuickSpec {
             describe("#instance") {
                 it("triggers #initialBestBlockHeightUpdated event on listener") {
                     stub(mockStorage) { mock in
-                        when(mock.lastBlock.get).thenReturn(checkpointBlock)
+                        when(mock.lastBlock.get).thenReturn(checkpoint.block)
                     }
                     stub(mockListener) { mock in
                         when(mock.initialBestBlockHeightUpdated(height: any())).thenDoNothing()
                     }
 
 
-                    let _ = BlockSyncer.instance(storage: mockStorage, checkpointBlock: checkpointBlock, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
+                    let _ = BlockSyncer.instance(storage: mockStorage, checkpoint: checkpoint, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
                             blockchain: mockBlockchain, publicKeyManager: mockAddressManager, hashCheckpointThreshold: 100)
 
-                    verify(mockListener).initialBestBlockHeightUpdated(height: equal(to: Int32(checkpointBlock.height)))
+                    verify(mockListener).initialBestBlockHeightUpdated(height: equal(to: Int32(checkpoint.block.height)))
                     verifyNoMoreInteractions(mockListener)
                 }
             }
 
-            describe("#checkpointBlock") {
-                let bip44CheckpointBlock = TestData.checkpointBlock
-                let lastCheckpointBlock = TestData.firstBlock
+            describe("#resolveCheckpoint") {
+                let bip44Checkpoint = TestData.checkpoint
+                let lastCheckpoint = TestData.lastCheckpoint
                 let mockNetwork = MockINetwork()
 
                 beforeEach {
                     stub(mockNetwork) { mock in
-                        when(mock.bip44CheckpointBlock.get).thenReturn(bip44CheckpointBlock)
-                        when(mock.lastCheckpointBlock.get).thenReturn(lastCheckpointBlock)
+                        when(mock.bip44Checkpoint.get).thenReturn(bip44Checkpoint)
+                        when(mock.lastCheckpoint.get).thenReturn(lastCheckpoint)
                     }
                 }
 
@@ -88,7 +88,7 @@ class BlockSyncerTests: QuickSpec {
                     }
 
                     it("doesn't save checkpointBlock to storage") {
-                        _ = BlockSyncer.checkpointBlock(network: mockNetwork, syncMode: .api, storage: mockStorage)
+                        _ = BlockSyncer.resolveCheckpoint(network: mockNetwork, syncMode: .api, storage: mockStorage)
 
                         verify(mockStorage, never()).save(block: any())
                         verify(mockStorage).lastBlock.get()
@@ -97,22 +97,22 @@ class BlockSyncerTests: QuickSpec {
 
                     context("when syncMode is .full") {
                         it("returns bip44CheckpointBlock") {
-                            expect(BlockSyncer.checkpointBlock(network: mockNetwork, syncMode: .full, storage: mockStorage)).to(equal(bip44CheckpointBlock))
+                            expect(BlockSyncer.resolveCheckpoint(network: mockNetwork, syncMode: .full, storage: mockStorage)).to(equal(bip44Checkpoint))
                         }
                     }
 
                     context("when syncMode is not .full") {
                         context("when lastBlock's height is more than lastCheckpointBlock") {
                             it("returns lastCheckpointBlock") {
-                                lastBlock.height = lastCheckpointBlock.height + 1
-                                expect(BlockSyncer.checkpointBlock(network: mockNetwork, syncMode: .api, storage: mockStorage)).to(equal(lastCheckpointBlock))
+                                lastBlock.height = lastCheckpoint.block.height + 1
+                                expect(BlockSyncer.resolveCheckpoint(network: mockNetwork, syncMode: .api, storage: mockStorage)).to(equal(lastCheckpoint))
                             }
                         }
 
                         context("when lastBlock's height is less than lastCheckpointBlock") {
                             it("returns bip44CheckpointBlock") {
-                                lastBlock.height = lastCheckpointBlock.height - 1
-                                expect(BlockSyncer.checkpointBlock(network: mockNetwork, syncMode: .api, storage: mockStorage)).to(equal(bip44CheckpointBlock))
+                                lastBlock.height = lastCheckpoint.block.height - 1
+                                expect(BlockSyncer.resolveCheckpoint(network: mockNetwork, syncMode: .api, storage: mockStorage)).to(equal(bip44Checkpoint))
                             }
                         }
                     }
@@ -127,24 +127,24 @@ class BlockSyncerTests: QuickSpec {
                     }
 
                     context("when syncMode is .full") {
-                        it("returns bip44CheckpointBlock") {
-                            expect(BlockSyncer.checkpointBlock(network: mockNetwork, syncMode: .full, storage: mockStorage)).to(equal(bip44CheckpointBlock))
+                        it("returns bip44Checkpoint") {
+                            expect(BlockSyncer.resolveCheckpoint(network: mockNetwork, syncMode: .full, storage: mockStorage)).to(equal(bip44Checkpoint))
                         }
 
-                        it("saves bip44CheckpointBlock to storage") {
-                            _ = BlockSyncer.checkpointBlock(network: mockNetwork, syncMode: .full, storage: mockStorage)
-                            verify(mockStorage).save(block: sameInstance(as: bip44CheckpointBlock))
+                        it("saves bip44Checkpoint to storage") {
+                            _ = BlockSyncer.resolveCheckpoint(network: mockNetwork, syncMode: .full, storage: mockStorage)
+                            verify(mockStorage).save(block: sameInstance(as: bip44Checkpoint.block))
                         }
                     }
 
                     context("when syncMode is not .full") {
-                        it("returns lastCheckpointBlock") {
-                            expect(BlockSyncer.checkpointBlock(network: mockNetwork, syncMode: .api, storage: mockStorage)).to(equal(lastCheckpointBlock))
+                        it("returns lastCheckpoint") {
+                            expect(BlockSyncer.resolveCheckpoint(network: mockNetwork, syncMode: .api, storage: mockStorage)).to(equal(lastCheckpoint))
                         }
 
-                        it("saves lastCheckpointBlock to storage") {
-                            _ = BlockSyncer.checkpointBlock(network: mockNetwork, syncMode: .api, storage: mockStorage)
-                            verify(mockStorage).save(block: sameInstance(as: lastCheckpointBlock))
+                        it("saves lastCheckpoint to storage") {
+                            _ = BlockSyncer.resolveCheckpoint(network: mockNetwork, syncMode: .api, storage: mockStorage)
+                            verify(mockStorage).save(block: sameInstance(as: lastCheckpoint.block))
                         }
                     }
                 }
@@ -153,7 +153,7 @@ class BlockSyncerTests: QuickSpec {
 
         context("instance methods") {
             beforeEach {
-                syncer = BlockSyncer(storage: mockStorage, checkpointBlock: checkpointBlock, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
+                syncer = BlockSyncer(storage: mockStorage, checkpoint: checkpoint, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
                         blockchain: mockBlockchain, publicKeyManager: mockAddressManager,
                         hashCheckpointThreshold: 100, logger: nil, state: mockState)
             }
@@ -162,9 +162,9 @@ class BlockSyncerTests: QuickSpec {
                 context("when there are some blocks in storage") {
                     it("returns the height of the last block") {
                         stub(mockStorage) { mock in
-                            when(mock.lastBlock.get).thenReturn(checkpointBlock)
+                            when(mock.lastBlock.get).thenReturn(checkpoint.block)
                         }
-                        expect(syncer.localDownloadedBestBlockHeight).to(equal(Int32(checkpointBlock.height)))
+                        expect(syncer.localDownloadedBestBlockHeight).to(equal(Int32(checkpoint.block.height)))
                     }
                 }
 
@@ -198,9 +198,9 @@ class BlockSyncerTests: QuickSpec {
                     context("when there are some blocks") {
                         it("returns last block's height + blocks count") {
                             stub(mockStorage) { mock in
-                                when(mock.lastBlock.get).thenReturn(checkpointBlock)
+                                when(mock.lastBlock.get).thenReturn(checkpoint.block)
                             }
-                            expect(syncer.localKnownBestBlockHeight).to(equal(Int32(checkpointBlock.height)))
+                            expect(syncer.localKnownBestBlockHeight).to(equal(Int32(checkpoint.block.height)))
                         }
                     }
                 }
@@ -216,9 +216,9 @@ class BlockSyncerTests: QuickSpec {
                     it("returns lastBlock + blockHashes count") {
                         expect(syncer.localKnownBestBlockHeight).to(equal(1))
                         stub(mockStorage) { mock in
-                            when(mock.lastBlock.get).thenReturn(checkpointBlock)
+                            when(mock.lastBlock.get).thenReturn(checkpoint.block)
                         }
-                        expect(syncer.localKnownBestBlockHeight).to(equal(Int32(checkpointBlock.height + 1)))
+                        expect(syncer.localKnownBestBlockHeight).to(equal(Int32(checkpoint.block.height + 1)))
                     }
                 }
 
@@ -233,9 +233,9 @@ class BlockSyncerTests: QuickSpec {
                     it("returns lastBlock + count of blockHashes without downloaded blocks") {
                         expect(syncer.localKnownBestBlockHeight).to(equal(0))
                         stub(mockStorage) { mock in
-                            when(mock.lastBlock.get).thenReturn(checkpointBlock)
+                            when(mock.lastBlock.get).thenReturn(checkpoint.block)
                         }
-                        expect(syncer.localKnownBestBlockHeight).to(equal(Int32(checkpointBlock.height)))
+                        expect(syncer.localKnownBestBlockHeight).to(equal(Int32(checkpoint.block.height)))
                     }
                 }
             }
@@ -245,7 +245,7 @@ class BlockSyncerTests: QuickSpec {
 
                 beforeEach {
                     stub(mockStorage) { mock in
-                        when(mock.blockHashHeaderHashes(except: equal(to: checkpointBlock.headerHash))).thenReturn([])
+                        when(mock.blockHashHeaderHashes(except: equal(to: [checkpoint.block.headerHash]))).thenReturn([])
                         when(mock.blocks(byHexes: equal(to: []))).thenReturn(emptyBlocks)
                     }
                     stub(mockBlockchain) { mock in
@@ -265,7 +265,7 @@ class BlockSyncerTests: QuickSpec {
                 }
 
                 it("clears partialBlock blocks") {
-                    verify(mockStorage).blockHashHeaderHashes(except: equal(to: checkpointBlock.headerHash))
+                    verify(mockStorage).blockHashHeaderHashes(except: equal(to: [checkpoint.block.headerHash]))
                     verify(mockStorage).blocks(byHexes: equal(to: []))
                     verify(mockBlockchain).deleteBlocks(blocks: equal(to: emptyBlocks))
                 }
@@ -313,7 +313,7 @@ class BlockSyncerTests: QuickSpec {
 
                 beforeEach {
                     stub(mockStorage) { mock in
-                        when(mock.blockHashHeaderHashes(except: equal(to: checkpointBlock.headerHash))).thenReturn([])
+                        when(mock.blockHashHeaderHashes(except: equal(to: [checkpoint.block.headerHash]))).thenReturn([])
                         when(mock.blocks(byHexes: equal(to: []))).thenReturn(emptyBlocks)
                     }
                     stub(mockBlockchain) { mock in
@@ -333,7 +333,7 @@ class BlockSyncerTests: QuickSpec {
                 }
 
                 it("clears partialBlock blocks") {
-                    verify(mockStorage).blockHashHeaderHashes(except: equal(to: checkpointBlock.headerHash))
+                    verify(mockStorage).blockHashHeaderHashes(except: equal(to: [checkpoint.block.headerHash]))
                     verify(mockStorage).blocks(byHexes: equal(to: []))
                     verify(mockBlockchain).deleteBlocks(blocks: equal(to: emptyBlocks))
                 }
@@ -363,14 +363,14 @@ class BlockSyncerTests: QuickSpec {
                 beforeEach {
                     stub(mockStorage) { mock in
                         when(mock.lastBlockchainBlockHash.get).thenReturn(nil)
-                        when(mock.blocks(heightGreaterThan: equal(to: checkpointBlock.height), sortedBy: equal(to: Block.Columns.height), limit: equal(to: 10))).thenReturn([Block]())
+                        when(mock.blocks(heightGreaterThan: equal(to: checkpoint.block.height), sortedBy: equal(to: Block.Columns.height), limit: equal(to: 10))).thenReturn([Block]())
                         when(mock.block(byHeight: Int(peerLastBlockHeight))).thenReturn(nil)
                     }
                 }
 
                 context("when there's no blocks or blockhashes") {
                     it("returns checkpointBlock's header hash") {
-                        expect(syncer.getBlockLocatorHashes(peerLastBlockHeight: peerLastBlockHeight)).to(equal([checkpointBlock.headerHash]))
+                        expect(syncer.getBlockLocatorHashes(peerLastBlockHeight: peerLastBlockHeight)).to(equal([checkpoint.block.headerHash]))
                     }
                 }
 
@@ -379,11 +379,11 @@ class BlockSyncerTests: QuickSpec {
                         let blockHash = BlockHash(headerHash: Data(repeating: 0, count: 0), height: 0, order: 0)
                         stub(mockStorage) { mock in
                             when(mock.lastBlockchainBlockHash.get).thenReturn(blockHash)
-                            when(mock.blocks(heightGreaterThan: equal(to: checkpointBlock.height), sortedBy: equal(to: Block.Columns.height), limit: equal(to: 10))).thenReturn([firstBlock, secondBlock])
+                            when(mock.blocks(heightGreaterThan: equal(to: checkpoint.block.height), sortedBy: equal(to: Block.Columns.height), limit: equal(to: 10))).thenReturn([firstBlock, secondBlock])
                         }
 
                         expect(syncer.getBlockLocatorHashes(peerLastBlockHeight: peerLastBlockHeight)).to(equal([
-                            blockHash.headerHash, checkpointBlock.headerHash
+                            blockHash.headerHash, checkpoint.block.headerHash
                         ]))
                     }
                 }
@@ -391,11 +391,11 @@ class BlockSyncerTests: QuickSpec {
                 context("when there's no blockhashes but there are blocks") {
                     it("returns last 10 blocks' header hashes") {
                         stub(mockStorage) { mock in
-                            when(mock.blocks(heightGreaterThan: equal(to: checkpointBlock.height), sortedBy: equal(to: Block.Columns.height), limit: equal(to: 10))).thenReturn([secondBlock, firstBlock])
+                            when(mock.blocks(heightGreaterThan: equal(to: checkpoint.block.height), sortedBy: equal(to: Block.Columns.height), limit: equal(to: 10))).thenReturn([secondBlock, firstBlock])
                         }
 
                         expect(syncer.getBlockLocatorHashes(peerLastBlockHeight: peerLastBlockHeight)).to(equal([
-                            secondBlock.headerHash, firstBlock.headerHash, checkpointBlock.headerHash
+                            secondBlock.headerHash, firstBlock.headerHash, checkpoint.block.headerHash
                         ]))
                     }
                 }

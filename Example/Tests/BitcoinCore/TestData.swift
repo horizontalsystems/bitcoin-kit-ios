@@ -4,8 +4,16 @@ import GRDB
 
 class TestData {
 
+    static var checkpoint: Checkpoint {
+        Checkpoint(block: checkpointBlock, additionalBlocks: [])
+    }
+
+    static var lastCheckpoint: Checkpoint {
+        Checkpoint(block: firstBlock, additionalBlocks: [])
+    }
+
     static var checkpointBlock: Block {
-        return Block(
+        Block(
                 withHeader: BlockHeader(
                         version: 1,
                         headerHash: "cec100cc".reversedData!,
@@ -19,7 +27,7 @@ class TestData {
     }
 
     static var firstBlock: Block {
-        return Block(
+        Block(
                 withHeader: BlockHeader(
                         version: 1,
                         headerHash: "11b10ccc".reversedData!,
@@ -33,7 +41,7 @@ class TestData {
     }
 
     static var secondBlock: Block {
-        return Block(
+        Block(
                 withHeader: BlockHeader(
                         version: 1,
                         headerHash: "22b10ccc".reversedData!,
@@ -47,7 +55,7 @@ class TestData {
     }
 
     static var thirdBlock: Block {
-        return Block(
+        Block(
                 withHeader: BlockHeader(
                         version: 1,
                         headerHash: "33b10ccc".reversedData!,
@@ -61,7 +69,7 @@ class TestData {
     }
 
     static var forthBlock: Block {
-        return Block(
+        Block(
                 withHeader: BlockHeader(
                         version: 1,
                         headerHash: "44b10ccc".reversedData!,
@@ -75,7 +83,7 @@ class TestData {
     }
 
     static var oldBlock: Block {
-        return Block(
+        Block(
                 withHeader: BlockHeader(
                         version: 1,
                         headerHash: "01db10cc".reversedData!,
@@ -189,15 +197,15 @@ class TestData {
     }
 
     static func pubKey(pubKeyHash: Data = Data(hex: "1ec865abcb88cec71c484d4dadec3d7dc0271a7b")!) -> PublicKey {
-        return PublicKey(withAccount: 0, index: 0, external: true, hdPublicKeyData: pubKeyHash)
+        PublicKey(withAccount: 0, index: 0, external: true, hdPublicKeyData: pubKeyHash)
     }
 
     static func input(previousTransaction: Transaction, previousOutput: Output, script: Data, sequence: Int) -> Input {
-        return Input(withPreviousOutputTxHash: previousTransaction.dataHash, previousOutputIndex: previousOutput.index, script: script, sequence: sequence)
+        Input(withPreviousOutputTxHash: previousTransaction.dataHash, previousOutputIndex: previousOutput.index, script: script, sequence: sequence)
     }
 
     static func unspentOutput(output: Output) -> UnspentOutput {
-        return UnspentOutput(output: output, publicKey: pubKey(), transaction: Transaction(), blockHeight: nil)
+        UnspentOutput(output: output, publicKey: pubKey(), transaction: Transaction(), blockHeight: nil)
     }
 
     private class func setRandomHash(to transaction: Transaction) {

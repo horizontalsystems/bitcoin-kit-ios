@@ -91,6 +91,14 @@ extension PublicKey: Equatable {
 
 }
 
+extension Checkpoint: Equatable {
+
+    public static func ==(lhs: Checkpoint, rhs: Checkpoint) -> Bool {
+        lhs.block == rhs.block
+    }
+
+}
+
 extension Block: Equatable {
 
     public static func ==(lhs: Block, rhs: Block) -> Bool {
