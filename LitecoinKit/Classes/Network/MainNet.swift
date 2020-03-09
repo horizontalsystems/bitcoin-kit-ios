@@ -13,7 +13,7 @@ class MainNet: INetwork {
     let port: UInt32 = 9333
     let coinType: UInt32 = 2
     let sigHash: SigHashType = .bitcoinAll
-    var syncableFromApi: Bool = false
+    var syncableFromApi: Bool = true
 
     let dnsSeeds = [
         "dnsseed.litecoinpool.org",

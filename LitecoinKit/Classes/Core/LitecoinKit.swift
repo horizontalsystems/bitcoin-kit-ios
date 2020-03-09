@@ -25,7 +25,7 @@ public class LitecoinKit: AbstractKit {
         switch networkType {
             case .mainNet:
                 network = MainNet()
-                initialSyncApiUrl = ""
+                initialSyncApiUrl = "http://ltc.horizontalsystems.xyz/api"
             case .testNet:
                 network = TestNet()
                 initialSyncApiUrl = ""
@@ -91,8 +91,6 @@ public class LitecoinKit: AbstractKit {
         switch bip {
         case .bip44:
             bitcoinCore.add(restoreKeyConverter: Bip44RestoreKeyConverter(addressConverter: base58AddressConverter))
-            bitcoinCore.add(restoreKeyConverter: Bip49RestoreKeyConverter(addressConverter: base58AddressConverter))
-            bitcoinCore.add(restoreKeyConverter: Bip84RestoreKeyConverter(addressConverter: bech32AddressConverter))
         case .bip49:
             bitcoinCore.add(restoreKeyConverter: Bip49RestoreKeyConverter(addressConverter: base58AddressConverter))
         case .bip84:
