@@ -28,7 +28,7 @@ class ProofOfWorkValidator: IBlockValidator {
         let header = serializeHeader(block: block)
 
         let hash = hasher.hash(data: header)
-        guard let headerHashBigInt = BigInt(hash.hex, radix: 16),
+        guard let headerHashBigInt = BigInt(hash.reversedHex, radix: 16),
               headerHashBigInt < difficultyEncoder.decodeCompact(bits: block.bits) else {
             throw BitcoinCoreErrors.BlockValidation.invalidProofOfWork
         }

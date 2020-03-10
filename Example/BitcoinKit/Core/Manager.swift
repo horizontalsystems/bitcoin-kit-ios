@@ -39,6 +39,7 @@ class Manager {
 
         adapters = [
             BitcoinAdapter(words: words, bip: .bip44, testMode: configuration.testNet, syncMode: syncMode),
+//            LitecoinAdapter(words: words, bip: .bip44, testMode: configuration.testNet, syncMode: syncMode),
 //            LitecoinAdapter(words: words, bip: .bip84, testMode: configuration.testNet, syncMode: syncMode),
 //            BitcoinCashAdapter(words: words, testMode: configuration.testNet, syncMode: syncMode),
 //            DashAdapter(words: words, testMode: configuration.testNet, syncMode: syncMode),

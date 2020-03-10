@@ -69,7 +69,7 @@ PODS:
     - Secp256k1Kit.swift (~> 1.0)
   - Nimble (8.0.5)
   - ObjectMapper (3.5.1)
-  - OpenSslKit.swift (1.1)
+  - OpenSslKit.swift (1.2)
   - Quick (2.2.0)
   - RxBlocking (5.0.1):
     - RxSwift (~> 5)
@@ -135,7 +135,7 @@ SPEC CHECKSUMS:
   LitecoinKit.swift: 71530f28446ba0f687e1850c2b4fd6b8bd61d7f7
   Nimble: 4ab1aeb9b45553c75b9687196b0fa0713170a332
   ObjectMapper: 70187b8941977c62ccfb423caf6b50be405cabf0
-  OpenSslKit.swift: 5e9906361c2f660c0aec0572dde575d8b6aeccc8
+  OpenSslKit.swift: 168b059e3438c21994a3e9fe6c5648df96660d94
   Quick: 7fb19e13be07b5dfb3b90d4f9824c855a11af40e
   RxBlocking: c5e090f42d046df8b0e7752742510f349963710f
   RxSwift: e2dc62b366a3adf6a0be44ba9f405efd4c94e0c4
