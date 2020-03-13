@@ -228,6 +228,7 @@ extension InitialBlockDownload {
     private func onPeerConnect(peer: IPeer) {
         peersQueue.async {
             self.syncedStates[peer.host] = false
+            self.blockHashesSyncedStates[peer.host] = false
             if let syncPeer = self.syncPeer, syncPeer.connectionTime > peer.connectionTime * InitialBlockDownload.peerSwitchMinimumRatio {
                 self.selectNewPeer = true
             }
@@ -249,6 +250,7 @@ extension InitialBlockDownload {
                 self.syncedPeers.remove(at: index)
             }
             self.syncedStates.removeValue(forKey: peer.host)
+            self.blockHashesSyncedStates.removeValue(forKey: peer.host)
 
             if peer.equalTo(self.syncPeer) {
                 self.syncPeer = nil
