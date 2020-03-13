@@ -241,6 +241,14 @@ extension GrdbStorage: IStorage {
         }
     }
 
+    public func peerAddressExist(address: String) -> Bool {
+        try! dbPool.read { db in
+            try PeerAddress
+                    .filter(PeerAddress.Columns.ip == address)
+                    .fetchCount(db) > 0
+        }
+    }
+
     public func save(peerAddresses: [PeerAddress]) {
         _ = try! dbPool.write { db in
             for peerAddress in peerAddresses {

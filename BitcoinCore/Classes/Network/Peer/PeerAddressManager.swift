@@ -53,11 +53,14 @@ extension PeerAddressManager: IPeerAddressManager {
     }
 
     func add(ips: [String]) {
-        guard !ips.isEmpty else {
+        let newAddresses = ips
+                .filter { !storage.peerAddressExist(address: $0) }
+                .map { PeerAddress(ip: $0, score: 0) }
+
+        guard !newAddresses.isEmpty else {
             return
         }
 
-        let newAddresses = ips.map { PeerAddress(ip: $0, score: 0) }
         logger?.debug("Adding new addresses: \(newAddresses.count)")
 
         storage.save(peerAddresses: newAddresses)
