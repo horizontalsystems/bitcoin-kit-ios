@@ -98,7 +98,7 @@ class PeerConnection: NSObject {
                 let message = networkMessage.message
 
                 guard !(message is UnknownMessage) else {
-                    break
+                    continue
                 }
 
                 log("<- \(type(of: message)): \(message.description)")
