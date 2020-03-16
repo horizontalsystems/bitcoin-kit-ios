@@ -17,12 +17,13 @@ class TransactionCreatorTests: QuickSpec {
         let sendingValue = 100_000_000
         let feeRate = 1000
         let senderPay = true
+        let sortType: TransactionDataSortType = .none
 
         var creator: TransactionCreator!
 
         beforeEach {
             stub(mockTransactionBuilder) { mock in
-                when(mock.buildTransaction(toAddress: any(), value: any(), feeRate: any(), senderPay: any(), pluginData: any())).thenReturn(transaction)
+                when(mock.buildTransaction(toAddress: any(), value: any(), feeRate: any(), senderPay: any(), sortType: any(), pluginData: any())).thenReturn(transaction)
             }
             stub(mockTransactionProcessor) { mock in
                 when(mock.processCreated(transaction: any())).thenDoNothing()
@@ -48,11 +49,11 @@ class TransactionCreatorTests: QuickSpec {
                     stub(mockTransactionSender) { mock in
                         when(mock.verifyCanSend()).thenDoNothing()
                     }
-                    _ = try! creator.create(to: toAddress, value: sendingValue, feeRate: feeRate, senderPay: senderPay)
+                    _ = try! creator.create(to: toAddress, value: sendingValue, feeRate: feeRate, senderPay: senderPay, sortType: sortType)
                 }
 
                 it("creates transaction") {
-                    verify(mockTransactionBuilder).buildTransaction(toAddress: toAddress, value: sendingValue, feeRate: feeRate, senderPay: senderPay, pluginData: any())
+                    verify(mockTransactionBuilder).buildTransaction(toAddress: toAddress, value: sendingValue, feeRate: feeRate, senderPay: senderPay, sortType: any(), pluginData: any())
                     verify(mockTransactionProcessor).processCreated(transaction: equal(to: transaction))
                 }
 
@@ -70,11 +71,11 @@ class TransactionCreatorTests: QuickSpec {
                         when(mock.verifyCanSend()).thenDoNothing()
                     }
 
-                    _ = try? creator.create(to: toAddress, value: sendingValue, feeRate: feeRate, senderPay: senderPay)
+                    _ = try? creator.create(to: toAddress, value: sendingValue, feeRate: feeRate, senderPay: senderPay, sortType: sortType)
                 }
 
                 it("does create transaction") {
-                    verify(mockTransactionBuilder).buildTransaction(toAddress: toAddress, value: sendingValue, feeRate: feeRate, senderPay: senderPay, pluginData: any())
+                    verify(mockTransactionBuilder).buildTransaction(toAddress: toAddress, value: sendingValue, feeRate: feeRate, senderPay: senderPay, sortType: equal(to: sortType), pluginData: any())
                     verify(mockTransactionProcessor).processCreated(transaction: any())
                 }
 
@@ -93,7 +94,7 @@ class TransactionCreatorTests: QuickSpec {
                         when(mock.verifyCanSend()).thenThrow(BitcoinCoreErrors.TransactionSendError.noConnectedPeers)
                     }
 
-                    _ = try? creator.create(to: toAddress, value: sendingValue, feeRate: feeRate, senderPay: senderPay)
+                    _ = try? creator.create(to: toAddress, value: sendingValue, feeRate: feeRate, senderPay: senderPay, sortType: sortType)
                 }
 
                 it("doesn't create transaction") {
@@ -111,7 +112,7 @@ class TransactionCreatorTests: QuickSpec {
 
             beforeEach {
                 stub(mockTransactionBuilder) { mock in
-                    when(mock).buildTransaction(from: any(), toAddress: any(), feeRate: any()).thenReturn(transaction)
+                    when(mock).buildTransaction(from: any(), toAddress: any(), feeRate: any(), sortType: any()).thenReturn(transaction)
                 }
             }
 
@@ -121,11 +122,11 @@ class TransactionCreatorTests: QuickSpec {
                         when(mock.verifyCanSend()).thenDoNothing()
                     }
 
-                    _ = try! creator.create(from: unspentOutput, to: toAddress, feeRate: feeRate)
+                    _ = try! creator.create(from: unspentOutput, to: toAddress, feeRate: feeRate, sortType: sortType)
                 }
 
                 it("creates transaction") {
-                    verify(mockTransactionBuilder).buildTransaction(from: equal(to: unspentOutput), toAddress: toAddress, feeRate: feeRate)
+                    verify(mockTransactionBuilder).buildTransaction(from: equal(to: unspentOutput), toAddress: toAddress, feeRate: feeRate, sortType: equal(to: sortType))
                     verify(mockTransactionProcessor).processCreated(transaction: equal(to: transaction))
                 }
 
@@ -143,11 +144,11 @@ class TransactionCreatorTests: QuickSpec {
                         when(mock.verifyCanSend()).thenDoNothing()
                     }
 
-                    _ = try! creator.create(from: unspentOutput, to: toAddress, feeRate: feeRate)
+                    _ = try! creator.create(from: unspentOutput, to: toAddress, feeRate: feeRate, sortType: sortType)
                 }
 
                 it("does create transaction") {
-                    verify(mockTransactionBuilder).buildTransaction(from: equal(to: unspentOutput), toAddress: toAddress, feeRate: feeRate)
+                    verify(mockTransactionBuilder).buildTransaction(from: equal(to: unspentOutput), toAddress: toAddress, feeRate: feeRate, sortType: equal(to: sortType))
                     verify(mockTransactionProcessor).processCreated(transaction: any())
                 }
 
@@ -166,7 +167,7 @@ class TransactionCreatorTests: QuickSpec {
                         when(mock.verifyCanSend()).thenThrow(BitcoinCoreErrors.TransactionSendError.noConnectedPeers)
                     }
 
-                    _ = try? creator.create(from: unspentOutput, to: toAddress, feeRate: feeRate)
+                    _ = try? creator.create(from: unspentOutput, to: toAddress, feeRate: feeRate, sortType: sortType)
                 }
 
                 it("doesn't create transaction") {

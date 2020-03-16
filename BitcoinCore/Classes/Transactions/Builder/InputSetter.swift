@@ -12,9 +12,10 @@ class InputSetter {
     private let pluginManager: IPluginManager
     private let dustCalculator: IDustCalculator
     private let changeScriptType: ScriptType
+    private let inputSorterFactory: ITransactionDataSorterFactory
 
     init(unspentOutputSelector: IUnspentOutputSelector, transactionSizeCalculator: ITransactionSizeCalculator, addressConverter: IAddressConverter, publicKeyManager: IPublicKeyManager,
-         factory: IFactory, pluginManager: IPluginManager, dustCalculator: IDustCalculator, changeScriptType: ScriptType) {
+         factory: IFactory, pluginManager: IPluginManager, dustCalculator: IDustCalculator, changeScriptType: ScriptType, inputSorterFactory: ITransactionDataSorterFactory) {
         self.unspentOutputSelector = unspentOutputSelector
         self.transactionSizeCalculator = transactionSizeCalculator
         self.addressConverter = addressConverter
@@ -23,6 +24,7 @@ class InputSetter {
         self.pluginManager = pluginManager
         self.dustCalculator = dustCalculator
         self.changeScriptType = changeScriptType
+        self.inputSorterFactory = inputSorterFactory
     }
 
     private func input(fromUnspentOutput unspentOutput: UnspentOutput) throws -> InputToSign {
@@ -44,7 +46,7 @@ class InputSetter {
 
 extension InputSetter: IInputSetter {
 
-    func setInputs(to mutableTransaction: MutableTransaction, feeRate: Int, senderPay: Bool) throws {
+    func setInputs(to mutableTransaction: MutableTransaction, feeRate: Int, senderPay: Bool, sortType: TransactionDataSortType) throws {
         let value = mutableTransaction.recipientValue
         let dust = dustCalculator.dust(type: changeScriptType)
         let unspentOutputInfo = try unspentOutputSelector.select(
@@ -52,7 +54,7 @@ extension InputSetter: IInputSetter {
                 outputScriptType: mutableTransaction.recipientAddress.scriptType, changeType: changeScriptType,
                 senderPay: senderPay, dust: dust, pluginDataOutputSize: mutableTransaction.pluginDataOutputSize
         )
-        let unspentOutputs = unspentOutputInfo.unspentOutputs.sorted(by: Bip69.inputComparator)
+        let unspentOutputs = inputSorterFactory.sorter(for: sortType).sort(unspentOutputs: unspentOutputInfo.unspentOutputs)
 
         for unspentOutput in unspentOutputs {
             mutableTransaction.add(inputToSign: try input(fromUnspentOutput: unspentOutput))
