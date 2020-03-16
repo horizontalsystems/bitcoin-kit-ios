@@ -331,7 +331,7 @@ extension GrdbStorage: IStorage {
 
     public func blockHashesSortedBySequenceAndHeight(limit: Int) -> [BlockHash] {
         try! dbPool.read { db in
-            try BlockHash.order(BlockHash.Columns.sequence.asc).order(BlockHash.Columns.height.asc).limit(limit).fetchAll(db)
+            try BlockHash.order(BlockHash.Columns.sequence.asc, BlockHash.Columns.height.asc).limit(limit).fetchAll(db)
         }
     }
 
