@@ -155,22 +155,22 @@ extension BitcoinCore {
         dataProvider.transactions(fromUid: fromUid, limit: limit)
     }
 
-    public func send(to address: String, value: Int, feeRate: Int, pluginData: [UInt8: IPluginData] = [:]) throws -> FullTransaction {
+    public func send(to address: String, value: Int, feeRate: Int, sortType: TransactionDataSortType, pluginData: [UInt8: IPluginData] = [:]) throws -> FullTransaction {
         do {
-            return try transactionCreator.create(to: address, value: value, feeRate: feeRate, senderPay: true, pluginData: pluginData)
+            return try transactionCreator.create(to: address, value: value, feeRate: feeRate, senderPay: true, sortType: sortType, pluginData: pluginData)
         } catch {
             errorStorage.add(sendError: error)
             throw error
         }
     }
 
-    public func send(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int) throws -> FullTransaction {
+    public func send(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int, sortType: TransactionDataSortType) throws -> FullTransaction {
         let toAddress = try addressConverter.convert(keyHash: hash, type: scriptType)
-        return try transactionCreator.create(to: toAddress.stringValue, value: value, feeRate: feeRate, senderPay: true, pluginData: [:])
+        return try transactionCreator.create(to: toAddress.stringValue, value: value, feeRate: feeRate, senderPay: true, sortType: sortType, pluginData: [:])
     }
 
-    func redeem(from unspentOutput: UnspentOutput, to address: String, feeRate: Int) throws -> FullTransaction {
-        try transactionCreator.create(from: unspentOutput, to: address, feeRate: feeRate)
+    func redeem(from unspentOutput: UnspentOutput, to address: String, feeRate: Int, sortType: TransactionDataSortType) throws -> FullTransaction {
+        try transactionCreator.create(from: unspentOutput, to: address, feeRate: feeRate, sortType: sortType)
     }
 
     public func validate(address: String, pluginData: [UInt8: IPluginData] = [:]) throws {

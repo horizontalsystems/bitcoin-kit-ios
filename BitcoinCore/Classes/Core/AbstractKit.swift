@@ -34,16 +34,16 @@ open class AbstractKit {
         bitcoinCore.transactions(fromUid: fromUid, limit: limit)
     }
 
-    open func send(to address: String, value: Int, feeRate: Int, pluginData: [UInt8: IPluginData] = [:]) throws -> FullTransaction {
-        try bitcoinCore.send(to: address, value: value, feeRate: feeRate, pluginData: pluginData)
+    open func send(to address: String, value: Int, feeRate: Int, sortType: TransactionDataSortType, pluginData: [UInt8: IPluginData] = [:]) throws -> FullTransaction {
+        try bitcoinCore.send(to: address, value: value, feeRate: feeRate, sortType: sortType, pluginData: pluginData)
     }
 
-    public func send(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int) throws -> FullTransaction {
-        try bitcoinCore.send(to: hash, scriptType: scriptType, value: value, feeRate: feeRate)
+    public func send(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int, sortType: TransactionDataSortType) throws -> FullTransaction {
+        try bitcoinCore.send(to: hash, scriptType: scriptType, value: value, feeRate: feeRate, sortType: sortType)
     }
 
-    public func redeem(from unspentOutput: UnspentOutput, to address: String, feeRate: Int) throws -> FullTransaction {
-        try bitcoinCore.redeem(from: unspentOutput, to: address, feeRate: feeRate)
+    public func redeem(from unspentOutput: UnspentOutput, to address: String, feeRate: Int, sortType: TransactionDataSortType) throws -> FullTransaction {
+        try bitcoinCore.redeem(from: unspentOutput, to: address, feeRate: feeRate, sortType: sortType)
     }
 
     open func validate(address: String, pluginData: [UInt8: IPluginData] = [:]) throws {

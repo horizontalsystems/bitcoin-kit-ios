@@ -165,7 +165,7 @@ class SendController: UIViewController {
             pluginData[HodlerPlugin.id] = HodlerData(lockTimeInterval: self.selectedTimeInterval)
         }
 
-        currentAdapter?.sendSingle(to: address, amount: amount, pluginData: pluginData)
+        currentAdapter?.sendSingle(to: address, amount: amount, sortType: .shuffle, pluginData: pluginData)
                 .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .userInitiated))
                 .observeOn(MainScheduler.instance)
                 .subscribe(onSuccess: { [weak self] _ in

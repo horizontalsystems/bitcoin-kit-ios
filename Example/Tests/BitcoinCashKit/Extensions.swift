@@ -7,3 +7,14 @@ extension Block: Equatable {
     }
 
 }
+
+extension TransactionDataSortType: Equatable {
+
+    public static func ==(lhs: TransactionDataSortType, rhs: TransactionDataSortType) -> Bool {
+        switch (lhs, rhs) {
+        case (.none, .none), (.shuffle, .shuffle), (.bip69, .bip69): return true
+        default: return false
+        }
+    }
+
+}

@@ -258,7 +258,8 @@ protocol IFactory {
     func peer(withHost host: String, logger: Logger?) -> IPeer
     func transaction(version: Int, lockTime: Int) -> Transaction
     func inputToSign(withPreviousOutput: UnspentOutput, script: Data, sequence: Int) -> InputToSign
-    func output(withIndex index: Int, address: Address, value: Int, publicKey: PublicKey?) throws -> Output
+    func output(withIndex index: Int, address: Address, value: Int, publicKey: PublicKey?) -> Output
+    func lockingOutput(data: Data) -> Output
     func bloomFilter(withElements: [Data]) -> BloomFilter
 }
 
@@ -354,13 +355,13 @@ public protocol ITransactionSyncer: class {
 }
 
 public protocol ITransactionCreator {
-    func create(to address: String, value: Int, feeRate: Int, senderPay: Bool, pluginData: [UInt8: IPluginData]) throws -> FullTransaction
-    func create(from: UnspentOutput, to address: String, feeRate: Int) throws -> FullTransaction
+    func create(to address: String, value: Int, feeRate: Int, senderPay: Bool, sortType: TransactionDataSortType, pluginData: [UInt8: IPluginData]) throws -> FullTransaction
+    func create(from: UnspentOutput, to address: String, feeRate: Int, sortType: TransactionDataSortType) throws -> FullTransaction
 }
 
 protocol ITransactionBuilder {
-    func buildTransaction(toAddress: String, value: Int, feeRate: Int, senderPay: Bool, pluginData: [UInt8: IPluginData]) throws -> FullTransaction
-    func buildTransaction(from: UnspentOutput, toAddress: String, feeRate: Int) throws -> FullTransaction
+    func buildTransaction(toAddress: String, value: Int, feeRate: Int, senderPay: Bool, sortType: TransactionDataSortType, pluginData: [UInt8: IPluginData]) throws -> FullTransaction
+    func buildTransaction(from: UnspentOutput, toAddress: String, feeRate: Int, sortType: TransactionDataSortType) throws -> FullTransaction
 }
 
 protocol ITransactionFeeCalculator {
@@ -608,12 +609,16 @@ public protocol IBlockMedianTimeHelper {
     func medianTimePast(block: Block) -> Int?
 }
 
+protocol IRecipientSetter {
+    func setRecipient(to mutableTransaction: MutableTransaction, toAddress: String, value: Int, pluginData: [UInt8: IPluginData], skipChecks: Bool) throws
+}
+
 protocol IOutputSetter {
-    func setOutputs(to mutableTransaction: MutableTransaction, toAddress: String, value: Int, pluginData: [UInt8: IPluginData], skipChecks: Bool) throws
+    func setOutputs(to mutableTransaction: MutableTransaction, sortType: TransactionDataSortType)
 }
 
 protocol IInputSetter {
-    func setInputs(to mutableTransaction: MutableTransaction, feeRate: Int, senderPay: Bool) throws
+    func setInputs(to mutableTransaction: MutableTransaction, feeRate: Int, senderPay: Bool, sortType: TransactionDataSortType) throws
     func setInputs(to mutableTransaction: MutableTransaction, fromUnspentOutput unspentOutput: UnspentOutput, feeRate: Int) throws
 }
 
@@ -629,4 +634,13 @@ public protocol IPluginData {
 }
 
 public protocol IPluginOutputData {
+}
+
+protocol ITransactionDataSorterFactory {
+    func sorter(for type: TransactionDataSortType) -> ITransactionDataSorter
+}
+
+protocol ITransactionDataSorter {
+    func sort(outputs: [Output]) -> [Output]
+    func sort(unspentOutputs: [UnspentOutput]) -> [UnspentOutput]
 }
