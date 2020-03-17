@@ -9,8 +9,7 @@ public class ProofOfWorkValidator: IBlockValidator {
     }
 
     public func validate(block: Block, previousBlock: Block) throws {
-        guard let headerHashBigInt = BigInt(block.headerHash.reversedHex, radix: 16),
-              headerHashBigInt < difficultyEncoder.decodeCompact(bits: block.bits) else {
+        guard difficultyEncoder.compactFrom(hash: block.headerHash) < block.bits else {
             throw BitcoinCoreErrors.BlockValidation.invalidProofOfWork
         }
     }

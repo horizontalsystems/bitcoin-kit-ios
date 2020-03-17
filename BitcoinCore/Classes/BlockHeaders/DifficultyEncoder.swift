@@ -17,6 +17,29 @@ public class DifficultyEncoder: IDifficultyEncoder {
  */
     public init() {}
 
+    public func compactFrom(hash: Data) -> Int {
+        var hashSize = hash.count - 1
+        while hashSize >= 0, hash[hashSize] == 0 {
+            hashSize -= 1
+        }
+        hashSize += 1
+        hashSize = max(hashSize, 3)         // if difficulty very stronger we must show bits as minimum 3 bytes (ex. 0x030000xx)
+
+        var firstSignificant = 0
+
+        let isBigFirstSignificant = hash[hashSize - 1] > 0x7f                   // if first byte > 0x7f we need add 0x00 as first byte and increase hashSize
+        let ignoreByte = hashSize == hash.count && isBigFirstSignificant        // if difficulty very simple and last byte > 0x7f we must make length = 33 and add 0x00)
+
+        if isBigFirstSignificant {
+            hashSize += 1
+        }
+        if !ignoreByte {
+            firstSignificant = Int(hash[hashSize - 1]) << 16
+        }
+
+        return hashSize << 24 + firstSignificant + Int(hash[hashSize - 2]) << 8 + Int(hash[hashSize - 3])
+    }
+
     public func decodeCompact(bits: Int) -> BigInt {
         let size = (bits >> 24) & 0xFF
 
