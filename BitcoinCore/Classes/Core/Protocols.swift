@@ -5,6 +5,7 @@ import Alamofire
 enum BlockValidatorType { case header, bits, legacy, testNet, EDA, DAA, DGW }
 
 public protocol IDifficultyEncoder {
+    func compactFrom(hash: Data) -> Int
     func decodeCompact(bits: Int) -> BigInt
     func encodeCompact(from bigInt: BigInt) -> Int
 }
