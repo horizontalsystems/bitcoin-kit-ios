@@ -25,7 +25,7 @@ public class LitecoinKit: AbstractKit {
         switch networkType {
             case .mainNet:
                 network = MainNet()
-                initialSyncApiUrl = "http://ltc.horizontalsystems.xyz/api"
+                initialSyncApiUrl = "https://ltc.horizontalsystems.xyz/api"
             case .testNet:
                 network = TestNet()
                 initialSyncApiUrl = ""
