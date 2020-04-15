@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name             = 'LitecoinKit.swift'
   s.module_name      = 'LitecoinKit'
-  s.version          = '0.14'
+  s.version          = '0.14.1'
   s.summary          = 'Litecoin library for Swift.'
 
   s.description      = <<-DESC
