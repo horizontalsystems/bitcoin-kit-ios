@@ -29,7 +29,7 @@ public class BitcoinKit: AbstractKit {
                 initialSyncApiUrl = "https://btc.horizontalsystems.xyz/apg"
             case .testNet:
                 network = TestNet()
-                initialSyncApiUrl = "http://btc-testnet.horizontalsystems.xyz/apg"
+                initialSyncApiUrl = "https://btc-testnet.horizontalsystems.xyz/api"
             case .regTest:
                 network = RegTest()
                 initialSyncApiUrl = ""
