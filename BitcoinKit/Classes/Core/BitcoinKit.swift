@@ -3,6 +3,7 @@ import HdWalletKit
 import Hodler
 import BigInt
 import RxSwift
+import HsToolKit
 
 public class BitcoinKit: AbstractKit {
     private static let heightInterval = 2016                                    // Default block count in difficulty change circle ( Bitcoin )
@@ -34,7 +35,10 @@ public class BitcoinKit: AbstractKit {
                 network = RegTest()
                 initialSyncApiUrl = ""
         }
-        let initialSyncApi = BCoinApi(url: initialSyncApiUrl)
+
+        let logger = Logger(minLogLevel: minLogLevel)
+
+        let initialSyncApi = BCoinApi(url: initialSyncApiUrl, logger: logger)
 
         let databaseFilePath = try DirectoryHelper.directoryURL(for: BitcoinKit.name).appendingPathComponent(BitcoinKit.databaseFileName(walletId: walletId, networkType: networkType, bip: bip, syncMode: syncMode)).path
         let storage = GrdbStorage(databaseFilePath: databaseFilePath)
@@ -44,7 +48,7 @@ public class BitcoinKit: AbstractKit {
         let bech32AddressConverter = SegWitBech32AddressConverter(prefix: network.bech32PrefixPattern, scriptConverter: scriptConverter)
         let base58AddressConverter = Base58AddressConverter(addressVersion: network.pubKeyHash, addressScriptVersion: network.scriptHash)
 
-        let bitcoinCoreBuilder = BitcoinCoreBuilder(minLogLevel: minLogLevel)
+        let bitcoinCoreBuilder = BitcoinCoreBuilder(logger: logger)
 
         let difficultyEncoder = DifficultyEncoder()
 

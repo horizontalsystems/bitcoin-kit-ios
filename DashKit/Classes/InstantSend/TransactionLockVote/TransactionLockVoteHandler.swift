@@ -1,4 +1,5 @@
 import BitcoinCore
+import HsToolKit
 
 class TransactionLockVoteHandler: ITransactionLockVoteHandler {
     private let requiredVoteCount: Int

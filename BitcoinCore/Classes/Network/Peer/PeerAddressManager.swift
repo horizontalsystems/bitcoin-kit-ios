@@ -1,3 +1,5 @@
+import HsToolKit
+
 class PeerAddressManager {
     weak var delegate: IPeerAddressManagerDelegate?
 

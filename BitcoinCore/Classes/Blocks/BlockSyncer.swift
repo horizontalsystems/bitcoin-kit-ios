@@ -1,3 +1,5 @@
+import HsToolKit
+
 class BlockSyncer {
     private let storage: IStorage
 

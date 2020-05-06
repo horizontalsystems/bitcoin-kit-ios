@@ -15,7 +15,7 @@ class BlockHashFetcher {
 
 extension BlockHashFetcher: IBlockHashFetcher {
 
-    func getBlockHashes(publicKeys: [PublicKey]) -> Observable<(responses: [BlockHash], lastUsedIndex: Int)> {
+    func getBlockHashes(publicKeys: [PublicKey]) -> Single<(responses: [BlockHash], lastUsedIndex: Int)> {
         let addresses = publicKeys.map {
             restoreKeyConverter.keysForApiRestore(publicKey: $0)
         }

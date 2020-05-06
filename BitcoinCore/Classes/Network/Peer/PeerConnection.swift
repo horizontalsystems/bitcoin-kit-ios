@@ -1,5 +1,6 @@
 import Foundation
 import HdWalletKit
+import HsToolKit
 
 class PeerConnection: NSObject {
     enum PeerConnectionError: Error {

@@ -2,6 +2,7 @@ import BitcoinCore
 import HdWalletKit
 import BigInt
 import RxSwift
+import HsToolKit
 
 public class LitecoinKit: AbstractKit {
     private static let heightInterval = 2016                                    // Default block count in difficulty change circle
@@ -30,7 +31,10 @@ public class LitecoinKit: AbstractKit {
                 network = TestNet()
                 initialSyncApiUrl = ""
         }
-        let initialSyncApi = BCoinApi(url: initialSyncApiUrl)
+
+        let logger = Logger(minLogLevel: minLogLevel)
+
+        let initialSyncApi = BCoinApi(url: initialSyncApiUrl, logger: logger)
 
         let databaseFilePath = try DirectoryHelper.directoryURL(for: LitecoinKit.name).appendingPathComponent(LitecoinKit.databaseFileName(walletId: walletId, networkType: networkType, bip: bip, syncMode: syncMode)).path
         let storage = GrdbStorage(databaseFilePath: databaseFilePath)
@@ -68,7 +72,7 @@ public class LitecoinKit: AbstractKit {
 
         blockValidatorSet.add(blockValidator: blockValidatorChain)
 
-        let bitcoinCore = try BitcoinCoreBuilder(minLogLevel: minLogLevel)
+        let bitcoinCore = try BitcoinCoreBuilder(logger: logger)
                 .set(network: network)
                 .set(initialSyncApi: initialSyncApi)
                 .set(words: words)

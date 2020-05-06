@@ -1,5 +1,6 @@
 import HdWalletKit
 import RxSwift
+import HsToolKit
 
 class InitialSyncer {
     weak var delegate: IInitialSyncerDelegate?
@@ -32,8 +33,8 @@ class InitialSyncer {
     }
 
     private func sync(forAccount account: Int) {
-        let externalObservable = blockDiscovery.discoverBlockHashes(account: account, external: true)
-        let internalObservable = blockDiscovery.discoverBlockHashes(account: account, external: false)
+        let externalObservable = blockDiscovery.discoverBlockHashes(account: account, external: true).asObservable()
+        let internalObservable = blockDiscovery.discoverBlockHashes(account: account, external: false).asObservable()
 
         var observable = Observable
                 .concat(externalObservable, internalObservable)
@@ -49,7 +50,7 @@ class InitialSyncer {
         if async {
             observable = observable.subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
         }
-        
+
         observable.subscribe(onSuccess: { [weak self] keys, responses in
                     self?.handle(forAccount: account, keys: keys, blockHashes: responses)
                 }, onError: { [weak self] error in

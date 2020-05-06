@@ -1,3 +1,5 @@
+import HsToolKit
+
 class PluginManager {
     enum PluginError: Error {
         case pluginNotFound

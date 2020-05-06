@@ -1,26 +1,29 @@
 import RxSwift
 import ObjectMapper
+import Alamofire
+import HsToolKit
 
 public class BCoinApi {
-    private let apiManager: ApiManager
+    private let url: String
+    private let networkManager: NetworkManager
 
     public init(url: String, logger: Logger? = nil) {
-        apiManager = ApiManager(apiUrl: url, logger: logger)
+        self.url = url
+        networkManager = NetworkManager(logger: logger)
     }
 
 }
 
 extension BCoinApi: ISyncTransactionApi {
 
-    public func getTransactions(addresses: [String]) -> Observable<[SyncTransactionItem]> {
-        let parameters: [String: Any] = [
+    public func getTransactions(addresses: [String]) -> Single<[SyncTransactionItem]> {
+        let parameters: Parameters = [
             "addresses": addresses
         ]
+        let path = "/tx/address"
 
-        let httpBody = try? JSONSerialization.data(withJSONObject: parameters)
-
-        let request = apiManager.request(withMethod: .post, path: "/tx/address", httpBody: httpBody)
-        return apiManager.observable(forRequest: request)
+        let request = networkManager.session.request(url + path, method: .post, parameters: parameters, encoding: JSONEncoding.default)
+        return networkManager.single(request: request)
     }
 
 }

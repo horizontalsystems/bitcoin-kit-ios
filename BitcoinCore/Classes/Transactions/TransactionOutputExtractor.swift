@@ -1,3 +1,5 @@
+import HsToolKit
+
 class TransactionOutputExtractor {
     let transactionKeySetter: ITransactionPublicKeySetter
     let pluginManager: IPluginManager
