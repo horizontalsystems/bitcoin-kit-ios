@@ -1,6 +1,6 @@
 import BigInt
 import RxSwift
-import Alamofire
+import HsToolKit
 
 enum BlockValidatorType { case header, bits, legacy, testNet, EDA, DAA, DGW }
 
@@ -34,11 +34,6 @@ protocol IApiConfigProvider {
     var apiUrl: String { get }
 }
 
-protocol IReachabilityManager {
-    var isReachable: Bool { get }
-    var reachabilitySignal: Signal { get }
-}
-
 protocol IPeerAddressManager: class {
     var delegate: IPeerAddressManagerDelegate? { get set }
     var ip: String? { get }
@@ -54,7 +49,7 @@ protocol IStateManager {
 }
 
 protocol IBlockDiscovery {
-    func discoverBlockHashes(account: Int, external: Bool) -> Observable<([PublicKey], [BlockHash])>
+    func discoverBlockHashes(account: Int, external: Bool) -> Single<([PublicKey], [BlockHash])>
 }
 
 public protocol IStorage {
@@ -265,7 +260,7 @@ protocol IFactory {
 }
 
 public protocol ISyncTransactionApi {
-    func getTransactions(addresses: [String]) -> Observable<[SyncTransactionItem]>
+    func getTransactions(addresses: [String]) -> Single<[SyncTransactionItem]>
 }
 
 protocol ISyncManager {
@@ -284,7 +279,7 @@ public protocol IHasher {
 }
 
 protocol IBlockHashFetcher {
-    func getBlockHashes(publicKeys: [PublicKey]) -> Observable<(responses: [BlockHash], lastUsedIndex: Int)>
+    func getBlockHashes(publicKeys: [PublicKey]) -> Single<(responses: [BlockHash], lastUsedIndex: Int)>
 }
 
 protocol IBlockHashFetcherHelper {

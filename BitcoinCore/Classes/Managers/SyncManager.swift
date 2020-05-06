@@ -1,4 +1,5 @@
 import RxSwift
+import HsToolKit
 
 class SyncManager {
     private var disposeBag = DisposeBag()
@@ -44,9 +45,9 @@ class SyncManager {
 extension SyncManager: ISyncManager {
 
     func start() {
-        reachabilityManager.reachabilitySignal
+        reachabilityManager.reachabilityObservable
                 .observeOn(ConcurrentDispatchQueueScheduler(qos: .background))
-                .subscribe(onNext: { [weak self] in
+                .subscribe(onNext: { [weak self] _ in
                     self?.onReachabilityChanged()
                 })
                 .disposed(by: disposeBag)

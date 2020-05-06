@@ -1,5 +1,6 @@
 import Foundation
 import RxSwift
+import HsToolKit
 
 public enum PeerGroupEvent {
     case onStart

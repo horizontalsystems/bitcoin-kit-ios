@@ -1,4 +1,5 @@
 import Foundation
+import HsToolKit
 
 class Peer {
     enum PeerError: Error {

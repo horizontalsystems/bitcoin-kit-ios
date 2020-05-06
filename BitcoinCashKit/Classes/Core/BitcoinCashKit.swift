@@ -2,6 +2,7 @@ import BitcoinCore
 import HdWalletKit
 import BigInt
 import RxSwift
+import HsToolKit
 
 public class BitcoinCashKit: AbstractKit {
     private static let name = "BitcoinCashKit"
@@ -39,7 +40,10 @@ public class BitcoinCashKit: AbstractKit {
                 initialSyncApiUrl = "https://tbch.blockdozer.com/api/" //not working
                 validScheme = "bchtest"
         }
-        let initialSyncApi = InsightApi(url: initialSyncApiUrl)
+
+        let logger = Logger(minLogLevel: minLogLevel)
+
+        let initialSyncApi = InsightApi(url: initialSyncApiUrl, logger: logger)
 
         let databaseFilePath = try DirectoryHelper.directoryURL(for: BitcoinCashKit.name).appendingPathComponent(BitcoinCashKit.databaseFileName(walletId: walletId, networkType: networkType, syncMode: syncMode)).path
         let storage = GrdbStorage(databaseFilePath: databaseFilePath)
@@ -68,7 +72,7 @@ public class BitcoinCashKit: AbstractKit {
 
         blockValidatorSet.add(blockValidator: blockValidatorChain)
 
-        let bitcoinCore = try BitcoinCoreBuilder(minLogLevel: minLogLevel)
+        let bitcoinCore = try BitcoinCoreBuilder(logger: logger)
                 .set(network: network)
                 .set(initialSyncApi: initialSyncApi)
                 .set(words: words)

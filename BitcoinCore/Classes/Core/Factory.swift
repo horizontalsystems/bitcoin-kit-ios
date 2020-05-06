@@ -1,3 +1,5 @@
+import HsToolKit
+
 class Factory: IFactory {
     private let network: INetwork
     private let networkMessageParser: INetworkMessageParser

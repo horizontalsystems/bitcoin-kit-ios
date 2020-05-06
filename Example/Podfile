@@ -8,6 +8,7 @@ target 'BitcoinKitExample' do
   pod 'DashKit.swift', :path => '../'
   pod 'LitecoinKit.swift', :path => '../'
   pod 'Hodler.swift', :path => '../'
+  pod 'HsToolKit.swift', git: 'https://github.com/horizontalsystems/hs-tool-kit-ios'
 end
 
 def testPods

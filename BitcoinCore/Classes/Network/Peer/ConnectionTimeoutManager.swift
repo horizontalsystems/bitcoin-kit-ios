@@ -1,4 +1,5 @@
 import Foundation
+import HsToolKit
 
 class ConnectionTimeoutManager: IConnectionTimeoutManager {
 

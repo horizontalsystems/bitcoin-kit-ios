@@ -31,24 +31,24 @@ class ErrorStorage {
     }
 
     func add(apiError: Error) {
-        if let error = apiError as? ApiError {
-            let currentTime = formatter.string(from: Date())
-            let value: String
-
-            switch error {
-            case .invalidRequest(let url): value = "\(formattedString(url)) (InvalidRequest)"
-            case .mappingError(let url): value = "\(formattedString(url)) (MappingError)"
-            case .noConnection(let url): value = "\(formattedString(url)) (NoConnection)"
-            case .serverError(let url, let status, let jsonData):
-                var dataString = "n/a"
-                if let jsonData = jsonData {
-                    dataString = formattedString("\(jsonData)")
-                }
-                value = "\(formattedString(url)) (ServerError status: \(status); data: \(dataString)"
-            }
-
-            apiErrors.append((currentTime, value))
-        }
+//        if let error = apiError as? ApiError {
+//            let currentTime = formatter.string(from: Date())
+//            let value: String
+//
+//            switch error {
+//            case .invalidRequest(let url): value = "\(formattedString(url)) (InvalidRequest)"
+//            case .mappingError(let url): value = "\(formattedString(url)) (MappingError)"
+//            case .noConnection(let url): value = "\(formattedString(url)) (NoConnection)"
+//            case .serverError(let url, let status, let jsonData):
+//                var dataString = "n/a"
+//                if let jsonData = jsonData {
+//                    dataString = formattedString("\(jsonData)")
+//                }
+//                value = "\(formattedString(url)) (ServerError status: \(status); data: \(dataString)"
+//            }
+//
+//            apiErrors.append((currentTime, value))
+//        }
     }
 
     func add(sendError: Error) {

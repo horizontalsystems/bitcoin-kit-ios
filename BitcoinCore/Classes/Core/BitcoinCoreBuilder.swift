@@ -1,5 +1,6 @@
 import Foundation
 import HdWalletKit
+import HsToolKit
 
 public class BitcoinCoreBuilder {
     public enum BuildError: Error { case noSeedData, noWalletId, noNetwork, noPaymentAddressParser, noAddressSelector, noStorage, noInitialSyncApi }
@@ -105,8 +106,8 @@ public class BitcoinCoreBuilder {
         return self
     }
 
-    public init(minLogLevel: Logger.Level = .verbose) {
-        self.logger = Logger(network: network, minLogLevel: minLogLevel)
+    public init(logger: Logger) {
+        self.logger = logger
     }
 
     public func build() throws -> BitcoinCore {

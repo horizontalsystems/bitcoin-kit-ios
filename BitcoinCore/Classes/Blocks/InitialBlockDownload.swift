@@ -1,4 +1,5 @@
 import RxSwift
+import HsToolKit
 
 public enum InitialBlockDownloadEvent {
     case onPeerSynced(peer: IPeer)
