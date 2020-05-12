@@ -125,7 +125,7 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   HsToolKit.swift:
-    :commit: 95152c6c3ca9a924f256c0c36de1a90caa02644b
+    :commit: b97c6224fee8d7b554a8e49e289ccdf131617dff
     :git: https://github.com/horizontalsystems/hs-tool-kit-ios
 
 SPEC CHECKSUMS:

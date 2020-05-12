@@ -8,8 +8,6 @@ class InitialSyncer {
     private var disposeBag = DisposeBag()
 
     private let storage: IStorage
-    private let listener: ISyncStateListener
-    private var stateManager: IStateManager
     private let blockDiscovery: IBlockDiscovery
     private let publicKeyManager: IPublicKeyManager
 
@@ -17,13 +15,9 @@ class InitialSyncer {
     private let async: Bool
     private let errorStorage: ErrorStorage?
 
-    private var restoring = false
-
-    init(storage: IStorage, listener: ISyncStateListener, stateManager: IStateManager, blockDiscovery: IBlockDiscovery, publicKeyManager: IPublicKeyManager,
+    init(storage: IStorage, blockDiscovery: IBlockDiscovery, publicKeyManager: IPublicKeyManager,
          async: Bool = true, logger: Logger? = nil, errorStorage: ErrorStorage? = nil) {
         self.storage = storage
-        self.listener = listener
-        self.stateManager = stateManager
         self.blockDiscovery = blockDiscovery
         self.publicKeyManager = publicKeyManager
 
@@ -65,19 +59,21 @@ class InitialSyncer {
 
         // If gap shift is found
         if blockHashes.isEmpty {
-            stateManager.restored = true
-            delegate?.syncingFinished()
+            handleSuccess()
         } else {
             storage.add(blockHashes: blockHashes)
             sync(forAccount: account + 1)
         }
     }
 
+    private func handleSuccess() {
+        delegate?.onSyncSuccess()
+    }
+
     private func handle(error: Error) {
-        stop()
         logger?.error(error)
         errorStorage?.add(apiError: error)
-        listener.syncStopped()
+        delegate?.onSyncFailed(error: error)
     }
 
 }
@@ -85,23 +81,10 @@ class InitialSyncer {
 extension InitialSyncer: IInitialSyncer {
 
     func sync() {
-        guard !stateManager.restored else {
-            delegate?.syncingFinished()
-            return
-        }
-
-        guard !restoring else {
-            return
-        }
-        restoring = true
-
-        listener.syncStarted()
         sync(forAccount: 0)
     }
 
-    func stop() {
-        restoring = false
-        // Deinit old DisposeGag
+    func terminate() {
         disposeBag = DisposeBag()
     }
 

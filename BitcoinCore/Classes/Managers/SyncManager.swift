@@ -7,36 +7,61 @@ class SyncManager {
     private let reachabilityManager: IReachabilityManager
     private let initialSyncer: IInitialSyncer
     private let peerGroup: IPeerGroup
-    private let queue = DispatchQueue(label: "io.horizontalsystems.bitcoin-core.sync-manager", qos: .background)
+    private let listener: ISyncStateListener
+    private let stateManager: IStateManager
 
-    init(reachabilityManager: IReachabilityManager, initialSyncer: IInitialSyncer, peerGroup: IPeerGroup) {
+    private var state: State = .stopped
+
+    init(reachabilityManager: IReachabilityManager, initialSyncer: IInitialSyncer, peerGroup: IPeerGroup, listener: ISyncStateListener, stateManager: IStateManager) {
         self.reachabilityManager = reachabilityManager
         self.initialSyncer = initialSyncer
         self.peerGroup = peerGroup
-    }
+        self.listener = listener
+        self.stateManager = stateManager
 
-    private func startSync() {
-        guard reachabilityManager.isReachable else {
-            return
-        }
-
-        queue.async { [weak self] in
-            self?.initialSyncer.sync()
-        }
-    }
-
-    private func stopSync() {
-        queue.async { [weak self] in
-            self?.initialSyncer.stop()
-            self?.peerGroup.stop()
-        }
+        reachabilityManager.reachabilityObservable
+                .observeOn(ConcurrentDispatchQueueScheduler(qos: .background))
+                .subscribe(onNext: { [weak self] _ in
+                    self?.onReachabilityChanged()
+                })
+                .disposed(by: disposeBag)
     }
 
     private func onReachabilityChanged() {
         if reachabilityManager.isReachable {
-            startSync()
+            onReachable()
         } else {
-            stopSync()
+            onUnreachable()
+        }
+    }
+
+    private func onReachable() {
+        if state == .idle {
+            startSync()
+        }
+    }
+
+    private func onUnreachable() {
+        if state == .peerGroupRunning {
+            peerGroup.stop()
+            state = .idle
+            listener.syncStopped(error: ReachabilityManager.ReachabilityError.notReachable)
+        }
+    }
+
+    private func startPeerGroup() {
+        state = .peerGroupRunning
+        peerGroup.start()
+    }
+
+    private func startSync() {
+        listener.syncStarted()
+
+        if stateManager.restored {
+            startPeerGroup()
+        } else {
+            state = .initialSyncing
+            initialSyncer.sync()
         }
     }
 
@@ -45,30 +70,55 @@ class SyncManager {
 extension SyncManager: ISyncManager {
 
     func start() {
-        reachabilityManager.reachabilityObservable
-                .observeOn(ConcurrentDispatchQueueScheduler(qos: .background))
-                .subscribe(onNext: { [weak self] _ in
-                    self?.onReachabilityChanged()
-                })
-                .disposed(by: disposeBag)
+        guard state == .stopped || state == .idle else {
+            return
+        }
+
+        guard reachabilityManager.isReachable else {
+            state = .idle
+            listener.syncStopped(error: ReachabilityManager.ReachabilityError.notReachable)
+            return
+        }
 
         startSync()
     }
 
     func stop() {
-        disposeBag = DisposeBag()
-        stopSync()
+        switch state {
+        case .initialSyncing:
+            initialSyncer.terminate()
+        case .peerGroupRunning:
+            peerGroup.stop()
+        default: ()
+        }
+
+        state = .stopped
+        listener.syncStopped(error: BitcoinCore.StateError.notStarted)
     }
 
 }
 
 extension SyncManager: IInitialSyncerDelegate {
 
-    func syncingFinished() {
-        queue.async { [weak self] in
-            self?.initialSyncer.stop()
-            self?.peerGroup.start()
-        }
+    func onSyncSuccess() {
+        stateManager.restored = true
+        startPeerGroup()
+    }
+
+    func onSyncFailed(error: Error) {
+        state = .idle
+        listener.syncStopped(error: error)
+    }
+
+}
+
+extension SyncManager {
+
+    enum State {
+        case stopped
+        case idle
+        case initialSyncing
+        case peerGroupRunning
     }
 
 }

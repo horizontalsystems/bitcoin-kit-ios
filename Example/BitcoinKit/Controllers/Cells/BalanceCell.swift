@@ -12,17 +12,22 @@ class BalanceCell: UITableViewCell {
     @IBOutlet weak var nameLabel: UILabel?
     @IBOutlet weak var titleLabel: UILabel?
     @IBOutlet weak var valueLabel: UILabel?
+    @IBOutlet weak var errorLabel: UILabel?
 
     func bind(adapter: BaseAdapter) {
         let syncStateString: String
+        var errorString = ""
 
         switch adapter.syncState {
         case .synced: syncStateString = "Synced!"
         case .syncing(let progress): syncStateString = "Syncing \(Int(progress * 100))%"
-        case .notSynced: syncStateString = "Not Synced"
+        case .notSynced(let error):
+            syncStateString = "Not Synced"
+            errorString = "\(error)"
         }
 
         nameLabel?.text = adapter.name
+        errorLabel?.text = errorString
 
         var lastBlockHeightString = "n/a"
         var lastBlockDateString = "n/a"

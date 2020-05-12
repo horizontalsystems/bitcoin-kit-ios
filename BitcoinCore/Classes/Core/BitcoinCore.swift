@@ -325,7 +325,7 @@ extension BitcoinCore {
     public enum KitState {
         case synced
         case syncing(progress: Double)
-        case notSynced
+        case notSynced(error: Error)
     }
 
     public enum SyncMode: Equatable {
@@ -342,17 +342,27 @@ extension BitcoinCore {
 
 }
 
-extension BitcoinCore.KitState {
+extension BitcoinCore.KitState: Equatable {
 
     public static func == (lhs: BitcoinCore.KitState, rhs: BitcoinCore.KitState) -> Bool {
         switch (lhs, rhs) {
-        case (.synced, .synced), (.notSynced, .notSynced):
+        case (.synced, .synced):
             return true
+        case (.notSynced(let lhsError), .notSynced(let rhsError)):
+            return "\(lhsError)" == "\(rhsError)"
         case (.syncing(progress: let leftProgress), .syncing(progress: let rightProgress)):
             return leftProgress == rightProgress
         default:
             return false
         }
+    }
+
+}
+
+extension BitcoinCore {
+
+    public enum StateError: Error {
+        case notStarted
     }
 
 }
