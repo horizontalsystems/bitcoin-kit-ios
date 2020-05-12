@@ -7,7 +7,7 @@ class KitStateProvider: IKitStateProvider {
     private var initialBestBlockHeight: Int32 = 0
     private var currentBestBlockHeight: Int32 = 0
 
-    private(set) var syncState: BitcoinCore.KitState = .notSynced {
+    private(set) var syncState: BitcoinCore.KitState = .notSynced(error: BitcoinCore.StateError.notStarted) {
         didSet {
             if !(oldValue == syncState) {
                 delegate?.handleKitStateUpdate(state: syncState)
@@ -23,8 +23,8 @@ extension KitStateProvider: ISyncStateListener {
         syncState = .syncing(progress: 0)
     }
 
-    func syncStopped() {
-        syncState = .notSynced
+    func syncStopped(error: Error) {
+        syncState = .notSynced(error: error)
     }
 
     func initialBestBlockHeightUpdated(height: Int32) {

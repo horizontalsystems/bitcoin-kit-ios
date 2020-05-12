@@ -44,7 +44,7 @@ protocol IPeerAddressManager: class {
     func markConnected(peer: IPeer)
 }
 
-protocol IStateManager {
+protocol IStateManager: AnyObject {
     var restored: Bool { get set }
 }
 
@@ -233,7 +233,7 @@ protocol IConnectionTimeoutManager: class {
 protocol ISyncStateListener: class {
     func syncFinished()
     func syncStarted()
-    func syncStopped()
+    func syncStopped(error: Error)
     func initialBestBlockHeightUpdated(height: Int32)
     func currentBestBlockHeightUpdated(height: Int32, maxBlockHeight: Int32)
 }
@@ -271,7 +271,7 @@ protocol ISyncManager {
 protocol IInitialSyncer {
     var delegate: IInitialSyncerDelegate? { get set }
     func sync()
-    func stop()
+    func terminate()
 }
 
 public protocol IHasher {
@@ -287,7 +287,8 @@ protocol IBlockHashFetcherHelper {
 }
 
 protocol IInitialSyncerDelegate: class {
-    func syncingFinished()
+    func onSyncSuccess()
+    func onSyncFailed(error: Error)
 }
 
 protocol IPaymentAddressParser {

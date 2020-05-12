@@ -104,7 +104,7 @@ class PeerGroup {
 extension PeerGroup: IPeerGroup {
 
     func start() {
-        guard started == false, reachabilityManager.isReachable else {
+        guard started == false else {
             return
         }
 

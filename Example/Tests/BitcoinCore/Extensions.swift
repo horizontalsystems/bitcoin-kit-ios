@@ -45,20 +45,6 @@ extension Block {
 
 }
 
-extension BitcoinCore.KitState: Equatable {
-
-    public static func ==(lhs: BitcoinCore.KitState, rhs: BitcoinCore.KitState) -> Bool {
-        switch (lhs, rhs) {
-        case (.synced,   .synced): return true
-        case let (.syncing(lProgress),   .syncing(rProgress)): return lProgress == rProgress
-        case (.notSynced,   .notSynced): return true
-        default:
-            return false
-        }
-    }
-
-}
-
 extension BlockInfo: Equatable {
 
     public static func ==(lhs: BlockInfo, rhs: BlockInfo) -> Bool {

@@ -213,13 +213,11 @@ extension InitialBlockDownload: IPeerTaskHandler {
 extension InitialBlockDownload {
 
     private func onStart() {
-        syncStateListener.syncStarted()
         resetRequiredDownloadSpeed()
         blockSyncer.prepareForDownload()
     }
 
     private func onStop() {
-        syncStateListener.syncStopped()
     }
 
     private func onPeerCreate(peer: IPeer) {
