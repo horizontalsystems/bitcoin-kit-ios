@@ -241,6 +241,10 @@ extension BaseAdapter {
         print(abstractKit.statusInfo)
     }
 
+    func rawTransaction(transactionHash: String) -> String? {
+        abstractKit.rawTransaction(transactionHash: transactionHash)
+    }
+
 }
 
 enum SendError: Error {

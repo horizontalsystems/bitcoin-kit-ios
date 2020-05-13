@@ -98,4 +98,8 @@ open class AbstractKit {
         bitcoinCore.statusInfo
     }
 
+    public func rawTransaction(transactionHash: String) -> String? {
+        bitcoinCore.rawTransaction(transactionHash: transactionHash)
+    }
+
 }
