@@ -34,6 +34,10 @@ open class AbstractKit {
         bitcoinCore.transactions(fromUid: fromUid, limit: limit)
     }
 
+    open func transaction(hash: String) -> TransactionInfo? {
+        bitcoinCore.transaction(hash: hash)
+    }
+
     open func send(to address: String, value: Int, feeRate: Int, sortType: TransactionDataSortType, pluginData: [UInt8: IPluginData] = [:]) throws -> FullTransaction {
         try bitcoinCore.send(to: address, value: value, feeRate: feeRate, sortType: sortType, pluginData: pluginData)
     }
