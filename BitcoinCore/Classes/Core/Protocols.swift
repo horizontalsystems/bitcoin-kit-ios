@@ -451,6 +451,7 @@ protocol IDataProvider {
     var balance: BalanceInfo { get }
     func debugInfo(network: INetwork, scriptType: ScriptType, addressConverter: IAddressConverter) -> String
     func transactions(fromUid: String?, limit: Int?) -> Single<[TransactionInfo]>
+    func transaction(hash: String) -> TransactionInfo?
 
     func rawTransaction(transactionHash: String) -> String?
 }

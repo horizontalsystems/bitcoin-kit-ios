@@ -155,6 +155,10 @@ extension BitcoinCore {
         dataProvider.transactions(fromUid: fromUid, limit: limit)
     }
 
+    public func transaction(hash: String) -> TransactionInfo? {
+        dataProvider.transaction(hash: hash)
+    }
+
     public func send(to address: String, value: Int, feeRate: Int, sortType: TransactionDataSortType, pluginData: [UInt8: IPluginData] = [:]) throws -> FullTransaction {
         do {
             return try transactionCreator.create(to: address, value: value, feeRate: feeRate, senderPay: true, sortType: sortType, pluginData: pluginData)

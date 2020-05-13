@@ -93,6 +93,18 @@ extension DataProvider: IDataProvider {
         }
     }
 
+    func transaction(hash: String) -> TransactionInfo? {
+        guard let hash = hash.reversedData else {
+            return nil
+        }
+
+        guard let transactionFullInfo = storage.transactionFullInfo(byHash: hash) else {
+            return nil
+        }
+
+        return transactionInfoConverter.transactionInfo(fromTransaction: transactionFullInfo)
+    }
+
     func debugInfo(network: INetwork, scriptType: ScriptType, addressConverter: IAddressConverter) -> String {
         var lines = [String]()
 
