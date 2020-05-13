@@ -105,4 +105,12 @@ extension DataProvider: IDataProvider {
         return lines.joined(separator: "\n")
     }
 
+    func rawTransaction(transactionHash: String) -> String? {
+        guard let hash = transactionHash.reversedData else {
+            return nil
+        }
+
+        return storage.fullTransaction(byHash: hash).map { TransactionSerializer.serialize(transaction: $0).hex }
+    }
+
 }

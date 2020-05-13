@@ -96,6 +96,7 @@ public protocol IStorage {
 
     func transactionExists(byHash: Data) -> Bool
     func transaction(byHash: Data) -> Transaction?
+    func fullTransaction(byHash: Data) -> FullTransaction?
     func invalidTransaction(byHash: Data) -> InvalidTransaction?
     func conflictingTransactions(for transaction: FullTransaction) -> [Transaction]
     func validOrInvalidTransaction(byUid: String) -> Transaction?
@@ -103,7 +104,7 @@ public protocol IStorage {
     func incomingPendingTransactionsExist() -> Bool
     func inputs(byHashes hashes: [Data]) -> [Input]
     func transactions(ofBlock: Block) -> [Transaction]
-    func newTransactions() -> [Transaction]
+    func newTransactions() -> [FullTransaction]
     func newTransaction(byHash: Data) -> Transaction?
     func relayedTransactionExists(byHash: Data) -> Bool
     func add(transaction: FullTransaction) throws
@@ -450,6 +451,8 @@ protocol IDataProvider {
     var balance: BalanceInfo { get }
     func debugInfo(network: INetwork, scriptType: ScriptType, addressConverter: IAddressConverter) -> String
     func transactions(fromUid: String?, limit: Int?) -> Single<[TransactionInfo]>
+
+    func rawTransaction(transactionHash: String) -> String?
 }
 
 protocol IDataProviderDelegate: class {

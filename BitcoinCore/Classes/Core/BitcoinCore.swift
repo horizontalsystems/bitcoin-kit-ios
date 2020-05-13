@@ -258,6 +258,10 @@ extension BitcoinCore {
         return status
     }
 
+    func rawTransaction(transactionHash: String) -> String? {
+        dataProvider.rawTransaction(transactionHash: transactionHash)
+    }
+
 }
 
 extension BitcoinCore: IDataProviderDelegate {

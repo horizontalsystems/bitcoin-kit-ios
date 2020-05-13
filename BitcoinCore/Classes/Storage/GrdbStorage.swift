@@ -211,6 +211,14 @@ open class GrdbStorage {
         return migrator
     }
 
+    private func fullTransaction(transaction: Transaction) -> FullTransaction {
+        FullTransaction(
+                header: transaction,
+                inputs: inputs(transactionHash: transaction.dataHash),
+                outputs: outputs(transactionHash: transaction.dataHash)
+        )
+    }
+
 }
 
 extension GrdbStorage: IStorage {
@@ -497,6 +505,10 @@ extension GrdbStorage: IStorage {
         }
     }
 
+    public func fullTransaction(byHash: Data) -> FullTransaction? {
+        transaction(byHash: byHash).map { fullTransaction(transaction: $0) }
+    }
+
     public func invalidTransaction(byHash hash: Data) -> InvalidTransaction? {
         try! dbPool.read { db in
             try InvalidTransaction.filter(Transaction.Columns.dataHash == hash).fetchOne(db)
@@ -571,10 +583,10 @@ extension GrdbStorage: IStorage {
         }
     }
 
-    public func newTransactions() -> [Transaction] {
+    public func newTransactions() -> [FullTransaction] {
         try! dbPool.read { db in
             try Transaction.filter(Transaction.Columns.status == TransactionStatus.new).fetchAll(db)
-        }
+        }.map { fullTransaction(transaction: $0) }
     }
 
     public func newTransaction(byHash hash: Data) -> Transaction? {

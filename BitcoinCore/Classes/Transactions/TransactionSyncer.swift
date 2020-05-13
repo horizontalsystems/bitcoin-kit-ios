@@ -16,13 +16,7 @@ public class TransactionSyncer {
 extension TransactionSyncer: ITransactionSyncer {
 
     public func newTransactions() -> [FullTransaction] {
-        storage.newTransactions().map {
-            FullTransaction(
-                    header: $0,
-                    inputs: self.storage.inputs(transactionHash: $0.dataHash),
-                    outputs: self.storage.outputs(transactionHash: $0.dataHash)
-            )
-        }
+        storage.newTransactions()
     }
 
     public func handleRelayed(transactions: [FullTransaction]) {
