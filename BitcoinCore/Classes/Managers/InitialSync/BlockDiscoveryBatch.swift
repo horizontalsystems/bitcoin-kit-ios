@@ -22,14 +22,13 @@ class BlockDiscoveryBatch {
         let maxHeight = self.maxHeight
 
         let count = gapLimit - prevCount + prevLastUsedIndex + 1
-        var newPublicKeys = [PublicKey]()
-        for i in 0..<count {
-            do {
-                newPublicKeys.append(try wallet.publicKey(account: account, index: i + startIndex, external: external))
-            } catch {
-                return Single.error(error)
-            }
+        let newPublicKeys: [PublicKey]
+        do {
+            newPublicKeys = try wallet.publicKeys(account: account, indices: UInt32(startIndex)..<UInt32(startIndex + count), external: external)
+        } catch {
+            return Single.error(error)
         }
+
         return blockHashFetcher.getBlockHashes(publicKeys: newPublicKeys).flatMap { [weak self] fetcherResult -> Single<([PublicKey], [BlockHash])> in
             let resultBlockHashes = blockHashes + fetcherResult.responses.filter { $0.height <= maxHeight }
             let resultPublicKeys = publicKeys + newPublicKeys

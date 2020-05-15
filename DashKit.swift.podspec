@@ -27,7 +27,7 @@ DashKit implements Dash protocol in Swift.
   s.dependency 'Secp256k1Kit.swift', '~> 1.0'
   s.dependency 'BlsKit.swift', '~> 1.0'
   s.dependency 'X11Kit.swift', '~> 1.0'
-  s.dependency 'HdWalletKit.swift', '~> 1.4'
+  s.dependency 'HdWalletKit.swift', '~> 1.5'
 
   s.dependency 'ObjectMapper', '~> 3.0'
   s.dependency 'RxSwift', '~> 5.0'
