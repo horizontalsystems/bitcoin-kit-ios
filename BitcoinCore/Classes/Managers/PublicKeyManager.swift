@@ -26,11 +26,10 @@ class PublicKeyManager {
         if gapKeysCount < hdWallet.gapLimit {
             let allKeys = publicKeys.sorted(by: { $0.publicKey.index < $1.publicKey.index })
             let lastIndex = allKeys.last?.publicKey.index ?? -1
+            let newKeysStartIndex = lastIndex + 1
+            let indices = UInt32(newKeysStartIndex)..<UInt32(newKeysStartIndex + hdWallet.gapLimit - gapKeysCount)
 
-            for i in 1..<(hdWallet.gapLimit - gapKeysCount + 1) {
-                let publicKey = try hdWallet.publicKey(account: account, index: lastIndex + i, external: external)
-                keys.append(publicKey)
-            }
+            keys = try hdWallet.publicKeys(account: account, indices: indices, external: external)
         }
 
         addKeys(keys: keys)
