@@ -58,15 +58,14 @@ class HodlerPluginTests: QuickSpec {
                     expect(mutableTransaction.recipientAddress.stringValue).to(equal(p2shAddress.stringValue))
                 }
 
-                it("sets pluginData") {
-                    let result = mutableTransaction.build()
-                    guard let nullDataOutput = result.outputs.last else {
-                        fail("Last output must be nullData output")
+                fit("sets pluginData") {
+                    guard let pluginData = mutableTransaction.pluginData[HodlerPlugin.id] else {
+                        fail("Must have pluginData output")
                         return
                     }
 
-                    let expectedLockingScript = Data(hex: "6a51020700140000000000000000000000000000000000000000")!
-                    expect(nullDataOutput.lockingScript).to(equal(expectedLockingScript))
+                    let expectedLockingScript = Data(hex: "020700140000000000000000000000000000000000000000")!
+                    expect(pluginData).to(equal(expectedLockingScript))
                 }
             }
 
@@ -102,7 +101,7 @@ class HodlerPluginTests: QuickSpec {
                     it("doesn't throw unsupportedAddress") {
                         mutableTransaction.recipientAddress = p2shAddress
                         do {
-                            try hodler.processOutputs(mutableTransaction: mutableTransaction, pluginData: HodlerData(lockTimeInterval: HodlerPlugin.LockTimeInterval.hour))
+                            try hodler.processOutputs(mutableTransaction: mutableTransaction, pluginData: HodlerData(lockTimeInterval: HodlerPlugin.LockTimeInterval.hour), skipChecks: true)
                         } catch {
                             fail("Unexpected exception")
                         }

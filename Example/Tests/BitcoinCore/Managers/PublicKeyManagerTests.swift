@@ -136,20 +136,18 @@ class PublicKeyManagerTests: XCTestCase {
         }
         stub(mockHDWallet) { mock in
             when(mock.gapLimit.get).thenReturn(2)
-            when(mock.publicKey(account: equal(to: 0), index: equal(to: 2), external: equal(to: false))).thenReturn(keys[2].publicKey)
-            when(mock.publicKey(account: equal(to: 0), index: equal(to: 0), external: equal(to: true))).thenReturn(keys[3].publicKey)
-            when(mock.publicKey(account: equal(to: 0), index: equal(to: 1), external: equal(to: true))).thenReturn(keys[4].publicKey)
-            when(mock.publicKey(account: equal(to: 1), index: equal(to: 0), external: equal(to: false))).thenReturn(keys[5].publicKey)
-            when(mock.publicKey(account: equal(to: 1), index: equal(to: 1), external: equal(to: false))).thenReturn(keys[6].publicKey)
-            when(mock.publicKey(account: equal(to: 1), index: equal(to: 0), external: equal(to: true))).thenReturn(keys[7].publicKey)
-            when(mock.publicKey(account: equal(to: 1), index: equal(to: 1), external: equal(to: true))).thenReturn(keys[8].publicKey)
+            when(mock.publicKeys(account: 0, indices: equal(to: UInt32(2)..<UInt32(3)), external: false)).thenReturn([keys[2].publicKey])
+            when(mock.publicKeys(account: 0, indices: equal(to: UInt32(0)..<UInt32(2)), external: true)).thenReturn([keys[3].publicKey, keys[4].publicKey])
+            when(mock.publicKeys(account: 1, indices: equal(to: UInt32(0)..<UInt32(2)), external: false)).thenReturn([keys[5].publicKey, keys[6].publicKey])
+            when(mock.publicKeys(account: 1, indices: equal(to: UInt32(0)..<UInt32(2)), external: true)).thenReturn([keys[7].publicKey, keys[8].publicKey])
         }
 
         try! manager.fillGap()
-        verify(mockHDWallet, times(1)).publicKey(account: equal(to: 0), index: any(), external: equal(to: false))
-        verify(mockHDWallet, times(2)).publicKey(account: equal(to: 1), index: any(), external: equal(to: false))
-        verify(mockHDWallet, times(2)).publicKey(account: equal(to: 0), index: any(), external: equal(to: true))
-        verify(mockHDWallet, times(2)).publicKey(account: equal(to: 1), index: any(), external: equal(to: true))
+
+        verify(mockHDWallet).publicKeys(account: equal(to: 0), indices: equal(to: UInt32(2)..<UInt32(3)), external: equal(to: false))
+        verify(mockHDWallet).publicKeys(account: equal(to: 0), indices: equal(to: UInt32(0)..<UInt32(2)), external: equal(to: true))
+        verify(mockHDWallet).publicKeys(account: equal(to: 1), indices: equal(to: UInt32(0)..<UInt32(2)), external: equal(to: false))
+        verify(mockHDWallet).publicKeys(account: equal(to: 1), indices: equal(to: UInt32(0)..<UInt32(2)), external: equal(to: true))
 
         verify(mockStorage).add(publicKeys: equal(to: [keys[2].publicKey]))
         verify(mockStorage).add(publicKeys: equal(to: [keys[3].publicKey, keys[4].publicKey]))
@@ -173,15 +171,13 @@ class PublicKeyManagerTests: XCTestCase {
         }
         stub(mockHDWallet) { mock in
             when(mock.gapLimit.get).thenReturn(2)
-            when(mock.publicKey(account: equal(to: 0), index: equal(to: 0), external: equal(to: false))).thenReturn(keys[0].publicKey)
-            when(mock.publicKey(account: equal(to: 0), index: equal(to: 1), external: equal(to: false))).thenReturn(keys[1].publicKey)
-            when(mock.publicKey(account: equal(to: 0), index: equal(to: 0), external: equal(to: true))).thenReturn(keys[2].publicKey)
-            when(mock.publicKey(account: equal(to: 0), index: equal(to: 1), external: equal(to: true))).thenReturn(keys[3].publicKey)
+            when(mock.publicKeys(account: 0, indices: equal(to: UInt32(0)..<UInt32(2)), external: false)).thenReturn([keys[0].publicKey, keys[1].publicKey])
+            when(mock.publicKeys(account: 0, indices: equal(to: UInt32(0)..<UInt32(2)), external: true)).thenReturn([keys[2].publicKey, keys[3].publicKey])
         }
 
         try! manager.fillGap()
-        verify(mockHDWallet, times(2)).publicKey(account: equal(to: 0), index: any(), external: equal(to: false))
-        verify(mockHDWallet, times(2)).publicKey(account: equal(to: 0), index: any(), external: equal(to: true))
+        verify(mockHDWallet).publicKeys(account: equal(to: 0), indices: equal(to: UInt32(0)..<UInt32(2)), external: equal(to: false))
+        verify(mockHDWallet).publicKeys(account: equal(to: 0), indices: equal(to: UInt32(0)..<UInt32(2)), external: equal(to: true))
         verify(mockHDWallet, never()).publicKey(account: equal(to: 1), index: any(), external: any())
 
         verify(mockStorage).add(publicKeys: equal(to: [keys[0].publicKey, keys[1].publicKey]))
@@ -206,19 +202,17 @@ class PublicKeyManagerTests: XCTestCase {
         }
         stub(mockHDWallet) { mock in
             when(mock.gapLimit.get).thenReturn(2)
-            when(mock.publicKey(account: equal(to: 0), index: equal(to: 1), external: equal(to: false))).thenReturn(keys[1].publicKey)
-            when(mock.publicKey(account: equal(to: 0), index: equal(to: 2), external: equal(to: false))).thenReturn(keys[2].publicKey)
-            when(mock.publicKey(account: equal(to: 0), index: equal(to: 0), external: equal(to: true))).thenReturn(keys[3].publicKey)
-            when(mock.publicKey(account: equal(to: 0), index: equal(to: 1), external: equal(to: true))).thenReturn(keys[4].publicKey)
-            when(mock.publicKey(account: equal(to: 1), index: equal(to: 0), external: equal(to: false))).thenReturn(keys[5].publicKey)
-            when(mock.publicKey(account: equal(to: 1), index: equal(to: 1), external: equal(to: false))).thenReturn(keys[6].publicKey)
-            when(mock.publicKey(account: equal(to: 1), index: equal(to: 0), external: equal(to: true))).thenReturn(keys[7].publicKey)
-            when(mock.publicKey(account: equal(to: 1), index: equal(to: 1), external: equal(to: true))).thenReturn(keys[8].publicKey)
+            when(mock.publicKeys(account: 0, indices: equal(to: UInt32(1)..<UInt32(3)), external: false)).thenReturn([keys[1].publicKey, keys[2].publicKey])
+            when(mock.publicKeys(account: 0, indices: equal(to: UInt32(0)..<UInt32(2)), external: true)).thenReturn([keys[3].publicKey, keys[4].publicKey])
+            when(mock.publicKeys(account: 1, indices: equal(to: UInt32(0)..<UInt32(2)), external: false)).thenReturn([keys[5].publicKey, keys[6].publicKey])
+            when(mock.publicKeys(account: 1, indices: equal(to: UInt32(0)..<UInt32(2)), external: true)).thenReturn([keys[7].publicKey, keys[8].publicKey])
         }
 
         try! manager.fillGap()
-        verify(mockHDWallet, times(2)).publicKey(account: equal(to: 0), index: any(), external: equal(to: false))
-        verify(mockHDWallet, times(2)).publicKey(account: equal(to: 0), index: any(), external: equal(to: true))
+        verify(mockHDWallet).publicKeys(account: equal(to: 0), indices: equal(to: UInt32(1)..<UInt32(3)), external: equal(to: false))
+        verify(mockHDWallet).publicKeys(account: equal(to: 0), indices: equal(to: UInt32(0)..<UInt32(2)), external: equal(to: true))
+        verify(mockHDWallet).publicKeys(account: equal(to: 1), indices: equal(to: UInt32(0)..<UInt32(2)), external: equal(to: false))
+        verify(mockHDWallet).publicKeys(account: equal(to: 1), indices: equal(to: UInt32(0)..<UInt32(2)), external: equal(to: true))
 
         verify(mockStorage).add(publicKeys: equal(to: [keys[1].publicKey, keys[2].publicKey]))
         verify(mockStorage).add(publicKeys: equal(to: [keys[3].publicKey, keys[4].publicKey]))
@@ -231,6 +225,7 @@ class PublicKeyManagerTests: XCTestCase {
             PublicKeyWithUsedState(publicKey: getPublicKey(withAccount: 0, index: 2, chain: .internal), used: true),
             PublicKeyWithUsedState(publicKey: getPublicKey(withAccount: 0, index: 0, chain: .external), used: false),
             PublicKeyWithUsedState(publicKey: getPublicKey(withAccount: 0, index: 1, chain: .external), used: true),
+
             PublicKeyWithUsedState(publicKey: getPublicKey(withAccount: 0, index: 3, chain: .internal), used: false),
             PublicKeyWithUsedState(publicKey: getPublicKey(withAccount: 0, index: 2, chain: .external), used: false),
             PublicKeyWithUsedState(publicKey: getPublicKey(withAccount: 1, index: 0, chain: .internal), used: false),
@@ -244,17 +239,17 @@ class PublicKeyManagerTests: XCTestCase {
         }
         stub(mockHDWallet) { mock in
             when(mock.gapLimit.get).thenReturn(1)
-            when(mock.publicKey(account: equal(to: 0), index: equal(to: 3), external: equal(to: false))).thenReturn(keys[5].publicKey)
-            when(mock.publicKey(account: equal(to: 0), index: equal(to: 2), external: equal(to: true))).thenReturn(keys[6].publicKey)
-            when(mock.publicKey(account: equal(to: 1), index: equal(to: 0), external: equal(to: false))).thenReturn(keys[7].publicKey)
-            when(mock.publicKey(account: equal(to: 1), index: equal(to: 1), external: equal(to: false))).thenReturn(keys[8].publicKey)
-            when(mock.publicKey(account: equal(to: 1), index: equal(to: 0), external: equal(to: true))).thenReturn(keys[9].publicKey)
-            when(mock.publicKey(account: equal(to: 1), index: equal(to: 1), external: equal(to: true))).thenReturn(keys[10].publicKey)
+            when(mock.publicKeys(account: 0, indices: equal(to: UInt32(3)..<UInt32(4)), external: false)).thenReturn([keys[5].publicKey])
+            when(mock.publicKeys(account: 0, indices: equal(to: UInt32(2)..<UInt32(3)), external: true)).thenReturn([keys[6].publicKey])
+            when(mock.publicKeys(account: 1, indices: equal(to: UInt32(0)..<UInt32(1)), external: false)).thenReturn([keys[7].publicKey])
+            when(mock.publicKeys(account: 1, indices: equal(to: UInt32(0)..<UInt32(1)), external: true)).thenReturn([keys[9].publicKey])
         }
 
         try! manager.fillGap()
-        verify(mockHDWallet, times(1)).publicKey(account: equal(to: 0), index: any(), external: equal(to: false))
-        verify(mockHDWallet, times(1)).publicKey(account: equal(to: 0), index: any(), external: equal(to: true))
+        verify(mockHDWallet).publicKeys(account: equal(to: 0), indices: equal(to: UInt32(3)..<UInt32(4)), external: equal(to: false))
+        verify(mockHDWallet).publicKeys(account: equal(to: 0), indices: equal(to: UInt32(2)..<UInt32(3)), external: equal(to: true))
+        verify(mockHDWallet).publicKeys(account: equal(to: 1), indices: equal(to: UInt32(0)..<UInt32(1)), external: equal(to: false))
+        verify(mockHDWallet).publicKeys(account: equal(to: 1), indices: equal(to: UInt32(0)..<UInt32(1)), external: equal(to: true))
 
         verify(mockStorage).add(publicKeys: equal(to: [keys[5].publicKey]))
         verify(mockStorage).add(publicKeys: equal(to: [keys[6].publicKey]))

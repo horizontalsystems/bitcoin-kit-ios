@@ -8,8 +8,6 @@ import RxSwift
 class InitialSyncerTests: QuickSpec {
     override func spec() {
         let mockStorage = MockIStorage()
-        let mockListener = MockISyncStateListener()
-        let mockStateManager = MockIStateManager()
         let mockBlockDiscovery = MockIBlockDiscovery()
         let mockAddressManager = MockIPublicKeyManager()
         let mockDelegate = MockIInitialSyncerDelegate()
@@ -20,16 +18,13 @@ class InitialSyncerTests: QuickSpec {
             stub(mockStorage) { mock in
                 when(mock.add(blockHashes: any())).thenDoNothing()
             }
-            stub(mockListener) { mock in
-                when(mock.syncStarted()).thenDoNothing()
-                when(mock.syncStopped()).thenDoNothing()
-            }
             stub(mockDelegate) { mock in
-                when(mock.syncingFinished()).thenDoNothing()
+                when(mock.onSyncSuccess()).thenDoNothing()
+                when(mock.onSyncFailed(error: any())).thenDoNothing()
             }
 
             syncer = InitialSyncer(
-                    storage: mockStorage, listener: mockListener, stateManager: mockStateManager, blockDiscovery: mockBlockDiscovery,
+                    storage: mockStorage, blockDiscovery: mockBlockDiscovery,
                     publicKeyManager: mockAddressManager, async: false
             )
 
@@ -37,30 +32,12 @@ class InitialSyncerTests: QuickSpec {
         }
 
         afterEach {
-            reset(mockStorage, mockListener, mockStateManager, mockBlockDiscovery, mockAddressManager, mockDelegate)
+            reset(mockStorage, mockBlockDiscovery, mockAddressManager, mockDelegate)
 
             syncer = nil
         }
 
         describe("#sync") {
-            context("when already synced") {
-                beforeEach {
-                    stub(mockStateManager) { mock in
-                        when(mock.restored.get).thenReturn(true)
-                    }
-
-                    syncer.sync()
-                }
-
-                it("triggers #syncingFinished on delegate") {
-                    verify(mockDelegate).syncingFinished()
-                }
-
-                it("doesn't trigger #syncStarted on listener") {
-                    verify(mockListener, never()).syncStarted()
-                }
-            }
-
             context("when not synced yet") {
                 let internalKeys = [PublicKey(withAccount: 0, index: 0, external: true, hdPublicKeyData: Data())]
                 let externalKeys = [PublicKey(withAccount: 0, index: 0, external: false, hdPublicKeyData: Data())]
@@ -69,25 +46,18 @@ class InitialSyncerTests: QuickSpec {
                 let internalBlockHashes = [blockHash0, blockHash1]
                 let externalBlockHashes = [blockHash1]
 
-                beforeEach {
-                    stub(mockStateManager) { mock in
-                        when(mock.restored.get).thenReturn(false)
-                    }
-                }
-
                 context("when blockDiscovery fails to fetch block hashes") {
                     beforeEach {
                         stub(mockBlockDiscovery) { mock in
-                            when(mock.discoverBlockHashes(account: 0, external: true)).thenReturn(Observable.error(ApiError.noConnection(url: "")))
-                            when(mock.discoverBlockHashes(account: 0, external: false)).thenReturn(Observable.just((externalKeys, externalBlockHashes)))
+                            when(mock.discoverBlockHashes(account: 0, external: true)).thenReturn(Single.error(BitcoinCore.StateError.notStarted))
+                            when(mock.discoverBlockHashes(account: 0, external: false)).thenReturn(Single.just((externalKeys, externalBlockHashes)))
                         }
 
                         syncer.sync()
                     }
 
-                    it("triggers #syncStopped on listener") {
-                        verify(mockListener).syncStarted()
-                        verify(mockListener).syncStopped()
+                    it("triggers #onSyncFailed on delegate") {
+                        verify(mockDelegate).onSyncFailed(error: any())
                     }
 
                     it("discovers block hashes and used public keys from blockDiscovery for accounts 0") {
@@ -101,25 +71,21 @@ class InitialSyncerTests: QuickSpec {
 
                 context("when blockDiscovery succeeds") {
                     beforeEach {
-                        stub(mockStateManager) { mock in
-                            when(mock.restored.set(any())).thenDoNothing()
-                        }
                         stub(mockAddressManager) { mock in
                             when(mock.addKeys(keys: any())).thenDoNothing()
                         }
                         stub(mockBlockDiscovery) { mock in
-                            when(mock.discoverBlockHashes(account: 0, external: true)).thenReturn(Observable.just((internalKeys, internalBlockHashes)))
-                            when(mock.discoverBlockHashes(account: 0, external: false)).thenReturn(Observable.just((externalKeys, externalBlockHashes)))
-                            when(mock.discoverBlockHashes(account: 1, external: true)).thenReturn(Observable.just(([], [])))
-                            when(mock.discoverBlockHashes(account: 1, external: false)).thenReturn(Observable.just(([], [])))
+                            when(mock.discoverBlockHashes(account: 0, external: true)).thenReturn(Single.just((internalKeys, internalBlockHashes)))
+                            when(mock.discoverBlockHashes(account: 0, external: false)).thenReturn(Single.just((externalKeys, externalBlockHashes)))
+                            when(mock.discoverBlockHashes(account: 1, external: true)).thenReturn(Single.just(([], [])))
+                            when(mock.discoverBlockHashes(account: 1, external: false)).thenReturn(Single.just(([], [])))
                         }
 
                         syncer.sync()
                     }
 
-                    it("triggers #syncStarted on listener") {
-                        verify(mockListener).syncStarted()
-                        verifyNoMoreInteractions(mockListener)
+                    it("triggers #onSyncSuccess on delegate") {
+                        verify(mockDelegate).onSyncSuccess()
                     }
 
                     it("discovers block hashes and used public keys from blockDiscovery accounts 0 and 1") {
@@ -139,11 +105,6 @@ class InitialSyncerTests: QuickSpec {
                     it("saves discovered unique block hashes in storage") {
                         verify(mockStorage).add(blockHashes: equal(to: [blockHash0, blockHash1]))
                         verifyNoMoreInteractions(mockStorage)
-                    }
-
-                    it("triggers #syncingFinished on delegate and set restored state") {
-                        verify(mockDelegate).syncingFinished()
-                        verify(mockStateManager).restored.set(true)
                     }
                 }
             }

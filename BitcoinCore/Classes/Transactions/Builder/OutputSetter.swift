@@ -29,7 +29,7 @@ extension OutputSetter: IOutputSetter {
                 data += Data([key]) + value
             }
 
-            outputs.append(factory.lockingOutput(data: data))
+            outputs.append(factory.nullDataOutput(data: data))
         }
 
         let sorted = outputSorterFactory.sorter(for: sortType).sort(outputs: outputs)

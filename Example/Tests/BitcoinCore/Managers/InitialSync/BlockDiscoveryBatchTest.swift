@@ -46,17 +46,16 @@ class BlockDiscoveryBatchTest: XCTestCase {
 
     func testFetchFromApi() {
         stub(mockWallet) { mock in
-            for i in 0..<5 {
-                when(mock.publicKey(account: 0, index: i, external: true)).thenReturn(publicKeys[i])
-            }
+            when(mock.publicKeys(account: 0, indices: equal(to: UInt32(0)..<UInt32(3)), external: true)).thenReturn(Array(publicKeys[0..<3]))
+            when(mock.publicKeys(account: 0, indices: equal(to: UInt32(3)..<UInt32(5)), external: true)).thenReturn(Array(publicKeys[3..<5]))
         }
 
         let lastUsedIndex = 1
         let blockHash = BlockHash(headerHashReversedHex: "1234", height: 1234, sequence: 0)!
 
         stub(mockBlockHashFetcher) { mock in
-            when(mock.getBlockHashes(publicKeys: equal(to: [publicKeys[0], publicKeys[1], publicKeys[2]]))).thenReturn(Observable.just(([blockHash], lastUsedIndex)))
-            when(mock.getBlockHashes(publicKeys: equal(to: [publicKeys[3], publicKeys[4]]))).thenReturn(Observable.just(([], -1)))
+            when(mock.getBlockHashes(publicKeys: equal(to: [publicKeys[0], publicKeys[1], publicKeys[2]]))).thenReturn(Single.just(([blockHash], lastUsedIndex)))
+            when(mock.getBlockHashes(publicKeys: equal(to: [publicKeys[3], publicKeys[4]]))).thenReturn(Single.just(([], -1)))
         }
 
         let resultObservable = blockDiscovery.discoverBlockHashes(account: 0, external: true)
