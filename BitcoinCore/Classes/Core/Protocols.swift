@@ -257,7 +257,7 @@ protocol IFactory {
     func transaction(version: Int, lockTime: Int) -> Transaction
     func inputToSign(withPreviousOutput: UnspentOutput, script: Data, sequence: Int) -> InputToSign
     func output(withIndex index: Int, address: Address, value: Int, publicKey: PublicKey?) -> Output
-    func lockingOutput(data: Data) -> Output
+    func nullDataOutput(data: Data) -> Output
     func bloomFilter(withElements: [Data]) -> BloomFilter
 }
 

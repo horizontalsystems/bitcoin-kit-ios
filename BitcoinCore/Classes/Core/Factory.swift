@@ -36,7 +36,7 @@ class Factory: IFactory {
         Output(withValue: value, index: index, lockingScript: address.lockingScript, type: address.scriptType, address: address.stringValue, keyHash: address.keyHash, publicKey: publicKey)
     }
 
-    func lockingOutput(data: Data) -> Output {
+    func nullDataOutput(data: Data) -> Output {
         Output(withValue: 0, index: 0, lockingScript: data, type: .nullData)
     }
 
