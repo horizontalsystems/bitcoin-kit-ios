@@ -8,7 +8,7 @@ class BlockSyncerTests: QuickSpec {
     override func spec() {
         let mockStorage = MockIStorage()
         let mockFactory = MockIFactory()
-        let mockListener = MockISyncStateListener()
+        let mockListener = MockIBlockSyncListener()
         let mockTransactionProcessor = MockITransactionProcessor()
         let mockBlockchain = MockIBlockchain()
         let mockAddressManager = MockIPublicKeyManager()

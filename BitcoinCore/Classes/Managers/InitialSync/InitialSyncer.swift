@@ -27,25 +27,19 @@ class InitialSyncer {
     }
 
     private func sync(forAccount account: Int) {
-        let externalObservable = blockDiscovery.discoverBlockHashes(account: account, external: true).asObservable()
-        let internalObservable = blockDiscovery.discoverBlockHashes(account: account, external: false).asObservable()
-
-        var observable = Observable
-                .concat(externalObservable, internalObservable)
-                .toArray()
+        var single = blockDiscovery.discoverBlockHashes(account: account)
                 .map { array -> ([PublicKey], [BlockHash]) in
-                    let (externalKeys, externalBlockHashes) = array[0]
-                    let (internalKeys, internalBlockHashes) = array[1]
-                    let sortedUniqueBlockHashes = Array<BlockHash>(externalBlockHashes + internalBlockHashes).unique.sorted { a, b in a.height < b.height }
+                    let (keys, blockHashes) = array
+                    let sortedUniqueBlockHashes = blockHashes.unique.sorted { a, b in a.height < b.height }
 
-                    return (externalKeys + internalKeys, sortedUniqueBlockHashes)
+                    return (keys, sortedUniqueBlockHashes)
                 }
 
         if async {
-            observable = observable.subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
+            single = single.subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
         }
 
-        observable.subscribe(onSuccess: { [weak self] keys, responses in
+        single.subscribe(onSuccess: { [weak self] keys, responses in
                     self?.handle(forAccount: account, keys: keys, blockHashes: responses)
                 }, onError: { [weak self] error in
                     self?.handle(error: error)

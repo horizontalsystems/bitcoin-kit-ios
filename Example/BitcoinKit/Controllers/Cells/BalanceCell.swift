@@ -20,6 +20,7 @@ class BalanceCell: UITableViewCell {
 
         switch adapter.syncState {
         case .synced: syncStateString = "Synced!"
+        case .apiSyncing(let transactionsFound): syncStateString = "API Syncing \(transactionsFound) txs"
         case .syncing(let progress): syncStateString = "Syncing \(Int(progress * 100))%"
         case .notSynced(let error):
             syncStateString = "Not Synced"

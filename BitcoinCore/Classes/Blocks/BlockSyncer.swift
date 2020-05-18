@@ -3,7 +3,7 @@ import HsToolKit
 class BlockSyncer {
     private let storage: IStorage
 
-    private let listener: ISyncStateListener
+    private let listener: IBlockSyncListener
     private let checkpoint: Checkpoint
     private let factory: IFactory
     private let transactionProcessor: ITransactionProcessor
@@ -15,7 +15,7 @@ class BlockSyncer {
 
     private let logger: Logger?
 
-    init(storage: IStorage, checkpoint: Checkpoint, factory: IFactory, listener: ISyncStateListener, transactionProcessor: ITransactionProcessor,
+    init(storage: IStorage, checkpoint: Checkpoint, factory: IFactory, listener: IBlockSyncListener, transactionProcessor: ITransactionProcessor,
          blockchain: IBlockchain, publicKeyManager: IPublicKeyManager, hashCheckpointThreshold: Int, logger: Logger?, state: BlockSyncerState
     ) {
         self.storage = storage
@@ -95,7 +95,7 @@ extension BlockSyncer: IBlockSyncer {
     }
 
     func getBlockHashes() -> [BlockHash] {
-        return storage.blockHashesSortedBySequenceAndHeight(limit: 500)
+        storage.blockHashesSortedBySequenceAndHeight(limit: 500)
     }
 
     func getBlockLocatorHashes(peerLastBlockHeight: Int32) -> [Data] {
@@ -160,14 +160,14 @@ extension BlockSyncer: IBlockSyncer {
     }
 
     func shouldRequestBlock(withHash hash: Data) -> Bool {
-        return storage.block(byHash: hash) == nil
+        storage.block(byHash: hash) == nil
     }
 
 }
 
 extension BlockSyncer {
 
-    public static func instance(storage: IStorage, checkpoint: Checkpoint, factory: IFactory, listener: ISyncStateListener,
+    public static func instance(storage: IStorage, checkpoint: Checkpoint, factory: IFactory, listener: IBlockSyncListener,
                                 transactionProcessor: ITransactionProcessor, blockchain: IBlockchain, publicKeyManager: IPublicKeyManager,
                                 hashCheckpointThreshold: Int = 100, logger: Logger? = nil, state: BlockSyncerState = BlockSyncerState()) -> BlockSyncer {
 
