@@ -13,7 +13,7 @@ public class InitialBlockDownload {
     private var blockSyncer: IBlockSyncer
     private let peerManager: IPeerManager
     private let merkleBlockValidator: IMerkleBlockValidator
-    private let syncStateListener: ISyncStateListener
+    private let listener: IBlockSyncListener
 
     private var minMerkleBlocksCount: Double = 0
     private var minTransactionsCount: Double = 0
@@ -33,14 +33,14 @@ public class InitialBlockDownload {
     public var syncedPeers = [IPeer]()
     public var syncPeer: IPeer?
 
-    init(blockSyncer: IBlockSyncer, peerManager: IPeerManager, merkleBlockValidator: IMerkleBlockValidator, syncStateListener: ISyncStateListener,
+    init(blockSyncer: IBlockSyncer, peerManager: IPeerManager, merkleBlockValidator: IMerkleBlockValidator, listener: IBlockSyncListener,
          peersQueue: DispatchQueue = DispatchQueue(label: "io.horizontalsystems.bitcoin-core.initial-block-download", qos: .userInitiated),
          scheduler: SchedulerType = SerialDispatchQueueScheduler(qos: .background),
          logger: Logger? = nil) {
         self.blockSyncer = blockSyncer
         self.peerManager = peerManager
         self.merkleBlockValidator = merkleBlockValidator
-        self.syncStateListener = syncStateListener
+        self.listener = listener
         self.peersQueue = peersQueue
         self.logger = logger
         self.observable = subject.asObservable().observeOn(scheduler)
@@ -48,11 +48,11 @@ public class InitialBlockDownload {
     }
 
     private func syncedState(_ peer: IPeer) -> Bool {
-        return syncedStates[peer.host] ?? false
+        syncedStates[peer.host] ?? false
     }
 
     private func blockHashesSyncedState(_ peer: IPeer) -> Bool {
-        return blockHashesSyncedStates[peer.host] ?? false
+        blockHashesSyncedStates[peer.host] ?? false
     }
 
     private func assignNextSyncPeer() {
@@ -130,8 +130,8 @@ public class InitialBlockDownload {
         if blockSyncer.localDownloadedBestBlockHeight >= peer.announcedLastBlockHeight {
             // Some peers fail to send InventoryMessage within expected time
             // and become 'synced' in InitialBlockDownload without sending all of their blocks.
-            // In such case, we shouldn't call 'syncFinished'
-            syncStateListener.syncFinished()
+            // In such case, we assume not all blocks are downloaded
+            listener.blocksSyncFinished()
         }
     }
 

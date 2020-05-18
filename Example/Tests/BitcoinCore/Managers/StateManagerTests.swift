@@ -6,7 +6,7 @@ import RxSwift
 class StateManagerTests: XCTestCase {
     private var mockStorage: MockIStorage!
 
-    private var manager: StateManager!
+    private var manager: ApiSyncStateManager!
 
     override func setUp() {
         super.setUp()
@@ -17,7 +17,7 @@ class StateManagerTests: XCTestCase {
             when(mock.set(initialRestored: any())).thenDoNothing()
         }
 
-        manager = StateManager(storage: mockStorage, restoreFromApi: true)
+        manager = ApiSyncStateManager(storage: mockStorage, restoreFromApi: true)
     }
 
     override func tearDown() {
@@ -28,7 +28,7 @@ class StateManagerTests: XCTestCase {
     }
 
     func testRestored_get_newWallet() {
-        let manager = StateManager(storage: mockStorage, restoreFromApi: false)
+        let manager = ApiSyncStateManager(storage: mockStorage, restoreFromApi: false)
 
         XCTAssertTrue(manager.restored)
     }

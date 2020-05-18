@@ -1,11 +1,12 @@
 import Foundation
 
-class KitStateProvider: IKitStateProvider {
+class KitStateManager {
 
-    weak var delegate: IKitStateProviderDelegate?
+    weak var delegate: IKitStateManagerDelegate?
 
     private var initialBestBlockHeight: Int32 = 0
     private var currentBestBlockHeight: Int32 = 0
+    private var foundTransactionsCount: Int = 0
 
     private(set) var syncState: BitcoinCore.KitState = .notSynced(error: BitcoinCore.StateError.notStarted) {
         didSet {
@@ -15,24 +16,54 @@ class KitStateProvider: IKitStateProvider {
         }
     }
 
+    var syncIdle: Bool {
+        guard case .notSynced(error: let error) = syncState else {
+            return false
+        }
+
+        if let stateError = error as? BitcoinCore.StateError, stateError == .notStarted {
+            return false
+        }
+
+        return true
+    }
+
 }
 
-extension KitStateProvider: ISyncStateListener {
+extension KitStateManager: IKitStateManager {
 
-    func syncStarted() {
+    func setApiSyncStarted() {
+        syncState = .apiSyncing(transactions: foundTransactionsCount)
+    }
+
+    func setBlocksSyncStarted() {
         syncState = .syncing(progress: 0)
     }
 
-    func syncStopped(error: Error) {
+    func setSyncFailed(error: Error) {
         syncState = .notSynced(error: error)
     }
+
+}
+
+extension KitStateManager: IApiSyncListener {
+
+    func transactionsFound(count: Int) {
+        foundTransactionsCount += count
+        syncState = .apiSyncing(transactions: foundTransactionsCount)
+    }
+
+}
+
+extension KitStateManager: IBlockSyncListener {
+
 
     func initialBestBlockHeightUpdated(height: Int32) {
         initialBestBlockHeight = height
         currentBestBlockHeight = height
     }
 
-    func syncFinished() {
+    func blocksSyncFinished() {
         syncState = .synced
     }
 

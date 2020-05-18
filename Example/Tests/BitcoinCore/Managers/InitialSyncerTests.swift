@@ -49,8 +49,7 @@ class InitialSyncerTests: QuickSpec {
                 context("when blockDiscovery fails to fetch block hashes") {
                     beforeEach {
                         stub(mockBlockDiscovery) { mock in
-                            when(mock.discoverBlockHashes(account: 0, external: true)).thenReturn(Single.error(BitcoinCore.StateError.notStarted))
-                            when(mock.discoverBlockHashes(account: 0, external: false)).thenReturn(Single.just((externalKeys, externalBlockHashes)))
+                            when(mock.discoverBlockHashes(account: 0)).thenReturn(Single.error(BitcoinCore.StateError.notStarted))
                         }
 
                         syncer.sync()
@@ -61,11 +60,8 @@ class InitialSyncerTests: QuickSpec {
                     }
 
                     it("discovers block hashes and used public keys from blockDiscovery for accounts 0") {
-                        verify(mockBlockDiscovery).discoverBlockHashes(account: 0, external: true)
-                        verify(mockBlockDiscovery).discoverBlockHashes(account: 0, external: false)
-
-                        verify(mockBlockDiscovery, never()).discoverBlockHashes(account: 1, external: true)
-                        verify(mockBlockDiscovery, never()).discoverBlockHashes(account: 1, external: false)
+                        verify(mockBlockDiscovery).discoverBlockHashes(account: 0)
+                        verify(mockBlockDiscovery, never()).discoverBlockHashes(account: 1)
                     }
                 }
 
@@ -75,10 +71,8 @@ class InitialSyncerTests: QuickSpec {
                             when(mock.addKeys(keys: any())).thenDoNothing()
                         }
                         stub(mockBlockDiscovery) { mock in
-                            when(mock.discoverBlockHashes(account: 0, external: true)).thenReturn(Single.just((internalKeys, internalBlockHashes)))
-                            when(mock.discoverBlockHashes(account: 0, external: false)).thenReturn(Single.just((externalKeys, externalBlockHashes)))
-                            when(mock.discoverBlockHashes(account: 1, external: true)).thenReturn(Single.just(([], [])))
-                            when(mock.discoverBlockHashes(account: 1, external: false)).thenReturn(Single.just(([], [])))
+                            when(mock.discoverBlockHashes(account: 0)).thenReturn(Single.just((internalKeys + externalKeys, internalBlockHashes + externalBlockHashes)))
+                            when(mock.discoverBlockHashes(account: 1)).thenReturn(Single.just(([], [])))
                         }
 
                         syncer.sync()
@@ -89,11 +83,8 @@ class InitialSyncerTests: QuickSpec {
                     }
 
                     it("discovers block hashes and used public keys from blockDiscovery accounts 0 and 1") {
-                        verify(mockBlockDiscovery).discoverBlockHashes(account: 0, external: true)
-                        verify(mockBlockDiscovery).discoverBlockHashes(account: 0, external: false)
-
-                        verify(mockBlockDiscovery).discoverBlockHashes(account: 1, external: true)
-                        verify(mockBlockDiscovery).discoverBlockHashes(account: 1, external: false)
+                        verify(mockBlockDiscovery).discoverBlockHashes(account: 0)
+                        verify(mockBlockDiscovery).discoverBlockHashes(account: 1)
                     }
 
                     it("adds discovered used public keys to addressManager") {

@@ -7,17 +7,15 @@ class SyncManager {
     private let reachabilityManager: IReachabilityManager
     private let initialSyncer: IInitialSyncer
     private let peerGroup: IPeerGroup
-    private let listener: ISyncStateListener
-    private let stateManager: IStateManager
+    private let stateManager: IKitStateManager
+    private let apiSyncStateManager: IApiSyncStateManager
 
-    private var state: State = .stopped
-
-    init(reachabilityManager: IReachabilityManager, initialSyncer: IInitialSyncer, peerGroup: IPeerGroup, listener: ISyncStateListener, stateManager: IStateManager) {
+    init(reachabilityManager: IReachabilityManager, initialSyncer: IInitialSyncer, peerGroup: IPeerGroup, stateManager: IKitStateManager, apiSyncStateManager: IApiSyncStateManager) {
         self.reachabilityManager = reachabilityManager
         self.initialSyncer = initialSyncer
         self.peerGroup = peerGroup
-        self.listener = listener
         self.stateManager = stateManager
+        self.apiSyncStateManager = apiSyncStateManager
 
         reachabilityManager.reachabilityObservable
                 .observeOn(ConcurrentDispatchQueueScheduler(qos: .background))
@@ -36,32 +34,33 @@ class SyncManager {
     }
 
     private func onReachable() {
-        if state == .idle {
+        if stateManager.syncIdle {
             startSync()
         }
     }
 
     private func onUnreachable() {
-        if state == .peerGroupRunning {
+        if case .syncing(_) = stateManager.syncState {
             peerGroup.stop()
-            state = .idle
-            listener.syncStopped(error: ReachabilityManager.ReachabilityError.notReachable)
+            stateManager.setSyncFailed(error: ReachabilityManager.ReachabilityError.notReachable)
         }
     }
 
     private func startPeerGroup() {
-        state = .peerGroupRunning
+        stateManager.setBlocksSyncStarted()
         peerGroup.start()
     }
 
-    private func startSync() {
-        listener.syncStarted()
+    private func startInitialSync() {
+        stateManager.setApiSyncStarted()
+        initialSyncer.sync()
+    }
 
-        if stateManager.restored {
+    private func startSync() {
+        if apiSyncStateManager.restored {
             startPeerGroup()
         } else {
-            state = .initialSyncing
-            initialSyncer.sync()
+            startInitialSync()
         }
     }
 
@@ -70,13 +69,12 @@ class SyncManager {
 extension SyncManager: ISyncManager {
 
     func start() {
-        guard state == .stopped || state == .idle else {
+        guard case .notSynced(_) = stateManager.syncState else {
             return
         }
 
         guard reachabilityManager.isReachable else {
-            state = .idle
-            listener.syncStopped(error: ReachabilityManager.ReachabilityError.notReachable)
+            stateManager.setSyncFailed(error: ReachabilityManager.ReachabilityError.notReachable)
             return
         }
 
@@ -84,16 +82,15 @@ extension SyncManager: ISyncManager {
     }
 
     func stop() {
-        switch state {
-        case .initialSyncing:
+        switch stateManager.syncState {
+        case .apiSyncing:
             initialSyncer.terminate()
-        case .peerGroupRunning:
+        case .syncing:
             peerGroup.stop()
         default: ()
         }
 
-        state = .stopped
-        listener.syncStopped(error: BitcoinCore.StateError.notStarted)
+        stateManager.setSyncFailed(error: BitcoinCore.StateError.notStarted)
     }
 
 }
@@ -101,24 +98,12 @@ extension SyncManager: ISyncManager {
 extension SyncManager: IInitialSyncerDelegate {
 
     func onSyncSuccess() {
-        stateManager.restored = true
+        apiSyncStateManager.restored = true
         startPeerGroup()
     }
 
     func onSyncFailed(error: Error) {
-        state = .idle
-        listener.syncStopped(error: error)
-    }
-
-}
-
-extension SyncManager {
-
-    enum State {
-        case stopped
-        case idle
-        case initialSyncing
-        case peerGroupRunning
+        stateManager.setSyncFailed(error: error)
     }
 
 }

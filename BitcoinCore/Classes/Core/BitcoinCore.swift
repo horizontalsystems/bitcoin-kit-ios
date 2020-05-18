@@ -12,7 +12,7 @@ public class BitcoinCore {
     private let addressConverter: AddressConverterChain
     private let restoreKeyConverterChain: RestoreKeyConverterChain
     private let unspentOutputSelector: UnspentOutputSelectorChain
-    private let kitStateProvider: IKitStateProvider & ISyncStateListener
+    private let kitStateManager: IKitStateManager
 
     private let transactionCreator: ITransactionCreator
     private let transactionFeeCalculator: ITransactionFeeCalculator
@@ -88,7 +88,7 @@ public class BitcoinCore {
          peerGroup: IPeerGroup, initialBlockDownload: IInitialBlockDownload, bloomFilterLoader: BloomFilterLoader,
          syncedReadyPeerManager: ISyncedReadyPeerManager, transactionSyncer: ITransactionSyncer,
          publicKeyManager: IPublicKeyManager, addressConverter: AddressConverterChain, restoreKeyConverterChain: RestoreKeyConverterChain,
-         unspentOutputSelector: UnspentOutputSelectorChain, kitStateProvider: IKitStateProvider & ISyncStateListener,
+         unspentOutputSelector: UnspentOutputSelectorChain, kitStateManager: IKitStateManager,
          transactionCreator: ITransactionCreator, transactionFeeCalculator: ITransactionFeeCalculator, dustCalculator: IDustCalculator,
          paymentAddressParser: IPaymentAddressParser, networkMessageParser: NetworkMessageParser, networkMessageSerializer: NetworkMessageSerializer,
          syncManager: SyncManager, pluginManager: IPluginManager, watchedTransactionManager: IWatchedTransactionManager, bip: Bip,
@@ -105,7 +105,7 @@ public class BitcoinCore {
         self.addressConverter = addressConverter
         self.restoreKeyConverterChain = restoreKeyConverterChain
         self.unspentOutputSelector = unspentOutputSelector
-        self.kitStateProvider = kitStateProvider
+        self.kitStateManager = kitStateManager
         self.transactionCreator = transactionCreator
         self.transactionFeeCalculator = transactionFeeCalculator
         self.dustCalculator = dustCalculator
@@ -148,7 +148,7 @@ extension BitcoinCore {
     }
 
     public var syncState: BitcoinCore.KitState {
-        kitStateProvider.syncState
+        kitStateManager.syncState
     }
 
     public func transactions(fromUid: String? = nil, limit: Int? = nil) -> Single<[TransactionInfo]> {
@@ -302,7 +302,7 @@ extension BitcoinCore: IDataProviderDelegate {
 
 }
 
-extension BitcoinCore: IKitStateProviderDelegate {
+extension BitcoinCore: IKitStateManagerDelegate {
     func handleKitStateUpdate(state: KitState) {
         delegateQueue.async { [weak self] in
             self?.delegate?.kitStateUpdated(state: state)
@@ -332,6 +332,7 @@ extension BitcoinCore {
 
     public enum KitState {
         case synced
+        case apiSyncing(transactions: Int)
         case syncing(progress: Double)
         case notSynced(error: Error)
     }
@@ -356,10 +357,12 @@ extension BitcoinCore.KitState: Equatable {
         switch (lhs, rhs) {
         case (.synced, .synced):
             return true
-        case (.notSynced(let lhsError), .notSynced(let rhsError)):
-            return "\(lhsError)" == "\(rhsError)"
+        case (.apiSyncing(transactions: let leftCount), .apiSyncing(transactions: let rightCount)):
+            return leftCount == rightCount
         case (.syncing(progress: let leftProgress), .syncing(progress: let rightProgress)):
             return leftProgress == rightProgress
+        case (.notSynced(let lhsError), .notSynced(let rhsError)):
+            return "\(lhsError)" == "\(rhsError)"
         default:
             return false
         }

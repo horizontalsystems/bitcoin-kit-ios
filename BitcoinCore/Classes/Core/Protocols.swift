@@ -45,12 +45,12 @@ protocol IPeerAddressManager: class {
     func markConnected(peer: IPeer)
 }
 
-protocol IStateManager: AnyObject {
+protocol IApiSyncStateManager: AnyObject {
     var restored: Bool { get set }
 }
 
 protocol IBlockDiscovery {
-    func discoverBlockHashes(account: Int, external: Bool) -> Single<([PublicKey], [BlockHash])>
+    func discoverBlockHashes(account: Int) -> Single<([PublicKey], [BlockHash])>
 }
 
 public protocol IStorage {
@@ -232,10 +232,12 @@ protocol IConnectionTimeoutManager: class {
     func timePeriodPassed(peer: IPeer)
 }
 
-protocol ISyncStateListener: class {
-    func syncFinished()
-    func syncStarted()
-    func syncStopped(error: Error)
+protocol IApiSyncListener {
+    func transactionsFound(count: Int)
+}
+
+protocol IBlockSyncListener {
+    func blocksSyncFinished()
     func initialBestBlockHeightUpdated(height: Int32)
     func currentBestBlockHeightUpdated(height: Int32, maxBlockHeight: Int32)
 }
@@ -281,7 +283,7 @@ public protocol IHasher {
 }
 
 protocol IBlockHashFetcher {
-    func getBlockHashes(publicKeys: [PublicKey]) -> Single<(responses: [BlockHash], lastUsedIndex: Int)>
+    func getBlockHashes(externalKeys: [PublicKey], internalKeys: [PublicKey]) -> Single<BlockHashesResponse>
 }
 
 protocol IBlockHashFetcherHelper {
@@ -427,12 +429,17 @@ public protocol IBlockSyncer: class {
     func shouldRequestBlock(withHash hash: Data) -> Bool
 }
 
-protocol IKitStateProvider: class {
+protocol IKitStateManager: class {
     var syncState: BitcoinCore.KitState { get }
-    var delegate: IKitStateProviderDelegate? { get set }
+    var syncIdle: Bool { get }
+    var delegate: IKitStateManagerDelegate? { get set }
+
+    func setApiSyncStarted()
+    func setBlocksSyncStarted()
+    func setSyncFailed(error: Error)
 }
 
-protocol IKitStateProviderDelegate: class {
+protocol IKitStateManagerDelegate: class {
     func handleKitStateUpdate(state: BitcoinCore.KitState)
 }
 

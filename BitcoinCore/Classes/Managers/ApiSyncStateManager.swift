@@ -1,4 +1,4 @@
-class StateManager {
+class ApiSyncStateManager {
     private let storage: IStorage
     private let restoreFromApi: Bool
 
@@ -9,7 +9,7 @@ class StateManager {
 
 }
 
-extension StateManager: IStateManager {
+extension ApiSyncStateManager: IApiSyncStateManager {
 
     var restored: Bool {
         get {
