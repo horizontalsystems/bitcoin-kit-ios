@@ -235,7 +235,8 @@ extension TransactionProcessor: ITransactionProcessor {
             return InvalidTransaction(
                     uid: transaction.uid, dataHash: transaction.dataHash, version: transaction.version, lockTime: transaction.lockTime, timestamp: transaction.timestamp,
                     order: transaction.order, blockHash: transaction.blockHash, isMine: transaction.isMine, isOutgoing: transaction.isOutgoing,
-                    status: transaction.status, segWit: transaction.segWit, conflictingTxHash: transaction.conflictingTxHash, transactionInfoJson: transactionInfoJson
+                    status: transaction.status, segWit: transaction.segWit, conflictingTxHash: transaction.conflictingTxHash,
+                    transactionInfoJson: transactionInfoJson, rawTransaction: transactionFullInfo.rawTransaction
             )
         }
 

@@ -97,7 +97,6 @@ public protocol IStorage {
 
     func transactionExists(byHash: Data) -> Bool
     func transaction(byHash: Data) -> Transaction?
-    func fullTransaction(byHash: Data) -> FullTransaction?
     func invalidTransaction(byHash: Data) -> InvalidTransaction?
     func conflictingTransactions(for transaction: FullTransaction) -> [Transaction]
     func validOrInvalidTransaction(byUid: String) -> Transaction?
