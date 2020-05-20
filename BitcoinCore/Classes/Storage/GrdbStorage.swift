@@ -208,6 +208,15 @@ open class GrdbStorage {
             }
         }
 
+        migrator.registerMigration("addRawTransactionToTransactionAndInvalidTransaction") { db in
+            try db.alter(table: Transaction.databaseTableName) { t in
+                t.add(column: Transaction.Columns.rawTransaction.name, .text)
+            }
+            try db.alter(table: InvalidTransaction.databaseTableName) { t in
+                t.add(column: Transaction.Columns.rawTransaction.name, .text)
+            }
+        }
+
         return migrator
     }
 
@@ -503,10 +512,6 @@ extension GrdbStorage: IStorage {
         try! dbPool.read { db in
             try Transaction.filter(Transaction.Columns.dataHash == hash).fetchOne(db)
         }
-    }
-
-    public func fullTransaction(byHash: Data) -> FullTransaction? {
-        transaction(byHash: byHash).map { fullTransaction(transaction: $0) }
     }
 
     public func invalidTransaction(byHash hash: Data) -> InvalidTransaction? {

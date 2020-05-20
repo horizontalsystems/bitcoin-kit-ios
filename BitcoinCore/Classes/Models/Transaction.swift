@@ -17,6 +17,7 @@ public class Transaction: Record {
     public var segWit: Bool = false
     public var conflictingTxHash: Data? = nil
     public var transactionInfoJson: Data = Data()
+    public var rawTransaction: String? = nil
 
     public init(version: Int = 0, lockTime: Int = 0, timestamp: Int? = nil) {
         self.version = version
@@ -48,6 +49,7 @@ public class Transaction: Record {
         case segWit
         case conflictingTxHash
         case transactionInfoJson
+        case rawTransaction
     }
 
     required init(row: Row) {
@@ -64,6 +66,7 @@ public class Transaction: Record {
         segWit = row[Columns.segWit]
         conflictingTxHash = row[Columns.conflictingTxHash]
         transactionInfoJson = row[Columns.transactionInfoJson]
+        rawTransaction = row[Columns.rawTransaction]
 
         super.init(row: row)
     }
@@ -82,6 +85,7 @@ public class Transaction: Record {
         container[Columns.segWit] = segWit
         container[Columns.conflictingTxHash] = conflictingTxHash
         container[Columns.transactionInfoJson] = transactionInfoJson
+        container[Columns.rawTransaction] = rawTransaction
     }
 
 }

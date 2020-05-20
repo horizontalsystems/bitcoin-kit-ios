@@ -122,7 +122,8 @@ extension DataProvider: IDataProvider {
             return nil
         }
 
-        return storage.fullTransaction(byHash: hash).map { TransactionSerializer.serialize(transaction: $0).hex }
+        return storage.transactionFullInfo(byHash: hash)?.rawTransaction ??
+                storage.invalidTransaction(byHash: hash)?.rawTransaction
     }
 
 }
