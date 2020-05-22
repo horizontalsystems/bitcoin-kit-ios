@@ -3,7 +3,7 @@ import BigInt
 
 class DAAValidator: IBlockChainedValidator {
     private let largestHash = BigInt(1) << 256
-    private let consensusDaaForkHeight = 504030                             // 2017 November 13, 14:06 GMT
+    private let consensusDaaForkHeight = 504031                             // 2017 November 13, 14:06 GMT
 
     private let difficultyEncoder: IDifficultyEncoder
     private let blockHelper: IBitcoinCashBlockValidatorHelper
