@@ -1,15 +1,15 @@
 import RxSwift
 
 class BlockHashFetcher {
+    weak var listener: IApiSyncListener?
+
     private let restoreKeyConverter: IRestoreKeyConverter
     private let apiManager: ISyncTransactionApi
-    private let listener: IApiSyncListener
     private let helper: IBlockHashFetcherHelper
 
-    init(restoreKeyConverter: IRestoreKeyConverter, apiManager: ISyncTransactionApi, listener: IApiSyncListener, helper: IBlockHashFetcherHelper) {
+    init(restoreKeyConverter: IRestoreKeyConverter, apiManager: ISyncTransactionApi, helper: IBlockHashFetcherHelper) {
         self.restoreKeyConverter = restoreKeyConverter
         self.apiManager = apiManager
-        self.listener = listener
         self.helper = helper
     }
 
@@ -33,7 +33,7 @@ extension BlockHashFetcher: IBlockHashFetcher {
                 return BlockHashesResponse(blockHashes: [], externalLastUsedIndex: -1, internalLastUsedIndex: -1)
             }
 
-            self?.listener.transactionsFound(count: transactionResponses.count)
+            self?.listener?.transactionsFound(count: transactionResponses.count)
 
             let outputs = transactionResponses.flatMap { $0.txOutputs }
             let externalLastUsedIndex = self?.helper.lastUsedIndex(addresses: externalAddresses, outputs: outputs)

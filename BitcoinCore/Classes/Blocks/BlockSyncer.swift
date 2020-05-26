@@ -1,9 +1,9 @@
 import HsToolKit
 
 class BlockSyncer {
+    weak var listener: IBlockSyncListener?
     private let storage: IStorage
 
-    private let listener: IBlockSyncListener
     private let checkpoint: Checkpoint
     private let factory: IFactory
     private let transactionProcessor: ITransactionProcessor
@@ -15,7 +15,7 @@ class BlockSyncer {
 
     private let logger: Logger?
 
-    init(storage: IStorage, checkpoint: Checkpoint, factory: IFactory, listener: IBlockSyncListener, transactionProcessor: ITransactionProcessor,
+    init(storage: IStorage, checkpoint: Checkpoint, factory: IFactory, transactionProcessor: ITransactionProcessor,
          blockchain: IBlockchain, publicKeyManager: IPublicKeyManager, hashCheckpointThreshold: Int, logger: Logger?, state: BlockSyncerState
     ) {
         self.storage = storage
@@ -25,7 +25,6 @@ class BlockSyncer {
         self.blockchain = blockchain
         self.publicKeyManager = publicKeyManager
         self.hashCheckpointThreshold = hashCheckpointThreshold
-        self.listener = listener
         self.logger = logger
         self.state = state
     }
@@ -156,7 +155,7 @@ extension BlockSyncer: IBlockSyncer {
             storage.deleteBlockHash(byHash: block.headerHash)
         }
 
-        listener.currentBestBlockHeightUpdated(height: Int32(block.height), maxBlockHeight: maxBlockHeight)
+        listener?.currentBestBlockHeightUpdated(height: Int32(block.height), maxBlockHeight: maxBlockHeight)
     }
 
     func shouldRequestBlock(withHash hash: Data) -> Bool {
@@ -167,14 +166,12 @@ extension BlockSyncer: IBlockSyncer {
 
 extension BlockSyncer {
 
-    public static func instance(storage: IStorage, checkpoint: Checkpoint, factory: IFactory, listener: IBlockSyncListener,
+    public static func instance(storage: IStorage, checkpoint: Checkpoint, factory: IFactory,
                                 transactionProcessor: ITransactionProcessor, blockchain: IBlockchain, publicKeyManager: IPublicKeyManager,
                                 hashCheckpointThreshold: Int = 100, logger: Logger? = nil, state: BlockSyncerState = BlockSyncerState()) -> BlockSyncer {
 
-        let syncer = BlockSyncer(storage: storage, checkpoint: checkpoint, factory: factory, listener: listener, transactionProcessor: transactionProcessor,
+        let syncer = BlockSyncer(storage: storage, checkpoint: checkpoint, factory: factory, transactionProcessor: transactionProcessor,
                 blockchain: blockchain, publicKeyManager: publicKeyManager, hashCheckpointThreshold: hashCheckpointThreshold, logger: logger, state: state)
-
-        listener.initialBestBlockHeightUpdated(height: syncer.localDownloadedBestBlockHeight)
 
         return syncer
     }

@@ -3,19 +3,44 @@ import HsToolKit
 
 class SyncManager {
     private var disposeBag = DisposeBag()
+    weak var delegate: ISyncManagerDelegate?
 
     private let reachabilityManager: IReachabilityManager
     private let initialSyncer: IInitialSyncer
     private let peerGroup: IPeerGroup
-    private let stateManager: IKitStateManager
     private let apiSyncStateManager: IApiSyncStateManager
 
-    init(reachabilityManager: IReachabilityManager, initialSyncer: IInitialSyncer, peerGroup: IPeerGroup, stateManager: IKitStateManager, apiSyncStateManager: IApiSyncStateManager) {
+    private var initialBestBlockHeight: Int32
+    private var currentBestBlockHeight: Int32
+    private var foundTransactionsCount: Int = 0
+
+    private(set) var syncState: BitcoinCore.KitState = .notSynced(error: BitcoinCore.StateError.notStarted) {
+        didSet {
+            if !(oldValue == syncState) {
+                delegate?.kitStateUpdated(state: syncState)
+            }
+        }
+    }
+
+    private var syncIdle: Bool {
+        guard case .notSynced(error: let error) = syncState else {
+            return false
+        }
+
+        if let stateError = error as? BitcoinCore.StateError, stateError == .notStarted {
+            return false
+        }
+
+        return true
+    }
+
+    init(reachabilityManager: IReachabilityManager, initialSyncer: IInitialSyncer, peerGroup: IPeerGroup, apiSyncStateManager: IApiSyncStateManager, bestBlockHeight: Int32) {
         self.reachabilityManager = reachabilityManager
         self.initialSyncer = initialSyncer
         self.peerGroup = peerGroup
-        self.stateManager = stateManager
         self.apiSyncStateManager = apiSyncStateManager
+        self.initialBestBlockHeight = bestBlockHeight
+        self.currentBestBlockHeight = bestBlockHeight
 
         reachabilityManager.reachabilityObservable
                 .observeOn(ConcurrentDispatchQueueScheduler(qos: .background))
@@ -34,25 +59,25 @@ class SyncManager {
     }
 
     private func onReachable() {
-        if stateManager.syncIdle {
+        if syncIdle {
             startSync()
         }
     }
 
     private func onUnreachable() {
-        if case .syncing(_) = stateManager.syncState {
+        if case .syncing(_) = syncState {
             peerGroup.stop()
-            stateManager.setSyncFailed(error: ReachabilityManager.ReachabilityError.notReachable)
+            syncState = .notSynced(error: ReachabilityManager.ReachabilityError.notReachable)
         }
     }
 
     private func startPeerGroup() {
-        stateManager.setBlocksSyncStarted()
+        syncState = .syncing(progress: 0)
         peerGroup.start()
     }
 
     private func startInitialSync() {
-        stateManager.setApiSyncStarted()
+        syncState = .apiSyncing(transactions: foundTransactionsCount)
         initialSyncer.sync()
     }
 
@@ -69,12 +94,12 @@ class SyncManager {
 extension SyncManager: ISyncManager {
 
     func start() {
-        guard case .notSynced(_) = stateManager.syncState else {
+        guard case .notSynced(_) = syncState else {
             return
         }
 
         guard reachabilityManager.isReachable else {
-            stateManager.setSyncFailed(error: ReachabilityManager.ReachabilityError.notReachable)
+            syncState = .notSynced(error: ReachabilityManager.ReachabilityError.notReachable)
             return
         }
 
@@ -82,7 +107,7 @@ extension SyncManager: ISyncManager {
     }
 
     func stop() {
-        switch stateManager.syncState {
+        switch syncState {
         case .apiSyncing:
             initialSyncer.terminate()
         case .syncing:
@@ -90,7 +115,7 @@ extension SyncManager: ISyncManager {
         default: ()
         }
 
-        stateManager.setSyncFailed(error: BitcoinCore.StateError.notStarted)
+        syncState = .notSynced(error: BitcoinCore.StateError.notStarted)
     }
 
 }
@@ -103,7 +128,51 @@ extension SyncManager: IInitialSyncerDelegate {
     }
 
     func onSyncFailed(error: Error) {
-        stateManager.setSyncFailed(error: error)
+        syncState = .notSynced(error: error)
+    }
+
+}
+
+
+extension SyncManager: IApiSyncListener {
+
+    func transactionsFound(count: Int) {
+        foundTransactionsCount += count
+        syncState = .apiSyncing(transactions: foundTransactionsCount)
+    }
+
+}
+
+extension SyncManager: IBlockSyncListener {
+
+    func blocksSyncFinished() {
+        syncState = .synced
+    }
+
+    func currentBestBlockHeightUpdated(height: Int32, maxBlockHeight: Int32) {
+        guard reachabilityManager.isReachable else {
+            return
+        }
+
+        if currentBestBlockHeight < height {
+            currentBestBlockHeight = height
+        }
+
+        let blocksDownloaded = currentBestBlockHeight - initialBestBlockHeight
+        let allBlocksToDownload = maxBlockHeight - initialBestBlockHeight
+        var progress: Double = 0
+
+        if allBlocksToDownload <= 0 || allBlocksToDownload <= blocksDownloaded {
+            progress = 1.0
+        } else {
+            progress = Double(blocksDownloaded) / Double(allBlocksToDownload)
+        }
+
+        if progress >= 1 {
+            syncState = .synced
+        } else {
+            syncState = .syncing(progress: progress)
+        }
     }
 
 }
