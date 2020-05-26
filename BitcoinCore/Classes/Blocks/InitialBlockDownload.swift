@@ -7,13 +7,13 @@ public enum InitialBlockDownloadEvent {
 }
 
 public class InitialBlockDownload {
+    public weak var listener: IBlockSyncListener?
     private static let peerSwitchMinimumRatio = 1.5
 
     private var disposeBag = DisposeBag()
     private var blockSyncer: IBlockSyncer
     private let peerManager: IPeerManager
     private let merkleBlockValidator: IMerkleBlockValidator
-    private let listener: IBlockSyncListener
 
     private var minMerkleBlocksCount: Double = 0
     private var minTransactionsCount: Double = 0
@@ -33,14 +33,13 @@ public class InitialBlockDownload {
     public var syncedPeers = [IPeer]()
     public var syncPeer: IPeer?
 
-    init(blockSyncer: IBlockSyncer, peerManager: IPeerManager, merkleBlockValidator: IMerkleBlockValidator, listener: IBlockSyncListener,
+    init(blockSyncer: IBlockSyncer, peerManager: IPeerManager, merkleBlockValidator: IMerkleBlockValidator,
          peersQueue: DispatchQueue = DispatchQueue(label: "io.horizontalsystems.bitcoin-core.initial-block-download", qos: .userInitiated),
          scheduler: SchedulerType = SerialDispatchQueueScheduler(qos: .background),
          logger: Logger? = nil) {
         self.blockSyncer = blockSyncer
         self.peerManager = peerManager
         self.merkleBlockValidator = merkleBlockValidator
-        self.listener = listener
         self.peersQueue = peersQueue
         self.logger = logger
         self.observable = subject.asObservable().observeOn(scheduler)
@@ -131,7 +130,7 @@ public class InitialBlockDownload {
             // Some peers fail to send InventoryMessage within expected time
             // and become 'synced' in InitialBlockDownload without sending all of their blocks.
             // In such case, we assume not all blocks are downloaded
-            listener.blocksSyncFinished()
+            listener?.blocksSyncFinished()
         }
     }
 
@@ -162,7 +161,7 @@ public class InitialBlockDownload {
     }
 
     public var hasSyncedPeer: Bool {
-        return syncedPeers.count > 0
+        syncedPeers.count > 0
     }
 
 }
@@ -170,7 +169,7 @@ public class InitialBlockDownload {
 extension InitialBlockDownload: IInitialBlockDownload {
 
     public func isSynced(peer: IPeer) -> Bool {
-        return syncedState(peer)
+        syncedState(peer)
     }
 
 }

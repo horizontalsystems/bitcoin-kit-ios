@@ -23,9 +23,6 @@ class BlockSyncerTests: QuickSpec {
                 when(mock.lastBlock.get).thenReturn(nil)
                 when(mock.deleteBlockchainBlockHashes()).thenDoNothing()
             }
-            stub(mockListener) { mock in
-                when(mock.initialBestBlockHeightUpdated(height: equal(to: 0))).thenDoNothing()
-            }
             stub(mockBlockchain) { mock in
                 when(mock.handleFork()).thenDoNothing()
             }
@@ -44,24 +41,6 @@ class BlockSyncerTests: QuickSpec {
         }
 
         context("static methods") {
-            describe("#instance") {
-                it("triggers #initialBestBlockHeightUpdated event on listener") {
-                    stub(mockStorage) { mock in
-                        when(mock.lastBlock.get).thenReturn(checkpoint.block)
-                    }
-                    stub(mockListener) { mock in
-                        when(mock.initialBestBlockHeightUpdated(height: any())).thenDoNothing()
-                    }
-
-
-                    let _ = BlockSyncer.instance(storage: mockStorage, checkpoint: checkpoint, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
-                            blockchain: mockBlockchain, publicKeyManager: mockAddressManager, hashCheckpointThreshold: 100)
-
-                    verify(mockListener).initialBestBlockHeightUpdated(height: equal(to: Int32(checkpoint.block.height)))
-                    verifyNoMoreInteractions(mockListener)
-                }
-            }
-
             describe("#resolveCheckpoint") {
                 let bip44Checkpoint = TestData.checkpoint
                 let lastCheckpoint = TestData.lastCheckpoint
@@ -153,9 +132,11 @@ class BlockSyncerTests: QuickSpec {
 
         context("instance methods") {
             beforeEach {
-                syncer = BlockSyncer(storage: mockStorage, checkpoint: checkpoint, factory: mockFactory, listener: mockListener, transactionProcessor: mockTransactionProcessor,
+                syncer = BlockSyncer(storage: mockStorage, checkpoint: checkpoint, factory: mockFactory, transactionProcessor: mockTransactionProcessor,
                         blockchain: mockBlockchain, publicKeyManager: mockAddressManager,
                         hashCheckpointThreshold: 100, logger: nil, state: mockState)
+
+                syncer.listener = mockListener
             }
 
             describe("#localDownloadedBestBlockHeight") {

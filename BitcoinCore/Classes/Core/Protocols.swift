@@ -231,13 +231,12 @@ protocol IConnectionTimeoutManager: class {
     func timePeriodPassed(peer: IPeer)
 }
 
-protocol IApiSyncListener {
+protocol IApiSyncListener: class {
     func transactionsFound(count: Int)
 }
 
-protocol IBlockSyncListener {
+public protocol IBlockSyncListener: class {
     func blocksSyncFinished()
-    func initialBestBlockHeightUpdated(height: Int32)
     func currentBestBlockHeightUpdated(height: Int32, maxBlockHeight: Int32)
 }
 
@@ -428,18 +427,8 @@ public protocol IBlockSyncer: class {
     func shouldRequestBlock(withHash hash: Data) -> Bool
 }
 
-protocol IKitStateManager: class {
-    var syncState: BitcoinCore.KitState { get }
-    var syncIdle: Bool { get }
-    var delegate: IKitStateManagerDelegate? { get set }
-
-    func setApiSyncStarted()
-    func setBlocksSyncStarted()
-    func setSyncFailed(error: Error)
-}
-
-protocol IKitStateManagerDelegate: class {
-    func handleKitStateUpdate(state: BitcoinCore.KitState)
+protocol ISyncManagerDelegate: class {
+    func kitStateUpdated(state: BitcoinCore.KitState)
 }
 
 public protocol ITransactionInfo: class {
