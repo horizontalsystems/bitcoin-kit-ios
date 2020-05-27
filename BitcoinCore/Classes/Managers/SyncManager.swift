@@ -150,7 +150,7 @@ extension SyncManager: IBlockSyncListener {
     }
 
     func currentBestBlockHeightUpdated(height: Int32, maxBlockHeight: Int32) {
-        guard reachabilityManager.isReachable else {
+        guard case .syncing(_) = syncState  else {
             return
         }
 
@@ -160,18 +160,11 @@ extension SyncManager: IBlockSyncListener {
 
         let blocksDownloaded = currentBestBlockHeight - initialBestBlockHeight
         let allBlocksToDownload = maxBlockHeight - initialBestBlockHeight
-        var progress: Double = 0
 
         if allBlocksToDownload <= 0 || allBlocksToDownload <= blocksDownloaded {
-            progress = 1.0
-        } else {
-            progress = Double(blocksDownloaded) / Double(allBlocksToDownload)
-        }
-
-        if progress >= 1 {
             syncState = .synced
         } else {
-            syncState = .syncing(progress: progress)
+            syncState = .syncing(progress: Double(blocksDownloaded) / Double(allBlocksToDownload))
         }
     }
 
