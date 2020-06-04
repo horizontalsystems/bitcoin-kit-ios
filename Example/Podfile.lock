@@ -1,7 +1,7 @@
 PODS:
   - Alamofire (5.1.0)
   - BigInt (5.0.0)
-  - BitcoinCashKit.swift (0.14.3):
+  - BitcoinCashKit.swift (0.14.4):
     - BigInt (~> 5.0)
     - BitcoinCore.swift (~> 0.14)
     - GRDB.swift (~> 4.0)
@@ -10,7 +10,7 @@ PODS:
     - OpenSslKit.swift (~> 1.0)
     - RxSwift (~> 5.0)
     - Secp256k1Kit.swift (~> 1.0)
-  - BitcoinCore.swift (0.14.3):
+  - BitcoinCore.swift (0.14.4):
     - BigInt (~> 5.0)
     - GRDB.swift (~> 4.0)
     - HdWalletKit.swift (~> 1.5)
@@ -19,7 +19,7 @@ PODS:
     - OpenSslKit.swift (~> 1.0)
     - RxSwift (~> 5.0)
     - Secp256k1Kit.swift (~> 1.0)
-  - BitcoinKit.swift (0.14.3):
+  - BitcoinKit.swift (0.14.4):
     - BigInt (~> 5.0)
     - BitcoinCore.swift (~> 0.14)
     - GRDB.swift (~> 4.0)
@@ -33,7 +33,7 @@ PODS:
   - Cuckoo (1.3.2):
     - Cuckoo/Swift (= 1.3.2)
   - Cuckoo/Swift (1.3.2)
-  - DashKit.swift (0.14.3):
+  - DashKit.swift (0.14.4):
     - BigInt (~> 5.0)
     - BitcoinCore.swift (~> 0.14)
     - BlsKit.swift (~> 1.0)
@@ -50,7 +50,7 @@ PODS:
   - HdWalletKit.swift (1.5):
     - OpenSslKit.swift (~> 1.0)
     - Secp256k1Kit.swift (~> 1.0)
-  - Hodler.swift (0.14.3):
+  - Hodler.swift (0.14.4):
     - BitcoinCore.swift (~> 0.14)
     - OpenSslKit.swift (~> 1.0)
     - Secp256k1Kit.swift (~> 1.0)
@@ -58,7 +58,7 @@ PODS:
     - Alamofire (~> 5.0)
     - ObjectMapper (~> 3.0)
     - RxSwift (~> 5.0)
-  - LitecoinKit.swift (0.14.3):
+  - LitecoinKit.swift (0.14.4):
     - BigInt (~> 5.0)
     - BitcoinCore.swift (~> 0.14)
     - GRDB.swift (~> 4.0)
@@ -131,17 +131,17 @@ CHECKOUT OPTIONS:
 SPEC CHECKSUMS:
   Alamofire: 9d5c5f602928e512395b30950c5984eca840093c
   BigInt: 74b4d88367b0e819d9f77393549226d36faeb0d8
-  BitcoinCashKit.swift: df5b06703e6b64cb63655da4b124376b784d8760
-  BitcoinCore.swift: cedc633dcdb979e3387ab201d3150619baa12464
-  BitcoinKit.swift: 8b9c69ad9a36ec0687606ed92f50cfbee64ecf66
+  BitcoinCashKit.swift: b61a8e74d481f22c21993aaff6564bd49296ef40
+  BitcoinCore.swift: ec6f5f4f8e731c13dec11b52cf7a002a3614fd7c
+  BitcoinKit.swift: c438244f03a41710c162a2621bf07afbb1ef6efa
   BlsKit.swift: 533e494e0068f9ad2cf211a31fe9279f688af123
   Cuckoo: 57f71c6616b6b08cd9fe27f803da056fb619ff3e
-  DashKit.swift: fdba9eea8ca67789c2b0eefb39794628e0269f10
+  DashKit.swift: aab54ef810b3880d2472d9bc8d3d5e56a5367dc7
   GRDB.swift: 8cc3ab7c8b8b4ac1761deb8dca4b51c1c9d429f8
   HdWalletKit.swift: 4af4ef744a446904261971e5c31daf2eea8403c5
-  Hodler.swift: a39a4f8b43e5a9de4221f6a369936ead4e91a1ef
+  Hodler.swift: 834565fc3c580263f78c316e122394851dc77c4c
   HsToolKit.swift: b89273c4018e3b70894e820c88cee8b684be9305
-  LitecoinKit.swift: 31ec809adc25f64b8467717182cd9a3e0ec2accf
+  LitecoinKit.swift: 2dfec868cd1b5adc18635b5ae44e2a04efd7e1b3
   Nimble: a73af6ecd4c9106f434f3d55fc54570be3739e0b
   ObjectMapper: b53ae947d370bf89423e86be7d4e2d2b2a8d3f40
   OpenSslKit.swift: 168b059e3438c21994a3e9fe6c5648df96660d94
