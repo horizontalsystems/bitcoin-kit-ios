@@ -2,7 +2,7 @@ import Foundation
 import ObjectMapper
 
 open class SyncTransactionItem: ImmutableMappable {
-    public let blockHash: String
+    public let blockHash: String?
     public let blockHeight: Int
     public let txOutputs: [SyncTransactionOutputItem]
 
@@ -19,7 +19,7 @@ open class SyncTransactionItem: ImmutableMappable {
     }
 
     static func ==(lhs: SyncTransactionItem, rhs: SyncTransactionItem) -> Bool {
-        return lhs.blockHash == rhs.blockHash && lhs.blockHeight == rhs.blockHeight
+        lhs.blockHash == rhs.blockHash && lhs.blockHeight == rhs.blockHeight
     }
 
 }
