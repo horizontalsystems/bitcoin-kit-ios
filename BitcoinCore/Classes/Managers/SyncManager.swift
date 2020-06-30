@@ -65,9 +65,11 @@ class SyncManager {
     }
 
     private func onUnreachable() {
-        if case .syncing(_) = syncState {
+        switch syncState {
+        case .syncing, .synced:
             peerGroup.stop()
             syncState = .notSynced(error: ReachabilityManager.ReachabilityError.notReachable)
+        default: ()
         }
     }
 
@@ -110,7 +112,7 @@ extension SyncManager: ISyncManager {
         switch syncState {
         case .apiSyncing:
             initialSyncer.terminate()
-        case .syncing:
+        case .syncing, .synced:
             peerGroup.stop()
         default: ()
         }
@@ -150,7 +152,7 @@ extension SyncManager: IBlockSyncListener {
     }
 
     func currentBestBlockHeightUpdated(height: Int32, maxBlockHeight: Int32) {
-        guard case .syncing(_) = syncState  else {
+        guard case .syncing(_) = syncState else {
             return
         }
 
