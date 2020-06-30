@@ -1,6 +1,10 @@
 class BlockHashFetcherHelper: IBlockHashFetcherHelper {
 
     func lastUsedIndex(addresses: [[String]], outputs: [SyncTransactionOutputItem]) -> Int {
+        guard addresses.count > 0 else {
+            return -1
+        }
+
         let searchAddressStrings = outputs.map { $0.address }
         let searchScriptStrings = outputs.map { $0.script }
 
