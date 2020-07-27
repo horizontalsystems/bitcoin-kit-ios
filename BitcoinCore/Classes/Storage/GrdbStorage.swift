@@ -444,6 +444,12 @@ extension GrdbStorage: IStorage {
         }
     }
 
+    public func blockByHeightStalePrioritized(height: Int) -> Block? {
+        try! dbPool.read { db in
+            try Block.filter(Block.Columns.height == height).order(Block.Columns.stale.desc).fetchOne(db)
+        }
+    }
+
     public func block(byHeight height: Int) -> Block? {
         try! dbPool.read { db in
             try Block.filter(Block.Columns.height == height).fetchOne(db)
