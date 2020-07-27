@@ -7,7 +7,7 @@ open class BlockValidatorHelper: IBlockValidatorHelper {
 
     public func previous(for block: Block, count: Int) -> Block? {
         let previousHeight = block.height - count
-        guard let previousBlock = storage.block(byHeight: previousHeight) else {
+        guard let previousBlock = storage.blockByHeightStalePrioritized(height: previousHeight) else {
             return nil
         }
         return previousBlock

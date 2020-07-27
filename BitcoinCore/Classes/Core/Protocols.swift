@@ -87,6 +87,7 @@ public protocol IStorage {
     func blocks(byHexes: [String]) -> [Block]
     func blocks(heightGreaterThanOrEqualTo: Int, stale: Bool) -> [Block]
     func blocks(stale: Bool) -> [Block]
+    func blockByHeightStalePrioritized(height: Int) -> Block?
     func block(byHeight: Int) -> Block?
     func block(byHash: Data) -> Block?
     func block(stale: Bool, sortedHeight: String) -> Block?

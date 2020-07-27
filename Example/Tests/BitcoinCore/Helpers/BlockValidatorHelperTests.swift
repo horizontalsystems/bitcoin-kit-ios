@@ -12,11 +12,11 @@ class BlockValidatorHelperTests: XCTestCase {
         mockStorage = MockIStorage()
 
         stub(mockStorage) { mock in
-            when(mock.block(byHeight: TestData.checkpointBlock.height - 1)).thenReturn(nil)
-            when(mock.block(byHeight: TestData.checkpointBlock.height)).thenReturn(TestData.checkpointBlock)
-            when(mock.block(byHeight: TestData.firstBlock.height)).thenReturn(TestData.firstBlock)
-            when(mock.block(byHeight: TestData.secondBlock.height)).thenReturn(TestData.secondBlock)
-            when(mock.block(byHeight: TestData.thirdBlock.height)).thenReturn(TestData.thirdBlock)
+            when(mock.blockByHeightStalePrioritized(height: TestData.checkpointBlock.height - 1)).thenReturn(nil)
+            when(mock.blockByHeightStalePrioritized(height: TestData.checkpointBlock.height)).thenReturn(TestData.checkpointBlock)
+            when(mock.blockByHeightStalePrioritized(height: TestData.firstBlock.height)).thenReturn(TestData.firstBlock)
+            when(mock.blockByHeightStalePrioritized(height: TestData.secondBlock.height)).thenReturn(TestData.secondBlock)
+            when(mock.blockByHeightStalePrioritized(height: TestData.thirdBlock.height)).thenReturn(TestData.thirdBlock)
         }
 
         firstBlock = TestData.thirdBlock
