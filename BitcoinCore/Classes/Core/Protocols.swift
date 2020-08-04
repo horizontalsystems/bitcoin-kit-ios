@@ -539,7 +539,7 @@ public protocol IPeerTaskHandler: class {
 
 protocol ITransactionSender {
     func verifyCanSend() throws
-    func send(pendingTransaction: FullTransaction) throws
+    func send(pendingTransaction: FullTransaction)
     func transactionsRelayed(transactions: [FullTransaction])
 }
 

@@ -630,13 +630,13 @@
 				D39EA3E323A2094700FF23B7 /* BitcoinTestNetTests.swift */,
 				D39EA3E423A2094700FF23B7 /* BitcoinMainNetTests.swift */,
 				D39EA3E523A2094700FF23B7 /* BitcoinRegTestNetTests.swift */,
-				D39EA3E623A2094700FF23B7 /* New Group */,
+				D39EA3E623A2094700FF23B7 /* Peer */,
 				D39EA3FA23A2094700FF23B7 /* BitcoinCashMainNetTests.swift */,
 			);
 			path = Network;
 			sourceTree = "<group>";
 		};
-		D39EA3E623A2094700FF23B7 /* New Group */ = {
+		D39EA3E623A2094700FF23B7 /* Peer */ = {
 			isa = PBXGroup;
 			children = (
 				D39EA3E723A2094700FF23B7 /* ConnectionTimeoutManagerTests.swift */,
@@ -646,7 +646,7 @@
 				D39EA3EF23A2094700FF23B7 /* PeerGroupTests */,
 				D39EA3F523A2094700FF23B7 /* PeerTests */,
 			);
-			path = "New Group";
+			path = Peer;
 			sourceTree = "<group>";
 		};
 		D39EA3EA23A2094700FF23B7 /* PeerTask */ = {
