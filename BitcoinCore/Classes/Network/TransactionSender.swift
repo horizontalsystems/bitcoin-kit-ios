@@ -27,12 +27,8 @@ class TransactionSender {
         self.retriesPeriod = retriesPeriod
     }
 
-    private func peersToSendTo() throws -> [IPeer] {
+    private func peersToSendTo() -> [IPeer] {
         let peers = syncedReadyPeerManager.peers
-        guard !peers.isEmpty else {
-            throw BitcoinCoreErrors.TransactionSendError.peersNotSynced
-        }
-
         let peersToSendTo: [IPeer]
 
         if peers.count == 1 {
@@ -81,7 +77,12 @@ class TransactionSender {
         }
     }
 
-    private func send(transactions: [FullTransaction], toPeers peers: [IPeer]) {
+    private func send(transactions: [FullTransaction]) {
+        let peers = peersToSendTo()
+        guard !peers.isEmpty  else {
+            return
+        }
+
         timer.startIfNotRunning()
 
         for transaction in transactions {
@@ -107,11 +108,7 @@ class TransactionSender {
             return
         }
 
-        guard let peers = try? peersToSendTo() else {
-            return
-        }
-
-        send(transactions: transactions, toPeers: peers)
+        send(transactions: transactions)
     }
 
 }
@@ -119,14 +116,14 @@ class TransactionSender {
 extension TransactionSender: ITransactionSender {
 
     func verifyCanSend() throws {
-        _ = try peersToSendTo()
+        if peersToSendTo().isEmpty {
+            throw BitcoinCoreErrors.TransactionSendError.peersNotSynced
+        }
     }
 
-    func send(pendingTransaction: FullTransaction) throws {
-        let peers = try peersToSendTo()
-
+    func send(pendingTransaction: FullTransaction) {
         queue.async {
-            self.send(transactions: [pendingTransaction], toPeers: peers)
+            self.send(transactions: [pendingTransaction])
         }
     }
 

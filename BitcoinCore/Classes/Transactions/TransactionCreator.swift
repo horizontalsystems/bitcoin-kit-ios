@@ -24,7 +24,7 @@ class TransactionCreator {
             bloomFilterManager.regenerateBloomFilter()
         }
 
-        try transactionSender.send(pendingTransaction: transaction)
+        transactionSender.send(pendingTransaction: transaction)
     }
 
 }
