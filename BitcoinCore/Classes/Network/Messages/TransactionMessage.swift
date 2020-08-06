@@ -1,3 +1,5 @@
+import UIExtensions
+
 struct TransactionMessage: IMessage {
     let transaction: FullTransaction
     let size: Int

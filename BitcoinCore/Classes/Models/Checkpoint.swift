@@ -1,3 +1,5 @@
+import UIExtensions
+
 public struct Checkpoint {
     public let block: Block
     public let additionalBlocks: [Block]

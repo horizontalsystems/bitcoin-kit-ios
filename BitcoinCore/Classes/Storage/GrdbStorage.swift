@@ -1,5 +1,6 @@
 import RxSwift
 import GRDB
+import UIExtensions
 
 open class GrdbStorage {
     public var dbPool: DatabasePool
@@ -750,7 +751,7 @@ extension GrdbStorage: IStorage {
                 let transaction: Transaction
 
                 if status == .invalid {
-                    let invalidTransaction: InvalidTransaction = row["transaction"] 
+                    let invalidTransaction: InvalidTransaction = row["transaction"]
                     transaction = invalidTransaction
                 } else {
                     transaction = row["transaction"]

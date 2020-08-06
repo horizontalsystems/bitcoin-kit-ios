@@ -1,4 +1,5 @@
 import Foundation
+import UIExtensions
 
 extension String {
 

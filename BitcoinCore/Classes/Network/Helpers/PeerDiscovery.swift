@@ -1,4 +1,5 @@
 import Foundation
+import UIExtensions
 
 class PeerDiscovery: IPeerDiscovery {
     weak var peerAddressManager: IPeerAddressManager?

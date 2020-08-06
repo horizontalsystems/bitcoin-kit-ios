@@ -1,3 +1,5 @@
+import UIExtensions
+
 class Blockchain {
     private let storage: IStorage
     private var blockValidator: IBlockValidator?

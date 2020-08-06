@@ -2,6 +2,7 @@ import Foundation
 import HdWalletKit
 import RxSwift
 import BigInt
+import UIExtensions
 
 class DataProvider {
     private let disposeBag = DisposeBag()
