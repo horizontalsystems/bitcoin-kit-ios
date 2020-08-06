@@ -1,4 +1,5 @@
 import OpenSslKit
+import UIExtensions
 
 class NetworkMessageParser: INetworkMessageParser {
     private let magic: UInt32

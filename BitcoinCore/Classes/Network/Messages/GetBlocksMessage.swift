@@ -1,3 +1,5 @@
+import UIExtensions
+
 struct GetBlocksMessage: IMessage {
     /// the protocol version
     let version: UInt32

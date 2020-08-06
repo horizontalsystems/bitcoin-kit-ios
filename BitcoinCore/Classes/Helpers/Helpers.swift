@@ -1,4 +1,5 @@
 import Foundation
+import UIExtensions
 
 func ipv4(from data: Data) -> String {
     return Data(data.dropFirst(12)).map { String($0) }.joined(separator: ".")

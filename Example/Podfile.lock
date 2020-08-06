@@ -19,6 +19,7 @@ PODS:
     - OpenSslKit.swift (~> 1.0)
     - RxSwift (~> 5.0)
     - Secp256k1Kit.swift (~> 1.0)
+    - UIExtensions.swift (~> 1.0)
   - BitcoinKit.swift (0.14.5):
     - BigInt (~> 5.0)
     - BitcoinCore.swift (~> 0.14)
@@ -75,6 +76,7 @@ PODS:
     - RxSwift (~> 5)
   - RxSwift (5.1.1)
   - Secp256k1Kit.swift (1.0)
+  - UIExtensions.swift (1.1)
   - X11Kit.swift (1.0)
 
 DEPENDENCIES:
@@ -89,6 +91,7 @@ DEPENDENCIES:
   - Nimble
   - Quick
   - RxBlocking (~> 5.0)
+  - UIExtensions.swift (from `../../gui-kit/`)
 
 SPEC REPOS:
   trunk:
@@ -122,6 +125,8 @@ EXTERNAL SOURCES:
     :git: https://github.com/horizontalsystems/hs-tool-kit-ios
   LitecoinKit.swift:
     :path: "../"
+  UIExtensions.swift:
+    :path: "../../gui-kit/"
 
 CHECKOUT OPTIONS:
   HsToolKit.swift:
@@ -132,7 +137,7 @@ SPEC CHECKSUMS:
   Alamofire: 9d5c5f602928e512395b30950c5984eca840093c
   BigInt: 74b4d88367b0e819d9f77393549226d36faeb0d8
   BitcoinCashKit.swift: 16253867ed90c8e2cb2422298e399f078bea2018
-  BitcoinCore.swift: 987ff5cde0473609ea1ed5ee0089f4ee769c3706
+  BitcoinCore.swift: c093f12fbd02ae72689cc4ddba2132f7a5792810
   BitcoinKit.swift: d2ba19d3a9cc2362c363e5cdcbb0a5b23948299b
   BlsKit.swift: 533e494e0068f9ad2cf211a31fe9279f688af123
   Cuckoo: 57f71c6616b6b08cd9fe27f803da056fb619ff3e
@@ -149,8 +154,9 @@ SPEC CHECKSUMS:
   RxBlocking: 5f700a78cad61ce253ebd37c9a39b5ccc76477b4
   RxSwift: 81470a2074fa8780320ea5fe4102807cb7118178
   Secp256k1Kit.swift: 93b1bfbb8909c12605666cc3b1e59d1d1fde7322
+  UIExtensions.swift: b3852a339a81c730d98b3342ae0275e807703782
   X11Kit.swift: 6cfd05473e41c7b866c1a016300da02af63ad049
 
-PODFILE CHECKSUM: b7f96edba49293384788ccc5542d993a373503db
+PODFILE CHECKSUM: 70fe22e3dab95d7312d4057654fa1a85f2cf495a
 
 COCOAPODS: 1.9.1

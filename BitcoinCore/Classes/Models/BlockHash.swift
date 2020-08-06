@@ -1,4 +1,5 @@
 import GRDB
+import UIExtensions
 
 public class BlockHash: Record {
     let headerHash: Data
