@@ -1,5 +1,6 @@
 import Foundation
 import HdWalletKit
+import HsToolKit
 import BigInt
 import RxSwift
 
@@ -27,7 +28,6 @@ public class BitcoinCore {
     private let bip: Bip
 
     private let peerManager: IPeerManager
-    private let errorStorage: ErrorStorage
 
     // START: Extending
 
@@ -91,7 +91,7 @@ public class BitcoinCore {
          transactionCreator: ITransactionCreator, transactionFeeCalculator: ITransactionFeeCalculator, dustCalculator: IDustCalculator,
          paymentAddressParser: IPaymentAddressParser, networkMessageParser: NetworkMessageParser, networkMessageSerializer: NetworkMessageSerializer,
          syncManager: SyncManager, pluginManager: IPluginManager, watchedTransactionManager: IWatchedTransactionManager, bip: Bip,
-         peerManager: IPeerManager, errorStorage: ErrorStorage) {
+         peerManager: IPeerManager) {
         self.storage = storage
         self.cache = cache
         self.dataProvider = dataProvider
@@ -118,7 +118,6 @@ public class BitcoinCore {
         self.bip = bip
 
         self.peerManager = peerManager
-        self.errorStorage = errorStorage
     }
 
 }
@@ -158,12 +157,7 @@ extension BitcoinCore {
     }
 
     public func send(to address: String, value: Int, feeRate: Int, sortType: TransactionDataSortType, pluginData: [UInt8: IPluginData] = [:]) throws -> FullTransaction {
-        do {
-            return try transactionCreator.create(to: address, value: value, feeRate: feeRate, senderPay: true, sortType: sortType, pluginData: pluginData)
-        } catch {
-            errorStorage.add(sendError: error)
-            throw error
-        }
+        try transactionCreator.create(to: address, value: value, feeRate: feeRate, senderPay: true, sortType: sortType, pluginData: pluginData)
     }
 
     public func send(to hash: Data, scriptType: ScriptType, value: Int, feeRate: Int, sortType: TransactionDataSortType) throws -> FullTransaction {
@@ -232,10 +226,10 @@ extension BitcoinCore {
 
     public var statusInfo: [(String, Any)] {
         var status = [(String, Any)]()
+        status.append(("state", syncManager.syncState.toString()))
         status.append(("synced until", ((lastBlockInfo?.timestamp.map { Double($0) })?.map { Date(timeIntervalSince1970: $0) }) ?? "n/a"))
         status.append(("syncing peer", initialBlockDownload.syncPeer?.host ?? "n/a"))
         status.append(("derivation", bip.description))
-        status.append(("errors", errorStorage.errors))
 
         status.append(contentsOf:
             peerManager.connected().enumerated().map { (index, peer) in
@@ -333,6 +327,15 @@ extension BitcoinCore {
         case apiSyncing(transactions: Int)
         case syncing(progress: Double)
         case notSynced(error: Error)
+
+        func toString() -> String {
+            switch self {
+            case .synced: return "Synced"
+            case .apiSyncing(let transactions): return "ApiSyncing-\(transactions)"
+            case .syncing(let progress): return "Syncing-\(Int(progress * 100))"
+            case .notSynced(let error): return "NotSynced-\(String(reflecting: error))"
+            }
+        }
     }
 
     public enum SyncMode: Equatable {

@@ -1,5 +1,5 @@
 PODS:
-  - Alamofire (5.1.0)
+  - Alamofire (5.2.2)
   - BigInt (5.0.0)
   - BitcoinCashKit.swift (0.14.5):
     - BigInt (~> 5.0)
@@ -125,11 +125,11 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   HsToolKit.swift:
-    :commit: b97c6224fee8d7b554a8e49e289ccdf131617dff
+    :commit: 9b4e0429e76073c753371020b8185abb41691911
     :git: https://github.com/horizontalsystems/hs-tool-kit-ios
 
 SPEC CHECKSUMS:
-  Alamofire: 9d5c5f602928e512395b30950c5984eca840093c
+  Alamofire: 814429acc853c6c54ff123fc3d2ef66803823ce0
   BigInt: 74b4d88367b0e819d9f77393549226d36faeb0d8
   BitcoinCashKit.swift: 16253867ed90c8e2cb2422298e399f078bea2018
   BitcoinCore.swift: 987ff5cde0473609ea1ed5ee0089f4ee769c3706

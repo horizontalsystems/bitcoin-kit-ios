@@ -1,14 +1,15 @@
 import LitecoinKit
 import BitcoinCore
 import HdWalletKit
+import HsToolKit
 import RxSwift
 
 class LitecoinAdapter: BaseAdapter {
     let litecoinKit: LitecoinKit
 
-    init(words: [String], bip: Bip, testMode: Bool, syncMode: BitcoinCore.SyncMode) {
+    init(words: [String], bip: Bip, testMode: Bool, syncMode: BitcoinCore.SyncMode, logger: Logger) {
         let networkType: LitecoinKit.NetworkType = testMode ? .testNet : .mainNet
-        litecoinKit = try! LitecoinKit(withWords: words, bip: bip, walletId: "walletId", syncMode: syncMode, networkType: networkType, confirmationsThreshold: 1, minLogLevel: Configuration.shared.minLogLevel)
+        litecoinKit = try! LitecoinKit(withWords: words, bip: bip, walletId: "walletId", syncMode: syncMode, networkType: networkType, confirmationsThreshold: 1, logger: logger.scoped(with: "LitecoinKit"))
 
         super.init(name: "Litecoin", coinCode: "LTC", abstractKit: litecoinKit)
         litecoinKit.delegate = self
