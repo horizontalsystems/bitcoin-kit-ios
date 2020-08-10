@@ -20,7 +20,7 @@ public class BitcoinKit: AbstractKit {
         }
     }
 
-    public init(withWords words: [String], bip: Bip, walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) throws {
+    public init(withWords words: [String], bip: Bip, walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
         let network: INetwork
         let initialSyncApiUrl: String
 
@@ -36,7 +36,7 @@ public class BitcoinKit: AbstractKit {
                 initialSyncApiUrl = ""
         }
 
-        let logger = Logger(minLogLevel: minLogLevel)
+        let logger = logger ?? Logger(minLogLevel: .verbose)
 
         let initialSyncApi = BCoinApi(url: initialSyncApiUrl, logger: logger)
 

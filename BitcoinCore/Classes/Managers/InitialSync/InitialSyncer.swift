@@ -13,17 +13,15 @@ class InitialSyncer {
 
     private let logger: Logger?
     private let async: Bool
-    private let errorStorage: ErrorStorage?
 
     init(storage: IStorage, blockDiscovery: IBlockDiscovery, publicKeyManager: IPublicKeyManager,
-         async: Bool = true, logger: Logger? = nil, errorStorage: ErrorStorage? = nil) {
+         async: Bool = true, logger: Logger? = nil) {
         self.storage = storage
         self.blockDiscovery = blockDiscovery
         self.publicKeyManager = publicKeyManager
 
         self.logger = logger
         self.async = async
-        self.errorStorage = errorStorage
     }
 
     private func sync(forAccount account: Int) {
@@ -65,8 +63,7 @@ class InitialSyncer {
     }
 
     private func handle(error: Error) {
-        logger?.error(error)
-        errorStorage?.add(apiError: error)
+        logger?.error(error, context: ["apiSync"], save: true)
         delegate?.onSyncFailed(error: error)
     }
 

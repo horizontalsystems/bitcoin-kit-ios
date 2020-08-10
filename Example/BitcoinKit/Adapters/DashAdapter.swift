@@ -1,5 +1,6 @@
 import DashKit
 import BitcoinCore
+import HsToolKit
 import DashKit
 import RxSwift
 
@@ -7,9 +8,9 @@ class DashAdapter: BaseAdapter {
     override var feeRate: Int { return 1 }
     private let dashKit: DashKit
 
-    init(words: [String], testMode: Bool, syncMode: BitcoinCore.SyncMode) {
+    init(words: [String], testMode: Bool, syncMode: BitcoinCore.SyncMode, logger: Logger) {
         let networkType: DashKit.NetworkType = testMode ? .testNet : .mainNet
-        dashKit = try! DashKit(withWords: words, walletId: "walletId", syncMode: syncMode, networkType: networkType, minLogLevel: Configuration.shared.minLogLevel)
+        dashKit = try! DashKit(withWords: words, walletId: "walletId", syncMode: syncMode, networkType: networkType, logger: logger.scoped(with: "DashKit"))
 
         super.init(name: "Dash", coinCode: "DASH", abstractKit: dashKit)
         dashKit.delegate = self

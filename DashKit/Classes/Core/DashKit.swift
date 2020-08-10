@@ -20,7 +20,7 @@ public class DashKit: AbstractKit {
     private var instantSend: InstantSend?
     private let dashTransactionInfoConverter: ITransactionInfoConverter
 
-    public init(withWords words: [String], walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) throws {
+    public init(withWords words: [String], walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
         let network: INetwork
         var initialSyncApiUrl: String
 
@@ -33,7 +33,7 @@ public class DashKit: AbstractKit {
             initialSyncApiUrl = "http://dash-testnet.horizontalsystems.xyz/apg"
         }
 
-        let logger = Logger(minLogLevel: minLogLevel)
+        let logger = logger ?? Logger(minLogLevel: .verbose)
 
         let initialSyncApi = InsightApi(url: initialSyncApiUrl, logger: logger)
 

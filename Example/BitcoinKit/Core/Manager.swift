@@ -1,5 +1,6 @@
 import RxSwift
 import BitcoinCore
+import HsToolKit
 
 class Manager {
     static let shared = Manager()
@@ -36,12 +37,13 @@ class Manager {
 
     private func initAdapters(words: [String], syncMode: BitcoinCore.SyncMode) {
         let configuration = Configuration.shared
+        let logger = Logger(minLogLevel: Configuration.shared.minLogLevel)
 
         adapters = [
-            BitcoinAdapter(words: words, bip: .bip44, testMode: configuration.testNet, syncMode: syncMode),
-//            LitecoinAdapter(words: words, bip: .bip44, testMode: configuration.testNet, syncMode: syncMode),
-//            BitcoinCashAdapter(words: words, testMode: configuration.testNet, syncMode: .full),
-//            DashAdapter(words: words, testMode: configuration.testNet, syncMode: syncMode),
+            BitcoinAdapter(words: words, bip: .bip44, testMode: configuration.testNet, syncMode: syncMode, logger: logger),
+//            LitecoinAdapter(words: words, bip: .bip44, testMode: configuration.testNet, syncMode: syncMode, logger: logger),
+//            BitcoinCashAdapter(words: words, testMode: configuration.testNet, syncMode: .full, logger: logger),
+//            DashAdapter(words: words, testMode: configuration.testNet, syncMode: syncMode, logger: logger),
         ]
 
         adapterSignal.notify()

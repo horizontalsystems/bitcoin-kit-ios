@@ -157,8 +157,8 @@ class Peer {
         delegate?.peer(self, didReceiveMessage: anyMessage)
     }
 
-    private func log(_ message: String, level: Logger.Level = .debug, file: String = #file, function: String = #function, line: Int = #line) {
-        logger?.log(level: level, message: message, file: file, function: function, line: line, context: logName)
+    private func log(_ message: String, level: Logger.Level = .debug) {
+        logger?.log(level: level, message: message, context: [logName])
     }
 
 }

@@ -25,7 +25,7 @@ public class BitcoinCashKit: AbstractKit {
         }
     }
 
-    public init(withWords words: [String], walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) throws {
+    public init(withWords words: [String], walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
         let network: INetwork
         let initialSyncApiUrl: String
 
@@ -41,7 +41,7 @@ public class BitcoinCashKit: AbstractKit {
                 validScheme = "bchtest"
         }
 
-        let logger = Logger(minLogLevel: minLogLevel)
+        let logger = logger ?? Logger(minLogLevel: .verbose)
 
         let initialSyncApi = InsightApi(url: initialSyncApiUrl, logger: logger)
 
