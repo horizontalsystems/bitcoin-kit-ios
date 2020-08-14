@@ -33,7 +33,6 @@ public class BitcoinCore {
 
     public let peerGroup: IPeerGroup
     public let initialBlockDownload: IInitialBlockDownload
-    public let syncedReadyPeerManager: ISyncedReadyPeerManager
     public let transactionSyncer: ITransactionSyncer
 
     let bloomFilterLoader: BloomFilterLoader
@@ -84,8 +83,7 @@ public class BitcoinCore {
     public weak var delegate: BitcoinCoreDelegate?
 
     init(storage: IStorage, cache: OutputsCache, dataProvider: IDataProvider,
-         peerGroup: IPeerGroup, initialBlockDownload: IInitialBlockDownload, bloomFilterLoader: BloomFilterLoader,
-         syncedReadyPeerManager: ISyncedReadyPeerManager, transactionSyncer: ITransactionSyncer,
+         peerGroup: IPeerGroup, initialBlockDownload: IInitialBlockDownload, bloomFilterLoader: BloomFilterLoader, transactionSyncer: ITransactionSyncer,
          publicKeyManager: IPublicKeyManager, addressConverter: AddressConverterChain, restoreKeyConverterChain: RestoreKeyConverterChain,
          unspentOutputSelector: UnspentOutputSelectorChain,
          transactionCreator: ITransactionCreator, transactionFeeCalculator: ITransactionFeeCalculator, dustCalculator: IDustCalculator,
@@ -98,7 +96,6 @@ public class BitcoinCore {
         self.peerGroup = peerGroup
         self.initialBlockDownload = initialBlockDownload
         self.bloomFilterLoader = bloomFilterLoader
-        self.syncedReadyPeerManager = syncedReadyPeerManager
         self.transactionSyncer = transactionSyncer
         self.publicKeyManager = publicKeyManager
         self.addressConverter = addressConverter
@@ -232,7 +229,7 @@ extension BitcoinCore {
         status.append(("derivation", bip.description))
 
         status.append(contentsOf:
-            peerManager.connected().enumerated().map { (index, peer) in
+            peerManager.connected.enumerated().map { (index, peer) in
                 var peerStatus = [(String, Any)]()
                 peerStatus.append(("status", initialBlockDownload.isSynced(peer: peer) ? "synced" : "not synced"))
                 peerStatus.append(("host", peer.host))

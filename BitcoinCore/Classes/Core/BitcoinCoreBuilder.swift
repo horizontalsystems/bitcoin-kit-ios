@@ -3,7 +3,7 @@ import HdWalletKit
 import HsToolKit
 
 public class BitcoinCoreBuilder {
-    public enum BuildError: Error { case noSeedData, noWalletId, noNetwork, noPaymentAddressParser, noAddressSelector, noStorage, noInitialSyncApi }
+    public enum BuildError: Error { case peerSizeLessThanRequired, noSeedData, noWalletId, noNetwork, noPaymentAddressParser, noAddressSelector, noStorage, noInitialSyncApi }
 
     // chains
     public let addressConverter = AddressConverterChain()
@@ -71,7 +71,11 @@ public class BitcoinCoreBuilder {
         return self
     }
 
-    public func set(peerSize: Int) -> BitcoinCoreBuilder {
+    public func set(peerSize: Int) throws -> BitcoinCoreBuilder {
+        guard peerSize >= TransactionSender.minConnectedPeersCount else {
+            throw BuildError.peerSizeLessThanRequired
+        }
+
         self.peerCount = peerSize
         return self
     }
@@ -199,7 +203,6 @@ public class BitcoinCoreBuilder {
         let peerGroup = PeerGroup(factory: factory, reachabilityManager: reachabilityManager,
                 peerAddressManager: peerAddressManager, peerCount: peerCount, localDownloadedBestBlockHeight: blockSyncer.localDownloadedBestBlockHeight,
                 peerManager: peerManager, logger: logger)
-        let syncedReadyPeerManager = SyncedReadyPeerManager(peerGroup: peerGroup, initialBlockDownload: initialBlockDownload, peerManager: peerManager)
 
         let transactionDataSorterFactory = TransactionDataSorterFactory()
 
@@ -214,7 +217,7 @@ public class BitcoinCoreBuilder {
         let transactionBuilder = TransactionBuilder(recipientSetter: recipientSetter, inputSetter: inputSetter, lockTimeSetter: lockTimeSetter, outputSetter: outputSetter, signer: transactionSigner)
         let transactionFeeCalculator = TransactionFeeCalculator(recipientSetter: recipientSetter, inputSetter: inputSetter, addressConverter: addressConverter, publicKeyManager: publicKeyManager, changeScriptType: bip.scriptType)
         let transactionSendTimer = TransactionSendTimer(interval: 60)
-        let transactionSender = TransactionSender(transactionSyncer: transactionSyncer, syncedReadyPeerManager: syncedReadyPeerManager, storage: storage, timer: transactionSendTimer, logger: logger)
+        let transactionSender = TransactionSender(transactionSyncer: transactionSyncer, initialBlockDownload: initialBlockDownload, peerManager: peerManager, storage: storage, timer: transactionSendTimer, logger: logger)
         let transactionCreator = TransactionCreator(transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, transactionSender: transactionSender, bloomFilterManager: bloomFilterManager)
         let mempoolTransactions = MempoolTransactions(transactionSyncer: transactionSyncer, transactionSender: transactionSender)
 
@@ -226,7 +229,6 @@ public class BitcoinCoreBuilder {
                 peerGroup: peerGroup,
                 initialBlockDownload: initialBlockDownload,
                 bloomFilterLoader: bloomFilterLoader,
-                syncedReadyPeerManager: syncedReadyPeerManager,
                 transactionSyncer: transactionSyncer,
                 publicKeyManager: publicKeyManager,
                 addressConverter: addressConverter,
@@ -293,16 +295,12 @@ public class BitcoinCoreBuilder {
 
         bloomFilterLoader.subscribeTo(observable: peerGroup.observable)
         initialBlockDownload.subscribeTo(observable: peerGroup.observable)
-        syncedReadyPeerManager.subscribeTo(observable: peerGroup.observable)
         mempoolTransactions.subscribeTo(observable: peerGroup.observable)
-
 
         bitcoinCore.add(peerTaskHandler: initialBlockDownload)
         bitcoinCore.add(inventoryItemsHandler: initialBlockDownload)
 
-        syncedReadyPeerManager.subscribeTo(observable: initialBlockDownload.observable)
-        transactionSender.subscribeTo(observable: syncedReadyPeerManager.observable)
-
+        transactionSender.subscribeTo(observable: initialBlockDownload.observable)
 
         bitcoinCore.add(peerTaskHandler: transactionSender)
         bitcoinCore.add(peerTaskHandler: mempoolTransactions)

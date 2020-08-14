@@ -74,7 +74,7 @@ class PeerGroup {
 
             var peersToConnect = [IPeer]()
 
-            for _ in self.peerManager.totalPeersCount()..<self.peerCountToHold {
+            for _ in self.peerManager.totalPeersCount..<self.peerCountToHold {
                 if let host = self.peerAddressManager.ip {
                     let peer = self.factory.peer(withHost: host, logger: self.logger)
                     peer.delegate = self
@@ -159,7 +159,7 @@ extension PeerGroup: PeerDelegate {
 
     private func disconnectSlowestPeer(peerCountToConnect: Int) {
         if peerCountToConnect > peerCountConnected && peerCountToHold > 1 && peerAddressManager.hasFreshIps {
-            let sortedPeers = peerManager.sorted()
+            let sortedPeers = peerManager.sorted
             if sortedPeers.count >= peerCountToHold {
                 sortedPeers.last?.disconnect(error: nil)
             }
