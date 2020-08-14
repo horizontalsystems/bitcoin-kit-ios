@@ -17,7 +17,7 @@ class BloomFilterLoader: IBloomFilterManagerDelegate {
     }
 
     func bloomFilterUpdated(bloomFilter: BloomFilter) {
-        for peer in peerManager.connected() {
+        for peer in peerManager.connected {
             peer.filterLoad(bloomFilter: bloomFilter)
         }
     }

@@ -2,10 +2,13 @@ import RxSwift
 import HsToolKit
 
 class TransactionSender {
+    static let minConnectedPeersCount = 2
+
     private let disposeBag = DisposeBag()
 
     private let transactionSyncer: ITransactionSyncer
-    private let syncedReadyPeerManager: ISyncedReadyPeerManager
+    private let initialBlockDownload: IInitialBlockDownload
+    private let peerManager: IPeerManager
     private let storage: IStorage
     private let timer: ITransactionSendTimer
     private let logger: Logger?
@@ -14,11 +17,12 @@ class TransactionSender {
     private let maxRetriesCount: Int
     private let retriesPeriod: Double // seconds
 
-    init(transactionSyncer: ITransactionSyncer, syncedReadyPeerManager: ISyncedReadyPeerManager, storage: IStorage, timer: ITransactionSendTimer,
+    init(transactionSyncer: ITransactionSyncer, initialBlockDownload: IInitialBlockDownload, peerManager: IPeerManager, storage: IStorage, timer: ITransactionSendTimer,
          logger: Logger? = nil, queue: DispatchQueue = DispatchQueue(label: "io.horizontalsystems.bitcoin-core.transaction-sender", qos: .background),
          maxRetriesCount: Int = 3, retriesPeriod: Double = 60) {
         self.transactionSyncer = transactionSyncer
-        self.syncedReadyPeerManager = syncedReadyPeerManager
+        self.initialBlockDownload = initialBlockDownload
+        self.peerManager = peerManager
         self.storage = storage
         self.timer = timer
         self.logger = logger
@@ -28,16 +32,28 @@ class TransactionSender {
     }
 
     private func peersToSendTo() -> [IPeer] {
-        let peers = syncedReadyPeerManager.peers
-        let peersToSendTo: [IPeer]
-
-        if peers.count == 1 {
-            peersToSendTo = peers
-        } else {
-            peersToSendTo = Array(peers.prefix(peers.count / 2))
+        var syncedPeers = initialBlockDownload.syncedPeers
+        guard let freeSyncedPeer = syncedPeers.sorted(by: { !$0.ready && $1.ready }).first else {
+            return []
         }
 
-        return peersToSendTo
+        guard peerManager.totalPeersCount >= TransactionSender.minConnectedPeersCount else {
+            return []
+        }
+
+        var sortedPeers = peerManager.readyPeers
+                .filter {
+                    freeSyncedPeer !== $0
+                }
+                .sorted { (a: IPeer, b: IPeer) in
+                    !syncedPeers.contains(where: { a === $0 }) && syncedPeers.contains(where: { b === $0 })
+                }
+
+        if sortedPeers.count == 1 {
+            return sortedPeers
+        }
+
+        return Array(sortedPeers.prefix(sortedPeers.count / 2))
     }
 
     private func transactionsToSend(from transactions: [FullTransaction]) -> [FullTransaction] {
@@ -60,7 +76,6 @@ class TransactionSender {
         sentTransaction.sendSuccess = true
 
         if sentTransaction.retriesCount >= maxRetriesCount {
-            transactionSyncer.handleInvalid(fullTransaction: transaction)
             storage.delete(sentTransaction: sentTransaction)
         } else {
             storage.update(sentTransaction: sentTransaction)
@@ -79,7 +94,7 @@ class TransactionSender {
 
     private func send(transactions: [FullTransaction]) {
         let peers = peersToSendTo()
-        guard !peers.isEmpty  else {
+        guard !peers.isEmpty else {
             return
         }
 
@@ -137,12 +152,18 @@ extension TransactionSender: ITransactionSender {
         }
     }
 
-    func subscribeTo(observable: Observable<Void>) {
-        observable.subscribe(onNext: { [weak self] in
-                    self?.queue.async {
-                        self?.sendPendingTransactions()
-                    }
-                })
+    func subscribeTo(observable: Observable<InitialBlockDownloadEvent>) {
+        observable.subscribe(
+                        onNext: { [weak self] in
+                            switch $0 {
+                            case .onAllPeersSynced:
+                                self?.queue.async {
+                                    self?.sendPendingTransactions()
+                                }
+                            default: ()
+                            }
+                        }
+                )
                 .disposed(by: disposeBag)
     }
 
@@ -158,7 +179,7 @@ extension TransactionSender: ITransactionSendTimerDelegate {
 
 }
 
-extension TransactionSender : IPeerTaskHandler {
+extension TransactionSender: IPeerTaskHandler {
 
     func handleCompletedTask(peer: IPeer, task: PeerTask) -> Bool {
         switch task {

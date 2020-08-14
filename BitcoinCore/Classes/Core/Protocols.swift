@@ -170,12 +170,13 @@ public protocol IPeerGroup: class {
 }
 
 protocol IPeerManager: class {
+    var totalPeersCount: Int { get }
+    var connected: [IPeer] { get }
+    var sorted: [IPeer] { get }
+    var readyPeers: [IPeer] { get }
     func add(peer: IPeer)
     func peerDisconnected(peer: IPeer)
     func disconnectAll()
-    func totalPeersCount() -> Int
-    func connected() -> [IPeer]
-    func sorted() -> [IPeer]
 }
 
 public protocol IPeer: class {

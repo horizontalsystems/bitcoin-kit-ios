@@ -91,7 +91,7 @@ DEPENDENCIES:
   - Nimble
   - Quick
   - RxBlocking (~> 5.0)
-  - UIExtensions.swift (from `../../gui-kit/`)
+  - UIExtensions.swift (from `https://github.com/horizontalsystems/gui-kit/`)
 
 SPEC REPOS:
   trunk:
@@ -126,12 +126,15 @@ EXTERNAL SOURCES:
   LitecoinKit.swift:
     :path: "../"
   UIExtensions.swift:
-    :path: "../../gui-kit/"
+    :git: https://github.com/horizontalsystems/gui-kit/
 
 CHECKOUT OPTIONS:
   HsToolKit.swift:
     :commit: 9b4e0429e76073c753371020b8185abb41691911
     :git: https://github.com/horizontalsystems/hs-tool-kit-ios
+  UIExtensions.swift:
+    :commit: 7f95e9a3125c34712cb73884f2479bb5d15c75f8
+    :git: https://github.com/horizontalsystems/gui-kit/
 
 SPEC CHECKSUMS:
   Alamofire: 814429acc853c6c54ff123fc3d2ef66803823ce0
@@ -157,6 +160,6 @@ SPEC CHECKSUMS:
   UIExtensions.swift: b3852a339a81c730d98b3342ae0275e807703782
   X11Kit.swift: 6cfd05473e41c7b866c1a016300da02af63ad049
 
-PODFILE CHECKSUM: 70fe22e3dab95d7312d4057654fa1a85f2cf495a
+PODFILE CHECKSUM: a156fcc8b40e251b5edc4728cca7725b531255a4
 
 COCOAPODS: 1.9.1

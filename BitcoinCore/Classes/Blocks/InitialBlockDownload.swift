@@ -2,6 +2,7 @@ import RxSwift
 import HsToolKit
 
 public enum InitialBlockDownloadEvent {
+    case onAllPeersSynced
     case onPeerSynced(peer: IPeer)
     case onPeerNotSynced(peer: IPeer)
 }
@@ -59,7 +60,10 @@ public class InitialBlockDownload {
             return
         }
 
-        let nonSyncedPeers = peerManager.sorted().filter { !syncedState($0) }
+        let nonSyncedPeers = peerManager.sorted.filter { !syncedState($0) }
+        if nonSyncedPeers.isEmpty {
+            subject.onNext(.onAllPeersSynced)
+        }
 
         if let peer = nonSyncedPeers.first(where: { $0.ready }) {
             logger?.debug("Setting sync peer to \(peer.logName)")
