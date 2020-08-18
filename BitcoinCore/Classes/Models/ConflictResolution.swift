@@ -1,4 +1,4 @@
 enum ConflictResolution {
-    case ignore
-    case accept
+    case ignore(needToUpdate: [Transaction])
+    case accept(needToMakeInvalid: [Transaction])
 }

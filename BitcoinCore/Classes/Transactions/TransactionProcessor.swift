@@ -101,7 +101,8 @@ extension TransactionProcessor: ITransactionProcessor {
                     continue
                 }
 
-                if storage.invalidTransaction(byHash: transaction.header.dataHash) != nil {                                  // if some peer send us transaction after it's invalidated, we must ignore it
+                let invalidTransaction = storage.invalidTransaction(byHash: transaction.header.dataHash)
+                if invalidTransaction != nil && !inBlock {                                  // if some peer send us transaction after it's invalidated, we must ignore it
                     continue
                 }
                 if let existingTransaction = self.storage.transaction(byHash: transaction.header.dataHash) {
@@ -127,22 +128,25 @@ extension TransactionProcessor: ITransactionProcessor {
 
                     let conflictingTransactions = storage.conflictingTransactions(for: transaction)
 
-                    var needToUpdate = [Transaction]()
-                    let resolution = transactionMediator.resolve(receivedTransaction: transaction, conflictingTransactions: conflictingTransactions, updatingTransactions: &needToUpdate)
+                    let resolution = transactionMediator.resolve(receivedTransaction: transaction, conflictingTransactions: conflictingTransactions)
                     switch resolution {
-                    case .ignore:
+                    case .ignore(let needToUpdate):
                         try needToUpdate.forEach {
                             try storage.update(transaction: $0)
                         }
                         updated.append(contentsOf: needToUpdate)
 
-                    case .accept:
-                        needToUpdate.forEach {
+                    case .accept(let needToMakeInvalid):
+                        needToMakeInvalid.forEach {
                             processInvalid(transactionHash: $0.dataHash, conflictingTxHash: transaction.header.dataHash)
                         }
-
-                        try self.storage.add(transaction: transaction)
-                        inserted.append(transaction.header)
+                        if let invalidTransaction = invalidTransaction {
+                            try storage.move(invalidTransaction: invalidTransaction, toTransactions: transaction)
+                            updated.append(transaction.header)
+                        } else {
+                            try storage.add(transaction: transaction)
+                            inserted.append(transaction.header)
+                        }
                     }
 
                     let checkDoubleSpend = !transaction.header.isOutgoing && !inBlock
