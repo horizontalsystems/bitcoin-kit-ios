@@ -114,6 +114,7 @@ public protocol IStorage {
     func validOrInvalidTransactionsFullInfo(fromTimestamp: Int?, fromOrder: Int?, limit: Int?) -> [FullTransactionForInfo]
     func transactionFullInfo(byHash hash: Data) -> FullTransactionForInfo?
     func moveTransactionsTo(invalidTransactions: [InvalidTransaction]) throws
+    func move(invalidTransaction: InvalidTransaction, toTransactions: FullTransaction) throws
 
     func outputsWithPublicKeys() -> [OutputWithPublicKey]
     func unspentOutputs() -> [UnspentOutput]
@@ -329,7 +330,7 @@ public protocol ITransactionProcessor: class {
 }
 
 protocol ITransactionMediator {
-    func resolve(receivedTransaction transaction: FullTransaction, conflictingTransactions: [Transaction], updatingTransactions: inout [Transaction]) -> ConflictResolution
+    func resolve(receivedTransaction transaction: FullTransaction, conflictingTransactions: [Transaction]) -> ConflictResolution
 }
 
 protocol ITransactionExtractor {

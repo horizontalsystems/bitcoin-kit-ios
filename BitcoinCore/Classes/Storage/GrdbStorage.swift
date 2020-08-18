@@ -229,6 +229,18 @@ open class GrdbStorage {
         )
     }
 
+    private func addWithoutTransaction(transaction: FullTransaction, db: Database) throws {
+        try transaction.header.insert(db)
+
+        for input in transaction.inputs {
+            try input.insert(db)
+        }
+
+        for output in transaction.outputs {
+            try output.insert(db)
+        }
+    }
+
 }
 
 extension GrdbStorage: IStorage {
@@ -565,7 +577,10 @@ extension GrdbStorage: IStorage {
 
     public func incomingPendingTransactionHashes() -> [Data] {
         try! dbPool.read { db in
-            try Transaction.filter(Transaction.Columns.blockHash == nil).filter(Transaction.Columns.isOutgoing == false).fetchAll(db)
+            try Transaction
+                    .filter(Transaction.Columns.blockHash == nil)
+                    .filter(Transaction.Columns.isOutgoing == false)
+                    .fetchAll(db)
         }.map { $0.dataHash }
     }
 
@@ -621,15 +636,7 @@ extension GrdbStorage: IStorage {
 
     public func add(transaction: FullTransaction) throws {
         _ = try! dbPool.write { db in
-            try transaction.header.insert(db)
-
-            for input in transaction.inputs {
-                try input.insert(db)
-            }
-
-            for output in transaction.outputs {
-                try output.insert(db)
-            }
+            try addWithoutTransaction(transaction: transaction, db: db)
         }
     }
 
@@ -774,6 +781,15 @@ extension GrdbStorage: IStorage {
                 try Output.filter(Output.Columns.transactionHash == invalidTransaction.dataHash).deleteAll(db)
                 try Transaction.filter(Transaction.Columns.dataHash == invalidTransaction.dataHash).deleteAll(db)
             }
+
+            return .commit
+        }
+    }
+
+    public func move(invalidTransaction: InvalidTransaction, toTransactions transaction: FullTransaction) throws {
+        try! dbPool.writeInTransaction { db in
+            try addWithoutTransaction(transaction: transaction, db: db)
+            try InvalidTransaction.filter(Transaction.Columns.uid == invalidTransaction.uid).deleteAll(db)
 
             return .commit
         }
