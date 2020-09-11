@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name             = 'DashKit.swift'
   s.module_name      = 'DashKit'
-  s.version          = '0.14.5'
+  s.version          = '0.15.0'
   s.summary          = 'Dash library for Swift.'
 
   s.description      = <<-DESC
