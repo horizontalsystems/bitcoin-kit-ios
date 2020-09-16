@@ -22,23 +22,20 @@ public class BitcoinKit: AbstractKit {
 
     public init(withWords words: [String], bip: Bip, walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
         let network: INetwork
-        let initialSyncApiUrl: String
+        let logger = logger ?? Logger(minLogLevel: .verbose)
 
+        let initialSyncApi: ISyncTransactionApi?
         switch networkType {
             case .mainNet:
                 network = MainNet()
-                initialSyncApiUrl = "https://btc.horizontalsystems.xyz/apg"
+                initialSyncApi = InsightApi(url: "https://explorer.api.bitcoin.com/btc/v1", logger: logger)
             case .testNet:
                 network = TestNet()
-                initialSyncApiUrl = "https://btc-testnet.horizontalsystems.xyz/api"
+                initialSyncApi = BCoinApi(url: "https://btc-testnet.horizontalsystems.xyz/api", logger: logger)
             case .regTest:
                 network = RegTest()
-                initialSyncApiUrl = ""
+                initialSyncApi = nil
         }
-
-        let logger = logger ?? Logger(minLogLevel: .verbose)
-
-        let initialSyncApi = BCoinApi(url: initialSyncApiUrl, logger: logger)
 
         let databaseFilePath = try DirectoryHelper.directoryURL(for: BitcoinKit.name).appendingPathComponent(BitcoinKit.databaseFileName(walletId: walletId, networkType: networkType, bip: bip, syncMode: syncMode)).path
         let storage = GrdbStorage(databaseFilePath: databaseFilePath)
