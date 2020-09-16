@@ -5,6 +5,7 @@ import HsToolKit
 
 public class InsightApi {
     private static let paginationLimit = 50
+    private static let addressesLimit = 99
 
     private let url: String
     private let networkManager: NetworkManager
@@ -19,9 +20,23 @@ public class InsightApi {
 extension InsightApi: ISyncTransactionApi {
 
     public func getTransactions(addresses: [String]) -> Single<[SyncTransactionItem]> {
-        let joinedAddresses = addresses.joined(separator: ",")
+        sendAddressesRecursive(addresses: addresses)
+    }
 
-        return getTransactionsRecursive(addresses: joinedAddresses)
+    private func sendAddressesRecursive(addresses: [String], from: Int = 0, transactions: [SyncTransactionItem] = []) -> Single<[SyncTransactionItem]> {
+        let last = min(from + InsightApi.addressesLimit, addresses.count)
+        let chunk = addresses[from..<last].joined(separator: ",")
+
+        return getTransactionsRecursive(addresses: chunk, from: from).flatMap { [weak self] result -> Single<[SyncTransactionItem]> in
+            let resultTransactions = transactions + result
+
+            let finishSingle = Single.just(resultTransactions)
+            if last >= addresses.count {
+                return finishSingle
+            } else {
+                return self?.sendAddressesRecursive(addresses: addresses, from: from + InsightApi.paginationLimit, transactions: resultTransactions) ?? finishSingle
+            }
+        }
     }
 
     private func getTransactionsRecursive(addresses: String, from: Int = 0, transactions: [SyncTransactionItem] = []) -> Single<[SyncTransactionItem]> {

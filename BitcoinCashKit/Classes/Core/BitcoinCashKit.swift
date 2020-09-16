@@ -33,11 +33,11 @@ public class BitcoinCashKit: AbstractKit {
         switch networkType {
             case .mainNet:
                 network = MainNet()
-                initialSyncApiUrl = "https://cashexplorer.bitcoin.com/api"
+                initialSyncApiUrl = "https://explorer.api.bitcoin.com/bch/v1"
                 validScheme = "bitcoincash"
             case .testNet:
                 network = TestNet()
-                initialSyncApiUrl = "https://tbch.blockdozer.com/api/" //not working
+                initialSyncApiUrl = "https://explorer.api.bitcoin.com/tbch/v1"
                 validScheme = "bchtest"
         }
 
