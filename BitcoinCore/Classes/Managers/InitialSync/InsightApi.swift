@@ -27,14 +27,14 @@ extension InsightApi: ISyncTransactionApi {
         let last = min(from + InsightApi.addressesLimit, addresses.count)
         let chunk = addresses[from..<last].joined(separator: ",")
 
-        return getTransactionsRecursive(addresses: chunk, from: from).flatMap { [weak self] result -> Single<[SyncTransactionItem]> in
+        return getTransactionsRecursive(addresses: chunk).flatMap { [weak self] result -> Single<[SyncTransactionItem]> in
             let resultTransactions = transactions + result
 
             let finishSingle = Single.just(resultTransactions)
             if last >= addresses.count {
                 return finishSingle
             } else {
-                return self?.sendAddressesRecursive(addresses: addresses, from: from + InsightApi.paginationLimit, transactions: resultTransactions) ?? finishSingle
+                return self?.sendAddressesRecursive(addresses: addresses, from: from + InsightApi.addressesLimit, transactions: resultTransactions) ?? finishSingle
             }
         }
     }
