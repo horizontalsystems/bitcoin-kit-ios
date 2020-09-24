@@ -4,11 +4,11 @@ class TransactionCreator {
     }
 
     private let transactionBuilder: ITransactionBuilder
-    private let transactionProcessor: ITransactionProcessor
+    private let transactionProcessor: IPendingTransactionProcessor
     private let transactionSender: ITransactionSender
     private let bloomFilterManager: IBloomFilterManager
 
-    init(transactionBuilder: ITransactionBuilder, transactionProcessor: ITransactionProcessor, transactionSender: ITransactionSender, bloomFilterManager: IBloomFilterManager) {
+    init(transactionBuilder: ITransactionBuilder, transactionProcessor: IPendingTransactionProcessor, transactionSender: ITransactionSender, bloomFilterManager: IBloomFilterManager) {
         self.transactionBuilder = transactionBuilder
         self.transactionProcessor = transactionProcessor
         self.transactionSender = transactionSender

@@ -344,15 +344,15 @@ extension GrdbStorage: IStorage {
         }
     }
 
-    public func blockHashHeaderHashes(except excludedHashes: [Data]) -> [String] {
+    public func blockHashHeaderHashes(except excludedHashes: [Data]) -> [Data] {
         try! dbPool.read { db in
             let hashesExpression = excludedHashes.map { _ in "?" }.joined(separator: ",")
             let hashesArgs = StatementArguments(excludedHashes)
             let rows = try Row.fetchCursor(db, sql: "SELECT headerHash from blockHashes WHERE headerHash NOT IN (\(hashesExpression))", arguments: hashesArgs)
-            var hexes = [String]()
+            var hexes = [Data]()
 
             while let row = try rows.next() {
-                hexes.append(row[0] as String)
+                hexes.append(row[0] as Data)
             }
 
             return hexes
@@ -439,7 +439,7 @@ extension GrdbStorage: IStorage {
         }
     }
 
-    public func blocks(byHexes hexes: [String]) -> [Block] {
+    public func blocks(byHexes hexes: [Data]) -> [Block] {
         try! dbPool.read { db in
             try Block.filter(hexes.contains(Block.Columns.headerHash)).fetchAll(db)
         }
@@ -527,6 +527,12 @@ extension GrdbStorage: IStorage {
     }
 
     // Transaction
+    public func fullTransaction(byHash hash: Data) -> FullTransaction? {
+        try! dbPool.read { db in
+            try Transaction.filter(Transaction.Columns.dataHash == hash).fetchOne(db)
+        }.flatMap { fullTransaction(transaction: $0) }
+    }
+
     public func transaction(byHash hash: Data) -> Transaction? {
         try! dbPool.read { db in
             try Transaction.filter(Transaction.Columns.dataHash == hash).fetchOne(db)
@@ -537,18 +543,6 @@ extension GrdbStorage: IStorage {
         try! dbPool.read { db in
             try InvalidTransaction.filter(Transaction.Columns.dataHash == hash).fetchOne(db)
         }
-    }
-
-    public func conflictingTransactions(for transaction: FullTransaction) -> [Transaction] {
-        let storageTransactionHashes = transaction.inputs.compactMap { input in
-            inputsUsing(previousOutputTxHash: input.previousOutputTxHash, previousOutputIndex: input.previousOutputIndex)
-                    .filter { $0.transactionHash != transaction.header.dataHash }.first?.transactionHash
-        }
-        guard !storageTransactionHashes.isEmpty else {
-            return []
-        }
-
-        return Array(Set(storageTransactionHashes)).compactMap { self.transaction(byHash: $0) }
     }
 
     public func validOrInvalidTransaction(byUid uid: String) -> Transaction? {
@@ -637,6 +631,18 @@ extension GrdbStorage: IStorage {
     public func add(transaction: FullTransaction) throws {
         _ = try! dbPool.write { db in
             try addWithoutTransaction(transaction: transaction, db: db)
+        }
+    }
+
+    public func update(transaction: FullTransaction) throws {
+        _ = try! dbPool.write { db in
+            try transaction.header.update(db)
+            for input in transaction.inputs {
+                try input.update(db)
+            }
+            for output in transaction.outputs {
+                try output.update(db)
+            }
         }
     }
 
@@ -892,7 +898,7 @@ extension GrdbStorage: IStorage {
         }
     }
 
-    private func inputsUsing(previousOutputTxHash: Data, previousOutputIndex: Int) -> [Input] {
+    public func inputsUsing(previousOutputTxHash: Data, previousOutputIndex: Int) -> [Input] {
         try! dbPool.read { db in
             try Input.filter(Input.Columns.previousOutputTxHash == previousOutputTxHash)
                     .filter(Input.Columns.previousOutputIndex == previousOutputIndex)

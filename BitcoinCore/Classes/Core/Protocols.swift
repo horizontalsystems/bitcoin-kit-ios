@@ -67,7 +67,7 @@ public protocol IStorage {
 
     var blockchainBlockHashes: [BlockHash] { get }
     var lastBlockchainBlockHash: BlockHash? { get }
-    func blockHashHeaderHashes(except: [Data]) -> [String]
+    func blockHashHeaderHashes(except: [Data]) -> [Data]
     var blockHashHeaderHashes: [Data] { get }
     var lastBlockHash: BlockHash? { get }
     func blockHashesSortedBySequenceAndHeight(limit: Int) -> [BlockHash]
@@ -84,7 +84,7 @@ public protocol IStorage {
     func save(block: Block)
     func blocks(heightGreaterThan: Int, sortedBy: Block.Columns, limit: Int) -> [Block]
     func blocks(from startHeight: Int, to endHeight: Int, ascending: Bool) -> [Block]
-    func blocks(byHexes: [String]) -> [Block]
+    func blocks(byHexes: [Data]) -> [Block]
     func blocks(heightGreaterThanOrEqualTo: Int, stale: Bool) -> [Block]
     func blocks(stale: Bool) -> [Block]
     func blockByHeightStalePrioritized(height: Int) -> Block?
@@ -97,9 +97,9 @@ public protocol IStorage {
     func timestamps(from startHeight: Int, to endHeight: Int) -> [Int]
 
     func transactionExists(byHash: Data) -> Bool
+    func fullTransaction(byHash hash: Data) -> FullTransaction?
     func transaction(byHash: Data) -> Transaction?
     func invalidTransaction(byHash: Data) -> InvalidTransaction?
-    func conflictingTransactions(for transaction: FullTransaction) -> [Transaction]
     func validOrInvalidTransaction(byUid: String) -> Transaction?
     func incomingPendingTransactionHashes() -> [Data]
     func incomingPendingTransactionsExist() -> Bool
@@ -109,6 +109,7 @@ public protocol IStorage {
     func newTransaction(byHash: Data) -> Transaction?
     func relayedTransactionExists(byHash: Data) -> Bool
     func add(transaction: FullTransaction) throws
+    func update(transaction: FullTransaction) throws
     func update(transaction: Transaction) throws
     func fullInfo(forTransactions: [TransactionWithBlock]) -> [FullTransactionForInfo]
     func validOrInvalidTransactionsFullInfo(fromTimestamp: Int?, fromOrder: Int?, limit: Int?) -> [FullTransactionForInfo]
@@ -122,6 +123,7 @@ public protocol IStorage {
     func outputs(transactionHash: Data) -> [Output]
     func previousOutput(ofInput: Input) -> Output?
     func inputsUsingOutputs(withTransactionHash: Data) -> [Input]
+    func inputsUsing(previousOutputTxHash: Data, previousOutputIndex: Int) -> [Input]
 
     func sentTransaction(byHash: Data) -> SentTransaction?
     func update(sentTransaction: SentTransaction)
@@ -316,21 +318,32 @@ protocol IScriptExtractor: class {
 }
 
 protocol IOutputsCache: class {
-    func add(fromOutputs outputs: [Output])
+    func addMineOutputs(from outputs: [Output])
     func hasOutputs(forInputs inputs: [Input]) -> Bool
     func clear()
 }
 
-public protocol ITransactionProcessor: class {
-    var listener: IBlockchainDataListener? { get set }
-
-    func processReceived(transactions: [FullTransaction], inBlock block: Block?, skipCheckBloomFilter: Bool) throws
-    func processCreated(transaction: FullTransaction) throws
-    func processInvalid(transactionHash: Data, conflictingTxHash: Data?)
+protocol ITransactionInvalidator {
+    func invalidate(transaction: Transaction)
 }
 
-protocol ITransactionMediator {
-    func resolve(receivedTransaction transaction: FullTransaction, conflictingTransactions: [Transaction]) -> ConflictResolution
+protocol ITransactionConflictsResolver {
+    func transactionsConflicting(withInblockTransaction transaction: FullTransaction) -> [Transaction]
+    func transactionsConflicting(withPendingTransaction transaction: FullTransaction) -> [Transaction]
+    func incomingPendingTransactionsConflicting(with transaction: FullTransaction) -> [Transaction]
+}
+
+public protocol IBlockTransactionProcessor: class {
+    var listener: IBlockchainDataListener? { get set }
+
+    func processReceived(transactions: [FullTransaction], inBlock block: Block, skipCheckBloomFilter: Bool) throws
+}
+
+public protocol IPendingTransactionProcessor: class {
+    var listener: IBlockchainDataListener? { get set }
+
+    func processReceived(transactions: [FullTransaction], skipCheckBloomFilter: Bool) throws
+    func processCreated(transaction: FullTransaction) throws
 }
 
 protocol ITransactionExtractor {

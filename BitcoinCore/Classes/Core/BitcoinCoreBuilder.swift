@@ -170,10 +170,12 @@ public class BitcoinCoreBuilder {
         let transactionKeySetter = TransactionPublicKeySetter(storage: storage)
         let transactionOutputExtractor = TransactionOutputExtractor(transactionKeySetter: transactionKeySetter, pluginManager: pluginManager, logger: logger)
         let transactionAddressExtractor = TransactionOutputAddressExtractor(storage: storage, addressConverter: addressConverter)
-        let transactionProcessor = TransactionProcessor(storage: storage,
-                outputExtractor: transactionOutputExtractor, inputExtractor: transactionInputExtractor,
-                outputsCache: myOutputsCache, outputAddressExtractor: transactionAddressExtractor,
-                addressManager: publicKeyManager, irregularOutputFinder: irregularOutputFinder, transactionInfoConverter: transactionInfoConverter, transactionMediator: TransactionMediator(), listener: dataProvider)
+        let transactionExtractor = TransactionExtractor(outputExtractor: transactionOutputExtractor, inputExtractor: transactionInputExtractor, outputsCache: myOutputsCache, outputAddressExtractor: transactionAddressExtractor)
+        let transactionInvalidator = TransactionInvalidator(storage: storage, transactionInfoConverter: transactionInfoConverter, listener: dataProvider)
+        let transactionConflictResolver = TransactionConflictsResolver(storage: storage)
+        let transactionsProcessorQueue = DispatchQueue(label: "io.horizontalsystems.bitcoin-core.transaction-processor", qos: .background)
+        let blockTransactionProcessor = BlockTransactionProcessor(storage: storage, extractor: transactionExtractor, publicKeyManager: publicKeyManager, irregularOutputFinder: irregularOutputFinder, conflictsResolver: transactionConflictResolver, invalidator: transactionInvalidator, listener: dataProvider, queue: transactionsProcessorQueue)
+        let pendingTransactionProcessor = PendingTransactionProcessor(storage: storage, extractor: transactionExtractor, publicKeyManager: publicKeyManager, irregularOutputFinder: irregularOutputFinder, conflictsResolver: transactionConflictResolver, listener: dataProvider, queue: transactionsProcessorQueue)
 
         let peerDiscovery = PeerDiscovery()
         let peerAddressManager = PeerAddressManager(storage: storage, dnsSeeds: network.dnsSeeds, peerDiscovery: peerDiscovery, logger: logger)
@@ -182,7 +184,7 @@ public class BitcoinCoreBuilder {
 
         let peerManager = PeerManager()
         let unspentOutputSelector = UnspentOutputSelectorChain()
-        let transactionSyncer = TransactionSyncer(storage: storage, processor: transactionProcessor, publicKeyManager: publicKeyManager)
+        let transactionSyncer = TransactionSyncer(storage: storage, processor: pendingTransactionProcessor, invalidator: transactionInvalidator, publicKeyManager: publicKeyManager)
 
         let checkpoint = BlockSyncer.resolveCheckpoint(network: network, syncMode: syncMode, storage: storage)
 
@@ -197,7 +199,7 @@ public class BitcoinCoreBuilder {
         let watchedTransactionManager = WatchedTransactionManager()
 
         let blockchain = Blockchain(storage: storage, blockValidator: blockValidator, factory: factory, listener: dataProvider)
-        let blockSyncer = BlockSyncer.instance(storage: storage, checkpoint: checkpoint, factory: factory, transactionProcessor: transactionProcessor, blockchain: blockchain, publicKeyManager: publicKeyManager, logger: logger)
+        let blockSyncer = BlockSyncer.instance(storage: storage, checkpoint: checkpoint, factory: factory, transactionProcessor: blockTransactionProcessor, blockchain: blockchain, publicKeyManager: publicKeyManager, logger: logger)
         let initialBlockDownload = InitialBlockDownload(blockSyncer: blockSyncer, peerManager: peerManager, merkleBlockValidator: merkleBlockValidator, logger: logger)
 
         let peerGroup = PeerGroup(factory: factory, reachabilityManager: reachabilityManager,
@@ -218,7 +220,7 @@ public class BitcoinCoreBuilder {
         let transactionFeeCalculator = TransactionFeeCalculator(recipientSetter: recipientSetter, inputSetter: inputSetter, addressConverter: addressConverter, publicKeyManager: publicKeyManager, changeScriptType: bip.scriptType)
         let transactionSendTimer = TransactionSendTimer(interval: 60)
         let transactionSender = TransactionSender(transactionSyncer: transactionSyncer, initialBlockDownload: initialBlockDownload, peerManager: peerManager, storage: storage, timer: transactionSendTimer, logger: logger)
-        let transactionCreator = TransactionCreator(transactionBuilder: transactionBuilder, transactionProcessor: transactionProcessor, transactionSender: transactionSender, bloomFilterManager: bloomFilterManager)
+        let transactionCreator = TransactionCreator(transactionBuilder: transactionBuilder, transactionProcessor: pendingTransactionProcessor, transactionSender: transactionSender, bloomFilterManager: bloomFilterManager)
         let mempoolTransactions = MempoolTransactions(transactionSyncer: transactionSyncer, transactionSender: transactionSender)
 
         let syncManager = SyncManager(reachabilityManager: reachabilityManager, initialSyncer: initialSyncer, peerGroup: peerGroup, apiSyncStateManager: stateManager, bestBlockHeight: blockSyncer.localDownloadedBestBlockHeight)
@@ -254,7 +256,8 @@ public class BitcoinCoreBuilder {
         bloomFilterManager.delegate = bloomFilterLoader
         dataProvider.delegate = bitcoinCore
         syncManager.delegate = bitcoinCore
-        transactionProcessor.transactionListener = watchedTransactionManager
+        blockTransactionProcessor.transactionListener = watchedTransactionManager
+        pendingTransactionProcessor.transactionListener = watchedTransactionManager
         transactionSendTimer.delegate = transactionSender
 
         bloomFilterManager.add(provider: watchedTransactionManager)

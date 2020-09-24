@@ -6,7 +6,7 @@ class BlockSyncer {
 
     private let checkpoint: Checkpoint
     private let factory: IFactory
-    private let transactionProcessor: ITransactionProcessor
+    private let transactionProcessor: IBlockTransactionProcessor
     private let blockchain: IBlockchain
     private let publicKeyManager: IPublicKeyManager
 
@@ -15,7 +15,7 @@ class BlockSyncer {
 
     private let logger: Logger?
 
-    init(storage: IStorage, checkpoint: Checkpoint, factory: IFactory, transactionProcessor: ITransactionProcessor,
+    init(storage: IStorage, checkpoint: Checkpoint, factory: IFactory, transactionProcessor: IBlockTransactionProcessor,
          blockchain: IBlockchain, publicKeyManager: IPublicKeyManager, hashCheckpointThreshold: Int, logger: Logger?, state: BlockSyncerState
     ) {
         self.storage = storage
@@ -49,9 +49,8 @@ class BlockSyncer {
         var excludedHashes = [checkpoint.block.headerHash]
         checkpoint.additionalBlocks.forEach { excludedHashes.append($0.headerHash) }
 
-        let blockReversedHashes = storage.blockHashHeaderHashes(except: excludedHashes)
-
-        let blocksToDelete = storage.blocks(byHexes: blockReversedHashes)
+        let blockHashes = storage.blockHashHeaderHashes(except: excludedHashes)
+        let blocksToDelete = storage.blocks(byHexes: blockHashes)
         try blockchain.deleteBlocks(blocks: blocksToDelete)
     }
 
@@ -167,7 +166,7 @@ extension BlockSyncer: IBlockSyncer {
 extension BlockSyncer {
 
     public static func instance(storage: IStorage, checkpoint: Checkpoint, factory: IFactory,
-                                transactionProcessor: ITransactionProcessor, blockchain: IBlockchain, publicKeyManager: IPublicKeyManager,
+                                transactionProcessor: IBlockTransactionProcessor, blockchain: IBlockchain, publicKeyManager: IPublicKeyManager,
                                 hashCheckpointThreshold: Int = 100, logger: Logger? = nil, state: BlockSyncerState = BlockSyncerState()) -> BlockSyncer {
 
         let syncer = BlockSyncer(storage: storage, checkpoint: checkpoint, factory: factory, transactionProcessor: transactionProcessor,
