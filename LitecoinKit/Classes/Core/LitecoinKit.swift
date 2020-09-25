@@ -98,7 +98,7 @@ public class LitecoinKit: AbstractKit {
         case .bip49:
             bitcoinCore.add(restoreKeyConverter: Bip49RestoreKeyConverter(addressConverter: base58AddressConverter))
         case .bip84:
-            bitcoinCore.add(restoreKeyConverter: Bip84RestoreKeyConverter(addressConverter: bech32AddressConverter))
+            bitcoinCore.add(restoreKeyConverter: KeyHashRestoreKeyConverter())
         }
     }
 
