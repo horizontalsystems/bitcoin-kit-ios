@@ -9,7 +9,7 @@ class BlockSyncerTests: QuickSpec {
         let mockStorage = MockIStorage()
         let mockFactory = MockIFactory()
         let mockListener = MockIBlockSyncListener()
-        let mockTransactionProcessor = MockITransactionProcessor()
+        let mockTransactionProcessor = MockIBlockTransactionProcessor()
         let mockBlockchain = MockIBlockchain()
         let mockAddressManager = MockIPublicKeyManager()
         let mockState = MockBlockSyncerState()

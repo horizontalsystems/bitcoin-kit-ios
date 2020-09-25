@@ -166,6 +166,10 @@ extension BitcoinCore {
         try transactionCreator.create(from: unspentOutput, to: address, feeRate: feeRate, sortType: sortType)
     }
 
+    public func createRawTransaction(to address: String, value: Int, feeRate: Int, sortType: TransactionDataSortType, pluginData: [UInt8: IPluginData] = [:]) throws -> Data {
+        try transactionCreator.createRawTransaction(to: address, value: value, feeRate: feeRate, senderPay: true, sortType: sortType, pluginData: pluginData)
+    }
+
     public func validate(address: String, pluginData: [UInt8: IPluginData] = [:]) throws {
         try pluginManager.validate(address: try addressConverter.convert(address: address), pluginData: pluginData)
     }

@@ -7,7 +7,7 @@ import Quick
 class TransactionCreatorTests: QuickSpec {
     override func spec() {
         let mockTransactionBuilder = MockITransactionBuilder()
-        let mockTransactionProcessor = MockITransactionProcessor()
+        let mockTransactionProcessor = MockIPendingTransactionProcessor()
         let mockTransactionSender = MockITransactionSender()
         let mockBloomFilterManager = MockIBloomFilterManager()
 

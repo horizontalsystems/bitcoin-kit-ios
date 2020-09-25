@@ -52,4 +52,17 @@ extension TransactionCreator: ITransactionCreator {
         return transaction
     }
 
+    func createRawTransaction(to address: String, value: Int, feeRate: Int, senderPay: Bool, sortType: TransactionDataSortType, pluginData: [UInt8: IPluginData] = [:]) throws -> Data {
+        let transaction = try transactionBuilder.buildTransaction(
+                toAddress: address,
+                value: value,
+                feeRate: feeRate,
+                senderPay: senderPay,
+                sortType: sortType,
+                pluginData: pluginData
+        )
+
+        return TransactionSerializer.serialize(transaction: transaction)
+    }
+
 }
