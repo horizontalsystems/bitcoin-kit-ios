@@ -50,6 +50,10 @@ open class AbstractKit {
         try bitcoinCore.redeem(from: unspentOutput, to: address, feeRate: feeRate, sortType: sortType)
     }
 
+    open func createRawTransaction(to address: String, value: Int, feeRate: Int, sortType: TransactionDataSortType, pluginData: [UInt8: IPluginData] = [:]) throws -> Data {
+        try bitcoinCore.createRawTransaction(to: address, value: value, feeRate: feeRate, sortType: sortType, pluginData: pluginData)
+    }
+
     open func validate(address: String, pluginData: [UInt8: IPluginData] = [:]) throws {
         try bitcoinCore.validate(address: address, pluginData: pluginData)
     }
