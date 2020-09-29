@@ -38,18 +38,11 @@ extension TransactionConflictsResolver: ITransactionConflictsResolver {
         }
 
         // If any of conflicting transactions is already in a block, then current transaction is invalid and non of them is conflicting with it.
-        let conflictingHash = conflictingTransactions.allSatisfy {
-            $0.blockHash == nil
-        } ? transaction.header.dataHash : nil
-        var needToUpdate = [Transaction]()
-
-        conflictingTransactions.forEach {
-            if $0.conflictingTxHash == nil && conflictingHash != nil {
-                needToUpdate.append($0)
-            }
+        guard conflictingTransactions.allSatisfy({ $0.blockHash == nil }) else {
+            return []
         }
 
-        return needToUpdate
+        return conflictingTransactions
     }
 
     func incomingPendingTransactionsConflicting(with transaction: FullTransaction) -> [Transaction] {
