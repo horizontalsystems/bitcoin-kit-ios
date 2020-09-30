@@ -3,19 +3,19 @@ import ObjectMapper
 
 open class SyncTransactionItem: ImmutableMappable {
     public let blockHash: String?
-    public let blockHeight: Int
+    public let blockHeight: Int?
     public let txOutputs: [SyncTransactionOutputItem]
 
-    public init(hash: String, height: Int, txOutputs: [SyncTransactionOutputItem]) {
+    public init(hash: String?, height: Int?, txOutputs: [SyncTransactionOutputItem]) {
         self.blockHash = hash
         self.blockHeight = height
         self.txOutputs = txOutputs
     }
 
     required public init(map: Map) throws {
-        blockHash = try map.value("block")
-        blockHeight = try map.value("height")
-        txOutputs = try map.value("outputs")
+        blockHash = try? map.value("block")
+        blockHeight = try? map.value("height")
+        txOutputs = (try? map.value("outputs")) ?? []
     }
 
     static func ==(lhs: SyncTransactionItem, rhs: SyncTransactionItem) -> Bool {

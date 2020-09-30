@@ -14,8 +14,8 @@ public class BlockHash: Record {
         super.init()
     }
 
-    init?(headerHashReversedHex: String?, height: Int, sequence: Int) {
-        guard let hex = headerHashReversedHex, let headerHash = Data(hex: hex) else {
+    init?(headerHashReversedHex: String?, height: Int?, sequence: Int) {
+        guard let hex = headerHashReversedHex, let height = height, let headerHash = Data(hex: hex) else {
             return nil
         }
 

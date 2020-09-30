@@ -98,9 +98,9 @@ extension InsightApi: ISyncTransactionApi {
     class InsightTransactionItem: SyncTransactionItem {
 
         required init(map: Map) throws {
-            let blockHash: String = try map.value("blockhash")
-            let blockHeight: Int = try map.value("blockheight")
-            let txOutputs: [InsightTransactionOutputItem] = try map.value("vout")
+            let blockHash: String? = try? map.value("blockhash")
+            let blockHeight: Int? = try? map.value("blockheight")
+            let txOutputs: [InsightTransactionOutputItem] = (try? map.value("vout")) ?? []
             super.init(hash: blockHash, height: blockHeight, txOutputs: txOutputs.map { $0 as SyncTransactionOutputItem })
         }
 
