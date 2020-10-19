@@ -48,11 +48,10 @@ extension InputSetter: IInputSetter {
 
     func setInputs(to mutableTransaction: MutableTransaction, feeRate: Int, senderPay: Bool, sortType: TransactionDataSortType) throws {
         let value = mutableTransaction.recipientValue
-        let dust = dustCalculator.dust(type: changeScriptType)
         let unspentOutputInfo = try unspentOutputSelector.select(
                 value: value, feeRate: feeRate,
                 outputScriptType: mutableTransaction.recipientAddress.scriptType, changeType: changeScriptType,
-                senderPay: senderPay, dust: dust, pluginDataOutputSize: mutableTransaction.pluginDataOutputSize
+                senderPay: senderPay, pluginDataOutputSize: mutableTransaction.pluginDataOutputSize
         )
         let unspentOutputs = inputSorterFactory.sorter(for: sortType).sort(unspentOutputs: unspentOutputInfo.unspentOutputs)
 

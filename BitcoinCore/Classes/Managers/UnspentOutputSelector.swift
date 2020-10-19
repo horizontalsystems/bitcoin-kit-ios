@@ -16,11 +16,13 @@ public class UnspentOutputSelector {
 
     private let calculator: ITransactionSizeCalculator
     private let provider: IUnspentOutputProvider
+    private let dustCalculator: IDustCalculator
     private let outputsLimit: Int?
 
-    public init(calculator: ITransactionSizeCalculator, provider: IUnspentOutputProvider, outputsLimit: Int? = nil) {
+    public init(calculator: ITransactionSizeCalculator, provider: IUnspentOutputProvider, dustCalculator: IDustCalculator, outputsLimit: Int? = nil) {
         self.calculator = calculator
         self.provider = provider
+        self.dustCalculator = dustCalculator
         self.outputsLimit = outputsLimit
     }
 
@@ -28,11 +30,13 @@ public class UnspentOutputSelector {
 
 extension UnspentOutputSelector: IUnspentOutputSelector {
 
-    public func select(value: Int, feeRate: Int, outputScriptType: ScriptType = .p2pkh, changeType: ScriptType = .p2pkh, senderPay: Bool, dust: Int, pluginDataOutputSize: Int) throws -> SelectedUnspentOutputInfo {
+    public func select(value: Int, feeRate: Int, outputScriptType: ScriptType = .p2pkh, changeType: ScriptType = .p2pkh, senderPay: Bool, pluginDataOutputSize: Int) throws -> SelectedUnspentOutputInfo {
         let unspentOutputs = provider.spendableUtxo
+        let recipientOutputDust = dustCalculator.dust(type: outputScriptType)
+        let changeOutputDust = dustCalculator.dust(type: changeType)
 
         // check if value is not dust. recipientValue may be less, but not more
-        guard value >= dust else {
+        guard value >= recipientOutputDust else {
             throw BitcoinCoreErrors.SendValueErrors.dust
         }
         guard !unspentOutputs.isEmpty else {
@@ -67,7 +71,7 @@ extension UnspentOutputSelector: IUnspentOutputSelector {
             sentValue = senderPay ? value + fee : value
 
             if sentValue <= totalValue {      // totalValue is enough
-                if recipientValue >= dust {   // receivedValue won't be dust
+                if recipientValue >= recipientOutputDust {   // receivedValue won't be dust
                     break
                 } else {
                     // Here senderPay is false, because otherwise "dust" exception would throw far above.
@@ -86,9 +90,9 @@ extension UnspentOutputSelector: IUnspentOutputSelector {
         let withChangeRecipientValue = senderPay ? value : value - changeOutputHavingTransactionFee
         let withChangeSentValue = senderPay ? value + changeOutputHavingTransactionFee : value
         // if selected UTXOs total value >= recipientValue(toOutput value) + fee(for transaction with change output) + dust(minimum changeOutput value)
-        if totalValue >= withChangeRecipientValue + changeOutputHavingTransactionFee + dust {
+        if totalValue >= withChangeRecipientValue + changeOutputHavingTransactionFee + changeOutputDust {
             // totalValue is too much, we must have change output
-            guard withChangeRecipientValue > dust else {
+            guard withChangeRecipientValue >= recipientOutputDust else {
                 throw BitcoinCoreErrors.SendValueErrors.dust
             }
 

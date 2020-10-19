@@ -4,20 +4,24 @@ public class UnspentOutputSelectorSingleNoChange {
 
     private let calculator: ITransactionSizeCalculator
     private let provider: IUnspentOutputProvider
+    private let dustCalculator: IDustCalculator
 
-    public init(calculator: ITransactionSizeCalculator, provider: IUnspentOutputProvider) {
+    public init(calculator: ITransactionSizeCalculator, provider: IUnspentOutputProvider, dustCalculator: IDustCalculator) {
         self.calculator = calculator
         self.provider = provider
+        self.dustCalculator = dustCalculator
     }
 
 }
 
 extension UnspentOutputSelectorSingleNoChange: IUnspentOutputSelector {
 
-    public func select(value: Int, feeRate: Int, outputScriptType: ScriptType = .p2pkh, changeType: ScriptType = .p2pkh, senderPay: Bool, dust: Int, pluginDataOutputSize: Int) throws -> SelectedUnspentOutputInfo {
+    public func select(value: Int, feeRate: Int, outputScriptType: ScriptType = .p2pkh, changeType: ScriptType = .p2pkh, senderPay: Bool, pluginDataOutputSize: Int) throws -> SelectedUnspentOutputInfo {
         let unspentOutputs = provider.spendableUtxo
+        let recipientOutputDust = dustCalculator.dust(type: outputScriptType)
+        let changeOutputDust = dustCalculator.dust(type: changeType)
 
-        guard value >= dust else {
+        guard value >= recipientOutputDust else {
             throw BitcoinCoreErrors.SendValueErrors.dust
         }
         guard !unspentOutputs.isEmpty else {
@@ -32,9 +36,9 @@ extension UnspentOutputSelectorSingleNoChange: IUnspentOutputSelector {
             let recipientValue = senderPay ? value : value - fee
             let sentValue = senderPay ? value + fee : value
 
-            if (sentValue <= output.value) &&                 // output.value is enough
-                       (recipientValue >= dust) &&            // receivedValue won't be dust
-                       (output.value - sentValue < dust) {    // no need to add change output
+            if (sentValue <= output.value) &&                                // output.value is enough
+                       (recipientValue >= recipientOutputDust) &&            // receivedValue won't be dust
+                       (output.value - sentValue < changeOutputDust) {       // no need to add change output
                 return SelectedUnspentOutputInfo(unspentOutputs: [unspentOutput], recipientValue: recipientValue, changeValue: nil)
             }
         }
