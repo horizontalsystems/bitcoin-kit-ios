@@ -413,12 +413,12 @@ public protocol ITransactionSizeCalculator {
     func toBytes(fee: Int) -> Int
 }
 
-protocol IDustCalculator {
+public protocol IDustCalculator {
     func dust(type: ScriptType) -> Int
 }
 
 public protocol IUnspentOutputSelector {
-    func select(value: Int, feeRate: Int, outputScriptType: ScriptType, changeType: ScriptType, senderPay: Bool, dust: Int, pluginDataOutputSize: Int) throws -> SelectedUnspentOutputInfo
+    func select(value: Int, feeRate: Int, outputScriptType: ScriptType, changeType: ScriptType, senderPay: Bool, pluginDataOutputSize: Int) throws -> SelectedUnspentOutputInfo
 }
 
 public protocol IUnspentOutputProvider {

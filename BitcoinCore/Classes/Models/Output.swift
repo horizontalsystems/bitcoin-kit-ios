@@ -17,7 +17,11 @@ public enum ScriptType: Int, DatabaseValueConvertible {
     }
 
     var witness: Bool {
-        return self == .p2wpkh || self == .p2wpkhSh || self == .p2wsh
+        self == .p2wpkh || self == .p2wpkhSh || self == .p2wsh
+    }
+
+    var nativeSegwit: Bool {
+        self == .p2wpkh || self == .p2wsh
     }
 
 }

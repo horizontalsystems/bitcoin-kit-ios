@@ -24,5 +24,5 @@ class MainNet: INetwork {
         "dnsseed.masternode.io",
     ]
 
-    let dustRelayTxFee = 1000 // https://github.com/dashpay/dash/blob/master/src/policy/policy.h#L36
+    let dustRelayTxFee = 3000 // https://github.com/dashpay/dash/blob/master/src/policy/policy.h#L38
 }
