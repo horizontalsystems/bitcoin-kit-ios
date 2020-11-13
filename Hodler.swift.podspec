@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name             = 'Hodler.swift'
   s.module_name      = 'Hodler'
-  s.version          = '0.15.2'
+  s.version          = '0.15.3'
   s.summary          = 'Hodler library for Swift.'
 
   s.description      = <<-DESC
