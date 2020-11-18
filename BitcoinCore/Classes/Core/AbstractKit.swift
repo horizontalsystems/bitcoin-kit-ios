@@ -46,6 +46,10 @@ open class AbstractKit {
         try bitcoinCore.send(to: hash, scriptType: scriptType, value: value, feeRate: feeRate, sortType: sortType)
     }
 
+    public func resend(transactionHash: String, feeRate: Int) throws -> FullTransaction {
+        try bitcoinCore.resend(transactionHash: transactionHash, feeRate: feeRate)
+    }
+
     public func redeem(from unspentOutput: UnspentOutput, to address: String, feeRate: Int, sortType: TransactionDataSortType) throws -> FullTransaction {
         try bitcoinCore.redeem(from: unspentOutput, to: address, feeRate: feeRate, sortType: sortType)
     }
@@ -109,5 +113,4 @@ open class AbstractKit {
     public func rawTransaction(transactionHash: String) -> String? {
         bitcoinCore.rawTransaction(transactionHash: transactionHash)
     }
-
 }

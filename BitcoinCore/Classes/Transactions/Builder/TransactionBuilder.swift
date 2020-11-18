@@ -43,4 +43,7 @@ extension TransactionBuilder: ITransactionBuilder {
         return mutableTransaction.build()
     }
 
+    func rebuildTransaction(transaction: FullTransaction, feeRate: Int) throws -> FullTransaction {
+        let inputsTotalValue = transaction.inputs.reduce(0) { acc, input in acc += input.previousOutputIndex }
+    }
 }

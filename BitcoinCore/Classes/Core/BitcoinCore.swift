@@ -162,6 +162,11 @@ extension BitcoinCore {
         return try transactionCreator.create(to: toAddress.stringValue, value: value, feeRate: feeRate, senderPay: true, sortType: sortType, pluginData: [:])
     }
 
+
+    func resend(transactionHash: String, feeRate: Int) throws -> FullTransaction {
+        try transactionCreator.recreate(transactionHash: transactionHash, feeRate: feeRate)
+    }
+
     func redeem(from unspentOutput: UnspentOutput, to address: String, feeRate: Int, sortType: TransactionDataSortType) throws -> FullTransaction {
         try transactionCreator.create(from: unspentOutput, to: address, feeRate: feeRate, sortType: sortType)
     }

@@ -208,6 +208,14 @@ extension BaseAdapter {
         }
     }
 
+    func resend(transactionHash: String, feeRate: Int) {
+        do {
+            _ = try self.abstractKit.resend(transactionHash: transactionHash, feeRate: feeRate)
+        } catch {
+            print(error)
+        }
+    }
+
     func availableBalance(for address: String?, pluginData: [UInt8: IPluginData] = [:]) -> Decimal {
         let amount = (try? abstractKit.maxSpendableValue(toAddress: address, feeRate: feeRate, pluginData: pluginData)) ?? 0
         return Decimal(amount) / coinRate

@@ -1,18 +1,22 @@
 class TransactionCreator {
     enum CreationError: Error {
         case transactionAlreadyExists
+        case noTransactionToRecreate
+        case cannotRecreateConfirmedTransaction
     }
 
     private let transactionBuilder: ITransactionBuilder
     private let transactionProcessor: IPendingTransactionProcessor
     private let transactionSender: ITransactionSender
     private let bloomFilterManager: IBloomFilterManager
+    private let storage: IStorage
 
-    init(transactionBuilder: ITransactionBuilder, transactionProcessor: IPendingTransactionProcessor, transactionSender: ITransactionSender, bloomFilterManager: IBloomFilterManager) {
+    init(transactionBuilder: ITransactionBuilder, transactionProcessor: IPendingTransactionProcessor, transactionSender: ITransactionSender, bloomFilterManager: IBloomFilterManager, storage: IStorage) {
         self.transactionBuilder = transactionBuilder
         self.transactionProcessor = transactionProcessor
         self.transactionSender = transactionSender
         self.bloomFilterManager = bloomFilterManager
+        self.storage = storage
     }
 
     private func processAndSend(transaction: FullTransaction) throws {
@@ -63,6 +67,21 @@ extension TransactionCreator: ITransactionCreator {
         )
 
         return TransactionSerializer.serialize(transaction: transaction)
+    }
+
+    public func recreate(transactionHash: String, feeRate: Int) throws -> FullTransaction {
+        guard let dataHash = Data(hex: transactionHash), let existingTransaction = storage.fullTransaction(byHash: dataHash) else {
+            throw CreationError.noTransactionToRecreate
+        }
+
+        guard existingTransaction.header.blockHash == nil else {
+            throw CreationError.cannotRecreateConfirmedTransaction
+        }
+
+        let transaction = try transactionBuilder.rebuildTransaction(transaction: existingTransaction, feeRate: feeRate)
+
+        try processAndSend(transaction: transaction)
+        return transaction
     }
 
 }

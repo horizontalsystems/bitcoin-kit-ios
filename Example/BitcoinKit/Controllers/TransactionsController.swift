@@ -111,6 +111,10 @@ class TransactionsController: UITableViewController {
 
         let alert = UIAlertController(title: "Success", message: "Transaction Hash copied", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Resend", style: .default) { action in
+            let adapter = self.adapters[self.segmentedControl.selectedSegmentIndex]
+            adapter.resend(transactionHash: transactionHash, feeRate: 5)
+        })
         present(alert, animated: true)
 
         tableView.deselectRow(at: indexPath, animated: true)
