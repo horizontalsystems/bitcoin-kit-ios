@@ -7,7 +7,9 @@ import HsToolKit
 public class BitcoinCashKit: AbstractKit {
     private static let name = "BitcoinCashKit"
     private static let svChainForkHeight = 556767                                  // 2018 November 14
+    private static let bchnChainForkHeight = 661648                                // 2020 November 15, 14:13 GMT
     private static let abcChainForkBlockHash = "0000000000000000004626ff6e3b936941d341c5932ece4357eeccac44e6d56c".reversedData!
+    private static let bchnChainForkBlockHash = "0000000000000000029e471c41818d24b8b74c911071c4ef0b4a0509f9b5a8ce".reversedData!
 
     private static let legacyHeightInterval = 2016                                    // Default block count in difficulty change circle ( Bitcoin )
     private static let legacyTargetSpacing = 10 * 60                                  // Time to mining one block ( 10 min. Bitcoin )
@@ -59,9 +61,12 @@ public class BitcoinCashKit: AbstractKit {
         let blockHelper = BitcoinCashBlockValidatorHelper(coreBlockValidatorHelper: coreBlockHelper)
 
         let daaValidator = DAAValidator(encoder: difficultyEncoder, blockHelper: blockHelper, targetSpacing: BitcoinCashKit.targetSpacing, heightInterval: BitcoinCashKit.heightInterval)
+        let asertValidator = ASERTValidator(encoder: difficultyEncoder)
 
         switch networkType {
         case .mainNet:
+            blockValidatorChain.add(blockValidator: ForkValidator(concreteValidator: asertValidator, forkHeight: BitcoinCashKit.bchnChainForkHeight, expectedBlockHash: BitcoinCashKit.bchnChainForkBlockHash))
+            blockValidatorChain.add(blockValidator: asertValidator)
             blockValidatorChain.add(blockValidator: ForkValidator(concreteValidator: daaValidator, forkHeight: BitcoinCashKit.svChainForkHeight, expectedBlockHash: BitcoinCashKit.abcChainForkBlockHash))
             blockValidatorChain.add(blockValidator: daaValidator)
             blockValidatorChain.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: coreBlockHelper, heightInterval: BitcoinCashKit.legacyHeightInterval, targetTimespan: BitcoinCashKit.legacyTargetSpacing * BitcoinCashKit.legacyHeightInterval, maxTargetBits: BitcoinCashKit.legacyMaxTargetBits))
