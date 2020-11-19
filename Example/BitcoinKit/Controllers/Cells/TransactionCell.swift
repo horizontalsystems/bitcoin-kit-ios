@@ -120,10 +120,10 @@ extension TransactionCell {
 
     static func rowHeight(for transaction: TransactionRecord) -> Int {
         let addressRowsCount = transaction.to.reduce(0) { $0 + rowsCount(address: $1) } + transaction.from.count
-        var height = (addressRowsCount + 9) * 21 + 10
+        var height = (addressRowsCount + 10) * 18 + 30
 
         if transaction.transactionExtraType != nil {
-            height += 20
+            height += 18
         }
 
         return height

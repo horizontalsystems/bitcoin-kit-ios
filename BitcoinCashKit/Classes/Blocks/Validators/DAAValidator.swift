@@ -1,7 +1,7 @@
 import BitcoinCore
 import BigInt
 
-class DAAValidator: IBlockChainedValidator {
+class DAAValidator: IBlockChainedValidator, IBitcoinCashBlockValidator {
     private let largestHash = BigInt(1) << 256
     private let consensusDaaForkHeight = 504031                             // 2017 November 13, 14:06 GMT
 
