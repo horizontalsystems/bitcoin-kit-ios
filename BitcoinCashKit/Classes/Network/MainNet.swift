@@ -12,7 +12,7 @@ class MainNet: INetwork {
     let xPrivKey: UInt32 = 0x0488ade4
     let magic: UInt32 = 0xe3e1f3e8
     let port: UInt32 = 8333
-    let coinType: UInt32 = 0
+    let coinType: UInt32
     let sigHash: SigHashType = .bitcoinCashAll
     var syncableFromApi: Bool = true
 
@@ -22,4 +22,22 @@ class MainNet: INetwork {
     ]
 
     let dustRelayTxFee = 3000
+
+    init(coinType: CoinType = .type145) {
+        self.coinType = coinType.rawValue
+    }
+
+}
+
+public enum CoinType {
+    case type0
+    case type145
+
+    var rawValue: UInt32 {
+        switch self {
+        case .type0: return 0
+        case .type145: return 145
+        }
+    }
+
 }
