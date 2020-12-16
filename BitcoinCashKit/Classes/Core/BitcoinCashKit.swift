@@ -19,7 +19,22 @@ public class BitcoinCashKit: AbstractKit {
     private static let targetSpacing = 10 * 60                                  // Time to mining one block ( 10 min. same as Bitcoin )
     private static let maxTargetBits = 0x1d00ffff                               // Initially and max. target difficulty for blocks
 
-    public enum NetworkType: String, CaseIterable { case mainNet, testNet }
+    public enum NetworkType {
+        case mainNet(coinType: CoinType)
+        case testNet
+
+        var description: String {
+            switch self {
+            case .mainNet(let coinType):
+                switch coinType {
+                case .type0: return "mainNet" // back compatibility for database file name in old NetworkType
+                case .type145: return "mainNet-145"
+                }
+            case .testNet:
+                return "testNet"
+            }
+        }
+    }
 
     public weak var delegate: BitcoinCoreDelegate? {
         didSet {
@@ -27,14 +42,14 @@ public class BitcoinCashKit: AbstractKit {
         }
     }
 
-    public init(withWords words: [String], walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
+    public init(withWords words: [String], walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet(coinType: .type145), confirmationsThreshold: Int = 6, logger: Logger?) throws {
         let network: INetwork
         let initialSyncApiUrl: String
 
         let validScheme: String
         switch networkType {
-            case .mainNet:
-                network = MainNet()
+            case .mainNet(let coinType):
+                network = MainNet(coinType: coinType)
                 initialSyncApiUrl = "https://explorer.api.bitcoin.com/bch/v1"
                 validScheme = "bitcoincash"
             case .testNet:
@@ -109,7 +124,7 @@ extension BitcoinCashKit {
     }
 
     private static func databaseFileName(walletId: String, networkType: NetworkType, syncMode: BitcoinCore.SyncMode) -> String {
-        "\(walletId)-\(networkType.rawValue)-\(syncMode)"
+        "\(walletId)-\(networkType.description)-\(syncMode)"
     }
 
 }

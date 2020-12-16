@@ -7,7 +7,7 @@ class BitcoinCashAdapter: BaseAdapter {
     let bitcoinCashKit: BitcoinCashKit
 
     init(words: [String], testMode: Bool, syncMode: BitcoinCore.SyncMode, logger: Logger) {
-        let networkType: BitcoinCashKit.NetworkType = testMode ? .testNet : .mainNet
+        let networkType: BitcoinCashKit.NetworkType = testMode ? .testNet : .mainNet(coinType: .type145)
         bitcoinCashKit = try! BitcoinCashKit(withWords: words, walletId: "walletId", syncMode: syncMode, networkType: networkType, logger: logger.scoped(with: "BitcoinCashKit"))
 
         super.init(name: "Bitcoin Cash", coinCode: "BCH", abstractKit: bitcoinCashKit)
