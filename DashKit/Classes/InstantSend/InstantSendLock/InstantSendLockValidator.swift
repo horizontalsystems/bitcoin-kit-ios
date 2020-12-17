@@ -20,7 +20,7 @@ class InstantSendLockValidator: IInstantSendLockValidator {
         signId = hasher.hash(data: signId)
 
         // 03. Verify signature by BLS
-        let verified = Kit.verify(messageDigest: signId, pubKey: quorum.quorumPublicKey, signature: isLock.sign)
+        let verified = BlsKit.Kit.verify(messageDigest: signId, pubKey: quorum.quorumPublicKey, signature: isLock.sign)
 
         guard verified else {
             throw DashKitErrors.ISLockValidation.signatureNotValid

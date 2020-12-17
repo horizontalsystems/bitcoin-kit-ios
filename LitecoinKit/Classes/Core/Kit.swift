@@ -4,7 +4,7 @@ import BigInt
 import RxSwift
 import HsToolKit
 
-public class LitecoinKit: AbstractKit {
+public class Kit: AbstractKit {
     private static let heightInterval = 2016                                    // Default block count in difficulty change circle
     private static let targetSpacing = Int(2.5 * 60)                            // Time to mining one block
     private static let maxTargetBits = 0x1e0fffff                               // Initially and max. target difficulty for blocks
@@ -36,7 +36,7 @@ public class LitecoinKit: AbstractKit {
 
         let initialSyncApi = BCoinApi(url: initialSyncApiUrl, logger: logger)
 
-        let databaseFilePath = try DirectoryHelper.directoryURL(for: LitecoinKit.name).appendingPathComponent(LitecoinKit.databaseFileName(walletId: walletId, networkType: networkType, bip: bip, syncMode: syncMode)).path
+        let databaseFilePath = try DirectoryHelper.directoryURL(for: Kit.name).appendingPathComponent(Kit.databaseFileName(walletId: walletId, networkType: networkType, bip: bip, syncMode: syncMode)).path
         let storage = GrdbStorage(databaseFilePath: databaseFilePath)
 
         let paymentAddressParser = PaymentAddressParser(validScheme: "litecoin", removeScheme: true)
@@ -56,9 +56,9 @@ public class LitecoinKit: AbstractKit {
         let difficultyAdjustmentValidator = LegacyDifficultyAdjustmentValidator(
                 encoder: difficultyEncoder,
                 blockValidatorHelper: blockHelper,
-                heightInterval: LitecoinKit.heightInterval,
-                targetTimespan: LitecoinKit.heightInterval * LitecoinKit.targetSpacing,
-                maxTargetBits: LitecoinKit.maxTargetBits
+                heightInterval: Kit.heightInterval,
+                targetTimespan: Kit.heightInterval * Kit.targetSpacing,
+                maxTargetBits: Kit.maxTargetBits
         )
 
         switch networkType {
@@ -67,7 +67,7 @@ public class LitecoinKit: AbstractKit {
             blockValidatorChain.add(blockValidator: BitsValidator())
         case .testNet:
             blockValidatorChain.add(blockValidator: difficultyAdjustmentValidator)
-            blockValidatorChain.add(blockValidator: LegacyTestNetDifficultyValidator(blockHelper: blockHelper, heightInterval: LitecoinKit.heightInterval, targetSpacing: LitecoinKit.targetSpacing, maxTargetBits: LitecoinKit.maxTargetBits))
+            blockValidatorChain.add(blockValidator: LegacyTestNetDifficultyValidator(blockHelper: blockHelper, heightInterval: Kit.heightInterval, targetSpacing: Kit.targetSpacing, maxTargetBits: Kit.maxTargetBits))
         }
 
         blockValidatorSet.add(blockValidator: blockValidatorChain)
@@ -104,10 +104,10 @@ public class LitecoinKit: AbstractKit {
 
 }
 
-extension LitecoinKit {
+extension Kit {
 
     public static func clear(exceptFor walletIdsToExclude: [String] = []) throws {
-        try DirectoryHelper.removeAll(inDirectory: LitecoinKit.name, except: walletIdsToExclude)
+        try DirectoryHelper.removeAll(inDirectory: Kit.name, except: walletIdsToExclude)
     }
 
     private static func databaseFileName(walletId: String, networkType: NetworkType, bip: Bip, syncMode: BitcoinCore.SyncMode) -> String {

@@ -6,11 +6,11 @@ import RxSwift
 
 class DashAdapter: BaseAdapter {
     override var feeRate: Int { return 1 }
-    private let dashKit: DashKit
+    private let dashKit: Kit
 
     init(words: [String], testMode: Bool, syncMode: BitcoinCore.SyncMode, logger: Logger) {
-        let networkType: DashKit.NetworkType = testMode ? .testNet : .mainNet
-        dashKit = try! DashKit(withWords: words, walletId: "walletId", syncMode: syncMode, networkType: networkType, logger: logger.scoped(with: "DashKit"))
+        let networkType: Kit.NetworkType = testMode ? .testNet : .mainNet
+        dashKit = try! Kit(withWords: words, walletId: "walletId", syncMode: syncMode, networkType: networkType, logger: logger.scoped(with: "DashKit"))
 
         super.init(name: "Dash", coinCode: "DASH", abstractKit: dashKit)
         dashKit.delegate = self
@@ -35,7 +35,7 @@ class DashAdapter: BaseAdapter {
     }
 
     class func clear() {
-        try? DashKit.clear()
+        try? Kit.clear()
     }
 }
 

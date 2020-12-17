@@ -6,7 +6,7 @@ class ScryptHasher: IHasher {
     init() {}
 
     func hash(data: Data) -> Data {
-        Kit.scrypt(pass: data)
+        OpenSslKit.Kit.scrypt(pass: data)
     }
 
 }

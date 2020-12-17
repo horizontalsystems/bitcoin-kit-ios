@@ -4,7 +4,7 @@ import BigInt
 import RxSwift
 import HsToolKit
 
-public class DashKit: AbstractKit {
+public class Kit: AbstractKit {
     private static let name = "DashKit"
     private static let heightInterval = 24                                      // Blocks count in window for calculating difficulty
     private static let targetSpacing = 150                                      // Time to mining one block ( 2.5 min. Dash )
@@ -37,7 +37,7 @@ public class DashKit: AbstractKit {
 
         let initialSyncApi = InsightApi(url: initialSyncApiUrl, logger: logger)
 
-        let databaseFilePath = try DirectoryHelper.directoryURL(for: DashKit.name).appendingPathComponent(DashKit.databaseFileName(walletId: walletId, networkType: networkType, syncMode: syncMode)).path
+        let databaseFilePath = try DirectoryHelper.directoryURL(for: Kit.name).appendingPathComponent(Kit.databaseFileName(walletId: walletId, networkType: networkType, syncMode: syncMode)).path
         let storage = DashGrdbStorage(databaseFilePath: databaseFilePath)
         self.storage = storage
 
@@ -61,13 +61,13 @@ public class DashKit: AbstractKit {
         let blockValidatorChain = BlockValidatorChain()
         let blockHelper = BlockValidatorHelper(storage: storage)
 
-        let targetTimespan = DashKit.heightInterval * DashKit.targetSpacing                 // Time to mining all 24 blocks in circle
+        let targetTimespan = Kit.heightInterval * Kit.targetSpacing                 // Time to mining all 24 blocks in circle
         switch networkType {
         case .mainNet:
-            blockValidatorChain.add(blockValidator: DarkGravityWaveValidator(encoder: difficultyEncoder, blockHelper: blockHelper, heightInterval: DashKit.heightInterval , targetTimeSpan: targetTimespan, maxTargetBits: DashKit.maxTargetBits, powDGWHeight: 68589))
+            blockValidatorChain.add(blockValidator: DarkGravityWaveValidator(encoder: difficultyEncoder, blockHelper: blockHelper, heightInterval: Kit.heightInterval , targetTimeSpan: targetTimespan, maxTargetBits: Kit.maxTargetBits, powDGWHeight: 68589))
         case .testNet:
-            blockValidatorChain.add(blockValidator: DarkGravityWaveTestNetValidator(difficultyEncoder: difficultyEncoder, targetSpacing: DashKit.targetSpacing, targetTimeSpan: targetTimespan, maxTargetBits: DashKit.maxTargetBits, powDGWHeight: 4002))
-            blockValidatorChain.add(blockValidator: DarkGravityWaveValidator(encoder: difficultyEncoder, blockHelper: blockHelper, heightInterval: DashKit.heightInterval, targetTimeSpan: targetTimespan, maxTargetBits: DashKit.maxTargetBits, powDGWHeight: 4002))
+            blockValidatorChain.add(blockValidator: DarkGravityWaveTestNetValidator(difficultyEncoder: difficultyEncoder, targetSpacing: Kit.targetSpacing, targetTimeSpan: targetTimespan, maxTargetBits: Kit.maxTargetBits, powDGWHeight: 4002))
+            blockValidatorChain.add(blockValidator: DarkGravityWaveValidator(encoder: difficultyEncoder, blockHelper: blockHelper, heightInterval: Kit.heightInterval, targetTimeSpan: targetTimespan, maxTargetBits: Kit.maxTargetBits, powDGWHeight: 4002))
         }
 
         blockValidatorSet.add(blockValidator: blockValidatorChain)
@@ -170,7 +170,7 @@ public class DashKit: AbstractKit {
 
 }
 
-extension DashKit: BitcoinCoreDelegate {
+extension Kit: BitcoinCoreDelegate {
 
     public func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo]) {
         // check for all new transactions if it's has instant lock
@@ -197,7 +197,7 @@ extension DashKit: BitcoinCoreDelegate {
 
 }
 
-extension DashKit: IInstantTransactionDelegate {
+extension Kit: IInstantTransactionDelegate {
 
     public func onUpdateInstant(transactionHash: Data) {
         guard let transaction = storage.transactionFullInfo(byHash: transactionHash) else {
@@ -213,10 +213,10 @@ extension DashKit: IInstantTransactionDelegate {
 
 }
 
-extension DashKit {
+extension Kit {
 
     public static func clear(exceptFor walletIdsToExclude: [String] = []) throws {
-        try DirectoryHelper.removeAll(inDirectory: DashKit.name, except: walletIdsToExclude)
+        try DirectoryHelper.removeAll(inDirectory: Kit.name, except: walletIdsToExclude)
     }
 
     private static func databaseFileName(walletId: String, networkType: NetworkType, syncMode: BitcoinCore.SyncMode) -> String {

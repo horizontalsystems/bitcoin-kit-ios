@@ -4,18 +4,18 @@ import HsToolKit
 import RxSwift
 
 class BitcoinCashAdapter: BaseAdapter {
-    let bitcoinCashKit: BitcoinCashKit
+    let bitcoinCashKit: Kit
 
     init(words: [String], testMode: Bool, syncMode: BitcoinCore.SyncMode, logger: Logger) {
-        let networkType: BitcoinCashKit.NetworkType = testMode ? .testNet : .mainNet(coinType: .type145)
-        bitcoinCashKit = try! BitcoinCashKit(withWords: words, walletId: "walletId", syncMode: syncMode, networkType: networkType, logger: logger.scoped(with: "BitcoinCashKit"))
+        let networkType: Kit.NetworkType = testMode ? .testNet : .mainNet(coinType: .type145)
+        bitcoinCashKit = try! Kit(withWords: words, walletId: "walletId", syncMode: syncMode, networkType: networkType, logger: logger.scoped(with: "BitcoinCashKit"))
 
         super.init(name: "Bitcoin Cash", coinCode: "BCH", abstractKit: bitcoinCashKit)
         bitcoinCashKit.delegate = self
     }
 
     class func clear() {
-        try? BitcoinCashKit.clear()
+        try? Kit.clear()
     }
 }
 

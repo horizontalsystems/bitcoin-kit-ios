@@ -5,18 +5,18 @@ import HsToolKit
 import RxSwift
 
 class LitecoinAdapter: BaseAdapter {
-    let litecoinKit: LitecoinKit
+    let litecoinKit: Kit
 
     init(words: [String], bip: Bip, testMode: Bool, syncMode: BitcoinCore.SyncMode, logger: Logger) {
-        let networkType: LitecoinKit.NetworkType = testMode ? .testNet : .mainNet
-        litecoinKit = try! LitecoinKit(withWords: words, bip: bip, walletId: "walletId", syncMode: syncMode, networkType: networkType, confirmationsThreshold: 1, logger: logger.scoped(with: "LitecoinKit"))
+        let networkType: Kit.NetworkType = testMode ? .testNet : .mainNet
+        litecoinKit = try! Kit(withWords: words, bip: bip, walletId: "walletId", syncMode: syncMode, networkType: networkType, confirmationsThreshold: 1, logger: logger.scoped(with: "LitecoinKit"))
 
         super.init(name: "Litecoin", coinCode: "LTC", abstractKit: litecoinKit)
         litecoinKit.delegate = self
     }
 
     class func clear() {
-        try? LitecoinKit.clear()
+        try? Kit.clear()
     }
 }
 
