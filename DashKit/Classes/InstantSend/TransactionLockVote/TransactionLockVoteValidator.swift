@@ -41,7 +41,7 @@ class TransactionLockVoteValidator: ITransactionLockVoteValidator {
 
         // 5. Check signature of masternode
         let masternode = quorumMasternodes[index].masternode
-        if !Kit.verify(messageDigest: lockVote.hash, pubKey: masternode.pubKeyOperator, signature: lockVote.vchMasternodeSignature) {
+        if !BlsKit.Kit.verify(messageDigest: lockVote.hash, pubKey: masternode.pubKeyOperator, signature: lockVote.vchMasternodeSignature) {
             throw DashKitErrors.LockVoteValidation.signatureNotValid
         }
     }

@@ -4,7 +4,7 @@ import BigInt
 import RxSwift
 import HsToolKit
 
-public class BitcoinCashKit: AbstractKit {
+public class Kit: AbstractKit {
     private static let name = "BitcoinCashKit"
     private static let svChainForkHeight = 556767                                  // 2018 November 14
     private static let bchnChainForkHeight = 661648                                // 2020 November 15, 14:13 GMT
@@ -62,7 +62,7 @@ public class BitcoinCashKit: AbstractKit {
 
         let initialSyncApi = InsightApi(url: initialSyncApiUrl, logger: logger)
 
-        let databaseFilePath = try DirectoryHelper.directoryURL(for: BitcoinCashKit.name).appendingPathComponent(BitcoinCashKit.databaseFileName(walletId: walletId, networkType: networkType, syncMode: syncMode)).path
+        let databaseFilePath = try DirectoryHelper.directoryURL(for: Kit.name).appendingPathComponent(Kit.databaseFileName(walletId: walletId, networkType: networkType, syncMode: syncMode)).path
         let storage = GrdbStorage(databaseFilePath: databaseFilePath)
         let paymentAddressParser = PaymentAddressParser(validScheme: validScheme, removeScheme: false)
 
@@ -75,17 +75,17 @@ public class BitcoinCashKit: AbstractKit {
         let coreBlockHelper = BlockValidatorHelper(storage: storage)
         let blockHelper = BitcoinCashBlockValidatorHelper(coreBlockValidatorHelper: coreBlockHelper)
 
-        let daaValidator = DAAValidator(encoder: difficultyEncoder, blockHelper: blockHelper, targetSpacing: BitcoinCashKit.targetSpacing, heightInterval: BitcoinCashKit.heightInterval)
+        let daaValidator = DAAValidator(encoder: difficultyEncoder, blockHelper: blockHelper, targetSpacing: Kit.targetSpacing, heightInterval: Kit.heightInterval)
         let asertValidator = ASERTValidator(encoder: difficultyEncoder)
 
         switch networkType {
         case .mainNet:
-            blockValidatorChain.add(blockValidator: ForkValidator(concreteValidator: asertValidator, forkHeight: BitcoinCashKit.bchnChainForkHeight, expectedBlockHash: BitcoinCashKit.bchnChainForkBlockHash))
+            blockValidatorChain.add(blockValidator: ForkValidator(concreteValidator: asertValidator, forkHeight: Kit.bchnChainForkHeight, expectedBlockHash: Kit.bchnChainForkBlockHash))
             blockValidatorChain.add(blockValidator: asertValidator)
-            blockValidatorChain.add(blockValidator: ForkValidator(concreteValidator: daaValidator, forkHeight: BitcoinCashKit.svChainForkHeight, expectedBlockHash: BitcoinCashKit.abcChainForkBlockHash))
+            blockValidatorChain.add(blockValidator: ForkValidator(concreteValidator: daaValidator, forkHeight: Kit.svChainForkHeight, expectedBlockHash: Kit.abcChainForkBlockHash))
             blockValidatorChain.add(blockValidator: daaValidator)
-            blockValidatorChain.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: coreBlockHelper, heightInterval: BitcoinCashKit.legacyHeightInterval, targetTimespan: BitcoinCashKit.legacyTargetSpacing * BitcoinCashKit.legacyHeightInterval, maxTargetBits: BitcoinCashKit.legacyMaxTargetBits))
-            blockValidatorChain.add(blockValidator: EDAValidator(encoder: difficultyEncoder, blockHelper: blockHelper, blockMedianTimeHelper: BlockMedianTimeHelper(storage: storage), maxTargetBits: BitcoinCashKit.legacyMaxTargetBits))
+            blockValidatorChain.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: coreBlockHelper, heightInterval: Kit.legacyHeightInterval, targetTimespan: Kit.legacyTargetSpacing * Kit.legacyHeightInterval, maxTargetBits: Kit.legacyMaxTargetBits))
+            blockValidatorChain.add(blockValidator: EDAValidator(encoder: difficultyEncoder, blockHelper: blockHelper, blockMedianTimeHelper: BlockMedianTimeHelper(storage: storage), maxTargetBits: Kit.legacyMaxTargetBits))
         case .testNet: ()
                 // not use test validators
         }
@@ -117,10 +117,10 @@ public class BitcoinCashKit: AbstractKit {
 
 }
 
-extension BitcoinCashKit {
+extension Kit {
 
     public static func clear(exceptFor walletIdsToExclude: [String] = []) throws {
-        try DirectoryHelper.removeAll(inDirectory: BitcoinCashKit.name, except: walletIdsToExclude)
+        try DirectoryHelper.removeAll(inDirectory: Kit.name, except: walletIdsToExclude)
     }
 
     private static func databaseFileName(walletId: String, networkType: NetworkType, syncMode: BitcoinCore.SyncMode) -> String {

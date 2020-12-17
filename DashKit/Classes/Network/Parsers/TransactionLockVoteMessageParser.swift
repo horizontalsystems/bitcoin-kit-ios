@@ -15,7 +15,7 @@ class TransactionLockVoteMessageParser: IMessageParser {
         let signatureLength = byteStream.read(VarInt.self)
         let vchMasternodeSignature = byteStream.read(Data.self, count: Int(signatureLength.underlyingValue))
 
-        let hash = Kit.sha256sha256(data.prefix(168))
+        let hash = OpenSslKit.Kit.sha256sha256(data.prefix(168))
 
         return TransactionLockVoteMessage(txHash: txHash,
                 outpoint: outpoint,

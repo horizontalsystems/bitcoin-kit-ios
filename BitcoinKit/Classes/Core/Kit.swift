@@ -5,7 +5,7 @@ import BigInt
 import RxSwift
 import HsToolKit
 
-public class BitcoinKit: AbstractKit {
+public class Kit: AbstractKit {
     private static let heightInterval = 2016                                    // Default block count in difficulty change circle ( Bitcoin )
     private static let targetSpacing = 10 * 60                                  // Time to mining one block ( 10 min. Bitcoin )
     private static let maxTargetBits = 0x1d00ffff                               // Initially and max. target difficulty for blocks
@@ -37,7 +37,7 @@ public class BitcoinKit: AbstractKit {
                 initialSyncApi = nil
         }
 
-        let databaseFilePath = try DirectoryHelper.directoryURL(for: BitcoinKit.name).appendingPathComponent(BitcoinKit.databaseFileName(walletId: walletId, networkType: networkType, bip: bip, syncMode: syncMode)).path
+        let databaseFilePath = try DirectoryHelper.directoryURL(for: Kit.name).appendingPathComponent(Kit.databaseFileName(walletId: walletId, networkType: networkType, bip: bip, syncMode: syncMode)).path
         let storage = GrdbStorage(databaseFilePath: databaseFilePath)
 
         let paymentAddressParser = PaymentAddressParser(validScheme: "bitcoin", removeScheme: true)
@@ -57,11 +57,11 @@ public class BitcoinKit: AbstractKit {
 
         switch networkType {
         case .mainNet:
-            blockValidatorChain.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: blockHelper, heightInterval: BitcoinKit.heightInterval, targetTimespan: BitcoinKit.heightInterval * BitcoinKit.targetSpacing, maxTargetBits: BitcoinKit.maxTargetBits))
+            blockValidatorChain.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: blockHelper, heightInterval: Kit.heightInterval, targetTimespan: Kit.heightInterval * Kit.targetSpacing, maxTargetBits: Kit.maxTargetBits))
             blockValidatorChain.add(blockValidator: BitsValidator())
         case .regTest, .testNet:
-            blockValidatorChain.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: blockHelper, heightInterval: BitcoinKit.heightInterval, targetTimespan: BitcoinKit.heightInterval * BitcoinKit.targetSpacing, maxTargetBits: BitcoinKit.maxTargetBits))
-            blockValidatorChain.add(blockValidator: LegacyTestNetDifficultyValidator(blockHelper: blockHelper, heightInterval: BitcoinKit.heightInterval, targetSpacing: BitcoinKit.targetSpacing, maxTargetBits: BitcoinKit.maxTargetBits))
+            blockValidatorChain.add(blockValidator: LegacyDifficultyAdjustmentValidator(encoder: difficultyEncoder, blockValidatorHelper: blockHelper, heightInterval: Kit.heightInterval, targetTimespan: Kit.heightInterval * Kit.targetSpacing, maxTargetBits: Kit.maxTargetBits))
+            blockValidatorChain.add(blockValidator: LegacyTestNetDifficultyValidator(blockHelper: blockHelper, heightInterval: Kit.heightInterval, targetSpacing: Kit.targetSpacing, maxTargetBits: Kit.maxTargetBits))
         }
 
         blockValidatorSet.add(blockValidator: blockValidatorChain)
@@ -103,10 +103,10 @@ public class BitcoinKit: AbstractKit {
 
 }
 
-extension BitcoinKit {
+extension Kit {
 
     public static func clear(exceptFor walletIdsToExclude: [String] = []) throws {
-        try DirectoryHelper.removeAll(inDirectory: BitcoinKit.name, except: walletIdsToExclude)
+        try DirectoryHelper.removeAll(inDirectory: Kit.name, except: walletIdsToExclude)
     }
 
     private static func databaseFileName(walletId: String, networkType: NetworkType, bip: Bip, syncMode: BitcoinCore.SyncMode) -> String {
