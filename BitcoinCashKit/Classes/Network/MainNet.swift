@@ -24,20 +24,12 @@ class MainNet: INetwork {
     let dustRelayTxFee = 3000
 
     init(coinType: CoinType = .type145) {
-        self.coinType = coinType.rawValue
+        self.coinType = UInt32(coinType.rawValue)
     }
 
 }
 
-public enum CoinType {
-    case type0
-    case type145
-
-    var rawValue: UInt32 {
-        switch self {
-        case .type0: return 0
-        case .type145: return 145
-        }
-    }
-
+public enum CoinType: Int {
+    case type0 = 0
+    case type145 = 145
 }
