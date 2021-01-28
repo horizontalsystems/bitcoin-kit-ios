@@ -17,19 +17,23 @@ class MainNet: INetwork {
     var syncableFromApi: Bool = true
 
     let dnsSeeds = [
-        "seed.bitcoinabc.org",
-        "seed-abc.bitcoinforks.org",
+        "seed.bitcoinabc.org",                  // Bitcoin ABC seeder
+        "seed-abc.bitcoinforks.org",            // bitcoinforks seeders
+        "btccash-seeder.bitcoinunlimited.info", // BU backed seeder
+        "seed.bitprim.org",                     // Bitprim
+        "seed.deadalnix.me",                    // Amaury SÉCHET
+        "seeder.criptolayer.net"                // criptolayer.net
     ]
 
     let dustRelayTxFee = 3000
 
     init(coinType: CoinType = .type145) {
-        self.coinType = UInt32(coinType.rawValue)
+        self.coinType = coinType.rawValue
     }
 
 }
 
-public enum CoinType: Int {
+public enum CoinType: UInt32 {
     case type0 = 0
     case type145 = 145
 }
