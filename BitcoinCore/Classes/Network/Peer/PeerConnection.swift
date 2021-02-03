@@ -165,8 +165,11 @@ extension PeerConnection: IPeerConnection {
             guard !data.isEmpty else {
                 return
             }
-            _ = data.withUnsafeBytes {
-                outputStream?.write($0.baseAddress!.assumingMemoryBound(to: UInt8.self), maxLength: data.count)
+            data.withUnsafeBytes {
+                guard let pointer = $0.baseAddress?.assumingMemoryBound(to: UInt8.self) else {
+                    return
+                }
+                outputStream?.write(pointer, maxLength: data.count)
             }
         } catch {
             log("Connection can't send message \(message) with error \(error)", level: .error) //todo catch error when try send message not registered in serializers

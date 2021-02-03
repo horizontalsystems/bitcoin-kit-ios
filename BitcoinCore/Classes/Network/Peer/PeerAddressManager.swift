@@ -8,6 +8,7 @@ class PeerAddressManager {
     private var peerDiscovery: IPeerDiscovery
     private let state: PeerAddressManagerState
     private let logger: Logger?
+    private let queue = DispatchQueue(label: "io.horizontalsystems.bitcoin-core.peer-address-manager", qos: .background)
 
     init(storage: IStorage, dnsSeeds: [String], peerDiscovery: IPeerDiscovery, state: PeerAddressManagerState = PeerAddressManagerState(), logger: Logger? = nil) {
         self.storage = storage
@@ -30,7 +31,9 @@ extension PeerAddressManager: IPeerAddressManager {
             return nil
         }
 
-        state.add(usedIp: ip)
+        queue.sync {
+            state.add(usedIp: ip)
+        }
 
         return ip
     }
@@ -44,14 +47,18 @@ extension PeerAddressManager: IPeerAddressManager {
     }
 
     func markSuccess(ip: String) {
-        state.remove(usedIp: ip)
-        storage.increasePeerAddressScore(ip: ip)
+        queue.sync {
+            state.remove(usedIp: ip)
+            storage.increasePeerAddressScore(ip: ip)
+        }
     }
 
 
     func markFailed(ip: String) {
-        state.remove(usedIp: ip)
-        storage.deletePeerAddress(byIp: ip)
+        queue.sync {
+            state.remove(usedIp: ip)
+            storage.deletePeerAddress(byIp: ip)
+        }
     }
 
     func add(ips: [String]) {
@@ -64,12 +71,16 @@ extension PeerAddressManager: IPeerAddressManager {
         }
 
         logger?.debug("Adding new addresses: \(newAddresses.count)")
+        queue.sync {
+            storage.save(peerAddresses: newAddresses)
+        }
 
-        storage.save(peerAddresses: newAddresses)
         delegate?.newIpsAdded()
     }
 
     func markConnected(peer: IPeer) {
-        storage.set(connectionTime: peer.connectionTime, toPeerAddress: peer.host)
+        queue.sync {
+            storage.set(connectionTime: peer.connectionTime, toPeerAddress: peer.host)
+        }
     }
 }
