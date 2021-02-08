@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## Current Version
 
+
+
+## 0.16.0
+
 * `BitcoinCashKit`
 
   * add support for two coin types: `0` and `145`
