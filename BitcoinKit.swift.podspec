@@ -14,7 +14,7 @@ BitcoinKit implements Bitcoin protocol in Swift.
   s.source           = { git: 'https://github.com/horizontalsystems/bitcoin-kit-ios.git', tag: "bitcoin-#{s.version}" }
   s.social_media_url = 'http://horizontalsystems.io/'
 
-  s.ios.deployment_target = '11.0'
+  s.ios.deployment_target = '13.0'
   s.swift_version = '5'
 
   s.source_files = 'BitcoinKit/Classes/**/*'
