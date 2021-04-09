@@ -27,7 +27,7 @@ BitcoinCashKit implements BitcoinCash protocol in Swift. It is an implementation
   s.dependency 'Secp256k1Kit.swift', '~> 1.0'
   s.dependency 'HdWalletKit.swift', '~> 1.5'
 
-  s.dependency 'ObjectMapper', '~> 3.0'
+  s.dependency 'ObjectMapper', '~> 4.0'
   s.dependency 'RxSwift', '~> 5.0'
   s.dependency 'BigInt', '~> 5.0'
   s.dependency 'GRDB.swift', '~> 4.0'
