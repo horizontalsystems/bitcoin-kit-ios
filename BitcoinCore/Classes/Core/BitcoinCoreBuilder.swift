@@ -10,7 +10,6 @@ public class BitcoinCoreBuilder {
 
     // required parameters
     private var seed: Data?
-    private var words: [String]?
     private var bip: Bip = .bip44
     private var network: INetwork?
     private var paymentAddressParser: IPaymentAddressParser?
@@ -33,11 +32,6 @@ public class BitcoinCoreBuilder {
 
     public func set(seed: Data) -> BitcoinCoreBuilder {
         self.seed = seed
-        return self
-    }
-
-    public func set(words: [String]) -> BitcoinCoreBuilder {
-        self.words = words
         return self
     }
 
@@ -118,8 +112,6 @@ public class BitcoinCoreBuilder {
         let seed: Data
         if let selfSeed = self.seed {
            seed = selfSeed
-        } else if let words = self.words {
-            seed = Mnemonic.seed(mnemonic: words)
         } else {
             throw BuildError.noSeedData
         }
