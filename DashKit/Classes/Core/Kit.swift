@@ -20,7 +20,7 @@ public class Kit: AbstractKit {
     private var instantSend: InstantSend?
     private let dashTransactionInfoConverter: ITransactionInfoConverter
 
-    public init(withWords words: [String], walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
+    public init(seed: Data, walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
         let network: INetwork
         var initialSyncApiUrl: String
 
@@ -74,7 +74,7 @@ public class Kit: AbstractKit {
 
         let bitcoinCore = try BitcoinCoreBuilder(logger: logger)
                 .set(network: network)
-                .set(words: words)
+                .set(seed: seed)
                 .set(initialSyncApi: initialSyncApi)
                 .set(paymentAddressParser: paymentAddressParser)
                 .set(walletId: walletId)

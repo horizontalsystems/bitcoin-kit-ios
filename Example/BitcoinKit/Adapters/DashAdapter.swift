@@ -3,6 +3,7 @@ import BitcoinCore
 import HsToolKit
 import DashKit
 import RxSwift
+import HdWalletKit
 
 class DashAdapter: BaseAdapter {
     override var feeRate: Int { return 1 }
@@ -10,7 +11,8 @@ class DashAdapter: BaseAdapter {
 
     init(words: [String], testMode: Bool, syncMode: BitcoinCore.SyncMode, logger: Logger) {
         let networkType: Kit.NetworkType = testMode ? .testNet : .mainNet
-        dashKit = try! Kit(withWords: words, walletId: "walletId", syncMode: syncMode, networkType: networkType, logger: logger.scoped(with: "DashKit"))
+        let seed = Mnemonic.seed(mnemonic: words)
+        dashKit = try! Kit(seed: seed, walletId: "walletId", syncMode: syncMode, networkType: networkType, logger: logger.scoped(with: "DashKit"))
 
         super.init(name: "Dash", coinCode: "DASH", abstractKit: dashKit)
         dashKit.delegate = self

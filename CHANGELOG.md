@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## Current Version
 
 * Increase minimum iOS version to 13.0 [ **non-back-compatible api change** ]
+* Accept seed data instead of words array when getting instance of all kits [ **non-back-compatible api change** ]
 
 ## 0.16.1
 

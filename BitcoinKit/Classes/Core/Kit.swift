@@ -20,7 +20,7 @@ public class Kit: AbstractKit {
         }
     }
 
-    public init(withWords words: [String], bip: Bip, walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
+    public init(seed: Data, bip: Bip, walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
         let network: INetwork
         let logger = logger ?? Logger(minLogLevel: .verbose)
 
@@ -71,7 +71,7 @@ public class Kit: AbstractKit {
         let bitcoinCore = try bitcoinCoreBuilder
                 .set(network: network)
                 .set(initialSyncApi: initialSyncApi)
-                .set(words: words)
+                .set(seed: seed)
                 .set(bip: bip)
                 .set(paymentAddressParser: paymentAddressParser)
                 .set(walletId: walletId)
