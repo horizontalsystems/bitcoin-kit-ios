@@ -10,7 +10,7 @@ class RegTest: INetwork {
     let xPubKey: UInt32 = 0x043587cf
     let xPrivKey: UInt32 = 0x04358394
     let magic: UInt32 = 0xfabfb5da
-    let port: UInt32 = 18444
+    let port = 18444
     let coinType: UInt32 = 1
     let sigHash: SigHashType = .bitcoinAll
     var syncableFromApi: Bool = false
