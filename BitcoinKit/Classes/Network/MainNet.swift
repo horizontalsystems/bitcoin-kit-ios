@@ -10,7 +10,7 @@ class MainNet: INetwork {
     let xPubKey: UInt32 = 0x0488b21e
     let xPrivKey: UInt32 = 0x0488ade4
     let magic: UInt32 = 0xf9beb4d9
-    let port: UInt32 = 8333
+    let port = 8333
     let coinType: UInt32 = 0
     let sigHash: SigHashType = .bitcoinAll
     var syncableFromApi: Bool = true

@@ -19,6 +19,7 @@ PODS:
     - OpenSslKit.swift (~> 1.0)
     - RxSwift (~> 5.0)
     - Secp256k1Kit.swift (~> 1.0)
+    - SwiftNIO (~> 2)
     - UIExtensions.swift (~> 1.1.1)
   - BitcoinKit.swift (0.16.1):
     - BigInt (~> 5.0)
@@ -182,7 +183,7 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   HsToolKit.swift:
-    :commit: 7a2139d6dc005b90abf3a92fbfdd8e6d41ead5a3
+    :commit: 5c520fd43b1795c720eeb2b7e6d96d6fb2d91579
     :git: https://github.com/horizontalsystems/hs-tool-kit-ios
   UIExtensions.swift:
     :commit: cdd45d3d29c230c14b68dbd03fae9b7f9c42a3ab
@@ -192,7 +193,7 @@ SPEC CHECKSUMS:
   Alamofire: bfbc4c2fe5909b1d94fb4ef2277c6b3727ef5dae
   BigInt: f668a80089607f521586bbe29513d708491ef2f7
   BitcoinCashKit.swift: c035ecdba64d9be70cef1913a043bfe0ce2d52b2
-  BitcoinCore.swift: a1ef07cc12d9b84d2c21f688bca508c93ca8eec6
+  BitcoinCore.swift: f5b03a4d85bb0c0ac3e8c277ef84722645497360
   BitcoinKit.swift: c08d5dbb6ceec04e195ae1188586b20e887729eb
   BlsKit.swift: e73fb332ed6a577b0f34a0da30aa5ec6c09bee55
   CNIOAtomics: 43316aa185f4bd639aa0a9cd49741151bbe8de7f

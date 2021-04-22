@@ -34,18 +34,39 @@ class SyncManager {
         return true
     }
 
+    private var peerGroupRunning: Bool {
+        switch syncState {
+        case .syncing, .synced: return true
+        default: return false
+        }
+    }
+
     init(reachabilityManager: IReachabilityManager, initialSyncer: IInitialSyncer, peerGroup: IPeerGroup, apiSyncStateManager: IApiSyncStateManager, bestBlockHeight: Int32) {
         self.reachabilityManager = reachabilityManager
         self.initialSyncer = initialSyncer
         self.peerGroup = peerGroup
         self.apiSyncStateManager = apiSyncStateManager
-        self.initialBestBlockHeight = bestBlockHeight
-        self.currentBestBlockHeight = bestBlockHeight
+        initialBestBlockHeight = bestBlockHeight
+        currentBestBlockHeight = bestBlockHeight
 
         reachabilityManager.reachabilityObservable
                 .observeOn(ConcurrentDispatchQueueScheduler(qos: .background))
                 .subscribe(onNext: { [weak self] _ in
                     self?.onReachabilityChanged()
+                })
+                .disposed(by: disposeBag)
+
+        reachabilityManager.connectionTypeUpdatedObservable
+                .observeOn(ConcurrentDispatchQueueScheduler(qos: .userInitiated))
+                .subscribe(onNext: { [weak self] _ in
+                    self?.onConnectionTypeUpdated()
+                })
+                .disposed(by: disposeBag)
+
+        BackgroundModeObserver.shared
+                .foregroundFromExpiredBackgroundObservable
+                .subscribe(onNext: { [weak self] _ in
+                    self?.onEnterForegroundFromExpiredBackground()
                 })
                 .disposed(by: disposeBag)
     }
@@ -58,6 +79,18 @@ class SyncManager {
         }
     }
 
+    private func onConnectionTypeUpdated() {
+        if peerGroupRunning {
+            peerGroup.reconnectPeers()
+        }
+    }
+
+    private func onEnterForegroundFromExpiredBackground() {
+        if peerGroupRunning {
+            peerGroup.reconnectPeers()
+        }
+    }
+
     private func onReachable() {
         if syncIdle {
             startSync()
@@ -65,11 +98,9 @@ class SyncManager {
     }
 
     private func onUnreachable() {
-        switch syncState {
-        case .syncing, .synced:
+        if peerGroupRunning {
             peerGroup.stop()
             syncState = .notSynced(error: ReachabilityManager.ReachabilityError.notReachable)
-        default: ()
         }
     }
 

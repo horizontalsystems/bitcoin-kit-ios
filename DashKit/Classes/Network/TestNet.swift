@@ -13,7 +13,7 @@ class TestNet: INetwork {
     let xPubKey: UInt32 = 0x0488b21e
     let xPrivKey: UInt32 = 0x0488ade4
     let magic: UInt32 = 0xcee2caff
-    let port: UInt32 = 19999
+    let port = 19999
     let coinType: UInt32 = 1
     let sigHash: SigHashType = .bitcoinAll
     var syncableFromApi: Bool = true

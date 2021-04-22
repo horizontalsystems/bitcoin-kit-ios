@@ -1,6 +1,8 @@
 import Foundation
 import HdWalletKit
 import HsToolKit
+import NIO
+import NIOFoundationCompat
 
 class PeerConnection: NSObject {
     enum PeerConnectionError: Error {
@@ -8,41 +10,38 @@ class PeerConnection: NSObject {
         case connectionClosedByPeer
     }
 
-    private let bufferSize = 4096
-    private let interval = 1.0
-
     let host: String
-    let port: UInt32
-    private let networkMessageParser: INetworkMessageParser
-    private let networkMessageSerializer: INetworkMessageSerializer
+    let port: Int
 
     weak var delegate: PeerConnectionDelegate?
 
-    private var readStream: Unmanaged<CFReadStream>?
-    private var writeStream: Unmanaged<CFWriteStream>?
-    private var timer: Timer?
-    private weak var runLoop: RunLoop?
-    private weak var inputStream: InputStream?
-    private weak var outputStream: OutputStream?
-
-    private var packets: Data = Data()
-
+    private let networkMessageParser: INetworkMessageParser
+    private let networkMessageSerializer: INetworkMessageSerializer
     private let logger: Logger?
+    private let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+    private var channel: Channel?
 
-    var connected: Bool = false
+    private var waitingForDisconnect: Bool = false
+    private let interval = TimeAmount.seconds(1)
 
     var logName: String {
         let index = abs(host.hash) % WordList.english.count
         return "[\(WordList.english[index])]".uppercased()
     }
 
-    init(host: String, port: UInt32, networkMessageParser: INetworkMessageParser, networkMessageSerializer: INetworkMessageSerializer, logger: Logger? = nil) {
+    private var bootstrap: ClientBootstrap {
+        ClientBootstrap(group: group)
+                .channelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
+                .channelInitializer { [weak self] channel in
+                    self?.initializeChannel(channel: channel) ?? channel.eventLoop.makeSucceededVoidFuture()
+                }
+    }
+
+    init(host: String, port: Int, networkMessageParser: INetworkMessageParser, networkMessageSerializer: INetworkMessageSerializer, logger: Logger? = nil) {
         self.host = host
         self.port = port
         self.networkMessageParser = networkMessageParser
         self.networkMessageSerializer = networkMessageSerializer
-
-        self.timer = nil
         self.logger = logger
     }
 
@@ -50,127 +49,74 @@ class PeerConnection: NSObject {
         disconnect()
     }
 
-    private func connectAsync() {
-        CFStreamCreatePairWithSocketToHost(kCFAllocatorDefault, host as CFString, port, &readStream, &writeStream)
-        inputStream = readStream!.takeUnretainedValue()
-        outputStream = writeStream!.takeUnretainedValue()
-
-        weak var weakSelf = self
-        inputStream?.delegate = weakSelf
-        outputStream?.delegate = weakSelf
-
-        inputStream?.schedule(in: .current, forMode: .common)
-        outputStream?.schedule(in: .current, forMode: .common)
-
-        inputStream?.open()
-        outputStream?.open()
-
-        let timer = Timer(timeInterval: interval, repeats: true, block: { [weak self] _ in self?.delegate?.connectionTimePeriodPassed() })
-        self.timer = timer
-
-        RunLoop.current.add(timer, forMode: .common)
-        RunLoop.current.run()
-    }
-
-    private func readAvailableBytes(stream: InputStream) {
-        delegate?.connectionAlive()
-
-        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
-        defer {
-            buffer.deallocate()
-        }
-
-        while stream.hasBytesAvailable {
-            let numberOfBytesRead = stream.read(buffer, maxLength: bufferSize)
-            if numberOfBytesRead <= 0 {
-                if let _ = stream.streamError {
-                    break
-                }
-            } else {
-                packets += Data(bytesNoCopy: buffer, count: numberOfBytesRead, deallocator: .none)
-            }
-
-            while packets.count >= NetworkMessage.minimumLength {
-                guard let networkMessage = networkMessageParser.parse(data: packets) else {
-                    break
-                }
-
-                packets = Data(packets.dropFirst(NetworkMessage.minimumLength + Int(networkMessage.length)))
-                let message = networkMessage.message
-
-                guard !(message is UnknownMessage) else {
-                    continue
-                }
-
-                log("<- \(type(of: message)): \(message.description)")
-                delegate?.connection(didReceiveMessage: message)
-            }
-        }
-    }
-
     private func log(_ message: @autoclosure () -> Any, level: Logger.Level = .debug) {
         logger?.log(level: level, message: message(), context: [logName])
     }
+
+    private func initializeChannel(channel: Channel) -> EventLoopFuture<Void> {
+        let handler = PeerMessageHandler(networkMessageParser: networkMessageParser)
+        handler.delegate = self
+
+        return channel.pipeline.addHandler(handler)
+    }
+
+    private func onConnected(channel: Channel) {
+        self.channel = channel
+
+        channel.eventLoop.scheduleRepeatedTask(initialDelay: .zero, delay: interval, notifying: nil) { [weak self] task in
+            guard !(self?.waitingForDisconnect ?? true) else {
+                task.cancel()
+                return
+            }
+
+            self?.delegate?.connectionTimePeriodPassed()
+        }
+    }
+
+    private func onConnectFailure(error: Error) {
+        disconnect(error: error)
+    }
+
 }
 
 extension PeerConnection: IPeerConnection {
 
     func connect() {
-        if runLoop == nil {
-            DispatchQueue.global(qos: .userInitiated).async {
-                self.runLoop = .current
-                self.connectAsync()
-            }
-        } else {
-            log("ALREADY CONNECTED")
+        let connectFuture = bootstrap.connect(host: host, port: port)
+
+        connectFuture.whenSuccess { [weak self] channel in
+            self?.onConnected(channel: channel)
+        }
+
+        connectFuture.whenFailure { [weak self] error in
+            self?.onConnectFailure(error: error)
         }
     }
 
     func disconnect(error: Error? = nil) {
-        guard readStream != nil && writeStream != nil else {
+        guard !waitingForDisconnect else {
             return
         }
 
-        if let runLoop = self.runLoop {
-            inputStream?.remove(from: runLoop, forMode: .common)
-            outputStream?.remove(from: runLoop, forMode: .common)
-            timer?.invalidate()
+        channel = nil
+        group.shutdownGracefully { _ in }
 
-            CFRunLoopStop(runLoop.getCFRunLoop())
-        }
-
-        inputStream?.delegate = nil
-        outputStream?.delegate = nil
-        inputStream?.close()
-        outputStream?.close()
-        readStream?.release()
-        writeStream?.release()
-
-        timer = nil
-        readStream = nil
-        writeStream = nil
-        inputStream = nil
-        outputStream = nil
-        connected = false
-
+        waitingForDisconnect = true
         delegate?.connectionDidDisconnect(withError: error)
-
-        log("DISCONNECTED")
     }
 
     func send(message: IMessage) {
         log("-> \(type(of: message)): \(message.description)")
         do {
             let data = try networkMessageSerializer.serialize(message: message)
-            guard !data.isEmpty else {
+            guard !data.isEmpty, let channel = channel else {
                 return
             }
-            data.withUnsafeBytes {
-                guard let pointer = $0.baseAddress?.assumingMemoryBound(to: UInt8.self) else {
-                    return
-                }
-                outputStream?.write(pointer, maxLength: data.count)
-            }
+
+            var buffer = channel.allocator.buffer(capacity: data.count)
+            buffer.writeBytes(data)
+
+            channel.writeAndFlush(buffer)
         } catch {
             log("Connection can't send message \(message) with error \(error)", level: .error) //todo catch error when try send message not registered in serializers
         }
@@ -178,54 +124,30 @@ extension PeerConnection: IPeerConnection {
 
 }
 
-extension PeerConnection: StreamDelegate {
+extension PeerConnection: PeerMessageHandlerDelegate {
 
-    func stream(_ stream: Stream, handle eventCode: Stream.Event) {
-        switch stream {
-        case let stream as InputStream:
-            switch eventCode {
-            case .openCompleted:
-                log("CONNECTION ESTABLISHED")
-                connected = true
-                break
-            case .hasBytesAvailable:
-                readAvailableBytes(stream: stream)
-            case .hasSpaceAvailable:
-                break
-            case .errorOccurred:
-                log("IN ERROR OCCURRED", level: .warning)
-                if connected {
-                    // If connected, then error is related not to peer, but to network
-                    disconnect()
-                } else {
-                    disconnect(error: PeerConnectionError.connectionClosedWithUnknownError)
-                }
-            case .endEncountered:
-                log("IN CLOSED")
-                disconnect(error: PeerConnectionError.connectionClosedByPeer)
-            default:
-                break
-            }
-        case _ as OutputStream:
-            switch eventCode {
-            case .openCompleted:
-                break
-            case .hasBytesAvailable:
-                break
-            case .hasSpaceAvailable:
-                delegate?.connectionReadyForWrite()
-            case .errorOccurred:
-                log("OUT ERROR OCCURRED", level: .warning)
-                disconnect()
-            case .endEncountered:
-                log("OUT CLOSED")
-                disconnect()
-            default:
-                break
-            }
-        default:
-            break
+    func onChannelActive() {
+        delegate?.connectionReadyForWrite()
+    }
+
+    func onChannelInactive() {
+        if !waitingForDisconnect {
+            disconnect(error: PeerConnectionError.connectionClosedWithUnknownError)
         }
+    }
+
+    func onChannelRead() {
+        delegate?.connectionAlive()
+    }
+
+    func onMessageReceived(message: IMessage) {
+        log("<- \(type(of: message)): \(message.description)")
+        delegate?.connection(didReceiveMessage: message)
+    }
+
+    func onErrorCaught(error: Error) {
+        log("Error received: \(error)")
+        disconnect(error: error)
     }
 
 }

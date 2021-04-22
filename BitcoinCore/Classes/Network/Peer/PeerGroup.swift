@@ -122,8 +122,12 @@ extension PeerGroup: IPeerGroup {
         onNext(.onStop)
     }
 
+    func reconnectPeers() {
+        peerManager.disconnectAll()
+    }
+
     func isReady(peer: IPeer) -> Bool {
-        return peer.ready
+        peer.ready
     }
 
 }

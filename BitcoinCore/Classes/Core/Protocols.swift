@@ -168,6 +168,7 @@ public protocol IPeerGroup: class {
 
     func start()
     func stop()
+    func reconnectPeers()
 
     func isReady(peer: IPeer) -> Bool
 }
@@ -224,7 +225,7 @@ public protocol IPeerTaskDelegate: class {
 protocol IPeerConnection: class {
     var delegate: PeerConnectionDelegate? { get set }
     var host: String { get }
-    var port: UInt32 { get }
+    var port: Int { get }
     var logName: String { get }
     func connect()
     func disconnect(error: Error?)
@@ -487,7 +488,7 @@ public protocol INetwork: class {
     var xPubKey: UInt32 { get }
     var xPrivKey: UInt32 { get }
     var magic: UInt32 { get }
-    var port: UInt32 { get }
+    var port: Int { get }
     var dnsSeeds: [String] { get }
     var dustRelayTxFee: Int { get }
     var bip44Checkpoint: Checkpoint { get }
