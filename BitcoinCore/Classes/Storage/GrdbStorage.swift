@@ -218,6 +218,12 @@ open class GrdbStorage {
             }
         }
 
+        migrator.registerMigration("addFailedToSpendToOutputs") { db in
+            try db.alter(table: Output.databaseTableName) { t in
+                t.add(column: Output.Columns.failedToSpend.name, .boolean).notNull().defaults(to: false)
+            }
+        }
+
         return migrator
     }
 
@@ -239,6 +245,32 @@ open class GrdbStorage {
         for output in transaction.outputs {
             try output.insert(db)
         }
+    }
+
+    private func inputsWithPreviousOutputs(transactionHashes: [Data], db: Database) throws -> [InputWithPreviousOutput] {
+        var inputs = [InputWithPreviousOutput]()
+
+        let inputC = Input.Columns.allCases.count
+        let outputC = Output.Columns.allCases.count
+
+        let adapter = ScopeAdapter([
+            "input": RangeRowAdapter(0..<inputC),
+            "output": RangeRowAdapter(inputC..<inputC + outputC)
+        ])
+
+        let sql = """
+                  SELECT inputs.*, outputs.*
+                  FROM inputs
+                  LEFT JOIN outputs ON inputs.previousOutputTxHash = outputs.transactionHash AND inputs.previousOutputIndex = outputs."index"
+                  WHERE inputs.transactionHash IN (\(transactionHashes.map({ "x'" + $0.hex + "'" }).joined(separator: ",")))
+                  """
+        let rows = try Row.fetchCursor(db, sql: sql, adapter: adapter)
+
+        while let row = try rows.next() {
+            inputs.append(InputWithPreviousOutput(input: row["input"], previousOutput: row["output"]))
+        }
+
+        return inputs
     }
 
 }
@@ -659,26 +691,7 @@ extension GrdbStorage: IStorage {
 
         try! dbPool.read { db in
             for transactionHashChunks in transactionHashes.chunked(into: 999) {
-                let inputC = Input.Columns.allCases.count
-                let outputC = Output.Columns.allCases.count
-
-                let adapter = ScopeAdapter([
-                    "input": RangeRowAdapter(0..<inputC),
-                    "output": RangeRowAdapter(inputC..<inputC + outputC)
-                ])
-
-                let sql = """
-                          SELECT inputs.*, outputs.*
-                          FROM inputs
-                          LEFT JOIN outputs ON inputs.previousOutputTxHash = outputs.transactionHash AND inputs.previousOutputIndex = outputs."index"
-                          WHERE inputs.transactionHash IN (\(transactionHashChunks.map({ "x'" + $0.hex + "'" }).joined(separator: ",")))
-                          """
-                let rows = try Row.fetchCursor(db, sql: sql, adapter: adapter)
-
-                while let row = try rows.next() {
-                    inputs.append(InputWithPreviousOutput(input: row["input"], previousOutput: row["output"]))
-                }
-
+                inputs.append(contentsOf: try inputsWithPreviousOutputs(transactionHashes: transactionHashChunks, db: db))
                 outputs.append(contentsOf: try Output.filter(transactionHashChunks.contains(Output.Columns.transactionHash)).fetchAll(db))
             }
         }
@@ -782,6 +795,14 @@ extension GrdbStorage: IStorage {
         try! dbPool.writeInTransaction { db in
             for invalidTransaction in invalidTransactions {
                 try invalidTransaction.insert(db)
+
+                let inputs = try inputsWithPreviousOutputs(transactionHashes: [invalidTransaction.dataHash], db: db)
+                for input in inputs {
+                    if let previousOutput = input.previousOutput {
+                        previousOutput.failedToSpend = true
+                        try previousOutput.update(db)
+                    }
+                }
 
                 try Input.filter(Input.Columns.transactionHash == invalidTransaction.dataHash).deleteAll(db)
                 try Output.filter(Output.Columns.transactionHash == invalidTransaction.dataHash).deleteAll(db)

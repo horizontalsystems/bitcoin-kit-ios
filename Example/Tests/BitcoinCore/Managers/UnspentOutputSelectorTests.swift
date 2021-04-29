@@ -39,7 +39,7 @@ class UnspentOutputSelectorTests: QuickSpec {
 
         let outputs = [TestData.unspentOutput(output: Output(withValue: 1000, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data())),
                        TestData.unspentOutput(output: Output(withValue: 2000, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data())),
-                       TestData.unspentOutput(output: Output(withValue: 4000, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data())),
+                       TestData.unspentOutput(output: Output(withValue: 3000, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data())),
                        TestData.unspentOutput(output: Output(withValue: 8000, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data())),
                        TestData.unspentOutput(output: Output(withValue: 16000, index: 0, lockingScript: Data(), type: .p2pkh, keyHash: Data()))
         ]
@@ -128,6 +128,22 @@ class UnspentOutputSelectorTests: QuickSpec {
                     } catch {
                         fail("Unexpected error")
                     }
+                }
+            }
+
+            context("when there is an output failed to spend before") {
+                beforeEach {
+                    outputs[2].output.failedToSpend = true
+                }
+                afterEach {
+                    outputs[2].output.failedToSpend = false
+                }
+
+                it("selects output failed to spend") {
+                    let selectedOutputs = try! selector.select(value: totalValue - fee, feeRate: feeRate, outputScriptType: .p2pkh, changeType: .p2pkh, senderPay: true, pluginDataOutputSize: 0)
+                    expect(selectedOutputs.unspentOutputs).to(equal([outputs[2]]))
+                    expect(selectedOutputs.recipientValue).to(equal(totalValue - fee))
+                    expect(selectedOutputs.changeValue).to(beNil())
                 }
             }
         }

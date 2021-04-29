@@ -123,6 +123,22 @@ class UnspentOutputSelectorSingleNoChangeTests: QuickSpec {
                     fail("Unexpected error")
                 }
             }
+
+            it("doesn't select it if there's an output failed to spend before") {
+                defer {
+                    outputs.first?.output.failedToSpend = false
+                }
+
+                do {
+                    outputs.first?.output.failedToSpend = true
+                    _ = try selector.select(value: value, feeRate: feeRate, outputScriptType: .p2pkh, changeType: .p2pkh, senderPay: false, pluginDataOutputSize: 0)
+                    fail("Exception expected")
+                } catch let error as BitcoinCoreErrors.SendValueErrors {
+                    expect(error).to(equal(BitcoinCoreErrors.SendValueErrors.singleNoChangeOutputNotFound))
+                } catch {
+                    fail("Unexpected error")
+                }
+            }
         }
     }
 
