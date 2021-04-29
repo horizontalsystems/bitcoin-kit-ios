@@ -43,7 +43,11 @@ extension UnspentOutputSelector: IUnspentOutputSelector {
             throw BitcoinCoreErrors.SendValueErrors.emptyOutputs
         }
 
-        let sortedOutputs = unspentOutputs.sorted(by: { lhs, rhs in lhs.output.value < rhs.output.value })
+        let sortedOutputs = unspentOutputs.sorted(by: { lhs, rhs in
+            (lhs.output.failedToSpend && !rhs.output.failedToSpend) || (
+                    lhs.output.failedToSpend == rhs.output.failedToSpend &&  lhs.output.value < rhs.output.value
+            )
+        })
 
         // select unspentOutputs with least value until we get needed value
         var selectedOutputs = [UnspentOutput]()

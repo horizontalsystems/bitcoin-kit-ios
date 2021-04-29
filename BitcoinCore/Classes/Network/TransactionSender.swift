@@ -32,7 +32,7 @@ class TransactionSender {
     }
 
     private func peersToSendTo() -> [IPeer] {
-        var syncedPeers = initialBlockDownload.syncedPeers
+        let syncedPeers = initialBlockDownload.syncedPeers
         guard let freeSyncedPeer = syncedPeers.sorted(by: { !$0.ready && $1.ready }).first else {
             return []
         }
@@ -41,7 +41,7 @@ class TransactionSender {
             return []
         }
 
-        var sortedPeers = peerManager.readyPeers
+        let sortedPeers = peerManager.readyPeers
                 .filter {
                     freeSyncedPeer !== $0
                 }
@@ -76,6 +76,7 @@ class TransactionSender {
         sentTransaction.sendSuccess = true
 
         if sentTransaction.retriesCount >= maxRetriesCount {
+            transactionSyncer.handleInvalid(fullTransaction: transaction)
             storage.delete(sentTransaction: sentTransaction)
         } else {
             storage.update(sentTransaction: sentTransaction)

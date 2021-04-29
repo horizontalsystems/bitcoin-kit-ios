@@ -38,6 +38,7 @@ public class Output: Record {
     public var redeemScript: Data? = nil
     public var keyHash: Data? = nil
     var address: String? = nil
+    var failedToSpend: Bool = false
 
     public var pluginId: UInt8? = nil
     public var pluginData: String? = nil
@@ -82,6 +83,7 @@ public class Output: Record {
         case address
         case pluginId
         case pluginData
+        case failedToSpend
     }
 
     required init(row: Row) {
@@ -97,6 +99,7 @@ public class Output: Record {
         address = row[Columns.address]
         pluginId = row[Columns.pluginId]
         pluginData = row[Columns.pluginData]
+        failedToSpend = row[Columns.failedToSpend]
 
         super.init(row: row)
     }
@@ -114,6 +117,7 @@ public class Output: Record {
         container[Columns.address] = address
         container[Columns.pluginId] = pluginId
         container[Columns.pluginData] = pluginData
+        container[Columns.failedToSpend] = failedToSpend
     }
 
 }

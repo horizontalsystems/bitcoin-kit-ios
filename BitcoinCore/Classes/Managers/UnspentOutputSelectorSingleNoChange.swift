@@ -21,6 +21,9 @@ extension UnspentOutputSelectorSingleNoChange: IUnspentOutputSelector {
         let recipientOutputDust = dustCalculator.dust(type: outputScriptType)
         let changeOutputDust = dustCalculator.dust(type: changeType)
 
+        guard unspentOutputs.allSatisfy({ !$0.output.failedToSpend }) else {
+            throw BitcoinCoreErrors.SendValueErrors.singleNoChangeOutputNotFound
+        }
         guard value >= recipientOutputDust else {
             throw BitcoinCoreErrors.SendValueErrors.dust
         }
