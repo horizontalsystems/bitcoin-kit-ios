@@ -1,4 +1,5 @@
 import HsToolKit
+import NIO
 
 class Factory: IFactory {
     private let network: INetwork
@@ -40,8 +41,10 @@ class Factory: IFactory {
         Output(withValue: 0, index: 0, lockingScript: data, type: .nullData)
     }
 
-    func peer(withHost host: String, logger: Logger? = nil) -> IPeer {
-        Peer(host: host, network: network, connection: PeerConnection(host: host, port: network.port, networkMessageParser: networkMessageParser, networkMessageSerializer: networkMessageSerializer, logger: logger), connectionTimeoutManager: ConnectionTimeoutManager(), logger: logger)
+    func peer(withHost host: String, eventLoopGroup: MultiThreadedEventLoopGroup, logger: Logger? = nil) -> IPeer {
+        let connection = PeerConnection(host: host, port: network.port, networkMessageParser: networkMessageParser, networkMessageSerializer: networkMessageSerializer, eventLoopGroup: eventLoopGroup, logger: logger)
+
+        return Peer(host: host, network: network, connection: connection, connectionTimeoutManager: ConnectionTimeoutManager(), logger: logger)
     }
 
     func blockHash(withHeaderHash headerHash: Data, height: Int, order: Int = 0) -> BlockHash {

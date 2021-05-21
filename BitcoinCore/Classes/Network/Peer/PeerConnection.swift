@@ -18,7 +18,7 @@ class PeerConnection: NSObject {
     private let networkMessageParser: INetworkMessageParser
     private let networkMessageSerializer: INetworkMessageSerializer
     private let logger: Logger?
-    private let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+    private let group: MultiThreadedEventLoopGroup
     private var channel: Channel?
 
     private var waitingForDisconnect: Bool = false
@@ -37,11 +37,13 @@ class PeerConnection: NSObject {
                 }
     }
 
-    init(host: String, port: Int, networkMessageParser: INetworkMessageParser, networkMessageSerializer: INetworkMessageSerializer, logger: Logger? = nil) {
+    init(host: String, port: Int, networkMessageParser: INetworkMessageParser, networkMessageSerializer: INetworkMessageSerializer,
+         eventLoopGroup: MultiThreadedEventLoopGroup, logger: Logger? = nil) {
         self.host = host
         self.port = port
         self.networkMessageParser = networkMessageParser
         self.networkMessageSerializer = networkMessageSerializer
+        self.group = eventLoopGroup
         self.logger = logger
     }
 
@@ -99,8 +101,6 @@ extension PeerConnection: IPeerConnection {
         }
 
         channel = nil
-        group.shutdownGracefully { _ in }
-
         waitingForDisconnect = true
         delegate?.connectionDidDisconnect(withError: error)
     }

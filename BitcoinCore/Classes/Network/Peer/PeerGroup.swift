@@ -1,6 +1,7 @@
 import Foundation
 import RxSwift
 import HsToolKit
+import NIO
 
 public enum PeerGroupEvent {
     case onStart
@@ -32,6 +33,7 @@ class PeerGroup {
     private let peersQueue: DispatchQueue
     private let inventoryQueue: DispatchQueue
     private let subjectQueue: DispatchQueue
+    private var eventLoopGroup: MultiThreadedEventLoopGroup
 
     private let logger: Logger?
 
@@ -59,11 +61,16 @@ class PeerGroup {
         self.peersQueue = peersQueue
         self.inventoryQueue = inventoryQueue
         self.subjectQueue = subjectQueue
+        self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: peerCount)
 
         self.logger = logger
         self.observable = subject.asObservable().observeOn(scheduler)
 
         self.peerAddressManager.delegate = self
+    }
+
+    deinit {
+        eventLoopGroup.shutdownGracefully { _ in }
     }
 
     private func connectPeersIfRequired() {
@@ -76,7 +83,7 @@ class PeerGroup {
 
             for _ in self.peerManager.totalPeersCount..<self.peerCountToHold {
                 if let host = self.peerAddressManager.ip {
-                    let peer = self.factory.peer(withHost: host, logger: self.logger)
+                    let peer = self.factory.peer(withHost: host, eventLoopGroup: self.eventLoopGroup, logger: self.logger)
                     peer.delegate = self
                     peersToConnect.append(peer)
                 } else {

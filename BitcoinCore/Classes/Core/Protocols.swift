@@ -1,6 +1,7 @@
 import BigInt
 import RxSwift
 import HsToolKit
+import NIO
 
 enum BlockValidatorType { case header, bits, legacy, testNet, EDA, DAA, DGW }
 
@@ -259,7 +260,7 @@ protocol IFactory {
     func block(withHeader header: BlockHeader, previousBlock: Block) -> Block
     func block(withHeader header: BlockHeader, height: Int) -> Block
     func blockHash(withHeaderHash headerHash: Data, height: Int, order: Int) -> BlockHash
-    func peer(withHost host: String, logger: Logger?) -> IPeer
+    func peer(withHost host: String, eventLoopGroup: MultiThreadedEventLoopGroup, logger: Logger?) -> IPeer
     func transaction(version: Int, lockTime: Int) -> Transaction
     func inputToSign(withPreviousOutput: UnspentOutput, script: Data, sequence: Int) -> InputToSign
     func output(withIndex index: Int, address: Address, value: Int, publicKey: PublicKey?) -> Output
