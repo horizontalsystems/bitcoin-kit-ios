@@ -2,7 +2,7 @@ class IrregularOutputFinder {
 
     private let irregularScriptTypes: [ScriptType] = [.p2wpkh, .p2pk, .p2wpkhSh]
     private let storage: IStorage
-    var bloomFilterManager: IBloomFilterManager? = nil
+    weak var bloomFilterManager: IBloomFilterManager? = nil
 
     init(storage: IStorage) {
         self.storage = storage
