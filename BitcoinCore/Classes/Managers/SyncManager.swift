@@ -63,8 +63,8 @@ class SyncManager {
                 })
                 .disposed(by: disposeBag)
 
-        BackgroundModeObserver.shared
-                .foregroundFromExpiredBackgroundObservable
+        BackgroundModeObserver.shared.foregroundFromExpiredBackgroundObservable
+                .observeOn(ConcurrentDispatchQueueScheduler(qos: .userInitiated))
                 .subscribe(onNext: { [weak self] _ in
                     self?.onEnterForegroundFromExpiredBackground()
                 })
