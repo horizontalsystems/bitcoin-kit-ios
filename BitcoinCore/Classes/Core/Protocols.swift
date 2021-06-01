@@ -253,7 +253,7 @@ protocol IPeerAddressManagerDelegate: class {
 
 protocol IPeerDiscovery {
     var peerAddressManager: IPeerAddressManager? { get set }
-    func lookup(dnsSeed: String)
+    func lookup(dnsSeeds: [String])
 }
 
 protocol IFactory {

@@ -3,12 +3,23 @@ import UIExtensions
 
 class PeerDiscovery: IPeerDiscovery {
     weak var peerAddressManager: IPeerAddressManager?
+    private var inProgress = false
 
-    func lookup(dnsSeed: String) {
+    func lookup(dnsSeeds: [String]) {
+        guard !inProgress else {
+            return
+        }
+
+        inProgress = true
+
         DispatchQueue.global(qos: .background).async { [weak self] in
-            if let ips = self?._lookup(dnsSeed: dnsSeed) {
-                self?.peerAddressManager?.add(ips: ips)
+            for seed in dnsSeeds {
+                if let ips = self?._lookup(dnsSeed: seed) {
+                    self?.peerAddressManager?.add(ips: ips)
+                }
             }
+
+            self?.inProgress = false
         }
     }
 

@@ -24,10 +24,7 @@ extension PeerAddressManager: IPeerAddressManager {
 
     var ip: String? {
         guard let ip = storage.leastScoreFastestPeerAddress(excludingIps: state.usedIps)?.ip else {
-            for dnsSeed in dnsSeeds {
-                peerDiscovery.lookup(dnsSeed: dnsSeed)
-            }
-
+            peerDiscovery.lookup(dnsSeeds: dnsSeeds)
             return nil
         }
 
