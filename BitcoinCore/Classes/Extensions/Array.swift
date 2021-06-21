@@ -50,27 +50,27 @@ extension Array where Element : Hashable {
 }
 
 extension Array: SQLExpressible where Element == Data {
-    
+
     public var sqlExpression: SQLExpression {
-        return databaseValue
+        databaseValue.sqlExpression
     }
-    
+
 }
 
-extension Array: DatabaseValueConvertible where Element == Data {
-    
+extension Array: DatabaseValueConvertible, StatementBinding where Element == Data {
+
     public var databaseValue: DatabaseValue {
-        return DataListSerializer.serialize(dataList: self).databaseValue
+        DataListSerializer.serialize(dataList: self).databaseValue
     }
-    
+
     public static func fromDatabaseValue(_ dbValue: DatabaseValue) -> Array<Element>? {
         if case let DatabaseValue.Storage.blob(value) = dbValue.storage {
             return DataListSerializer.deserialize(data: value)
         }
-        
+
         return nil
     }
-    
+
 }
 
 extension Array {
