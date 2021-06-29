@@ -20,7 +20,7 @@ public class BitcoinKit: AbstractKit {
         }
     }
 
-    public init(withWords words: [String], passphrase: String = "", bip: Bip, walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
+    public init(withWords words: [String], passphrase: String = "", bip: Bip, walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, minLogLevel: Logger.Level = .verbose) throws {
         let network: INetwork
         let initialSyncApiUrl: String
 
@@ -49,6 +49,7 @@ public class BitcoinKit: AbstractKit {
                 .set(network: network)
                 .set(initialSyncApi: initialSyncApi)
                 .set(words: words)
+                .set(passphrase: passphrase)
                 .set(paymentAddressParser: paymentAddressParser)
                 .set(addressSelector: addressSelector)
                 .set(addressKeyHashConverter: addressKeyHashConverter)
