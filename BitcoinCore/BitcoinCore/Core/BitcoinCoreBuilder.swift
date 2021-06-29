@@ -23,6 +23,7 @@ public class BitcoinCoreBuilder {
     private var syncMode = BitcoinCore.SyncMode.api
     private var peerCount = 10
     private var peerCountToConnect = 100
+    private var passphrase = ""
 
     private var storage: IStorage?
 
@@ -33,6 +34,11 @@ public class BitcoinCoreBuilder {
 
     public func set(words: [String]) -> BitcoinCoreBuilder {
         self.words = words
+        return self
+    }
+    
+    public func set(passphrase: String) -> BitcoinCoreBuilder {
+        self.passphrase = passphrase
         return self
     }
 
@@ -105,7 +111,7 @@ public class BitcoinCoreBuilder {
         if let selfSeed = self.seed {
            seed = selfSeed
         } else if let words = self.words {
-            seed = Mnemonic.seed(mnemonic: words)
+            seed = Mnemonic.seed(mnemonic: words, passphrase: passphrase)
         } else {
             throw BuildError.noSeedData
         }
