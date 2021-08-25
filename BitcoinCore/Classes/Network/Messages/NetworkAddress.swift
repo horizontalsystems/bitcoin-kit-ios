@@ -37,6 +37,10 @@ public struct NetworkAddress {
         return data
     }
 
+    func supportsBloomFilter() -> Bool {
+        ServiceFlags(rawValue: services).contains(ServiceFlags.bloom)
+    }
+
 }
 
 extension NetworkAddress: CustomStringConvertible {
