@@ -46,7 +46,6 @@ extension PeerAddressManager: IPeerAddressManager {
     func markSuccess(ip: String) {
         queue.sync {
             state.remove(usedIp: ip)
-            storage.increasePeerAddressScore(ip: ip)
         }
     }
 

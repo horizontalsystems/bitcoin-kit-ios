@@ -319,15 +319,6 @@ extension GrdbStorage: IStorage {
         }
     }
 
-    public func increasePeerAddressScore(ip: String) {
-        _ = try! dbPool.write { db in
-            if let peerAddress = try PeerAddress.filter(PeerAddress.Columns.ip == ip).fetchOne(db) {
-                peerAddress.score += 1
-                try peerAddress.save(db)
-            }
-        }
-    }
-
     public func deletePeerAddress(byIp ip: String) {
         _ = try! dbPool.write { db in
             try PeerAddress.filter(PeerAddress.Columns.ip == ip).deleteAll(db)
@@ -338,6 +329,7 @@ extension GrdbStorage: IStorage {
         _ = try! dbPool.write { db in
             if let peerAddress = try PeerAddress.filter(PeerAddress.Columns.ip == ip).fetchOne(db) {
                 peerAddress.connectionTime = connectionTime
+                peerAddress.score += 1
                 try peerAddress.save(db)
             }
         }
