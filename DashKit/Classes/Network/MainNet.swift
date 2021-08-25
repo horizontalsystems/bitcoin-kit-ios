@@ -19,8 +19,8 @@ class MainNet: INetwork {
     var syncableFromApi: Bool = true
 
     let dnsSeeds = [
-        "dnsseed.dash.org",
-        "dnsseed.dashdot.io",
+        "x5.dnsseed.dash.org",
+        "x5.dnsseed.dashdot.io",
         "dnsseed.masternode.io",
     ]
 

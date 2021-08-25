@@ -16,12 +16,14 @@ class MainNet: INetwork {
     var syncableFromApi: Bool = true
 
     let dnsSeeds = [
-        "seed.bitcoin.sipa.be",         // Pieter Wuille
-        "dnsseed.bluematt.me",          // Matt Corallo
-        "dnsseed.bitcoin.dashjr.org",   // Luke Dashjr
-        "seed.bitcoinstats.com",        // Chris Decker
-        "seed.bitnodes.io",             // Addy Yeow
-        "seed.bitcoin.jonasschnelli.ch",// Jonas Schnelli
+        "x5.seed.bitcoin.sipa.be",             // Pieter Wuille
+        "x5.dnsseed.bluematt.me",              // Matt Corallo
+        "x5.seed.bitcoinstats.com",            // Chris Decker
+        "x5.seed.btc.petertodd.org",           // Peter Todd
+        "x5.seed.bitcoin.sprovoost.nl",        // Sjors Provoost
+        "x5.seed.bitnodes.io",                 // Addy Yeow
+        "x5.dnsseed.emzy.de",                  // Stephan Oeste
+        "x5.seed.bitcoin.wiz.biz"              // Jason Maurice
     ]
 
     let dustRelayTxFee = 3000 //  https://github.com/bitcoin/bitcoin/blob/master/src/policy/policy.h#L52
