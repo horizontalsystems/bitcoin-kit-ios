@@ -61,7 +61,6 @@ public protocol IStorage {
     func leastScoreFastestPeerAddress(excludingIps: [String]) -> PeerAddress?
     func peerAddressExist(address: String) -> Bool
     func save(peerAddresses: [PeerAddress])
-    func increasePeerAddressScore(ip: String)
     func deletePeerAddress(byIp ip: String)
     func set(connectionTime: Double, toPeerAddress: String)
 
