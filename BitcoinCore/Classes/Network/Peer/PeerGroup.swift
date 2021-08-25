@@ -203,9 +203,11 @@ extension PeerGroup: PeerDelegate {
     func peer(_ peer: IPeer, didReceiveMessage message: IMessage) {
         switch message {
         case let addressMessage as AddressMessage:
-            self.peerAddressManager.add(ips: addressMessage.addressList.map {
-                $0.address
-            })
+            let addresses = addressMessage.addressList
+                    .filter { $0.supportsBloomFilter() }
+                    .map { $0.address }
+
+            peerAddressManager.add(ips: addresses)
         case let inventoryMessage as InventoryMessage:
             inventoryQueue.async {
                 self.inventoryItemsHandler?.handleInventoryItems(peer: peer, inventoryItems: inventoryMessage.inventoryItems)
