@@ -17,12 +17,12 @@ class MainNet: INetwork {
     var syncableFromApi: Bool = true
 
     let dnsSeeds = [
-        "seed.bitcoinabc.org",                  // Bitcoin ABC seeder
-        "seed-abc.bitcoinforks.org",            // bitcoinforks seeders
-        "btccash-seeder.bitcoinunlimited.info", // BU backed seeder
-        "seed.bitprim.org",                     // Bitprim
-        "seed.deadalnix.me",                    // Amaury SÉCHET
-        "seeder.criptolayer.net"                // criptolayer.net
+        "x5.seed.bitcoinabc.org",                   // Bitcoin ABC seeder
+        "btccash-seeder.bitcoinunlimited.info",     // BU backed seeder
+        "x5.seeder.jasonbcox.com",                  // Jason B. Cox
+        "seed.deadalnix.me",                        // Amaury SÉCHET
+        "seed.bchd.cash",                           // BCHD
+        "x5.seeder.fabien.cash"                     // Fabien
     ]
 
     let dustRelayTxFee = 3000

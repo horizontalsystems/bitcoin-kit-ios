@@ -16,11 +16,10 @@ class MainNet: INetwork {
     var syncableFromApi: Bool = true
 
     let dnsSeeds = [
-        "dnsseed.litecoinpool.org",
-        "seed-a.litecoin.loshan.co.uk",
-        "dnsseed.thrasher.io",
-        "dnsseed.koin-project.com",
-        "dnsseed.litecointools.com",
+        "x5.dnsseed.thrasher.io",
+        "x5.dnsseed.litecointools.com",
+        "x5.dnsseed.litecoinpool.org",
+        "seed-a.litecoin.loshan.co.uk"
     ]
 
     let dustRelayTxFee = 3000
