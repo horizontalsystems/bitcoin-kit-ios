@@ -59,24 +59,28 @@ extension TransactionMetadataExtractor: ITransactionExtractor {
             fee = myInputsTotalValue - outputsTotalValue
             amount += fee!
         } else {
+            var inputsTotalValue = 0
+            var allInputsHaveValue = true
             for input in transaction.inputs {
                 if let previousOutput = storage.previousOutput(ofInput: input) {
-                    fee = (fee ?? 0) + previousOutput.value
+                    inputsTotalValue += previousOutput.value
                 } else {
-                    fee = nil
+                    allInputsHaveValue = false
                     break
                 }
             }
+
+            fee = allInputsHaveValue ? inputsTotalValue - outputsTotalValue : nil
         }
 
         if amount > 0 {
             transaction.metaData.amount = amount
             transaction.metaData.type = .incoming
         } else if amount < 0 {
-            transaction.metaData.amount = amount
+            transaction.metaData.amount = abs(amount)
             transaction.metaData.type = .outgoing
         } else {
-            transaction.metaData.amount = myOutputsTotalValue - myChangeOutputsTotalValue
+            transaction.metaData.amount = abs(myOutputsTotalValue - myChangeOutputsTotalValue)
             transaction.metaData.type = .sentToSelf
         }
         transaction.metaData.fee = fee

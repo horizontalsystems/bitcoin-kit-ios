@@ -37,7 +37,7 @@ public struct FullTransaction {
 
         let hash = Kit.sha256sha256(TransactionSerializer.serialize(transaction: self, withoutWitness: true))
         self.header.dataHash = hash
-        metaData.hash = hash
+        metaData.transactionHash = hash
 
         for input in self.inputs {
             input.transactionHash = self.header.dataHash

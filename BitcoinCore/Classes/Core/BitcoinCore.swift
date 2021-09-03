@@ -143,8 +143,8 @@ extension BitcoinCore {
         syncManager.syncState
     }
 
-    public func transactions(fromUid: String? = nil, limit: Int? = nil) -> Single<[TransactionInfo]> {
-        dataProvider.transactions(fromUid: fromUid, limit: limit)
+    public func transactions(fromUid: String? = nil, type: TransactionFilterType?, limit: Int? = nil) -> Single<[TransactionInfo]> {
+        dataProvider.transactions(fromUid: fromUid, type: type, limit: limit)
     }
 
     public func transaction(hash: String) -> TransactionInfo? {

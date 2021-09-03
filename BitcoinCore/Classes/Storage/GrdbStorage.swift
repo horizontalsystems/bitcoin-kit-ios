@@ -246,11 +246,11 @@ open class GrdbStorage {
             let anonymousOutputStorage = AnonymousOutputStorage(storage: self, db: db)
             let extractor = TransactionMetadataExtractor(storage: anonymousOutputStorage)
 
-            try db.alter(table: TransactionMetadata.databaseTableName) { t in
-                t.add(column: TransactionMetadata.Columns.hash.name, .text).primaryKey()
-                t.add(column: TransactionMetadata.Columns.amount.name, .integer).notNull().defaults(to: 0)
-                t.add(column: TransactionMetadata.Columns.type.name, .integer).notNull().defaults(to: 0)
-                t.add(column: TransactionMetadata.Columns.fee.name, .integer).notNull().defaults(to: 0)
+            try db.create(table: TransactionMetadata.databaseTableName) { t in
+                t.column(TransactionMetadata.Columns.transactionHash.name, .text).primaryKey()
+                t.column(TransactionMetadata.Columns.amount.name, .integer).notNull().defaults(to: 0)
+                t.column(TransactionMetadata.Columns.type.name, .integer).notNull().defaults(to: 0)
+                t.column(TransactionMetadata.Columns.fee.name, .integer)
             }
 
             for transaction in try Transaction.order([Transaction.Columns.timestamp, Transaction.Columns.order]).fetchAll(db) {
@@ -779,13 +779,13 @@ extension GrdbStorage: IStorage {
             for transactionHashChunks in transactionHashes.chunked(into: 999) {
                 inputs.append(contentsOf: try inputsWithPreviousOutputs(transactionHashes: transactionHashChunks, db: db))
                 outputs.append(contentsOf: try Output.filter(transactionHashChunks.contains(Output.Columns.transactionHash)).fetchAll(db))
-                metadata.append(contentsOf: try TransactionMetadata.filter(transactionHashChunks.contains(TransactionMetadata.Columns.hash)).fetchAll(db))
+                metadata.append(contentsOf: try TransactionMetadata.filter(transactionHashChunks.contains(TransactionMetadata.Columns.transactionHash)).fetchAll(db))
             }
         }
 
         let inputsByTransaction: [Data: [InputWithPreviousOutput]] = Dictionary(grouping: inputs, by: { $0.input.transactionHash })
         let outputsByTransaction: [Data: [Output]] = Dictionary(grouping: outputs, by: { $0.transactionHash })
-        let metadataByTransaction: [Data: [TransactionMetadata]] = Dictionary(grouping: metadata, by: { $0.hash })
+        let metadataByTransaction: [Data: [TransactionMetadata]] = Dictionary(grouping: metadata, by: { $0.transactionHash })
         var results = [FullTransactionForInfo]()
 
         for transactionWithBlock in transactionsWithBlocks {
@@ -793,7 +793,7 @@ extension GrdbStorage: IStorage {
                     transactionWithBlock: transactionWithBlock,
                     inputsWithPreviousOutputs: inputsByTransaction[transactionWithBlock.transaction.dataHash] ?? [],
                     outputs: outputsByTransaction[transactionWithBlock.transaction.dataHash] ?? [],
-                    metaData: metadataByTransaction[transactionWithBlock.transaction.dataHash]?.first ?? TransactionMetadata(hash: transactionWithBlock.transaction.dataHash)
+                    metaData: metadataByTransaction[transactionWithBlock.transaction.dataHash]?.first ?? TransactionMetadata(transactionHash: transactionWithBlock.transaction.dataHash)
             )
 
             results.append(fullTransaction)
@@ -833,7 +833,7 @@ extension GrdbStorage: IStorage {
         return fullInfo(forTransactions: [transactionWithBlock]).first
     }
 
-    public func validOrInvalidTransactionsFullInfo(fromTimestamp: Int?, fromOrder: Int?, limit: Int?) -> [FullTransactionForInfo] {
+    public func validOrInvalidTransactionsFullInfo(fromTimestamp: Int?, fromOrder: Int?, type: TransactionFilterType?, limit: Int?) -> [FullTransactionForInfo] {
         var transactions = [TransactionWithBlock]()
 
         try! dbPool.read { db in
@@ -847,10 +847,22 @@ extension GrdbStorage: IStorage {
                       SELECT transactions.*, blocks.height as blockHeight
                       FROM (SELECT * FROM invalid_transactions UNION ALL SELECT transactions.* FROM transactions) AS transactions
                       LEFT JOIN blocks ON transactions.blockHash = blocks.headerHash
+                      LEFT JOIN transaction_metadata ON transactions.dataHash = transaction_metadata.transactionHash
                       """
 
+            var whereConditions = [String]()
+
             if let fromTimestamp = fromTimestamp, let fromOrder = fromOrder {
-                sql = sql + " WHERE transactions.timestamp < \(fromTimestamp) OR (transactions.timestamp == \(fromTimestamp) AND transactions.\"order\" < \(fromOrder))"
+                whereConditions.append("transactions.timestamp < \(fromTimestamp) OR (transactions.timestamp == \(fromTimestamp) AND transactions.\"order\" < \(fromOrder))")
+            }
+
+            if let filterType = type {
+                let filters = filterType.types.map({ "transaction_metadata.type = \($0.rawValue)" }).joined(separator: " OR ")
+                whereConditions.append("(\(filters))")
+            }
+
+            if whereConditions.count > 0 {
+                sql += " WHERE \(whereConditions.joined(separator: " AND "))"
             }
 
             sql += " ORDER BY transactions.timestamp DESC, transactions.\"order\" DESC"

@@ -7,14 +7,26 @@ public enum TransactionType: Int, DatabaseValueConvertible, Codable {
     case sentToSelf = 3
 }
 
+public enum TransactionFilterType {
+    case incoming, outgoing
+
+    var types: [TransactionType] {
+        switch self {
+        case .incoming: return [.incoming, .sentToSelf]
+        case .outgoing: return [.outgoing, .sentToSelf]
+        }
+    }
+}
+
+
 public class TransactionMetadata: Record {
-    public var hash: Data
+    public var transactionHash: Data
     public var amount: Int
     public var type: TransactionType
     public var fee: Int?
 
-    public init(hash: Data = Data(), amount: Int = 0, type: TransactionType = .incoming, fee: Int? = nil) {
-        self.hash = hash
+    public init(transactionHash: Data = Data(), amount: Int = 0, type: TransactionType = .incoming, fee: Int? = nil) {
+        self.transactionHash = transactionHash
         self.amount = amount
         self.type = type
         self.fee = fee
@@ -23,18 +35,18 @@ public class TransactionMetadata: Record {
     }
 
     override open class var databaseTableName: String {
-        "transactions_meta_data"
+        "transaction_metadata"
     }
     
     enum Columns: String, ColumnExpression, CaseIterable {
-        case hash
+        case transactionHash
         case amount
         case type
         case fee
     }
     
     required init(row: Row) {
-        hash = row[Columns.hash]
+        transactionHash = row[Columns.transactionHash]
         amount = row[Columns.amount]
         type = row[Columns.type]
         fee = row[Columns.fee]
@@ -43,7 +55,7 @@ public class TransactionMetadata: Record {
     }
     
     override open func encode(to container: inout PersistenceContainer) {
-        container[Columns.hash] = hash
+        container[Columns.transactionHash] = transactionHash
         container[Columns.amount] = amount
         container[Columns.type] = type
         container[Columns.fee] = fee

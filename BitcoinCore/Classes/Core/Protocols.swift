@@ -117,7 +117,7 @@ public protocol IStorage: IOutputStorage {
     func update(transaction: FullTransaction) throws
     func update(transaction: Transaction) throws
     func fullInfo(forTransactions: [TransactionWithBlock]) -> [FullTransactionForInfo]
-    func validOrInvalidTransactionsFullInfo(fromTimestamp: Int?, fromOrder: Int?, limit: Int?) -> [FullTransactionForInfo]
+    func validOrInvalidTransactionsFullInfo(fromTimestamp: Int?, fromOrder: Int?, type: TransactionFilterType?, limit: Int?) -> [FullTransactionForInfo]
     func transactionFullInfo(byHash hash: Data) -> FullTransactionForInfo?
     func moveTransactionsTo(invalidTransactions: [InvalidTransaction]) throws
     func move(invalidTransaction: InvalidTransaction, toTransactions: FullTransaction) throws
@@ -463,7 +463,7 @@ protocol IDataProvider {
     var lastBlockInfo: BlockInfo? { get }
     var balance: BalanceInfo { get }
     func debugInfo(network: INetwork, scriptType: ScriptType, addressConverter: IAddressConverter) -> String
-    func transactions(fromUid: String?, limit: Int?) -> Single<[TransactionInfo]>
+    func transactions(fromUid: String?, type: TransactionFilterType?, limit: Int?) -> Single<[TransactionInfo]>
     func transaction(hash: String) -> TransactionInfo?
 
     func rawTransaction(transactionHash: String) -> String?

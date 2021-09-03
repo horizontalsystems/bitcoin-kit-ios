@@ -77,7 +77,7 @@ extension DataProvider: IBlockchainDataListener {
 
 extension DataProvider: IDataProvider {
 
-    func transactions(fromUid: String?, limit: Int?) -> Single<[TransactionInfo]> {
+    func transactions(fromUid: String?, type: TransactionFilterType?, limit: Int?) -> Single<[TransactionInfo]> {
         Single.create { observer in
             var resolvedTimestamp: Int? = nil
             var resolvedOrder: Int? = nil
@@ -87,7 +87,7 @@ extension DataProvider: IDataProvider {
                 resolvedOrder = transaction.order
             }
 
-            let transactions = self.storage.validOrInvalidTransactionsFullInfo(fromTimestamp: resolvedTimestamp, fromOrder: resolvedOrder, limit: limit)
+            let transactions = self.storage.validOrInvalidTransactionsFullInfo(fromTimestamp: resolvedTimestamp, fromOrder: resolvedOrder, type: type, limit: limit)
 
             observer(.success(transactions.map() { self.transactionInfoConverter.transactionInfo(fromTransaction: $0) }))
             return Disposables.create()

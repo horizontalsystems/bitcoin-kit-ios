@@ -160,8 +160,8 @@ public class Kit: AbstractKit {
         try super.send(to: address, value: value, feeRate: feeRate, sortType: sortType)
     }
 
-    public func transactions(fromUid: String? = nil, limit: Int? = nil) -> Single<[DashTransactionInfo]> {
-        super.transactions(fromUid: fromUid, limit: limit).map { self.cast(transactionInfos: $0) }
+    public func transactions(fromUid: String? = nil, type: TransactionFilterType?, limit: Int? = nil) -> Single<[DashTransactionInfo]> {
+        super.transactions(fromUid: fromUid, type: type, limit: limit).map { self.cast(transactionInfos: $0) }
     }
 
     override public func transaction(hash: String) -> DashTransactionInfo? {

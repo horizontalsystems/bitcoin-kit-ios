@@ -18,8 +18,8 @@ class DashAdapter: BaseAdapter {
         dashKit.delegate = self
     }
 
-    override func transactionsSingle(fromUid: String?, limit: Int) -> Single<[TransactionRecord]> {
-        dashKit.transactions(fromUid: fromUid, limit: limit)
+    override func transactionsSingle(fromUid: String?, type: TransactionFilterType?, limit: Int) -> Single<[TransactionRecord]> {
+        dashKit.transactions(fromUid: fromUid, type: type, limit: limit)
                 .map { [weak self] transactions -> [TransactionRecord] in
                     transactions.compactMap {
                         self?.transactionRecord(fromTransaction: $0)

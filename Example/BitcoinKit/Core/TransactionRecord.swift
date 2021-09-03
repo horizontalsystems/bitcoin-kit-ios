@@ -1,4 +1,5 @@
 import Foundation
+import BitcoinCore
 
 struct TransactionRecord {
     let uid: String
@@ -28,17 +29,4 @@ struct TransactionInputOutput {
 
 enum TransactionStatus: Int {
     case new, relayed, invalid
-}
-
-enum TransactionType {
-    case incoming, outgoing, sentToSelf(enteredAmount: Decimal)
-
-    var description: String {
-        switch self {
-        case .incoming: return "incoming"
-        case .outgoing: return "outgoing"
-        case .sentToSelf(let possibleEnteredAmount): return "sentToSelf: \(possibleEnteredAmount.formattedAmount)"
-        }
-    }
-
 }
