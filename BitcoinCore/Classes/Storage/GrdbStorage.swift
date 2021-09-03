@@ -853,11 +853,11 @@ extension GrdbStorage: IStorage {
             var whereConditions = [String]()
 
             if let fromTimestamp = fromTimestamp, let fromOrder = fromOrder {
-                whereConditions.append("transactions.timestamp < \(fromTimestamp) OR (transactions.timestamp == \(fromTimestamp) AND transactions.\"order\" < \(fromOrder))")
+                whereConditions.append("(transactions.timestamp < \(fromTimestamp) OR (transactions.timestamp == \(fromTimestamp) AND transactions.\"order\" < \(fromOrder)))")
             }
 
             if let filterType = type {
-                let filters = filterType.types.map({ "transaction_metadata.type = \($0.rawValue)" }).joined(separator: " OR ")
+                let filters = filterType.types.map({ "transaction_metadata.type == \($0.rawValue)" }).joined(separator: " OR ")
                 whereConditions.append("(\(filters))")
             }
 
