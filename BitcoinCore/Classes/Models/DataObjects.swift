@@ -28,13 +28,17 @@ public struct FullTransaction {
     public let header: Transaction
     public let inputs: [Input]
     public let outputs: [Output]
+    public let metaData = TransactionMetadata()
 
     public init(header: Transaction, inputs: [Input], outputs: [Output]) {
         self.header = header
         self.inputs = inputs
         self.outputs = outputs
 
-        self.header.dataHash = Kit.sha256sha256(TransactionSerializer.serialize(transaction: self, withoutWitness: true))
+        let hash = Kit.sha256sha256(TransactionSerializer.serialize(transaction: self, withoutWitness: true))
+        self.header.dataHash = hash
+        metaData.hash = hash
+
         for input in self.inputs {
             input.transactionHash = self.header.dataHash
         }
@@ -97,6 +101,7 @@ public struct FullTransactionForInfo {
     public let transactionWithBlock: TransactionWithBlock
     let inputsWithPreviousOutputs: [InputWithPreviousOutput]
     let outputs: [Output]
+    let metaData: TransactionMetadata
 
     var rawTransaction: String {
         let fullTransaction = FullTransaction(

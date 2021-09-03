@@ -62,9 +62,7 @@ extension TransactionOutputExtractor: ITransactionExtractor {
             output.scriptType = validScriptType
             output.keyHash = payload
 
-            if transactionKeySetter.set(output: output) {
-                transaction.header.isMine = true
-            }
+            transactionKeySetter.set(output: output)
         }
 
         if let nullDataOutput = nullDataOutput {

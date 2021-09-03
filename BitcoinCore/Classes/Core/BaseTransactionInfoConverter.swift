@@ -20,9 +20,6 @@ public class BaseTransactionInfoConverter: IBaseTransactionInfoConverter {
         var outputsInfo = [TransactionOutputInfo]()
         let transaction = transactionForInfo.transactionWithBlock.transaction
         let transactionTimestamp = transaction.timestamp
-        var allInputsHaveValue = true
-        var inputsTotalValue = 0
-        var outputsTotalValue = 0
 
         for inputWithPreviousOutput in transactionForInfo.inputsWithPreviousOutputs {
             var mine = false
@@ -30,20 +27,16 @@ public class BaseTransactionInfoConverter: IBaseTransactionInfoConverter {
 
             if let previousOutput = inputWithPreviousOutput.previousOutput {
                 value = previousOutput.value
-                inputsTotalValue += previousOutput.value
 
                 if previousOutput.publicKeyPath != nil {
                     mine = true
                 }
-            } else {
-                allInputsHaveValue = false
             }
 
             inputsInfo.append(TransactionInputInfo(mine: mine, address: inputWithPreviousOutput.input.address, value: value))
         }
 
         for output in transactionForInfo.outputs {
-            outputsTotalValue += output.value
             let outputInfo = TransactionOutputInfo(mine: output.publicKeyPath != nil, changeOutput: output.changeOutput, value: output.value, address: output.address)
 
             if let pluginId = output.pluginId, let pluginDataString = output.pluginData {
@@ -61,7 +54,9 @@ public class BaseTransactionInfoConverter: IBaseTransactionInfoConverter {
                 transactionIndex: transaction.order,
                 inputs: inputsInfo,
                 outputs: outputsInfo,
-                fee: allInputsHaveValue ? inputsTotalValue - outputsTotalValue : nil,
+                amount: transactionForInfo.metaData.amount,
+                type: transactionForInfo.metaData.type,
+                fee: transactionForInfo.metaData.fee,
                 blockHeight: transactionForInfo.transactionWithBlock.blockHeight,
                 timestamp: transactionTimestamp,
                 status: transaction.status,

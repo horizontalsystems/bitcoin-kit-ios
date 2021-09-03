@@ -138,7 +138,6 @@ extension HodlerPlugin: IPlugin {
         if let publicKey = publicKeyStorage.publicKey(byRawOrKeyHash: publicKeyHash) {
             output.redeemScript = redeemScript
             output.set(publicKey: publicKey)
-            transaction.header.isMine = true
         }
     }
 
