@@ -12,9 +12,9 @@ class TransactionOutputAddressExtractor {
 
 }
 
-extension TransactionOutputAddressExtractor: ITransactionOutputAddressExtractor {
+extension TransactionOutputAddressExtractor: ITransactionExtractor {
 
-    public func extractOutputAddresses(transaction: FullTransaction) {
+    public func extract(transaction: FullTransaction) {
         for output in transaction.outputs {
             guard let key = output.keyHash else {
                 continue

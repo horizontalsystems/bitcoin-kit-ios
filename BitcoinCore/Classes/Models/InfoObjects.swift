@@ -6,6 +6,8 @@ open class TransactionInfo: ITransactionInfo, Codable {
     public let transactionIndex: Int
     public let inputs: [TransactionInputInfo]
     public let outputs: [TransactionOutputInfo]
+    public let amount: Int
+    public let type: TransactionType
     public let fee: Int?
     public let blockHeight: Int?
     public let timestamp: Int
@@ -13,12 +15,14 @@ open class TransactionInfo: ITransactionInfo, Codable {
     public let conflictingHash: String?
 
     public required init(uid: String, transactionHash: String, transactionIndex: Int, inputs: [TransactionInputInfo], outputs: [TransactionOutputInfo],
-                         fee: Int?, blockHeight: Int?, timestamp: Int, status: TransactionStatus, conflictingHash: String?) {
+                         amount: Int, type: TransactionType, fee: Int?, blockHeight: Int?, timestamp: Int, status: TransactionStatus, conflictingHash: String?) {
         self.uid = uid
         self.transactionHash = transactionHash
         self.transactionIndex = transactionIndex
         self.inputs = inputs
         self.outputs = outputs
+        self.amount = amount
+        self.type = type
         self.fee = fee
         self.blockHeight = blockHeight
         self.timestamp = timestamp

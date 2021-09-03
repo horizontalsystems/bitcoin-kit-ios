@@ -54,7 +54,12 @@ protocol IBlockDiscovery {
     func discoverBlockHashes(account: Int) -> Single<([PublicKey], [BlockHash])>
 }
 
-public protocol IStorage {
+public protocol IOutputStorage {
+    func previousOutput(ofInput: Input) -> Output?
+    func outputsWithPublicKeys() -> [OutputWithPublicKey]
+}
+
+public protocol IStorage: IOutputStorage {
     var initialRestored: Bool? { get }
     func set(initialRestored: Bool)
 
@@ -117,11 +122,9 @@ public protocol IStorage {
     func moveTransactionsTo(invalidTransactions: [InvalidTransaction]) throws
     func move(invalidTransaction: InvalidTransaction, toTransactions: FullTransaction) throws
 
-    func outputsWithPublicKeys() -> [OutputWithPublicKey]
     func unspentOutputs() -> [UnspentOutput]
     func inputs(transactionHash: Data) -> [Input]
     func outputs(transactionHash: Data) -> [Output]
-    func previousOutput(ofInput: Input) -> Output?
     func inputsUsingOutputs(withTransactionHash: Data) -> [Input]
     func inputsUsing(previousOutputTxHash: Data, previousOutputIndex: Int) -> [Input]
 
@@ -319,8 +322,8 @@ protocol IScriptExtractor: class {
 }
 
 protocol IOutputsCache: class {
-    func addMineOutputs(from outputs: [Output])
-    func hasOutputs(forInputs inputs: [Input]) -> Bool
+    func add(outputs: [Output])
+    func valueSpent(by input: Input) -> Int?
     func clear()
 }
 
@@ -351,16 +354,12 @@ protocol ITransactionExtractor {
     func extract(transaction: FullTransaction)
 }
 
-protocol ITransactionOutputAddressExtractor {
-    func extractOutputAddresses(transaction: FullTransaction)
-}
-
 protocol ITransactionLinker {
     func handle(transaction: FullTransaction)
 }
 
 protocol ITransactionPublicKeySetter {
-    func set(output: Output) -> Bool
+    func set(output: Output)
 }
 
 public protocol ITransactionSyncer: class {
@@ -450,7 +449,7 @@ protocol ISyncManagerDelegate: class {
 }
 
 public protocol ITransactionInfo: class {
-    init(uid: String, transactionHash: String, transactionIndex: Int, inputs: [TransactionInputInfo], outputs: [TransactionOutputInfo], fee: Int?, blockHeight: Int?, timestamp: Int, status: TransactionStatus, conflictingHash: String?)
+    init(uid: String, transactionHash: String, transactionIndex: Int, inputs: [TransactionInputInfo], outputs: [TransactionOutputInfo], amount: Int, type: TransactionType, fee: Int?, blockHeight: Int?, timestamp: Int, status: TransactionStatus, conflictingHash: String?)
 }
 
 public protocol ITransactionInfoConverter {
