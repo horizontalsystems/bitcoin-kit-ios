@@ -21,6 +21,7 @@ DerivedData
 
 # Bundler
 .bundle
+_Pods.xcodeproj
 
 Pods/
 .idea

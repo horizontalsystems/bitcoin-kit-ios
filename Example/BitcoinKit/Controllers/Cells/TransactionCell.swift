@@ -71,7 +71,7 @@ class TransactionCell: UITableViewCell {
                     \(transaction.status)
                     \(transaction.transactionIndex)
                     \(TransactionCell.dateFormatter.string(from: transaction.date))
-                    \(transaction.type.description)
+                    \(transaction.type.rawValue)
                     \(transaction.amount.formattedAmount) \(coinCode)
                     \(transaction.fee?.formattedAmount ?? "") \(coinCode)
                     \(transaction.blockHeight.map { "# \($0)" } ?? "n/a")
