@@ -261,7 +261,7 @@ open class GrdbStorage {
                 )
 
                 extractor.extract(transaction: fullTransaction)
-                try self._update(transaction: fullTransaction, db: db)
+                try fullTransaction.metaData.insert(db)
             }
 
             try InvalidTransaction.deleteAll(db)
