@@ -247,7 +247,7 @@ open class GrdbStorage {
             let extractor = TransactionMetadataExtractor(storage: anonymousOutputStorage)
 
             try db.create(table: TransactionMetadata.databaseTableName) { t in
-                t.column(TransactionMetadata.Columns.transactionHash.name, .text).primaryKey()
+                t.column(TransactionMetadata.Columns.transactionHash.name, .text).primaryKey(onConflict: .replace)
                 t.column(TransactionMetadata.Columns.amount.name, .integer).notNull().defaults(to: 0)
                 t.column(TransactionMetadata.Columns.type.name, .integer).notNull().defaults(to: 0)
                 t.column(TransactionMetadata.Columns.fee.name, .integer)
