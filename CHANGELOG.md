@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## Current Version
 
+## 0.18.0
+
+* Add transaction filters [ **non-back-compatible api change** ]
+
 ## 0.17.1
 
 * Increase minimum iOS version to 13.0 [ **non-back-compatible api change** ]

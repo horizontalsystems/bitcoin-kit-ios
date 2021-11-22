@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name             = 'LitecoinKit.swift'
   s.module_name      = 'LitecoinKit'
-  s.version          = '0.17'
+  s.version          = '0.18'
   s.summary          = 'Litecoin library for Swift.'
 
   s.description      = <<-DESC
@@ -22,7 +22,7 @@ LitecoinKit implements Litecoin protocol in Swift.
 
   s.requires_arc = true
 
-  s.dependency 'BitcoinCore.swift', '~> 0.17'
+  s.dependency 'BitcoinCore.swift', '~> 0.18'
   s.dependency 'OpenSslKit.swift', '~> 1.0'
   s.dependency 'Secp256k1Kit.swift', '~> 1.0'
   s.dependency 'HdWalletKit.swift', '~> 1.5'

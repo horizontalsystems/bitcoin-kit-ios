@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name             = 'Hodler.swift'
   s.module_name      = 'Hodler'
-  s.version          = '0.17'
+  s.version          = '0.18'
   s.summary          = 'Hodler library for Swift.'
 
   s.description      = <<-DESC
@@ -21,7 +21,7 @@ Hodler plugin enables to send/receive/spend time-locked transactions.
 
   s.requires_arc = true
 
-  s.dependency 'BitcoinCore.swift', '~> 0.17'
+  s.dependency 'BitcoinCore.swift', '~> 0.18'
   s.dependency 'OpenSslKit.swift', '~> 1.0'
   s.dependency 'Secp256k1Kit.swift', '~> 1.0'
 end
