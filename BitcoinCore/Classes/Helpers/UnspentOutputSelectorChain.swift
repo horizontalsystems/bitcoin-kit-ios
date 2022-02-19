@@ -2,7 +2,7 @@ class UnspentOutputSelectorChain: IUnspentOutputSelector {
     var concreteSelectors = [IUnspentOutputSelector]()
 
     func select(value: Int, feeRate: Int, outputScriptType: ScriptType, changeType: ScriptType, senderPay: Bool, pluginDataOutputSize: Int) throws -> SelectedUnspentOutputInfo {
-        var lastError: Error = BitcoinCoreErrors.Unexpected.unkown
+        var lastError: Error = BitcoinCoreErrors.Unexpected.unknown
 
         for selector in concreteSelectors {
             do {

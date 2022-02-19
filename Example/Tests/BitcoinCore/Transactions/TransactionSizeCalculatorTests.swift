@@ -19,7 +19,7 @@ class TransactionSizeCalculatorTests: XCTestCase {
 
     func testTransactionSize() {
         XCTAssertEqual(calculator.transactionSize(previousOutputs: [], outputScriptTypes: []), 10) // empty legacy tx
-        XCTAssertEqual(calculator.transactionSize(previousOutputs: outputs(withScriptTypes: [.p2pkh]), outputScriptTypes: [.p2pkh]), 192) // 1-in 1-out standart tx
+        XCTAssertEqual(calculator.transactionSize(previousOutputs: outputs(withScriptTypes: [.p2pkh]), outputScriptTypes: [.p2pkh]), 192) // 1-in 1-out standard tx
         XCTAssertEqual(calculator.transactionSize(previousOutputs: outputs(withScriptTypes: [.p2pkh, .p2pk]), outputScriptTypes: [.p2pkh]), 306) // 2-in 1-out legacy tx
         XCTAssertEqual(calculator.transactionSize(previousOutputs: outputs(withScriptTypes: [.p2pkh, .p2pk]), outputScriptTypes: [.p2wpkh]), 303) // 2-in 1-out legacy tx with witness output
         XCTAssertEqual(calculator.transactionSize(previousOutputs: outputs(withScriptTypes: [.p2pkh, .p2pk]), outputScriptTypes: [.p2pkh, .p2pk]), 350) // 2-in 2-out legacy tx

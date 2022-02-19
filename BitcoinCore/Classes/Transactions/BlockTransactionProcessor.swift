@@ -2,7 +2,7 @@ import RxSwift
 
 class BlockTransactionProcessor {
     private let storage: IStorage
-    private let extrator: ITransactionExtractor
+    private let extractor: ITransactionExtractor
     private let publicKeyManager: IPublicKeyManager
     private let irregularOutputFinder: IIrregularOutputFinder
     private let conflictsResolver: TransactionConflictsResolver
@@ -16,7 +16,7 @@ class BlockTransactionProcessor {
     init(storage: IStorage, extractor: ITransactionExtractor, publicKeyManager: IPublicKeyManager, irregularOutputFinder: IIrregularOutputFinder,
          conflictsResolver: TransactionConflictsResolver, invalidator: TransactionInvalidator, listener: IBlockchainDataListener? = nil, queue: DispatchQueue) {
         self.storage = storage
-        self.extrator = extractor
+        self.extractor = extractor
         self.publicKeyManager = publicKeyManager
         self.irregularOutputFinder = irregularOutputFinder
         self.conflictsResolver = conflictsResolver
@@ -47,7 +47,7 @@ extension BlockTransactionProcessor: IBlockTransactionProcessor {
             for (index, fullTransaction) in transactions.inTopologicalOrder().enumerated() {
                 let transaction = fullTransaction.header
                 if let existingTransaction = storage.fullTransaction(byHash: fullTransaction.header.dataHash) {
-                    extrator.extract(transaction: existingTransaction)
+                    extractor.extract(transaction: existingTransaction)
                     transactionListener?.onReceive(transaction: existingTransaction)
                     relay(transaction: existingTransaction.header, inBlock: block, order: index)
 
@@ -57,7 +57,7 @@ extension BlockTransactionProcessor: IBlockTransactionProcessor {
                     continue
                 }
 
-                extrator.extract(transaction: fullTransaction)
+                extractor.extract(transaction: fullTransaction)
                 transactionListener?.onReceive(transaction: fullTransaction)
 
                 guard transaction.isMine else {
