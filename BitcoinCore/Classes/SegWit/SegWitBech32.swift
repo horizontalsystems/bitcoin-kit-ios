@@ -99,7 +99,7 @@ extension SegWitBech32 {
             case .hrpMismatch(let got, let expected):
                 return "Human-readable-part \"\(got)\" does not match requested \"\(expected)\""
             case .segwitV0ProgramSizeMismatch(let size):
-                return "Segwit program size \(size) does not meet version 0 requirments"
+                return "Segwit program size \(size) does not meet version 0 requirements"
             case .segwitVersionNotSupported(let version):
                 return "Segwit version \(version) is not supported by this decoder"
             }

@@ -58,7 +58,7 @@ public class BitcoinCoreErrors {
     }
 
     public enum Unexpected: Error {
-        case unkown
+        case unknown
     }
 
 
