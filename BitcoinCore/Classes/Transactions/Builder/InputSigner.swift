@@ -9,10 +9,10 @@ class InputSigner {
         case noPrivateKey
     }
 
-    let hdWallet: IHDWallet
+    let hdWallet: IPrivateHDWallet
     let network: INetwork
 
-    init(hdWallet: IHDWallet, network: INetwork) {
+    init(hdWallet: IPrivateHDWallet, network: INetwork) {
         self.hdWallet = hdWallet
         self.network = network
     }
