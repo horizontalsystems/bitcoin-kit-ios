@@ -141,6 +141,7 @@ DEPENDENCIES:
   - BitcoinKit.swift (from `../`)
   - Cuckoo
   - DashKit.swift (from `../`)
+  - HdWalletKit.swift (from `https://github.com/horizontalsystems/hd-wallet-kit-ios`)
   - Hodler.swift (from `../`)
   - HsToolKit.swift (from `https://github.com/horizontalsystems/hs-tool-kit-ios`)
   - LitecoinKit.swift (from `../`)
@@ -165,7 +166,6 @@ SPEC REPOS:
     - CNIOWindows
     - Cuckoo
     - GRDB.swift
-    - HdWalletKit.swift
     - Nimble
     - ObjectMapper
     - OpenSslKit.swift
@@ -194,6 +194,8 @@ EXTERNAL SOURCES:
     :path: "../"
   DashKit.swift:
     :path: "../"
+  HdWalletKit.swift:
+    :git: https://github.com/horizontalsystems/hd-wallet-kit-ios
   Hodler.swift:
     :path: "../"
   HsToolKit.swift:
@@ -204,6 +206,9 @@ EXTERNAL SOURCES:
     :git: https://github.com/horizontalsystems/gui-kit/
 
 CHECKOUT OPTIONS:
+  HdWalletKit.swift:
+    :commit: f317b18445a4a2b2bf1eb99e45f63ca2143ae465
+    :git: https://github.com/horizontalsystems/hd-wallet-kit-ios
   HsToolKit.swift:
     :commit: 6f9a747e67919f5ce09a7816f3cbe0471e10e608
     :git: https://github.com/horizontalsystems/hs-tool-kit-ios
@@ -254,6 +259,6 @@ SPEC CHECKSUMS:
   UIExtensions.swift: 3ed084c0343ddd0f86c7c558d37759e1fd7d5778
   X11Kit.swift: 6cfd05473e41c7b866c1a016300da02af63ad049
 
-PODFILE CHECKSUM: 44011f29c3b37c36a94661fe78af9dd4e38fc36e
+PODFILE CHECKSUM: 9277a95f45b85ccffcf8399ad47ffc9d0fa92b45
 
 COCOAPODS: 1.11.2

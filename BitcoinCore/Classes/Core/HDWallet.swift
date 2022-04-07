@@ -23,6 +23,10 @@ extension HDWallet: IHDWallet {
         }
     }
 
+}
+
+extension HDWallet: IPrivateHDWallet {
+
     func privateKeyData(account: Int, index: Int, external: Bool) throws -> Data {
         try privateKey(account: account, index: index, chain: external ? .external : .internal).raw
     }

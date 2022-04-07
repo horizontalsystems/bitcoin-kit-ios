@@ -28,6 +28,9 @@ protocol IHDWallet {
     var gapLimit: Int { get }
     func publicKey(account: Int, index: Int, external: Bool) throws -> PublicKey
     func publicKeys(account: Int, indices: Range<UInt32>, external: Bool) throws -> [PublicKey]
+}
+
+protocol IPrivateHDWallet {
     func privateKeyData(account: Int, index: Int, external: Bool) throws -> Data
 }
 
