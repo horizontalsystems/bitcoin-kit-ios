@@ -28,7 +28,7 @@ public class Kit: AbstractKit {
         switch networkType {
             case .mainNet:
                 network = MainNet()
-                initialSyncApi = InsightApi(url: "https://explorer.api.bitcoin.com/btc/v1", logger: logger)
+                initialSyncApi = BlockchainComApi(url: "https://blockchain.info", hsUrl: "https://api.blocksdecoded.com/v1/blockchains/bitcoin", logger: logger)
             case .testNet:
                 network = TestNet()
                 initialSyncApi = BCoinApi(url: "https://btc-testnet.horizontalsystems.xyz/api", logger: logger)

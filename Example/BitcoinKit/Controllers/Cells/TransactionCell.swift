@@ -15,7 +15,7 @@ class TransactionCell: UITableViewCell {
     @IBOutlet weak var transactionTypeLabel: UILabel?
     private let coinRate: Decimal = pow(10, 8)
 
-    func bind(transaction: TransactionRecord, coinCode: String, lastBlockHeight: Int?) {
+    func bind(index: Int, transaction: TransactionRecord, coinCode: String, lastBlockHeight: Int?) {
         var confirmations = "n/a"
 
         if let lastBlockHeight = lastBlockHeight, let blockHeight = transaction.blockHeight {
@@ -52,7 +52,7 @@ class TransactionCell: UITableViewCell {
         }
 
         set(string: """
-                    Tx Hash:
+                    Tx Hash: \(index)
                     Tx Status:
                     Tx Index:
                     Date:
