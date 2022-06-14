@@ -183,10 +183,6 @@ extension SyncManager: IBlockSyncListener {
     }
 
     func currentBestBlockHeightUpdated(height: Int32, maxBlockHeight: Int32) {
-        guard case .syncing(_) = syncState else {
-            return
-        }
-
         if currentBestBlockHeight < height {
             currentBestBlockHeight = height
         }
