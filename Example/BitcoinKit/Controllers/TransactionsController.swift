@@ -93,7 +93,7 @@ class TransactionsController: UITableViewController {
         }
 
         if let cell = cell as? TransactionCell {
-            cell.bind(transaction: transactions[indexPath.row], coinCode: currentAdapter.coinCode, lastBlockHeight: currentAdapter.lastBlockInfo?.height)
+            cell.bind(index: indexPath.row, transaction: transactions[indexPath.row], coinCode: currentAdapter.coinCode, lastBlockHeight: currentAdapter.lastBlockInfo?.height)
         }
 
         if indexPath.row > transactions.count - 3 {

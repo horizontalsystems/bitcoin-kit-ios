@@ -50,17 +50,17 @@ public class Kit: AbstractKit {
         switch networkType {
             case .mainNet(let coinType):
                 network = MainNet(coinType: coinType)
-                initialSyncApiUrl = "https://explorer.api.bitcoin.com/bch/v1"
+                initialSyncApiUrl = "https://api.haskoin.com/bch/blockchain"
                 validScheme = "bitcoincash"
             case .testNet:
                 network = TestNet()
-                initialSyncApiUrl = "https://explorer.api.bitcoin.com/tbch/v1"
+                initialSyncApiUrl = "https://api.haskoin.com/bchtest/blockchain"
                 validScheme = "bchtest"
         }
 
         let logger = logger ?? Logger(minLogLevel: .verbose)
 
-        let initialSyncApi = InsightApi(url: initialSyncApiUrl, logger: logger)
+        let initialSyncApi = BlockchainComApi(url: initialSyncApiUrl, hsUrl: "https://api.blocksdecoded.com/v1/blockchains/bitcoin-cash", logger: logger)
 
         let databaseFilePath = try DirectoryHelper.directoryURL(for: Kit.name).appendingPathComponent(Kit.databaseFileName(walletId: walletId, networkType: networkType, syncMode: syncMode)).path
         let storage = GrdbStorage(databaseFilePath: databaseFilePath)
