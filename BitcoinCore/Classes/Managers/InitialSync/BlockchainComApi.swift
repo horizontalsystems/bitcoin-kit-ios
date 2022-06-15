@@ -11,10 +11,20 @@ public class BlockchainComApi {
     private let hsUrl: String
     private let networkManager: NetworkManager
 
+    private static var serialSchedulers = [String: SerialDispatchQueueScheduler]()
+    private let serialScheduler: SerialDispatchQueueScheduler
+
     public init(url: String, hsUrl: String, logger: Logger? = nil) {
         self.url = url
         self.hsUrl = hsUrl
         networkManager = NetworkManager(logger: logger)
+
+        if let scheduler = Self.serialSchedulers[url] {
+            serialScheduler = scheduler
+        } else {
+            serialScheduler = SerialDispatchQueueScheduler(qos: .utility)
+            Self.serialSchedulers[url] = serialScheduler
+        }
     }
 
     private func addressesSingle(addresses: [String], offset: Int = 0) -> Single<AddressesResponse> {
@@ -25,7 +35,7 @@ public class BlockchainComApi {
         ]
 
         let request = networkManager.session.request("\(url)/multiaddr", method: .get, parameters: parameters)
-        return networkManager.single(request: request)
+        return networkManager.single(request: request, sync: true, postDelay: 0.5)
     }
 
     private func blocksSingle(heights: [Int]) -> Single<[BlockResponse]> {
@@ -54,7 +64,9 @@ public class BlockchainComApi {
                         return SyncTransactionItem(
                                 hash: block.hash,
                                 height: block.height,
-                                txOutputs: response.outputs.map { SyncTransactionOutputItem(script: $0.script, address: $0.address) }
+                                txOutputs: response.outputs.map {
+                                    SyncTransactionOutputItem(script: $0.script, address: $0.address)
+                                }
                         )
                     }
                 }
@@ -62,6 +74,7 @@ public class BlockchainComApi {
 
     private func itemsSingle(addresses: [String], offset: Int) -> Single<[SyncTransactionItem]> {
         addressesSingle(addresses: addresses, offset: offset)
+                .subscribeOn(serialScheduler)
                 .flatMap { [unowned self] response in
                     itemsSingle(transactionResponses: response.transactions)
                 }

@@ -12,16 +12,13 @@ class InitialSyncer {
     private let publicKeyManager: IPublicKeyManager
 
     private let logger: Logger?
-    private let async: Bool
 
-    init(storage: IStorage, blockDiscovery: IBlockDiscovery, publicKeyManager: IPublicKeyManager,
-         async: Bool = true, logger: Logger? = nil) {
+    init(storage: IStorage, blockDiscovery: IBlockDiscovery, publicKeyManager: IPublicKeyManager, logger: Logger? = nil) {
         self.storage = storage
         self.blockDiscovery = blockDiscovery
         self.publicKeyManager = publicKeyManager
 
         self.logger = logger
-        self.async = async
     }
 
     private func sync(forAccount account: Int) {
@@ -32,10 +29,6 @@ class InitialSyncer {
 
                     return (keys, sortedUniqueBlockHashes)
                 }
-
-        if async {
-            single = single.subscribeOn(ConcurrentDispatchQueueScheduler(qos: .background))
-        }
 
         single.subscribe(onSuccess: { [weak self] keys, responses in
                     self?.handle(forAccount: account, keys: keys, blockHashes: responses)
