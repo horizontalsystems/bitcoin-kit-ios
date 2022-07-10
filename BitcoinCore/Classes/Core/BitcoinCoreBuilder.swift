@@ -21,6 +21,7 @@ public class BitcoinCoreBuilder {
     private var blockHeaderHasher: IHasher?
     private var blockValidator: IBlockValidator?
     private var transactionInfoConverter: ITransactionInfoConverter?
+    private var hdWallet: IHDWallet?
 
     // parameters with default values
     private var confirmationsThreshold = 6
@@ -94,6 +95,11 @@ public class BitcoinCoreBuilder {
         return self
     }
 
+    public func set(hdWallet: IHDWallet?) -> BitcoinCoreBuilder {
+        self.hdWallet = hdWallet
+        return self
+    }
+
     public func set(initialSyncApi: ISyncTransactionApi?) -> BitcoinCoreBuilder {
         self.initialSyncApi = initialSyncApi
         return self
@@ -142,7 +148,7 @@ public class BitcoinCoreBuilder {
 
         let reachabilityManager = ReachabilityManager()
 
-        let hdWallet = HDWallet(seed: seed, coinType: network.coinType, xPrivKey: network.xPrivKey, xPubKey: network.xPubKey, gapLimit: 20, purpose: bip.purpose)
+        var hdWallet = self.hdWallet ?? HDWallet(seed: seed, coinType: network.coinType, xPrivKey: network.xPrivKey, xPubKey: network.xPubKey, gapLimit: 20, purpose: bip.purpose)
 
         let networkMessageParser = NetworkMessageParser(magic: network.magic)
         let networkMessageSerializer = NetworkMessageSerializer(magic: network.magic)
