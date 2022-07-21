@@ -32,6 +32,10 @@ public class ByteStream {
     }
 
     public func read(_ type: VarInt.Type) -> VarInt {
+        guard data.count > offset else {
+            return VarInt(0)
+        }
+
         let len = data[offset..<(offset + 1)].to(type: UInt8.self)
         let length: UInt64
         switch len {

@@ -23,7 +23,7 @@ public struct BlockHeader {
 
 }
 
-public struct FullTransaction {
+open class FullTransaction {
 
     public let header: Transaction
     public let inputs: [Input]
@@ -35,15 +35,21 @@ public struct FullTransaction {
         self.inputs = inputs
         self.outputs = outputs
 
-        let hash = Kit.sha256sha256(TransactionSerializer.serialize(transaction: self, withoutWitness: true))
-        self.header.dataHash = hash
+        if header.dataHash.isEmpty { //todo: check logic. It avoid double check if some special transactions make tx with already hash
+            let hash = Kit.sha256sha256(TransactionSerializer.serialize(transaction: self, withoutWitness: true))
+            set(hash: hash)
+        }
+    }
+
+    public func set(hash: Data) {
+        header.dataHash = hash
         metaData.transactionHash = hash
 
-        for input in self.inputs {
-            input.transactionHash = self.header.dataHash
+        for input in inputs {
+            input.transactionHash = header.dataHash
         }
-        for output in self.outputs {
-            output.transactionHash = self.header.dataHash
+        for output in outputs {
+            output.transactionHash = header.dataHash
         }
     }
 

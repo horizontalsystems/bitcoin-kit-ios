@@ -1,11 +1,16 @@
 import UIExtensions
 
-struct TransactionMessage: IMessage {
+public struct TransactionMessage: IMessage {
     let transaction: FullTransaction
     let size: Int
 
-    var description: String {
-        return "\(transaction.header.dataHash.reversedHex)"
+    public init(transaction: FullTransaction, size: Int) {
+        self.transaction = transaction
+        self.size = size
+    }
+
+    public var description: String {
+        "\(transaction.header.dataHash.reversedHex)"
     }
 
 }
