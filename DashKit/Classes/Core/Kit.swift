@@ -98,6 +98,7 @@ public class Kit: AbstractKit {
                 .add(messageParser: TransactionLockVoteMessageParser())
                 .add(messageParser: MasternodeListDiffMessageParser(masternodeParser: masternodeParser, quorumParser: quorumParser))
                 .add(messageParser: ISLockParser(hasher: doubleShaHasher))
+                .add(messageParser: TransactionMessageParser(hasher: doubleShaHasher))
 
         bitcoinCore.add(messageSerializer: GetMasternodeListDiffMessageSerializer())
 
