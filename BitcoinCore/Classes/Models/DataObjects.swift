@@ -30,12 +30,12 @@ open class FullTransaction {
     public let outputs: [Output]
     public let metaData = TransactionMetadata()
 
-    public init(header: Transaction, inputs: [Input], outputs: [Output]) {
+    public init(header: Transaction, inputs: [Input], outputs: [Output], forceHashUpdate: Bool = true) {
         self.header = header
         self.inputs = inputs
         self.outputs = outputs
 
-        if header.dataHash.isEmpty { //todo: check logic. It avoid double check if some special transactions make tx with already hash
+        if forceHashUpdate {
             let hash = Kit.sha256sha256(TransactionSerializer.serialize(transaction: self, withoutWitness: true))
             set(hash: hash)
         }

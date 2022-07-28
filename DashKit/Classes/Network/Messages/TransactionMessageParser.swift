@@ -22,7 +22,7 @@ class TransactionMessageParser: IMessageParser {
         let hash = hasher.hash(data: output)
         transaction.set(hash: hash)
 
-        return SpecialTransaction(transaction: transaction, extraPayload: payload)
+        return SpecialTransaction(transaction: transaction, extraPayload: payload, forceHashUpdate: false)
     }
 
     func parse(data: Data) -> IMessage {
