@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name             = 'TyzenKit.swift'
   s.module_name      = 'TyzenKit'
-  s.version          = '1.0.0'
+  s.version          = '1.0'
   s.summary          = 'Tyzen library for Swift.'
 
   s.description      = <<-DESC
