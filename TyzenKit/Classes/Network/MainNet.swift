@@ -3,9 +3,9 @@ import BitcoinCore
 public class MainNet: INetwork {
     public let bundleName = "TyzenKit"
 
-    public let pubKeyHash: UInt8 = 0x30
+    public let pubKeyHash: UInt8 = 0x42
     public let privateKey: UInt8 = 0xb0
-    public let scriptHash: UInt8 = 0x32
+    public let scriptHash: UInt8 = 0x80
     public let bech32PrefixPattern: String = "tzn"
     public let xPubKey: UInt32 = 0x03b47334
     public let xPrivKey: UInt32 = 0x03b473b9
