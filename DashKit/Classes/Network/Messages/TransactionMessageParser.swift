@@ -11,8 +11,12 @@ class TransactionMessageParser: IMessageParser {
         self.hasher = hasher
     }
 
-    private func parseSpecialTxData(input: ByteStream, transaction: FullTransaction) -> SpecialTransaction {
+    private func parseSpecialTxData(input: ByteStream, transaction: FullTransaction) throws -> SpecialTransaction {
         let payloadSize = input.read(VarInt.self)
+        guard payloadSize.underlyingValue != 0 else {
+            throw SpecialTransactionError.noExtraPayload
+        }
+
         let payload = input.read(Data.self, count: Int(payloadSize.underlyingValue))
 
         var output = TransactionSerializer.serialize(transaction: transaction)
@@ -30,11 +34,19 @@ class TransactionMessageParser: IMessageParser {
         var transaction = TransactionSerializer.deserialize(byteStream: byteStream)
 
         let version = Data(from: transaction.header.version)
-        let isSpecialTransaction = (Int(version[0]) + Int(version[1])) > 0
-        if isSpecialTransaction {
-            transaction = parseSpecialTxData(input: byteStream, transaction: transaction)
+
+        // Version type is last 2 bytes of version. Special txs has none zero type and has extraPayload
+        let isSpecialTransaction = (Int(version[2]) + Int(version[3])) > 0
+        if isSpecialTransaction, let specialTransaction = try? parseSpecialTxData(input: byteStream, transaction: transaction) {
+            transaction = specialTransaction
         }
 
         return TransactionMessage(transaction: transaction, size: data.count)
+    }
+}
+
+extension TransactionMessageParser {
+    enum SpecialTransactionError: Error {
+        case noExtraPayload
     }
 }
