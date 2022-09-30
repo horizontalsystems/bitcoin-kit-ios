@@ -66,6 +66,11 @@ class DashGrdbStorage: GrdbStorage {
                 t.primaryKey([Quorum.Columns.hash.name], onConflict: .replace)
             }
         }
+        migrator.registerMigration("add index column to Quorum") { db in
+            try db.alter(table: Quorum.databaseTableName) { t in
+                t.add(column: Quorum.Columns.quorumIndex.name, .integer)
+            }
+        }
 
         return migrator
     }
