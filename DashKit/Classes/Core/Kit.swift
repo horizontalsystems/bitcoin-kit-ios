@@ -27,7 +27,7 @@ public class Kit: AbstractKit {
         switch networkType {
         case .mainNet:
             network = MainNet()
-            initialSyncApiUrl = "https://dash.horizontalsystems.xyz/apg"
+            initialSyncApiUrl = "https://insight.dash.org/insight-api"
         case .testNet:
             network = TestNet()
             initialSyncApiUrl = "http://dash-testnet.horizontalsystems.xyz/apg"

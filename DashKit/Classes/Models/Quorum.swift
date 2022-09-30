@@ -1,3 +1,4 @@
+import Foundation
 import GRDB
 
 class Quorum: Record {
@@ -6,6 +7,7 @@ class Quorum: Record {
     let type: UInt8
     let quorumHash: Data
     let typeWithQuorumHash: Data
+    let quorumIndex: UInt16?
     let signers: Data
     let validMembers: Data
     let quorumPublicKey: Data
@@ -14,7 +16,7 @@ class Quorum: Record {
     let sig: Data
 
     override class var databaseTableName: String {
-        return "quorums"
+        "quorums"
     }
 
     enum Columns: String, ColumnExpression {
@@ -23,6 +25,7 @@ class Quorum: Record {
         case type
         case quorumHash
         case typeWithQuorumHash
+        case quorumIndex
         case signers
         case validMembers
         case quorumPublicKey
@@ -37,6 +40,7 @@ class Quorum: Record {
         type = row[Columns.type]
         quorumHash = row[Columns.quorumHash]
         typeWithQuorumHash = row[Columns.typeWithQuorumHash]
+        quorumIndex = row[Columns.quorumIndex]
         signers = row[Columns.signers]
         validMembers = row[Columns.validMembers]
         quorumPublicKey = row[Columns.quorumPublicKey]
@@ -53,6 +57,7 @@ class Quorum: Record {
         container[Columns.type] = type
         container[Columns.quorumHash] = quorumHash
         container[Columns.typeWithQuorumHash] = typeWithQuorumHash
+        container[Columns.quorumIndex] = quorumIndex
         container[Columns.signers] = signers
         container[Columns.validMembers] = validMembers
         container[Columns.quorumPublicKey] = quorumPublicKey
@@ -61,12 +66,13 @@ class Quorum: Record {
         container[Columns.sig] = sig
     }
 
-    init(hash: Data, version: UInt16, type: UInt8, quorumHash: Data, typeWithQuorumHash: Data, signers: Data, validMembers: Data, quorumPublicKey: Data, quorumVvecHash: Data, quorumSig: Data, sig: Data) {
+    init(hash: Data, version: UInt16, type: UInt8, quorumHash: Data, typeWithQuorumHash: Data, quorumIndex: UInt16?, signers: Data, validMembers: Data, quorumPublicKey: Data, quorumVvecHash: Data, quorumSig: Data, sig: Data) {
         self.dataHash = hash
         self.version = version
         self.type = type
         self.quorumHash = quorumHash
         self.typeWithQuorumHash = typeWithQuorumHash
+        self.quorumIndex = quorumIndex
         self.signers = signers
         self.validMembers = validMembers
         self.quorumPublicKey = quorumPublicKey

@@ -1,7 +1,7 @@
 import BitcoinCore
 
 public class MainNet: INetwork {
-    public let protocolVersion: Int32 = 70214
+    public let protocolVersion: Int32 = 70220
 
     public let bundleName = "DashKit"
 
@@ -19,7 +19,7 @@ public class MainNet: INetwork {
     public var syncableFromApi: Bool = true
 
     public let dnsSeeds = [
-        "x5.dnsseed.dash.org",
+        "dnsseed.dash.org",
         "x5.dnsseed.dashdot.io",
         "dnsseed.masternode.io",
     ]

@@ -1,4 +1,5 @@
 import BitcoinCore
+import Foundation
 import OpenSslKit
 
 class QuorumParser: IQuorumParser {
@@ -16,6 +17,14 @@ class QuorumParser: IQuorumParser {
         let type = typeWithQuorumHash[0]
         let quorumHash = typeWithQuorumHash.subdata(in: Range(uncheckedBounds: (lower: 1, upper: 33)))
 
+        var quorumIndexData: Data?
+        var quorumIndex: UInt16?
+        if version == 2 { // read v2 quorumIndex
+            let indexData = byteStream.read(Data.self, count: 2)
+            quorumIndex = indexData.to(type: UInt16.self).littleEndian
+            quorumIndexData = indexData
+        }
+
         let signerSizeVarInt = byteStream.read(VarInt.self)
         let signerSize = Int(signerSizeVarInt.underlyingValue)
 
@@ -31,19 +40,23 @@ class QuorumParser: IQuorumParser {
         let quorumSig = byteStream.read(Data.self, count: 96)
         let sig = byteStream.read(Data.self, count: 96)
 
-        let data = versionData +
-                    type +
-                    quorumHash +
-                    signerSizeVarInt.data +
-                    signers +
-                    validMemberSizeVarInt.data +
-                    members +
-                    quorumPublicKey +
-                    quorumVvecHash +
-                    quorumSig +
-                    sig
+
+        var data = versionData +
+                type +
+                quorumHash
+        if let index = quorumIndexData {
+            data += index
+        }
+        data += signerSizeVarInt.data +
+                signers +
+                validMemberSizeVarInt.data +
+                members +
+                quorumPublicKey +
+                quorumVvecHash +
+                quorumSig +
+                sig
         let hash = hasher.hash(data: data)
-        return Quorum(hash: hash, version: version, type: type, quorumHash: quorumHash, typeWithQuorumHash: typeWithQuorumHash, signers: signers, validMembers: members, quorumPublicKey: quorumPublicKey, quorumVvecHash: quorumVvecHash, quorumSig: quorumSig, sig: sig)
+        return Quorum(hash: hash, version: version, type: type, quorumHash: quorumHash, typeWithQuorumHash: typeWithQuorumHash, quorumIndex: quorumIndex, signers: signers, validMembers: members, quorumPublicKey: quorumPublicKey, quorumVvecHash: quorumVvecHash, quorumSig: quorumSig, sig: sig)
     }
 
 }
