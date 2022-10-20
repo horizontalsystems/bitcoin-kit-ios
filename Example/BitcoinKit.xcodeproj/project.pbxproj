@@ -1,0 +1,1998 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		11B35F729A8303254F2CC2A7 /* LitecoinAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35784074A8A389B0C3A6F /* LitecoinAdapter.swift */; };
+		1A564D56C3A051FF606AC76B /* Bip69Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A56412D624E0604F48AEECE /* Bip69Tests.swift */; };
+		1A564F07A30BCD9D357CB960 /* OutputSetterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A56436E5E862A9A35F6FE41 /* OutputSetterTests.swift */; };
+		2FA5D47CFAEB8DB143F27645 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DACF4DE83AC5FE512D28 /* Extensions.swift */; };
+		2FA5D7CBDF994AEB18C185DD /* TransactionSenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5D6678DE19DE48939B822 /* TransactionSenderTests.swift */; };
+		3A713DE3E57894A08D0D7BCA /* libPods-BitcoinKitExample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8533447FA6137FF0AD1A8653 /* libPods-BitcoinKitExample.a */; };
+		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
+		6BADE51A1F50100CE1EA2E77 /* libPods-DashKitTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 68064D100A6B89360F422ACD /* libPods-DashKitTests.a */; };
+		CCEE7A41B8D1161D30ECF667 /* libPods-BitcoinKitTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 61760DF10CCBAC95608DF73F /* libPods-BitcoinKitTests.a */; };
+		CED3DF3255F84A325E377749 /* libPods-HodlerTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AEBF785A9D87D74223787CA0 /* libPods-HodlerTests.a */; };
+		D369A2F3240E51AB00D6FE1E /* SegWitBech32AddressConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B35B0FC1EF59DDBB427A25 /* SegWitBech32AddressConverterTests.swift */; };
+		D36AAA9523A2125D0065B32B /* BitcoinCashAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA7C23A2125D0065B32B /* BitcoinCashAdapter.swift */; };
+		D36AAA9623A2125D0065B32B /* DashAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA7D23A2125D0065B32B /* DashAdapter.swift */; };
+		D36AAA9723A2125E0065B32B /* BitcoinAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA7E23A2125D0065B32B /* BitcoinAdapter.swift */; };
+		D36AAA9823A2125E0065B32B /* BaseAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA7F23A2125D0065B32B /* BaseAdapter.swift */; };
+		D36AAA9923A2125E0065B32B /* SendController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D36AAA8123A2125D0065B32B /* SendController.xib */; };
+		D36AAA9A23A2125E0065B32B /* BalanceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA8223A2125D0065B32B /* BalanceController.swift */; };
+		D36AAA9B23A2125E0065B32B /* TransactionCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = D36AAA8423A2125D0065B32B /* TransactionCell.xib */; };
+		D36AAA9C23A2125E0065B32B /* TransactionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA8523A2125D0065B32B /* TransactionCell.swift */; };
+		D36AAA9D23A2125E0065B32B /* BalanceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA8623A2125D0065B32B /* BalanceCell.swift */; };
+		D36AAA9E23A2125E0065B32B /* BalanceCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = D36AAA8723A2125D0065B32B /* BalanceCell.xib */; };
+		D36AAA9F23A2125E0065B32B /* ReceiveController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA8823A2125D0065B32B /* ReceiveController.swift */; };
+		D36AAAA023A2125E0065B32B /* WordsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA8923A2125D0065B32B /* WordsController.swift */; };
+		D36AAAA123A2125E0065B32B /* MainController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA8A23A2125D0065B32B /* MainController.swift */; };
+		D36AAAA223A2125E0065B32B /* WordsController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D36AAA8B23A2125D0065B32B /* WordsController.xib */; };
+		D36AAAA323A2125E0065B32B /* TransactionsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA8C23A2125D0065B32B /* TransactionsController.swift */; };
+		D36AAAA423A2125E0065B32B /* SendController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA8D23A2125D0065B32B /* SendController.swift */; };
+		D36AAAA523A2125E0065B32B /* ReceiveController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D36AAA8E23A2125D0065B32B /* ReceiveController.xib */; };
+		D36AAAA623A2125E0065B32B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D36AAA8F23A2125D0065B32B /* Assets.xcassets */; };
+		D36AAAA723A2125E0065B32B /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA9023A2125D0065B32B /* Configuration.swift */; };
+		D36AAAA823A2125E0065B32B /* Manager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA9223A2125D0065B32B /* Manager.swift */; };
+		D36AAAA923A2125E0065B32B /* Signal.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA9323A2125D0065B32B /* Signal.swift */; };
+		D36AAAAA23A2125E0065B32B /* TransactionRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA9423A2125D0065B32B /* TransactionRecord.swift */; };
+		D36AAAAC23A212E30065B32B /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = D36AAAAB23A212E30065B32B /* LaunchScreen.xib */; };
+		D39EA3D623A2053700FF23B7 /* GeneratedMocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3D523A2053700FF23B7 /* GeneratedMocks.swift */; };
+		D39EA42823A2094800FF23B7 /* KitStateProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3D923A2094700FF23B7 /* KitStateProviderTests.swift */; };
+		D39EA42923A2094800FF23B7 /* BlockSyncerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3DA23A2094700FF23B7 /* BlockSyncerTests.swift */; };
+		D39EA42A23A2094800FF23B7 /* ProofOfWorkValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3DC23A2094700FF23B7 /* ProofOfWorkValidatorTests.swift */; };
+		D39EA42B23A2094800FF23B7 /* LegacyTestNetDifficultyValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3DD23A2094700FF23B7 /* LegacyTestNetDifficultyValidatorTests.swift */; };
+		D39EA42C23A2094800FF23B7 /* LegacyDifficultyAdjustmentValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3DE23A2094700FF23B7 /* LegacyDifficultyAdjustmentValidatorTests.swift */; };
+		D39EA42D23A2094800FF23B7 /* BitsValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3DF23A2094700FF23B7 /* BitsValidatorTests.swift */; };
+		D39EA42E23A2094800FF23B7 /* BlockchainTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3E023A2094700FF23B7 /* BlockchainTests.swift */; };
+		D39EA42F23A2094800FF23B7 /* MerkleBlockValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3E123A2094700FF23B7 /* MerkleBlockValidatorTests.swift */; };
+		D39EA43023A2094800FF23B7 /* BitcoinTestNetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3E323A2094700FF23B7 /* BitcoinTestNetTests.swift */; };
+		D39EA43123A2094800FF23B7 /* BitcoinMainNetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3E423A2094700FF23B7 /* BitcoinMainNetTests.swift */; };
+		D39EA43223A2094800FF23B7 /* BitcoinRegTestNetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3E523A2094700FF23B7 /* BitcoinRegTestNetTests.swift */; };
+		D39EA43323A2094800FF23B7 /* ConnectionTimeoutManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3E723A2094700FF23B7 /* ConnectionTimeoutManagerTests.swift */; };
+		D39EA43423A2094800FF23B7 /* PeerManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3E823A2094700FF23B7 /* PeerManagerTests.swift */; };
+		D39EA43523A2094800FF23B7 /* PeerAddressManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3E923A2094700FF23B7 /* PeerAddressManagerTests.swift */; };
+		D39EA43623A2094800FF23B7 /* GetBlockHashesTaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3EB23A2094700FF23B7 /* GetBlockHashesTaskTests.swift */; };
+		D39EA43723A2094800FF23B7 /* SendTransactionTaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3EC23A2094700FF23B7 /* SendTransactionTaskTests.swift */; };
+		D39EA43823A2094800FF23B7 /* RequestTransactionTaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3ED23A2094700FF23B7 /* RequestTransactionTaskTests.swift */; };
+		D39EA43923A2094800FF23B7 /* GetMerkleBlocksTaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3EE23A2094700FF23B7 /* GetMerkleBlocksTaskTests.swift */; };
+		D39EA43A23A2094800FF23B7 /* PeerHostManagerDelegateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3F023A2094700FF23B7 /* PeerHostManagerDelegateTests.swift */; };
+		D39EA43B23A2094800FF23B7 /* BloomFilterManagerDelegateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3F123A2094700FF23B7 /* BloomFilterManagerDelegateTests.swift */; };
+		D39EA43C23A2094800FF23B7 /* IPeerGroupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3F223A2094700FF23B7 /* IPeerGroupTests.swift */; };
+		D39EA43D23A2094800FF23B7 /* PeerDelegateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3F323A2094700FF23B7 /* PeerDelegateTests.swift */; };
+		D39EA43E23A2094800FF23B7 /* PeerGroupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3F423A2094700FF23B7 /* PeerGroupTests.swift */; };
+		D39EA43F23A2094800FF23B7 /* IPeerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3F623A2094700FF23B7 /* IPeerTests.swift */; };
+		D39EA44023A2094800FF23B7 /* IPeerTaskDelegateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3F723A2094700FF23B7 /* IPeerTaskDelegateTests.swift */; };
+		D39EA44123A2094800FF23B7 /* PeerConnectionDelegateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3F823A2094700FF23B7 /* PeerConnectionDelegateTests.swift */; };
+		D39EA44223A2094800FF23B7 /* IPeerTaskRequesterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3F923A2094700FF23B7 /* IPeerTaskRequesterTests.swift */; };
+		D39EA44323A2094800FF23B7 /* BitcoinCashMainNetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3FA23A2094700FF23B7 /* BitcoinCashMainNetTests.swift */; };
+		D39EA44423A2094800FF23B7 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3FB23A2094700FF23B7 /* Extensions.swift */; };
+		D39EA44523A2094800FF23B7 /* DataProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3FD23A2094700FF23B7 /* DataProviderTests.swift */; };
+		D39EA44623A2094800FF23B7 /* UnspentOutputSelectorSingleNoChangeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA3FF23A2094700FF23B7 /* UnspentOutputSelectorSingleNoChangeTests.swift */; };
+		D39EA44723A2094800FF23B7 /* BloomFilterManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA40023A2094700FF23B7 /* BloomFilterManagerTests.swift */; };
+		D39EA44823A2094800FF23B7 /* UnspentOutputProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA40123A2094700FF23B7 /* UnspentOutputProviderTests.swift */; };
+		D39EA44923A2094800FF23B7 /* StateManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA40223A2094700FF23B7 /* StateManagerTests.swift */; };
+		D39EA44A23A2094800FF23B7 /* WatchedTransactionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA40323A2094700FF23B7 /* WatchedTransactionManagerTests.swift */; };
+		D39EA44B23A2094800FF23B7 /* UnspentOutputSelectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA40423A2094700FF23B7 /* UnspentOutputSelectorTests.swift */; };
+		D39EA44C23A2094800FF23B7 /* PublicKeyManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA40523A2094700FF23B7 /* PublicKeyManagerTests.swift */; };
+		D39EA44D23A2094800FF23B7 /* InitialSyncerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA40623A2094700FF23B7 /* InitialSyncerTests.swift */; };
+		D39EA44E23A2094800FF23B7 /* UnspentOutputSelectorOldTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA40723A2094700FF23B7 /* UnspentOutputSelectorOldTests.swift */; };
+		D39EA44F23A2094800FF23B7 /* IrregularOutputFinderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA40823A2094700FF23B7 /* IrregularOutputFinderTests.swift */; };
+		D39EA45023A2094800FF23B7 /* BlockHashFetcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA40A23A2094700FF23B7 /* BlockHashFetcherTests.swift */; };
+		D39EA45123A2094800FF23B7 /* BlockDiscoveryBatchTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA40B23A2094700FF23B7 /* BlockDiscoveryBatchTest.swift */; };
+		D39EA45223A2094800FF23B7 /* BlockHashFetcherHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA40C23A2094700FF23B7 /* BlockHashFetcherHelperTests.swift */; };
+		D39EA45323A2094800FF23B7 /* TestData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA40D23A2094700FF23B7 /* TestData.swift */; };
+		D39EA45423A2094800FF23B7 /* GeneratedMocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA40E23A2094700FF23B7 /* GeneratedMocks.swift */; };
+		D39EA45523A2094800FF23B7 /* DifficultyEncoderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA41023A2094700FF23B7 /* DifficultyEncoderTests.swift */; };
+		D39EA45623A2094800FF23B7 /* BlockValidatorHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA41223A2094800FF23B7 /* BlockValidatorHelperTests.swift */; };
+		D39EA45723A2094800FF23B7 /* AddressConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA41323A2094800FF23B7 /* AddressConverterTests.swift */; };
+		D39EA45823A2094800FF23B7 /* PaymentAddressParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA41423A2094800FF23B7 /* PaymentAddressParserTests.swift */; };
+		D39EA45923A2094800FF23B7 /* MerkleBranchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA41523A2094800FF23B7 /* MerkleBranchTests.swift */; };
+		D39EA45A23A2094800FF23B7 /* HDPrivateKeyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA41723A2094800FF23B7 /* HDPrivateKeyTests.swift */; };
+		D39EA45B23A2094800FF23B7 /* TransactionOutputExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA41923A2094800FF23B7 /* TransactionOutputExtractorTests.swift */; };
+		D39EA45C23A2094800FF23B7 /* TransactionCreatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA41A23A2094800FF23B7 /* TransactionCreatorTests.swift */; };
+		D39EA45D23A2094800FF23B7 /* TransactionPublicKeySetterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA41B23A2094800FF23B7 /* TransactionPublicKeySetterTests.swift */; };
+		D39EA45E23A2094800FF23B7 /* TransactionProcessorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA41C23A2094800FF23B7 /* TransactionProcessorTests.swift */; };
+		D39EA45F23A2094800FF23B7 /* TransactionOutputAddressExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA41D23A2094800FF23B7 /* TransactionOutputAddressExtractorTests.swift */; };
+		D39EA46023A2094800FF23B7 /* TransactionSyncerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA41E23A2094800FF23B7 /* TransactionSyncerTests.swift */; };
+		D39EA46123A2094800FF23B7 /* ScriptTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA42023A2094800FF23B7 /* ScriptTests.swift */; };
+		D39EA46223A2094800FF23B7 /* ChunkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA42123A2094800FF23B7 /* ChunkTests.swift */; };
+		D39EA46323A2094800FF23B7 /* ScriptConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA42223A2094800FF23B7 /* ScriptConverterTests.swift */; };
+		D39EA46423A2094800FF23B7 /* TransactionInputExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA42323A2094800FF23B7 /* TransactionInputExtractorTests.swift */; };
+		D39EA46523A2094800FF23B7 /* SegWitAddress.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA42523A2094800FF23B7 /* SegWitAddress.swift */; };
+		D39EA46623A2094800FF23B7 /* InputSignerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA42623A2094800FF23B7 /* InputSignerTests.swift */; };
+		D39EA46723A2094800FF23B7 /* TransactionSizeCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA42723A2094800FF23B7 /* TransactionSizeCalculatorTests.swift */; };
+		D39EA47623A20C5E00FF23B7 /* BitcoinCashValidatorHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA46C23A20C5E00FF23B7 /* BitcoinCashValidatorHelperTests.swift */; };
+		D39EA47723A20C5E00FF23B7 /* ForkValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA46E23A20C5E00FF23B7 /* ForkValidatorTests.swift */; };
+		D39EA47823A20C5E00FF23B7 /* EDAValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA46F23A20C5E00FF23B7 /* EDAValidatorTests.swift */; };
+		D39EA47923A20C5E00FF23B7 /* DAAValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA47023A20C5E00FF23B7 /* DAAValidatorTests.swift */; };
+		D39EA47A23A20C5E00FF23B7 /* CashBech32AddressConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA47223A20C5E00FF23B7 /* CashBech32AddressConverterTests.swift */; };
+		D39EA47B23A20C5E00FF23B7 /* GeneratedMocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA47323A20C5E00FF23B7 /* GeneratedMocks.swift */; };
+		D39EA47C23A20C5E00FF23B7 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA47423A20C5E00FF23B7 /* Extensions.swift */; };
+		D39EA47D23A20C5E00FF23B7 /* TestData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA47523A20C5E00FF23B7 /* TestData.swift */; };
+		D39EA49623A20C7000FF23B7 /* DashExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA47E23A20C6F00FF23B7 /* DashExtensions.swift */; };
+		D39EA49723A20C7000FF23B7 /* MasternodeSortedListTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA48023A20C7000FF23B7 /* MasternodeSortedListTests.swift */; };
+		D39EA49823A20C7000FF23B7 /* MerkleRootCreatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA48123A20C7000FF23B7 /* MerkleRootCreatorTests.swift */; };
+		D39EA49923A20C7000FF23B7 /* MasternodeListManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA48223A20C7000FF23B7 /* MasternodeListManagerTests.swift */; };
+		D39EA49A23A20C7000FF23B7 /* MasternodeListSyncerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA48323A20C7000FF23B7 /* MasternodeListSyncerTests.swift */; };
+		D39EA49B23A20C7000FF23B7 /* MasternodeCbTxHashCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA48423A20C7000FF23B7 /* MasternodeCbTxHashCalculatorTests.swift */; };
+		D39EA49C23A20C7000FF23B7 /* MasternodeListMerkleRootCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA48523A20C7000FF23B7 /* MasternodeListMerkleRootCalculatorTests.swift */; };
+		D39EA49D23A20C7000FF23B7 /* GeneratedMocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA48623A20C7000FF23B7 /* GeneratedMocks.swift */; };
+		D39EA49E23A20C7000FF23B7 /* DarkGravityWaveTestNetValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA48923A20C7000FF23B7 /* DarkGravityWaveTestNetValidatorTests.swift */; };
+		D39EA49F23A20C7000FF23B7 /* DarkGravityWaveValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA48A23A20C7000FF23B7 /* DarkGravityWaveValidatorTests.swift */; };
+		D39EA4A023A20C7000FF23B7 /* TransactionLockVoteValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA48C23A20C7000FF23B7 /* TransactionLockVoteValidatorTests.swift */; };
+		D39EA4A123A20C7000FF23B7 /* InstantSendLockValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA48E23A20C7000FF23B7 /* InstantSendLockValidatorTests.swift */; };
+		D39EA4A223A20C7000FF23B7 /* InstantSendLockHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA48F23A20C7000FF23B7 /* InstantSendLockHandlerTests.swift */; };
+		D39EA4A323A20C7000FF23B7 /* TransactionLockVoteManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA49023A20C7000FF23B7 /* TransactionLockVoteManagerTests.swift */; };
+		D39EA4A423A20C7000FF23B7 /* InstantSendTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA49123A20C7000FF23B7 /* InstantSendTests.swift */; };
+		D39EA4A523A20C7000FF23B7 /* TransactionLockVoteHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA49323A20C7000FF23B7 /* TransactionLockVoteHandlerTests.swift */; };
+		D39EA4A623A20C7000FF23B7 /* InstantTransactionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA49423A20C7000FF23B7 /* InstantTransactionManagerTests.swift */; };
+		D39EA4A723A20C7000FF23B7 /* DashTestData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA49523A20C7000FF23B7 /* DashTestData.swift */; };
+		D39EA4AA23A20C8500FF23B7 /* GeneratedMocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA4A823A20C8500FF23B7 /* GeneratedMocks.swift */; };
+		D39EA4AB23A20C8500FF23B7 /* HodlerPluginTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39EA4A923A20C8500FF23B7 /* HodlerPluginTests.swift */; };
+		EE39228BA69CD5E423918C4E /* libPods-BitcoinCoreTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F2017BF6B8CE56A1B7B7DF7 /* libPods-BitcoinCoreTests.a */; };
+		F58031596DC7395E2A4ADB3D /* libPods-BitcoinCashKitTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 752AEC72EEED42E4B36FB86A /* libPods-BitcoinCashKitTests.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1029C270FEFAD935F7997EBE /* Pods-BitcoinKit_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BitcoinKit_Example.release.xcconfig"; path = "Target Support Files/Pods-BitcoinKit_Example/Pods-BitcoinKit_Example.release.xcconfig"; sourceTree = "<group>"; };
+		11B35784074A8A389B0C3A6F /* LitecoinAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LitecoinAdapter.swift; sourceTree = "<group>"; };
+		11B35B0FC1EF59DDBB427A25 /* SegWitBech32AddressConverterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegWitBech32AddressConverterTests.swift; sourceTree = "<group>"; };
+		1A56412D624E0604F48AEECE /* Bip69Tests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bip69Tests.swift; sourceTree = "<group>"; };
+		1A56436E5E862A9A35F6FE41 /* OutputSetterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OutputSetterTests.swift; sourceTree = "<group>"; };
+		2FA5D6678DE19DE48939B822 /* TransactionSenderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionSenderTests.swift; sourceTree = "<group>"; };
+		2FA5DACF4DE83AC5FE512D28 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		5ABDFB9CD579008DADA21D5E /* Pods-BitcoinKit_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BitcoinKit_Example.debug.xcconfig"; path = "Target Support Files/Pods-BitcoinKit_Example/Pods-BitcoinKit_Example.debug.xcconfig"; sourceTree = "<group>"; };
+		5F2017BF6B8CE56A1B7B7DF7 /* libPods-BitcoinCoreTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-BitcoinCoreTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5F8F16D600F4DF6CD20E0BAF /* Pods-BitcoinKitExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BitcoinKitExample.debug.xcconfig"; path = "Target Support Files/Pods-BitcoinKitExample/Pods-BitcoinKitExample.debug.xcconfig"; sourceTree = "<group>"; };
+		607FACD01AFB9204008FA782 /* BitcoinKitExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BitcoinKitExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		607FACD41AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		607FACD51AFB9204008FA782 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		607FACE51AFB9204008FA782 /* BitcoinKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BitcoinKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		61760DF10CCBAC95608DF73F /* libPods-BitcoinKitTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-BitcoinKitTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		62C1FEEDB0512E77E56FACEC /* Pods-BitcoinCoreTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BitcoinCoreTests.debug.xcconfig"; path = "Target Support Files/Pods-BitcoinCoreTests/Pods-BitcoinCoreTests.debug.xcconfig"; sourceTree = "<group>"; };
+		68064D100A6B89360F422ACD /* libPods-DashKitTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-DashKitTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		752AEC72EEED42E4B36FB86A /* libPods-BitcoinCashKitTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-BitcoinCashKitTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8533447FA6137FF0AD1A8653 /* libPods-BitcoinKitExample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-BitcoinKitExample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8A7E6415B5F8A8DC1879CFA8 /* Pods-DashKitTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DashKitTests.debug.xcconfig"; path = "Target Support Files/Pods-DashKitTests/Pods-DashKitTests.debug.xcconfig"; sourceTree = "<group>"; };
+		9D42C5E0E663DB7B00733723 /* Pods-HodlerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HodlerTests.debug.xcconfig"; path = "Target Support Files/Pods-HodlerTests/Pods-HodlerTests.debug.xcconfig"; sourceTree = "<group>"; };
+		A4262CF9BB9B657C6BD94DDA /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
+		A7DBA76475D067CD41CF0EAA /* Pods-BitcoinKit_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BitcoinKit_Tests.release.xcconfig"; path = "Target Support Files/Pods-BitcoinKit_Tests/Pods-BitcoinKit_Tests.release.xcconfig"; sourceTree = "<group>"; };
+		ABCB45B4E8EBC7D5B2EB2632 /* Pods-BitcoinKit_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BitcoinKit_Tests.debug.xcconfig"; path = "Target Support Files/Pods-BitcoinKit_Tests/Pods-BitcoinKit_Tests.debug.xcconfig"; sourceTree = "<group>"; };
+		ACD6E6BDE7C346289FAB2499 /* Pods-BitcoinKitTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BitcoinKitTests.debug.xcconfig"; path = "Target Support Files/Pods-BitcoinKitTests/Pods-BitcoinKitTests.debug.xcconfig"; sourceTree = "<group>"; };
+		AEBF785A9D87D74223787CA0 /* libPods-HodlerTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-HodlerTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BBB9FFCB21BB700523232782 /* Pods-HodlerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HodlerTests.release.xcconfig"; path = "Target Support Files/Pods-HodlerTests/Pods-HodlerTests.release.xcconfig"; sourceTree = "<group>"; };
+		C45B20346E834C6B8A93D7EC /* Pods-BitcoinKitTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BitcoinKitTests.release.xcconfig"; path = "Target Support Files/Pods-BitcoinKitTests/Pods-BitcoinKitTests.release.xcconfig"; sourceTree = "<group>"; };
+		CA5C17E35989902FCC31411F /* BitcoinKit.swift.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file.podspec; name = BitcoinKit.swift.podspec; path = ../BitcoinKit.swift.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		CC223B703634B83592B29EE5 /* Pods-BitcoinCashKitTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BitcoinCashKitTests.debug.xcconfig"; path = "Target Support Files/Pods-BitcoinCashKitTests/Pods-BitcoinCashKitTests.debug.xcconfig"; sourceTree = "<group>"; };
+		D369A2F22409238F00D6FE1E /* LitecoinKit.swift.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; name = LitecoinKit.swift.podspec; path = ../LitecoinKit.swift.podspec; sourceTree = "<group>"; };
+		D36AAA7C23A2125D0065B32B /* BitcoinCashAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinCashAdapter.swift; sourceTree = "<group>"; };
+		D36AAA7D23A2125D0065B32B /* DashAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashAdapter.swift; sourceTree = "<group>"; };
+		D36AAA7E23A2125D0065B32B /* BitcoinAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinAdapter.swift; sourceTree = "<group>"; };
+		D36AAA7F23A2125D0065B32B /* BaseAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseAdapter.swift; sourceTree = "<group>"; };
+		D36AAA8123A2125D0065B32B /* SendController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SendController.xib; sourceTree = "<group>"; };
+		D36AAA8223A2125D0065B32B /* BalanceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BalanceController.swift; sourceTree = "<group>"; };
+		D36AAA8423A2125D0065B32B /* TransactionCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TransactionCell.xib; sourceTree = "<group>"; };
+		D36AAA8523A2125D0065B32B /* TransactionCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionCell.swift; sourceTree = "<group>"; };
+		D36AAA8623A2125D0065B32B /* BalanceCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BalanceCell.swift; sourceTree = "<group>"; };
+		D36AAA8723A2125D0065B32B /* BalanceCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = BalanceCell.xib; sourceTree = "<group>"; };
+		D36AAA8823A2125D0065B32B /* ReceiveController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReceiveController.swift; sourceTree = "<group>"; };
+		D36AAA8923A2125D0065B32B /* WordsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WordsController.swift; sourceTree = "<group>"; };
+		D36AAA8A23A2125D0065B32B /* MainController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainController.swift; sourceTree = "<group>"; };
+		D36AAA8B23A2125D0065B32B /* WordsController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = WordsController.xib; sourceTree = "<group>"; };
+		D36AAA8C23A2125D0065B32B /* TransactionsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionsController.swift; sourceTree = "<group>"; };
+		D36AAA8D23A2125D0065B32B /* SendController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SendController.swift; sourceTree = "<group>"; };
+		D36AAA8E23A2125D0065B32B /* ReceiveController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ReceiveController.xib; sourceTree = "<group>"; };
+		D36AAA8F23A2125D0065B32B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D36AAA9023A2125D0065B32B /* Configuration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
+		D36AAA9223A2125D0065B32B /* Manager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Manager.swift; sourceTree = "<group>"; };
+		D36AAA9323A2125D0065B32B /* Signal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Signal.swift; sourceTree = "<group>"; };
+		D36AAA9423A2125D0065B32B /* TransactionRecord.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionRecord.swift; sourceTree = "<group>"; };
+		D36AAAAB23A212E30065B32B /* LaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LaunchScreen.xib; sourceTree = "<group>"; };
+		D39EA37F23A113EF00FF23B7 /* Hodler.swift.podspec */ = {isa = PBXFileReference; lastKnownFileType = file.podspec; name = Hodler.swift.podspec; path = ../Hodler.swift.podspec; sourceTree = "<group>"; };
+		D39EA38023A113EF00FF23B7 /* DashKit.swift.podspec */ = {isa = PBXFileReference; lastKnownFileType = file.podspec; name = DashKit.swift.podspec; path = ../DashKit.swift.podspec; sourceTree = "<group>"; };
+		D39EA38123A113EF00FF23B7 /* BitcoinCore.swift.podspec */ = {isa = PBXFileReference; lastKnownFileType = file.podspec; name = BitcoinCore.swift.podspec; path = ../BitcoinCore.swift.podspec; sourceTree = "<group>"; };
+		D39EA38223A113EF00FF23B7 /* BitcoinCashKit.swift.podspec */ = {isa = PBXFileReference; lastKnownFileType = file.podspec; name = BitcoinCashKit.swift.podspec; path = ../BitcoinCashKit.swift.podspec; sourceTree = "<group>"; };
+		D39EA39923A1230000FF23B7 /* BitcoinCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BitcoinCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D39EA3A823A123FF00FF23B7 /* BitcoinCashKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BitcoinCashKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D39EA3B723A1240C00FF23B7 /* DashKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DashKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D39EA3C623A1241600FF23B7 /* HodlerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HodlerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D39EA3C823A124A600FF23B7 /* BitcoinCoreTests.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = BitcoinCoreTests.plist; sourceTree = "<group>"; };
+		D39EA3CA23A124B000FF23B7 /* BitcoinCashKitTests.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = BitcoinCashKitTests.plist; sourceTree = "<group>"; };
+		D39EA3CC23A124B900FF23B7 /* BitcoinKitTests.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = BitcoinKitTests.plist; sourceTree = "<group>"; };
+		D39EA3CE23A124C000FF23B7 /* HodlerTests.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = HodlerTests.plist; sourceTree = "<group>"; };
+		D39EA3D023A124CA00FF23B7 /* DashKitTests.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = DashKitTests.plist; sourceTree = "<group>"; };
+		D39EA3D523A2053700FF23B7 /* GeneratedMocks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratedMocks.swift; sourceTree = "<group>"; };
+		D39EA3D923A2094700FF23B7 /* KitStateProviderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KitStateProviderTests.swift; sourceTree = "<group>"; };
+		D39EA3DA23A2094700FF23B7 /* BlockSyncerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockSyncerTests.swift; sourceTree = "<group>"; };
+		D39EA3DC23A2094700FF23B7 /* ProofOfWorkValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProofOfWorkValidatorTests.swift; sourceTree = "<group>"; };
+		D39EA3DD23A2094700FF23B7 /* LegacyTestNetDifficultyValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LegacyTestNetDifficultyValidatorTests.swift; sourceTree = "<group>"; };
+		D39EA3DE23A2094700FF23B7 /* LegacyDifficultyAdjustmentValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LegacyDifficultyAdjustmentValidatorTests.swift; sourceTree = "<group>"; };
+		D39EA3DF23A2094700FF23B7 /* BitsValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitsValidatorTests.swift; sourceTree = "<group>"; };
+		D39EA3E023A2094700FF23B7 /* BlockchainTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockchainTests.swift; sourceTree = "<group>"; };
+		D39EA3E123A2094700FF23B7 /* MerkleBlockValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MerkleBlockValidatorTests.swift; sourceTree = "<group>"; };
+		D39EA3E323A2094700FF23B7 /* BitcoinTestNetTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinTestNetTests.swift; sourceTree = "<group>"; };
+		D39EA3E423A2094700FF23B7 /* BitcoinMainNetTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinMainNetTests.swift; sourceTree = "<group>"; };
+		D39EA3E523A2094700FF23B7 /* BitcoinRegTestNetTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinRegTestNetTests.swift; sourceTree = "<group>"; };
+		D39EA3E723A2094700FF23B7 /* ConnectionTimeoutManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectionTimeoutManagerTests.swift; sourceTree = "<group>"; };
+		D39EA3E823A2094700FF23B7 /* PeerManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerManagerTests.swift; sourceTree = "<group>"; };
+		D39EA3E923A2094700FF23B7 /* PeerAddressManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerAddressManagerTests.swift; sourceTree = "<group>"; };
+		D39EA3EB23A2094700FF23B7 /* GetBlockHashesTaskTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetBlockHashesTaskTests.swift; sourceTree = "<group>"; };
+		D39EA3EC23A2094700FF23B7 /* SendTransactionTaskTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SendTransactionTaskTests.swift; sourceTree = "<group>"; };
+		D39EA3ED23A2094700FF23B7 /* RequestTransactionTaskTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestTransactionTaskTests.swift; sourceTree = "<group>"; };
+		D39EA3EE23A2094700FF23B7 /* GetMerkleBlocksTaskTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetMerkleBlocksTaskTests.swift; sourceTree = "<group>"; };
+		D39EA3F023A2094700FF23B7 /* PeerHostManagerDelegateTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerHostManagerDelegateTests.swift; sourceTree = "<group>"; };
+		D39EA3F123A2094700FF23B7 /* BloomFilterManagerDelegateTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BloomFilterManagerDelegateTests.swift; sourceTree = "<group>"; };
+		D39EA3F223A2094700FF23B7 /* IPeerGroupTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IPeerGroupTests.swift; sourceTree = "<group>"; };
+		D39EA3F323A2094700FF23B7 /* PeerDelegateTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerDelegateTests.swift; sourceTree = "<group>"; };
+		D39EA3F423A2094700FF23B7 /* PeerGroupTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerGroupTests.swift; sourceTree = "<group>"; };
+		D39EA3F623A2094700FF23B7 /* IPeerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IPeerTests.swift; sourceTree = "<group>"; };
+		D39EA3F723A2094700FF23B7 /* IPeerTaskDelegateTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IPeerTaskDelegateTests.swift; sourceTree = "<group>"; };
+		D39EA3F823A2094700FF23B7 /* PeerConnectionDelegateTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerConnectionDelegateTests.swift; sourceTree = "<group>"; };
+		D39EA3F923A2094700FF23B7 /* IPeerTaskRequesterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IPeerTaskRequesterTests.swift; sourceTree = "<group>"; };
+		D39EA3FA23A2094700FF23B7 /* BitcoinCashMainNetTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinCashMainNetTests.swift; sourceTree = "<group>"; };
+		D39EA3FB23A2094700FF23B7 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		D39EA3FD23A2094700FF23B7 /* DataProviderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataProviderTests.swift; sourceTree = "<group>"; };
+		D39EA3FF23A2094700FF23B7 /* UnspentOutputSelectorSingleNoChangeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnspentOutputSelectorSingleNoChangeTests.swift; sourceTree = "<group>"; };
+		D39EA40023A2094700FF23B7 /* BloomFilterManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BloomFilterManagerTests.swift; sourceTree = "<group>"; };
+		D39EA40123A2094700FF23B7 /* UnspentOutputProviderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnspentOutputProviderTests.swift; sourceTree = "<group>"; };
+		D39EA40223A2094700FF23B7 /* StateManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StateManagerTests.swift; sourceTree = "<group>"; };
+		D39EA40323A2094700FF23B7 /* WatchedTransactionManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchedTransactionManagerTests.swift; sourceTree = "<group>"; };
+		D39EA40423A2094700FF23B7 /* UnspentOutputSelectorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnspentOutputSelectorTests.swift; sourceTree = "<group>"; };
+		D39EA40523A2094700FF23B7 /* PublicKeyManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PublicKeyManagerTests.swift; sourceTree = "<group>"; };
+		D39EA40623A2094700FF23B7 /* InitialSyncerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InitialSyncerTests.swift; sourceTree = "<group>"; };
+		D39EA40723A2094700FF23B7 /* UnspentOutputSelectorOldTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnspentOutputSelectorOldTests.swift; sourceTree = "<group>"; };
+		D39EA40823A2094700FF23B7 /* IrregularOutputFinderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IrregularOutputFinderTests.swift; sourceTree = "<group>"; };
+		D39EA40A23A2094700FF23B7 /* BlockHashFetcherTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockHashFetcherTests.swift; sourceTree = "<group>"; };
+		D39EA40B23A2094700FF23B7 /* BlockDiscoveryBatchTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockDiscoveryBatchTest.swift; sourceTree = "<group>"; };
+		D39EA40C23A2094700FF23B7 /* BlockHashFetcherHelperTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockHashFetcherHelperTests.swift; sourceTree = "<group>"; };
+		D39EA40D23A2094700FF23B7 /* TestData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestData.swift; sourceTree = "<group>"; };
+		D39EA40E23A2094700FF23B7 /* GeneratedMocks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratedMocks.swift; sourceTree = "<group>"; };
+		D39EA41023A2094700FF23B7 /* DifficultyEncoderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DifficultyEncoderTests.swift; sourceTree = "<group>"; };
+		D39EA41223A2094800FF23B7 /* BlockValidatorHelperTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlockValidatorHelperTests.swift; sourceTree = "<group>"; };
+		D39EA41323A2094800FF23B7 /* AddressConverterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddressConverterTests.swift; sourceTree = "<group>"; };
+		D39EA41423A2094800FF23B7 /* PaymentAddressParserTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PaymentAddressParserTests.swift; sourceTree = "<group>"; };
+		D39EA41523A2094800FF23B7 /* MerkleBranchTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MerkleBranchTests.swift; sourceTree = "<group>"; };
+		D39EA41723A2094800FF23B7 /* HDPrivateKeyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HDPrivateKeyTests.swift; sourceTree = "<group>"; };
+		D39EA41923A2094800FF23B7 /* TransactionOutputExtractorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionOutputExtractorTests.swift; sourceTree = "<group>"; };
+		D39EA41A23A2094800FF23B7 /* TransactionCreatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionCreatorTests.swift; sourceTree = "<group>"; };
+		D39EA41B23A2094800FF23B7 /* TransactionPublicKeySetterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionPublicKeySetterTests.swift; sourceTree = "<group>"; };
+		D39EA41C23A2094800FF23B7 /* TransactionProcessorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionProcessorTests.swift; sourceTree = "<group>"; };
+		D39EA41D23A2094800FF23B7 /* TransactionOutputAddressExtractorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionOutputAddressExtractorTests.swift; sourceTree = "<group>"; };
+		D39EA41E23A2094800FF23B7 /* TransactionSyncerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionSyncerTests.swift; sourceTree = "<group>"; };
+		D39EA42023A2094800FF23B7 /* ScriptTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScriptTests.swift; sourceTree = "<group>"; };
+		D39EA42123A2094800FF23B7 /* ChunkTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChunkTests.swift; sourceTree = "<group>"; };
+		D39EA42223A2094800FF23B7 /* ScriptConverterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScriptConverterTests.swift; sourceTree = "<group>"; };
+		D39EA42323A2094800FF23B7 /* TransactionInputExtractorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionInputExtractorTests.swift; sourceTree = "<group>"; };
+		D39EA42523A2094800FF23B7 /* SegWitAddress.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegWitAddress.swift; sourceTree = "<group>"; };
+		D39EA42623A2094800FF23B7 /* InputSignerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputSignerTests.swift; sourceTree = "<group>"; };
+		D39EA42723A2094800FF23B7 /* TransactionSizeCalculatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionSizeCalculatorTests.swift; sourceTree = "<group>"; };
+		D39EA46C23A20C5E00FF23B7 /* BitcoinCashValidatorHelperTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BitcoinCashValidatorHelperTests.swift; sourceTree = "<group>"; };
+		D39EA46E23A20C5E00FF23B7 /* ForkValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ForkValidatorTests.swift; sourceTree = "<group>"; };
+		D39EA46F23A20C5E00FF23B7 /* EDAValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EDAValidatorTests.swift; sourceTree = "<group>"; };
+		D39EA47023A20C5E00FF23B7 /* DAAValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DAAValidatorTests.swift; sourceTree = "<group>"; };
+		D39EA47223A20C5E00FF23B7 /* CashBech32AddressConverterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CashBech32AddressConverterTests.swift; sourceTree = "<group>"; };
+		D39EA47323A20C5E00FF23B7 /* GeneratedMocks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratedMocks.swift; sourceTree = "<group>"; };
+		D39EA47423A20C5E00FF23B7 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		D39EA47523A20C5E00FF23B7 /* TestData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestData.swift; sourceTree = "<group>"; };
+		D39EA47E23A20C6F00FF23B7 /* DashExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashExtensions.swift; sourceTree = "<group>"; };
+		D39EA48023A20C7000FF23B7 /* MasternodeSortedListTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeSortedListTests.swift; sourceTree = "<group>"; };
+		D39EA48123A20C7000FF23B7 /* MerkleRootCreatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MerkleRootCreatorTests.swift; sourceTree = "<group>"; };
+		D39EA48223A20C7000FF23B7 /* MasternodeListManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeListManagerTests.swift; sourceTree = "<group>"; };
+		D39EA48323A20C7000FF23B7 /* MasternodeListSyncerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeListSyncerTests.swift; sourceTree = "<group>"; };
+		D39EA48423A20C7000FF23B7 /* MasternodeCbTxHashCalculatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeCbTxHashCalculatorTests.swift; sourceTree = "<group>"; };
+		D39EA48523A20C7000FF23B7 /* MasternodeListMerkleRootCalculatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasternodeListMerkleRootCalculatorTests.swift; sourceTree = "<group>"; };
+		D39EA48623A20C7000FF23B7 /* GeneratedMocks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratedMocks.swift; sourceTree = "<group>"; };
+		D39EA48923A20C7000FF23B7 /* DarkGravityWaveTestNetValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DarkGravityWaveTestNetValidatorTests.swift; sourceTree = "<group>"; };
+		D39EA48A23A20C7000FF23B7 /* DarkGravityWaveValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DarkGravityWaveValidatorTests.swift; sourceTree = "<group>"; };
+		D39EA48C23A20C7000FF23B7 /* TransactionLockVoteValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionLockVoteValidatorTests.swift; sourceTree = "<group>"; };
+		D39EA48E23A20C7000FF23B7 /* InstantSendLockValidatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstantSendLockValidatorTests.swift; sourceTree = "<group>"; };
+		D39EA48F23A20C7000FF23B7 /* InstantSendLockHandlerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstantSendLockHandlerTests.swift; sourceTree = "<group>"; };
+		D39EA49023A20C7000FF23B7 /* TransactionLockVoteManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionLockVoteManagerTests.swift; sourceTree = "<group>"; };
+		D39EA49123A20C7000FF23B7 /* InstantSendTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstantSendTests.swift; sourceTree = "<group>"; };
+		D39EA49323A20C7000FF23B7 /* TransactionLockVoteHandlerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionLockVoteHandlerTests.swift; sourceTree = "<group>"; };
+		D39EA49423A20C7000FF23B7 /* InstantTransactionManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstantTransactionManagerTests.swift; sourceTree = "<group>"; };
+		D39EA49523A20C7000FF23B7 /* DashTestData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashTestData.swift; sourceTree = "<group>"; };
+		D39EA4A823A20C8500FF23B7 /* GeneratedMocks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratedMocks.swift; sourceTree = "<group>"; };
+		D39EA4A923A20C8500FF23B7 /* HodlerPluginTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HodlerPluginTests.swift; sourceTree = "<group>"; };
+		D63B3F32063845F0AC9AD815 /* Pods-BitcoinCoreTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BitcoinCoreTests.release.xcconfig"; path = "Target Support Files/Pods-BitcoinCoreTests/Pods-BitcoinCoreTests.release.xcconfig"; sourceTree = "<group>"; };
+		D9ABDE71F0DEF9D85F4A4A80 /* Pods-BitcoinCashKitTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BitcoinCashKitTests.release.xcconfig"; path = "Target Support Files/Pods-BitcoinCashKitTests/Pods-BitcoinCashKitTests.release.xcconfig"; sourceTree = "<group>"; };
+		F7D3B3F76026512382C0D30D /* Pods-BitcoinKitExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BitcoinKitExample.release.xcconfig"; path = "Target Support Files/Pods-BitcoinKitExample/Pods-BitcoinKitExample.release.xcconfig"; sourceTree = "<group>"; };
+		F9F3077F37128BE5E33206CB /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		FA329D8E228BBD9936928CD6 /* Pods-DashKitTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DashKitTests.release.xcconfig"; path = "Target Support Files/Pods-DashKitTests/Pods-DashKitTests.release.xcconfig"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		607FACCD1AFB9204008FA782 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3A713DE3E57894A08D0D7BCA /* libPods-BitcoinKitExample.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		607FACE21AFB9204008FA782 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CCEE7A41B8D1161D30ECF667 /* libPods-BitcoinKitTests.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D39EA39223A1230000FF23B7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EE39228BA69CD5E423918C4E /* libPods-BitcoinCoreTests.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D39EA3A123A123FF00FF23B7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F58031596DC7395E2A4ADB3D /* libPods-BitcoinCashKitTests.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D39EA3B023A1240C00FF23B7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6BADE51A1F50100CE1EA2E77 /* libPods-DashKitTests.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D39EA3BF23A1241600FF23B7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CED3DF3255F84A325E377749 /* libPods-HodlerTests.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		11B3516617F1FFA536053E9B /* DashKit */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA48723A20C7000FF23B7 /* Blocks */,
+				D39EA48B23A20C7000FF23B7 /* InstantSend */,
+				D39EA47F23A20C7000FF23B7 /* MasternodeList */,
+				D39EA47E23A20C6F00FF23B7 /* DashExtensions.swift */,
+				D39EA49523A20C7000FF23B7 /* DashTestData.swift */,
+				D39EA48623A20C7000FF23B7 /* GeneratedMocks.swift */,
+			);
+			path = DashKit;
+			sourceTree = "<group>";
+		};
+		11B353BEEBD2124FD00AFA60 /* Hodler */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA4A923A20C8500FF23B7 /* HodlerPluginTests.swift */,
+				D39EA4A823A20C8500FF23B7 /* GeneratedMocks.swift */,
+			);
+			path = Hodler;
+			sourceTree = "<group>";
+		};
+		11B35549713764C672AF8747 /* BitcoinCashKit */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA47123A20C5E00FF23B7 /* Bech32 */,
+				D39EA46B23A20C5E00FF23B7 /* Blocks */,
+				D39EA47423A20C5E00FF23B7 /* Extensions.swift */,
+				D39EA47523A20C5E00FF23B7 /* TestData.swift */,
+				D39EA47323A20C5E00FF23B7 /* GeneratedMocks.swift */,
+			);
+			path = BitcoinCashKit;
+			sourceTree = "<group>";
+		};
+		11B355C4845959AD2F3A465A /* BitcoinCore */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA40F23A2094700FF23B7 /* BlockHeaders */,
+				D39EA3D823A2094700FF23B7 /* Blocks */,
+				D39EA3FC23A2094700FF23B7 /* Core */,
+				D39EA41623A2094800FF23B7 /* HDWallet */,
+				D39EA41123A2094700FF23B7 /* Helpers */,
+				D39EA3FE23A2094700FF23B7 /* Managers */,
+				D39EA3E223A2094700FF23B7 /* Network */,
+				D39EA41823A2094800FF23B7 /* Transactions */,
+				11B35EB8AB33382E0F0DE3C5 /* SegWit */,
+				D39EA3FB23A2094700FF23B7 /* Extensions.swift */,
+				D39EA40D23A2094700FF23B7 /* TestData.swift */,
+				D39EA40E23A2094700FF23B7 /* GeneratedMocks.swift */,
+			);
+			path = BitcoinCore;
+			sourceTree = "<group>";
+		};
+		11B35B706250BEAB6C3A01AD /* BitcoinKit */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA3D523A2053700FF23B7 /* GeneratedMocks.swift */,
+			);
+			path = BitcoinKit;
+			sourceTree = "<group>";
+		};
+		11B35EB8AB33382E0F0DE3C5 /* SegWit */ = {
+			isa = PBXGroup;
+			children = (
+				11B35B0FC1EF59DDBB427A25 /* SegWitBech32AddressConverterTests.swift */,
+			);
+			path = SegWit;
+			sourceTree = "<group>";
+		};
+		607FACC71AFB9204008FA782 = {
+			isa = PBXGroup;
+			children = (
+				607FACF51AFB993E008FA782 /* Podspec Metadata */,
+				607FACD21AFB9204008FA782 /* Example for BitcoinKit */,
+				607FACE81AFB9204008FA782 /* Tests */,
+				607FACD11AFB9204008FA782 /* Products */,
+				77152A17349C0FD70A530B43 /* Pods */,
+				C2139571C0F6E4D2D26ED0AD /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		607FACD11AFB9204008FA782 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				607FACD01AFB9204008FA782 /* BitcoinKitExample.app */,
+				607FACE51AFB9204008FA782 /* BitcoinKitTests.xctest */,
+				D39EA39923A1230000FF23B7 /* BitcoinCoreTests.xctest */,
+				D39EA3A823A123FF00FF23B7 /* BitcoinCashKitTests.xctest */,
+				D39EA3B723A1240C00FF23B7 /* DashKitTests.xctest */,
+				D39EA3C623A1241600FF23B7 /* HodlerTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		607FACD21AFB9204008FA782 /* Example for BitcoinKit */ = {
+			isa = PBXGroup;
+			children = (
+				D36AAA9123A2125D0065B32B /* Core */,
+				D36AAA7B23A2125D0065B32B /* Adapters */,
+				D36AAA8023A2125D0065B32B /* Controllers */,
+				D36AAA8F23A2125D0065B32B /* Assets.xcassets */,
+				D36AAA9023A2125D0065B32B /* Configuration.swift */,
+				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
+				D36AAAAB23A212E30065B32B /* LaunchScreen.xib */,
+				607FACD31AFB9204008FA782 /* Supporting Files */,
+			);
+			name = "Example for BitcoinKit";
+			path = BitcoinKit;
+			sourceTree = "<group>";
+		};
+		607FACD31AFB9204008FA782 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				607FACD41AFB9204008FA782 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		607FACE81AFB9204008FA782 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				607FACE91AFB9204008FA782 /* Supporting Files */,
+				11B355C4845959AD2F3A465A /* BitcoinCore */,
+				11B35B706250BEAB6C3A01AD /* BitcoinKit */,
+				11B35549713764C672AF8747 /* BitcoinCashKit */,
+				11B3516617F1FFA536053E9B /* DashKit */,
+				11B353BEEBD2124FD00AFA60 /* Hodler */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		607FACE91AFB9204008FA782 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA3D023A124CA00FF23B7 /* DashKitTests.plist */,
+				D39EA3CE23A124C000FF23B7 /* HodlerTests.plist */,
+				D39EA3CC23A124B900FF23B7 /* BitcoinKitTests.plist */,
+				D39EA3CA23A124B000FF23B7 /* BitcoinCashKitTests.plist */,
+				D39EA3C823A124A600FF23B7 /* BitcoinCoreTests.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		607FACF51AFB993E008FA782 /* Podspec Metadata */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA38123A113EF00FF23B7 /* BitcoinCore.swift.podspec */,
+				CA5C17E35989902FCC31411F /* BitcoinKit.swift.podspec */,
+				D39EA38223A113EF00FF23B7 /* BitcoinCashKit.swift.podspec */,
+				D39EA38023A113EF00FF23B7 /* DashKit.swift.podspec */,
+				D369A2F22409238F00D6FE1E /* LitecoinKit.swift.podspec */,
+				D39EA37F23A113EF00FF23B7 /* Hodler.swift.podspec */,
+				F9F3077F37128BE5E33206CB /* README.md */,
+				A4262CF9BB9B657C6BD94DDA /* LICENSE */,
+			);
+			name = "Podspec Metadata";
+			sourceTree = "<group>";
+		};
+		77152A17349C0FD70A530B43 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				5ABDFB9CD579008DADA21D5E /* Pods-BitcoinKit_Example.debug.xcconfig */,
+				1029C270FEFAD935F7997EBE /* Pods-BitcoinKit_Example.release.xcconfig */,
+				ABCB45B4E8EBC7D5B2EB2632 /* Pods-BitcoinKit_Tests.debug.xcconfig */,
+				A7DBA76475D067CD41CF0EAA /* Pods-BitcoinKit_Tests.release.xcconfig */,
+				5F8F16D600F4DF6CD20E0BAF /* Pods-BitcoinKitExample.debug.xcconfig */,
+				F7D3B3F76026512382C0D30D /* Pods-BitcoinKitExample.release.xcconfig */,
+				ACD6E6BDE7C346289FAB2499 /* Pods-BitcoinKitTests.debug.xcconfig */,
+				C45B20346E834C6B8A93D7EC /* Pods-BitcoinKitTests.release.xcconfig */,
+				62C1FEEDB0512E77E56FACEC /* Pods-BitcoinCoreTests.debug.xcconfig */,
+				D63B3F32063845F0AC9AD815 /* Pods-BitcoinCoreTests.release.xcconfig */,
+				CC223B703634B83592B29EE5 /* Pods-BitcoinCashKitTests.debug.xcconfig */,
+				D9ABDE71F0DEF9D85F4A4A80 /* Pods-BitcoinCashKitTests.release.xcconfig */,
+				8A7E6415B5F8A8DC1879CFA8 /* Pods-DashKitTests.debug.xcconfig */,
+				FA329D8E228BBD9936928CD6 /* Pods-DashKitTests.release.xcconfig */,
+				9D42C5E0E663DB7B00733723 /* Pods-HodlerTests.debug.xcconfig */,
+				BBB9FFCB21BB700523232782 /* Pods-HodlerTests.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		C2139571C0F6E4D2D26ED0AD /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				752AEC72EEED42E4B36FB86A /* libPods-BitcoinCashKitTests.a */,
+				5F2017BF6B8CE56A1B7B7DF7 /* libPods-BitcoinCoreTests.a */,
+				8533447FA6137FF0AD1A8653 /* libPods-BitcoinKitExample.a */,
+				61760DF10CCBAC95608DF73F /* libPods-BitcoinKitTests.a */,
+				68064D100A6B89360F422ACD /* libPods-DashKitTests.a */,
+				AEBF785A9D87D74223787CA0 /* libPods-HodlerTests.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D36AAA7B23A2125D0065B32B /* Adapters */ = {
+			isa = PBXGroup;
+			children = (
+				D36AAA7C23A2125D0065B32B /* BitcoinCashAdapter.swift */,
+				D36AAA7D23A2125D0065B32B /* DashAdapter.swift */,
+				D36AAA7E23A2125D0065B32B /* BitcoinAdapter.swift */,
+				D36AAA7F23A2125D0065B32B /* BaseAdapter.swift */,
+				11B35784074A8A389B0C3A6F /* LitecoinAdapter.swift */,
+			);
+			path = Adapters;
+			sourceTree = "<group>";
+		};
+		D36AAA8023A2125D0065B32B /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				D36AAA8123A2125D0065B32B /* SendController.xib */,
+				D36AAA8223A2125D0065B32B /* BalanceController.swift */,
+				D36AAA8323A2125D0065B32B /* Cells */,
+				D36AAA8823A2125D0065B32B /* ReceiveController.swift */,
+				D36AAA8923A2125D0065B32B /* WordsController.swift */,
+				D36AAA8A23A2125D0065B32B /* MainController.swift */,
+				D36AAA8B23A2125D0065B32B /* WordsController.xib */,
+				D36AAA8C23A2125D0065B32B /* TransactionsController.swift */,
+				D36AAA8D23A2125D0065B32B /* SendController.swift */,
+				D36AAA8E23A2125D0065B32B /* ReceiveController.xib */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		D36AAA8323A2125D0065B32B /* Cells */ = {
+			isa = PBXGroup;
+			children = (
+				D36AAA8423A2125D0065B32B /* TransactionCell.xib */,
+				D36AAA8523A2125D0065B32B /* TransactionCell.swift */,
+				D36AAA8623A2125D0065B32B /* BalanceCell.swift */,
+				D36AAA8723A2125D0065B32B /* BalanceCell.xib */,
+			);
+			path = Cells;
+			sourceTree = "<group>";
+		};
+		D36AAA9123A2125D0065B32B /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				D36AAA9223A2125D0065B32B /* Manager.swift */,
+				D36AAA9323A2125D0065B32B /* Signal.swift */,
+				D36AAA9423A2125D0065B32B /* TransactionRecord.swift */,
+				2FA5DACF4DE83AC5FE512D28 /* Extensions.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		D39EA3D823A2094700FF23B7 /* Blocks */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA3D923A2094700FF23B7 /* KitStateProviderTests.swift */,
+				D39EA3DA23A2094700FF23B7 /* BlockSyncerTests.swift */,
+				D39EA3DB23A2094700FF23B7 /* Validators */,
+				D39EA3E023A2094700FF23B7 /* BlockchainTests.swift */,
+				D39EA3E123A2094700FF23B7 /* MerkleBlockValidatorTests.swift */,
+			);
+			path = Blocks;
+			sourceTree = "<group>";
+		};
+		D39EA3DB23A2094700FF23B7 /* Validators */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA3DC23A2094700FF23B7 /* ProofOfWorkValidatorTests.swift */,
+				D39EA3DD23A2094700FF23B7 /* LegacyTestNetDifficultyValidatorTests.swift */,
+				D39EA3DE23A2094700FF23B7 /* LegacyDifficultyAdjustmentValidatorTests.swift */,
+				D39EA3DF23A2094700FF23B7 /* BitsValidatorTests.swift */,
+			);
+			path = Validators;
+			sourceTree = "<group>";
+		};
+		D39EA3E223A2094700FF23B7 /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA3E323A2094700FF23B7 /* BitcoinTestNetTests.swift */,
+				D39EA3E423A2094700FF23B7 /* BitcoinMainNetTests.swift */,
+				D39EA3E523A2094700FF23B7 /* BitcoinRegTestNetTests.swift */,
+				D39EA3E623A2094700FF23B7 /* Peer */,
+				D39EA3FA23A2094700FF23B7 /* BitcoinCashMainNetTests.swift */,
+				2FA5D6678DE19DE48939B822 /* TransactionSenderTests.swift */,
+			);
+			path = Network;
+			sourceTree = "<group>";
+		};
+		D39EA3E623A2094700FF23B7 /* Peer */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA3E723A2094700FF23B7 /* ConnectionTimeoutManagerTests.swift */,
+				D39EA3E823A2094700FF23B7 /* PeerManagerTests.swift */,
+				D39EA3E923A2094700FF23B7 /* PeerAddressManagerTests.swift */,
+				D39EA3EA23A2094700FF23B7 /* PeerTask */,
+				D39EA3EF23A2094700FF23B7 /* PeerGroupTests */,
+				D39EA3F523A2094700FF23B7 /* PeerTests */,
+			);
+			path = Peer;
+			sourceTree = "<group>";
+		};
+		D39EA3EA23A2094700FF23B7 /* PeerTask */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA3EB23A2094700FF23B7 /* GetBlockHashesTaskTests.swift */,
+				D39EA3EC23A2094700FF23B7 /* SendTransactionTaskTests.swift */,
+				D39EA3ED23A2094700FF23B7 /* RequestTransactionTaskTests.swift */,
+				D39EA3EE23A2094700FF23B7 /* GetMerkleBlocksTaskTests.swift */,
+			);
+			path = PeerTask;
+			sourceTree = "<group>";
+		};
+		D39EA3EF23A2094700FF23B7 /* PeerGroupTests */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA3F023A2094700FF23B7 /* PeerHostManagerDelegateTests.swift */,
+				D39EA3F123A2094700FF23B7 /* BloomFilterManagerDelegateTests.swift */,
+				D39EA3F223A2094700FF23B7 /* IPeerGroupTests.swift */,
+				D39EA3F323A2094700FF23B7 /* PeerDelegateTests.swift */,
+				D39EA3F423A2094700FF23B7 /* PeerGroupTests.swift */,
+			);
+			path = PeerGroupTests;
+			sourceTree = "<group>";
+		};
+		D39EA3F523A2094700FF23B7 /* PeerTests */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA3F623A2094700FF23B7 /* IPeerTests.swift */,
+				D39EA3F723A2094700FF23B7 /* IPeerTaskDelegateTests.swift */,
+				D39EA3F823A2094700FF23B7 /* PeerConnectionDelegateTests.swift */,
+				D39EA3F923A2094700FF23B7 /* IPeerTaskRequesterTests.swift */,
+			);
+			path = PeerTests;
+			sourceTree = "<group>";
+		};
+		D39EA3FC23A2094700FF23B7 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA3FD23A2094700FF23B7 /* DataProviderTests.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		D39EA3FE23A2094700FF23B7 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA3FF23A2094700FF23B7 /* UnspentOutputSelectorSingleNoChangeTests.swift */,
+				D39EA40023A2094700FF23B7 /* BloomFilterManagerTests.swift */,
+				D39EA40123A2094700FF23B7 /* UnspentOutputProviderTests.swift */,
+				D39EA40223A2094700FF23B7 /* StateManagerTests.swift */,
+				D39EA40323A2094700FF23B7 /* WatchedTransactionManagerTests.swift */,
+				D39EA40423A2094700FF23B7 /* UnspentOutputSelectorTests.swift */,
+				D39EA40523A2094700FF23B7 /* PublicKeyManagerTests.swift */,
+				D39EA40623A2094700FF23B7 /* InitialSyncerTests.swift */,
+				D39EA40723A2094700FF23B7 /* UnspentOutputSelectorOldTests.swift */,
+				D39EA40823A2094700FF23B7 /* IrregularOutputFinderTests.swift */,
+				D39EA40923A2094700FF23B7 /* InitialSync */,
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
+		D39EA40923A2094700FF23B7 /* InitialSync */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA40A23A2094700FF23B7 /* BlockHashFetcherTests.swift */,
+				D39EA40B23A2094700FF23B7 /* BlockDiscoveryBatchTest.swift */,
+				D39EA40C23A2094700FF23B7 /* BlockHashFetcherHelperTests.swift */,
+			);
+			path = InitialSync;
+			sourceTree = "<group>";
+		};
+		D39EA40F23A2094700FF23B7 /* BlockHeaders */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA41023A2094700FF23B7 /* DifficultyEncoderTests.swift */,
+			);
+			path = BlockHeaders;
+			sourceTree = "<group>";
+		};
+		D39EA41123A2094700FF23B7 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA41223A2094800FF23B7 /* BlockValidatorHelperTests.swift */,
+				D39EA41323A2094800FF23B7 /* AddressConverterTests.swift */,
+				D39EA41423A2094800FF23B7 /* PaymentAddressParserTests.swift */,
+				D39EA41523A2094800FF23B7 /* MerkleBranchTests.swift */,
+				1A56412D624E0604F48AEECE /* Bip69Tests.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
+		D39EA41623A2094800FF23B7 /* HDWallet */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA41723A2094800FF23B7 /* HDPrivateKeyTests.swift */,
+			);
+			path = HDWallet;
+			sourceTree = "<group>";
+		};
+		D39EA41823A2094800FF23B7 /* Transactions */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA41923A2094800FF23B7 /* TransactionOutputExtractorTests.swift */,
+				D39EA41A23A2094800FF23B7 /* TransactionCreatorTests.swift */,
+				D39EA41B23A2094800FF23B7 /* TransactionPublicKeySetterTests.swift */,
+				D39EA41C23A2094800FF23B7 /* TransactionProcessorTests.swift */,
+				D39EA41D23A2094800FF23B7 /* TransactionOutputAddressExtractorTests.swift */,
+				D39EA41E23A2094800FF23B7 /* TransactionSyncerTests.swift */,
+				D39EA41F23A2094800FF23B7 /* Scripts */,
+				D39EA42323A2094800FF23B7 /* TransactionInputExtractorTests.swift */,
+				D39EA42423A2094800FF23B7 /* Builder */,
+				D39EA42723A2094800FF23B7 /* TransactionSizeCalculatorTests.swift */,
+				1A56436E5E862A9A35F6FE41 /* OutputSetterTests.swift */,
+			);
+			path = Transactions;
+			sourceTree = "<group>";
+		};
+		D39EA41F23A2094800FF23B7 /* Scripts */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA42023A2094800FF23B7 /* ScriptTests.swift */,
+				D39EA42123A2094800FF23B7 /* ChunkTests.swift */,
+				D39EA42223A2094800FF23B7 /* ScriptConverterTests.swift */,
+			);
+			path = Scripts;
+			sourceTree = "<group>";
+		};
+		D39EA42423A2094800FF23B7 /* Builder */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA42523A2094800FF23B7 /* SegWitAddress.swift */,
+				D39EA42623A2094800FF23B7 /* InputSignerTests.swift */,
+			);
+			path = Builder;
+			sourceTree = "<group>";
+		};
+		D39EA46B23A20C5E00FF23B7 /* Blocks */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA46C23A20C5E00FF23B7 /* BitcoinCashValidatorHelperTests.swift */,
+				D39EA46D23A20C5E00FF23B7 /* Validators */,
+			);
+			path = Blocks;
+			sourceTree = "<group>";
+		};
+		D39EA46D23A20C5E00FF23B7 /* Validators */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA46E23A20C5E00FF23B7 /* ForkValidatorTests.swift */,
+				D39EA46F23A20C5E00FF23B7 /* EDAValidatorTests.swift */,
+				D39EA47023A20C5E00FF23B7 /* DAAValidatorTests.swift */,
+			);
+			path = Validators;
+			sourceTree = "<group>";
+		};
+		D39EA47123A20C5E00FF23B7 /* Bech32 */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA47223A20C5E00FF23B7 /* CashBech32AddressConverterTests.swift */,
+			);
+			path = Bech32;
+			sourceTree = "<group>";
+		};
+		D39EA47F23A20C7000FF23B7 /* MasternodeList */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA48023A20C7000FF23B7 /* MasternodeSortedListTests.swift */,
+				D39EA48123A20C7000FF23B7 /* MerkleRootCreatorTests.swift */,
+				D39EA48223A20C7000FF23B7 /* MasternodeListManagerTests.swift */,
+				D39EA48323A20C7000FF23B7 /* MasternodeListSyncerTests.swift */,
+				D39EA48423A20C7000FF23B7 /* MasternodeCbTxHashCalculatorTests.swift */,
+				D39EA48523A20C7000FF23B7 /* MasternodeListMerkleRootCalculatorTests.swift */,
+			);
+			path = MasternodeList;
+			sourceTree = "<group>";
+		};
+		D39EA48723A20C7000FF23B7 /* Blocks */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA48823A20C7000FF23B7 /* Validators */,
+			);
+			path = Blocks;
+			sourceTree = "<group>";
+		};
+		D39EA48823A20C7000FF23B7 /* Validators */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA48923A20C7000FF23B7 /* DarkGravityWaveTestNetValidatorTests.swift */,
+				D39EA48A23A20C7000FF23B7 /* DarkGravityWaveValidatorTests.swift */,
+			);
+			path = Validators;
+			sourceTree = "<group>";
+		};
+		D39EA48B23A20C7000FF23B7 /* InstantSend */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA48C23A20C7000FF23B7 /* TransactionLockVoteValidatorTests.swift */,
+				D39EA48D23A20C7000FF23B7 /* InstantSendLock */,
+				D39EA49023A20C7000FF23B7 /* TransactionLockVoteManagerTests.swift */,
+				D39EA49123A20C7000FF23B7 /* InstantSendTests.swift */,
+				D39EA49223A20C7000FF23B7 /* TransactionLockVote */,
+				D39EA49423A20C7000FF23B7 /* InstantTransactionManagerTests.swift */,
+			);
+			path = InstantSend;
+			sourceTree = "<group>";
+		};
+		D39EA48D23A20C7000FF23B7 /* InstantSendLock */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA48E23A20C7000FF23B7 /* InstantSendLockValidatorTests.swift */,
+				D39EA48F23A20C7000FF23B7 /* InstantSendLockHandlerTests.swift */,
+			);
+			path = InstantSendLock;
+			sourceTree = "<group>";
+		};
+		D39EA49223A20C7000FF23B7 /* TransactionLockVote */ = {
+			isa = PBXGroup;
+			children = (
+				D39EA49323A20C7000FF23B7 /* TransactionLockVoteHandlerTests.swift */,
+			);
+			path = TransactionLockVote;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		607FACCF1AFB9204008FA782 /* BitcoinKitExample */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 607FACEF1AFB9204008FA782 /* Build configuration list for PBXNativeTarget "BitcoinKitExample" */;
+			buildPhases = (
+				4D2F1739ADC1B8FF2F30DEC6 /* [CP] Check Pods Manifest.lock */,
+				607FACCC1AFB9204008FA782 /* Sources */,
+				607FACCD1AFB9204008FA782 /* Frameworks */,
+				607FACCE1AFB9204008FA782 /* Resources */,
+				CBACB7D2806000B2E6B7D92D /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BitcoinKitExample;
+			productName = BitcoinKit;
+			productReference = 607FACD01AFB9204008FA782 /* BitcoinKitExample.app */;
+			productType = "com.apple.product-type.application";
+		};
+		607FACE41AFB9204008FA782 /* BitcoinKitTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 607FACF21AFB9204008FA782 /* Build configuration list for PBXNativeTarget "BitcoinKitTests" */;
+			buildPhases = (
+				393739D2DB22DC4B9F04D4C3 /* [CP] Check Pods Manifest.lock */,
+				D39EA3D423A2021100FF23B7 /* Cuckoo */,
+				607FACE11AFB9204008FA782 /* Sources */,
+				607FACE21AFB9204008FA782 /* Frameworks */,
+				607FACE31AFB9204008FA782 /* Resources */,
+				73F6CD24266C8DEFDA100A12 /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BitcoinKitTests;
+			productName = Tests;
+			productReference = 607FACE51AFB9204008FA782 /* BitcoinKitTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D39EA38C23A1230000FF23B7 /* BitcoinCoreTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D39EA39623A1230000FF23B7 /* Build configuration list for PBXNativeTarget "BitcoinCoreTests" */;
+			buildPhases = (
+				BA9D76541EFC6174DADECCB8 /* [CP] Check Pods Manifest.lock */,
+				D39EA3D723A2089100FF23B7 /* Cuckoo */,
+				D39EA39023A1230000FF23B7 /* Sources */,
+				D39EA39223A1230000FF23B7 /* Frameworks */,
+				D39EA39423A1230000FF23B7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BitcoinCoreTests;
+			productName = Tests;
+			productReference = D39EA39923A1230000FF23B7 /* BitcoinCoreTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D39EA39B23A123FF00FF23B7 /* BitcoinCashKitTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D39EA3A523A123FF00FF23B7 /* Build configuration list for PBXNativeTarget "BitcoinCashKitTests" */;
+			buildPhases = (
+				0C5DFCC8EAC8A6516BFBCDA4 /* [CP] Check Pods Manifest.lock */,
+				D39EA46823A20B4300FF23B7 /* Cuckoo */,
+				D39EA39F23A123FF00FF23B7 /* Sources */,
+				D39EA3A123A123FF00FF23B7 /* Frameworks */,
+				D39EA3A323A123FF00FF23B7 /* Resources */,
+				2F8AFF29D42B269D1BE10D3E /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BitcoinCashKitTests;
+			productName = Tests;
+			productReference = D39EA3A823A123FF00FF23B7 /* BitcoinCashKitTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D39EA3AA23A1240C00FF23B7 /* DashKitTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D39EA3B423A1240C00FF23B7 /* Build configuration list for PBXNativeTarget "DashKitTests" */;
+			buildPhases = (
+				F9F696295B738796CD994D53 /* [CP] Check Pods Manifest.lock */,
+				D39EA46923A20B8C00FF23B7 /* Cuckoo */,
+				D39EA3AE23A1240C00FF23B7 /* Sources */,
+				D39EA3B023A1240C00FF23B7 /* Frameworks */,
+				D39EA3B223A1240C00FF23B7 /* Resources */,
+				CA02FDE0341145E1B5A15696 /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DashKitTests;
+			productName = Tests;
+			productReference = D39EA3B723A1240C00FF23B7 /* DashKitTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D39EA3B923A1241600FF23B7 /* HodlerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D39EA3C323A1241600FF23B7 /* Build configuration list for PBXNativeTarget "HodlerTests" */;
+			buildPhases = (
+				AA3C1258195C13A83DF8BDFE /* [CP] Check Pods Manifest.lock */,
+				D39EA46A23A20BBF00FF23B7 /* Cuckoo */,
+				D39EA3BD23A1241600FF23B7 /* Sources */,
+				D39EA3BF23A1241600FF23B7 /* Frameworks */,
+				D39EA3C123A1241600FF23B7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HodlerTests;
+			productName = Tests;
+			productReference = D39EA3C623A1241600FF23B7 /* HodlerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		607FACC81AFB9204008FA782 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0830;
+				LastUpgradeCheck = 1120;
+				ORGANIZATIONNAME = CocoaPods;
+				TargetAttributes = {
+					607FACCF1AFB9204008FA782 = {
+						CreatedOnToolsVersion = 6.3.1;
+						DevelopmentTeam = HC4MCAXJ66;
+						LastSwiftMigration = 0900;
+					};
+					607FACE41AFB9204008FA782 = {
+						CreatedOnToolsVersion = 6.3.1;
+						DevelopmentTeam = HC4MCAXJ66;
+						LastSwiftMigration = 1120;
+					};
+					D39EA38C23A1230000FF23B7 = {
+						DevelopmentTeam = HC4MCAXJ66;
+						LastSwiftMigration = 1120;
+					};
+					D39EA39B23A123FF00FF23B7 = {
+						DevelopmentTeam = HC4MCAXJ66;
+						LastSwiftMigration = 1120;
+					};
+					D39EA3AA23A1240C00FF23B7 = {
+						DevelopmentTeam = HC4MCAXJ66;
+						LastSwiftMigration = 1120;
+					};
+					D39EA3B923A1241600FF23B7 = {
+						DevelopmentTeam = HC4MCAXJ66;
+						LastSwiftMigration = 1120;
+					};
+				};
+			};
+			buildConfigurationList = 607FACCB1AFB9204008FA782 /* Build configuration list for PBXProject "BitcoinKit" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 607FACC71AFB9204008FA782;
+			productRefGroup = 607FACD11AFB9204008FA782 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				607FACCF1AFB9204008FA782 /* BitcoinKitExample */,
+				607FACE41AFB9204008FA782 /* BitcoinKitTests */,
+				D39EA38C23A1230000FF23B7 /* BitcoinCoreTests */,
+				D39EA39B23A123FF00FF23B7 /* BitcoinCashKitTests */,
+				D39EA3AA23A1240C00FF23B7 /* DashKitTests */,
+				D39EA3B923A1241600FF23B7 /* HodlerTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		607FACCE1AFB9204008FA782 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D36AAA9923A2125E0065B32B /* SendController.xib in Resources */,
+				D36AAA9E23A2125E0065B32B /* BalanceCell.xib in Resources */,
+				D36AAAA223A2125E0065B32B /* WordsController.xib in Resources */,
+				D36AAAAC23A212E30065B32B /* LaunchScreen.xib in Resources */,
+				D36AAAA623A2125E0065B32B /* Assets.xcassets in Resources */,
+				D36AAA9B23A2125E0065B32B /* TransactionCell.xib in Resources */,
+				D36AAAA523A2125E0065B32B /* ReceiveController.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		607FACE31AFB9204008FA782 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D39EA39423A1230000FF23B7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D39EA3A323A123FF00FF23B7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D39EA3B223A1240C00FF23B7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D39EA3C123A1241600FF23B7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		0C5DFCC8EAC8A6516BFBCDA4 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-BitcoinCashKitTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		2F8AFF29D42B269D1BE10D3E /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-BitcoinCashKitTests/Pods-BitcoinCashKitTests-resources.sh",
+				"${PODS_CONFIGURATION_BUILD_DIR}/BitcoinCashKit.swift/BitcoinCashKit.bundle",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/BitcoinCashKit.bundle",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BitcoinCashKitTests/Pods-BitcoinCashKitTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		393739D2DB22DC4B9F04D4C3 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-BitcoinKitTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		4D2F1739ADC1B8FF2F30DEC6 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-BitcoinKitExample-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		73F6CD24266C8DEFDA100A12 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-BitcoinKitTests/Pods-BitcoinKitTests-resources.sh",
+				"${PODS_CONFIGURATION_BUILD_DIR}/BitcoinKit.swift/BitcoinKit.bundle",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/BitcoinKit.bundle",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BitcoinKitTests/Pods-BitcoinKitTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		AA3C1258195C13A83DF8BDFE /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-HodlerTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		BA9D76541EFC6174DADECCB8 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-BitcoinCoreTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		CA02FDE0341145E1B5A15696 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-DashKitTests/Pods-DashKitTests-resources.sh",
+				"${PODS_CONFIGURATION_BUILD_DIR}/DashKit.swift/DashKit.bundle",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DashKit.bundle",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-DashKitTests/Pods-DashKitTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		CBACB7D2806000B2E6B7D92D /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-BitcoinKitExample/Pods-BitcoinKitExample-resources.sh",
+				"${PODS_CONFIGURATION_BUILD_DIR}/BitcoinCashKit.swift/BitcoinCashKit.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/BitcoinKit.swift/BitcoinKit.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/DashKit.swift/DashKit.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/LitecoinKit.swift/LitecoinKit.bundle",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/BitcoinCashKit.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/BitcoinKit.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DashKit.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/LitecoinKit.bundle",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BitcoinKitExample/Pods-BitcoinKitExample-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D39EA3D423A2021100FF23B7 /* Cuckoo */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = Cuckoo;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "OUTPUT_FILE=\"${PROJECT_DIR}/Tests/BitcoinKit/GeneratedMocks.swift\"\necho \"Generated Mocks File = ${OUTPUT_FILE}\"\n\nINPUT_DIR=\"${PROJECT_DIR}/../BitcoinKit/Classes\"\necho \"Mocks Input Directory = ${INPUT_DIR}\"\n\n\"${PODS_ROOT}/Cuckoo/run\" generate --testable \"BitcoinKit\" \\\n--output \"${OUTPUT_FILE}\" \\\n\"${INPUT_DIR}/Core/Protocols.swift\"\n";
+		};
+		D39EA3D723A2089100FF23B7 /* Cuckoo */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = Cuckoo;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "OUTPUT_FILE=\"${PROJECT_DIR}/Tests/BitcoinCore/GeneratedMocks.swift\"\necho \"Generated Mocks File = ${OUTPUT_FILE}\"\n\nINPUT_DIR=\"${PROJECT_DIR}/../BitcoinCore/Classes\"\necho \"Mocks Input Directory = ${INPUT_DIR}\"\n\n\"${PODS_ROOT}/Cuckoo/run\" generate --testable \"BitcoinCore\" \\\n--output \"${OUTPUT_FILE}\" \\\n\"${INPUT_DIR}/Core/Protocols.swift\" \\\n\"${INPUT_DIR}/Transactions/Scripts/Script.swift\" \\\n\"${INPUT_DIR}/Network/Peer/PeerTask/PeerTask.swift\" \\\n\"${INPUT_DIR}/Network/Peer/PeerAddressManagerState.swift\" \\\n\"${INPUT_DIR}/Blocks/BlockSyncerState.swift\"\n";
+		};
+		D39EA46823A20B4300FF23B7 /* Cuckoo */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = Cuckoo;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "OUTPUT_FILE=\"${PROJECT_DIR}/Tests/BitcoinCashKit/GeneratedMocks.swift\"\necho \"Generated Mocks File = ${OUTPUT_FILE}\"\n\nINPUT_DIR=\"${PROJECT_DIR}/../BitcoinCashKit/Classes\"\necho \"Mocks Input Directory = ${INPUT_DIR}\"\n\n\"${PODS_ROOT}/Cuckoo/run\" generate --testable \"BitcoinCashKit\" \\\n--output \"${OUTPUT_FILE}\" \\\n\"${INPUT_DIR}/Core/Protocols.swift\"\n";
+		};
+		D39EA46923A20B8C00FF23B7 /* Cuckoo */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = Cuckoo;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "OUTPUT_FILE=\"${PROJECT_DIR}/Tests/DashKit/GeneratedMocks.swift\"\necho \"Generated Mocks File = ${OUTPUT_FILE}\"\n\nINPUT_DIR=\"${PROJECT_DIR}/../DashKit/Classes\"\necho \"Mocks Input Directory = ${INPUT_DIR}\"\n\n\"${PODS_ROOT}/Cuckoo/run\" generate --testable \"DashKit\" \\\n--output \"${OUTPUT_FILE}\" \\\n\"${INPUT_DIR}/Core/Protocols.swift\"\n";
+		};
+		D39EA46A23A20BBF00FF23B7 /* Cuckoo */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = Cuckoo;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "OUTPUT_FILE=\"${PROJECT_DIR}/Tests/Hodler/GeneratedMocks.swift\"\necho \"Generated Mocks File = ${OUTPUT_FILE}\"\n\nINPUT_DIR=\"${PROJECT_DIR}/../Hodler/Classes\"\necho \"Mocks Input Directory = ${INPUT_DIR}\"\n\n\"${PODS_ROOT}/Cuckoo/run\" generate --testable \"Hodler\" \\\n--output \"${OUTPUT_FILE}\" \\\n\"${INPUT_DIR}/Core/Protocols.swift\"\n";
+		};
+		F9F696295B738796CD994D53 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-DashKitTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		607FACCC1AFB9204008FA782 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D36AAAA323A2125E0065B32B /* TransactionsController.swift in Sources */,
+				D36AAAAA23A2125E0065B32B /* TransactionRecord.swift in Sources */,
+				D36AAA9F23A2125E0065B32B /* ReceiveController.swift in Sources */,
+				D36AAAA723A2125E0065B32B /* Configuration.swift in Sources */,
+				D36AAAA023A2125E0065B32B /* WordsController.swift in Sources */,
+				D36AAAA823A2125E0065B32B /* Manager.swift in Sources */,
+				D36AAAA923A2125E0065B32B /* Signal.swift in Sources */,
+				D36AAA9C23A2125E0065B32B /* TransactionCell.swift in Sources */,
+				D36AAA9723A2125E0065B32B /* BitcoinAdapter.swift in Sources */,
+				D36AAAA423A2125E0065B32B /* SendController.swift in Sources */,
+				D36AAA9D23A2125E0065B32B /* BalanceCell.swift in Sources */,
+				D36AAA9823A2125E0065B32B /* BaseAdapter.swift in Sources */,
+				D36AAA9A23A2125E0065B32B /* BalanceController.swift in Sources */,
+				D36AAAA123A2125E0065B32B /* MainController.swift in Sources */,
+				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
+				D36AAA9623A2125D0065B32B /* DashAdapter.swift in Sources */,
+				D36AAA9523A2125D0065B32B /* BitcoinCashAdapter.swift in Sources */,
+				2FA5D47CFAEB8DB143F27645 /* Extensions.swift in Sources */,
+				11B35F729A8303254F2CC2A7 /* LitecoinAdapter.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		607FACE11AFB9204008FA782 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D39EA3D623A2053700FF23B7 /* GeneratedMocks.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D39EA39023A1230000FF23B7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D39EA43223A2094800FF23B7 /* BitcoinRegTestNetTests.swift in Sources */,
+				D39EA46323A2094800FF23B7 /* ScriptConverterTests.swift in Sources */,
+				D39EA43923A2094800FF23B7 /* GetMerkleBlocksTaskTests.swift in Sources */,
+				D39EA42D23A2094800FF23B7 /* BitsValidatorTests.swift in Sources */,
+				D39EA45223A2094800FF23B7 /* BlockHashFetcherHelperTests.swift in Sources */,
+				D39EA45423A2094800FF23B7 /* GeneratedMocks.swift in Sources */,
+				D39EA43123A2094800FF23B7 /* BitcoinMainNetTests.swift in Sources */,
+				D39EA45B23A2094800FF23B7 /* TransactionOutputExtractorTests.swift in Sources */,
+				D39EA43B23A2094800FF23B7 /* BloomFilterManagerDelegateTests.swift in Sources */,
+				D39EA45723A2094800FF23B7 /* AddressConverterTests.swift in Sources */,
+				D39EA44723A2094800FF23B7 /* BloomFilterManagerTests.swift in Sources */,
+				D39EA44B23A2094800FF23B7 /* UnspentOutputSelectorTests.swift in Sources */,
+				D39EA43323A2094800FF23B7 /* ConnectionTimeoutManagerTests.swift in Sources */,
+				D39EA46723A2094800FF23B7 /* TransactionSizeCalculatorTests.swift in Sources */,
+				D39EA43A23A2094800FF23B7 /* PeerHostManagerDelegateTests.swift in Sources */,
+				D39EA44423A2094800FF23B7 /* Extensions.swift in Sources */,
+				D39EA44523A2094800FF23B7 /* DataProviderTests.swift in Sources */,
+				D39EA43023A2094800FF23B7 /* BitcoinTestNetTests.swift in Sources */,
+				D39EA43C23A2094800FF23B7 /* IPeerGroupTests.swift in Sources */,
+				D39EA43823A2094800FF23B7 /* RequestTransactionTaskTests.swift in Sources */,
+				D39EA45023A2094800FF23B7 /* BlockHashFetcherTests.swift in Sources */,
+				D39EA43423A2094800FF23B7 /* PeerManagerTests.swift in Sources */,
+				D39EA46523A2094800FF23B7 /* SegWitAddress.swift in Sources */,
+				D39EA45E23A2094800FF23B7 /* TransactionProcessorTests.swift in Sources */,
+				D39EA43F23A2094800FF23B7 /* IPeerTests.swift in Sources */,
+				D39EA42823A2094800FF23B7 /* KitStateProviderTests.swift in Sources */,
+				D39EA42923A2094800FF23B7 /* BlockSyncerTests.swift in Sources */,
+				D39EA45523A2094800FF23B7 /* DifficultyEncoderTests.swift in Sources */,
+				D39EA44123A2094800FF23B7 /* PeerConnectionDelegateTests.swift in Sources */,
+				D39EA44223A2094800FF23B7 /* IPeerTaskRequesterTests.swift in Sources */,
+				D39EA45D23A2094800FF23B7 /* TransactionPublicKeySetterTests.swift in Sources */,
+				D39EA44A23A2094800FF23B7 /* WatchedTransactionManagerTests.swift in Sources */,
+				D39EA45323A2094800FF23B7 /* TestData.swift in Sources */,
+				D39EA42C23A2094800FF23B7 /* LegacyDifficultyAdjustmentValidatorTests.swift in Sources */,
+				D39EA45C23A2094800FF23B7 /* TransactionCreatorTests.swift in Sources */,
+				D39EA45623A2094800FF23B7 /* BlockValidatorHelperTests.swift in Sources */,
+				D39EA44E23A2094800FF23B7 /* UnspentOutputSelectorOldTests.swift in Sources */,
+				D39EA44823A2094800FF23B7 /* UnspentOutputProviderTests.swift in Sources */,
+				D39EA45123A2094800FF23B7 /* BlockDiscoveryBatchTest.swift in Sources */,
+				D39EA46423A2094800FF23B7 /* TransactionInputExtractorTests.swift in Sources */,
+				D39EA45A23A2094800FF23B7 /* HDPrivateKeyTests.swift in Sources */,
+				D39EA44F23A2094800FF23B7 /* IrregularOutputFinderTests.swift in Sources */,
+				D39EA43623A2094800FF23B7 /* GetBlockHashesTaskTests.swift in Sources */,
+				D39EA44323A2094800FF23B7 /* BitcoinCashMainNetTests.swift in Sources */,
+				D39EA46223A2094800FF23B7 /* ChunkTests.swift in Sources */,
+				D39EA43E23A2094800FF23B7 /* PeerGroupTests.swift in Sources */,
+				D39EA42B23A2094800FF23B7 /* LegacyTestNetDifficultyValidatorTests.swift in Sources */,
+				D39EA46623A2094800FF23B7 /* InputSignerTests.swift in Sources */,
+				D39EA42A23A2094800FF23B7 /* ProofOfWorkValidatorTests.swift in Sources */,
+				D39EA45F23A2094800FF23B7 /* TransactionOutputAddressExtractorTests.swift in Sources */,
+				D39EA44023A2094800FF23B7 /* IPeerTaskDelegateTests.swift in Sources */,
+				D39EA44923A2094800FF23B7 /* StateManagerTests.swift in Sources */,
+				D39EA42F23A2094800FF23B7 /* MerkleBlockValidatorTests.swift in Sources */,
+				D39EA45923A2094800FF23B7 /* MerkleBranchTests.swift in Sources */,
+				D39EA46123A2094800FF23B7 /* ScriptTests.swift in Sources */,
+				D39EA43D23A2094800FF23B7 /* PeerDelegateTests.swift in Sources */,
+				D39EA44D23A2094800FF23B7 /* InitialSyncerTests.swift in Sources */,
+				D39EA44C23A2094800FF23B7 /* PublicKeyManagerTests.swift in Sources */,
+				D39EA43523A2094800FF23B7 /* PeerAddressManagerTests.swift in Sources */,
+				D39EA46023A2094800FF23B7 /* TransactionSyncerTests.swift in Sources */,
+				D39EA45823A2094800FF23B7 /* PaymentAddressParserTests.swift in Sources */,
+				D39EA44623A2094800FF23B7 /* UnspentOutputSelectorSingleNoChangeTests.swift in Sources */,
+				D39EA42E23A2094800FF23B7 /* BlockchainTests.swift in Sources */,
+				D369A2F3240E51AB00D6FE1E /* SegWitBech32AddressConverterTests.swift in Sources */,
+				D39EA43723A2094800FF23B7 /* SendTransactionTaskTests.swift in Sources */,
+				1A564D56C3A051FF606AC76B /* Bip69Tests.swift in Sources */,
+				1A564F07A30BCD9D357CB960 /* OutputSetterTests.swift in Sources */,
+				2FA5D7CBDF994AEB18C185DD /* TransactionSenderTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D39EA39F23A123FF00FF23B7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D39EA47823A20C5E00FF23B7 /* EDAValidatorTests.swift in Sources */,
+				D39EA47B23A20C5E00FF23B7 /* GeneratedMocks.swift in Sources */,
+				D39EA47923A20C5E00FF23B7 /* DAAValidatorTests.swift in Sources */,
+				D39EA47D23A20C5E00FF23B7 /* TestData.swift in Sources */,
+				D39EA47723A20C5E00FF23B7 /* ForkValidatorTests.swift in Sources */,
+				D39EA47A23A20C5E00FF23B7 /* CashBech32AddressConverterTests.swift in Sources */,
+				D39EA47623A20C5E00FF23B7 /* BitcoinCashValidatorHelperTests.swift in Sources */,
+				D39EA47C23A20C5E00FF23B7 /* Extensions.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D39EA3AE23A1240C00FF23B7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D39EA49F23A20C7000FF23B7 /* DarkGravityWaveValidatorTests.swift in Sources */,
+				D39EA4A023A20C7000FF23B7 /* TransactionLockVoteValidatorTests.swift in Sources */,
+				D39EA49B23A20C7000FF23B7 /* MasternodeCbTxHashCalculatorTests.swift in Sources */,
+				D39EA49723A20C7000FF23B7 /* MasternodeSortedListTests.swift in Sources */,
+				D39EA49C23A20C7000FF23B7 /* MasternodeListMerkleRootCalculatorTests.swift in Sources */,
+				D39EA49D23A20C7000FF23B7 /* GeneratedMocks.swift in Sources */,
+				D39EA49A23A20C7000FF23B7 /* MasternodeListSyncerTests.swift in Sources */,
+				D39EA4A123A20C7000FF23B7 /* InstantSendLockValidatorTests.swift in Sources */,
+				D39EA49E23A20C7000FF23B7 /* DarkGravityWaveTestNetValidatorTests.swift in Sources */,
+				D39EA4A423A20C7000FF23B7 /* InstantSendTests.swift in Sources */,
+				D39EA4A223A20C7000FF23B7 /* InstantSendLockHandlerTests.swift in Sources */,
+				D39EA4A723A20C7000FF23B7 /* DashTestData.swift in Sources */,
+				D39EA49823A20C7000FF23B7 /* MerkleRootCreatorTests.swift in Sources */,
+				D39EA4A623A20C7000FF23B7 /* InstantTransactionManagerTests.swift in Sources */,
+				D39EA4A323A20C7000FF23B7 /* TransactionLockVoteManagerTests.swift in Sources */,
+				D39EA49923A20C7000FF23B7 /* MasternodeListManagerTests.swift in Sources */,
+				D39EA4A523A20C7000FF23B7 /* TransactionLockVoteHandlerTests.swift in Sources */,
+				D39EA49623A20C7000FF23B7 /* DashExtensions.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D39EA3BD23A1241600FF23B7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D39EA4AB23A20C8500FF23B7 /* HodlerPluginTests.swift in Sources */,
+				D39EA4AA23A20C8500FF23B7 /* GeneratedMocks.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		607FACED1AFB9204008FA782 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = singlefile;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		607FACEE1AFB9204008FA782 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		607FACF01AFB9204008FA782 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5F8F16D600F4DF6CD20E0BAF /* Pods-BitcoinKitExample.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = HC4MCAXJ66;
+				ENABLE_BITCODE = NO;
+				INFOPLIST_FILE = BitcoinKit/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MODULE_NAME = ExampleApp;
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		607FACF11AFB9204008FA782 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = F7D3B3F76026512382C0D30D /* Pods-BitcoinKitExample.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = HC4MCAXJ66;
+				ENABLE_BITCODE = NO;
+				INFOPLIST_FILE = BitcoinKit/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MODULE_NAME = ExampleApp;
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		607FACF31AFB9204008FA782 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = ACD6E6BDE7C346289FAB2499 /* Pods-BitcoinKitTests.debug.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				DEVELOPMENT_TEAM = HC4MCAXJ66;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = Tests/BitcoinKitTests.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		607FACF41AFB9204008FA782 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C45B20346E834C6B8A93D7EC /* Pods-BitcoinKitTests.release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				DEVELOPMENT_TEAM = HC4MCAXJ66;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = Tests/BitcoinKitTests.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		D39EA39723A1230000FF23B7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 62C1FEEDB0512E77E56FACEC /* Pods-BitcoinCoreTests.debug.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				DEVELOPMENT_TEAM = HC4MCAXJ66;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = Tests/BitcoinCoreTests.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		D39EA39823A1230000FF23B7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D63B3F32063845F0AC9AD815 /* Pods-BitcoinCoreTests.release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				DEVELOPMENT_TEAM = HC4MCAXJ66;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = Tests/BitcoinCoreTests.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		D39EA3A623A123FF00FF23B7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = CC223B703634B83592B29EE5 /* Pods-BitcoinCashKitTests.debug.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				DEVELOPMENT_TEAM = HC4MCAXJ66;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = Tests/BitcoinCashKitTests.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		D39EA3A723A123FF00FF23B7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D9ABDE71F0DEF9D85F4A4A80 /* Pods-BitcoinCashKitTests.release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				DEVELOPMENT_TEAM = HC4MCAXJ66;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = Tests/BitcoinCashKitTests.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		D39EA3B523A1240C00FF23B7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8A7E6415B5F8A8DC1879CFA8 /* Pods-DashKitTests.debug.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				DEVELOPMENT_TEAM = HC4MCAXJ66;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = Tests/DashKitTests.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		D39EA3B623A1240C00FF23B7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = FA329D8E228BBD9936928CD6 /* Pods-DashKitTests.release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				DEVELOPMENT_TEAM = HC4MCAXJ66;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = Tests/DashKitTests.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		D39EA3C423A1241600FF23B7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9D42C5E0E663DB7B00733723 /* Pods-HodlerTests.debug.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				DEVELOPMENT_TEAM = HC4MCAXJ66;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = Tests/HodlerTests.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		D39EA3C523A1241600FF23B7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BBB9FFCB21BB700523232782 /* Pods-HodlerTests.release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				DEVELOPMENT_TEAM = HC4MCAXJ66;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = Tests/HodlerTests.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		607FACCB1AFB9204008FA782 /* Build configuration list for PBXProject "BitcoinKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				607FACED1AFB9204008FA782 /* Debug */,
+				607FACEE1AFB9204008FA782 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		607FACEF1AFB9204008FA782 /* Build configuration list for PBXNativeTarget "BitcoinKitExample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				607FACF01AFB9204008FA782 /* Debug */,
+				607FACF11AFB9204008FA782 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		607FACF21AFB9204008FA782 /* Build configuration list for PBXNativeTarget "BitcoinKitTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				607FACF31AFB9204008FA782 /* Debug */,
+				607FACF41AFB9204008FA782 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D39EA39623A1230000FF23B7 /* Build configuration list for PBXNativeTarget "BitcoinCoreTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D39EA39723A1230000FF23B7 /* Debug */,
+				D39EA39823A1230000FF23B7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D39EA3A523A123FF00FF23B7 /* Build configuration list for PBXNativeTarget "BitcoinCashKitTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D39EA3A623A123FF00FF23B7 /* Debug */,
+				D39EA3A723A123FF00FF23B7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D39EA3B423A1240C00FF23B7 /* Build configuration list for PBXNativeTarget "DashKitTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D39EA3B523A1240C00FF23B7 /* Debug */,
+				D39EA3B623A1240C00FF23B7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D39EA3C323A1241600FF23B7 /* Build configuration list for PBXNativeTarget "HodlerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D39EA3C423A1241600FF23B7 /* Debug */,
+				D39EA3C523A1241600FF23B7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 607FACC81AFB9204008FA782 /* Project object */;
+}

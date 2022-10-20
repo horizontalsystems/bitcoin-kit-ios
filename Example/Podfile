@@ -1,0 +1,56 @@
+platform :ios, '13'
+use_modular_headers!
+
+target 'BitcoinKitExample' do
+  pod 'BitcoinCore.swift', :path => '../'
+  pod 'BitcoinKit.swift', :path => '../'
+  pod 'BitcoinCashKit.swift', :path => '../'
+  pod 'DashKit.swift', :path => '../'
+  pod 'LitecoinKit.swift', :path => '../'
+  pod 'Hodler.swift', :path => '../'
+  pod 'HsToolKit.swift', git: 'https://github.com/horizontalsystems/hs-tool-kit-ios'
+  pod 'HdWalletKit.swift', git: 'https://github.com/horizontalsystems/hd-wallet-kit-ios'
+  pod 'UIExtensions.swift', git: 'https://github.com/horizontalsystems/gui-kit/'
+end
+
+def testPods
+  pod 'Quick'
+  pod 'Nimble'
+  pod 'Cuckoo'
+  pod 'RxBlocking', '~> 5.0'
+end
+
+target 'BitcoinCoreTests' do
+  pod 'BitcoinCore.swift', :path => '../'
+  testPods
+end
+
+target 'BitcoinKitTests' do
+  pod 'BitcoinKit.swift', :path => '../'
+  testPods
+end
+
+target 'BitcoinCashKitTests' do
+  pod 'BitcoinCashKit.swift', :path => '../'
+  testPods
+end
+
+target 'DashKitTests' do
+  pod 'DashKit.swift', :path => '../'
+  testPods
+end
+
+target 'HodlerTests' do
+  pod 'Hodler.swift', :path => '../'
+  testPods
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    if target.respond_to?(:product_type) and target.product_type == "com.apple.product-type.bundle"
+      target.build_configurations.each do |config|
+        config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
+      end
+    end
+  end
+end

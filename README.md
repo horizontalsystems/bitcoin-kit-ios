@@ -20,7 +20,7 @@ Bitcoin, BitcoinCash(ABC) and Dash wallet toolkit for Swift. This is a full impl
 ### BitcoinCashKit.swift
 - bech32 cashaddr addresses
 
-### DashKit.swfit
+### DashKit.swift
 - Instant send
 - LLMQ lock, Masternodes validation
 
@@ -56,10 +56,10 @@ let dashKit = DashKit(withWords: words, walletId: "dash-wallet-id", syncMode: .a
 
 All 3 *Kits* can be configured to work in `.mainNet` or `.testNet`. 
 
-##### `sycMode` paramater
+##### `syncMode` parameter
 *Kits* can restore existing wallet or create a new one. When restoring, it generates addresses for given wallet according to bip44 protocol, then it pulls all historical transactions for each of those addresses. This is done only once on initial sync. `syncMode` parameter defines where it pulls historical transactions from. When they are pulled, it continues to sync according to [SPV](https://en.bitcoinwiki.org/wiki/Simplified_Payment_Verification) protocol no matter which syncMode was used for initial sync. There are 3 modes available:
 
-- `.full`: Fully synchronizes from peer-to-peer network starting from the block when bip44 was introduced. This mode is the most private (since it fully complies with [SPV](https://en.bitcoinwiki.org/wiki/Simplified_Payment_Verification) protocol), but it takes approximately 2 hours to sync upto now (June 10, 2019).
+- `.full`: Fully synchronizes from peer-to-peer network starting from the block when bip44 was introduced. This mode is the most private (since it fully complies with [SPV](https://en.bitcoinwiki.org/wiki/Simplified_Payment_Verification) protocol), but it takes approximately 2 hours to sync up to now (June 10, 2019).
 - `.api`: Transactions before checkpoint are pulled from API(currently [Insight API](https://github.com/bitpay/insight-api) or [BcoinAPI](http://bcoin.io/api-docs/)). Then the rest is synchronized from peer-to-peer network. This is the fastest one, but it's possible for an attacker to learn which addresses you own. Checkpoints are updated with each new release and hardcoded so the blocks validation is not broken.
 - `.newWallet`: No need to pull transactions.
 
@@ -300,16 +300,18 @@ $ pod install
 
 All features of the library are used in example project. It can be referred as a starting point for usage of the library.
 
-* [Example Project](https://github.com/horizontalsystems/bitcoin-kit-ios/tree/master/HSBitcoinKitDemo)
+* [Example Project](https://github.com/horizontalsystems/bitcoin-kit-ios/tree/master/Example)
 
 ## Dependencies
 
-* [HSHDWalletKit](https://github.com/horizontalsystems/hd-wallet-kit-ios) - HD Wallet related features, mnemonic phrase geneartion.
-* [HSCryptoKit](https://github.com/horizontalsystems/crypto-kit-ios) - Crypto functions required for working with blockchain.
+* [HSHDWalletKit](https://github.com/horizontalsystems/hd-wallet-kit-ios) - HD Wallet related features, mnemonic phrase generation.
+* [OpenSslKit.swift](https://github.com/horizontalsystems/open-ssl-kit-ios) - Crypto functions required for working with blockchain.
+* [Secp256k1Kit.swift](https://github.com/horizontalsystems/secp256k1-kit-ios) - Crypto functions required for working with blockchain.
 
 ### Dash dependencies
-* [CryptoBLS.swift](https://github.com/horizontalsystems/crypto-bls-ios)
-* [CryptoX11.swift](https://github.com/horizontalsystems/crypto-x11-ios)
+
+* [BlsKit.swift](https://github.com/horizontalsystems/bls-kit-ios)
+* [X11Kit.swift](https://github.com/horizontalsystems/x11-kit-ios)
 
 ## License
 
